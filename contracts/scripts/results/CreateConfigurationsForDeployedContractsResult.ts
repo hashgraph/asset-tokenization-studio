@@ -204,19 +204,19 @@
 */
 
 interface CreateConfigurationsForDeployedContractsResultParams {
-    commonFacetIdList: string[]
-    equityFacetIdList: string[]
-    bondFacetIdList: string[]
-    equityFacetVersionList: number[]
-    bondFacetVersionList: number[]
+    commonFacetIdList: string[];
+    equityFacetIdList: string[];
+    bondFacetIdList: string[];
+    equityFacetVersionList: number[];
+    bondFacetVersionList: number[];
 }
 
 export default class CreateConfigurationsForDeployedContractsResult {
-    public commonFacetIdList: string[]
-    public equityFacetIdList: string[]
-    public bondFacetIdList: string[]
-    public equityFacetVersionList: number[]
-    public bondFacetVersionList: number[]
+    public commonFacetIdList: string[];
+    public equityFacetIdList: string[];
+    public bondFacetIdList: string[];
+    public equityFacetVersionList: number[];
+    public bondFacetVersionList: number[];
 
     constructor({
         commonFacetIdList,
@@ -225,11 +225,11 @@ export default class CreateConfigurationsForDeployedContractsResult {
         equityFacetVersionList,
         bondFacetVersionList,
     }: CreateConfigurationsForDeployedContractsResultParams) {
-        this.commonFacetIdList = commonFacetIdList
-        this.equityFacetIdList = equityFacetIdList
-        this.equityFacetVersionList = equityFacetVersionList
-        this.bondFacetIdList = bondFacetIdList
-        this.bondFacetVersionList = bondFacetVersionList
+        this.commonFacetIdList = commonFacetIdList;
+        this.equityFacetIdList = equityFacetIdList;
+        this.equityFacetVersionList = equityFacetVersionList;
+        this.bondFacetIdList = bondFacetIdList;
+        this.bondFacetVersionList = bondFacetVersionList;
     }
 
     public static empty(): CreateConfigurationsForDeployedContractsResult {
@@ -239,6 +239,6 @@ export default class CreateConfigurationsForDeployedContractsResult {
             bondFacetIdList: [],
             equityFacetVersionList: [],
             bondFacetVersionList: [],
-        })
+        });
     }
 }

@@ -203,9 +203,9 @@
 
 */
 
-import { task, types } from 'hardhat/config'
-import { CONTRACT_NAMES, ContractName, Network } from '@configuration'
-import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
+import { task, types } from 'hardhat/config';
+import { CONTRACT_NAMES, ContractName, Network } from '@configuration';
+import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments';
 
 task(
     'deployAll',
@@ -247,14 +247,14 @@ task(
             deployAtsFullInfrastructure,
             DeployAtsFullInfrastructureCommand,
             addresstoHederaId,
-        } = await import('@scripts')
-        const network = hre.network.name as Network
-        console.log(`Executing deployAll on ${hre.network.name} ...`)
+        } = await import('@scripts');
+        const network = hre.network.name as Network;
+        console.log(`Executing deployAll on ${hre.network.name} ...`);
         const { signer }: GetSignerResult = await hre.run('getSigner', {
             privateKey: args.privateKey,
             signerAddress: args.signerAddress,
             signerPosition: args.signerPosition,
-        })
+        });
 
         // * Deploy the full infrastructure
         const {
@@ -292,7 +292,7 @@ task(
                 useDeployed: args.useDeployed,
                 useEnvironment: false,
             })
-        )
+        );
 
         // * Display the deployed addresses
         const addressList = {
@@ -329,20 +329,20 @@ task(
             'Adjust Balances': adjustBalances.address,
             'Clearing Action Facet': clearingActionsFacet.address,
             'Clearing Facet': clearingFacet.address,
-        }
+        };
 
-        console.log('\n 🟢 Deployed ATS Contract List:')
+        console.log('\n 🟢 Deployed ATS Contract List:');
         for (const [key, address] of Object.entries(addressList)) {
             if (!address) {
-                continue
+                continue;
             }
             const contractId = await addresstoHederaId({
                 address,
                 network,
-            })
-            console.log(`   --> ${key}: ${address} (${contractId})`)
+            });
+            console.log(`   --> ${key}: ${address} (${contractId})`);
         }
-    })
+    });
 
 task('deploy', 'Deploy new contract')
     .addPositionalParam(
@@ -375,21 +375,21 @@ task('deploy', 'Deploy new contract')
             deployContract,
             DeployContractCommand,
             addressListToHederaIdList,
-        } = await import('@scripts')
-        const network = hre.network.name as Network
-        console.log(`Executing deploy on ${network} ...`)
+        } = await import('@scripts');
+        const network = hre.network.name as Network;
+        console.log(`Executing deploy on ${network} ...`);
         if (!CONTRACT_NAMES.includes(args.contractName as ContractName)) {
             throw new Error(
                 `Contract name ${args.contractName} is not in the list of deployable contracts`
-            )
+            );
         }
-        const contractName = args.contractName as ContractName
+        const contractName = args.contractName as ContractName;
         const { signer }: GetSignerResult = await hre.run('getSigner', {
             privateKey: args.privateKey,
             signerAddress: args.signerAddress,
             signerPosition: args.signerPosition,
-        })
-        console.log(`Using signer: ${signer.address}`)
+        });
+        console.log(`Using signer: ${signer.address}`);
         // * Deploy the contract
         const { proxyAdminAddress, proxyAddress, address } =
             await deployContract(
@@ -397,7 +397,7 @@ task('deploy', 'Deploy new contract')
                     name: contractName,
                     signer,
                 })
-            )
+            );
 
         const [contractId, proxyContractId, proxyAdminContractId] =
             await addressListToHederaIdList({
@@ -405,18 +405,18 @@ task('deploy', 'Deploy new contract')
                     (addr): addr is string => !!addr
                 ),
                 network,
-            })
+            });
 
-        console.log('\n 🟢 Deployed Contract:')
+        console.log('\n 🟢 Deployed Contract:');
         if (proxyAdminAddress) {
             console.log(
                 `Proxy Admin: ${proxyAdminAddress} (${proxyAdminContractId})`
-            )
+            );
         }
         if (proxyAddress) {
-            console.log(`Proxy: ${proxyAddress} (${proxyContractId})`)
+            console.log(`Proxy: ${proxyAddress} (${proxyContractId})`);
         }
         console.log(
             `Implementation: ${address} (${contractId}) for ${contractName}`
-        )
-    })
+        );
+    });

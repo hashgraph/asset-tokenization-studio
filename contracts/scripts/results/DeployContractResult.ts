@@ -203,12 +203,12 @@
 
 */
 
-import { Contract, ContractReceipt } from 'ethers'
-import { ContractName } from '@configuration'
-import DeployContractWithFactoryResult from './DeployContractWithFactoryResult'
+import { Contract, ContractReceipt } from 'ethers';
+import { ContractName } from '@configuration';
+import DeployContractWithFactoryResult from './DeployContractWithFactoryResult';
 
 export default class DeployContractResult extends DeployContractWithFactoryResult<Contract> {
-    public readonly name: ContractName
+    public readonly name: ContractName;
 
     constructor({
         name,
@@ -218,12 +218,12 @@ export default class DeployContractResult extends DeployContractWithFactoryResul
         proxyAdminAddress,
         receipt,
     }: {
-        name: ContractName
-        address: string
-        contract: Contract
-        proxyAddress?: string
-        proxyAdminAddress?: string
-        receipt?: ContractReceipt
+        name: ContractName;
+        address: string;
+        contract: Contract;
+        proxyAddress?: string;
+        proxyAdminAddress?: string;
+        receipt?: ContractReceipt;
     }) {
         super({
             address,
@@ -231,7 +231,7 @@ export default class DeployContractResult extends DeployContractWithFactoryResul
             proxyAddress,
             proxyAdminAddress,
             receipt,
-        })
-        this.name = name
+        });
+        this.name = name;
     }
 }

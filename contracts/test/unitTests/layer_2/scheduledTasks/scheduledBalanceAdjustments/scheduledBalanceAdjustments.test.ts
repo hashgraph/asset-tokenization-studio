@@ -203,10 +203,10 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
     type ResolverProxy,
     type Equity,
@@ -221,7 +221,7 @@ import {
     ScheduledBalanceAdjustments__factory,
     ScheduledTasks__factory,
     TimeTravel__factory,
-} from '@typechain'
+} from '@typechain';
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -232,35 +232,35 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
-} from '@scripts'
-import { dateToUnixTimestamp } from '../../../../dateFormatter'
+} from '@scripts';
+import { dateToUnixTimestamp } from '../../../../dateFormatter';
 
 describe('Scheduled BalanceAdjustments Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+    let diamond: ResolverProxy;
+    let signer_A: SignerWithAddress;
+    let signer_B: SignerWithAddress;
+    let signer_C: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+    let account_A: string;
+    let account_B: string;
+    let account_C: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let equityFacet: Equity
-    let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments
-    let scheduledTasksFacet: ScheduledTasks
-    let accessControlFacet: AccessControl
-    let timeTravelFacet: TimeTravel
+    let factory: IFactory;
+    let businessLogicResolver: BusinessLogicResolver;
+    let equityFacet: Equity;
+    let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments;
+    let scheduledTasksFacet: ScheduledTasks;
+    let accessControlFacet: AccessControl;
+    let timeTravelFacet: TimeTravel;
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {}
+        console.log = () => {};
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+        [signer_A, signer_B, signer_C] = await ethers.getSigners();
+        account_A = signer_A.address;
+        account_B = signer_B.address;
+        account_C = signer_C.address;
 
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
@@ -270,18 +270,19 @@ describe('Scheduled BalanceAdjustments Tests', () => {
                     useEnvironment: false,
                     timeTravelEnabled: true,
                 })
-            )
+            );
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
+        factory = deployedContracts.factory.contract;
+        businessLogicResolver =
+            deployedContracts.businessLogicResolver.contract;
+    });
 
     beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
+        };
+        const init_rbacs: Rbac[] = [rbacPause];
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -313,184 +314,193 @@ describe('Scheduled BalanceAdjustments Tests', () => {
             init_rbacs,
             businessLogicResolver: businessLogicResolver.address,
             factory,
-        })
+        });
 
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
-        )
-        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        );
+        equityFacet = Equity__factory.connect(diamond.address, signer_A);
         scheduledBalanceAdjustmentsFacet =
             ScheduledBalanceAdjustments__factory.connect(
                 diamond.address,
                 signer_A
-            )
+            );
         scheduledTasksFacet = ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
-        )
-        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
-    })
+        );
+        timeTravelFacet = TimeTravel__factory.connect(
+            diamond.address,
+            signer_A
+        );
+    });
 
     afterEach(async () => {
-        timeTravelFacet.resetSystemTimestamp()
-    })
+        timeTravelFacet.resetSystemTimestamp();
+    });
 
     it('GIVEN a token WHEN triggerBalanceAdjustments THEN transaction succeeds', async () => {
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C);
         // Using account C (with role)
-        equityFacet = equityFacet.connect(signer_C)
+        equityFacet = equityFacet.connect(signer_C);
 
         // set balanceAdjustment
         const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp(
             '2030-01-01T00:00:06Z'
-        )
+        );
         const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp(
             '2030-01-01T00:00:12Z'
-        )
+        );
         const balanceAdjustmentExecutionDateInSeconds_3 = dateToUnixTimestamp(
             '2030-01-01T00:00:18Z'
-        )
-        const balanceAdjustmentsFactor = 1
-        const balanceAdjustmentsDecimals = 2
+        );
+        const balanceAdjustmentsFactor = 1;
+        const balanceAdjustmentsDecimals = 2;
 
         const balanceAdjustmentData_1 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
             factor: balanceAdjustmentsFactor,
             decimals: balanceAdjustmentsDecimals,
-        }
+        };
         const balanceAdjustmentData_2 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_2.toString(),
             factor: balanceAdjustmentsFactor,
             decimals: balanceAdjustmentsDecimals,
-        }
+        };
         const balanceAdjustmentData_3 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_3.toString(),
             factor: balanceAdjustmentsFactor,
             decimals: balanceAdjustmentsDecimals,
-        }
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_3)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+        };
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_2
+        );
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_3
+        );
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_1
+        );
 
         const balanceAdjustment_2_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000001'
+            '0x0000000000000000000000000000000000000000000000000000000000000001';
         const balanceAdjustment_3_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000002'
+            '0x0000000000000000000000000000000000000000000000000000000000000002';
         const balanceAdjustment_1_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000003'
+            '0x0000000000000000000000000000000000000000000000000000000000000003';
 
         // check schedled BalanceAdjustments
         scheduledBalanceAdjustmentsFacet =
-            scheduledBalanceAdjustmentsFacet.connect(signer_A)
+            scheduledBalanceAdjustmentsFacet.connect(signer_A);
 
         let scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount();
         let scheduledBalanceAdjustments =
             await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
                 0,
                 100
-            )
+            );
 
-        expect(scheduledBalanceAdjustmentCount).to.equal(3)
+        expect(scheduledBalanceAdjustmentCount).to.equal(3);
         expect(scheduledBalanceAdjustments.length).to.equal(
             scheduledBalanceAdjustmentCount
-        )
+        );
         expect(
             scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3);
         expect(scheduledBalanceAdjustments[0].data).to.equal(
             balanceAdjustment_3_Id
-        )
+        );
         expect(
             scheduledBalanceAdjustments[1].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2);
         expect(scheduledBalanceAdjustments[1].data).to.equal(
             balanceAdjustment_2_Id
-        )
+        );
         expect(
             scheduledBalanceAdjustments[2].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_1)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_1);
         expect(scheduledBalanceAdjustments[2].data).to.equal(
             balanceAdjustment_1_Id
-        )
+        );
 
         // AFTER FIRST SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
+        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A);
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_1 + 1
-        )
-        await scheduledTasksFacet.triggerPendingScheduledTasks()
+        );
+        await scheduledTasksFacet.triggerPendingScheduledTasks();
 
         scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount();
         scheduledBalanceAdjustments =
             await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
                 0,
                 100
-            )
+            );
 
-        expect(scheduledBalanceAdjustmentCount).to.equal(2)
+        expect(scheduledBalanceAdjustmentCount).to.equal(2);
         expect(scheduledBalanceAdjustments.length).to.equal(
             scheduledBalanceAdjustmentCount
-        )
+        );
         expect(
             scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3);
         expect(scheduledBalanceAdjustments[0].data).to.equal(
             balanceAdjustment_3_Id
-        )
+        );
         expect(
             scheduledBalanceAdjustments[1].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2);
         expect(scheduledBalanceAdjustments[1].data).to.equal(
             balanceAdjustment_2_Id
-        )
+        );
 
         // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_2 + 1
-        )
-        await scheduledTasksFacet.triggerScheduledTasks(100)
+        );
+        await scheduledTasksFacet.triggerScheduledTasks(100);
 
         scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount();
         scheduledBalanceAdjustments =
             await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
                 0,
                 100
-            )
+            );
 
-        expect(scheduledBalanceAdjustmentCount).to.equal(1)
+        expect(scheduledBalanceAdjustmentCount).to.equal(1);
         expect(scheduledBalanceAdjustments.length).to.equal(
             scheduledBalanceAdjustmentCount
-        )
+        );
         expect(
             scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3);
         expect(scheduledBalanceAdjustments[0].data).to.equal(
             balanceAdjustment_3_Id
-        )
+        );
 
         // AFTER THIRD SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_3 + 1
-        )
-        await scheduledTasksFacet.triggerScheduledTasks(0)
+        );
+        await scheduledTasksFacet.triggerScheduledTasks(0);
 
         scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount();
         scheduledBalanceAdjustments =
             await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
                 0,
                 100
-            )
+            );
 
-        expect(scheduledBalanceAdjustmentCount).to.equal(0)
+        expect(scheduledBalanceAdjustmentCount).to.equal(0);
         expect(scheduledBalanceAdjustments.length).to.equal(
             scheduledBalanceAdjustmentCount
-        )
-    })
-})
+        );
+    });
+});

@@ -203,12 +203,12 @@
 
 */
 
-import { task, types } from 'hardhat/config'
+import { task, types } from 'hardhat/config';
 import {
     GetProxyAdminConfigArgs,
     GetSignerResult,
     UpdateFactoryVersionArgs,
-} from '@tasks'
+} from '@tasks';
 
 task('updateFactoryVersion', 'Updates the factory version')
     .addPositionalParam('proxyAdminAddress', 'The proxy admin contract address')
@@ -243,8 +243,10 @@ task('updateFactoryVersion', 'Updates the factory version')
         const {
             upgradeProxyImplementation,
             UpgradeProxyImplementationCommand,
-        } = await import('@scripts')
-        console.log(`Executing updateFactoryVersion on ${hre.network.name} ...`)
+        } = await import('@scripts');
+        console.log(
+            `Executing updateFactoryVersion on ${hre.network.name} ...`
+        );
         const {
             privateKey,
             signerAddress,
@@ -252,12 +254,12 @@ task('updateFactoryVersion', 'Updates the factory version')
             proxyAdminAddress,
             transparentProxyAddress,
             newImplementationAddress,
-        } = args
+        } = args;
         const { signer }: GetSignerResult = await hre.run('getSigner', {
             privateKey: privateKey,
             signerAddress: signerAddress,
             signerPosition: signerPosition,
-        })
+        });
         await upgradeProxyImplementation(
             new UpgradeProxyImplementationCommand({
                 proxyAdminAddress,
@@ -265,10 +267,10 @@ task('updateFactoryVersion', 'Updates the factory version')
                 newImplementationAddress,
                 signer,
             })
-        )
+        );
 
-        console.log('Factory version updated')
-    })
+        console.log('Factory version updated');
+    });
 
 task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
     .addPositionalParam(
@@ -284,18 +286,18 @@ task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
         types.string
     )
     .setAction(async (args: GetProxyAdminConfigArgs, hre) => {
-        console.log(`Executing getProxyAdminConfig on ${hre.network.name} ...`)
-        const { ProxyAdmin__factory } = await import('@typechain')
+        console.log(`Executing getProxyAdminConfig on ${hre.network.name} ...`);
+        const { ProxyAdmin__factory } = await import('@typechain');
 
         const proxyAdmin = ProxyAdmin__factory.connect(
             args.proxyAdmin,
             hre.ethers.provider
-        )
+        );
 
-        const owner = await proxyAdmin.owner()
+        const owner = await proxyAdmin.owner();
         const implementation = await proxyAdmin.getProxyImplementation(
             args.proxy
-        )
+        );
 
-        console.log(`Owner: ${owner}, Implementation: ${implementation}`)
-    })
+        console.log(`Owner: ${owner}, Implementation: ${implementation}`);
+    });

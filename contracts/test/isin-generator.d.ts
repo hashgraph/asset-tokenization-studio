@@ -203,4 +203,4 @@
 
 */
 
-declare module '@thomaschaplin/isin-generator'
+declare module '@thomaschaplin/isin-generator';

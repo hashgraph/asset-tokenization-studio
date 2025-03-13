@@ -208,11 +208,11 @@ import {
     BusinessLogicResolverProxyNotFound,
     BaseAtsContractListCommand,
     BaseBlockchainCommandParams,
-} from '../index'
+} from '../index';
 
 interface RegisterDeployedContractBusinessLogicsCommandParams
     extends BaseBlockchainCommandParams {
-    readonly deployedContractList: DeployAtsContractsResult
+    readonly deployedContractList: DeployAtsContractsResult;
 }
 
 export default class RegisterDeployedContractBusinessLogicsCommand extends BaseAtsContractListCommand {
@@ -225,13 +225,13 @@ export default class RegisterDeployedContractBusinessLogicsCommand extends BaseA
             deployer: _,
             businessLogicResolver,
             ...contractListToRegister
-        } = deployedContractList
+        } = deployedContractList;
         const contractAddressList = Object.values(contractListToRegister).map(
             (contract) => contract.address
-        )
+        );
 
         if (!businessLogicResolver.proxyAddress) {
-            throw new BusinessLogicResolverProxyNotFound()
+            throw new BusinessLogicResolverProxyNotFound();
         }
 
         super({
@@ -240,9 +240,9 @@ export default class RegisterDeployedContractBusinessLogicsCommand extends BaseA
                 businessLogicResolver.proxyAddress,
             signer,
             overrides,
-        })
+        });
     }
     get deployedContractAddressList() {
-        return this.contractAddressList
+        return this.contractAddressList;
     }
 }

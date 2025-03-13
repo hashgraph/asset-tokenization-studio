@@ -203,65 +203,65 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 export interface GetSignerResult {
-    signer: SignerWithAddress
-    address: string
-    privateKey: string
+    signer: SignerWithAddress;
+    address: string;
+    privateKey: string;
 }
 
 interface WithSigner {
-    privateKey?: string
-    signerAddress?: string
-    signerPosition?: number
+    privateKey?: string;
+    signerAddress?: string;
+    signerPosition?: number;
 }
 
-export type GetSignerArgs = WithSigner
+export type GetSignerArgs = WithSigner;
 
 // * Utils
 
 export interface Keccak256Args {
-    input: string
+    input: string;
 }
 
 export interface CreateVcArgs {
-    holder: string
-    privatekey: string
+    holder: string;
+    privatekey: string;
 }
 
 // * Deploy
 export interface DeployArgs extends WithSigner {
-    contractName: string
+    contractName: string;
 }
 
 export interface DeployAllArgs extends WithSigner {
-    useDeployed: boolean
+    useDeployed: boolean;
 }
 
 // * Transparent Upgradeable Proxy
 export interface GetProxyAdminConfigArgs {
-    proxyAdmin: string
-    proxy: string
+    proxyAdmin: string;
+    proxy: string;
 }
 
 export interface UpdateFactoryVersionArgs extends WithSigner {
-    proxyAdminAddress: string
-    transparentProxyAddress: string
-    newImplementationAddress: string
+    proxyAdminAddress: string;
+    transparentProxyAddress: string;
+    newImplementationAddress: string;
 }
 
 // * Business Logic Resolver
 export interface GetConfigurationInfoArgs {
-    resolver: string
-    configurationId: string
+    resolver: string;
+    configurationId: string;
 }
 
 export interface GetResolverBusinessLogicsArgs {
-    resolver: string
+    resolver: string;
 }
 
 export interface UpdateBusinessLogicKeysArgs extends WithSigner {
-    resolverAddress: string
-    implementationAddressList: string // * Comma separated list
+    resolverAddress: string;
+    implementationAddressList: string; // * Comma separated list
 }

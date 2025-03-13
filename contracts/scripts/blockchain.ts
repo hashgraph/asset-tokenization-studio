@@ -207,7 +207,7 @@ import {
     TransactionReceiptError,
     ValidateTxResponseCommand,
     ValidateTxResponseResult,
-} from '@scripts'
+} from '@scripts';
 
 export async function validateTxResponse({
     txResponse,
@@ -215,28 +215,28 @@ export async function validateTxResponse({
     confirmations,
     errorMessage,
 }: ValidateTxResponseCommand): Promise<ValidateTxResponseResult> {
-    const txReceipt = await txResponse.wait(confirmations)
+    const txReceipt = await txResponse.wait(confirmations);
     if (txReceipt.status === 0) {
         throw new TransactionReceiptError({
             errorMessage,
             txHash: txResponse.hash,
-        })
+        });
     }
     if (confirmationEvent) {
         const eventFound = txReceipt.events?.filter((event) => {
-            return event.event === confirmationEvent
-        })
+            return event.event === confirmationEvent;
+        });
         if (!eventFound || eventFound.length === 0) {
             throw new TransactionReceiptError({
                 errorMessage,
                 txHash: txResponse.hash,
-            })
+            });
         }
     }
     return new ValidateTxResponseResult({
         txResponse,
         txReceipt,
-    })
+    });
 }
 
 export async function validateTxResponseList(
@@ -244,7 +244,7 @@ export async function validateTxResponseList(
 ): Promise<ValidateTxResponseResult[]> {
     return Promise.all(
         txResponseList.map(async (txResponse) => {
-            return await validateTxResponse(txResponse)
+            return await validateTxResponse(txResponse);
         })
-    )
+    );
 }

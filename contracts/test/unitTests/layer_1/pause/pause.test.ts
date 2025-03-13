@@ -203,10 +203,10 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
     type ResolverProxy,
     type Pause,
@@ -215,7 +215,7 @@ import {
     BusinessLogicResolver,
     AccessControlFacet__factory,
     PauseFacet__factory,
-} from '@typechain'
+} from '@typechain';
 import {
     PAUSER_ROLE,
     deployEquityFromFactory,
@@ -224,29 +224,29 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
-} from '@scripts'
-import { grantRoleAndPauseToken } from '../../../common'
+} from '@scripts';
+import { grantRoleAndPauseToken } from '../../../common';
 
 describe('Pause Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
+    let diamond: ResolverProxy;
+    let signer_A: SignerWithAddress;
+    let signer_B: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
+    let account_A: string;
+    let account_B: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
+    let factory: IFactory;
+    let businessLogicResolver: BusinessLogicResolver;
+    let accessControlFacet: AccessControl;
+    let pauseFacet: Pause;
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {}
+        console.log = () => {};
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
+        [signer_A, signer_B] = await ethers.getSigners();
+        account_A = signer_A.address;
+        account_B = signer_B.address;
 
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
@@ -256,11 +256,12 @@ describe('Pause Tests', () => {
                     useEnvironment: false,
                     timeTravelEnabled: true,
                 })
-            )
+            );
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
+        factory = deployedContracts.factory.contract;
+        businessLogicResolver =
+            deployedContracts.businessLogicResolver.contract;
+    });
 
     beforeEach(async () => {
         diamond = await deployEquityFromFactory({
@@ -292,31 +293,31 @@ describe('Pause Tests', () => {
             info: 'nothing',
             factory: factory,
             businessLogicResolver: businessLogicResolver.address,
-        })
+        });
 
         accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
-        )
-        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
-    })
+        );
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A);
+    });
 
     it('GIVEN an account without pause role WHEN pause THEN transaction fails with AccountHasNoRole', async () => {
         // Using account B (non role)
-        pauseFacet = pauseFacet.connect(signer_B)
+        pauseFacet = pauseFacet.connect(signer_B);
         // pause fails
-        await expect(pauseFacet.pause()).to.be.rejectedWith('AccountHasNoRole')
-    })
+        await expect(pauseFacet.pause()).to.be.rejectedWith('AccountHasNoRole');
+    });
 
     it('GIVEN an account without pause role WHEN unpause THEN transaction fails with AccountHasNoRole', async () => {
         // Using account B (non role)
-        pauseFacet = pauseFacet.connect(signer_B)
+        pauseFacet = pauseFacet.connect(signer_B);
 
         // unpause fails
         await expect(pauseFacet.unpause()).to.be.rejectedWith(
             'AccountHasNoRole'
-        )
-    })
+        );
+    });
 
     it('GIVEN a paused Token WHEN pause THEN transaction fails with TokenIsPaused', async () => {
         // Granting Role to account C and Pause
@@ -327,51 +328,51 @@ describe('Pause Tests', () => {
             signer_A,
             signer_B,
             account_B
-        )
+        );
 
         // pause fails
-        pauseFacet = pauseFacet.connect(signer_B)
+        pauseFacet = pauseFacet.connect(signer_B);
         await expect(pauseFacet.pause()).to.be.revertedWithCustomError(
             pauseFacet,
             'TokenIsPaused'
-        )
-    })
+        );
+    });
 
     it('GIVEN an unpause Token WHEN unpause THEN transaction fails with TokenIsUnpaused', async () => {
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_B)
-        pauseFacet = pauseFacet.connect(signer_B)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_B);
+        pauseFacet = pauseFacet.connect(signer_B);
 
         // unpause fails
         await expect(pauseFacet.unpause()).to.be.revertedWithCustomError(
             pauseFacet,
             'TokenIsUnpaused'
-        )
-    })
+        );
+    });
 
     it('GIVEN an account with pause role WHEN pause and unpause THEN transaction succeeds', async () => {
         // PAUSE ------------------------------------------------------------------
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_B)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_B);
         // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
+        pauseFacet = pauseFacet.connect(signer_B);
 
         await expect(pauseFacet.pause())
             .to.emit(pauseFacet, 'TokenPaused')
-            .withArgs(account_B)
+            .withArgs(account_B);
         // check is paused
-        let paused = await pauseFacet.isPaused()
-        expect(paused).to.be.equal(true)
+        let paused = await pauseFacet.isPaused();
+        expect(paused).to.be.equal(true);
 
         // UNPAUSE ------------------------------------------------------------------
         // remove From list
         await expect(pauseFacet.unpause())
             .to.emit(pauseFacet, 'TokenUnpaused')
-            .withArgs(account_B)
+            .withArgs(account_B);
         // check is unpaused
-        paused = await pauseFacet.isPaused()
-        expect(paused).to.be.equal(false)
-    })
-})
+        paused = await pauseFacet.isPaused();
+        expect(paused).to.be.equal(false);
+    });
+});

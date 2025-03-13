@@ -1,43 +1,43 @@
-'use strict'
-Object.defineProperty(exports, '__esModule', { value: true })
-const hardhat_network_helpers_1 = require('@nomicfoundation/hardhat-network-helpers')
-const chai_1 = require('chai')
-const hardhat_1 = require('hardhat')
-var VersionStatus
-;(function (VersionStatus) {
-    VersionStatus[(VersionStatus['NONE'] = 0)] = 'NONE'
-    VersionStatus[(VersionStatus['ACTIVATED'] = 1)] = 'ACTIVATED'
-    VersionStatus[(VersionStatus['DEACTIVATED'] = 2)] = 'DEACTIVATED'
-})(VersionStatus || (VersionStatus = {}))
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
+const hardhat_network_helpers_1 = require('@nomicfoundation/hardhat-network-helpers');
+const chai_1 = require('chai');
+const hardhat_1 = require('hardhat');
+var VersionStatus;
+(function (VersionStatus) {
+    VersionStatus[(VersionStatus['NONE'] = 0)] = 'NONE';
+    VersionStatus[(VersionStatus['ACTIVATED'] = 1)] = 'ACTIVATED';
+    VersionStatus[(VersionStatus['DEACTIVATED'] = 2)] = 'DEACTIVATED';
+})(VersionStatus || (VersionStatus = {}));
 describe('Demo RedSwam', () => {
     let businessLogicResolver,
         diamond,
         diamondLoupe,
         diamondCut,
         testFacet1,
-        testFacet2
+        testFacet2;
     async function deployBusinessLogicResolver() {
         businessLogicResolver = await hardhat_1.ethers
             .getContractFactory('BusinessLogicResolver')
-            .then(async (contract) => await contract.deploy())
+            .then(async (contract) => await contract.deploy());
     }
     async function deployDiamond() {
-        const rbacs = []
+        const rbacs = [];
         const initialization = {
             contractAddress: '0x0000000000000000000000000000000000000000',
             calldataInitialization: '0x',
-        }
+        };
         const diamondArgs = {
             rbacs,
             initialization,
-        }
+        };
         const businessLogicKeys = [
             await diamondCut.getStaticResolverKey(),
             await diamondLoupe.getStaticResolverKey(),
             await testFacet1.getStaticResolverKey(),
             await testFacet2.getStaticResolverKey(),
-        ]
-        const resolver = await businessLogicResolver.address
+        ];
+        const resolver = await businessLogicResolver.address;
         diamond = await hardhat_1.ethers
             .getContractFactory('Diamond')
             .then(
@@ -47,36 +47,36 @@ describe('Demo RedSwam', () => {
                         businessLogicKeys,
                         diamondArgs
                     )
-            )
+            );
     }
     async function deployDiamondCut() {
         diamondCut = await hardhat_1.ethers
             .getContractFactory('DiamondCutFacet')
-            .then(async (contract) => await contract.deploy())
+            .then(async (contract) => await contract.deploy());
     }
     async function deployDiamondLoupe() {
         diamondLoupe = await hardhat_1.ethers
             .getContractFactory('DiamondLoupeFacet')
-            .then(async (contract) => await contract.deploy())
+            .then(async (contract) => await contract.deploy());
     }
     async function deployTestFacet1() {
         testFacet1 = await hardhat_1.ethers
             .getContractFactory('TestFacet1')
-            .then(async (contract) => await contract.deploy())
+            .then(async (contract) => await contract.deploy());
     }
     async function deployTestFacet2() {
         testFacet2 = await hardhat_1.ethers
             .getContractFactory('TestFacet2')
-            .then(async (contract) => await contract.deploy())
+            .then(async (contract) => await contract.deploy());
     }
     it('Demo RedSwam', async () => {
         await (0, hardhat_network_helpers_1.loadFixture)(
             deployBusinessLogicResolver
-        )
-        await (0, hardhat_network_helpers_1.loadFixture)(deployDiamondCut)
-        await (0, hardhat_network_helpers_1.loadFixture)(deployDiamondLoupe)
-        await (0, hardhat_network_helpers_1.loadFixture)(deployTestFacet1)
-        await (0, hardhat_network_helpers_1.loadFixture)(deployTestFacet2)
+        );
+        await (0, hardhat_network_helpers_1.loadFixture)(deployDiamondCut);
+        await (0, hardhat_network_helpers_1.loadFixture)(deployDiamondLoupe);
+        await (0, hardhat_network_helpers_1.loadFixture)(deployTestFacet1);
+        await (0, hardhat_network_helpers_1.loadFixture)(deployTestFacet2);
         console.log(`
 Deployed contracts:
     BusinessLogicResolver: ${await businessLogicResolver.address},
@@ -103,7 +103,7 @@ Deployed contracts:
         key: ${await testFacet2.getStaticResolverKey()},
         selectors: ${JSON.stringify(
             await testFacet2.getStaticFunctionSelectors()
-        )}`)
+        )}`);
         const businessLogicRegistries = [
             {
                 businessLogicKey: await diamondCut.getStaticResolverKey(),
@@ -121,56 +121,56 @@ Deployed contracts:
                 businessLogicKey: await testFacet2.getStaticResolverKey(),
                 businessLogicAddress: await testFacet2.address,
             },
-        ]
+        ];
         await (0, chai_1.expect)(
             businessLogicResolver.registerBusinessLogics(
                 businessLogicRegistries
             )
-        ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered')
-        ;(0, chai_1.expect)(
+        ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered');
+        (0, chai_1.expect)(
             await businessLogicResolver.getVersionStatus(1)
-        ).to.be.equal(VersionStatus.ACTIVATED)
-        ;(0, chai_1.expect)(
+        ).to.be.equal(VersionStatus.ACTIVATED);
+        (0, chai_1.expect)(
             await businessLogicResolver.getLatestVersion()
-        ).to.be.equal(1)
-        ;(0, chai_1.expect)(
+        ).to.be.equal(1);
+        (0, chai_1.expect)(
             await businessLogicResolver.resolveLatestBusinessLogic(
                 await diamondCut.getStaticResolverKey()
             )
-        ).to.be.equal(await diamondCut.address)
-        ;(0, chai_1.expect)(
+        ).to.be.equal(await diamondCut.address);
+        (0, chai_1.expect)(
             await businessLogicResolver.resolveLatestBusinessLogic(
                 await diamondLoupe.getStaticResolverKey()
             )
-        ).to.be.equal(await diamondLoupe.address)
-        ;(0, chai_1.expect)(
+        ).to.be.equal(await diamondLoupe.address);
+        (0, chai_1.expect)(
             await businessLogicResolver.resolveLatestBusinessLogic(
                 await testFacet1.getStaticResolverKey()
             )
-        ).to.be.equal(await testFacet1.address)
-        ;(0, chai_1.expect)(
+        ).to.be.equal(await testFacet1.address);
+        (0, chai_1.expect)(
             await businessLogicResolver.resolveLatestBusinessLogic(
                 await testFacet2.getStaticResolverKey()
             )
-        ).to.be.equal(await testFacet2.address)
-        ;(0, chai_1.expect)(
+        ).to.be.equal(await testFacet2.address);
+        (0, chai_1.expect)(
             await businessLogicResolver.resolveBusinessLogicByVersion(
                 await diamondCut.getStaticResolverKey(),
                 1
             )
-        ).to.be.equal(await diamondCut.address)
-        ;(0, chai_1.expect)(
+        ).to.be.equal(await diamondCut.address);
+        (0, chai_1.expect)(
             await businessLogicResolver.getBusinessLogicCount()
-        ).to.be.equal(4)
-        ;(0, chai_1.expect)(
+        ).to.be.equal(4);
+        (0, chai_1.expect)(
             await businessLogicResolver.getBusinessLogicKeys(0, 10)
         ).to.be.deep.equal([
             await diamondCut.getStaticResolverKey(),
             await diamondLoupe.getStaticResolverKey(),
             await testFacet1.getStaticResolverKey(),
             await testFacet2.getStaticResolverKey(),
-        ])
-        await (0, hardhat_network_helpers_1.loadFixture)(deployDiamond)
+        ]);
+        await (0, hardhat_network_helpers_1.loadFixture)(deployDiamond);
         /*console.log(`    Diamond: ${await diamond.address}`)
 
         const loupeFacet: DiamondLoupeFacet = await ethers.getContractAt(
@@ -248,5 +248,5 @@ DiamondResume:
         await expect(facet2.testFunction8()).to.be.revertedWith(
             'TestFacet2.testFunction8'
         )*/
-    })
-})
+    });
+});

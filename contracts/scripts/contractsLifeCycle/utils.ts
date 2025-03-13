@@ -204,15 +204,15 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ContractFactory } from 'ethers'
-import { Interface } from 'ethers/lib/utils'
+import { ContractFactory } from 'ethers';
+import { Interface } from 'ethers/lib/utils';
 import {
     Client,
     ContractExecuteTransaction,
     ContractId,
     Hbar,
     Long,
-} from '@hashgraph/sdk'
+} from '@hashgraph/sdk';
 
 export async function contractCall(
     contractId: ContractId,
@@ -227,34 +227,34 @@ export async function contractCall(
         functionName,
         parameters,
         abi
-    )
+    );
 
     const contractTx = await new ContractExecuteTransaction()
         .setContractId(contractId)
         .setFunctionParameters(functionCallParameters)
         .setGas(gas)
         .setPayableAmount(value)
-        .execute(clientOperator)
+        .execute(clientOperator);
 
-    const record = await contractTx.getRecord(clientOperator)
-    let results
+    const record = await contractTx.getRecord(clientOperator);
+    let results;
     if (record.contractFunctionResult) {
         results = decodeFunctionResult(
             abi,
             functionName,
             record.contractFunctionResult?.bytes
-        )
+        );
     }
 
-    return results
+    return results;
 }
 
 function encodeFunctionCall(functionName: string, parameters: any[], abi: any) {
-    const iface = new Interface(abi)
+    const iface = new Interface(abi);
     const encodedParametersHex = iface
         .encodeFunctionData(functionName, parameters)
-        .slice(2)
-    return Buffer.from(encodedParametersHex, 'hex')
+        .slice(2);
+    return Buffer.from(encodedParametersHex, 'hex');
 }
 
 function decodeFunctionResult(
@@ -262,18 +262,18 @@ function decodeFunctionResult(
     functionName: string,
     resultAsBytes: Uint8Array
 ) {
-    const iface = new Interface(abi)
-    const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'))
-    const decodedResult = iface.decodeFunctionResult(functionName, resultHex)
+    const iface = new Interface(abi);
+    const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
+    const decodedResult = iface.decodeFunctionResult(functionName, resultHex);
 
     try {
-        const jsonParsedArray = JSON.parse(JSON.stringify(decodedResult))
-        return jsonParsedArray
+        const jsonParsedArray = JSON.parse(JSON.stringify(decodedResult));
+        return jsonParsedArray;
     } catch (e) {
-        return resultHex
+        return resultHex;
     }
 }
 
 export function createContractFactory(factory: any): ContractFactory {
-    return new ContractFactory(factory.createInterface(), factory.bytecode)
+    return new ContractFactory(factory.createInterface(), factory.bytecode);
 }

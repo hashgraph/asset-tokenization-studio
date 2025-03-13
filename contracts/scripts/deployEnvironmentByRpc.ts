@@ -203,7 +203,7 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import {
     IBusinessLogicResolver,
     IBusinessLogicResolver__factory,
@@ -212,35 +212,35 @@ import {
     IStaticFunctionSelectors,
     ProxyAdmin,
     ProxyAdmin__factory,
-} from '@typechain'
+} from '@typechain';
 import {
     DeployedBusinessLogics,
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
-} from '@scripts'
-import { Network } from '@configuration'
-import { network } from 'hardhat'
+} from '@scripts';
+import { Network } from '@configuration';
+import { network } from 'hardhat';
 
 export interface Environment {
-    deployedBusinessLogics: DeployedBusinessLogics
-    facetIdsEquities: string[]
-    facetVersionsEquities: number[]
-    facetIdsBonds: string[]
-    facetVersionsBonds: number[]
-    proxyAdmin: ProxyAdmin
-    resolver: IBusinessLogicResolver
-    factory: IFactory
+    deployedBusinessLogics: DeployedBusinessLogics;
+    facetIdsEquities: string[];
+    facetVersionsEquities: number[];
+    facetIdsBonds: string[];
+    facetVersionsBonds: number[];
+    proxyAdmin: ProxyAdmin;
+    resolver: IBusinessLogicResolver;
+    factory: IFactory;
 }
 
-export const environment: Environment = buildEmptyEnvironment()
-let environmentInitialized = false
+export const environment: Environment = buildEmptyEnvironment();
+let environmentInitialized = false;
 
 export async function deployEnvironment({
     signer,
     timeTravelEnabled = false,
 }: {
-    signer: SignerWithAddress
-    timeTravelEnabled?: boolean
+    signer: SignerWithAddress;
+    timeTravelEnabled?: boolean;
 }) {
     if (!environmentInitialized) {
         const { deployer, factory, businessLogicResolver } =
@@ -251,21 +251,21 @@ export async function deployEnvironment({
                     useDeployed: false,
                     timeTravelEnabled: timeTravelEnabled,
                 })
-            )
+            );
 
         environment.proxyAdmin = ProxyAdmin__factory.connect(
             businessLogicResolver.proxyAdminAddress!,
             deployer!
-        )
+        );
         environment.resolver = IBusinessLogicResolver__factory.connect(
             businessLogicResolver.proxyAddress!,
             deployer!
-        )
+        );
         environment.factory = IFactory__factory.connect(
             factory.proxyAddress!,
             deployer!
-        )
-        environmentInitialized = true
+        );
+        environmentInitialized = true;
     }
 }
 
@@ -306,5 +306,5 @@ function buildEmptyEnvironment(): Environment {
         proxyAdmin: {} as ProxyAdmin,
         resolver: {} as IBusinessLogicResolver,
         factory: {} as IFactory,
-    }
+    };
 }

@@ -203,9 +203,9 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { expect } from 'chai'
-import { type Pause, type AccessControl } from '@typechain'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { expect } from 'chai';
+import { type Pause, type AccessControl } from '@typechain';
 
 export async function grantRoleAndPauseToken(
     accessControlFacet: AccessControl,
@@ -218,17 +218,17 @@ export async function grantRoleAndPauseToken(
     // Granting Role to account
     await accessControlFacet
         .connect(signerAccessControl)
-        .grantRole(role, accountToAssignRole)
+        .grantRole(role, accountToAssignRole);
     // Pausing the token
-    await pauseFacet.connect(signerPause).pause()
+    await pauseFacet.connect(signerPause).pause();
 }
 
 // Add to CHAI API
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function assertObject(actual: any, expected: any, path = ''): void {
     Object.keys(expected).forEach((key) => {
-        const actualValue = actual[key]
-        const expectedValue = expected[key]
+        const actualValue = actual[key];
+        const expectedValue = expected[key];
 
         if (
             typeof actualValue === 'object' &&
@@ -237,17 +237,17 @@ export function assertObject(actual: any, expected: any, path = ''): void {
             if (Array.isArray(actualValue) && Array.isArray(expectedValue)) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 actualValue.forEach((item: any, index: number) => {
-                    assertObject(item, expectedValue[index], key)
-                })
+                    assertObject(item, expectedValue[index], key);
+                });
             } else {
-                assertObject(actualValue, expectedValue, key)
+                assertObject(actualValue, expectedValue, key);
             }
         } else {
-            const pathError = path === '' ? key : `${path}.${key}`
+            const pathError = path === '' ? key : `${path}.${key}`;
             expect(actualValue).to.equal(
                 expectedValue,
                 `Found error on ${pathError}`
-            )
+            );
         }
-    })
+    });
 }

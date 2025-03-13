@@ -203,17 +203,20 @@
 
 */
 
-import { BaseBlockchainCommand, BaseBlockchainCommandParams } from '../../index'
+import {
+    BaseBlockchainCommand,
+    BaseBlockchainCommandParams,
+} from '../../index';
 
 export interface BaseAtsContractListCommandParams
     extends BaseBlockchainCommandParams {
-    readonly contractAddressList: string[]
-    readonly businessLogicResolverProxyAddress: string
+    readonly contractAddressList: string[];
+    readonly businessLogicResolverProxyAddress: string;
 }
 
 export default abstract class BaseAtsContractListCommand extends BaseBlockchainCommand {
-    public readonly contractAddressList: string[]
-    public readonly businessLogicResolverProxyAddress: string
+    public readonly contractAddressList: string[];
+    public readonly businessLogicResolverProxyAddress: string;
 
     constructor({
         contractAddressList,
@@ -221,9 +224,9 @@ export default abstract class BaseAtsContractListCommand extends BaseBlockchainC
         signer,
         overrides,
     }: BaseAtsContractListCommandParams) {
-        super({ signer, overrides })
-        this.contractAddressList = contractAddressList
+        super({ signer, overrides });
+        this.contractAddressList = contractAddressList;
         this.businessLogicResolverProxyAddress =
-            businessLogicResolverProxyAddress
+            businessLogicResolverProxyAddress;
     }
 }

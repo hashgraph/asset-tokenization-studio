@@ -203,9 +203,9 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
 import {
     type ResolverProxy,
     type AdjustBalances,
@@ -219,7 +219,7 @@ import {
     TimeTravel,
     Kyc,
     SsiManagement,
-} from '@typechain'
+} from '@typechain';
 import {
     ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
@@ -236,52 +236,52 @@ import {
     MAX_UINT256,
     ZERO,
     EMPTY_STRING,
-} from '@scripts'
-import { grantRoleAndPauseToken } from '../../../common'
-import { dateToUnixTimestamp } from '../../../dateFormatter'
+} from '@scripts';
+import { grantRoleAndPauseToken } from '../../../common';
+import { dateToUnixTimestamp } from '../../../dateFormatter';
 
-const amount = 1
-const balanceOf_B_Original = [20 * amount, 200 * amount]
+const amount = 1;
+const balanceOf_B_Original = [20 * amount, 200 * amount];
 const _PARTITION_ID_2 =
-    '0x0000000000000000000000000000000000000000000000000000000000000002'
-const adjustFactor = 253
-const adjustDecimals = 2
-const decimals_Original = 6
-const maxSupply_Original = 1000000 * amount
-const EMPTY_VC_ID = EMPTY_STRING
+    '0x0000000000000000000000000000000000000000000000000000000000000002';
+const adjustFactor = 253;
+const adjustDecimals = 2;
+const decimals_Original = 6;
+const maxSupply_Original = 1000000 * amount;
+const EMPTY_VC_ID = EMPTY_STRING;
 
 describe('Adjust Balances Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+    let diamond: ResolverProxy;
+    let signer_A: SignerWithAddress;
+    let signer_B: SignerWithAddress;
+    let signer_C: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+    let account_A: string;
+    let account_B: string;
+    let account_C: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let erc1410Facet: ERC1410ScheduledTasks
-    let adjustBalancesFacet: AdjustBalances
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
-    let equityFacet: Equity
-    let scheduledTasksFacet: ScheduledTasks
-    let timeTravelFacet: TimeTravel
-    let kycFacet: Kyc
-    let ssiManagementFacet: SsiManagement
+    let factory: IFactory;
+    let businessLogicResolver: BusinessLogicResolver;
+    let erc1410Facet: ERC1410ScheduledTasks;
+    let adjustBalancesFacet: AdjustBalances;
+    let accessControlFacet: AccessControl;
+    let pauseFacet: Pause;
+    let equityFacet: Equity;
+    let scheduledTasksFacet: ScheduledTasks;
+    let timeTravelFacet: TimeTravel;
+    let kycFacet: Kyc;
+    let ssiManagementFacet: SsiManagement;
 
     async function deployAsset({
         multiPartition,
         factory,
         businessLogicResolver,
     }: {
-        multiPartition: boolean
-        factory: IFactory
-        businessLogicResolver: BusinessLogicResolver
+        multiPartition: boolean;
+        factory: IFactory;
+        businessLogicResolver: BusinessLogicResolver;
     }) {
-        const init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs();
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -313,72 +313,72 @@ describe('Adjust Balances Tests', () => {
             init_rbacs,
             factory,
             businessLogicResolver: businessLogicResolver.address,
-        })
+        });
 
-        await setFacets(diamond)
+        await setFacets(diamond);
     }
 
     async function setFacets(diamond: ResolverProxy) {
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
-        )
+        );
 
         erc1410Facet = await ethers.getContractAt(
             'ERC1410ScheduledTasks',
             diamond.address
-        )
+        );
 
         adjustBalancesFacet = await ethers.getContractAt(
             'AdjustBalances',
             diamond.address
-        )
+        );
 
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+        pauseFacet = await ethers.getContractAt('Pause', diamond.address);
 
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+        equityFacet = await ethers.getContractAt('Equity', diamond.address);
 
         scheduledTasksFacet = await ethers.getContractAt(
             'ScheduledTasksTimeTravel',
             diamond.address
-        )
+        );
 
         timeTravelFacet = await ethers.getContractAt(
             'TimeTravel',
             diamond.address
-        )
+        );
 
-        kycFacet = await ethers.getContractAt('Kyc', diamond.address)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address);
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',
             diamond.address
-        )
+        );
     }
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
-        }
+        };
         const rbacKYC: Rbac = {
             role: KYC_ROLE,
             members: [account_B],
-        }
+        };
         const rbacSSI: Rbac = {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
-        }
-        return [rbacPause, rbacKYC, rbacSSI]
+        };
+        return [rbacPause, rbacKYC, rbacSSI];
     }
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {}
+        console.log = () => {};
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+        [signer_A, signer_B, signer_C] = await ethers.getSigners();
+        account_A = signer_A.address;
+        account_B = signer_B.address;
+        account_C = signer_C.address;
 
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
@@ -388,33 +388,34 @@ describe('Adjust Balances Tests', () => {
                     useEnvironment: true,
                     timeTravelEnabled: true,
                 })
-            )
+            );
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
+        factory = deployedContracts.factory.contract;
+        businessLogicResolver =
+            deployedContracts.businessLogicResolver.contract;
+    });
 
     afterEach(async () => {
-        await timeTravelFacet.resetSystemTimestamp()
-    })
+        await timeTravelFacet.resetSystemTimestamp();
+    });
 
     beforeEach(async () => {
         await deployAsset({
             multiPartition: true,
             factory,
             businessLogicResolver,
-        })
-    })
+        });
+    });
 
     it('GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole', async () => {
         // Using account C (non role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C);
 
         // adjustBalances fails
         await expect(
             adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
-        ).to.be.rejectedWith('AccountHasNoRole')
-    })
+        ).to.be.rejectedWith('AccountHasNoRole');
+    });
 
     it('GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused', async () => {
         // Granting Role to account C and Pause
@@ -425,94 +426,97 @@ describe('Adjust Balances Tests', () => {
             signer_A,
             signer_B,
             account_C
-        )
+        );
 
         // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C);
 
         // adjustBalances fails
         await expect(
             adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
+        ).to.be.rejectedWith('TokenIsPaused');
+    });
 
     it('GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero', async () => {
         // Granting Role to account C and Pause
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C);
 
         // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C);
 
         // adjustBalances fails
         await expect(
             adjustBalancesFacet.adjustBalances(0, adjustDecimals)
-        ).to.be.revertedWithCustomError(adjustBalancesFacet, 'FactorIsZero')
-    })
+        ).to.be.revertedWithCustomError(adjustBalancesFacet, 'FactorIsZero');
+    });
 
     it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_A)
-        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_A);
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A);
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A);
 
-        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A);
         await kycFacet
             .connect(signer_B)
-            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A);
 
-        erc1410Facet = erc1410Facet.connect(signer_A)
-        equityFacet = equityFacet.connect(signer_A)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
+        erc1410Facet = erc1410Facet.connect(signer_A);
+        equityFacet = equityFacet.connect(signer_A);
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A);
 
         await erc1410Facet.issueByPartition({
             partition: _PARTITION_ID_2,
             tokenHolder: account_B,
             value: balanceOf_B_Original,
             data: '0x',
-        })
+        });
 
         // schedule tasks
         const dividendsRecordDateInSeconds_1 =
-            dateToUnixTimestamp(`2030-01-01T00:00:06Z`)
+            dateToUnixTimestamp(`2030-01-01T00:00:06Z`);
         const dividendsExecutionDateInSeconds =
-            dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
-        const dividendsAmountPerEquity = 1
+            dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
+        const dividendsAmountPerEquity = 1;
         const dividendData_1 = {
             recordDate: dividendsRecordDateInSeconds_1.toString(),
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
-        }
+        };
 
-        await equityFacet.setDividends(dividendData_1)
+        await equityFacet.setDividends(dividendData_1);
 
         const balanceAdjustmentExecutionDateInSeconds_1 =
-            dateToUnixTimestamp(`2030-01-01T00:00:07Z`)
+            dateToUnixTimestamp(`2030-01-01T00:00:07Z`);
 
         const balanceAdjustmentData_1 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
             factor: adjustFactor,
             decimals: adjustDecimals,
-        }
+        };
 
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_1
+        );
 
         const tasks_count_Before =
-            await scheduledTasksFacet.scheduledTaskCount()
+            await scheduledTasksFacet.scheduledTaskCount();
 
         //-------------------------
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_1 + 1
-        )
+        );
 
         // balance adjustment
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
-        await adjustBalancesFacet.adjustBalances(1, 0)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A);
+        await adjustBalancesFacet.adjustBalances(1, 0);
 
-        const tasks_count_After = await scheduledTasksFacet.scheduledTaskCount()
+        const tasks_count_After =
+            await scheduledTasksFacet.scheduledTaskCount();
 
-        expect(tasks_count_Before).to.be.equal(2)
-        expect(tasks_count_After).to.be.equal(0)
-    })
-})
+        expect(tasks_count_Before).to.be.equal(2);
+        expect(tasks_count_After).to.be.equal(0);
+    });
+});

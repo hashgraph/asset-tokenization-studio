@@ -203,16 +203,16 @@
 
 */
 
-import { BaseBlockchainQuery, BaseBlockchainQueryParams } from '../index'
+import { BaseBlockchainQuery, BaseBlockchainQueryParams } from '../index';
 
 interface ProxyImplementationQueryParams extends BaseBlockchainQueryParams {
-    proxyAdminAddress: string
-    transparentProxyAddress: string
+    proxyAdminAddress: string;
+    transparentProxyAddress: string;
 }
 
 export default class ProxyImplementationQuery extends BaseBlockchainQuery {
-    public readonly proxyAdminAddress: string
-    public readonly transparentProxyAddress: string
+    public readonly proxyAdminAddress: string;
+    public readonly transparentProxyAddress: string;
 
     constructor({
         proxyAdminAddress,
@@ -220,8 +220,8 @@ export default class ProxyImplementationQuery extends BaseBlockchainQuery {
         provider,
         overrides,
     }: ProxyImplementationQueryParams) {
-        super({ provider, overrides })
-        this.proxyAdminAddress = proxyAdminAddress
-        this.transparentProxyAddress = transparentProxyAddress
+        super({ provider, overrides });
+        this.proxyAdminAddress = proxyAdminAddress;
+        this.transparentProxyAddress = transparentProxyAddress;
     }
 }

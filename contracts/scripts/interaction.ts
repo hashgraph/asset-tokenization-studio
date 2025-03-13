@@ -203,12 +203,12 @@
 
 */
 
-import { Result } from 'ethers/lib/utils'
-import { CallContractCommand } from '@scripts'
+import { Result } from 'ethers/lib/utils';
+import { CallContractCommand } from '@scripts';
 import {
     TransactionReceipt,
     TransactionResponse,
-} from '@ethersproject/providers'
+} from '@ethersproject/providers';
 
 // * External functions
 /**
@@ -228,8 +228,8 @@ export async function callReadContract({
 }: CallContractCommand): Promise<Result> {
     const result: Result = await contract.callStatic[method](...args, {
         ...overrides,
-    })
-    return result
+    });
+    return result;
 }
 
 /**
@@ -253,11 +253,11 @@ export async function callWriteContract({
         method,
         args,
         overrides,
-    })
+    });
     const response: TransactionResponse = (await callContract(
         command
-    )) as TransactionResponse
-    return await response.wait()
+    )) as TransactionResponse;
+    return await response.wait();
 }
 
 // * Internal functions
@@ -276,5 +276,5 @@ function callContract({
     args,
     overrides,
 }: CallContractCommand): Promise<TransactionResponse | Result> {
-    return contract[method](...args, { ...overrides })
+    return contract[method](...args, { ...overrides });
 }

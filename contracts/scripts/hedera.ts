@@ -205,54 +205,54 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from 'axios'
-import Configuration, { Network } from '@configuration'
-import { ADDRESS_ZERO } from './constants'
-import { delay } from '@scripts'
+import axios from 'axios';
+import Configuration, { Network } from '@configuration';
+import { ADDRESS_ZERO } from './constants';
+import { delay } from '@scripts';
 
 interface IAccount {
-    evm_address: string
-    key: IKey
-    account: string
+    evm_address: string;
+    key: IKey;
+    account: string;
 }
 
 interface IKey {
-    _type: string
-    key: string
+    _type: string;
+    key: string;
 }
 
 export async function addressListToHederaIdList({
     addressList,
     network,
 }: {
-    addressList: string[]
-    network: Network
+    addressList: string[];
+    network: Network;
 }): Promise<string[]> {
     return Promise.all(
         addressList.map((address) => addresstoHederaId({ address, network }))
-    )
+    );
 }
 
 export async function addresstoHederaId({
     address: address,
     network,
 }: {
-    address: string
-    network: Network
+    address: string;
+    network: Network;
 }): Promise<string> {
     if (address === ADDRESS_ZERO) {
-        return '0.0.0'
+        return '0.0.0';
     }
 
-    const url = `accounts/${address}`
+    const url = `accounts/${address}`;
     const res = await getFromMirrorNode<IAccount>({
         url,
         network,
-    })
+    });
     if (!res) {
-        throw new Error(`Error retrieving account information for ${address}`)
+        throw new Error(`Error retrieving account information for ${address}`);
     }
-    return res.account
+    return res.account;
 }
 
 async function getFromMirrorNode<T>({
@@ -261,30 +261,30 @@ async function getFromMirrorNode<T>({
     timeBetweenRetries = 1,
     timeout = 10,
 }: {
-    url: string
-    network: Network
-    timeBetweenRetries?: number
-    timeout?: number
+    url: string;
+    network: Network;
+    timeBetweenRetries?: number;
+    timeout?: number;
 }): Promise<T | undefined> {
     const mirrorUrl = `${Configuration.endpoints[network].mirror}/api/v1/${
         url.startsWith('/') ? url.slice(1) : url
-    }`
-    let timePassed = 0
+    }`;
+    let timePassed = 0;
     while (timePassed <= timeout) {
         try {
-            const res = await axios.get<T>(mirrorUrl)
+            const res = await axios.get<T>(mirrorUrl);
             if (res.status === 200) {
-                return res.data
+                return res.data;
             }
         } catch (error) {
             console.error(
                 `Error retrieving data from Mirror Node: ${
                     (error as Error).message
                 }`
-            )
+            );
         }
-        await delay({ time: timeBetweenRetries, unit: 'seconds' })
-        timePassed += timeBetweenRetries
+        await delay({ time: timeBetweenRetries, unit: 'seconds' });
+        timePassed += timeBetweenRetries;
     }
-    return undefined
+    return undefined;
 }
