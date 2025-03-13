@@ -1746,14 +1746,14 @@ describe('Hold Tests', () => {
                 )
 
                 const hold_TotalAmount_After =
-                    await holdFacet.getHeldAmountForAdjusted(account_A)
+                    await holdFacet.getHeldAmountFor(account_A)
                 const hold_TotalAmount_After_Partition_1 =
-                    await holdFacet.getHeldAmountForByPartitionAdjusted(
+                    await holdFacet.getHeldAmountForByPartition(
                         _PARTITION_ID_1,
                         account_A
                     )
                 const hold_After =
-                    await holdFacet.getHoldForByPartitionAdjusted(
+                    await holdFacet.getHoldForByPartition(
                         holdIdentifier
                     )
                 const balance_After = await erc1410Facet.balanceOf(account_A)
@@ -2174,75 +2174,6 @@ describe('Hold Tests', () => {
                         held_Amount_After_Partition_1
                     )
                 ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
-            })
-
-            it('GIVEN a hold WHEN adjustBalances and release THEN reset hold LABAF succeeds', async () => {
-                await setPreBalanceAdjustment()
-
-                // HOLD
-                const currentTimestamp = (
-                    await ethers.provider.getBlock('latest')
-                ).timestamp
-
-                holdFacet = holdFacet.connect(signer_A)
-                let hold = {
-                    amount: _AMOUNT,
-                    expirationTimestamp: currentTimestamp + 10 * ONE_SECOND,
-                    escrow: account_B,
-                    to: ADDRESS_ZERO,
-                    data: '0x',
-                }
-
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
-
-                const TotalHoldLABAF_Before =
-                    await adjustBalancesFacet.getTotalHeldLabafByPartition(
-                        _PARTITION_ID_1,
-                        account_A
-                    )
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-
-                // HOLD AGAIN
-                hold.expirationTimestamp = currentTimestamp + 100 * ONE_SECOND
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
-
-                const HoldLABAF_Before =
-                    await adjustBalancesFacet.getHoldLabafByPartition(
-                        _PARTITION_ID_1,
-                        2,
-                        account_A
-                    )
-
-                // EXECUTE HOLD
-                await holdFacet
-                    .connect(signer_B)
-                    .executeHoldByPartition(
-                        holdIdentifier,
-                        account_C,
-                        hold.amount
-                    )
-
-                const TotalHoldLABAF_After =
-                    await adjustBalancesFacet.getTotalHeldLabafByPartition(
-                        _PARTITION_ID_1,
-                        account_A
-                    )
-                const HoldLABAF_After =
-                    await adjustBalancesFacet.getHoldLabafByPartition(
-                        _PARTITION_ID_1,
-                        2,
-                        account_A
-                    )
-
-                expect(HoldLABAF_Before).to.be.equal(HoldLABAF_After)
-                expect(TotalHoldLABAF_Before).to.be.equal(0)
-                expect(TotalHoldLABAF_After).to.be.equal(adjustFactor)
-                expect(HoldLABAF_Before).to.be.equal(adjustFactor)
             })
         })
     })

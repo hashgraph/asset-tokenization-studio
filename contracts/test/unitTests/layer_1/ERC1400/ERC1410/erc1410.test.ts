@@ -437,7 +437,7 @@ describe('ERC1410 Tests', () => {
             getTotalSupplyValues(),
             getBalanceValues(account_A),
             getBalanceValues(account_B),
-            erc20Facet.decimalsAdjusted(),
+            erc20Facet.decimals(),
             erc20Facet.getERC20Metadata(),
         ])
 
@@ -476,11 +476,12 @@ describe('ERC1410 Tests', () => {
     }
 
     async function getTotalSupplyValues() {
-        const totalSupply = await erc1410Facet.totalSupplyAdjusted()
+        const totalSupply = await erc1410Facet.totalSupply()
         const totalSupply_Partition_1 =
-            await erc1410Facet.totalSupplyByPartitionAdjusted(_PARTITION_ID_1)
-        const totalSupply_Partition =
-            await erc1410Facet.totalSupplyByPartitionAdjusted(_PARTITION_ID)
+            await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1)
+        const totalSupply_Partition = await erc1410Facet.totalSupplyByPartition(
+            _PARTITION_ID
+        )
 
         return {
             totalSupply,
@@ -3728,12 +3729,6 @@ describe('ERC1410 Tests', () => {
                     account_B
                 )
 
-                const LABAF_Before =
-                    await adjustBalancesFacet.getAllowanceLabaf(
-                        account_A,
-                        account_B
-                    )
-
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
                     adjustFactor,
@@ -3748,17 +3743,9 @@ describe('ERC1410 Tests', () => {
                     account_B
                 )
 
-                const LABAF_After = await adjustBalancesFacet.getAllowanceLabaf(
-                    account_A,
-                    account_B
-                )
-
                 expect(allowance_After).to.be.equal(
                     allowance_Before.mul(adjustFactor).add(amount)
                 )
-
-                expect(LABAF_Before).to.be.equal(0)
-                expect(LABAF_After).to.be.equal(adjustFactor)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 decreaseAllowance succeeds', async () => {
@@ -3773,11 +3760,6 @@ describe('ERC1410 Tests', () => {
                     account_A,
                     account_B
                 )
-                const LABAF_Before =
-                    await adjustBalancesFacet.getAllowanceLabaf(
-                        account_A,
-                        account_B
-                    )
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3795,18 +3777,12 @@ describe('ERC1410 Tests', () => {
                     account_A,
                     account_B
                 )
-                const LABAF_After = await adjustBalancesFacet.getAllowanceLabaf(
-                    account_A,
-                    account_B
-                )
 
                 expect(allowance_After).to.be.equal(
                     allowance_Before
                         .mul(adjustFactor)
                         .sub(allowance_Before.add(amount))
                 )
-                expect(LABAF_Before).to.be.equal(0)
-                expect(LABAF_After).to.be.equal(adjustFactor)
             })
         })
     })

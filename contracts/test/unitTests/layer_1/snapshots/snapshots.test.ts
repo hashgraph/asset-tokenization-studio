@@ -794,13 +794,9 @@ describe('Snapshots Tests', () => {
                 2
             )
 
-        const current_Balance_Of_A = await erc1410Facet.balanceOfAdjusted(
-            account_A
-        )
-        const current_Balance_Of_C = await erc1410Facet.balanceOfAdjusted(
-            account_C
-        )
-        const current_TotalSupply = await erc1410Facet.totalSupplyAdjusted()
+        const current_Balance_Of_A = await erc1410Facet.balanceOf(account_A)
+        const current_Balance_Of_C = await erc1410Facet.balanceOf(account_C)
+        const current_TotalSupply = await erc1410Facet.totalSupply()
 
         expect(snapshot_Balance_Of_A_1).to.equal(0)
         expect(snapshot_Balance_Of_A_1_Partition_1).to.equal(0)
@@ -1170,16 +1166,6 @@ describe('Snapshots Tests', () => {
             expect(decimals_At_Snapshot_4).to.be.equal(
                 DECIMALS + decimalFactor_3
             )
-
-            const ABAF_At_Snapshot_1 = await snapshotFacet.abafAtSnapshot(1)
-            const ABAF_At_Snapshot_2 = await snapshotFacet.abafAtSnapshot(2)
-            const ABAF_At_Snapshot_3 = await snapshotFacet.abafAtSnapshot(3)
-            const ABAF_At_Snapshot_4 = await snapshotFacet.abafAtSnapshot(4)
-
-            expect(ABAF_At_Snapshot_1).to.be.equal(0)
-            expect(ABAF_At_Snapshot_2).to.be.equal(adjustmentFactor_1)
-            expect(ABAF_At_Snapshot_3).to.be.equal(adjustmentFactor_2)
-            expect(ABAF_At_Snapshot_4).to.be.equal(adjustmentFactor_3)
 
             const totalSupply_At_Snapshot_1 =
                 await snapshotFacet.totalSupplyAtSnapshot(1)
