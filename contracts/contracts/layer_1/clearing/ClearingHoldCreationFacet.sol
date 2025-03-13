@@ -241,18 +241,20 @@ contract ClearingHoldCreationFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        address sender = _msgSender();
+        
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperation,
-            _msgSender(),
-            _msgSender(),
+            sender,
+            sender,
             false,
             _hold,
             ''
         );
 
         emit ClearedHoldByPartition(
-            _msgSender(),
-            _msgSender(),
+            sender,
+            sender,
             _clearingOperation.partition,
             clearingId_,
             _hold,
@@ -280,17 +282,19 @@ contract ClearingHoldCreationFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        address sender = _msgSender();
+
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
-            _msgSender(),
+            sender,
             true,
             _hold,
             _clearingOperationFrom.operatorData
         );
 
         emit ClearedHoldByPartition(
-            _msgSender(),
+            sender,
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
@@ -325,17 +329,19 @@ contract ClearingHoldCreationFacet is
                 _clearingOperationFrom.from
             );
         }
+        address sender = _msgSender();
+
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
-            _msgSender(),
+            sender,
             false,
             _hold,
             _clearingOperationFrom.operatorData
         );
 
         emit ClearedHoldByPartition(
-            _msgSender(),
+            sender,
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
@@ -354,6 +360,7 @@ contract ClearingHoldCreationFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        address sender = _msgSender();
         {
             _checkUnpaused();
             _checkProtectedPartitions();
@@ -367,7 +374,7 @@ contract ClearingHoldCreationFacet is
                 _protectedPartitionsRole(
                     _protectedClearingOperation.clearingOperation.partition
                 ),
-                _msgSender()
+                sender
             );
         }
         (success_, clearingId_) = _protectedClearingCreateHoldByPartition(
@@ -377,7 +384,7 @@ contract ClearingHoldCreationFacet is
         );
 
         emit ClearedHoldByPartition(
-            _msgSender(),
+            sender,
             _protectedClearingOperation.from,
             _protectedClearingOperation.clearingOperation.partition,
             clearingId_,

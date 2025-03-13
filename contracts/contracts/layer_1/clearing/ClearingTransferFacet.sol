@@ -274,11 +274,13 @@ contract ClearingTransferFacet is
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         )
-        validateAddress(_clearingOperationFrom.from)
-        validateAddress(_to)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        {
+            _checkValidAddress(_clearingOperationFrom.from);
+            _checkValidAddress(_to);
+        }
         address sender = _msgSender();
 
         (success_, clearingId_) = _clearingTransferCreation(
@@ -316,12 +318,12 @@ contract ClearingTransferFacet is
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         )
-        validateAddress(_clearingOperationFrom.from)
-        validateAddress(_to)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
+            _checkValidAddress(_clearingOperationFrom.from);
+            _checkValidAddress(_to);
             _checkOperator(
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from

@@ -235,18 +235,20 @@ contract ClearingRedeemFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        address sender = _msgSender();
+
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperation,
             _amount,
-            _msgSender(),
-            _msgSender(),
+            sender,
+            sender,
             false,
             ''
         );
 
         emit ClearedRedeemByPartition(
-            _msgSender(),
-            _msgSender(),
+            sender,
+            sender,
             _clearingOperation.partition,
             clearingId_,
             ''
@@ -271,17 +273,19 @@ contract ClearingRedeemFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        address sender = _msgSender();
+
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
-            _msgSender(),
+            sender,
             true,
             _clearingOperationFrom.operatorData
         );
 
         emit ClearedRedeemByPartition(
-            _msgSender(),
+            sender,
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
@@ -313,17 +317,19 @@ contract ClearingRedeemFacet is
                 _clearingOperationFrom.from
             );
         }
+        address sender = _msgSender();
+
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
-            _msgSender(),
+            sender,
             false,
             _clearingOperationFrom.operatorData
         );
 
         emit ClearedRedeemByPartition(
-            _msgSender(),
+            sender,
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
@@ -341,6 +347,7 @@ contract ClearingRedeemFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        address sender = _msgSender();
         {
             _checkUnpaused();
             _checkProtectedPartitions();
@@ -354,7 +361,7 @@ contract ClearingRedeemFacet is
                 _protectedPartitionsRole(
                     _protectedClearingOperation.clearingOperation.partition
                 ),
-                _msgSender()
+                sender
             );
         }
         (success_, clearingId_) = _protectedClearingRedeemByPartition(
@@ -364,7 +371,7 @@ contract ClearingRedeemFacet is
         );
 
         emit ClearedRedeemByPartition(
-            _msgSender(),
+            sender,
             _protectedClearingOperation.from,
             _protectedClearingOperation.clearingOperation.partition,
             clearingId_,
