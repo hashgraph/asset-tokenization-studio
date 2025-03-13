@@ -239,6 +239,7 @@ import {
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 import { dateToUnixTimestamp } from '../../../dateFormatter'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const amount = 1
 const balanceOf_B_Original = [20 * amount, 200 * amount]
@@ -272,16 +273,8 @@ describe('Adjust Balances Tests', () => {
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
 
-    async function deployAsset({
-        multiPartition,
-        factory,
-        businessLogicResolver,
-    }: {
-        multiPartition: boolean
-        factory: IFactory
-        businessLogicResolver: BusinessLogicResolver
-    }) {
-        const init_rbacs: Rbac[] = set_initRbacs()
+    async function deploySecurityFixtureMultiPartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -289,7 +282,7 @@ describe('Adjust Balances Tests', () => {
             isControllable: true,
             arePartitionsProtected: false,
             clearingActive: false,
-            isMultiPartition: multiPartition,
+            isMultiPartition: true,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: decimals_Original,
@@ -399,11 +392,7 @@ describe('Adjust Balances Tests', () => {
     })
 
     beforeEach(async () => {
-        await deployAsset({
-            multiPartition: true,
-            factory,
-            businessLogicResolver,
-        })
+        await loadFixture(deploySecurityFixtureMultiPartition)
     })
 
     it('GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole', async () => {
