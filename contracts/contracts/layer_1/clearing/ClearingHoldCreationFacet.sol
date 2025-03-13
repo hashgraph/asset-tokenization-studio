@@ -357,26 +357,20 @@ contract ClearingHoldCreationFacet is
     )
         external
         override
+        onlyUnpaused
+        onlyProtectedPartitions
+        validateAddress(_protectedClearingOperation.from)
+        onlyWithValidExpirationTimestamp(
+            _protectedClearingOperation.clearingOperation.expirationTimestamp
+        )
+        onlyRole(
+            _protectedPartitionsRole(
+                _protectedClearingOperation.clearingOperation.partition
+            )
+        )
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
-        {
-            _checkUnpaused();
-            _checkProtectedPartitions();
-            _checkValidAddress(_protectedClearingOperation.from);
-            _checkExpirationTimestamp(
-                _protectedClearingOperation
-                    .clearingOperation
-                    .expirationTimestamp
-            );
-            _checkRole(
-                _protectedPartitionsRole(
-                    _protectedClearingOperation.clearingOperation.partition
-                ),
-                sender
-            );
-        }
         (success_, clearingId_) = _protectedClearingCreateHoldByPartition(
             _protectedClearingOperation,
             _hold,
@@ -384,7 +378,7 @@ contract ClearingHoldCreationFacet is
         );
 
         emit ClearedHoldByPartition(
-            sender,
+            _msgSender(),
             _protectedClearingOperation.from,
             _protectedClearingOperation.clearingOperation.partition,
             clearingId_,

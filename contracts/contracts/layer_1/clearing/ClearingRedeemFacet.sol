@@ -344,26 +344,20 @@ contract ClearingRedeemFacet is
     )
         external
         override
+        onlyUnpaused
+        onlyProtectedPartitions
+        validateAddress(_protectedClearingOperation.from)
+        onlyWithValidExpirationTimestamp(
+            _protectedClearingOperation.clearingOperation.expirationTimestamp
+        )
+        onlyRole(
+            _protectedPartitionsRole(
+                _protectedClearingOperation.clearingOperation.partition
+            )
+        )
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
-        {
-            _checkUnpaused();
-            _checkProtectedPartitions();
-            _checkValidAddress(_protectedClearingOperation.from);
-            _checkExpirationTimestamp(
-                _protectedClearingOperation
-                    .clearingOperation
-                    .expirationTimestamp
-            );
-            _checkRole(
-                _protectedPartitionsRole(
-                    _protectedClearingOperation.clearingOperation.partition
-                ),
-                sender
-            );
-        }
         (success_, clearingId_) = _protectedClearingRedeemByPartition(
             _protectedClearingOperation,
             _amount,
@@ -371,7 +365,7 @@ contract ClearingRedeemFacet is
         );
 
         emit ClearedRedeemByPartition(
-            sender,
+            _msgSender(),
             _protectedClearingOperation.from,
             _protectedClearingOperation.clearingOperation.partition,
             clearingId_,
