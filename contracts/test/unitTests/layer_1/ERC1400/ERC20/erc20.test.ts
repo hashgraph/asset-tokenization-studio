@@ -218,7 +218,7 @@ import {
     IFactory,
     Kyc,
     SsiManagement,
-    ClearingActionsFacet
+    ClearingActionsFacet,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -310,9 +310,13 @@ describe('ERC20 Tests', () => {
             }
             const rbacClearing: Rbac = {
                 role: CLEARING_ROLE,
-                members: [account_A]
+                members: [account_A],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacControlList, rbacClearing]
+            const init_rbacs: Rbac[] = [
+                rbacPause,
+                rbacControlList,
+                rbacClearing,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,

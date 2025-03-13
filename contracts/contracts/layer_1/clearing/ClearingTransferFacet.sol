@@ -237,19 +237,21 @@ contract ClearingTransferFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        address sender = _msgSender();
+
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperation,
             _amount,
             _to,
-            _msgSender(),
-            _msgSender(),
+            sender,
+            sender,
             false,
             ''
         );
 
         emit ClearedTransferByPartition(
-            _msgSender(),
-            _msgSender(),
+            sender,
+            sender,
             _to,
             _clearingOperation.partition,
             clearingId_,
@@ -277,18 +279,20 @@ contract ClearingTransferFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        address sender = _msgSender();
+
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
             _clearingOperationFrom.from,
-            _msgSender(),
+            sender,
             true,
             _clearingOperationFrom.operatorData
         );
 
         emit ClearedTransferByPartition(
-            _msgSender(),
+            sender,
             _clearingOperationFrom.from,
             _to,
             _clearingOperationFrom.clearingOperation.partition,
@@ -323,18 +327,20 @@ contract ClearingTransferFacet is
                 _clearingOperationFrom.from
             );
         }
+        address sender = _msgSender();
+
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
             _clearingOperationFrom.from,
-            _msgSender(),
+            sender,
             false,
             _clearingOperationFrom.operatorData
         );
 
         emit ClearedTransferByPartition(
-            _msgSender(),
+            sender,
             _clearingOperationFrom.from,
             _to,
             _clearingOperationFrom.clearingOperation.partition,
@@ -354,6 +360,7 @@ contract ClearingTransferFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        address sender = _msgSender();
         {
             _checkUnpaused();
             _checkProtectedPartitions();
@@ -367,7 +374,7 @@ contract ClearingTransferFacet is
                 _protectedPartitionsRole(
                     _protectedClearingOperation.clearingOperation.partition
                 ),
-                _msgSender()
+                sender
             );
             _checkValidAddress(_to);
         }
@@ -379,7 +386,7 @@ contract ClearingTransferFacet is
         );
 
         emit ClearedTransferByPartition(
-            _msgSender(),
+            sender,
             _protectedClearingOperation.from,
             _to,
             _protectedClearingOperation.clearingOperation.partition,
