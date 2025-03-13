@@ -328,15 +328,12 @@ import { ClearingCreateHoldFromByPartitionCommand } from '../../app/usecase/comm
 import { ProtectedClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand.js';
 import GetClearedAmountForByPartitionRequest from './request/GetClearedAmountForByPartitionRequest.js';
 import GetClearingCountForByPartitionRequest from './request/GetClearingCountForByPartitionRequest.js';
-import GetClearingForByPartitionRequest from './request/GetClearingForByPartitionRequest.js';
 import GetClearingsIdForByPartitionRequest from './request/GetClearingsIdForByPartitionRequest.js';
 import IsClearingActivatedRequest from './request/IsClearingActivatedRequest.js';
-import ClearingViewModel from './response/ClearingViewModel.js';
 import GetClearedAmountForRequest from './request/GetClearedAmountForRequest.js';
 import { GetClearedAmountForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery.js';
 import { GetClearedAmountForQuery } from '../../app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery.js';
 import { GetClearingCountForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery.js';
-import { GetClearingForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingForByPartition/GetClearingForByPartitionQuery.js';
 import { GetClearingsIdForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery.js';
 import { IsClearingActivatedQuery } from '../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
 import OperatorClearingCreateHoldByPartitionRequest from './request/OperatorClearingCreateHoldByPartitionRequest.js';
@@ -345,6 +342,15 @@ import OperatorClearingRedeemByPartitionRequest from './request/OperatorClearing
 import { OperatorClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand.js';
 import OperatorClearingTransferByPartitionRequest from './request/OperatorClearingTransferByPartitionRequest.js';
 import { OperatorClearingTransferByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommand.js';
+import GetClearingCreateHoldForByPartitionRequest from './request/GetClearingCreateHoldForByPartitionRequest.js';
+import GetClearingTransferForByPartitionRequest from './request/GetClearingTransferForByPartitionRequest.js';
+import GetClearingRedeemForByPartitionRequest from './request/GetClearingRedeemForByPartitionRequest.js';
+import ClearingCreateHoldViewModel from './response/ClearingCreateHoldViewModel.js';
+import ClearingRedeemViewModel from './response/ClearingRedeemViewModel.js';
+import ClearingTransferViewModel from './response/ClearingTransferViewModel.js';
+import { GetClearingCreateHoldForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery.js';
+import { GetClearingRedeemForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery.js';
+import { GetClearingTransferForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -486,9 +492,15 @@ interface ISecurityInPort {
   getClearingCountForByPartition(
     request: GetClearingCountForByPartitionRequest,
   ): Promise<number>;
-  getClearingForByPartition(
-    request: GetClearingForByPartitionRequest,
-  ): Promise<ClearingViewModel>;
+  getClearingCreateHoldForByPartition(
+    request: GetClearingCreateHoldForByPartitionRequest,
+  ): Promise<ClearingCreateHoldViewModel>;
+  getClearingRedeemForByPartition(
+    request: GetClearingRedeemForByPartitionRequest,
+  ): Promise<ClearingRedeemViewModel>;
+  getClearingTransferForByPartition(
+    request: GetClearingTransferForByPartitionRequest,
+  ): Promise<ClearingTransferViewModel>;
   getClearingsIdForByPartition(
     request: GetClearingsIdForByPartitionRequest,
   ): Promise<number[]>;
@@ -1543,40 +1555,88 @@ class SecurityInPort implements ISecurityInPort {
   }
 
   @LogError
-  async getClearingForByPartition(
-    request: GetClearingForByPartitionRequest,
-  ): Promise<ClearingViewModel> {
-    handleValidation('GetClearingForByPartitionRequest', request);
+  async getClearingCreateHoldForByPartition(
+    request: GetClearingCreateHoldForByPartitionRequest,
+  ): Promise<ClearingCreateHoldViewModel> {
+    handleValidation('GetClearingCreateHoldForByPartitionRequest', request);
 
     const res = (
       await this.queryBus.execute(
-        new GetClearingForByPartitionQuery(
+        new GetClearingCreateHoldForByPartitionQuery(
           request.securityId,
           request.partitionId,
           request.targetId,
-          request.clearingOperationType,
           request.clearingId,
         ),
       )
     ).payload;
 
-    const clearing: ClearingViewModel = {
+    const clearing: ClearingCreateHoldViewModel = {
       id: request.clearingId,
       amount: res.amount.toString(),
-      expirationDate: new Date(res.expirationTimeStamp * ONE_THOUSAND),
-      destinationAddress: res.destination,
-      clearingOperationType: res.clearingOperationType,
+      expirationDate: new Date(res.expirationTimestamp * ONE_THOUSAND),
       data: res.data,
       operatorData: res.operatorData,
-      hold: {
-        amount: res.hold.amount.toString(),
-        expirationDate: new Date(
-          res.hold.expirationTimestamp.toBigNumber().toNumber() * ONE_THOUSAND,
+      holdEscrow: res.holdEscrow,
+      holdExpirationDate: new Date(res.holdExpirationTimestamp * ONE_THOUSAND),
+      holdTo: res.holdTo,
+      holdData: res.holdData,
+    };
+
+    return clearing;
+  }
+
+  @LogError
+  async getClearingRedeemForByPartition(
+    request: GetClearingRedeemForByPartitionRequest,
+  ): Promise<ClearingRedeemViewModel> {
+    handleValidation('GetClearingRedeemForByPartitionRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetClearingRedeemForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.clearingId,
         ),
-        escrow: res.hold.escrow,
-        to: res.hold.to,
-        data: res.hold.data,
-      },
+      )
+    ).payload;
+
+    const clearing: ClearingRedeemViewModel = {
+      id: request.clearingId,
+      amount: res.amount.toString(),
+      expirationDate: new Date(res.expirationTimestamp * ONE_THOUSAND),
+      data: res.data,
+      operatorData: res.operatorData,
+    };
+
+    return clearing;
+  }
+
+  @LogError
+  async getClearingTransferForByPartition(
+    request: GetClearingTransferForByPartitionRequest,
+  ): Promise<ClearingTransferViewModel> {
+    handleValidation('GetClearingTransferForByPartitionRequest', request);
+    const res = (
+      await this.queryBus.execute(
+        new GetClearingTransferForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.clearingId,
+        ),
+      )
+    ).payload;
+
+    const clearing: ClearingTransferViewModel = {
+      id: request.clearingId,
+      amount: res.amount.toString(),
+      expirationDate: new Date(res.expirationTimestamp * ONE_THOUSAND),
+      destination: res.destination,
+      data: res.data,
+      operatorData: res.operatorData,
     };
 
     return clearing;

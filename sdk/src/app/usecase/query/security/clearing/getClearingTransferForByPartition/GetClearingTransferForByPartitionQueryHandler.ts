@@ -203,137 +203,62 @@
 
 */
 
-import { BigNumber } from 'ethers';
-import BigDecimal from '../shared/BigDecimal';
 import {
-  InvalidClearingOperationType,
-  InvalidClearingOperationTypeNumber,
-} from './error/InvalidClearingOperationType';
+  GetClearingTransferForByPartitionQuery,
+  GetClearingTransferForByPartitionQueryResponse,
+} from './GetClearingTransferForByPartitionQuery.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 
-export class ClearingOperation {
-  partition: string;
-  expirationTimestamp: BigNumber;
-  data: string;
-}
-
-export class ClearingOperationFrom {
-  clearingOperation: ClearingOperation;
-  from: string;
-  operatorData: string;
-}
-
-export class ProtectedClearingOperation {
-  clearingOperation: ClearingOperation;
-  from: string;
-  deadline: BigNumber;
-  nonce: BigNumber;
-}
-
-export class ClearingOperationIdentifier {
-  partition: string;
-  tokenHolder: string;
-  clearingOperationType: ClearingOperationType;
-  clearingId: number;
-}
-
-export enum ClearingOperationType {
-  Transfer,
-  Redeem,
-  HoldCreation,
-}
-
-export class CastClearingOperationType {
-  static fromNumber(id: number): ClearingOperationType {
-    switch (id) {
-      case 0:
-        return ClearingOperationType.Transfer;
-      case 1:
-        return ClearingOperationType.Redeem;
-      case 2:
-        return ClearingOperationType.HoldCreation;
-      default:
-        throw new InvalidClearingOperationTypeNumber(id);
-    }
-  }
-
-  static toNumber(value: ClearingOperationType): number {
-    switch (value) {
-      case ClearingOperationType.Transfer:
-        return 0;
-      case ClearingOperationType.Redeem:
-        return 1;
-      case ClearingOperationType.HoldCreation:
-        return 2;
-      default:
-        throw new InvalidClearingOperationType(value);
-    }
-  }
-}
-export class ClearingHoldCreation {
-  amount: BigDecimal;
-  expirationTimestamp: number;
-  data: string;
-  operatorData: string;
-  holdEscrow: string;
-  holdExpirationTimestamp: number;
-  holdTo: string;
-  holdData: string;
+@QueryHandler(GetClearingTransferForByPartitionQuery)
+export class GetClearingTransferForByPartitionQueryHandler
+  implements IQueryHandler<GetClearingTransferForByPartitionQuery>
+{
   constructor(
-    amount: BigDecimal,
-    expirationTimestamp: number,
-    data: string,
-    operatorData: string,
-    holdEscrow: string,
-    holdExpirationTimestamp: number,
-    holdTo: string,
-    holdData: string,
-  ) {
-    this.amount = amount;
-    this.expirationTimestamp = expirationTimestamp;
-    this.data = data;
-    this.operatorData = operatorData;
-    this.holdEscrow = holdEscrow;
-    this.holdExpirationTimestamp = holdExpirationTimestamp;
-    this.holdTo = holdTo;
-    this.holdData = holdData;
-  }
-}
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
 
-export class ClearingRedeem {
-  amount: BigDecimal;
-  expirationTimestamp: number;
-  data: string;
-  operatorData: string;
-  constructor(
-    amount: BigDecimal,
-    expirationTimestamp: number,
-    data: string,
-    operatorData: string,
-  ) {
-    this.amount = amount;
-    this.expirationTimestamp = expirationTimestamp;
-    this.data = data;
-    this.operatorData = operatorData;
-  }
-}
+  async execute(
+    query: GetClearingTransferForByPartitionQuery,
+  ): Promise<GetClearingTransferForByPartitionQueryResponse> {
+    const { securityId, partitionId, targetId, clearingId } = query;
+    const security = await this.securityService.get(securityId);
+    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-export class ClearingTransfer {
-  amount: BigDecimal;
-  expirationTimestamp: number;
-  destination: string;
-  data: string;
-  operatorData: string;
-  constructor(
-    amount: BigDecimal,
-    expirationTimestamp: number,
-    destination: string,
-    data: string,
-    operatorData: string,
-  ) {
-    this.expirationTimestamp = expirationTimestamp;
-    this.amount = amount;
-    this.destination = destination;
-    this.data = data;
-    this.operatorData = operatorData;
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.exec(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+      : new EvmAddress(targetId);
+
+    const clearing = await this.queryAdapter.getClearingTransferForByPartition(
+      securityEvmAddress,
+      partitionId,
+      targetEvmAddress,
+      clearingId,
+    );
+
+    clearing.amount = BigDecimal.fromStringFixed(
+      clearing.amount.toString(),
+      security.decimals,
+    );
+
+    return new GetClearingTransferForByPartitionQueryResponse(clearing);
   }
 }

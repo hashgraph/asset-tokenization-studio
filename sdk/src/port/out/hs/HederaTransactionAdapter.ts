@@ -232,7 +232,9 @@ import {
   TransferAndLock__factory,
   SsiManagement__factory,
   Kyc__factory,
-  ClearingFacet__factory,
+  ClearingTransferFacet__factory,
+  ClearingRedeemFacet__factory,
+  ClearingHoldCreationFacet__factory,
   ClearingActionsFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
@@ -2371,7 +2373,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingTransferFacet__factory().attach(
       security.toString(),
     );
 
@@ -2416,7 +2418,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingTransferFacet__factory().attach(
       security.toString(),
     );
 
@@ -2465,7 +2467,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       nonce: nonce.toBigNumber(),
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingTransferFacet__factory().attach(
       security.toString(),
     );
 
@@ -2638,7 +2640,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingRedeemFacet__factory().attach(
       security.toString(),
     );
 
@@ -2682,7 +2684,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingRedeemFacet__factory().attach(
       security.toString(),
     );
 
@@ -2730,7 +2732,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       nonce: nonce.toBigNumber(),
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingRedeemFacet__factory().attach(
       security.toString(),
     );
 
@@ -2780,7 +2782,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
     );
 
@@ -2835,7 +2837,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
     );
 
@@ -2894,7 +2896,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
     );
 
@@ -2949,7 +2951,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
     );
 
@@ -2993,7 +2995,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingRedeemFacet__factory().attach(
       security.toString(),
     );
 
@@ -3038,7 +3040,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingTransferFacet__factory().attach(
       security.toString(),
     );
 

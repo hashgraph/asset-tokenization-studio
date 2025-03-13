@@ -203,40 +203,16 @@
 
 */
 
-import { ClearingOperationType } from '../../../domain/context/security/Clearing.js';
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
+import { QueryResponse } from 'core/query/QueryResponse';
 
-export default class GetClearingForByPartitionRequest extends ValidatedRequest<GetClearingForByPartitionRequest> {
-  securityId: string;
-  targetId: string;
-  partitionId: string;
-  clearingOperationType: ClearingOperationType;
-  clearingId: number;
-
-  constructor({
-    securityId,
-    targetId,
-    partitionId,
-    clearingOperationType,
-    clearingId,
-  }: {
-    securityId: string;
-    targetId: string;
-    partitionId: string;
-    clearingOperationType: ClearingOperationType;
-    clearingId: number;
-  }) {
-    super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
-    });
-
-    this.securityId = securityId;
-    this.targetId = targetId;
-    this.partitionId = partitionId;
-    this.clearingOperationType = clearingOperationType;
-    this.clearingId = clearingId;
-  }
+export default interface ClearingCreateHoldViewModel extends QueryResponse {
+  id: number;
+  amount: string;
+  expirationDate: Date;
+  data: string;
+  operatorData: string;
+  holdEscrow: string;
+  holdExpirationDate: Date;
+  holdTo: string;
+  holdData: string;
 }

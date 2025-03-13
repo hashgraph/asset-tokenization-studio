@@ -256,6 +256,9 @@ import {
   OperatorClearingCreateHoldByPartitionRequest,
   OperatorClearingRedeemByPartitionRequest,
   OperatorClearingTransferByPartitionRequest,
+  GetClearingRedeemForByPartitionRequest,
+  GetClearingCreateHoldForByPartitionRequest,
+  GetClearingTransferForByPartitionRequest,
 } from '../../../src/index.js';
 import TransferRequest from '../../../src/port/in/request/TransferRequest.js';
 import RedeemRequest from '../../../src/port/in/request/RedeemRequest.js';
@@ -288,6 +291,8 @@ import { keccak256 } from 'js-sha3';
 import { _PARTITION_ID_1 } from '../../../src/core/Constants.js';
 import createVcT3 from '../../utils/verifiableCredentials.js';
 import { ClearingOperationType } from '../../../src/domain/context/security/Clearing.js';
+import BigDecimal from '../../../src/domain/context/shared/BigDecimal.js';
+import { ONE_THOUSAND } from '../../../src/domain/context/shared/SecurityDate.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -1451,6 +1456,10 @@ describe('🧪 Security tests', () => {
       const issuedAmount = '10';
       const clearedAmount = '2';
       const expirationTimeStamp = '9991976120';
+      const date = new Date(
+        BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() *
+          ONE_THOUSAND,
+      );
 
       await Security.issue(
         new IssueRequest({
@@ -1495,6 +1504,29 @@ describe('🧪 Security tests', () => {
           }),
         ),
       ).toEqual(+clearedAmount);
+
+      const clearing = await Security.getClearingCreateHoldForByPartition(
+        new GetClearingCreateHoldForByPartitionRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          partitionId: _PARTITION_ID_1,
+          clearingId: 1,
+        }),
+      );
+
+      expect(clearing.id).toEqual(1);
+      expect(clearing.amount).toEqual(clearedAmount);
+      expect(clearing.expirationDate).toEqual(date);
+      expect(clearing.data).toEqual('0x');
+      expect(clearing.operatorData).toEqual('0x');
+      expect(clearing.holdEscrow).toEqual(
+        CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+      );
+      expect(clearing.holdExpirationDate).toEqual(date);
+      expect(clearing.holdTo).toEqual(
+        CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+      );
+      expect(clearing.holdData).toEqual('0x');
 
       const clearingHoldCount = await Security.getClearingCountForByPartition(
         new GetClearingCountForByPartitionRequest({
@@ -1558,6 +1590,10 @@ describe('🧪 Security tests', () => {
       const issuedAmount = '10';
       const clearedAmount = '2';
       const expirationTimeStamp = '9991976120';
+      const date = new Date(
+        BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() *
+          ONE_THOUSAND,
+      );
 
       await Security.issue(
         new IssueRequest({
@@ -1599,6 +1635,21 @@ describe('🧪 Security tests', () => {
           }),
         ),
       ).toEqual(+clearedAmount);
+
+      const clearing = await Security.getClearingRedeemForByPartition(
+        new GetClearingRedeemForByPartitionRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          partitionId: _PARTITION_ID_1,
+          clearingId: 1,
+        }),
+      );
+
+      expect(clearing.id).toEqual(1);
+      expect(clearing.amount).toEqual(clearedAmount);
+      expect(clearing.expirationDate).toEqual(date);
+      expect(clearing.data).toEqual('0x');
+      expect(clearing.operatorData).toEqual('0x');
 
       const clearingRedeemCount = await Security.getClearingCountForByPartition(
         new GetClearingCountForByPartitionRequest({
@@ -1662,6 +1713,10 @@ describe('🧪 Security tests', () => {
       const issuedAmount = '10';
       const clearedAmount = '2';
       const expirationTimeStamp = '9991976120';
+      const date = new Date(
+        BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() *
+          ONE_THOUSAND,
+      );
 
       await Security.issue(
         new IssueRequest({
@@ -1704,6 +1759,24 @@ describe('🧪 Security tests', () => {
           }),
         ),
       ).toEqual(+clearedAmount);
+
+      const clearing = await Security.getClearingTransferForByPartition(
+        new GetClearingTransferForByPartitionRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          partitionId: _PARTITION_ID_1,
+          clearingId: 1,
+        }),
+      );
+
+      expect(clearing.id).toEqual(1);
+      expect(clearing.amount).toEqual(clearedAmount);
+      expect(clearing.expirationDate).toEqual(date);
+      expect(clearing.destination).toEqual(
+        CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+      );
+      expect(clearing.data).toEqual('0x');
+      expect(clearing.operatorData).toEqual('0x');
 
       const clearingTransferCount =
         await Security.getClearingCountForByPartition(
