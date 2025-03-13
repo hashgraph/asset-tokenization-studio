@@ -265,7 +265,7 @@ contract ClearingActionsFacet is
         )
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyClearingActivated
-        checkExpirationTimestamp(_clearingOperationIdentifier, false)
+        validateExpirationTimestamp(_clearingOperationIdentifier, false)
         returns (bool success_)
     {
         success_ = _approveClearingOperationByPartition(
@@ -298,7 +298,7 @@ contract ClearingActionsFacet is
             _clearingOperationIdentifier.tokenHolder
         )
         onlyClearingActivated
-        checkExpirationTimestamp(_clearingOperationIdentifier, false)
+        validateExpirationTimestamp(_clearingOperationIdentifier, false)
         returns (bool success_)
     {
         success_ = _cancelClearingOperationByPartition(
@@ -330,7 +330,7 @@ contract ClearingActionsFacet is
             _clearingOperationIdentifier.tokenHolder
         )
         onlyClearingActivated
-        checkExpirationTimestamp(_clearingOperationIdentifier, true)
+        validateExpirationTimestamp(_clearingOperationIdentifier, true)
         returns (bool success_)
     {
         success_ = _reclaimClearingOperationByPartition(

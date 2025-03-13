@@ -222,7 +222,6 @@ import {
     Kyc,
     SsiManagement,
     Hold,
-    ClearingActionsFacet,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -414,7 +413,6 @@ describe('ProtectedPartitions Tests', () => {
     let ssiManagementFacet: SsiManagement
     let holdFacet: Hold
     let clearingFacet: any
-    let clearingActionsFacet: ClearingActionsFacet
     let protectedHold: any
     let hold: any
     let clearingOperation: any
@@ -489,6 +487,11 @@ describe('ProtectedPartitions Tests', () => {
             address,
             signer_A
         )
+        let clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
+            address,
+            signer_A
+        )
 
         clearingFacet = new ethers.Contract(
             address,
@@ -497,12 +500,8 @@ describe('ProtectedPartitions Tests', () => {
                 ...clearingRedeemFacet.interface.fragments,
                 ...clearingHoldCreationFacet.interface.fragments,
                 ...clearingReadFacet.interface.fragments,
+                ...clearingActionsFacet.interface.fragments,
             ],
-            signer_A
-        )
-        clearingActionsFacet = await ethers.getContractAt(
-            'ClearingActionsFacet',
-            address,
             signer_A
         )
     }
@@ -1799,7 +1798,7 @@ describe('ProtectedPartitions Tests', () => {
         })
         describe('Clearing Tests', () => {
             beforeEach(async () => {
-                await clearingActionsFacet.activateClearing()
+                await clearingFacet.activateClearing()
             })
             it('GIVEN a protected token WHEN performing a create clearing THEN transaction fails with PartitionsAreProtected', async () => {
                 // TRANSFERS

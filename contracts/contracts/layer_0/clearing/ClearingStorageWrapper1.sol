@@ -237,17 +237,16 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier
     ) {
-        if (!_isClearingIdValid(_clearingOperationIdentifier))
-            revert IClearing.WrongClearingId();
+        _checkClearingId(_clearingOperationIdentifier);
         _;
     }
 
     modifier onlyClearingActivated() {
-        if (!_isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        _checkClearingActivated();
         _;
     }
 
-    modifier checkExpirationTimestamp(
+    modifier validateExpirationTimestamp(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier,
         bool _mutBeExpired
@@ -528,6 +527,18 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
                 clearingId: _clearingId,
                 clearingOperationType: _operationType
             });
+    }
+
+    function _checkClearingId(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
+    ) private view {
+        if (!_isClearingIdValid(_clearingOperationIdentifier))
+            revert IClearing.WrongClearingId();
+    }
+
+    function _checkClearingActivated() private view {
+        if (!_isClearingActivated()) revert IClearing.ClearingIsDisabled();
     }
 
     function _clearingStorage()

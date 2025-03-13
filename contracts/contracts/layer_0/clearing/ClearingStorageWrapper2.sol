@@ -689,9 +689,9 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
     ) internal {
         if (_validPartitionForReceiver(_partition, _to)) {
             _increaseBalanceByPartition(_to, _amount, _partition);
-        } else {
-            _addPartitionTo(_amount, _to, _partition);
+            return;
         }
+        _addPartitionTo(_amount, _to, _partition);
     }
 
     function _removeClearing(
@@ -808,30 +808,33 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         if (
             _clearingOperationIdentifier.clearingOperationType ==
             IClearing.ClearingOperationType.Transfer
-        )
+        ) {
             _clearingStorage()
             .clearingTransferByAccountPartitionAndId[
                 _clearingOperationIdentifier.tokenHolder
             ][_clearingOperationIdentifier.partition][
                 _clearingOperationIdentifier.clearingId
             ].amount *= _factor;
-        else if (
+            return;
+        }
+        if (
             _clearingOperationIdentifier.clearingOperationType ==
             IClearing.ClearingOperationType.Redeem
-        )
+        ) {
             _clearingStorage()
             .clearingRedeemByAccountPartitionAndId[
                 _clearingOperationIdentifier.tokenHolder
             ][_clearingOperationIdentifier.partition][
                 _clearingOperationIdentifier.clearingId
             ].amount *= _factor;
-        else
-            _clearingStorage()
-            .clearingHoldCreationByAccountPartitionAndId[
-                _clearingOperationIdentifier.tokenHolder
-            ][_clearingOperationIdentifier.partition][
-                _clearingOperationIdentifier.clearingId
-            ].amount *= _factor;
+            return;
+        }
+        _clearingStorage()
+        .clearingHoldCreationByAccountPartitionAndId[
+            _clearingOperationIdentifier.tokenHolder
+        ][_clearingOperationIdentifier.partition][
+            _clearingOperationIdentifier.clearingId
+        ].amount *= _factor;
     }
 
     function _increaseClearedAmounts(
@@ -947,7 +950,13 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             IClearingTransfer.ClearingTransferData memory clearingTransferData_
         )
     {
-        uint256 factor = _calculateFactor(
+        clearingTransferData_ = _getClearingTransferForByPartition(
+            _partition,
+            _tokenHolder,
+            _clearingId
+        );
+
+        clearingTransferData_.amount *= _calculateFactor(
             _getAbafAdjusted(),
             _getClearingLabafByPartition(
                 _buildClearingOperationIdentifier(
@@ -958,12 +967,6 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 )
             )
         );
-        clearingTransferData_ = _getClearingTransferForByPartition(
-            _partition,
-            _tokenHolder,
-            _clearingId
-        );
-        clearingTransferData_.amount *= factor;
     }
 
     function _getClearingRedeemForByPartitionAdjusted(
@@ -977,7 +980,13 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             IClearingTransfer.ClearingRedeemData memory clearingRedeemData_
         )
     {
-        uint256 factor = _calculateFactor(
+        clearingRedeemData_ = _getClearingRedeemForByPartition(
+            _partition,
+            _tokenHolder,
+            _clearingId
+        );
+
+        clearingRedeemData_.amount *= _calculateFactor(
             _getAbafAdjusted(),
             _getClearingLabafByPartition(
                 _buildClearingOperationIdentifier(
@@ -988,12 +997,6 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 )
             )
         );
-        clearingRedeemData_ = _getClearingRedeemForByPartition(
-            _partition,
-            _tokenHolder,
-            _clearingId
-        );
-        clearingRedeemData_.amount *= factor;
     }
 
     function _getClearingHoldCreationForByPartitionAdjusted(
@@ -1008,7 +1011,13 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 memory clearingHoldCreationData_
         )
     {
-        uint256 factor = _calculateFactor(
+        clearingHoldCreationData_ = _getClearingHoldCreationForByPartition(
+            _partition,
+            _tokenHolder,
+            _clearingId
+        );
+
+        clearingHoldCreationData_.amount *= _calculateFactor(
             _getAbafAdjusted(),
             _getClearingLabafByPartition(
                 _buildClearingOperationIdentifier(
@@ -1019,12 +1028,6 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 )
             )
         );
-        clearingHoldCreationData_ = _getClearingHoldCreationForByPartition(
-            _partition,
-            _tokenHolder,
-            _clearingId
-        );
-        clearingHoldCreationData_.amount *= factor;
     }
 
     function _getClearingLabafByPartition(
