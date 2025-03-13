@@ -288,6 +288,7 @@ describe('Adjust Balances Tests', () => {
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             isMultiPartition: multiPartition,
             name: 'TEST_AccessControl',
             symbol: 'TAC',

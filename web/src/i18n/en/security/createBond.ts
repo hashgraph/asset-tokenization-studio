@@ -241,6 +241,9 @@ export default {
       "Enable access control to the security using a list of blocked accounts",
     permissionApprovalListTooltip:
       "Enable access control to the security using a list of allowed accounts",
+    configuration: "Bond configuration",
+    isClearing: "Clearing mode enabled",
+    isClearingTooltip: "Enable or disable clearing mode",
   },
 
   stepConfiguration: {

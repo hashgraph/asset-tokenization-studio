@@ -206,7 +206,11 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
+import {
+    takeSnapshot,
+    time,
+    loadFixture,
+} from '@nomicfoundation/hardhat-network-helpers'
 import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
@@ -218,11 +222,20 @@ import {
     BusinessLogicResolver,
     Kyc,
     SsiManagement,
+    AdjustBalances,
+    AccessControl,
+    Cap,
+    Equity,
+    TimeTravel,
 } from '@typechain'
 import {
     PAUSER_ROLE,
     LOCKER_ROLE,
     ISSUER_ROLE,
+    CORPORATE_ACTION_ROLE,
+    ADJUSTMENT_BALANCE_ROLE,
+    CAP_ROLE,
+    CONTROLLER_ROLE,
     MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
@@ -235,13 +248,27 @@ import {
     ZERO,
     EMPTY_STRING,
 } from '@scripts'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
+const _PARTITION_ID_1 =
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
+const _PARTITION_ID_2 =
+    '0x0000000000000000000000000000000000000000000000000000000000000002'
 const _AMOUNT = 1000
+const maxSupply_Original = 1000000 * _AMOUNT
+const maxSupply_Partition_1_Original = 50000 * _AMOUNT
+const maxSupply_Partition_2_Original = 0
+const ONE_SECOND = 1
 const EMPTY_VC_ID = EMPTY_STRING
+const balanceOf_A_Original = [10 * _AMOUNT, 100 * _AMOUNT]
+const balanceOf_B_Original = [20 * _AMOUNT, 200 * _AMOUNT]
+const adjustFactor = 253
+const adjustDecimals = 2
+const decimals_Original = 6
 
 describe('Lock Tests', () => {
     let diamond: ResolverProxy
@@ -262,12 +289,197 @@ describe('Lock Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
+    let adjustBalancesFacet: AdjustBalances
+    let accessControlFacet: AccessControl
+    let capFacet: Cap
+    let equityFacet: Equity
+    let timeTravelFacet: TimeTravel
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
     let expirationTimestamp = 0
 
     let snapshot: SnapshotRestorer
+
+    function set_initRbacs(): Rbac[] {
+        const rbacIssuer: Rbac = {
+            role: ISSUER_ROLE,
+            members: [account_B],
+        }
+        const rbacLocker: Rbac = {
+            role: LOCKER_ROLE,
+            members: [account_C],
+        }
+        const rbacPausable: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_D],
+        }
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const rbacCorporateAction: Rbac = {
+            role: CORPORATE_ACTION_ROLE,
+            members: [account_B],
+        }
+        return [
+            rbacIssuer,
+            rbacLocker,
+            rbacPausable,
+            rbacKYC,
+            rbacSSI,
+            rbacCorporateAction,
+        ]
+    }
+
+    async function setFacets({ diamond }: { diamond: ResolverProxy }) {
+        lockFacet = await ethers.getContractAt(
+            'Lock',
+            diamond.address,
+            signer_C
+        )
+        pauseFacet = await ethers.getContractAt(
+            'Pause',
+            diamond.address,
+            signer_D
+        )
+        erc1410Facet = await ethers.getContractAt(
+            'ERC1410ScheduledTasks',
+            diamond.address,
+            signer_B
+        )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+        equityFacet = await ethers.getContractAt(
+            'Equity',
+            diamond.address,
+            signer_A
+        )
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
+            diamond.address,
+            signer_A
+        )
+        adjustBalancesFacet = await ethers.getContractAt(
+            'AdjustBalances',
+            diamond.address,
+            signer_A
+        )
+        capFacet = await ethers.getContractAt('Cap', diamond.address, signer_A)
+
+        accessControlFacet = await ethers.getContractAt(
+            'AccessControl',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+        await kycFacet.grantKyc(
+            account_B,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+    }
+
+    async function deploySecurityFixtureMultiPartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: true,
+            clearingActive: false,
+            name: 'TEST_Lock',
+            symbol: 'TAC',
+            decimals: decimals_Original,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        await setFacets({ diamond })
+    }
+
+    async function deploySecurityFixtureSinglePartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: false,
+            clearingActive: false,
+            name: 'TEST_Lock',
+            symbol: 'TAC',
+            decimals: decimals_Original,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        await setFacets({ diamond })
+    }
 
     before(async () => {
         snapshot = await takeSnapshot()
@@ -285,6 +497,7 @@ describe('Lock Tests', () => {
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -303,112 +516,7 @@ describe('Lock Tests', () => {
 
     describe('Multi-partition enabled', () => {
         beforeEach(async () => {
-            const rbacIssuer: Rbac = {
-                role: ISSUER_ROLE,
-                members: [account_B],
-            }
-            const rbacLocker: Rbac = {
-                role: LOCKER_ROLE,
-                members: [account_C],
-            }
-            const rbacPausable: Rbac = {
-                role: PAUSER_ROLE,
-                members: [account_D],
-            }
-            const rbacKYC: Rbac = {
-                role: KYC_ROLE,
-                members: [account_B],
-            }
-            const rbacSSI: Rbac = {
-                role: SSI_MANAGER_ROLE,
-                members: [account_A],
-            }
-            const init_rbacs: Rbac[] = [
-                rbacIssuer,
-                rbacLocker,
-                rbacPausable,
-                rbacKYC,
-                rbacSSI,
-            ]
-
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                isMultiPartition: true,
-                name: 'TEST_Lock',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                factory,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            lockFacet = await ethers.getContractAt(
-                'Lock',
-                diamond.address,
-                signer_C
-            )
-            pauseFacet = await ethers.getContractAt(
-                'Pause',
-                diamond.address,
-                signer_D
-            )
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
-                diamond.address,
-                signer_B
-            )
-            kycFacet = await ethers.getContractAt(
-                'Kyc',
-                diamond.address,
-                signer_B
-            )
-            ssiManagementFacet = await ethers.getContractAt(
-                'SsiManagement',
-                diamond.address,
-                signer_A
-            )
-            await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-            await kycFacet.grantKyc(
-                account_A,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_A
-            )
-            await kycFacet.grantKyc(
-                account_B,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_A
-            )
-            await kycFacet.grantKyc(
-                account_C,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_A
-            )
+            await loadFixture(deploySecurityFixtureMultiPartition)
         })
 
         describe('Paused', () => {
@@ -752,116 +860,362 @@ describe('Lock Tests', () => {
                 ).to.equal(_AMOUNT)
             })
         })
+
+        describe('Adjust Balances', () => {
+            async function setPreBalanceAdjustment() {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    ADJUSTMENT_BALANCE_ROLE,
+                    account_C
+                )
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+                await accessControlFacet.grantRole(CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+                await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
+
+                // Using account C (with role)
+                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+                erc1410Facet = erc1410Facet.connect(signer_A)
+                capFacet = capFacet.connect(signer_A)
+
+                await capFacet.setMaxSupply(maxSupply_Original)
+                await capFacet.setMaxSupplyByPartition(
+                    _PARTITION_ID_1,
+                    maxSupply_Partition_1_Original
+                )
+                await capFacet.setMaxSupplyByPartition(
+                    _PARTITION_ID_2,
+                    maxSupply_Partition_2_Original
+                )
+
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_A,
+                    value: balanceOf_A_Original[0],
+                    data: '0x',
+                })
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_2,
+                    tokenHolder: account_A,
+                    value: balanceOf_A_Original[1],
+                    data: '0x',
+                })
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_B,
+                    value: balanceOf_B_Original[0],
+                    data: '0x',
+                })
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_2,
+                    tokenHolder: account_B,
+                    value: balanceOf_B_Original[1],
+                    data: '0x',
+                })
+            }
+
+            it('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
+                await setPreBalanceAdjustment()
+
+                const balance_Before = await erc1410Facet.balanceOf(account_A)
+                const balance_Before_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // LOCK
+                lockFacet = lockFacet.connect(signer_A)
+                await lockFacet.lockByPartition(
+                    _PARTITION_ID_1,
+                    _AMOUNT,
+                    account_A,
+                    dateToUnixTimestamp('2030-01-01T00:00:01Z')
+                )
+
+                const lock_TotalAmount_Before =
+                    await lockFacet.getLockedAmountFor(account_A)
+                const lock_TotalAmount_Before_Partition_1 =
+                    await lockFacet.getLockedAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const lock_Before = await lockFacet.getLockForByPartition(
+                    _PARTITION_ID_1,
+                    account_A,
+                    1
+                )
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // scheduled two balance updates
+                equityFacet = equityFacet.connect(signer_B)
+
+                const balanceAdjustmentData = {
+                    executionDate: dateToUnixTimestamp(
+                        '2030-01-01T00:00:02Z'
+                    ).toString(),
+                    factor: adjustFactor,
+                    decimals: adjustDecimals,
+                }
+
+                const balanceAdjustmentData_2 = {
+                    executionDate: dateToUnixTimestamp(
+                        '2030-01-01T00:16:40Z'
+                    ).toString(),
+                    factor: adjustFactor,
+                    decimals: adjustDecimals,
+                }
+                await equityFacet.setScheduledBalanceAdjustment(
+                    balanceAdjustmentData
+                )
+                await equityFacet.setScheduledBalanceAdjustment(
+                    balanceAdjustmentData_2
+                )
+
+                // wait for first scheduled balance adjustment only
+                await timeTravelFacet.changeSystemTimestamp(
+                    dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                )
+
+                const lock_TotalAmount_After =
+                    await lockFacet.getLockedAmountFor(account_A)
+                const lock_TotalAmount_After_Partition_1 =
+                    await lockFacet.getLockedAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const lock_After = await lockFacet.getLockForByPartition(
+                    _PARTITION_ID_1,
+                    account_A,
+                    1
+                )
+                const balance_After = await erc1410Facet.balanceOf(account_A)
+                const balance_After_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                expect(lock_TotalAmount_After).to.be.equal(
+                    lock_TotalAmount_Before.mul(adjustFactor * adjustFactor)
+                )
+                expect(lock_TotalAmount_After_Partition_1).to.be.equal(
+                    lock_TotalAmount_Before_Partition_1.mul(
+                        adjustFactor * adjustFactor
+                    )
+                )
+                expect(balance_After).to.be.equal(
+                    balance_Before.sub(_AMOUNT).mul(adjustFactor * adjustFactor)
+                )
+                expect(lock_TotalAmount_After).to.be.equal(
+                    lock_TotalAmount_Before.mul(adjustFactor * adjustFactor)
+                )
+                expect(balance_After_Partition_1).to.be.equal(
+                    balance_Before_Partition_1
+                        .sub(_AMOUNT)
+                        .mul(adjustFactor * adjustFactor)
+                )
+                expect(lock_After.amount_).to.be.equal(
+                    lock_Before.amount_.mul(adjustFactor * adjustFactor)
+                )
+            })
+
+            it('GIVEN a lock WHEN adjustBalances THEN release succeeds', async () => {
+                await setPreBalanceAdjustment()
+                const balance_Before = await erc1410Facet.balanceOf(account_A)
+                const balance_Before_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // LOCK TWICE
+                const currentTimestamp = (
+                    await ethers.provider.getBlock('latest')
+                ).timestamp
+
+                lockFacet = lockFacet.connect(signer_A)
+                await lockFacet.lockByPartition(
+                    _PARTITION_ID_1,
+                    _AMOUNT,
+                    account_A,
+                    currentTimestamp + ONE_SECOND
+                )
+                await lockFacet.lockByPartition(
+                    _PARTITION_ID_1,
+                    _AMOUNT,
+                    account_A,
+                    currentTimestamp + 100 * ONE_SECOND
+                )
+
+                const locked_Amount_Before = await lockFacet.getLockedAmountFor(
+                    account_A
+                )
+                const locked_Amount_Before_Partition_1 =
+                    await lockFacet.getLockedAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // RELEASE LOCK
+                await time.setNextBlockTimestamp(
+                    (await ethers.provider.getBlock('latest')).timestamp +
+                        2 * ONE_SECOND
+                )
+                await lockFacet.releaseByPartition(
+                    _PARTITION_ID_1,
+                    1,
+                    account_A
+                )
+
+                const balance_After_Release = await erc1410Facet.balanceOf(
+                    account_A
+                )
+                const balance_After_Release_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const locked_Amount_After = await lockFacet.getLockedAmountFor(
+                    account_A
+                )
+                const locked_Amount_After_Partition_1 =
+                    await lockFacet.getLockedAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                expect(balance_After_Release).to.be.equal(
+                    balance_Before.sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(balance_After_Release_Partition_1).to.be.equal(
+                    balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(locked_Amount_After).to.be.equal(
+                    locked_Amount_Before.sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(locked_Amount_After_Partition_1).to.be.equal(
+                    locked_Amount_Before_Partition_1
+                        .sub(_AMOUNT)
+                        .mul(adjustFactor)
+                )
+                expect(
+                    balance_After_Release.add(locked_Amount_After)
+                ).to.be.equal(balance_Before.mul(adjustFactor))
+                expect(
+                    balance_After_Release_Partition_1.add(
+                        locked_Amount_After_Partition_1
+                    )
+                ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
+            })
+
+            it('GIVEN a lock WHEN adjustBalances THEN lock succeeds', async () => {
+                await setPreBalanceAdjustment()
+                const balance_Before = await erc1410Facet.balanceOf(account_A)
+                const balance_Before_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // LOCK BEFORE BALANCE ADJUSTMENT
+                const currentTimestamp = (
+                    await ethers.provider.getBlock('latest')
+                ).timestamp
+
+                lockFacet = lockFacet.connect(signer_A)
+                await lockFacet.lockByPartition(
+                    _PARTITION_ID_1,
+                    _AMOUNT,
+                    account_A,
+                    currentTimestamp + 100 * ONE_SECOND
+                )
+
+                const locked_Amount_Before = await lockFacet.getLockedAmountFor(
+                    account_A
+                )
+                const locked_Amount_Before_Partition_1 =
+                    await lockFacet.getLockedAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // LOCK AFTER BALANCE ADJUSTMENT
+                lockFacet = lockFacet.connect(signer_A)
+                await lockFacet.lockByPartition(
+                    _PARTITION_ID_1,
+                    _AMOUNT,
+                    account_A,
+                    currentTimestamp + 100 * ONE_SECOND
+                )
+
+                const balance_After_Lock = await erc1410Facet.balanceOf(
+                    account_A
+                )
+                const balance_After_Lock_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const locked_Amount_After = await lockFacet.getLockedAmountFor(
+                    account_A
+                )
+                const locked_Amount_After_Partition_1 =
+                    await lockFacet.getLockedAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                expect(balance_After_Lock).to.be.equal(
+                    balance_Before.sub(_AMOUNT).mul(adjustFactor).sub(_AMOUNT)
+                )
+                expect(balance_After_Lock_Partition_1).to.be.equal(
+                    balance_Before_Partition_1
+                        .sub(_AMOUNT)
+                        .mul(adjustFactor)
+                        .sub(_AMOUNT)
+                )
+                expect(locked_Amount_After).to.be.equal(
+                    locked_Amount_Before.mul(adjustFactor).add(_AMOUNT)
+                )
+                expect(locked_Amount_After_Partition_1).to.be.equal(
+                    locked_Amount_Before_Partition_1
+                        .mul(adjustFactor)
+                        .add(_AMOUNT)
+                )
+                expect(balance_After_Lock.add(locked_Amount_After)).to.be.equal(
+                    balance_Before.mul(adjustFactor)
+                )
+                expect(
+                    balance_After_Lock_Partition_1.add(
+                        locked_Amount_After_Partition_1
+                    )
+                ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
+            })
+        })
     })
 
     describe('Multi-partition disabled', () => {
         beforeEach(async () => {
-            const rbacIssuer: Rbac = {
-                role: ISSUER_ROLE,
-                members: [account_B],
-            }
-            const rbacLocker: Rbac = {
-                role: LOCKER_ROLE,
-                members: [account_C],
-            }
-            const rbacPausable: Rbac = {
-                role: PAUSER_ROLE,
-                members: [account_D],
-            }
-            const rbacKYC: Rbac = {
-                role: KYC_ROLE,
-                members: [account_B],
-            }
-            const rbacSSI: Rbac = {
-                role: SSI_MANAGER_ROLE,
-                members: [account_A],
-            }
-            const init_rbacs: Rbac[] = [
-                rbacIssuer,
-                rbacLocker,
-                rbacPausable,
-                rbacKYC,
-                rbacSSI,
-            ]
-
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                isMultiPartition: false,
-                name: 'TEST_Lock',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                factory,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            lockFacet = await ethers.getContractAt(
-                'Lock',
-                diamond.address,
-                signer_C
-            )
-            pauseFacet = await ethers.getContractAt(
-                'Pause',
-                diamond.address,
-                signer_D
-            )
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
-                diamond.address,
-                signer_B
-            )
-            kycFacet = await ethers.getContractAt(
-                'Kyc',
-                diamond.address,
-                signer_B
-            )
-            ssiManagementFacet = await ethers.getContractAt(
-                'SsiManagement',
-                diamond.address,
-                signer_A
-            )
-            await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-            await kycFacet.grantKyc(
-                account_A,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_A
-            )
-            await kycFacet.grantKyc(
-                account_B,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_A
-            )
-            await kycFacet.grantKyc(
-                account_C,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_A
-            )
+            await loadFixture(deploySecurityFixtureSinglePartition)
         })
 
         describe('multi-partition transactions arent enabled', () => {

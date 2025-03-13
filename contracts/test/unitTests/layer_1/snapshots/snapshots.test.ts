@@ -314,6 +314,7 @@ describe('Snapshots Tests', () => {
             isControllable: true,
             isMultiPartition: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,
@@ -756,13 +757,9 @@ describe('Snapshots Tests', () => {
                 2
             )
 
-        const current_Balance_Of_A = await erc1410Facet.balanceOfAdjusted(
-            account_A
-        )
-        const current_Balance_Of_C = await erc1410Facet.balanceOfAdjusted(
-            account_C
-        )
-        const current_TotalSupply = await erc1410Facet.totalSupplyAdjusted()
+        const current_Balance_Of_A = await erc1410Facet.balanceOf(account_A)
+        const current_Balance_Of_C = await erc1410Facet.balanceOf(account_C)
+        const current_TotalSupply = await erc1410Facet.totalSupply()
 
         expect(snapshot_Balance_Of_A_1).to.equal(0)
         expect(snapshot_Balance_Of_A_1_Partition_1).to.equal(0)

@@ -259,6 +259,7 @@ export enum ErrorCode {
   ClearingActivated = '20024',
   ClearingDeactivated = '20025',
   AccountNotKycd = '20026',
+  AccountIsNotOperator = '20027',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',

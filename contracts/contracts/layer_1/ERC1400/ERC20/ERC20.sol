@@ -236,16 +236,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         return _allowanceAdjusted(owner, spender);
     }
 
-    function decimalsAdjusted() external view returns (uint8) {
-        return _decimalsAdjusted();
-    }
-
-    function decimalsAdjustedAt(
-        uint256 _timestamp
-    ) external view returns (uint8) {
-        return _decimalsAdjustedAt(_timestamp);
-    }
-
     // solhint-disable no-unused-vars
     function approve(
         address spender,
@@ -269,11 +259,11 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
         returns (bool)
@@ -289,12 +279,12 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(from)
         onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
         returns (bool)
@@ -339,7 +329,11 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     }
 
     function decimals() external view returns (uint8) {
-        return _decimals();
+        return _decimalsAdjusted();
+    }
+
+    function decimalsAt(uint256 _timestamp) external view returns (uint8) {
+        return _decimalsAdjustedAt(_timestamp);
     }
 
     // solhint-enable no-empty-blocks
@@ -364,7 +358,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](13);
+        staticFunctionSelectors_ = new bytes4[](12);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .initialize_ERC20
@@ -385,12 +379,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         staticFunctionSelectors_[selectorsIndex++] = this.name.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.symbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.decimals.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .decimalsAdjustedAt
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .decimalsAdjusted
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.decimalsAt.selector;
     }
 
     function getStaticInterfaceIds()
