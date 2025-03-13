@@ -418,19 +418,6 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
             );
     }
 
-    function getLockedAmountForAdjusted(
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getLockedAmountFor(_tokenHolder);
-    }
-
-    function getLockedAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
-    }
-
     function getStaticResolverKey()
         external
         pure
@@ -447,7 +434,7 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](14);
+        staticFunctionSelectors_ = new bytes4[](12);
         staticFunctionSelectors_[selectorIndex++] = this
             .lockByPartition
             .selector;
@@ -476,13 +463,6 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this.getLocksIdFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getLockFor.selector;
-        //TODO: Check if these (ADJUSTED) are necessary
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockedAmountForAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockedAmountForByPartitionAdjusted
-            .selector;
     }
 
     function getStaticInterfaceIds()

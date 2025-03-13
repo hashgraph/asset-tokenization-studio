@@ -562,8 +562,6 @@ describe('Clearing Tests', () => {
         account: string,
         totalClearedAmountByPartition_expected: number,
         totalClearedAmount_expected: number,
-        totalClearedAmountByPartitionAdjusted_expected: number,
-        totalClearedAmountAdjusted_expected: number,
         clearingCount_Transfer_expected: number,
         clearingCount_Redeem_expected: number,
         clearingCount_HoldCreation_expected: number
@@ -574,14 +572,7 @@ describe('Clearing Tests', () => {
                 _DEFAULT_PARTITION,
                 account
             )
-        let clearedAmountByPartitionAdjusted =
-            await clearingFacet.getClearedAmountForByPartitionAdjusted(
-                _DEFAULT_PARTITION,
-                account
-            )
         let clearedAmount = await clearingFacet.getClearedAmountFor(account)
-        let clearedAmountAdjusted =
-            await clearingFacet.getClearedAmountForAdjusted(account)
 
         let clearingCount_Transfer =
             await clearingFacet.getClearingCountForByPartition(
@@ -631,13 +622,7 @@ describe('Clearing Tests', () => {
         expect(clearedAmountByPartition).to.equal(
             totalClearedAmountByPartition_expected
         )
-        expect(clearedAmountByPartitionAdjusted).to.equal(
-            totalClearedAmountByPartitionAdjusted_expected
-        )
         expect(clearedAmount).to.equal(totalClearedAmount_expected)
-        expect(clearedAmountAdjusted).to.equal(
-            totalClearedAmountAdjusted_expected
-        )
 
         expect(clearingCount_Transfer).to.equal(clearingCount_Transfer_expected)
         expect(clearingCount_Redeem).to.equal(clearingCount_Redeem_expected)
@@ -667,24 +652,9 @@ describe('Clearing Tests', () => {
         let clearing = await clearingFacet.getClearingForByPartition(
             clearingIdentifier
         )
-        let clearingAdjusted =
-            await clearingFacet.getClearingForByPartitionAdjusted(
-                clearingIdentifier
-            )
 
         checkClearingValues(
             clearing,
-            clearingIdentifier,
-            to,
-            amount,
-            expirationTimestamp,
-            data,
-            operatorData,
-            hold
-        )
-
-        checkClearingValues(
-            clearingAdjusted,
             clearingIdentifier,
             to,
             amount,
@@ -2581,8 +2551,6 @@ describe('Clearing Tests', () => {
                 account_A,
                 totalClearedAmount,
                 totalClearedAmount,
-                totalClearedAmount,
-                totalClearedAmount,
                 3,
                 0,
                 0
@@ -2687,8 +2655,6 @@ describe('Clearing Tests', () => {
             await checkCreatedClearingAmounts(
                 balance_A_original.toNumber() - totalClearedAmount,
                 account_A,
-                totalClearedAmount,
-                totalClearedAmount,
                 totalClearedAmount,
                 totalClearedAmount,
                 0,
@@ -2801,8 +2767,6 @@ describe('Clearing Tests', () => {
             await checkCreatedClearingAmounts(
                 balance_A_original.toNumber() - totalClearedAmount,
                 account_A,
-                totalClearedAmount,
-                totalClearedAmount,
                 totalClearedAmount,
                 totalClearedAmount,
                 0,
@@ -3202,16 +3166,15 @@ describe('Clearing Tests', () => {
             )
 
             const cleared_TotalAmount_After =
-                await clearingFacet.getClearedAmountForAdjusted(account_A)
+                await clearingFacet.getClearedAmountFor(account_A)
             const cleared_TotalAmount_After_Partition_1 =
-                await clearingFacet.getClearedAmountForByPartitionAdjusted(
+                await clearingFacet.getClearedAmountForByPartition(
                     _PARTITION_ID_1,
                     account_A
                 )
-            const cleared_After =
-                await clearingFacet.getClearingForByPartitionAdjusted(
-                    clearingIdentifier
-                )
+            const cleared_After = await clearingFacet.getClearingForByPartition(
+                clearingIdentifier
+            )
             const balance_After = await erc1410Facet.balanceOf(account_A)
             const balance_After_Partition_1 =
                 await erc1410Facet.balanceOfByPartition(
@@ -3987,193 +3950,6 @@ describe('Clearing Tests', () => {
                     cleared_Amount_After_Partition_1
                 )
             ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
-        })
-
-        it('GIVEN a clearing WHEN adjustBalances THEN adjust clearing LABAF succeeds', async () => {
-            await setPreBalanceAdjustment()
-
-            await erc1410Facet.issueByPartition({
-                partition: _DEFAULT_PARTITION,
-                tokenHolder: account_A,
-                value: 15 * _AMOUNT,
-                data: '0x',
-            })
-
-            // CLEARING TRANSFER
-            clearingOperation.partition = _PARTITION_ID_1
-            await clearingFacet
-                .connect(signer_A)
-                .clearingTransferByPartition(
-                    clearingOperation,
-                    _AMOUNT,
-                    account_C
-                )
-            await erc20Facet.increaseAllowance(account_B, _AMOUNT)
-            await clearingFacet
-                .connect(signer_B)
-                .clearingTransferFromByPartition(
-                    clearingOperationFrom,
-                    _AMOUNT,
-                    account_C
-                )
-
-            await erc1410Facet.connect(signer_A).authorizeOperator(account_B)
-            await clearingFacet
-                .connect(signer_B)
-                .operatorClearingTransferByPartition(
-                    clearingOperationFrom,
-                    _AMOUNT,
-                    account_C
-                )
-            // CLEARING CREATE HOLD
-            await clearingFacet
-                .connect(signer_A)
-                .clearingCreateHoldByPartition(clearingOperation, hold)
-            await erc20Facet.increaseAllowance(account_B, _AMOUNT)
-            await clearingFacet
-                .connect(signer_B)
-                .clearingCreateHoldFromByPartition(clearingOperationFrom, hold)
-            await clearingFacet
-                .connect(signer_B)
-                .operatorClearingCreateHoldByPartition(
-                    clearingOperationFrom,
-                    hold
-                )
-            // CLEARING REDEEM
-            await clearingFacet
-                .connect(signer_A)
-                .clearingRedeemByPartition(clearingOperation, _AMOUNT)
-            await erc20Facet.increaseAllowance(account_B, _AMOUNT)
-            await clearingFacet
-                .connect(signer_B)
-                .clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT)
-            await clearingFacet
-                .connect(signer_B)
-                .operatorClearingRedeemByPartition(
-                    clearingOperationFrom,
-                    _AMOUNT
-                )
-
-            const TotalClearingLABAF_Before =
-                await adjustBalancesFacet.getTotalClearedLabafByPartition(
-                    _PARTITION_ID_1,
-                    account_A
-                )
-
-            // adjustBalances
-            await adjustBalancesFacet.adjustBalances(
-                adjustFactor,
-                adjustDecimals
-            )
-
-            // CREATE CLEARINGS AGAIN
-            // CLEARING TRANSFER
-            clearingOperation.partition = _PARTITION_ID_1
-            await clearingFacet
-                .connect(signer_A)
-                .clearingTransferByPartition(
-                    clearingOperation,
-                    _AMOUNT,
-                    account_C
-                )
-            await erc20Facet.increaseAllowance(account_B, _AMOUNT)
-            await clearingFacet
-                .connect(signer_B)
-                .clearingTransferFromByPartition(
-                    clearingOperationFrom,
-                    _AMOUNT,
-                    account_C
-                )
-
-            await erc1410Facet.connect(signer_A).authorizeOperator(account_B)
-            await clearingFacet
-                .connect(signer_B)
-                .operatorClearingTransferByPartition(
-                    clearingOperationFrom,
-                    _AMOUNT,
-                    account_C
-                )
-            // CLEARING CREATE HOLD
-            await clearingFacet
-                .connect(signer_A)
-                .clearingCreateHoldByPartition(clearingOperation, hold)
-            await erc20Facet.increaseAllowance(account_B, _AMOUNT)
-            await clearingFacet
-                .connect(signer_B)
-                .clearingCreateHoldFromByPartition(clearingOperationFrom, hold)
-            await clearingFacet
-                .connect(signer_B)
-                .operatorClearingCreateHoldByPartition(
-                    clearingOperationFrom,
-                    hold
-                )
-            // CLEARING REDEEM
-            await clearingFacet
-                .connect(signer_A)
-                .clearingRedeemByPartition(clearingOperation, _AMOUNT)
-            await erc20Facet.increaseAllowance(account_B, _AMOUNT)
-            await clearingFacet
-                .connect(signer_B)
-                .clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT)
-            await clearingFacet
-                .connect(signer_B)
-                .operatorClearingRedeemByPartition(
-                    clearingOperationFrom,
-                    _AMOUNT
-                )
-
-            let ClearingLABAF_Before = []
-
-            for (let clearingId = 10; clearingId <= 18; clearingId++) {
-                const labaf =
-                    await adjustBalancesFacet.getClearingLabafByPartition(
-                        _PARTITION_ID_1,
-                        clearingId,
-                        account_A
-                    )
-                ClearingLABAF_Before.push(labaf.toNumber())
-            }
-
-            // APPROVE CLEARINGS
-            for (let i = 1; i <= 9; i++) {
-                clearingIdentifier.clearingId = i
-                if (i <= 3) {
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.Transfer
-                } else if (i <= 6) {
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.HoldCreation
-                } else {
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.Redeem
-                }
-                await clearingActionsFacet.approveClearingOperationByPartition(
-                    clearingIdentifier
-                )
-            }
-
-            const TotalClearingLABAF_After =
-                await adjustBalancesFacet.getTotalClearedLabafByPartition(
-                    _PARTITION_ID_1,
-                    account_A
-                )
-            let ClearingLABAF_After = []
-
-            for (let clearingId = 10; clearingId <= 18; clearingId++) {
-                const labaf =
-                    await adjustBalancesFacet.getClearingLabafByPartition(
-                        _PARTITION_ID_1,
-                        clearingId,
-                        account_A
-                    )
-                ClearingLABAF_After.push(labaf.toNumber())
-            }
-
-            expect(ClearingLABAF_Before).to.deep.equal(ClearingLABAF_After)
-            expect(TotalClearingLABAF_Before).to.be.equal(0)
-            expect(TotalClearingLABAF_After).to.be.equal(adjustFactor)
-            let adjustFactorArray = new Array(9).fill(adjustFactor)
-            expect(ClearingLABAF_Before).to.deep.equal(adjustFactorArray)
         })
     })
 })
