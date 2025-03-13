@@ -944,7 +944,7 @@ export async function deployContractWithFactory<
     let implementationContract: C;
     let proxyAddress: string | undefined;
     let proxyAdminAddress: string | undefined;
-    let txResponseList: ContractTransaction[] = [];
+    const txResponseList: ContractTransaction[] = [];
 
     if (deployedContract?.address) {
         implementationContract = factory.attach(deployedContract.address) as C;

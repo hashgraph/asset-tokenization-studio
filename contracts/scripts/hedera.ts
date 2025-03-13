@@ -203,8 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 import Configuration, { Network } from '@configuration';
 import { ADDRESS_ZERO } from './constants';
