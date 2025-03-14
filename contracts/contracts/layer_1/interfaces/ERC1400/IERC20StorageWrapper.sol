@@ -209,9 +209,6 @@
 pragma solidity 0.8.18;
 
 interface IERC20StorageWrapper {
-    error InsufficientAllowance(address spender, address from);
-    error SpenderWithZeroAddress();
-
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     event Approval(
@@ -219,4 +216,7 @@ interface IERC20StorageWrapper {
         address indexed spender,
         uint256 value
     );
+
+    error InsufficientAllowance(address spender, address from);
+    error SpenderWithZeroAddress();
 }

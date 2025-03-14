@@ -358,15 +358,6 @@ abstract contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
         return _corporateActionsStorage().actionsData[actionId].data;
     }
 
-    function _checkDates(uint256 _firstDate, uint256 _secondDate) private pure {
-        if (_secondDate < _firstDate) {
-            revert ICorporateActionsStorageWrapper.WrongDates(
-                _firstDate,
-                _secondDate
-            );
-        }
-    }
-
     function _corporateActionsStorage()
         internal
         pure
@@ -376,6 +367,15 @@ abstract contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             corporateActions_.slot := position
+        }
+    }
+
+    function _checkDates(uint256 _firstDate, uint256 _secondDate) private pure {
+        if (_secondDate < _firstDate) {
+            revert ICorporateActionsStorageWrapper.WrongDates(
+                _firstDate,
+                _secondDate
+            );
         }
     }
 }

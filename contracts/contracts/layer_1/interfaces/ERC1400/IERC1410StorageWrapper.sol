@@ -207,10 +207,6 @@
 pragma solidity 0.8.18;
 
 interface IERC1410StorageWrapper {
-    error NotAllowedInMultiPartitionMode();
-    error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
-    error ZeroAddressNotAllowed();
-
     // Transfer Events
     event TransferByPartition(
         bytes32 indexed _fromPartition,
@@ -259,6 +255,9 @@ interface IERC1410StorageWrapper {
         bytes operatorData
     );
 
+    error NotAllowedInMultiPartitionMode();
+    error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
+    error ZeroAddressNotAllowed();
     error ZeroPartition();
     error ZeroValue();
     error InvalidPartition(address account, bytes32 partition);
