@@ -8,5 +8,4 @@ package.json
 typechain-types/
 .gitlab-ci.yml
 build
-package.json
-*.md
+**/*.md

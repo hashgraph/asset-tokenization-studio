@@ -318,9 +318,8 @@ export async function deployAtsFullInfrastructure({
         useDeployed,
         timeTravelEnabled,
     })
-    const { deployer, ...deployedContractList } = await deployAtsContracts(
-        deployCommand
-    )
+    const { deployer, ...deployedContractList } =
+        await deployAtsContracts(deployCommand)
 
     // * Check if BusinessLogicResolver is deployed correctly
     const resolver = deployedContractList.businessLogicResolver
@@ -921,7 +920,8 @@ export async function deployAtsContracts({
         })
 
     if (!timeTravelEnabled) {
-        const { timeTravel, ...atsContracts } = deployedContracts
+        const { ...atsContracts } = deployedContracts
+        delete atsContracts.timeTravel
         return atsContracts
     }
     return deployedContracts
@@ -929,7 +929,7 @@ export async function deployAtsContracts({
 
 export async function deployContractWithFactory<
     F extends ContractFactory,
-    C extends Contract = ReturnType<F['attach']>
+    C extends Contract = ReturnType<F['attach']>,
 >({
     factory,
     signer,
@@ -943,7 +943,7 @@ export async function deployContractWithFactory<
     let implementationContract: C
     let proxyAddress: string | undefined
     let proxyAdminAddress: string | undefined
-    let txResponseList: ContractTransaction[] = []
+    const txResponseList: ContractTransaction[] = []
 
     if (deployedContract?.address) {
         implementationContract = factory.attach(deployedContract.address) as C

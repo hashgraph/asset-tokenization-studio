@@ -206,7 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
+import { takeSnapshot } from '@nomicfoundation/hardhat-network-helpers'
 import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
@@ -260,9 +260,7 @@ describe('Kyc Tests', () => {
     let revocationList: T3RevocationRegistry
     let timeTravelFacet: TimeTravel
 
-    const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
-    let expirationTimestamp = 0
 
     let snapshot: SnapshotRestorer
 
@@ -270,27 +268,25 @@ describe('Kyc Tests', () => {
         snapshot = await takeSnapshot()
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
         account_D = signer_D.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: false,
-                    timeTravelEnabled: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: false,
+                timeTravelEnabled: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
-        let reovationListDeployed = await deployContractWithFactory(
+        const reovationListDeployed = await deployContractWithFactory(
             new DeployContractWithFactoryCommand({
                 factory: new T3RevocationRegistry__factory(),
                 signer: signer_A,
@@ -301,6 +297,11 @@ describe('Kyc Tests', () => {
             'T3RevocationRegistry',
             reovationListDeployed.address,
             signer_C
+        )
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
+            businessLogicResolver.address,
+            signer_A
         )
     })
 
@@ -314,7 +315,6 @@ describe('Kyc Tests', () => {
 
     beforeEach(async () => {
         currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
-        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
 
         const rbacKYC: Rbac = {
             role: KYC_ROLE,
@@ -490,10 +490,9 @@ describe('Kyc Tests', () => {
 
     describe('Kyc OK', () => {
         it('GIVEN a VC WHEN grantKyc THEN transaction succeed', async () => {
-            let KYCStatusFor_B_Before = await kycFacet.getKycStatusFor(
-                account_B
-            )
-            let KYC_Count_Before = await kycFacet.getKycAccountsCount(1)
+            const KYCStatusFor_B_Before =
+                await kycFacet.getKycStatusFor(account_B)
+            const KYC_Count_Before = await kycFacet.getKycAccountsCount(1)
 
             await kycFacet.grantKyc(
                 account_B,
@@ -503,10 +502,11 @@ describe('Kyc Tests', () => {
                 account_C
             )
 
-            let KYCStatusFor_B_After = await kycFacet.getKycStatusFor(account_B)
-            let KYC_Count_After = await kycFacet.getKycAccountsCount(1)
-            let KYCSFor_B = await kycFacet.getKycFor(account_B)
-            let [kycAccounts, kycAccountsData_After] =
+            const KYCStatusFor_B_After =
+                await kycFacet.getKycStatusFor(account_B)
+            const KYC_Count_After = await kycFacet.getKycAccountsCount(1)
+            const KYCSFor_B = await kycFacet.getKycFor(account_B)
+            const [kycAccounts, kycAccountsData_After] =
                 await kycFacet.getKycAccountsData(1, 0, 1)
 
             expect(KYCStatusFor_B_Before).to.equal(0)
@@ -534,9 +534,10 @@ describe('Kyc Tests', () => {
 
             await kycFacet.revokeKyc(account_B)
 
-            let KYCStatusFor_B_After = await kycFacet.getKycStatusFor(account_B)
-            let KYC_Count_After = await kycFacet.getKycAccountsCount(1)
-            let [kycAccounts, kycAccountsData] =
+            const KYCStatusFor_B_After =
+                await kycFacet.getKycStatusFor(account_B)
+            const KYC_Count_After = await kycFacet.getKycAccountsCount(1)
+            const [kycAccounts, kycAccountsData] =
                 await kycFacet.getKycAccountsData(1, 0, 100)
 
             expect(KYCStatusFor_B_After).to.equal(0)
@@ -554,13 +555,12 @@ describe('Kyc Tests', () => {
                 account_C
             )
 
-            let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
-                account_B
-            )
+            const KYCStatusFor_B_After_Grant =
+                await kycFacet.getKycStatusFor(account_B)
 
             await timeTravelFacet.changeSystemTimestamp(_VALID_TO + 1)
 
-            let KYCStatusFor_B_After_Expiration =
+            const KYCStatusFor_B_After_Expiration =
                 await kycFacet.getKycStatusFor(account_B)
 
             expect(KYCStatusFor_B_After_Grant).to.equal(1)
@@ -576,13 +576,12 @@ describe('Kyc Tests', () => {
                 account_C
             )
 
-            let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
-                account_B
-            )
+            const KYCStatusFor_B_After_Grant =
+                await kycFacet.getKycStatusFor(account_B)
 
             await ssiManagementFacet.removeIssuer(account_C)
 
-            let KYCStatusFor_B_After_Cancelling_Issuer =
+            const KYCStatusFor_B_After_Cancelling_Issuer =
                 await kycFacet.getKycStatusFor(account_B)
 
             expect(KYCStatusFor_B_After_Grant).to.equal(1)
@@ -598,15 +597,13 @@ describe('Kyc Tests', () => {
                 account_C
             )
 
-            let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
-                account_B
-            )
+            const KYCStatusFor_B_After_Grant =
+                await kycFacet.getKycStatusFor(account_B)
 
             await revocationList.connect(signer_C).revoke(_VC_ID)
 
-            let KYCFor_B_After_Revoking_VC = await kycFacet.getKycStatusFor(
-                account_B
-            )
+            const KYCFor_B_After_Revoking_VC =
+                await kycFacet.getKycStatusFor(account_B)
 
             expect(KYCStatusFor_B_After_Grant).to.equal(1)
             expect(KYCFor_B_After_Revoking_VC).to.equal(0)

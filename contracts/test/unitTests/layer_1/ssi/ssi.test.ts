@@ -254,25 +254,23 @@ describe('SSI Tests', () => {
         snapshot = await takeSnapshot()
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
-        let reovationListDeployed = await deployContractWithFactory(
+        const reovationListDeployed = await deployContractWithFactory(
             new DeployContractWithFactoryCommand({
                 factory: new T3RevocationRegistry__factory(),
                 signer: signer_A,
@@ -432,7 +430,7 @@ describe('SSI Tests', () => {
                 .to.emit(ssiManagementFacet, 'RevocationRegistryAddressSet')
                 .withArgs(ethers.constants.AddressZero, revocationList.address)
 
-            let revocationListAddress =
+            const revocationListAddress =
                 await ssiManagementFacet.getRevocationRegistryAddress()
 
             expect(revocationListAddress).to.equal(revocationList.address)
@@ -458,12 +456,11 @@ describe('SSI Tests', () => {
 
         it('GIVEN a listed issuer WHEN removeIssuer THEN transaction succeed', async () => {
             await ssiManagementFacet.addIssuer(account_B)
-            let issuerStatusBefore = await ssiManagementFacet.isIssuer(
-                account_B
-            )
-            let issuerListBefore =
+            const issuerStatusBefore =
+                await ssiManagementFacet.isIssuer(account_B)
+            const issuerListBefore =
                 await ssiManagementFacet.getIssuerListMembers(0, 1)
-            let issuerListCountBefore =
+            const issuerListCountBefore =
                 await ssiManagementFacet.getIssuerListCount()
 
             expect(await ssiManagementFacet.removeIssuer(account_B)).to.emit(

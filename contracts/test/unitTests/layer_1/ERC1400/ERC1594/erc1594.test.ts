@@ -219,7 +219,7 @@ import {
     BusinessLogicResolver,
     Kyc,
     SsiManagement,
-    ClearingFacet
+    ClearingFacet,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -285,7 +285,6 @@ describe('ERC1594 Tests', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -294,15 +293,14 @@ describe('ERC1594 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                        timeTravelEnabled: true,
-                    })
-                )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
@@ -318,7 +316,7 @@ describe('ERC1594 Tests', () => {
                 role: CLEARING_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacPause,rbacClearing]
+            const init_rbacs: Rbac[] = [rbacPause, rbacClearing]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -450,28 +448,28 @@ describe('ERC1594 Tests', () => {
             })
         })
 
-        describe ('Clearing', () => {
+        describe('Clearing', () => {
             beforeEach(async () => {
                 await clearingFacet.activateClearing()
             })
-            it('GIVEN a token with clearing mode active WHEN transfer THEN transaction fails with ClearingIsActivated', async() =>{
-                 // Using account C (with role)
-                 erc1594Facet = erc1594Facet.connect(signer_C)
+            it('GIVEN a token with clearing mode active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
+                // Using account C (with role)
+                erc1594Facet = erc1594Facet.connect(signer_C)
 
-                 // transfer with data fails
-                 await expect(
-                     erc1594Facet.transferWithData(account_D, AMOUNT, DATA)
-                 ).to.be.rejectedWith('ClearingIsActivated')
- 
-                 // transfer from with data fails
-                 await expect(
-                     erc1594Facet.transferFromWithData(
-                         account_E,
-                         account_D,
-                         AMOUNT,
-                         DATA
-                     )
-                 ).to.be.rejectedWith('ClearingIsActivated')
+                // transfer with data fails
+                await expect(
+                    erc1594Facet.transferWithData(account_D, AMOUNT, DATA)
+                ).to.be.rejectedWith('ClearingIsActivated')
+
+                // transfer from with data fails
+                await expect(
+                    erc1594Facet.transferFromWithData(
+                        account_E,
+                        account_D,
+                        AMOUNT,
+                        DATA
+                    )
+                ).to.be.rejectedWith('ClearingIsActivated')
             })
 
             it('GIVEN a token with clearing mode active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
@@ -780,7 +778,6 @@ describe('ERC1594 Tests', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -789,14 +786,13 @@ describe('ERC1594 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                    })
-                )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =

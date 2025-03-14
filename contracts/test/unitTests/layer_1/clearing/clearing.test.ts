@@ -205,8 +205,9 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
+import { takeSnapshot } from '@nomicfoundation/hardhat-network-helpers'
 import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
@@ -246,13 +247,10 @@ import {
     ADDRESS_ZERO,
     ZERO,
     EMPTY_STRING,
-    DEFAULT_PARTITION,
     ADJUSTMENT_BALANCE_ROLE,
-    CAP_ROLE,
     CORPORATE_ACTION_ROLE,
+    dateToUnixTimestamp,
 } from '@scripts'
-import { dateToUnixTimestamp } from '../../../dateFormatter'
-import { BigNumber } from 'ethers'
 
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -260,8 +258,6 @@ const _WRONG_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000321'
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
-const _PARTITION_ID_2 =
-    '0x0000000000000000000000000000000000000000000000000000000000000002'
 const adjustFactor = 253
 const adjustDecimals = 2
 const _AMOUNT = 1000
@@ -273,47 +269,48 @@ enum ClearingOperationType {
     Redeem,
     HoldCreation,
 }
-type ClearingIdentifier = {
+
+interface Clearing {
+    amount_: BigNumber
+    expirationTimestamp_: BigNumber
+    destination_: string
+    clearingOperationType_: ClearingOperationType
+    data_: string
+    operatorData_?: string
+    hold_?: Hold
+}
+
+interface ClearingIdentifier {
     partition: string
     tokenHolder: string
     clearingId: number
     clearingOperationType: ClearingOperationType
 }
-type ClearingOperation = {
+
+interface ClearingOperation {
     partition: string
     expirationTimestamp: number
     data: string
 }
-type ClearingOperationFrom = {
+
+interface ClearingOperationFrom {
     clearingOperation: ClearingOperation
     from: string
     operatorData: string
 }
-type Hold = {
-    amount: number
-    expirationTimestamp: number
+
+interface Hold {
+    amount: BigNumber
+    expirationTimestamp: BigNumber
     escrow: string
     to: string
     data: string
-}
-type ClearingData = {
-    clearingOperationType: ClearingOperationType
-    amount: number
-    expirationTimestamp: number
-    destination: string
-    escrow: string
-    holdExpirationTimestamp: number
-    data: string
-    holdData: string
-    operatorData: string
-    clearingId: number
 }
 
 let clearingIdentifier: ClearingIdentifier
 let clearingOperation: ClearingOperation
 let clearingOperationFrom: ClearingOperationFrom
 let hold: Hold
-let clearingData: ClearingData
 
 describe('Clearing Tests', () => {
     let diamond: ResolverProxy
@@ -355,7 +352,6 @@ describe('Clearing Tests', () => {
         snapshot = await takeSnapshot()
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
             await ethers.getSigners()
         account_A = signer_A.address
@@ -364,14 +360,13 @@ describe('Clearing Tests', () => {
         account_D = signer_D.address
         account_E = signer_E.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    timeTravelEnabled: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                timeTravelEnabled: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -566,34 +561,34 @@ describe('Clearing Tests', () => {
         clearingCount_Redeem_expected: number,
         clearingCount_HoldCreation_expected: number
     ) {
-        let balance = await erc1410Facet.balanceOf(account_A)
-        let clearedAmountByPartition =
+        const balance = await erc1410Facet.balanceOf(account_A)
+        const clearedAmountByPartition =
             await clearingFacet.getClearedAmountForByPartition(
                 _DEFAULT_PARTITION,
                 account
             )
-        let clearedAmount = await clearingFacet.getClearedAmountFor(account)
+        const clearedAmount = await clearingFacet.getClearedAmountFor(account)
 
-        let clearingCount_Transfer =
+        const clearingCount_Transfer =
             await clearingFacet.getClearingCountForByPartition(
                 _DEFAULT_PARTITION,
                 account,
                 ClearingOperationType.Transfer
             )
-        let clearingCount_Redeem =
+        const clearingCount_Redeem =
             await clearingFacet.getClearingCountForByPartition(
                 _DEFAULT_PARTITION,
                 account,
                 ClearingOperationType.Redeem
             )
-        let clearingCount_HoldCreation =
+        const clearingCount_HoldCreation =
             await clearingFacet.getClearingCountForByPartition(
                 _DEFAULT_PARTITION,
                 account,
                 ClearingOperationType.HoldCreation
             )
 
-        let clearingIds_Transfer =
+        const clearingIds_Transfer =
             await clearingFacet.getClearingsIdForByPartition(
                 _DEFAULT_PARTITION,
                 account,
@@ -601,7 +596,7 @@ describe('Clearing Tests', () => {
                 0,
                 100
             )
-        let clearingIds_Redeem =
+        const clearingIds_Redeem =
             await clearingFacet.getClearingsIdForByPartition(
                 _DEFAULT_PARTITION,
                 account,
@@ -609,7 +604,7 @@ describe('Clearing Tests', () => {
                 0,
                 100
             )
-        let clearingIds_HoldCreation =
+        const clearingIds_HoldCreation =
             await clearingFacet.getClearingsIdForByPartition(
                 _DEFAULT_PARTITION,
                 account,
@@ -649,9 +644,8 @@ describe('Clearing Tests', () => {
         operatorData?: string,
         hold?: Hold
     ) {
-        let clearing = await clearingFacet.getClearingForByPartition(
-            clearingIdentifier
-        )
+        const clearing =
+            await clearingFacet.getClearingForByPartition(clearingIdentifier)
 
         checkClearingValues(
             clearing,
@@ -666,7 +660,7 @@ describe('Clearing Tests', () => {
     }
 
     async function checkClearingValues(
-        clearing: any,
+        clearing: Clearing,
         clearingIdentifier: ClearingIdentifier,
         to: string,
         amount: number,
@@ -684,13 +678,13 @@ describe('Clearing Tests', () => {
         expect(clearing.data_).to.equal(data)
         if (operatorData) expect(clearing.operatorData_).to.equal(operatorData)
         if (hold) {
-            expect(clearing.hold_.amount).to.equal(hold.amount)
-            expect(clearing.hold_.expirationTimestamp).to.equal(
+            expect(clearing.hold_!.amount).to.equal(hold.amount)
+            expect(clearing.hold_!.expirationTimestamp).to.equal(
                 hold.expirationTimestamp
             )
-            expect(clearing.hold_.escrow).to.equal(hold.escrow)
-            expect(clearing.hold_.to).to.equal(hold.to)
-            expect(clearing.hold_.data).to.equal(hold.data)
+            expect(clearing.hold_!.escrow).to.equal(hold.escrow)
+            expect(clearing.hold_!.to).to.equal(hold.to)
+            expect(clearing.hold_!.data).to.equal(hold.data)
         }
     }
 
@@ -699,8 +693,8 @@ describe('Clearing Tests', () => {
         expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
 
         hold = {
-            amount: _AMOUNT,
-            expirationTimestamp: expirationTimestamp,
+            amount: BigNumber.from(_AMOUNT),
+            expirationTimestamp: BigNumber.from(expirationTimestamp),
             escrow: account_B,
             to: account_C,
             data: _DATA,
@@ -1117,7 +1111,7 @@ describe('Clearing Tests', () => {
             )
 
             // From
-            let clearingIdentifierFrom = {
+            const clearingIdentifierFrom = {
                 ...clearingIdentifier,
                 clearingId: 2,
             }
@@ -1131,7 +1125,7 @@ describe('Clearing Tests', () => {
             )
 
             // Operator
-            let clearingIdentifierOperator = {
+            const clearingIdentifierOperator = {
                 ...clearingIdentifier,
                 clearingId: 3,
             }
@@ -1156,7 +1150,7 @@ describe('Clearing Tests', () => {
             await erc20Facet
                 .connect(signer_B)
                 .increaseAllowance(account_A, _AMOUNT)
-            let clearingOperationFromB = {
+            const clearingOperationFromB = {
                 ...clearingOperationFrom,
                 from: account_B,
             }
@@ -1175,7 +1169,7 @@ describe('Clearing Tests', () => {
             await controlListFacet.addToControlList(account_B)
 
             // Transfer
-            let clearingIdentifierB = {
+            const clearingIdentifierB = {
                 ...clearingIdentifier,
                 tokenHolder: account_B,
             }
@@ -1189,7 +1183,7 @@ describe('Clearing Tests', () => {
             )
 
             // From
-            let clearingIdentifierFromB = {
+            const clearingIdentifierFromB = {
                 ...clearingIdentifierB,
                 clearingId: 2,
             }
@@ -1203,7 +1197,7 @@ describe('Clearing Tests', () => {
             )
 
             // Operator
-            let clearingIdentifierOperatorB = {
+            const clearingIdentifierOperatorB = {
                 ...clearingIdentifierB,
                 clearingId: 3,
             }
@@ -1359,7 +1353,7 @@ describe('Clearing Tests', () => {
             await erc20Facet
                 .connect(signer_B)
                 .increaseAllowance(account_A, _AMOUNT)
-            let clearingOperationFromB = {
+            const clearingOperationFromB = {
                 ...clearingOperationFrom,
                 from: account_B,
             }
@@ -1376,7 +1370,7 @@ describe('Clearing Tests', () => {
             await controlListFacet.addToControlList(account_B)
 
             // Redeem
-            let clearingIdentifierB = {
+            const clearingIdentifierB = {
                 ...clearingIdentifier,
                 clearingOperationType: ClearingOperationType.Redeem,
                 tokenHolder: account_B,
@@ -1391,7 +1385,7 @@ describe('Clearing Tests', () => {
             )
 
             // From
-            let clearingIdentifierFromB = {
+            const clearingIdentifierFromB = {
                 ...clearingIdentifierB,
                 clearingId: 2,
             }
@@ -1405,7 +1399,7 @@ describe('Clearing Tests', () => {
             )
 
             // Operator
-            let clearingIdentifierOperatorB = {
+            const clearingIdentifierOperatorB = {
                 ...clearingIdentifierB,
                 clearingId: 3,
             }
@@ -1422,7 +1416,7 @@ describe('Clearing Tests', () => {
 
     describe('KYC', () => {
         it('Given a non kyc account WHEN approveClearingOperationByPartition with operation type Transfer THEN transaction fails with InvalidKycStatus', async () => {
-            let clearingOperationFromB = {
+            const clearingOperationFromB = {
                 ...clearingOperationFrom,
                 from: account_B,
             }
@@ -1459,7 +1453,7 @@ describe('Clearing Tests', () => {
             )
 
             // Transfer
-            let clearingIdentifierB = {
+            const clearingIdentifierB = {
                 ...clearingIdentifier,
                 tokenHolder: account_B,
             }
@@ -1470,7 +1464,7 @@ describe('Clearing Tests', () => {
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
 
             // From
-            let clearingIdentifierFromB = {
+            const clearingIdentifierFromB = {
                 ...clearingIdentifierB,
                 clearingId: 2,
             }
@@ -1481,7 +1475,7 @@ describe('Clearing Tests', () => {
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
 
             // Operator
-            let clearingIdentifierOperatorB = {
+            const clearingIdentifierOperatorB = {
                 ...clearingIdentifierB,
                 clearingId: 3,
             }
@@ -1616,7 +1610,7 @@ describe('Clearing Tests', () => {
         // })
 
         it('Given a non kyc account WHEN approveClearingOperationByPartition with operation type Redeem THEN transaction fails with InvalidKycStatus', async () => {
-            let clearingOperationFromB = {
+            const clearingOperationFromB = {
                 ...clearingOperationFrom,
                 from: account_B,
             }
@@ -1640,7 +1634,7 @@ describe('Clearing Tests', () => {
             await kycFacet.revokeKyc(account_B)
 
             // Redeem
-            let clearingIdentifierB = {
+            const clearingIdentifierB = {
                 ...clearingIdentifier,
                 tokenHolder: account_B,
                 clearingOperationType: ClearingOperationType.Redeem,
@@ -1652,7 +1646,7 @@ describe('Clearing Tests', () => {
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
 
             // From
-            let clearingIdentifierFromB = {
+            const clearingIdentifierFromB = {
                 ...clearingIdentifierB,
                 clearingId: 2,
             }
@@ -1663,7 +1657,7 @@ describe('Clearing Tests', () => {
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
 
             // Operator
-            let clearingIdentifierOperatorB = {
+            const clearingIdentifierOperatorB = {
                 ...clearingIdentifierB,
                 clearingId: 3,
             }
@@ -1687,7 +1681,7 @@ describe('Clearing Tests', () => {
                 )
             ).to.be.revertedWithCustomError(erc20Facet, 'InsufficientBalance')
 
-            let clearingOperationFromB = {
+            const clearingOperationFromB = {
                 ...clearingOperationFrom,
                 from: account_B,
             }
@@ -1712,7 +1706,7 @@ describe('Clearing Tests', () => {
             ).to.be.revertedWithCustomError(erc20Facet, 'InsufficientBalance')
 
             // Holds
-            let hold_wrong = {
+            const hold_wrong = {
                 ...hold,
                 amount: 4 * _AMOUNT,
             }
@@ -1759,12 +1753,12 @@ describe('Clearing Tests', () => {
         it('GIVEN a Token WHEN createHoldByPartition for wrong partition THEN transaction fails with InvalidPartition', async () => {
             await deployAll(true)
 
-            let clearingOperation_wrong_partition = {
+            const clearingOperation_wrong_partition = {
                 ...clearingOperation,
                 partition: _WRONG_PARTITION,
             }
 
-            let clearingOperationFromB_wrong_partition = {
+            const clearingOperationFromB_wrong_partition = {
                 ...clearingOperationFrom,
                 clearingOperation: clearingOperation_wrong_partition,
                 from: account_B,
@@ -1788,7 +1782,7 @@ describe('Clearing Tests', () => {
             ).to.be.revertedWithCustomError(erc1410Facet, 'InvalidPartition')
 
             // Holds
-            let hold_wrong = {
+            const hold_wrong = {
                 ...hold,
                 amount: _AMOUNT,
             }
@@ -1849,7 +1843,7 @@ describe('Clearing Tests', () => {
 
         it('GIVEN a Token WHEN creating clearing passing empty address from or escrow THEN transaction fails with ZeroAddressNotAllowed', async () => {
             // Transfers
-            let clearingOperationFrom_wrong = {
+            const clearingOperationFrom_wrong = {
                 ...clearingOperationFrom,
                 from: ADDRESS_ZERO,
             }
@@ -1893,7 +1887,7 @@ describe('Clearing Tests', () => {
                 clearingFacet,
                 'ZeroAddressNotAllowed'
             )
-            let hold_wrong_empty_address_escrow = {
+            const hold_wrong_empty_address_escrow = {
                 ...hold,
                 escrow: ADDRESS_ZERO,
             }
@@ -1947,14 +1941,14 @@ describe('Clearing Tests', () => {
         })
 
         it('GIVEN a Token WHEN creating clearing passing wrong expirationTimestamp THEN transaction fails with WrongExpirationTimestamp', async () => {
-            let wrongExpirationTimestamp = currentTimestamp - 1
+            const wrongExpirationTimestamp = currentTimestamp - 1
 
-            let clearingOperation__wrong = {
+            const clearingOperation__wrong = {
                 ...clearingOperation,
                 expirationTimestamp: wrongExpirationTimestamp,
             }
 
-            let clearingOperationFrom_wrong = {
+            const clearingOperationFrom_wrong = {
                 ...clearingOperationFrom,
                 from: account_B,
                 clearingOperation: clearingOperation__wrong,
@@ -2029,7 +2023,7 @@ describe('Clearing Tests', () => {
                 'WrongExpirationTimestamp'
             )
 
-            let hold_wrong = {
+            const hold_wrong = {
                 ...hold,
                 expirationTimestamp: wrongExpirationTimestamp,
             }
@@ -2092,12 +2086,12 @@ describe('Clearing Tests', () => {
         })
 
         it('GIVEN a wrong partition WHEN creating clearing THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
-            let clearingOperation__wrong = {
+            const clearingOperation__wrong = {
                 ...clearingOperation,
                 partition: _WRONG_PARTITION,
             }
 
-            let clearingOperationFrom_wrong = {
+            const clearingOperationFrom_wrong = {
                 ...clearingOperationFrom,
                 from: account_B,
                 clearingOperation: clearingOperation__wrong,
@@ -2220,7 +2214,7 @@ describe('Clearing Tests', () => {
                 )
 
             // Wrong Partition Id
-            let clearingIdentifier_WrongPartition = {
+            const clearingIdentifier_WrongPartition = {
                 ...clearingIdentifier,
                 partition: _WRONG_PARTITION,
             }
@@ -2235,7 +2229,7 @@ describe('Clearing Tests', () => {
             )
 
             // Wrong Token Holder
-            let clearingIdentifier_WrongTokenHolder = {
+            const clearingIdentifier_WrongTokenHolder = {
                 ...clearingIdentifier,
                 tokenHolder: account_B,
             }
@@ -2250,7 +2244,7 @@ describe('Clearing Tests', () => {
             )
 
             // Wrong Clearing Id
-            let clearingIdentifier_ClearingId = {
+            const clearingIdentifier_ClearingId = {
                 ...clearingIdentifier,
                 clearingId: 100,
             }
@@ -2289,7 +2283,7 @@ describe('Clearing Tests', () => {
                 .clearingRedeemByPartition(clearingOperation, _AMOUNT)
 
             // Wrong Partition Id
-            let clearingIdentifier_WrongPartition = {
+            const clearingIdentifier_WrongPartition = {
                 ...clearingIdentifier,
                 partition: _WRONG_PARTITION,
             }
@@ -2304,7 +2298,7 @@ describe('Clearing Tests', () => {
             )
 
             // Wrong Token Holder
-            let clearingIdentifier_WrongTokenHolder = {
+            const clearingIdentifier_WrongTokenHolder = {
                 ...clearingIdentifier,
                 tokenHolder: account_B,
             }
@@ -2319,7 +2313,7 @@ describe('Clearing Tests', () => {
             )
 
             // Wrong Clearing Id
-            let clearingIdentifier_ClearingId = {
+            const clearingIdentifier_ClearingId = {
                 ...clearingIdentifier,
                 clearingId: 100,
             }
@@ -2358,7 +2352,7 @@ describe('Clearing Tests', () => {
                 .clearingCreateHoldByPartition(clearingOperation, hold)
 
             // Wrong Partition Id
-            let clearingIdentifier_WrongPartition = {
+            const clearingIdentifier_WrongPartition = {
                 ...clearingIdentifier,
                 partition: _WRONG_PARTITION,
             }
@@ -2373,7 +2367,7 @@ describe('Clearing Tests', () => {
             )
 
             // Wrong Token Holder
-            let clearingIdentifier_WrongTokenHolder = {
+            const clearingIdentifier_WrongTokenHolder = {
                 ...clearingIdentifier,
                 tokenHolder: account_B,
             }
@@ -2388,7 +2382,7 @@ describe('Clearing Tests', () => {
             )
 
             // Wrong Clearing Id
-            let clearingIdentifier_ClearingId = {
+            const clearingIdentifier_ClearingId = {
                 ...clearingIdentifier,
                 clearingId: 100,
             }
@@ -2433,13 +2427,13 @@ describe('Clearing Tests', () => {
                 .to.emit(clearingFacet, 'ClearingDeactivated')
                 .withArgs(account_A)
 
-            let deactivated = await clearingFacet.isClearingActivated()
+            const deactivated = await clearingFacet.isClearingActivated()
 
             await expect(clearingFacet.connect(signer_A).activateClearing())
                 .to.emit(clearingFacet, 'ClearingActivated')
                 .withArgs(account_A)
 
-            let activated = await clearingFacet.isClearingActivated()
+            const activated = await clearingFacet.isClearingActivated()
 
             expect(deactivated).to.equal(false)
             expect(activated).to.equal(true)
@@ -2778,8 +2772,8 @@ describe('Clearing Tests', () => {
 
     describe('Managing clearing success', () => {
         it('GIVEN a Token WHEN clearing operation approved THEN transaction succeeds', async () => {
-            let balance_A_original = await erc1410Facet.balanceOf(account_A)
-            let balance_B_original = await erc1410Facet.balanceOf(account_B)
+            const balance_A_original = await erc1410Facet.balanceOf(account_A)
+            const balance_B_original = await erc1410Facet.balanceOf(account_B)
 
             // Transfer
             await clearingFacet.clearingTransferByPartition(
@@ -2794,12 +2788,10 @@ describe('Clearing Tests', () => {
             await clearingActionsFacet.approveClearingOperationByPartition(
                 clearingIdentifier
             )
-            let balance_A_final_Transfer = await erc1410Facet.balanceOf(
-                account_A
-            )
-            let balance_B_final_Transfer = await erc1410Facet.balanceOf(
-                account_B
-            )
+            const balance_A_final_Transfer =
+                await erc1410Facet.balanceOf(account_A)
+            const balance_B_final_Transfer =
+                await erc1410Facet.balanceOf(account_B)
 
             // Redeem
 
@@ -2813,8 +2805,10 @@ describe('Clearing Tests', () => {
             await clearingActionsFacet.approveClearingOperationByPartition(
                 clearingIdentifier
             )
-            let balance_A_final_Redeem = await erc1410Facet.balanceOf(account_A)
-            let balance_B_final_Redeem = await erc1410Facet.balanceOf(account_B)
+            const balance_A_final_Redeem =
+                await erc1410Facet.balanceOf(account_A)
+            const balance_B_final_Redeem =
+                await erc1410Facet.balanceOf(account_B)
 
             // HoldCreate
             await clearingFacet.clearingCreateHoldByPartition(
@@ -2828,12 +2822,10 @@ describe('Clearing Tests', () => {
             await clearingActionsFacet.approveClearingOperationByPartition(
                 clearingIdentifier
             )
-            let balance_A_final_HoldCreation = await erc1410Facet.balanceOf(
-                account_A
-            )
-            let balance_B_final_HoldCreation = await erc1410Facet.balanceOf(
-                account_B
-            )
+            const balance_A_final_HoldCreation =
+                await erc1410Facet.balanceOf(account_A)
+            const balance_B_final_HoldCreation =
+                await erc1410Facet.balanceOf(account_B)
 
             expect(balance_B_final_Transfer.toNumber()).to.equal(
                 balance_B_original.toNumber() + _AMOUNT
@@ -2856,8 +2848,8 @@ describe('Clearing Tests', () => {
         })
 
         it('GIVEN a Token WHEN clearing operation cancelled THEN transaction succeeds', async () => {
-            let balance_A_original = await erc1410Facet.balanceOf(account_A)
-            let balance_B_original = await erc1410Facet.balanceOf(account_B)
+            const balance_A_original = await erc1410Facet.balanceOf(account_A)
+            const balance_B_original = await erc1410Facet.balanceOf(account_B)
 
             // Transfer
             await clearingFacet.clearingTransferByPartition(
@@ -2872,12 +2864,10 @@ describe('Clearing Tests', () => {
             await clearingActionsFacet.cancelClearingOperationByPartition(
                 clearingIdentifier
             )
-            let balance_A_final_Transfer = await erc1410Facet.balanceOf(
-                account_A
-            )
-            let balance_B_final_Transfer = await erc1410Facet.balanceOf(
-                account_B
-            )
+            const balance_A_final_Transfer =
+                await erc1410Facet.balanceOf(account_A)
+            const balance_B_final_Transfer =
+                await erc1410Facet.balanceOf(account_B)
 
             // Redeem
 
@@ -2891,8 +2881,10 @@ describe('Clearing Tests', () => {
             await clearingActionsFacet.cancelClearingOperationByPartition(
                 clearingIdentifier
             )
-            let balance_A_final_Redeem = await erc1410Facet.balanceOf(account_A)
-            let balance_B_final_Redeem = await erc1410Facet.balanceOf(account_B)
+            const balance_A_final_Redeem =
+                await erc1410Facet.balanceOf(account_A)
+            const balance_B_final_Redeem =
+                await erc1410Facet.balanceOf(account_B)
 
             // HoldCreate
             await clearingFacet.clearingCreateHoldByPartition(
@@ -2906,12 +2898,10 @@ describe('Clearing Tests', () => {
             await clearingActionsFacet.cancelClearingOperationByPartition(
                 clearingIdentifier
             )
-            let balance_A_final_HoldCreation = await erc1410Facet.balanceOf(
-                account_A
-            )
-            let balance_B_final_HoldCreation = await erc1410Facet.balanceOf(
-                account_B
-            )
+            const balance_A_final_HoldCreation =
+                await erc1410Facet.balanceOf(account_A)
+            const balance_B_final_HoldCreation =
+                await erc1410Facet.balanceOf(account_B)
 
             expect(balance_B_final_Transfer.toNumber()).to.equal(
                 balance_B_original.toNumber()
@@ -2934,8 +2924,8 @@ describe('Clearing Tests', () => {
         })
 
         it('GIVEN a Token WHEN clearing operation recalimed THEN transaction succeeds', async () => {
-            let balance_A_original = await erc1410Facet.balanceOf(account_A)
-            let balance_B_original = await erc1410Facet.balanceOf(account_B)
+            const balance_A_original = await erc1410Facet.balanceOf(account_A)
+            const balance_B_original = await erc1410Facet.balanceOf(account_B)
 
             // Transfer
             await clearingFacet.clearingTransferByPartition(
@@ -2955,12 +2945,10 @@ describe('Clearing Tests', () => {
             await clearingActionsFacet.reclaimClearingOperationByPartition(
                 clearingIdentifier
             )
-            let balance_A_final_Transfer = await erc1410Facet.balanceOf(
-                account_A
-            )
-            let balance_B_final_Transfer = await erc1410Facet.balanceOf(
-                account_B
-            )
+            const balance_A_final_Transfer =
+                await erc1410Facet.balanceOf(account_A)
+            const balance_B_final_Transfer =
+                await erc1410Facet.balanceOf(account_B)
 
             await timeTravelFacet.changeSystemTimestamp(1)
 
@@ -2981,8 +2969,10 @@ describe('Clearing Tests', () => {
             await clearingActionsFacet.reclaimClearingOperationByPartition(
                 clearingIdentifier
             )
-            let balance_A_final_Redeem = await erc1410Facet.balanceOf(account_A)
-            let balance_B_final_Redeem = await erc1410Facet.balanceOf(account_B)
+            const balance_A_final_Redeem =
+                await erc1410Facet.balanceOf(account_A)
+            const balance_B_final_Redeem =
+                await erc1410Facet.balanceOf(account_B)
 
             await timeTravelFacet.changeSystemTimestamp(1)
 
@@ -3003,12 +2993,10 @@ describe('Clearing Tests', () => {
             await clearingActionsFacet.reclaimClearingOperationByPartition(
                 clearingIdentifier
             )
-            let balance_A_final_HoldCreation = await erc1410Facet.balanceOf(
-                account_A
-            )
-            let balance_B_final_HoldCreation = await erc1410Facet.balanceOf(
-                account_B
-            )
+            const balance_A_final_HoldCreation =
+                await erc1410Facet.balanceOf(account_A)
+            const balance_B_final_HoldCreation =
+                await erc1410Facet.balanceOf(account_B)
 
             expect(balance_B_final_Transfer.toNumber()).to.equal(
                 balance_B_original.toNumber()
@@ -3172,9 +3160,10 @@ describe('Clearing Tests', () => {
                     _PARTITION_ID_1,
                     account_A
                 )
-            const cleared_After = await clearingFacet.getClearingForByPartition(
-                clearingIdentifier
-            )
+            const cleared_After =
+                await clearingFacet.getClearingForByPartition(
+                    clearingIdentifier
+                )
             const balance_After = await erc1410Facet.balanceOf(account_A)
             const balance_After_Partition_1 =
                 await erc1410Facet.balanceOfByPartition(
@@ -3292,9 +3281,8 @@ describe('Clearing Tests', () => {
                     account_A
                 )
 
-            const held_Amount_Before = await holdFacet.getHeldAmountFor(
-                account_A
-            )
+            const held_Amount_Before =
+                await holdFacet.getHeldAmountFor(account_A)
             const held_Amount_Before_Partition_1 =
                 await holdFacet.getHeldAmountFor(account_A)
 
@@ -3322,17 +3310,15 @@ describe('Clearing Tests', () => {
                 )
             }
 
-            const balance_After_Approve_A = await erc1410Facet.balanceOf(
-                account_A
-            )
+            const balance_After_Approve_A =
+                await erc1410Facet.balanceOf(account_A)
             const balance_After_Approve_Partition_1_A =
                 await erc1410Facet.balanceOfByPartition(
                     _PARTITION_ID_1,
                     account_A
                 )
-            const balance_After_Approve_C = await erc1410Facet.balanceOf(
-                account_C
-            )
+            const balance_After_Approve_C =
+                await erc1410Facet.balanceOf(account_C)
             const balance_After_Approve_Partition_1_C =
                 await erc1410Facet.balanceOfByPartition(
                     _PARTITION_ID_1,
@@ -3345,9 +3331,8 @@ describe('Clearing Tests', () => {
                     _PARTITION_ID_1,
                     account_A
                 )
-            const held_Amount_After = await holdFacet.getHeldAmountFor(
-                account_A
-            )
+            const held_Amount_After =
+                await holdFacet.getHeldAmountFor(account_A)
             const held_Amount_After_Partition_1 =
                 await holdFacet.getHeldAmountForByPartition(
                     _PARTITION_ID_1,
@@ -3480,9 +3465,8 @@ describe('Clearing Tests', () => {
                     account_A
                 )
 
-            const held_Amount_Before = await holdFacet.getHeldAmountFor(
-                account_A
-            )
+            const held_Amount_Before =
+                await holdFacet.getHeldAmountFor(account_A)
             const held_Amount_Before_Partition_1 =
                 await holdFacet.getHeldAmountFor(account_A)
 
@@ -3510,17 +3494,15 @@ describe('Clearing Tests', () => {
                 )
             }
 
-            const balance_After_Cancel_A = await erc1410Facet.balanceOf(
-                account_A
-            )
+            const balance_After_Cancel_A =
+                await erc1410Facet.balanceOf(account_A)
             const balance_After_Cancel_Partition_1_A =
                 await erc1410Facet.balanceOfByPartition(
                     _PARTITION_ID_1,
                     account_A
                 )
-            const balance_After_Cancel_C = await erc1410Facet.balanceOf(
-                account_C
-            )
+            const balance_After_Cancel_C =
+                await erc1410Facet.balanceOf(account_C)
             const balance_After_Cancel_Partition_1_C =
                 await erc1410Facet.balanceOfByPartition(
                     _PARTITION_ID_1,
@@ -3533,9 +3515,8 @@ describe('Clearing Tests', () => {
                     _PARTITION_ID_1,
                     account_A
                 )
-            const held_Amount_After = await holdFacet.getHeldAmountFor(
-                account_A
-            )
+            const held_Amount_After =
+                await holdFacet.getHeldAmountFor(account_A)
             const held_Amount_After_Partition_1 =
                 await holdFacet.getHeldAmountForByPartition(
                     _PARTITION_ID_1,
@@ -3664,9 +3645,8 @@ describe('Clearing Tests', () => {
                     account_A
                 )
 
-            const held_Amount_Before = await holdFacet.getHeldAmountFor(
-                account_A
-            )
+            const held_Amount_Before =
+                await holdFacet.getHeldAmountFor(account_A)
             const held_Amount_Before_Partition_1 =
                 await holdFacet.getHeldAmountFor(account_A)
 
@@ -3698,17 +3678,15 @@ describe('Clearing Tests', () => {
                 )
             }
 
-            const balance_After_Cancel_A = await erc1410Facet.balanceOf(
-                account_A
-            )
+            const balance_After_Cancel_A =
+                await erc1410Facet.balanceOf(account_A)
             const balance_After_Cancel_Partition_1_A =
                 await erc1410Facet.balanceOfByPartition(
                     _PARTITION_ID_1,
                     account_A
                 )
-            const balance_After_Cancel_C = await erc1410Facet.balanceOf(
-                account_C
-            )
+            const balance_After_Cancel_C =
+                await erc1410Facet.balanceOf(account_C)
             const balance_After_Cancel_Partition_1_C =
                 await erc1410Facet.balanceOfByPartition(
                     _PARTITION_ID_1,
@@ -3721,9 +3699,8 @@ describe('Clearing Tests', () => {
                     _PARTITION_ID_1,
                     account_A
                 )
-            const held_Amount_After = await holdFacet.getHeldAmountFor(
-                account_A
-            )
+            const held_Amount_After =
+                await holdFacet.getHeldAmountFor(account_A)
             const held_Amount_After_Partition_1 =
                 await holdFacet.getHeldAmountForByPartition(
                     _PARTITION_ID_1,
@@ -3906,9 +3883,8 @@ describe('Clearing Tests', () => {
                     _AMOUNT
                 )
 
-            const balance_After_Clearing = await erc1410Facet.balanceOf(
-                account_A
-            )
+            const balance_After_Clearing =
+                await erc1410Facet.balanceOf(account_A)
             const balance_After_Clearing_Partition_1 =
                 await erc1410Facet.balanceOfByPartition(
                     _PARTITION_ID_1,

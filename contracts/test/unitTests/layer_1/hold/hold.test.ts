@@ -252,8 +252,8 @@ import {
     ZERO,
     EMPTY_STRING,
     CLEARING_ROLE,
+    dateToUnixTimestamp,
 } from '@scripts'
-import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -275,6 +275,7 @@ const balanceOf_B_Original = [20 * _AMOUNT, 200 * _AMOUNT]
 const adjustFactor = 253
 const adjustDecimals = 2
 const decimals_Original = 6
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let holdIdentifier: any
 
 describe('Hold Tests', () => {
@@ -313,6 +314,7 @@ describe('Hold Tests', () => {
 
     let snapshot: SnapshotRestorer
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let hold: any
 
     function set_initRbacs(): Rbac[] {
@@ -397,7 +399,11 @@ describe('Hold Tests', () => {
             diamond.address,
             signer_A
         )
-        clearingFacet = await ethers.getContractAt('ClearingFacet', diamond.address, signer_A)
+        clearingFacet = await ethers.getContractAt(
+            'ClearingFacet',
+            diamond.address,
+            signer_A
+        )
         capFacet = await ethers.getContractAt('Cap', diamond.address, signer_A)
 
         accessControlFacet = await ethers.getContractAt(
@@ -448,7 +454,7 @@ describe('Hold Tests', () => {
     }
 
     async function deploySecurityFixtureMultiPartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -486,7 +492,7 @@ describe('Hold Tests', () => {
     }
 
     async function deploySecurityFixtureSinglePartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -527,7 +533,6 @@ describe('Hold Tests', () => {
         snapshot = await takeSnapshot()
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
             await ethers.getSigners()
         account_A = signer_A.address
@@ -536,14 +541,13 @@ describe('Hold Tests', () => {
         account_D = signer_D.address
         account_E = signer_E.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    timeTravelEnabled: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                timeTravelEnabled: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -571,16 +575,16 @@ describe('Hold Tests', () => {
             holdsLength_expected: number,
             holdId_expected: number
         ) {
-            let balance = await erc1410Facet.balanceOf(account_A)
-            let heldAmount = await holdFacet.getHeldAmountForByPartition(
+            const balance = await erc1410Facet.balanceOf(account_A)
+            const heldAmount = await holdFacet.getHeldAmountForByPartition(
                 _DEFAULT_PARTITION,
                 account_A
             )
-            let holdCount = await holdFacet.getHoldCountForByPartition(
+            const holdCount = await holdFacet.getHoldCountForByPartition(
                 _DEFAULT_PARTITION,
                 account_A
             )
-            let holdIds = await holdFacet.getHoldsIdForByPartition(
+            const holdIds = await holdFacet.getHoldsIdForByPartition(
                 _DEFAULT_PARTITION,
                 account_A,
                 0,
@@ -593,9 +597,8 @@ describe('Hold Tests', () => {
             expect(holdIds.length).to.equal(holdsLength_expected)
 
             if (holdCount_expected > 0) {
-                let retrieved_hold = await holdFacet.getHoldForByPartition(
-                    holdIdentifier
-                )
+                const retrieved_hold =
+                    await holdFacet.getHoldForByPartition(holdIdentifier)
 
                 expect(retrieved_hold.amount_).to.equal(holdAmount_expected)
                 expect(retrieved_hold.escrow_).to.equal(holdEscrow_expected)
@@ -837,9 +840,9 @@ describe('Hold Tests', () => {
 
         describe('Create with wrong input arguments', () => {
             it('GIVEN a Token WHEN creating hold with amount bigger than balance THEN transaction fails with InsufficientBalance', async () => {
-                let AmountLargerThanBalance = 1000 * _AMOUNT
+                const AmountLargerThanBalance = 1000 * _AMOUNT
 
-                let hold_wrong = {
+                const hold_wrong = {
                     amount: AmountLargerThanBalance,
                     expirationTimestamp: expirationTimestamp,
                     escrow: account_B,
@@ -923,7 +926,7 @@ describe('Hold Tests', () => {
             })
 
             it('GIVEN a Token WHEN createHoldByPartition passing empty escrow THEN transaction fails with ZeroAddressNotAllowed', async () => {
-                let hold_wrong = {
+                const hold_wrong = {
                     amount: _AMOUNT,
                     expirationTimestamp: expirationTimestamp,
                     escrow: ADDRESS_ZERO,
@@ -1006,9 +1009,9 @@ describe('Hold Tests', () => {
 
             it('GIVEN a Token WHEN createHoldByPartition passing wrong expirationTimestamp THEN transaction fails with WrongExpirationTimestamp', async () => {
                 await timeTravelFacet.changeSystemTimestamp(currentTimestamp)
-                let wrongExpirationTimestamp = currentTimestamp - 1
+                const wrongExpirationTimestamp = currentTimestamp - 1
 
-                let hold_wrong = {
+                const hold_wrong = {
                     amount: _AMOUNT,
                     expirationTimestamp: wrongExpirationTimestamp,
                     escrow: account_B,
@@ -1197,7 +1200,7 @@ describe('Hold Tests', () => {
             it('GIVEN a Token WHEN createHoldFromByPartition hold THEN transaction succeeds', async () => {
                 await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
 
-                let operatorData = '0x'
+                const operatorData = '0x'
 
                 await expect(
                     holdFacet
@@ -1223,7 +1226,7 @@ describe('Hold Tests', () => {
             })
 
             it('GIVEN a Token WHEN operatorCreateHoldByPartition hold THEN transaction succeeds', async () => {
-                let operatorData = '0xab56'
+                const operatorData = '0xab56'
 
                 await erc1410Facet
                     .connect(signer_A)
@@ -1255,7 +1258,7 @@ describe('Hold Tests', () => {
             })
 
             it('GIVEN a Token WHEN controllerCreateHoldByPartition hold THEN transaction succeeds', async () => {
-                let operatorData = '0xab56222233'
+                const operatorData = '0xab56222233'
 
                 await expect(
                     holdFacet
@@ -1322,8 +1325,8 @@ describe('Hold Tests', () => {
             })
 
             it('GIVEN a hold WHEN executeHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached', async () => {
-                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
-                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+                const initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                const finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
 
                 hold.expirationTimestamp = finalDate - 1
 
@@ -1400,8 +1403,8 @@ describe('Hold Tests', () => {
             })
 
             it('GIVEN hold WHEN releaseHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached', async () => {
-                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
-                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+                const initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                const finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
 
                 hold.expirationTimestamp = finalDate - 1
 
@@ -1460,7 +1463,7 @@ describe('Hold Tests', () => {
 
         describe('Execute OK', () => {
             it('GIVEN hold with no destination WHEN executeHoldByPartition THEN transaction succeeds', async () => {
-                let balance_before = await erc1410Facet.balanceOf(account_C)
+                const balance_before = await erc1410Facet.balanceOf(account_C)
 
                 await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
 
@@ -1496,7 +1499,7 @@ describe('Hold Tests', () => {
                     0
                 )
 
-                let balance_after = await erc1410Facet.balanceOf(account_C)
+                const balance_after = await erc1410Facet.balanceOf(account_C)
 
                 expect(balance_after.toNumber()).to.equal(
                     balance_before.add(_AMOUNT).toNumber()
@@ -1534,8 +1537,8 @@ describe('Hold Tests', () => {
 
         describe('Reclaim OK', () => {
             it('GIVEN hold with no destination WHEN reclaimHoldByPartition THEN transaction succeeds', async () => {
-                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
-                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+                const initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                const finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
 
                 hold.expirationTimestamp = finalDate - 1
 
@@ -1686,7 +1689,7 @@ describe('Hold Tests', () => {
 
                 // HOLD
                 holdFacet = holdFacet.connect(signer_A)
-                let hold = {
+                const hold = {
                     amount: _AMOUNT,
                     expirationTimestamp: dateToUnixTimestamp(
                         '2030-01-01T00:00:01Z'
@@ -1705,9 +1708,8 @@ describe('Hold Tests', () => {
                         _PARTITION_ID_1,
                         account_A
                     )
-                const hold_Before = await holdFacet.getHoldForByPartition(
-                    holdIdentifier
-                )
+                const hold_Before =
+                    await holdFacet.getHoldForByPartition(holdIdentifier)
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -1753,9 +1755,7 @@ describe('Hold Tests', () => {
                         account_A
                     )
                 const hold_After =
-                    await holdFacet.getHoldForByPartition(
-                        holdIdentifier
-                    )
+                    await holdFacet.getHoldForByPartition(holdIdentifier)
                 const balance_After = await erc1410Facet.balanceOf(account_A)
                 const balance_After_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
@@ -1808,7 +1808,7 @@ describe('Hold Tests', () => {
                 ).timestamp
 
                 holdFacet = holdFacet.connect(signer_A)
-                let hold = {
+                const hold = {
                     amount: _AMOUNT,
                     expirationTimestamp: currentTimestamp + 10 * ONE_SECOND,
                     escrow: account_B,
@@ -1821,9 +1821,8 @@ describe('Hold Tests', () => {
                 hold.expirationTimestamp = currentTimestamp + 100 * ONE_SECOND
                 await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
 
-                const held_Amount_Before = await holdFacet.getHeldAmountFor(
-                    account_A
-                )
+                const held_Amount_Before =
+                    await holdFacet.getHeldAmountFor(account_A)
                 const held_Amount_Before_Partition_1 =
                     await holdFacet.getHeldAmountForByPartition(
                         _PARTITION_ID_1,
@@ -1845,25 +1844,22 @@ describe('Hold Tests', () => {
                         hold.amount * adjustFactor
                     )
 
-                const balance_After_Execute_A = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balance_After_Execute_A =
+                    await erc1410Facet.balanceOf(account_A)
                 const balance_After_Execute_Partition_1_A =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
                     )
-                const balance_After_Execute_C = await erc1410Facet.balanceOf(
-                    account_C
-                )
+                const balance_After_Execute_C =
+                    await erc1410Facet.balanceOf(account_C)
                 const balance_After_Execute_Partition_1_C =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_C
                     )
-                const held_Amount_After = await holdFacet.getHeldAmountFor(
-                    account_A
-                )
+                const held_Amount_After =
+                    await holdFacet.getHeldAmountFor(account_A)
                 const held_Amount_After_Partition_1 =
                     await holdFacet.getHeldAmountForByPartition(
                         _PARTITION_ID_1,
@@ -1920,7 +1916,7 @@ describe('Hold Tests', () => {
                 ).timestamp
 
                 holdFacet = holdFacet.connect(signer_A)
-                let hold = {
+                const hold = {
                     amount: _AMOUNT,
                     expirationTimestamp: currentTimestamp + 10 * ONE_SECOND,
                     escrow: account_B,
@@ -1933,9 +1929,8 @@ describe('Hold Tests', () => {
                 hold.expirationTimestamp = currentTimestamp + 100 * ONE_SECOND
                 await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
 
-                const held_Amount_Before = await holdFacet.getHeldAmountFor(
-                    account_A
-                )
+                const held_Amount_Before =
+                    await holdFacet.getHeldAmountFor(account_A)
                 const held_Amount_Before_Partition_1 =
                     await holdFacet.getHeldAmountForByPartition(
                         _PARTITION_ID_1,
@@ -1956,17 +1951,15 @@ describe('Hold Tests', () => {
                         hold.amount * adjustFactor
                     )
 
-                const balance_After_Release = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balance_After_Release =
+                    await erc1410Facet.balanceOf(account_A)
                 const balance_After_Release_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
                     )
-                const held_Amount_After = await holdFacet.getHeldAmountFor(
-                    account_A
-                )
+                const held_Amount_After =
+                    await holdFacet.getHeldAmountFor(account_A)
                 const held_Amount_After_Partition_1 =
                     await holdFacet.getHeldAmountForByPartition(
                         _PARTITION_ID_1,
@@ -2012,7 +2005,7 @@ describe('Hold Tests', () => {
                 ).timestamp
 
                 holdFacet = holdFacet.connect(signer_A)
-                let hold = {
+                const hold = {
                     amount: _AMOUNT,
                     expirationTimestamp: currentTimestamp + ONE_SECOND,
                     escrow: account_B,
@@ -2025,9 +2018,8 @@ describe('Hold Tests', () => {
                 hold.expirationTimestamp = currentTimestamp + 100 * ONE_SECOND
                 await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
 
-                const held_Amount_Before = await holdFacet.getHeldAmountFor(
-                    account_A
-                )
+                const held_Amount_Before =
+                    await holdFacet.getHeldAmountFor(account_A)
                 const held_Amount_Before_Partition_1 =
                     await holdFacet.getHeldAmountForByPartition(
                         _PARTITION_ID_1,
@@ -2047,17 +2039,15 @@ describe('Hold Tests', () => {
                 )
                 await holdFacet.reclaimHoldByPartition(holdIdentifier)
 
-                const balance_After_Release = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balance_After_Release =
+                    await erc1410Facet.balanceOf(account_A)
                 const balance_After_Release_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
                     )
-                const held_Amount_After = await holdFacet.getHeldAmountFor(
-                    account_A
-                )
+                const held_Amount_After =
+                    await holdFacet.getHeldAmountFor(account_A)
                 const held_Amount_After_Partition_1 =
                     await holdFacet.getHeldAmountForByPartition(
                         _PARTITION_ID_1,
@@ -2103,7 +2093,7 @@ describe('Hold Tests', () => {
                 ).timestamp
 
                 holdFacet = holdFacet.connect(signer_A)
-                let hold = {
+                const hold = {
                     amount: _AMOUNT,
                     expirationTimestamp: currentTimestamp + 100 * ONE_SECOND,
                     escrow: account_B,
@@ -2113,9 +2103,8 @@ describe('Hold Tests', () => {
 
                 await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
 
-                const held_Amount_Before = await holdFacet.getHeldAmountFor(
-                    account_A
-                )
+                const held_Amount_Before =
+                    await holdFacet.getHeldAmountFor(account_A)
                 const held_Amount_Before_Partition_1 =
                     await holdFacet.getHeldAmountForByPartition(
                         _PARTITION_ID_1,
@@ -2132,17 +2121,15 @@ describe('Hold Tests', () => {
                 holdFacet = holdFacet.connect(signer_A)
                 await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
 
-                const balance_After_Hold = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balance_After_Hold =
+                    await erc1410Facet.balanceOf(account_A)
                 const balance_After_Hold_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
                     )
-                const held_Amount_After = await holdFacet.getHeldAmountFor(
-                    account_A
-                )
+                const held_Amount_After =
+                    await holdFacet.getHeldAmountFor(account_A)
                 const held_Amount_After_Partition_1 =
                     await holdFacet.getHeldAmountForByPartition(
                         _PARTITION_ID_1,

@@ -218,7 +218,7 @@ import {
     IFactory,
     Kyc,
     SsiManagement,
-    ClearingFacet
+    ClearingFacet,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -276,7 +276,6 @@ describe('ERC20 Tests', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -284,15 +283,14 @@ describe('ERC20 Tests', () => {
             account_C = signer_C.address
             account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                        timeTravelEnabled: true,
-                    })
-                )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
@@ -310,9 +308,13 @@ describe('ERC20 Tests', () => {
             }
             const rbacClearing: Rbac = {
                 role: CLEARING_ROLE,
-                members: [account_A]
+                members: [account_A],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacControlList, rbacClearing]
+            const init_rbacs: Rbac[] = [
+                rbacPause,
+                rbacControlList,
+                rbacClearing,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -519,7 +521,6 @@ describe('ERC20 Tests', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -527,14 +528,13 @@ describe('ERC20 Tests', () => {
             account_C = signer_C.address
             account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                    })
-                )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =

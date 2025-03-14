@@ -243,8 +243,8 @@ import {
     MAX_UINT256,
     ZERO,
     EMPTY_STRING,
+    dateToUnixTimestamp,
 } from '@scripts'
-import { dateToUnixTimestamp } from '../../../../dateFormatter'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const _PARTITION_ID_1 =
@@ -366,21 +366,19 @@ describe('Scheduled Tasks Tests', () => {
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                    timeTravelEnabled: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+                timeTravelEnabled: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract

@@ -238,9 +238,8 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
             provider: hre.ethers.provider,
         })
 
-        const { facetListRecord } = await getFacetsByConfigurationIdAndVersion(
-            query
-        )
+        const { facetListRecord } =
+            await getFacetsByConfigurationIdAndVersion(query)
 
         Object.entries(facetListRecord).forEach(([version, facetList]) => {
             console.log(
