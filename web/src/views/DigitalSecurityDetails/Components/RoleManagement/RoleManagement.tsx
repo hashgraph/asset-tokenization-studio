@@ -215,7 +215,7 @@ export const RoleManagement = () => {
   });
 
   return (
-    <Stack w="full" h="full" layerStyle="container">
+    <Stack w="full" h="full" layerStyle="container" p={0}>
       <Tabs
         tabs={[
           {

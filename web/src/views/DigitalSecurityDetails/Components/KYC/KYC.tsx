@@ -17,6 +17,8 @@ import { useParams } from "react-router-dom";
 import { useRevokeKYC } from "../../../../hooks/mutations/useKYC";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { SecurityRole } from "../../../../utils/SecurityRole";
+import { DATE_TIME_FORMAT } from "../../../../utils/constants";
+import { formatDate } from "../../../../utils/format";
 
 const STATUS = {
   VALID: { status: "Valid", color: "green" },
@@ -99,30 +101,24 @@ export const KYC = () => {
       header: tTable("fields.validFrom"),
       enableSorting: false,
       cell({ getValue }) {
-        const date = Number(getValue());
+        const formattedDate = formatDate(
+          Number(getValue()) * 1000,
+          DATE_TIME_FORMAT,
+        );
 
-        if (date > 1e13) {
-          return "-";
-        }
-
-        const formatDate = new Date(date);
-
-        return <Box>{formatDate.toLocaleString()}</Box>;
+        return <Box>{formattedDate}</Box>;
       },
     }),
     columnsHelper.accessor("validTo", {
       header: tTable("fields.validTo"),
       enableSorting: false,
       cell({ getValue }) {
-        const date = Number(getValue());
+        const formattedDate = formatDate(
+          Number(getValue()) * 1000,
+          DATE_TIME_FORMAT,
+        );
 
-        if (date > 1e13) {
-          return "-";
-        }
-
-        const formatDate = new Date(date);
-
-        return <Box>{formatDate.toLocaleString()}</Box>;
+        return <Box>{formattedDate}</Box>;
       },
     }),
     columnsHelper.accessor("VCid", {

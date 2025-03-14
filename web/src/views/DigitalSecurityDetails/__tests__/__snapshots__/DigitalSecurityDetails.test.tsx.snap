@@ -75,13 +75,13 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
     >
       <div
         aria-orientation="horizontal"
-        class="chakra-tabs__tablist css-3o7rpu"
+        class="chakra-tabs__tablist css-qf0tky"
         role="tablist"
       >
         <button
           aria-controls="tabs-:r0:--tabpanel-0"
           aria-selected="true"
-          class="chakra-tabs__tab css-8mj2xm"
+          class="chakra-tabs__tab css-1fryz8v"
           data-index="0"
           id="tabs-:r0:--tab-0"
           role="tab"
@@ -93,7 +93,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
         <button
           aria-controls="tabs-:r0:--tabpanel-1"
           aria-selected="false"
-          class="chakra-tabs__tab css-8mj2xm"
+          class="chakra-tabs__tab css-1fryz8v"
           data-index="1"
           id="tabs-:r0:--tab-1"
           role="tab"
@@ -108,11 +108,11 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
         style="position: absolute; transition-property: left, right, top, bottom, height, width; transition-duration: 0ms; transition-timing-function: cubic-bezier(0, 0, 0.2, 1); left: 0px; width: 0px;"
       />
       <div
-        class="chakra-tabs__tab-panels css-1akcp04"
+        class="chakra-tabs__tab-panels css-1oiq8y1"
       >
         <div
           aria-labelledby="tabs-:r0:--tab-0"
-          class="chakra-tabs__tab-panel css-1ip3kt8"
+          class="chakra-tabs__tab-panel css-uzjpue"
           id="tabs-:r0:--tabpanel-0"
           role="tabpanel"
           tabindex="0"
@@ -120,25 +120,6 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
           <div
             class="chakra-stack css-1lzo5bt"
           >
-            <div
-              class="chakra-stack css-1xa9bwv"
-              data-testid="holder-actions-buttons"
-            >
-              <a
-                class="chakra-button css-vueqt9"
-                data-testid="transfer-button"
-                href="/security/:id/transfer"
-              >
-                Transfer
-              </a>
-              <a
-                class="chakra-button css-vueqt9"
-                data-testid="redeem-button"
-                href="/security/:id/redeem"
-              >
-                Redeem
-              </a>
-            </div>
             <div
               class="chakra-stack css-13czc0d"
             >
@@ -633,7 +614,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
         </div>
         <div
           aria-labelledby="tabs-:r0:--tab-1"
-          class="chakra-tabs__tab-panel css-1ip3kt8"
+          class="chakra-tabs__tab-panel css-uzjpue"
           hidden=""
           id="tabs-:r0:--tabpanel-1"
           role="tabpanel"
