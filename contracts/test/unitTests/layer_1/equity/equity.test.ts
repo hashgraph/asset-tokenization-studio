@@ -244,8 +244,12 @@ import {
     DeployAtsFullInfrastructureCommand,
     ADDRESS_ZERO,
     dateToUnixTimestamp,
+    EMPTY_STRING,
+    MAX_UINT256,
+    ZERO,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const DECIMALS = 7
 let dividendsRecordDateInSeconds = 0
@@ -277,6 +281,7 @@ let balanceAdjustmentData = {
     decimals: balanceAdjustmentDecimals,
 }
 const number_Of_Shares = 100000n
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Equity Tests', () => {
     let diamond: ResolverProxy
@@ -300,28 +305,7 @@ describe('Equity Tests', () => {
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: true,
-                timeTravelEnabled: true,
-            })
-        )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
+    function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
@@ -334,7 +318,45 @@ describe('Equity Tests', () => {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
         }
-        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
+        return [rbacPause, rbacKYC, rbacSSI]
+    }
+
+    async function setFacets({ diamond }: { diamond: ResolverProxy }) {
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock__factory.connect(diamond.address, signer_A)
+        holdFacet = Hold__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        equityFacet = EquityUSATimeTravel__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+    }
+
+    async function deploySecurityFixtureSinglePartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -368,33 +390,33 @@ describe('Equity Tests', () => {
             factory,
         })
 
-        accessControlFacet = AccessControl__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        equityFacet = EquityUSATimeTravel__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        lockFacet = Lock__factory.connect(diamond.address, signer_A)
-        holdFacet = Hold__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
-        rbacSSI
-        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
-        ssiManagementFacet = await ethers.getContractAt(
-            'SsiManagement',
-            diamond.address,
-            signer_A
-        )
+        await setFacets({ diamond })
+    }
 
-        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKyc(account_A, '', 0, 9999999999, account_A)
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
 
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: false,
+                    timeTravelEnabled: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
         dividendsRecordDateInSeconds = dateToUnixTimestamp(
             '2030-01-01T00:00:10Z'
         )
@@ -420,6 +442,8 @@ describe('Equity Tests', () => {
             factor: balanceAdjustmentFactor,
             decimals: balanceAdjustmentDecimals,
         }
+
+        await loadFixture(deploySecurityFixtureSinglePartition)
     })
 
     afterEach(async () => {

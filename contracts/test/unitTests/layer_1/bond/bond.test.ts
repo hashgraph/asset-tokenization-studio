@@ -251,6 +251,7 @@ import {
     dateToUnixTimestamp,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const numberOfUnits = 1000
 let startingDate = 0
@@ -296,6 +297,91 @@ describe('Bond Tests', () => {
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
 
+    function set_initRbacs(): Rbac[] {
+        const rbacPause: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_B],
+        }
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        return [rbacPause, rbacKYC, rbacSSI]
+    }
+
+    async function setFacets({ diamond }: { diamond: ResolverProxy }) {
+        bondFacet = BondUSATimeTravel__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock__factory.connect(diamond.address, signer_A)
+        holdFacet = Hold__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+    }
+
+    async function deploySecurityFixtureSinglePartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployBondFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            currency: '0x455552',
+            numberOfUnits,
+            nominalValue: 100,
+            startingDate,
+            maturityDate,
+            couponFrequency: frequency,
+            couponRate: rate,
+            firstCouponDate,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_C,
+            countriesControlListType,
+            listOfCountries,
+            info,
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        await setFacets({ diamond })
+    }
+
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
@@ -329,81 +415,7 @@ describe('Bond Tests', () => {
             executionDate: couponExecutionDateInSeconds.toString(),
             rate: couponRate,
         }
-
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const rbacKYC: Rbac = {
-            role: KYC_ROLE,
-            members: [account_B],
-        }
-        const rbacSSI: Rbac = {
-            role: SSI_MANAGER_ROLE,
-            members: [account_A],
-        }
-        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
-
-        diamond = await deployBondFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            isMultiPartition: false,
-            name: 'TEST_AccessControl',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            currency: '0x455552',
-            numberOfUnits,
-            nominalValue: 100,
-            startingDate,
-            maturityDate,
-            couponFrequency: frequency,
-            couponRate: rate,
-            firstCouponDate,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_C,
-            countriesControlListType,
-            listOfCountries,
-            info,
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
-
-        bondFacet = BondUSATimeTravel__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        accessControlFacet = AccessControl__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        lockFacet = Lock__factory.connect(diamond.address, signer_A)
-        holdFacet = Hold__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
-        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
-        ssiManagementFacet = await ethers.getContractAt(
-            'SsiManagement',
-            diamond.address,
-            signer_A
-        )
-
-        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKyc(
-            account_A,
-            EMPTY_VC_ID,
-            ZERO,
-            MAX_UINT256,
-            account_A
-        )
+        await loadFixture(deploySecurityFixtureSinglePartition)
     })
 
     afterEach(async () => {

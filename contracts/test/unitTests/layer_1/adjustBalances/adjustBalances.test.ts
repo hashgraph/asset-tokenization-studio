@@ -206,25 +206,27 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Equity,
-    type ScheduledBalanceAdjustments,
+    type AdjustBalances,
+    type Pause,
+    type ERC1410ScheduledTasks,
     type AccessControl,
+    Equity,
     ScheduledTasks,
-    TimeTravel,
-    IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
-    Equity__factory,
-    ScheduledBalanceAdjustments__factory,
-    ScheduledTasks__factory,
-    TimeTravel__factory,
+    IFactory,
+    TimeTravel,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
-    CORPORATE_ACTION_ROLE,
+    ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
+    ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
+    CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
@@ -232,10 +234,24 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
     dateToUnixTimestamp,
 } from '@scripts'
+import { grantRoleAndPauseToken } from '@test'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
-describe('Scheduled BalanceAdjustments Tests', () => {
+const amount = 1
+const balanceOf_B_Original = [20 * amount, 200 * amount]
+const _PARTITION_ID_2 =
+    '0x0000000000000000000000000000000000000000000000000000000000000002'
+const adjustFactor = 253
+const adjustDecimals = 2
+const decimals_Original = 6
+const maxSupply_Original = 1000000 * amount
+const EMPTY_VC_ID = EMPTY_STRING
+
+describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -247,11 +263,106 @@ describe('Scheduled BalanceAdjustments Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let equityFacet: Equity
-    let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments
-    let scheduledTasksFacet: ScheduledTasks
+    let erc1410Facet: ERC1410ScheduledTasks
+    let adjustBalancesFacet: AdjustBalances
     let accessControlFacet: AccessControl
+    let pauseFacet: Pause
+    let equityFacet: Equity
+    let scheduledTasksFacet: ScheduledTasks
     let timeTravelFacet: TimeTravel
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
+
+    async function deploySecurityFixtureMultiPartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            isMultiPartition: true,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: decimals_Original,
+            isin: 'RO3682287482',
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: BigInt(maxSupply_Original),
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        await setFacets(diamond)
+    }
+
+    async function setFacets(diamond: ResolverProxy) {
+        accessControlFacet = await ethers.getContractAt(
+            'AccessControl',
+            diamond.address
+        )
+
+        erc1410Facet = await ethers.getContractAt(
+            'ERC1410ScheduledTasks',
+            diamond.address
+        )
+
+        adjustBalancesFacet = await ethers.getContractAt(
+            'AdjustBalances',
+            diamond.address
+        )
+
+        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+
+        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+
+        scheduledTasksFacet = await ethers.getContractAt(
+            'ScheduledTasksTimeTravel',
+            diamond.address
+        )
+
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
+            diamond.address
+        )
+
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address
+        )
+    }
+
+    function set_initRbacs(): Rbac[] {
+        const rbacPause: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_B],
+        }
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        return [rbacPause, rbacKYC, rbacSSI]
+    }
 
     before(async () => {
         // mute | mock console.log
@@ -265,7 +376,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
             await DeployAtsFullInfrastructureCommand.newInstance({
                 signer: signer_A,
                 useDeployed: false,
-                useEnvironment: false,
+                useEnvironment: true,
                 timeTravelEnabled: true,
             })
         )
@@ -274,221 +385,121 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
-    beforeEach(async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
-
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            isMultiPartition: false,
-            name: 'TEST_AccessControl',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_B,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            businessLogicResolver: businessLogicResolver.address,
-            factory,
-        })
-
-        accessControlFacet = AccessControl__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        equityFacet = Equity__factory.connect(diamond.address, signer_A)
-        scheduledBalanceAdjustmentsFacet =
-            ScheduledBalanceAdjustments__factory.connect(
-                diamond.address,
-                signer_A
-            )
-        scheduledTasksFacet = ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
-    })
-
     afterEach(async () => {
-        timeTravelFacet.resetSystemTimestamp()
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
-    it('GIVEN a token WHEN triggerBalanceAdjustments THEN transaction succeeds', async () => {
+    beforeEach(async () => {
+        await loadFixture(deploySecurityFixtureMultiPartition)
+    })
+
+    it('GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole', async () => {
+        // Using account C (non role)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+
+        // adjustBalances fails
+        await expect(
+            adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
+        ).to.be.rejectedWith('AccountHasNoRole')
+    })
+
+    it('GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused', async () => {
+        // Granting Role to account C and Pause
+        await grantRoleAndPauseToken(
+            accessControlFacet,
+            pauseFacet,
+            ADJUSTMENT_BALANCE_ROLE,
+            signer_A,
+            signer_B,
+            account_C
+        )
+
+        // Using account C (with role)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+
+        // adjustBalances fails
+        await expect(
+            adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
+        ).to.be.rejectedWith('TokenIsPaused')
+    })
+
+    it('GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero', async () => {
+        // Granting Role to account C and Pause
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+
+        // Using account C (with role)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+
+        // adjustBalances fails
+        await expect(
+            adjustBalancesFacet.adjustBalances(0, adjustDecimals)
+        ).to.be.revertedWithCustomError(adjustBalancesFacet, 'FactorIsZero')
+    })
+
+    it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-        // Using account C (with role)
-        equityFacet = equityFacet.connect(signer_C)
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_A)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
 
-        // set balanceAdjustment
-        const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp(
-            '2030-01-01T00:00:06Z'
-        )
-        const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp(
-            '2030-01-01T00:00:12Z'
-        )
-        const balanceAdjustmentExecutionDateInSeconds_3 = dateToUnixTimestamp(
-            '2030-01-01T00:00:18Z'
-        )
-        const balanceAdjustmentsFactor = 1
-        const balanceAdjustmentsDecimals = 2
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+
+        erc1410Facet = erc1410Facet.connect(signer_A)
+        equityFacet = equityFacet.connect(signer_A)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
+
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original,
+            data: '0x',
+        })
+
+        // schedule tasks
+        const dividendsRecordDateInSeconds_1 =
+            dateToUnixTimestamp(`2030-01-01T00:00:06Z`)
+        const dividendsExecutionDateInSeconds =
+            dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
+        const dividendsAmountPerEquity = 1
+        const dividendData_1 = {
+            recordDate: dividendsRecordDateInSeconds_1.toString(),
+            executionDate: dividendsExecutionDateInSeconds.toString(),
+            amount: dividendsAmountPerEquity,
+        }
+
+        await equityFacet.setDividends(dividendData_1)
+
+        const balanceAdjustmentExecutionDateInSeconds_1 =
+            dateToUnixTimestamp(`2030-01-01T00:00:07Z`)
 
         const balanceAdjustmentData_1 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
-            factor: balanceAdjustmentsFactor,
-            decimals: balanceAdjustmentsDecimals,
+            factor: adjustFactor,
+            decimals: adjustDecimals,
         }
-        const balanceAdjustmentData_2 = {
-            executionDate: balanceAdjustmentExecutionDateInSeconds_2.toString(),
-            factor: balanceAdjustmentsFactor,
-            decimals: balanceAdjustmentsDecimals,
-        }
-        const balanceAdjustmentData_3 = {
-            executionDate: balanceAdjustmentExecutionDateInSeconds_3.toString(),
-            factor: balanceAdjustmentsFactor,
-            decimals: balanceAdjustmentsDecimals,
-        }
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_3)
+
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
 
-        const balanceAdjustment_2_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000001'
-        const balanceAdjustment_3_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000002'
-        const balanceAdjustment_1_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000003'
+        const tasks_count_Before =
+            await scheduledTasksFacet.scheduledTaskCount()
 
-        // check schedled BalanceAdjustments
-        scheduledBalanceAdjustmentsFacet =
-            scheduledBalanceAdjustmentsFacet.connect(signer_A)
-
-        let scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
-        let scheduledBalanceAdjustments =
-            await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
-                0,
-                100
-            )
-
-        expect(scheduledBalanceAdjustmentCount).to.equal(3)
-        expect(scheduledBalanceAdjustments.length).to.equal(
-            scheduledBalanceAdjustmentCount
-        )
-        expect(
-            scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
-        expect(scheduledBalanceAdjustments[0].data).to.equal(
-            balanceAdjustment_3_Id
-        )
-        expect(
-            scheduledBalanceAdjustments[1].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2)
-        expect(scheduledBalanceAdjustments[1].data).to.equal(
-            balanceAdjustment_2_Id
-        )
-        expect(
-            scheduledBalanceAdjustments[2].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_1)
-        expect(scheduledBalanceAdjustments[2].data).to.equal(
-            balanceAdjustment_1_Id
-        )
-
-        // AFTER FIRST SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
+        //-------------------------
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_1 + 1
         )
-        await scheduledTasksFacet.triggerPendingScheduledTasks()
 
-        scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
-        scheduledBalanceAdjustments =
-            await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
-                0,
-                100
-            )
+        // balance adjustment
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
+        await adjustBalancesFacet.adjustBalances(1, 0)
 
-        expect(scheduledBalanceAdjustmentCount).to.equal(2)
-        expect(scheduledBalanceAdjustments.length).to.equal(
-            scheduledBalanceAdjustmentCount
-        )
-        expect(
-            scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
-        expect(scheduledBalanceAdjustments[0].data).to.equal(
-            balanceAdjustment_3_Id
-        )
-        expect(
-            scheduledBalanceAdjustments[1].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2)
-        expect(scheduledBalanceAdjustments[1].data).to.equal(
-            balanceAdjustment_2_Id
-        )
+        const tasks_count_After = await scheduledTasksFacet.scheduledTaskCount()
 
-        // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        await timeTravelFacet.changeSystemTimestamp(
-            balanceAdjustmentExecutionDateInSeconds_2 + 1
-        )
-        await scheduledTasksFacet.triggerScheduledTasks(100)
-
-        scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
-        scheduledBalanceAdjustments =
-            await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
-                0,
-                100
-            )
-
-        expect(scheduledBalanceAdjustmentCount).to.equal(1)
-        expect(scheduledBalanceAdjustments.length).to.equal(
-            scheduledBalanceAdjustmentCount
-        )
-        expect(
-            scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
-        expect(scheduledBalanceAdjustments[0].data).to.equal(
-            balanceAdjustment_3_Id
-        )
-
-        // AFTER THIRD SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        await timeTravelFacet.changeSystemTimestamp(
-            balanceAdjustmentExecutionDateInSeconds_3 + 1
-        )
-        await scheduledTasksFacet.triggerScheduledTasks(0)
-
-        scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
-        scheduledBalanceAdjustments =
-            await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
-                0,
-                100
-            )
-
-        expect(scheduledBalanceAdjustmentCount).to.equal(0)
-        expect(scheduledBalanceAdjustments.length).to.equal(
-            scheduledBalanceAdjustmentCount
-        )
+        expect(tasks_count_Before).to.be.equal(2)
+        expect(tasks_count_After).to.be.equal(0)
     })
 })
