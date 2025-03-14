@@ -203,7 +203,7 @@
 
 */
 
-import { Signer } from 'ethers';
+import { Signer } from 'ethers'
 import {
     BusinessLogicResolver,
     AccessControlFacet,
@@ -233,71 +233,71 @@ import {
     ClearingFacet,
     ClearingActionsFacet,
     TimeTravel,
-} from '@typechain';
-import { DeployContractWithFactoryResult } from '../index';
+} from '@typechain'
+import { DeployContractWithFactoryResult } from '../index'
 
 export interface DeployAtsContractsResultParams {
-    businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>;
-    accessControl: DeployContractWithFactoryResult<AccessControlFacet>;
-    cap: DeployContractWithFactoryResult<Cap>;
-    controlList: DeployContractWithFactoryResult<ControlList>;
-    kyc: DeployContractWithFactoryResult<Kyc>;
-    ssiManagement: DeployContractWithFactoryResult<SsiManagement>;
-    pause: DeployContractWithFactoryResult<PauseFacet>;
-    erc20: DeployContractWithFactoryResult<ERC20>;
-    erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>;
-    erc1594: DeployContractWithFactoryResult<ERC1594>;
-    erc1643: DeployContractWithFactoryResult<ERC1643>;
-    erc1644: DeployContractWithFactoryResult<ERC1644>;
-    diamondFacet: DeployContractWithFactoryResult<DiamondFacet>;
-    equityUsa: DeployContractWithFactoryResult<EquityUSA>;
-    bondUsa: DeployContractWithFactoryResult<BondUSA>;
-    scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>;
-    scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>;
-    scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>;
-    snapshots: DeployContractWithFactoryResult<Snapshots>;
-    corporateActions: DeployContractWithFactoryResult<CorporateActions>;
-    transferAndLock: DeployContractWithFactoryResult<TransferAndLock>;
-    lock: DeployContractWithFactoryResult<Lock>;
-    hold: DeployContractWithFactoryResult<Hold>;
-    adjustBalances: DeployContractWithFactoryResult<AdjustBalances>;
-    protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>;
-    clearingFacet: DeployContractWithFactoryResult<ClearingFacet>;
-    clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>;
-    timeTravel?: DeployContractWithFactoryResult<TimeTravel>;
-    deployer?: Signer;
+    businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
+    accessControl: DeployContractWithFactoryResult<AccessControlFacet>
+    cap: DeployContractWithFactoryResult<Cap>
+    controlList: DeployContractWithFactoryResult<ControlList>
+    kyc: DeployContractWithFactoryResult<Kyc>
+    ssiManagement: DeployContractWithFactoryResult<SsiManagement>
+    pause: DeployContractWithFactoryResult<PauseFacet>
+    erc20: DeployContractWithFactoryResult<ERC20>
+    erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
+    erc1594: DeployContractWithFactoryResult<ERC1594>
+    erc1643: DeployContractWithFactoryResult<ERC1643>
+    erc1644: DeployContractWithFactoryResult<ERC1644>
+    diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
+    equityUsa: DeployContractWithFactoryResult<EquityUSA>
+    bondUsa: DeployContractWithFactoryResult<BondUSA>
+    scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
+    scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
+    scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
+    snapshots: DeployContractWithFactoryResult<Snapshots>
+    corporateActions: DeployContractWithFactoryResult<CorporateActions>
+    transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
+    lock: DeployContractWithFactoryResult<Lock>
+    hold: DeployContractWithFactoryResult<Hold>
+    adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
+    protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
+    clearingFacet: DeployContractWithFactoryResult<ClearingFacet>
+    clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
+    timeTravel?: DeployContractWithFactoryResult<TimeTravel>
+    deployer?: Signer
 }
 
 export default class DeployAtsContractsResult {
-    public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>;
-    public readonly accessControl: DeployContractWithFactoryResult<AccessControlFacet>;
-    public readonly cap: DeployContractWithFactoryResult<Cap>;
-    public readonly controlList: DeployContractWithFactoryResult<ControlList>;
-    public readonly kyc: DeployContractWithFactoryResult<Kyc>;
-    public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>;
-    public readonly pause: DeployContractWithFactoryResult<PauseFacet>;
-    public readonly erc20: DeployContractWithFactoryResult<ERC20>;
-    public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>;
-    public readonly erc1594: DeployContractWithFactoryResult<ERC1594>;
-    public readonly erc1643: DeployContractWithFactoryResult<ERC1643>;
-    public readonly erc1644: DeployContractWithFactoryResult<ERC1644>;
-    public readonly diamondFacet: DeployContractWithFactoryResult<DiamondFacet>;
-    public readonly equityUsa: DeployContractWithFactoryResult<EquityUSA>;
-    public readonly bondUsa: DeployContractWithFactoryResult<BondUSA>;
-    public readonly scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>;
-    public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>;
-    public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>;
-    public readonly snapshots: DeployContractWithFactoryResult<Snapshots>;
-    public readonly corporateActions: DeployContractWithFactoryResult<CorporateActions>;
-    public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>;
-    public readonly lock: DeployContractWithFactoryResult<Lock>;
-    public readonly hold: DeployContractWithFactoryResult<Hold>;
-    public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>;
-    public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>;
-    public readonly clearingFacet: DeployContractWithFactoryResult<ClearingFacet>;
-    public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>;
-    public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>;
-    public readonly deployer?: Signer;
+    public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
+    public readonly accessControl: DeployContractWithFactoryResult<AccessControlFacet>
+    public readonly cap: DeployContractWithFactoryResult<Cap>
+    public readonly controlList: DeployContractWithFactoryResult<ControlList>
+    public readonly kyc: DeployContractWithFactoryResult<Kyc>
+    public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>
+    public readonly pause: DeployContractWithFactoryResult<PauseFacet>
+    public readonly erc20: DeployContractWithFactoryResult<ERC20>
+    public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
+    public readonly erc1594: DeployContractWithFactoryResult<ERC1594>
+    public readonly erc1643: DeployContractWithFactoryResult<ERC1643>
+    public readonly erc1644: DeployContractWithFactoryResult<ERC1644>
+    public readonly diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
+    public readonly equityUsa: DeployContractWithFactoryResult<EquityUSA>
+    public readonly bondUsa: DeployContractWithFactoryResult<BondUSA>
+    public readonly scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
+    public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
+    public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
+    public readonly snapshots: DeployContractWithFactoryResult<Snapshots>
+    public readonly corporateActions: DeployContractWithFactoryResult<CorporateActions>
+    public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
+    public readonly lock: DeployContractWithFactoryResult<Lock>
+    public readonly hold: DeployContractWithFactoryResult<Hold>
+    public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
+    public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
+    public readonly clearingFacet: DeployContractWithFactoryResult<ClearingFacet>
+    public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
+    public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
+    public readonly deployer?: Signer
 
     constructor({
         businessLogicResolver,
@@ -330,35 +330,35 @@ export default class DeployAtsContractsResult {
         timeTravel,
         deployer,
     }: DeployAtsContractsResultParams) {
-        this.businessLogicResolver = businessLogicResolver;
-        this.accessControl = accessControl;
-        this.cap = cap;
-        this.controlList = controlList;
-        this.kyc = kyc;
-        this.ssiManagement = ssiManagement;
-        this.pause = pause;
-        this.erc20 = erc20;
-        this.erc1410ScheduledTasks = erc1410ScheduledTasks;
-        this.erc1594 = erc1594;
-        this.erc1643 = erc1643;
-        this.erc1644 = erc1644;
-        this.diamondFacet = diamondFacet;
-        this.equityUsa = equityUsa;
-        this.bondUsa = bondUsa;
-        this.scheduledSnapshots = scheduledSnapshots;
-        this.scheduledBalanceAdjustments = scheduledBalanceAdjustments;
-        this.scheduledTasks = scheduledTasks;
-        this.snapshots = snapshots;
-        this.corporateActions = corporateActions;
-        this.transferAndLock = transferAndLock;
-        this.lock = lock;
-        this.hold = hold;
-        this.adjustBalances = adjustBalances;
-        this.protectedPartitions = protectedPartitions;
-        this.clearingFacet = clearingFacet;
-        this.clearingActionsFacet = clearingActionsFacet;
-        this.timeTravel = timeTravel;
+        this.businessLogicResolver = businessLogicResolver
+        this.accessControl = accessControl
+        this.cap = cap
+        this.controlList = controlList
+        this.kyc = kyc
+        this.ssiManagement = ssiManagement
+        this.pause = pause
+        this.erc20 = erc20
+        this.erc1410ScheduledTasks = erc1410ScheduledTasks
+        this.erc1594 = erc1594
+        this.erc1643 = erc1643
+        this.erc1644 = erc1644
+        this.diamondFacet = diamondFacet
+        this.equityUsa = equityUsa
+        this.bondUsa = bondUsa
+        this.scheduledSnapshots = scheduledSnapshots
+        this.scheduledBalanceAdjustments = scheduledBalanceAdjustments
+        this.scheduledTasks = scheduledTasks
+        this.snapshots = snapshots
+        this.corporateActions = corporateActions
+        this.transferAndLock = transferAndLock
+        this.lock = lock
+        this.hold = hold
+        this.adjustBalances = adjustBalances
+        this.protectedPartitions = protectedPartitions
+        this.clearingFacet = clearingFacet
+        this.clearingActionsFacet = clearingActionsFacet
+        this.timeTravel = timeTravel
         // Deployer
-        this.deployer = deployer;
+        this.deployer = deployer
     }
 }

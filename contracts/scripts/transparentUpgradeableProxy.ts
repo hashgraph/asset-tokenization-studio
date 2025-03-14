@@ -203,11 +203,11 @@
 
 */
 
-import { ContractReceipt } from 'ethers';
+import { ContractReceipt } from 'ethers'
 import {
     ProxyAdmin__factory,
     TransparentUpgradeableProxy__factory,
-} from '@typechain';
+} from '@typechain'
 import {
     deployContractWithFactory,
     DeployContractWithFactoryCommand,
@@ -217,7 +217,7 @@ import {
     UpgradeProxyImplementationCommand,
     validateTxResponse,
     ValidateTxResponseCommand,
-} from '@scripts';
+} from '@scripts'
 
 export async function deployProxyAdmin({
     signer,
@@ -227,8 +227,8 @@ export async function deployProxyAdmin({
         factory: new ProxyAdmin__factory(),
         signer: signer,
         overrides,
-    });
-    return await deployContractWithFactory(deployCommand);
+    })
+    return await deployContractWithFactory(deployCommand)
 }
 export async function deployTransparentProxy({
     proxyAdminAddress,
@@ -241,8 +241,8 @@ export async function deployTransparentProxy({
         signer: signer,
         args: [implementationAddress, proxyAdminAddress, '0x'],
         overrides,
-    });
-    return await deployContractWithFactory(deployCommand);
+    })
+    return await deployContractWithFactory(deployCommand)
 }
 
 export async function upgradeProxyImplementation({
@@ -252,18 +252,16 @@ export async function upgradeProxyImplementation({
     signer,
     overrides,
 }: UpgradeProxyImplementationCommand): Promise<ContractReceipt> {
-    const proxyAdmin = new ProxyAdmin__factory(signer).attach(
-        proxyAdminAddress
-    );
+    const proxyAdmin = new ProxyAdmin__factory(signer).attach(proxyAdminAddress)
     const txResponse = await proxyAdmin.upgrade(
         transparentProxyAddress,
         newImplementationAddress,
         overrides
-    );
+    )
     const { txReceipt } = await validateTxResponse(
         new ValidateTxResponseCommand({ txResponse })
-    );
-    return txReceipt;
+    )
+    return txReceipt
 }
 
 // * Read functions
@@ -272,10 +270,10 @@ export async function proxyImplementation({
     transparentProxyAddress,
     overrides,
 }: ProxyImplementationQuery) {
-    const proxyAdmin = new ProxyAdmin__factory().attach(proxyAdminAddress);
+    const proxyAdmin = new ProxyAdmin__factory().attach(proxyAdminAddress)
 
     return await proxyAdmin.getProxyImplementation(
         transparentProxyAddress,
         overrides
-    );
+    )
 }

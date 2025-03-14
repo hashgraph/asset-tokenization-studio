@@ -203,14 +203,14 @@
 
 */
 
-import { HardhatUserConfig } from 'hardhat/config';
-import 'tsconfig-paths/register';
-import '@nomicfoundation/hardhat-toolbox';
-import 'hardhat-contract-sizer';
-import 'solidity-coverage';
-import '@hashgraph/sdk';
-import Configuration from '@configuration';
-import '@tasks';
+import { HardhatUserConfig } from 'hardhat/config'
+import 'tsconfig-paths/register'
+import '@nomicfoundation/hardhat-toolbox'
+import 'hardhat-contract-sizer'
+import 'solidity-coverage'
+import '@hashgraph/sdk'
+import Configuration from '@configuration'
+import '@tasks'
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -264,6 +264,6 @@ const config: HardhatUserConfig = {
     mocha: {
         timeout: 3_000_000,
     },
-};
+}
 
-export default config;
+export default config

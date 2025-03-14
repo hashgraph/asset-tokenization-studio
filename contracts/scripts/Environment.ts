@@ -203,31 +203,31 @@
 
 */
 
-import { DeployContractWithFactoryResult } from '@scripts';
-import { BusinessLogicResolver, Factory } from '@typechain';
-import DeployAtsContractsResult from './results/DeployAtsContractsResult';
-import DeployAtsFullInfrastructureResult from './results/DeployAtsFullInfrastructureResult';
+import { DeployContractWithFactoryResult } from '@scripts'
+import { BusinessLogicResolver, Factory } from '@typechain'
+import DeployAtsContractsResult from './results/DeployAtsContractsResult'
+import DeployAtsFullInfrastructureResult from './results/DeployAtsFullInfrastructureResult'
 
 interface NewEnvironmentParams {
-    commonFacetIdList?: string[];
-    equityFacetIdList?: string[];
-    bondFacetIdList?: string[];
-    equityFacetVersionList?: number[];
-    bondFacetVersionList?: number[];
-    businessLogicResolver?: BusinessLogicResolver;
-    factory?: Factory;
-    deployedContracts?: DeployAtsContractsResult;
+    commonFacetIdList?: string[]
+    equityFacetIdList?: string[]
+    bondFacetIdList?: string[]
+    equityFacetVersionList?: number[]
+    bondFacetVersionList?: number[]
+    businessLogicResolver?: BusinessLogicResolver
+    factory?: Factory
+    deployedContracts?: DeployAtsContractsResult
 }
 
 export default class Environment {
-    public commonFacetIdList?: string[];
-    public equityFacetIdList?: string[];
-    public bondFacetIdList?: string[];
-    public equityFacetVersionList?: number[];
-    public bondFacetVersionList?: number[];
-    public businessLogicResolver?: BusinessLogicResolver;
-    public factory?: Factory;
-    public deployedContracts?: DeployAtsContractsResult;
+    public commonFacetIdList?: string[]
+    public equityFacetIdList?: string[]
+    public bondFacetIdList?: string[]
+    public equityFacetVersionList?: number[]
+    public bondFacetVersionList?: number[]
+    public businessLogicResolver?: BusinessLogicResolver
+    public factory?: Factory
+    public deployedContracts?: DeployAtsContractsResult
 
     constructor({
         commonFacetIdList,
@@ -239,18 +239,18 @@ export default class Environment {
         factory,
         deployedContracts,
     }: NewEnvironmentParams) {
-        this.commonFacetIdList = commonFacetIdList;
-        this.equityFacetIdList = equityFacetIdList;
-        this.bondFacetIdList = bondFacetIdList;
-        this.equityFacetVersionList = equityFacetVersionList;
-        this.bondFacetVersionList = bondFacetVersionList;
-        this.businessLogicResolver = businessLogicResolver;
-        this.factory = factory;
-        this.deployedContracts = deployedContracts;
+        this.commonFacetIdList = commonFacetIdList
+        this.equityFacetIdList = equityFacetIdList
+        this.bondFacetIdList = bondFacetIdList
+        this.equityFacetVersionList = equityFacetVersionList
+        this.bondFacetVersionList = bondFacetVersionList
+        this.businessLogicResolver = businessLogicResolver
+        this.factory = factory
+        this.deployedContracts = deployedContracts
     }
 
     public static empty(): Environment {
-        return new Environment({});
+        return new Environment({})
     }
 
     public toDeployAtsFullInfrastructureResult(): DeployAtsFullInfrastructureResult {
@@ -262,7 +262,7 @@ export default class Environment {
             bondFacetVersionList,
             factory,
             deployedContracts,
-        } = this._validateInitialization();
+        } = this._validateInitialization()
 
         return new DeployAtsFullInfrastructureResult({
             facetLists: {
@@ -277,15 +277,15 @@ export default class Environment {
                 contract: factory,
             }),
             ...deployedContracts,
-        });
+        })
     }
 
     public get initialized(): boolean {
         try {
-            this._validateInitialization();
-            return true;
+            this._validateInitialization()
+            return true
         } catch {
-            return false;
+            return false
         }
     }
 
@@ -300,7 +300,7 @@ export default class Environment {
             !this.factory ||
             !this.deployedContracts
         ) {
-            throw new Error('Environment must be initialized');
+            throw new Error('Environment must be initialized')
         }
         return {
             commonFacetIdList: this.commonFacetIdList,
@@ -311,6 +311,6 @@ export default class Environment {
             businessLogicResolver: this.businessLogicResolver,
             factory: this.factory,
             deployedContracts: this.deployedContracts,
-        };
+        }
     }
 }

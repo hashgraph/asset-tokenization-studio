@@ -205,16 +205,16 @@
 
 // * Arguments
 // TODO: Add command , query based logic
-export * from './Arguments';
+export * from './Arguments'
 
 // * Utils
-export * from './utils';
+export * from './utils'
 
 // * Deploy
-export * from './deploy';
+export * from './deploy'
 
 // * Transparent Upgradeable Proxy
-export * from './transparentUpgradeableProxy';
+export * from './transparentUpgradeableProxy'
 
 // * Business Logic Resolver
-export * from './businessLogicResolver';
+export * from './businessLogicResolver'

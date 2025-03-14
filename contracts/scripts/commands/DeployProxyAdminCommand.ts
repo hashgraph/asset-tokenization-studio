@@ -203,6 +203,6 @@
 
 */
 
-import { BaseBlockchainCommand } from '../index';
+import { BaseBlockchainCommand } from '../index'
 
 export default class DeployProxyAdminCommand extends BaseBlockchainCommand {}

@@ -203,23 +203,23 @@
 
 */
 
-import dotenv from 'dotenv';
+import dotenv from 'dotenv'
 
 // Load the `.env` file
-dotenv.config();
+dotenv.config()
 
-const EMPTY_STRING = '';
+const EMPTY_STRING = ''
 export const NETWORKS = [
     'hardhat',
     'local',
     'previewnet',
     'testnet',
     'mainnet',
-] as const;
-export type Network = (typeof NETWORKS)[number];
+] as const
+export type Network = (typeof NETWORKS)[number]
 
-export const DEPLOY_TYPES = ['proxy', 'direct'] as const;
-export type DeployType = (typeof DEPLOY_TYPES)[number];
+export const DEPLOY_TYPES = ['proxy', 'direct'] as const
+export type DeployType = (typeof DEPLOY_TYPES)[number]
 
 export const CONTRACT_NAMES = [
     'TransparentUpgradeableProxy',
@@ -253,31 +253,31 @@ export const CONTRACT_NAMES = [
     'SsiManagement',
     'ClearingFacet',
     'ClearingActionsFacet',
-] as const;
-export type ContractName = (typeof CONTRACT_NAMES)[number];
-export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver'];
+] as const
+export type ContractName = (typeof CONTRACT_NAMES)[number]
+export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
 
 export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
     (name) => `${name}__factory`
-);
-export type ContractFactoryName = (typeof CONTRACT_FACTORY_NAMES)[number];
+)
+export type ContractFactoryName = (typeof CONTRACT_FACTORY_NAMES)[number]
 
 export interface Endpoints {
-    jsonRpc: string;
-    mirror: string;
+    jsonRpc: string
+    mirror: string
 }
 
 export interface DeployedContract {
-    address: string;
-    proxyAddress?: string;
-    proxyAdminAddress?: string;
+    address: string
+    proxyAddress?: string
+    proxyAdminAddress?: string
 }
 
 export interface ContractConfig {
-    name: ContractName;
-    factoryName: ContractFactoryName;
-    deployType: DeployType;
-    addresses?: Record<Network, DeployedContract>;
+    name: ContractName
+    factoryName: ContractFactoryName
+    deployType: DeployType
+    addresses?: Record<Network, DeployedContract>
 }
 
 export default class Configuration {
@@ -290,11 +290,11 @@ export default class Configuration {
             (result, network) => {
                 result[network] = Configuration._getEnvironmentVariableList({
                     name: `${network.toUpperCase()}_PRIVATE_KEY_#`,
-                });
-                return result;
+                })
+                return result
             },
             {} as Record<Network, string[]>
-        );
+        )
     }
 
     public static get endpoints(): Record<Network, Endpoints> {
@@ -315,18 +315,18 @@ export default class Configuration {
                                 ? 'http://localhost:5551'
                                 : `https://${network}.mirrornode.hedera.com`,
                     }),
-                };
-                return result;
+                }
+                return result
             },
             {} as Record<Network, Endpoints>
-        );
+        )
     }
 
     public static get contracts(): Record<ContractName, ContractConfig> {
         const contracts: Record<ContractName, ContractConfig> = {} as Record<
             ContractName,
             ContractConfig
-        >;
+        >
         CONTRACT_NAMES.forEach((contractName) => {
             contracts[contractName] = {
                 name: contractName,
@@ -337,9 +337,9 @@ export default class Configuration {
                 addresses: Configuration._getDeployedAddresses({
                     contractName,
                 }),
-            };
-        });
-        return contracts;
+            }
+        })
+        return contracts
     }
 
     // * Private methods
@@ -358,28 +358,28 @@ export default class Configuration {
     private static _getDeployedAddresses({
         contractName,
     }: {
-        contractName: ContractName;
+        contractName: ContractName
     }): Record<Network, DeployedContract> {
         const deployedAddresses: Record<Network, DeployedContract> =
-            {} as Record<Network, DeployedContract>;
+            {} as Record<Network, DeployedContract>
 
         NETWORKS.forEach((network) => {
             const address = Configuration._getEnvironmentVariable({
                 name: `${network.toUpperCase()}_${contractName.toUpperCase()}`,
                 defaultValue: EMPTY_STRING,
-            });
+            })
 
             if (address !== EMPTY_STRING) {
                 const proxyAddress = Configuration._getEnvironmentVariable({
                     name: `${network.toUpperCase()}_${contractName}_PROXY`,
                     defaultValue: EMPTY_STRING,
-                });
+                })
                 const proxyAdminAddress = Configuration._getEnvironmentVariable(
                     {
                         name: `${network.toUpperCase()}_${contractName}_PROXY_ADMIN`,
                         defaultValue: EMPTY_STRING,
                     }
-                );
+                )
 
                 deployedAddresses[network] = {
                     address,
@@ -387,54 +387,54 @@ export default class Configuration {
                     ...(proxyAdminAddress !== EMPTY_STRING && {
                         proxyAdminAddress,
                     }),
-                };
+                }
             }
-        });
+        })
 
-        return deployedAddresses;
+        return deployedAddresses
     }
 
     private static _getEnvironmentVariableList({
         name,
         indexChar = '#',
     }: {
-        name: string;
-        indexChar?: string;
+        name: string
+        indexChar?: string
     }): string[] {
-        const resultList: string[] = [];
-        let index = 0;
+        const resultList: string[] = []
+        let index = 0
         do {
             const env = Configuration._getEnvironmentVariable({
                 name: name.replace(indexChar, `${index}`),
                 defaultValue: EMPTY_STRING,
-            });
+            })
             if (env !== EMPTY_STRING) {
-                resultList.push(env);
+                resultList.push(env)
             }
-            index++;
-        } while (resultList.length === index);
-        return resultList;
+            index++
+        } while (resultList.length === index)
+        return resultList
     }
 
     private static _getEnvironmentVariable({
         name,
         defaultValue,
     }: {
-        name: string;
-        defaultValue?: string;
+        name: string
+        defaultValue?: string
     }): string {
-        const value = process.env?.[name];
+        const value = process.env?.[name]
         if (value) {
-            return value;
+            return value
         }
         if (defaultValue !== undefined) {
             // console.warn(
             //     `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
             // )
-            return defaultValue;
+            return defaultValue
         }
         throw new Error(
             `Environment variable "${name}" is not defined. Please set the "${name}" environment variable.`
-        );
+        )
     }
 }

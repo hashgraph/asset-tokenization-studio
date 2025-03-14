@@ -203,6 +203,6 @@
 
 */
 
-import { DeployAtsContractsCommand } from '../';
+import { DeployAtsContractsCommand } from '../'
 
 export default class DeployAtsFullInfrastructureCommand extends DeployAtsContractsCommand {}

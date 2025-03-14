@@ -210,8 +210,8 @@ import {
     IBusinessLogicResolver__factory,
     IDiamondCutManager__factory,
     IStaticFunctionSelectors__factory,
-} from '@typechain';
-import { IStaticFunctionSelectors } from '@typechain';
+} from '@typechain'
+import { IStaticFunctionSelectors } from '@typechain'
 import {
     CreateConfigurationsForDeployedContractsCommand,
     CreateConfigurationsForDeployedContractsResult,
@@ -226,47 +226,47 @@ import {
     RegisterDeployedContractBusinessLogicsCommand,
     validateTxResponse,
     ValidateTxResponseCommand,
-} from '@scripts';
-import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, EVENTS } from './constants';
-import { getContractFactory } from '@nomiclabs/hardhat-ethers/types';
-import { FacetConfiguration } from './resolverDiamondCut';
-import { Signer } from 'ethers';
+} from '@scripts'
+import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, EVENTS } from './constants'
+import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
+import { FacetConfiguration } from './resolverDiamondCut'
+import { Signer } from 'ethers'
 
 export interface BusinessLogicRegistryData {
-    businessLogicKey: string;
-    businessLogicAddress: string;
+    businessLogicKey: string
+    businessLogicAddress: string
 }
 
 export interface DeployedBusinessLogics {
-    businessLogicResolver: IStaticFunctionSelectors;
-    factory: IStaticFunctionSelectors;
-    diamondFacet: IStaticFunctionSelectors;
-    accessControl: IStaticFunctionSelectors;
-    controlList: IStaticFunctionSelectors;
-    kyc: IStaticFunctionSelectors;
-    ssiManagement: IStaticFunctionSelectors;
-    corporateActions: IStaticFunctionSelectors;
-    pause: IStaticFunctionSelectors;
-    ERC20: IStaticFunctionSelectors;
-    ERC1644: IStaticFunctionSelectors;
-    eRC1410ScheduledTasks: IStaticFunctionSelectors;
-    ERC1594: IStaticFunctionSelectors;
-    eRC1643: IStaticFunctionSelectors;
-    equityUSA: IStaticFunctionSelectors;
-    bondUSA: IStaticFunctionSelectors;
-    Snapshots: IStaticFunctionSelectors;
-    scheduledSnapshots: IStaticFunctionSelectors;
-    scheduledBalanceAdjustments: IStaticFunctionSelectors;
-    scheduledTasks: IStaticFunctionSelectors;
-    Cap: IStaticFunctionSelectors;
-    Lock: IStaticFunctionSelectors;
-    transferAndLock: IStaticFunctionSelectors;
-    adjustBalances: IStaticFunctionSelectors;
-    protectedPartitions: IStaticFunctionSelectors;
-    Hold: IStaticFunctionSelectors;
+    businessLogicResolver: IStaticFunctionSelectors
+    factory: IStaticFunctionSelectors
+    diamondFacet: IStaticFunctionSelectors
+    accessControl: IStaticFunctionSelectors
+    controlList: IStaticFunctionSelectors
+    kyc: IStaticFunctionSelectors
+    ssiManagement: IStaticFunctionSelectors
+    corporateActions: IStaticFunctionSelectors
+    pause: IStaticFunctionSelectors
+    ERC20: IStaticFunctionSelectors
+    ERC1644: IStaticFunctionSelectors
+    eRC1410ScheduledTasks: IStaticFunctionSelectors
+    ERC1594: IStaticFunctionSelectors
+    eRC1643: IStaticFunctionSelectors
+    equityUSA: IStaticFunctionSelectors
+    bondUSA: IStaticFunctionSelectors
+    Snapshots: IStaticFunctionSelectors
+    scheduledSnapshots: IStaticFunctionSelectors
+    scheduledBalanceAdjustments: IStaticFunctionSelectors
+    scheduledTasks: IStaticFunctionSelectors
+    Cap: IStaticFunctionSelectors
+    Lock: IStaticFunctionSelectors
+    transferAndLock: IStaticFunctionSelectors
+    adjustBalances: IStaticFunctionSelectors
+    protectedPartitions: IStaticFunctionSelectors
+    Hold: IStaticFunctionSelectors
 }
 
-export let businessLogicResolver: IBusinessLogicResolver;
+export let businessLogicResolver: IBusinessLogicResolver
 
 export async function deployProxyForBusinessLogicResolver({
     businessLogicResolverImplementationAddress,
@@ -283,28 +283,28 @@ export async function deployProxyForBusinessLogicResolver({
         },
         signer,
         overrides,
-    });
+    })
     const { contract: businessLogicResolver } =
-        await deployContractWithFactory(deployProxyCommand);
+        await deployContractWithFactory(deployProxyCommand)
 
     const txResponse =
         await businessLogicResolver.initialize_BusinessLogicResolver({
             gasLimit: GAS_LIMIT.initilize.businessLogicResolver,
-        });
+        })
     validateTxResponse(
         new ValidateTxResponseCommand({
             txResponse: txResponse,
             errorMessage: MESSAGES.businessLogicResolver.error.initializing,
         })
-    );
+    )
 }
 
 function capitalizeFirst(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+    return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
 function uncapitalizeFirst(str: string) {
-    return str.charAt(0).toLowerCase() + str.slice(1);
+    return str.charAt(0).toLowerCase() + str.slice(1)
 }
 
 export async function getFacetsByConfigurationIdAndVersion({
@@ -316,25 +316,25 @@ export async function getFacetsByConfigurationIdAndVersion({
     const diamondCutManager = IDiamondCutManager__factory.connect(
         businessLogicResolverAddress,
         provider
-    );
+    )
     const latestConfigVersionRaw =
         await diamondCutManager.getLatestVersionByConfiguration(
             configurationId,
             overrides
-        );
+        )
 
     const lastestConfigVersion = parseInt(
         latestConfigVersionRaw.toHexString(),
         16
-    );
+    )
 
     console.log(
         `Number of Versions for Config ${configurationId}: ${lastestConfigVersion}`
-    );
+    )
 
     const result = new GetFacetsByConfigurationIdAndVersionResult({
         facetListRecord: [],
-    });
+    })
     for (
         let currentVersion = 1;
         currentVersion <= lastestConfigVersion;
@@ -345,8 +345,8 @@ export async function getFacetsByConfigurationIdAndVersion({
                 configurationId,
                 currentVersion,
                 overrides
-            );
-        const facetListLength = parseInt(facetListLengthRaw.toHexString(), 16);
+            )
+        const facetListLength = parseInt(facetListLengthRaw.toHexString(), 16)
 
         result.facetListRecord[currentVersion] =
             await diamondCutManager.getFacetsByConfigurationIdAndVersion(
@@ -355,9 +355,9 @@ export async function getFacetsByConfigurationIdAndVersion({
                 0,
                 facetListLength,
                 overrides
-            );
+            )
     }
-    return result;
+    return result
 }
 
 export async function deployBusinessLogics(
@@ -368,25 +368,25 @@ export async function deployBusinessLogics(
         contractToDeploy: string
     ) {
         async function deployContract() {
-            return await (await getContractFactory(contractToDeploy)).deploy();
+            return await (await getContractFactory(contractToDeploy)).deploy()
         }
         //await loadFixture(deployContract)
-        const deployedContract = await deployContract();
+        const deployedContract = await deployContract()
         const deployedAndRegisteredBusinessLogics_Property =
-            uncapitalizeFirst(contractToDeploy);
+            uncapitalizeFirst(contractToDeploy)
         deployedAndRegisteredBusinessLogics[
             deployedAndRegisteredBusinessLogics_Property as keyof DeployedBusinessLogics
         ] = IStaticFunctionSelectors__factory.connect(
             deployedContract.address,
             deployedContract.signer
-        );
+        )
     }
-    let key: keyof typeof deployedAndRegisteredBusinessLogics;
+    let key: keyof typeof deployedAndRegisteredBusinessLogics
     for (key in deployedAndRegisteredBusinessLogics) {
         await deployContractAndAssignIt(
             deployedAndRegisteredBusinessLogics,
             capitalizeFirst(key)
-        );
+        )
     }
 }
 
@@ -401,8 +401,8 @@ export async function registerDeployedContractBusinessLogics({
         businessLogicResolverProxyAddress,
         signer,
         overrides,
-    });
-    await registerBusinessLogics(registerBusinessLogicsCommand);
+    })
+    await registerBusinessLogics(registerBusinessLogicsCommand)
 }
 
 /**
@@ -437,43 +437,43 @@ export async function registerBusinessLogics({
                         IStaticFunctionSelectors__factory.connect(
                             address,
                             signer
-                        );
+                        )
                     const businessLogicKey =
-                        await proxiedContract.getStaticResolverKey();
+                        await proxiedContract.getStaticResolverKey()
 
                     return {
                         businessLogicKey,
                         businessLogicAddress: address.replace('0x', ''),
-                    };
+                    }
                 }
             )
-        );
+        )
 
     const resolverContract = IBusinessLogicResolver__factory.connect(
         businessLogicResolverProxyAddress,
         signer
-    );
+    )
     const response = await resolverContract.registerBusinessLogics(
         businessLogicRegistries,
         {
             gasLimit: GAS_LIMIT.businessLogicResolver.registerBusinessLogics,
             ...overrides,
         }
-    );
+    )
     await validateTxResponse(
         new ValidateTxResponseCommand({
             txResponse: response,
             confirmationEvent: EVENTS.businessLogicResolver.registered,
             errorMessage: MESSAGES.businessLogicResolver.error.registering,
         })
-    );
+    )
 }
 
 function createFacetConfigurations(
     ids: string[],
     versions: number[]
 ): FacetConfiguration[] {
-    return ids.map((id, index) => ({ id, version: versions[index] }));
+    return ids.map((id, index) => ({ id, version: versions[index] }))
 }
 
 async function sendBatchConfiguration(
@@ -488,7 +488,7 @@ async function sendBatchConfiguration(
         signer
     ).createBatchConfiguration(configId, configurations, isFinalBatch, {
         gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
-    });
+    })
 
     await validateTxResponse(
         new ValidateTxResponseCommand({
@@ -498,7 +498,7 @@ async function sendBatchConfiguration(
             errorMessage:
                 MESSAGES.businessLogicResolver.error.creatingConfigurations,
         })
-    );
+    )
 }
 
 async function processFacetLists(
@@ -512,18 +512,18 @@ async function processFacetLists(
     if (facetIdList.length !== facetVersionList.length) {
         throw new Error(
             'facetIdList and facetVersionList must have the same length'
-        );
+        )
     }
-    const batchSize = Math.ceil(facetIdList.length / 2);
+    const batchSize = Math.ceil(facetIdList.length / 2)
 
     for (let i = 0; i < facetIdList.length; i += batchSize) {
-        const batchIds = facetIdList.slice(i, i + batchSize);
-        const batchVersions = facetVersionList.slice(i, i + batchSize);
-        const batch = createFacetConfigurations(batchIds, batchVersions);
+        const batchIds = facetIdList.slice(i, i + batchSize)
+        const batchVersions = facetVersionList.slice(i, i + batchSize)
+        const batch = createFacetConfigurations(batchIds, batchVersions)
 
         const isLastBatch = partialBatchDeploy
             ? false
-            : i + batchSize >= facetIdList.length;
+            : i + batchSize >= facetIdList.length
 
         await sendBatchConfiguration(
             configId,
@@ -531,7 +531,7 @@ async function processFacetLists(
             isLastBatch,
             businessLogicResolverProxyAddress,
             signer
-        );
+        )
     }
 }
 
@@ -545,7 +545,7 @@ export async function createConfigurationsForDeployedContracts(
         signer,
     }: CreateConfigurationsForDeployedContractsCommand
 ): Promise<CreateConfigurationsForDeployedContractsResult> {
-    const result = CreateConfigurationsForDeployedContractsResult.empty();
+    const result = CreateConfigurationsForDeployedContractsResult.empty()
 
     await fetchFacetResolverKeys(
         result,
@@ -553,7 +553,7 @@ export async function createConfigurationsForDeployedContracts(
         commonFacetAddressList,
         equityFacetAddressList,
         bondFacetAddressList
-    );
+    )
 
     await processFacetLists(
         EQUITY_CONFIG_ID,
@@ -562,7 +562,7 @@ export async function createConfigurationsForDeployedContracts(
         businessLogicResolverProxyAddress,
         signer,
         partialBatchDeploy
-    );
+    )
     await processFacetLists(
         BOND_CONFIG_ID,
         result.bondFacetIdList,
@@ -570,8 +570,8 @@ export async function createConfigurationsForDeployedContracts(
         businessLogicResolverProxyAddress,
         signer,
         partialBatchDeploy
-    );
-    return result;
+    )
+    return result
 }
 
 async function fetchFacetResolverKeys(
@@ -581,28 +581,28 @@ async function fetchFacetResolverKeys(
     equityFacetAddressList: string[],
     bondFacetAddressList: string[]
 ): Promise<void> {
-    const resolverKeyMap = new Map<string, string>();
+    const resolverKeyMap = new Map<string, string>()
 
     result.commonFacetIdList = await Promise.all(
         commonFacetAddressList.map((address) =>
             getResolverKey(address, signer, resolverKeyMap)
         )
-    );
+    )
     result.equityFacetIdList = await Promise.all(
         equityFacetAddressList.map((address) =>
             getResolverKey(address, signer, resolverKeyMap)
         )
-    );
+    )
     result.bondFacetIdList = await Promise.all(
         bondFacetAddressList.map((address) =>
             getResolverKey(address, signer, resolverKeyMap)
         )
-    );
+    )
 
     result.equityFacetVersionList = Array(result.equityFacetIdList.length).fill(
         1
-    );
-    result.bondFacetVersionList = Array(result.bondFacetIdList.length).fill(1);
+    )
+    result.bondFacetVersionList = Array(result.bondFacetIdList.length).fill(1)
 }
 
 async function getResolverKey(
@@ -614,8 +614,8 @@ async function getResolverKey(
         const key = await IStaticFunctionSelectors__factory.connect(
             address,
             signer
-        ).getStaticResolverKey();
-        keyMap.set(address, key);
+        ).getStaticResolverKey()
+        keyMap.set(address, key)
     }
-    return keyMap.get(address)!;
+    return keyMap.get(address)!
 }

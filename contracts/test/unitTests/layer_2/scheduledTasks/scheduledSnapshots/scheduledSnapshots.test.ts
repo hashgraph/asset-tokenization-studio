@@ -203,10 +203,10 @@
 
 */
 
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
-import { isinGenerator } from '@thomaschaplin/isin-generator';
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Equity,
@@ -221,7 +221,7 @@ import {
     ScheduledTasks__factory,
     ScheduledSnapshots__factory,
     TimeTravel__factory,
-} from '@typechain';
+} from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -232,57 +232,54 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
-} from '@scripts';
-import { dateToUnixTimestamp } from '../../../../dateFormatter';
+    dateToUnixTimestamp,
+} from '@scripts'
 
 describe('Scheduled Snapshots Tests', () => {
-    let diamond: ResolverProxy;
-    let signer_A: SignerWithAddress;
-    let signer_B: SignerWithAddress;
-    let signer_C: SignerWithAddress;
+    let diamond: ResolverProxy
+    let signer_A: SignerWithAddress
+    let signer_B: SignerWithAddress
+    let signer_C: SignerWithAddress
 
-    let account_A: string;
-    let account_B: string;
-    let account_C: string;
+    let account_A: string
+    let account_B: string
+    let account_C: string
 
-    let factory: IFactory;
-    let businessLogicResolver: BusinessLogicResolver;
-    let equityFacet: Equity;
-    let scheduledSnapshotsFacet: ScheduledSnapshots;
-    let scheduledTasksFacet: ScheduledTasks;
-    let accessControlFacet: AccessControl;
-    let timeTravelFacet: TimeTravel;
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
+    let equityFacet: Equity
+    let scheduledSnapshotsFacet: ScheduledSnapshots
+    let scheduledTasksFacet: ScheduledTasks
+    let accessControlFacet: AccessControl
+    let timeTravelFacet: TimeTravel
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {};
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        [signer_A, signer_B, signer_C] = await ethers.getSigners();
-        account_A = signer_A.address;
-        account_B = signer_B.address;
-        account_C = signer_C.address;
+        console.log = () => {}
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                    timeTravelEnabled: true,
-                })
-            );
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+                timeTravelEnabled: true,
+            })
+        )
 
-        factory = deployedContracts.factory.contract;
-        businessLogicResolver =
-            deployedContracts.businessLogicResolver.contract;
-    });
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
     beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
-        };
-        const init_rbacs: Rbac[] = [rbacPause];
+        }
+        const init_rbacs: Rbac[] = [rbacPause]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -314,161 +311,158 @@ describe('Scheduled Snapshots Tests', () => {
             init_rbacs,
             businessLogicResolver: businessLogicResolver.address,
             factory,
-        });
+        })
 
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
-        );
-        equityFacet = Equity__factory.connect(diamond.address, signer_A);
+        )
+        equityFacet = Equity__factory.connect(diamond.address, signer_A)
         scheduledSnapshotsFacet = ScheduledSnapshots__factory.connect(
             diamond.address,
             signer_A
-        );
+        )
         scheduledTasksFacet = ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
-        );
-        timeTravelFacet = TimeTravel__factory.connect(
-            diamond.address,
-            signer_A
-        );
-    });
+        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+    })
 
     afterEach(async () => {
-        timeTravelFacet.resetSystemTimestamp();
-    });
+        timeTravelFacet.resetSystemTimestamp()
+    })
 
     it('GIVEN a token WHEN triggerSnapshots THEN transaction succeeds', async () => {
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A);
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C);
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
         // Using account C (with role)
-        equityFacet = equityFacet.connect(signer_C);
+        equityFacet = equityFacet.connect(signer_C)
 
         // set dividend
         const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
             '2030-01-01T00:00:06Z'
-        );
+        )
         const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp(
             '2030-01-01T00:00:12Z'
-        );
+        )
         const dividendsRecordDateInSeconds_3 = dateToUnixTimestamp(
             '2030-01-01T00:00:18Z'
-        );
+        )
         const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
             '2030-01-01T00:01:00Z'
-        );
-        const dividendsAmountPerEquity = 1;
+        )
+        const dividendsAmountPerEquity = 1
         const dividendData_1 = {
             recordDate: dividendsRecordDateInSeconds_1.toString(),
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
-        };
+        }
         const dividendData_2 = {
             recordDate: dividendsRecordDateInSeconds_2.toString(),
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
-        };
+        }
         const dividendData_3 = {
             recordDate: dividendsRecordDateInSeconds_3.toString(),
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
-        };
-        await equityFacet.setDividends(dividendData_2);
-        await equityFacet.setDividends(dividendData_3);
-        await equityFacet.setDividends(dividendData_1);
+        }
+        await equityFacet.setDividends(dividendData_2)
+        await equityFacet.setDividends(dividendData_3)
+        await equityFacet.setDividends(dividendData_1)
 
         const dividend_2_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000001';
+            '0x0000000000000000000000000000000000000000000000000000000000000001'
         const dividend_3_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000002';
+            '0x0000000000000000000000000000000000000000000000000000000000000002'
         const dividend_1_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000003';
+            '0x0000000000000000000000000000000000000000000000000000000000000003'
 
         // check schedled snapshots
-        scheduledSnapshotsFacet = scheduledSnapshotsFacet.connect(signer_A);
+        scheduledSnapshotsFacet = scheduledSnapshotsFacet.connect(signer_A)
 
         let scheduledSnapshotCount =
-            await scheduledSnapshotsFacet.scheduledSnapshotCount();
+            await scheduledSnapshotsFacet.scheduledSnapshotCount()
         let scheduledSnapshots =
-            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100);
+            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100)
 
-        expect(scheduledSnapshotCount).to.equal(3);
-        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
+        expect(scheduledSnapshotCount).to.equal(3)
+        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount)
         expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.equal(
             dividendsRecordDateInSeconds_3
-        );
-        expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id);
+        )
+        expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id)
         expect(scheduledSnapshots[1].scheduledTimestamp.toNumber()).to.equal(
             dividendsRecordDateInSeconds_2
-        );
-        expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id);
+        )
+        expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id)
         expect(scheduledSnapshots[2].scheduledTimestamp.toNumber()).to.equal(
             dividendsRecordDateInSeconds_1
-        );
-        expect(scheduledSnapshots[2].data).to.equal(dividend_1_Id);
+        )
+        expect(scheduledSnapshots[2].data).to.equal(dividend_1_Id)
 
         // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A);
+        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
 
         await timeTravelFacet.changeSystemTimestamp(
             dividendsRecordDateInSeconds_1 + 1
-        );
+        )
         await expect(scheduledTasksFacet.triggerPendingScheduledTasks())
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
-            .withArgs(account_A, 1);
+            .withArgs(account_A, 1)
 
         scheduledSnapshotCount =
-            await scheduledSnapshotsFacet.scheduledSnapshotCount();
+            await scheduledSnapshotsFacet.scheduledSnapshotCount()
         scheduledSnapshots =
-            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100);
+            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100)
 
-        expect(scheduledSnapshotCount).to.equal(2);
-        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
+        expect(scheduledSnapshotCount).to.equal(2)
+        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount)
         expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.equal(
             dividendsRecordDateInSeconds_3
-        );
-        expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id);
+        )
+        expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id)
         expect(scheduledSnapshots[1].scheduledTimestamp.toNumber()).to.equal(
             dividendsRecordDateInSeconds_2
-        );
-        expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id);
+        )
+        expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id)
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
         await timeTravelFacet.changeSystemTimestamp(
             dividendsRecordDateInSeconds_2 + 1
-        );
+        )
         await expect(scheduledTasksFacet.triggerScheduledTasks(100))
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
-            .withArgs(account_A, 2);
+            .withArgs(account_A, 2)
 
         scheduledSnapshotCount =
-            await scheduledSnapshotsFacet.scheduledSnapshotCount();
+            await scheduledSnapshotsFacet.scheduledSnapshotCount()
         scheduledSnapshots =
-            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100);
+            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100)
 
-        expect(scheduledSnapshotCount).to.equal(1);
-        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
+        expect(scheduledSnapshotCount).to.equal(1)
+        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount)
         expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.equal(
             dividendsRecordDateInSeconds_3
-        );
-        expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id);
+        )
+        expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id)
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
         await timeTravelFacet.changeSystemTimestamp(
             dividendsRecordDateInSeconds_3 + 1
-        );
+        )
         await expect(scheduledTasksFacet.triggerScheduledTasks(0))
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
-            .withArgs(account_A, 3);
+            .withArgs(account_A, 3)
 
         scheduledSnapshotCount =
-            await scheduledSnapshotsFacet.scheduledSnapshotCount();
+            await scheduledSnapshotsFacet.scheduledSnapshotCount()
         scheduledSnapshots =
-            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100);
+            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100)
 
-        expect(scheduledSnapshotCount).to.equal(0);
-        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
-    });
-});
+        expect(scheduledSnapshotCount).to.equal(0)
+        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount)
+    })
+})

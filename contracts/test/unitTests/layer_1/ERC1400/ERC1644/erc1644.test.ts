@@ -203,10 +203,10 @@
 
 */
 
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
-import { isinGenerator } from '@thomaschaplin/isin-generator';
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ERC1644,
@@ -219,7 +219,7 @@ import {
     BusinessLogicResolver,
     SsiManagement,
     Kyc,
-} from '@typechain';
+} from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
     ISSUER_ROLE,
@@ -237,93 +237,91 @@ import {
     SSI_MANAGER_ROLE,
     ZERO,
     EMPTY_STRING,
-} from '@scripts';
-import { grantRoleAndPauseToken } from '../../../../common';
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../../common'
 
-const amount = 1;
-const data = '0x1234';
-const operatorData = '0x5678';
-const EMPTY_VC_ID = EMPTY_STRING;
+const amount = 1
+const data = '0x1234'
+const operatorData = '0x5678'
+const EMPTY_VC_ID = EMPTY_STRING
 describe('ERC1644 Tests', () => {
-    let diamond: ResolverProxy;
-    let signer_A: SignerWithAddress;
-    let signer_B: SignerWithAddress;
-    let signer_C: SignerWithAddress;
-    let signer_D: SignerWithAddress;
-    let signer_E: SignerWithAddress;
+    let diamond: ResolverProxy
+    let signer_A: SignerWithAddress
+    let signer_B: SignerWithAddress
+    let signer_C: SignerWithAddress
+    let signer_D: SignerWithAddress
+    let signer_E: SignerWithAddress
 
-    let account_A: string;
-    let account_B: string;
-    let account_C: string;
-    let account_D: string;
-    let account_E: string;
+    let account_A: string
+    let account_B: string
+    let account_C: string
+    let account_D: string
+    let account_E: string
 
-    let factory: IFactory;
-    let businessLogicResolver: BusinessLogicResolver;
-    let erc1644Facet: ERC1644;
-    let erc1594Facet: ERC1594;
-    let accessControlFacet: AccessControl;
-    let pauseFacet: Pause;
-    let equityFacet: Equity;
-    let erc1410Facet: ERC1410ScheduledTasks;
-    let kycFacet: Kyc;
-    let ssiManagementFacet: SsiManagement;
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
+    let erc1644Facet: ERC1644
+    let erc1594Facet: ERC1594
+    let accessControlFacet: AccessControl
+    let pauseFacet: Pause
+    let equityFacet: Equity
+    let erc1410Facet: ERC1410ScheduledTasks
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     describe('single partition', () => {
         before(async () => {
             // mute | mock console.log
-            console.log = () => {};
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
-            [signer_A, signer_B, signer_C, signer_D, signer_E] =
-                await ethers.getSigners();
-            account_A = signer_A.address;
-            account_B = signer_B.address;
-            account_C = signer_C.address;
-            account_D = signer_D.address;
-            account_E = signer_E.address;
+            console.log = () => {}
+            ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
+                await ethers.getSigners()
+            account_A = signer_A.address
+            account_B = signer_B.address
+            account_C = signer_C.address
+            account_D = signer_D.address
+            account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                        timeTravelEnabled: true,
-                    })
-                );
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
 
-            factory = deployedContracts.factory.contract;
+            factory = deployedContracts.factory.contract
             businessLogicResolver =
-                deployedContracts.businessLogicResolver.contract;
-        });
+                deployedContracts.businessLogicResolver.contract
+        })
         beforeEach(async () => {
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
                 members: [account_B],
-            };
+            }
             const rbacIssuable: Rbac = {
                 role: ISSUER_ROLE,
                 members: [account_B],
-            };
+            }
             const rbacController: Rbac = {
                 role: CONTROLLER_ROLE,
                 members: [account_B],
-            };
+            }
             const rbacKYC: Rbac = {
                 role: KYC_ROLE,
                 members: [account_B],
-            };
+            }
             const rbacSSI: Rbac = {
                 role: SSI_MANAGER_ROLE,
                 members: [account_A],
-            };
+            }
             const init_rbacs: Rbac[] = [
                 rbacPause,
                 rbacIssuable,
                 rbacController,
                 rbacKYC,
                 rbacSSI,
-            ];
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -355,49 +353,49 @@ describe('ERC1644 Tests', () => {
                 init_rbacs,
                 factory,
                 businessLogicResolver: businessLogicResolver.address,
-            });
+            })
 
             accessControlFacet = await ethers.getContractAt(
                 'AccessControl',
                 diamond.address
-            );
+            )
 
             erc1644Facet = await ethers.getContractAt(
                 'ERC1644',
                 diamond.address
-            );
+            )
 
             erc1594Facet = await ethers.getContractAt(
                 'ERC1594',
                 diamond.address
-            );
+            )
 
-            equityFacet = await ethers.getContractAt('Equity', diamond.address);
+            equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
-            pauseFacet = await ethers.getContractAt('Pause', diamond.address);
+            pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
             erc1410Facet = await ethers.getContractAt(
                 'ERC1410ScheduledTasks',
                 diamond.address,
                 signer_B
-            );
+            )
             kycFacet = await ethers.getContractAt(
                 'Kyc',
                 diamond.address,
                 signer_B
-            );
+            )
             ssiManagementFacet = await ethers.getContractAt(
                 'SsiManagement',
                 diamond.address,
                 signer_A
-            );
-        });
+            )
+        })
 
         it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
             await expect(
                 erc1644Facet.initialize_ERC1644(false)
-            ).to.be.rejectedWith('AlreadyInitialized');
-        });
+            ).to.be.rejectedWith('AlreadyInitialized')
+        })
 
         describe('Paused', () => {
             beforeEach(async () => {
@@ -409,11 +407,11 @@ describe('ERC1644 Tests', () => {
                     signer_A,
                     signer_B,
                     account_C
-                );
-            });
+                )
+            })
             it('GIVEN a paused Token WHEN controllerTransfer THEN transaction fails with TokenIsPaused', async () => {
                 // Using account C (with role)
-                erc1644Facet = erc1644Facet.connect(signer_C);
+                erc1644Facet = erc1644Facet.connect(signer_C)
 
                 // controller transfer fails
                 await expect(
@@ -424,34 +422,34 @@ describe('ERC1644 Tests', () => {
                         '0x',
                         '0x'
                     )
-                ).to.be.revertedWithCustomError(erc1644Facet, 'TokenIsPaused');
-            });
+                ).to.be.revertedWithCustomError(erc1644Facet, 'TokenIsPaused')
+            })
 
             it('GIVEN a paused Token WHEN controllerRedeem THEN transaction fails with TokenIsPaused', async () => {
                 // Using account C (with role)
-                erc1644Facet = erc1644Facet.connect(signer_C);
+                erc1644Facet = erc1644Facet.connect(signer_C)
 
                 // remove document
                 await expect(
                     erc1644Facet.controllerRedeem(account_D, amount, '0x', '0x')
-                ).to.be.revertedWithCustomError(erc1644Facet, 'TokenIsPaused');
-            });
-        });
+                ).to.be.revertedWithCustomError(erc1644Facet, 'TokenIsPaused')
+            })
+        })
 
         describe('AccessControl', () => {
             it('GIVEN an account without admin role WHEN finalizeControllable THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
-                erc1644Facet = erc1644Facet.connect(signer_C);
+                erc1644Facet = erc1644Facet.connect(signer_C)
 
                 // controller finalize fails
                 await expect(
                     erc1644Facet.finalizeControllable()
-                ).to.be.rejectedWith('AccountHasNoRole');
-            });
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
 
             it('GIVEN an account without controller role WHEN controllerTransfer THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
-                erc1644Facet = erc1644Facet.connect(signer_C);
+                erc1644Facet = erc1644Facet.connect(signer_C)
 
                 // controller transfer fails
                 await expect(
@@ -462,12 +460,12 @@ describe('ERC1644 Tests', () => {
                         data,
                         operatorData
                     )
-                ).to.be.rejectedWith('AccountHasNoRole');
-            });
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
 
             it('GIVEN an account without controller role WHEN controllerRedeem THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
-                erc1644Facet = erc1644Facet.connect(signer_C);
+                erc1644Facet = erc1644Facet.connect(signer_C)
 
                 // controller redeem fails
                 await expect(
@@ -477,29 +475,29 @@ describe('ERC1644 Tests', () => {
                         data,
                         operatorData
                     )
-                ).to.be.rejectedWith('AccountHasNoRole');
-            });
-        });
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+        })
 
         describe('Controllable', () => {
             beforeEach(async () => {
                 // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
                 // Granting Role to account C
-                await ssiManagementFacet.addIssuer(account_E);
+                await ssiManagementFacet.addIssuer(account_E)
                 await kycFacet.grantKyc(
                     account_D,
                     EMPTY_VC_ID,
                     ZERO,
                     MAX_UINT256,
                     account_E
-                );
+                )
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
                     tokenHolder: account_D,
                     value: amount * 2,
                     data: data,
-                });
-            });
+                })
+            })
 
             it(
                 'GIVEN a controllable token ' +
@@ -525,35 +523,35 @@ describe('ERC1644 Tests', () => {
                             amount,
                             data,
                             data
-                        );
+                        )
                     expect(await erc1410Facet.totalSupply()).to.equal(
                         amount * 2
-                    );
+                    )
                     expect(await erc1410Facet.balanceOf(account_D)).to.equal(
                         amount
-                    );
+                    )
                     expect(await erc1410Facet.balanceOf(account_E)).to.equal(
                         amount
-                    );
+                    )
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
                             DEFAULT_PARTITION
                         )
-                    ).to.equal(amount * 2);
+                    ).to.equal(amount * 2)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
                             DEFAULT_PARTITION,
                             account_D
                         )
-                    ).to.equal(amount);
+                    ).to.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
                             DEFAULT_PARTITION,
                             account_E
                         )
-                    ).to.equal(amount);
+                    ).to.equal(amount)
                 }
-            );
+            )
 
             it(
                 'GIVEN a controllable token ' +
@@ -571,46 +569,46 @@ describe('ERC1644 Tests', () => {
                             )
                     )
                         .to.emit(erc1644Facet, 'ControllerRedemption')
-                        .withArgs(account_B, account_D, amount, data, data);
-                    expect(await erc1410Facet.totalSupply()).to.equal(amount);
+                        .withArgs(account_B, account_D, amount, data, data)
+                    expect(await erc1410Facet.totalSupply()).to.equal(amount)
                     expect(await erc1410Facet.balanceOf(account_D)).to.equal(
                         amount
-                    );
+                    )
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
                             DEFAULT_PARTITION
                         )
-                    ).to.equal(amount);
+                    ).to.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
                             DEFAULT_PARTITION,
                             account_D
                         )
-                    ).to.equal(amount);
+                    ).to.equal(amount)
                 }
-            );
-        });
+            )
+        })
 
         describe('finalizeControllable', () => {
             beforeEach(async () => {
                 // Using account C (non role)
-                accessControlFacet = accessControlFacet.connect(signer_A);
-                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A);
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_C);
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
 
                 // controller finalize fails
-                erc1644Facet = erc1644Facet.connect(signer_A);
-                erc1594Facet = erc1594Facet.connect(signer_C);
+                erc1644Facet = erc1644Facet.connect(signer_A)
+                erc1594Facet = erc1594Facet.connect(signer_C)
 
                 await expect(erc1644Facet.finalizeControllable())
                     .to.emit(erc1644Facet, 'FinalizedControllerFeature')
-                    .withArgs(account_A);
-            });
+                    .withArgs(account_A)
+            })
 
             it('GIVEN an account with admin role WHEN finalizeControllable THEN transaction succeeds', async () => {
-                const isControllable = await erc1644Facet.isControllable();
-                expect(isControllable).to.equal(false);
-            });
+                const isControllable = await erc1644Facet.isControllable()
+                expect(isControllable).to.equal(false)
+            })
 
             it('GIVEN finalizeControllable WHEN controllerTransfer THEN TokenIsNotControllable', async () => {
                 await expect(
@@ -624,8 +622,8 @@ describe('ERC1644 Tests', () => {
                 ).to.revertedWithCustomError(
                     erc1644Facet,
                     'TokenIsNotControllable'
-                );
-            });
+                )
+            })
 
             it('GIVEN finalizeControllable WHEN controllerRedeem THEN TokenIsNotControllable', async () => {
                 await expect(
@@ -638,8 +636,8 @@ describe('ERC1644 Tests', () => {
                 ).to.revertedWithCustomError(
                     erc1644Facet,
                     'TokenIsNotControllable'
-                );
-            });
+                )
+            })
 
             it('GIVEN finalizeControllable WHEN finalizeControllable THEN TokenIsNotControllable', async () => {
                 await expect(
@@ -647,43 +645,41 @@ describe('ERC1644 Tests', () => {
                 ).to.revertedWithCustomError(
                     erc1644Facet,
                     'TokenIsNotControllable'
-                );
-            });
-        });
-    });
+                )
+            })
+        })
+    })
 
     describe('multi partition', () => {
         before(async () => {
             // mute | mock console.log
-            console.log = () => {};
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
-            [signer_A, signer_B, signer_C, signer_D, signer_E] =
-                await ethers.getSigners();
-            account_A = signer_A.address;
-            account_B = signer_B.address;
-            account_C = signer_C.address;
-            account_D = signer_D.address;
-            account_E = signer_E.address;
+            console.log = () => {}
+            ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
+                await ethers.getSigners()
+            account_A = signer_A.address
+            account_B = signer_B.address
+            account_C = signer_C.address
+            account_D = signer_D.address
+            account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                    })
-                );
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
-            factory = deployedContracts.factory.contract;
+            factory = deployedContracts.factory.contract
             businessLogicResolver =
-                deployedContracts.businessLogicResolver.contract;
-        });
+                deployedContracts.businessLogicResolver.contract
+        })
         beforeEach(async () => {
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
                 members: [account_B],
-            };
-            const init_rbacs: Rbac[] = [rbacPause];
+            }
+            const init_rbacs: Rbac[] = [rbacPause]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -715,49 +711,49 @@ describe('ERC1644 Tests', () => {
                 init_rbacs,
                 factory,
                 businessLogicResolver: businessLogicResolver.address,
-            });
+            })
 
             accessControlFacet = await ethers.getContractAt(
                 'AccessControl',
                 diamond.address
-            );
+            )
 
             erc1644Facet = await ethers.getContractAt(
                 'ERC1644',
                 diamond.address
-            );
+            )
 
             erc1594Facet = await ethers.getContractAt(
                 'ERC1594',
                 diamond.address
-            );
+            )
 
-            equityFacet = await ethers.getContractAt('Equity', diamond.address);
+            equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
-            pauseFacet = await ethers.getContractAt('Pause', diamond.address);
-        });
+            pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+        })
 
         describe('NotAllowedInMultiPartitionMode', () => {
             beforeEach(async () => {
                 // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
                 // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A);
-                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C);
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_C);
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
                 await accessControlFacet.grantRole(
                     CORPORATE_ACTION_ROLE,
                     account_C
-                );
+                )
                 // Using account C (with role)
-                erc1644Facet = erc1644Facet.connect(signer_C);
-                erc1594Facet = erc1594Facet.connect(signer_C);
-                equityFacet = equityFacet.connect(signer_C);
-            });
+                erc1644Facet = erc1644Facet.connect(signer_C)
+                erc1594Facet = erc1594Facet.connect(signer_C)
+                equityFacet = equityFacet.connect(signer_C)
+            })
 
             it('GIVEN an account with controller role WHEN controllerTransfer THEN NotAllowedInMultiPartitionMode', async () => {
                 // check is controllable
-                const isControllable = await erc1644Facet.isControllable();
-                expect(isControllable).to.equal(true);
+                const isControllable = await erc1644Facet.isControllable()
+                expect(isControllable).to.equal(true)
 
                 // controller transfer
                 await expect(
@@ -771,13 +767,13 @@ describe('ERC1644 Tests', () => {
                 ).to.revertedWithCustomError(
                     erc1644Facet,
                     'NotAllowedInMultiPartitionMode'
-                );
-            });
+                )
+            })
 
             it('GIVEN an account with controller role WHEN controllerRedeem THEN NotAllowedInMultiPartitionMode', async () => {
                 // check is controllable
-                const isControllable = await erc1644Facet.isControllable();
-                expect(isControllable).to.equal(true);
+                const isControllable = await erc1644Facet.isControllable()
+                expect(isControllable).to.equal(true)
 
                 // controller transfer
                 await expect(
@@ -790,8 +786,8 @@ describe('ERC1644 Tests', () => {
                 ).to.revertedWithCustomError(
                     erc1644Facet,
                     'NotAllowedInMultiPartitionMode'
-                );
-            });
-        });
-    });
-});
+                )
+            })
+        })
+    })
+})

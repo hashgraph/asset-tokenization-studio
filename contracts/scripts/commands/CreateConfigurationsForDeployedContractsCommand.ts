@@ -208,18 +208,18 @@ import {
     BusinessLogicResolverProxyNotFound,
     BaseAtsContractListCommand,
     BaseBlockchainCommandParams,
-} from '../index';
+} from '../index'
 
 interface CreateConfigurationsForDeployedContractsCommandParams
     extends BaseBlockchainCommandParams {
-    readonly deployedContractList: DeployAtsContractsResult;
+    readonly deployedContractList: DeployAtsContractsResult
 }
 
 export default class CreateConfigurationsForDeployedContractsCommand extends BaseAtsContractListCommand {
-    private readonly equityUsaAddress: string;
-    private readonly bondUsaAddress: string;
-    private readonly excludeEquityAddresses: string[] = [];
-    private readonly excludeBondAddresses: string[] = [];
+    private readonly equityUsaAddress: string
+    private readonly bondUsaAddress: string
+    private readonly excludeEquityAddresses: string[] = []
+    private readonly excludeBondAddresses: string[] = []
 
     constructor({
         deployedContractList,
@@ -227,20 +227,21 @@ export default class CreateConfigurationsForDeployedContractsCommand extends Bas
         overrides,
     }: CreateConfigurationsForDeployedContractsCommandParams) {
         const {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             deployer: _,
             businessLogicResolver,
             equityUsa,
             bondUsa,
             ...contractListToRegister
-        } = deployedContractList;
+        } = deployedContractList
 
         if (!businessLogicResolver.proxyAddress) {
-            throw new BusinessLogicResolverProxyNotFound();
+            throw new BusinessLogicResolverProxyNotFound()
         }
 
         const contractAddressList = Object.values(contractListToRegister).map(
             (contract) => contract.address
-        );
+        )
 
         super({
             contractAddressList,
@@ -248,39 +249,39 @@ export default class CreateConfigurationsForDeployedContractsCommand extends Bas
                 businessLogicResolver.proxyAddress,
             signer,
             overrides,
-        });
-        this.equityUsaAddress = equityUsa.address;
-        this.bondUsaAddress = bondUsa.address;
+        })
+        this.equityUsaAddress = equityUsa.address
+        this.bondUsaAddress = bondUsa.address
         this.excludeBondAddresses = [
             deployedContractList.adjustBalances.address,
             deployedContractList.scheduledBalanceAdjustments.address,
-        ];
+        ]
     }
 
     get commonFacetAddressList(): string[] {
-        const bondFacetSet = new Set(this.bondFacetAddressList);
+        const bondFacetSet = new Set(this.bondFacetAddressList)
         return this.equityFacetAddressList.filter((address) =>
             bondFacetSet.has(address)
-        );
+        )
     }
 
     get equityFacetAddressList(): string[] {
         return [
             ...this.getFilteredFacetAddresses(this.excludeEquityAddresses),
             this.equityUsaAddress,
-        ];
+        ]
     }
 
     get bondFacetAddressList(): string[] {
         return [
             ...this.getFilteredFacetAddresses(this.excludeBondAddresses),
             this.bondUsaAddress,
-        ];
+        ]
     }
 
     private getFilteredFacetAddresses(excludeList: string[]): string[] {
         return this.contractAddressList.filter(
             (address) => !excludeList.includes(address)
-        );
+        )
     }
 }

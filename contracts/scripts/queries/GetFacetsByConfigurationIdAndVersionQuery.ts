@@ -203,17 +203,17 @@
 
 */
 
-import { BaseBlockchainQuery, BaseBlockchainQueryParams } from '../index';
+import { BaseBlockchainQuery, BaseBlockchainQueryParams } from '../index'
 
 interface GetFacetsByConfigurationIdAndVersionQueryParams
     extends BaseBlockchainQueryParams {
-    businessLogicResolverAddress: string;
-    configurationId: string;
+    businessLogicResolverAddress: string
+    configurationId: string
 }
 
 export default class GetFacetsByConfigurationIdAndVersionQuery extends BaseBlockchainQuery {
-    public readonly businessLogicResolverAddress: string;
-    public readonly configurationId: string;
+    public readonly businessLogicResolverAddress: string
+    public readonly configurationId: string
 
     constructor({
         businessLogicResolverAddress,
@@ -221,8 +221,8 @@ export default class GetFacetsByConfigurationIdAndVersionQuery extends BaseBlock
         provider,
         overrides,
     }: GetFacetsByConfigurationIdAndVersionQueryParams) {
-        super({ provider, overrides });
-        this.businessLogicResolverAddress = businessLogicResolverAddress;
-        this.configurationId = configurationId;
+        super({ provider, overrides })
+        this.businessLogicResolverAddress = businessLogicResolverAddress
+        this.configurationId = configurationId
     }
 }

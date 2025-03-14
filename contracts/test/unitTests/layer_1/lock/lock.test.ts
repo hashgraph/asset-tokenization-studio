@@ -203,16 +203,16 @@
 
 */
 
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     takeSnapshot,
     time,
     loadFixture,
-} from '@nomicfoundation/hardhat-network-helpers';
-import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot';
-import { isinGenerator } from '@thomaschaplin/isin-generator';
+} from '@nomicfoundation/hardhat-network-helpers'
+import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Lock,
@@ -227,7 +227,7 @@ import {
     Cap,
     Equity,
     TimeTravel,
-} from '@typechain';
+} from '@typechain'
 import {
     PAUSER_ROLE,
     LOCKER_ROLE,
@@ -247,85 +247,85 @@ import {
     SSI_MANAGER_ROLE,
     ZERO,
     EMPTY_STRING,
-} from '@scripts';
-import { dateToUnixTimestamp } from '../../../dateFormatter';
+    dateToUnixTimestamp,
+} from '@scripts'
 
 const _NON_DEFAULT_PARTITION =
-    '0x0000000000000000000000000000000000000000000000000000000000000011';
+    '0x0000000000000000000000000000000000000000000000000000000000000011'
 const _DEFAULT_PARTITION =
-    '0x0000000000000000000000000000000000000000000000000000000000000001';
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
 const _PARTITION_ID_1 =
-    '0x0000000000000000000000000000000000000000000000000000000000000001';
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
 const _PARTITION_ID_2 =
-    '0x0000000000000000000000000000000000000000000000000000000000000002';
-const _AMOUNT = 1000;
-const maxSupply_Original = 1000000 * _AMOUNT;
-const maxSupply_Partition_1_Original = 50000 * _AMOUNT;
-const maxSupply_Partition_2_Original = 0;
-const ONE_SECOND = 1;
-const EMPTY_VC_ID = EMPTY_STRING;
-const balanceOf_A_Original = [10 * _AMOUNT, 100 * _AMOUNT];
-const balanceOf_B_Original = [20 * _AMOUNT, 200 * _AMOUNT];
-const adjustFactor = 253;
-const adjustDecimals = 2;
-const decimals_Original = 6;
+    '0x0000000000000000000000000000000000000000000000000000000000000002'
+const _AMOUNT = 1000
+const maxSupply_Original = 1000000 * _AMOUNT
+const maxSupply_Partition_1_Original = 50000 * _AMOUNT
+const maxSupply_Partition_2_Original = 0
+const ONE_SECOND = 1
+const EMPTY_VC_ID = EMPTY_STRING
+const balanceOf_A_Original = [10 * _AMOUNT, 100 * _AMOUNT]
+const balanceOf_B_Original = [20 * _AMOUNT, 200 * _AMOUNT]
+const adjustFactor = 253
+const adjustDecimals = 2
+const decimals_Original = 6
 
 describe('Lock Tests', () => {
-    let diamond: ResolverProxy;
-    let signer_A: SignerWithAddress;
-    let signer_B: SignerWithAddress;
-    let signer_C: SignerWithAddress;
-    let signer_D: SignerWithAddress;
+    let diamond: ResolverProxy
+    let signer_A: SignerWithAddress
+    let signer_B: SignerWithAddress
+    let signer_C: SignerWithAddress
+    let signer_D: SignerWithAddress
 
-    let account_A: string;
-    let account_B: string;
-    let account_C: string;
-    let account_D: string;
+    let account_A: string
+    let account_B: string
+    let account_C: string
+    let account_D: string
 
-    let factory: IFactory;
-    let businessLogicResolver: BusinessLogicResolver;
-    let lockFacet: Lock;
-    let pauseFacet: Pause;
-    let erc1410Facet: ERC1410ScheduledTasks;
-    let kycFacet: Kyc;
-    let ssiManagementFacet: SsiManagement;
-    let adjustBalancesFacet: AdjustBalances;
-    let accessControlFacet: AccessControl;
-    let capFacet: Cap;
-    let equityFacet: Equity;
-    let timeTravelFacet: TimeTravel;
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
+    let lockFacet: Lock
+    let pauseFacet: Pause
+    let erc1410Facet: ERC1410ScheduledTasks
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
+    let adjustBalancesFacet: AdjustBalances
+    let accessControlFacet: AccessControl
+    let capFacet: Cap
+    let equityFacet: Equity
+    let timeTravelFacet: TimeTravel
 
-    const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
-    let currentTimestamp = 0;
-    let expirationTimestamp = 0;
+    const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
+    let currentTimestamp = 0
+    let expirationTimestamp = 0
 
-    let snapshot: SnapshotRestorer;
+    let snapshot: SnapshotRestorer
 
     function set_initRbacs(): Rbac[] {
         const rbacIssuer: Rbac = {
             role: ISSUER_ROLE,
             members: [account_B],
-        };
+        }
         const rbacLocker: Rbac = {
             role: LOCKER_ROLE,
             members: [account_C],
-        };
+        }
         const rbacPausable: Rbac = {
             role: PAUSER_ROLE,
             members: [account_D],
-        };
+        }
         const rbacKYC: Rbac = {
             role: KYC_ROLE,
             members: [account_B],
-        };
+        }
         const rbacSSI: Rbac = {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
-        };
+        }
         const rbacCorporateAction: Rbac = {
             role: CORPORATE_ACTION_ROLE,
             members: [account_B],
-        };
+        }
         return [
             rbacIssuer,
             rbacLocker,
@@ -333,7 +333,7 @@ describe('Lock Tests', () => {
             rbacKYC,
             rbacSSI,
             rbacCorporateAction,
-        ];
+        ]
     }
 
     async function setFacets({ diamond }: { diamond: ResolverProxy }) {
@@ -341,72 +341,72 @@ describe('Lock Tests', () => {
             'Lock',
             diamond.address,
             signer_C
-        );
+        )
         pauseFacet = await ethers.getContractAt(
             'Pause',
             diamond.address,
             signer_D
-        );
+        )
         erc1410Facet = await ethers.getContractAt(
             'ERC1410ScheduledTasks',
             diamond.address,
             signer_B
-        );
-        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B);
+        )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',
             diamond.address,
             signer_A
-        );
+        )
         equityFacet = await ethers.getContractAt(
             'Equity',
             diamond.address,
             signer_A
-        );
+        )
         timeTravelFacet = await ethers.getContractAt(
             'TimeTravel',
             diamond.address,
             signer_A
-        );
+        )
         adjustBalancesFacet = await ethers.getContractAt(
             'AdjustBalances',
             diamond.address,
             signer_A
-        );
-        capFacet = await ethers.getContractAt('Cap', diamond.address, signer_A);
+        )
+        capFacet = await ethers.getContractAt('Cap', diamond.address, signer_A)
 
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address,
             signer_A
-        );
+        )
 
-        await ssiManagementFacet.connect(signer_A).addIssuer(account_A);
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
         await kycFacet.grantKyc(
             account_A,
             EMPTY_VC_ID,
             ZERO,
             MAX_UINT256,
             account_A
-        );
+        )
         await kycFacet.grantKyc(
             account_B,
             EMPTY_VC_ID,
             ZERO,
             MAX_UINT256,
             account_A
-        );
+        )
         await kycFacet.grantKyc(
             account_C,
             EMPTY_VC_ID,
             ZERO,
             MAX_UINT256,
             account_A
-        );
+        )
     }
 
     async function deploySecurityFixtureMultiPartition() {
-        let init_rbacs: Rbac[] = set_initRbacs();
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -438,13 +438,13 @@ describe('Lock Tests', () => {
             init_rbacs,
             factory,
             businessLogicResolver: businessLogicResolver.address,
-        });
+        })
 
-        await setFacets({ diamond });
+        await setFacets({ diamond })
     }
 
     async function deploySecurityFixtureSinglePartition() {
-        let init_rbacs: Rbac[] = set_initRbacs();
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -476,55 +476,52 @@ describe('Lock Tests', () => {
             init_rbacs,
             factory,
             businessLogicResolver: businessLogicResolver.address,
-        });
+        })
 
-        await setFacets({ diamond });
+        await setFacets({ diamond })
     }
 
     before(async () => {
-        snapshot = await takeSnapshot();
+        snapshot = await takeSnapshot()
         // mute | mock console.log
-        console.log = () => {};
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        [signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners();
-        account_A = signer_A.address;
-        account_B = signer_B.address;
-        account_C = signer_C.address;
-        account_D = signer_D.address;
+        console.log = () => {}
+        ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+        account_D = signer_D.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    timeTravelEnabled: true,
-                })
-            );
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                timeTravelEnabled: true,
+            })
+        )
 
-        factory = deployedContracts.factory.contract;
-        businessLogicResolver =
-            deployedContracts.businessLogicResolver.contract;
-    });
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
     after(async () => {
-        await snapshot.restore();
-    });
+        await snapshot.restore()
+    })
 
     beforeEach(async () => {
-        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
-        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
-    });
+        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
+        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
+    })
 
     describe('Multi-partition enabled', () => {
         beforeEach(async () => {
-            await loadFixture(deploySecurityFixtureMultiPartition);
-        });
+            await loadFixture(deploySecurityFixtureMultiPartition)
+        })
 
         describe('Paused', () => {
             beforeEach(async () => {
                 // Pausing the token
-                await pauseFacet.pause();
-            });
+                await pauseFacet.pause()
+            })
 
             it('GIVEN a paused Token WHEN lockByPartition THEN transaction fails with TokenIsPaused', async () => {
                 // lockByPartition with data fails
@@ -535,8 +532,8 @@ describe('Lock Tests', () => {
                         account_A,
                         currentTimestamp
                     )
-                ).to.be.rejectedWith('TokenIsPaused');
-            });
+                ).to.be.rejectedWith('TokenIsPaused')
+            })
 
             it('GIVEN a paused Token WHEN releaseByPartition THEN transaction fails with TokenIsPaused', async () => {
                 // transfer from with data fails
@@ -546,23 +543,23 @@ describe('Lock Tests', () => {
                         1,
                         account_A
                     )
-                ).to.be.rejectedWith('TokenIsPaused');
-            });
+                ).to.be.rejectedWith('TokenIsPaused')
+            })
 
             it('GIVEN a paused Token WHEN lock THEN transaction fails with TokenIsPaused', async () => {
                 // lockByPartition with data fails
                 await expect(
                     lockFacet.lock(_AMOUNT, account_A, currentTimestamp)
-                ).to.be.rejectedWith('TokenIsPaused');
-            });
+                ).to.be.rejectedWith('TokenIsPaused')
+            })
 
             it('GIVEN a paused Token WHEN release THEN transaction fails with TokenIsPaused', async () => {
                 // transfer from with data fails
                 await expect(
                     lockFacet.release(1, account_A)
-                ).to.be.rejectedWith('TokenIsPaused');
-            });
-        });
+                ).to.be.rejectedWith('TokenIsPaused')
+            })
+        })
 
         describe('AccessControl', () => {
             it('GIVEN an account without LOCKER role WHEN lockByPartition THEN transaction fails with AccountHasNoRole', async () => {
@@ -576,8 +573,8 @@ describe('Lock Tests', () => {
                             account_A,
                             currentTimestamp
                         )
-                ).to.be.rejectedWith('AccountHasNoRole');
-            });
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
 
             it('GIVEN an account without LOCKER role WHEN lock THEN transaction fails with AccountHasNoRole', async () => {
                 // add to list fails
@@ -585,9 +582,9 @@ describe('Lock Tests', () => {
                     lockFacet
                         .connect(signer_D)
                         .lock(_AMOUNT, account_A, currentTimestamp)
-                ).to.be.rejectedWith('AccountHasNoRole');
-            });
-        });
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+        })
 
         describe('multi-partition transactions are enabled', () => {
             it('GIVEN a token with multi-partition enabled GIVEN lock THEN fails with NotAllowedInMultiPartitionMode', async () => {
@@ -596,8 +593,8 @@ describe('Lock Tests', () => {
                 ).to.be.revertedWithCustomError(
                     lockFacet,
                     'NotAllowedInMultiPartitionMode'
-                );
-            });
+                )
+            })
 
             it('GIVEN a token with multi-partition enabled GIVEN release THEN fails with NotAllowedInMultiPartitionMode', async () => {
                 await expect(
@@ -605,9 +602,9 @@ describe('Lock Tests', () => {
                 ).to.be.revertedWithCustomError(
                     lockFacet,
                     'NotAllowedInMultiPartitionMode'
-                );
-            });
-        });
+                )
+            })
+        })
 
         describe('lockByPartition', () => {
             it('GIVEN a expiration timestamp in past WHEN lockByPartition THEN transaction fails with WrongExpirationTimestamp', async () => {
@@ -621,8 +618,8 @@ describe('Lock Tests', () => {
                 ).to.be.revertedWithCustomError(
                     lockFacet,
                     'WrongExpirationTimestamp'
-                );
-            });
+                )
+            })
 
             it('GIVEN a non valid partition WHEN lockByPartition THEN transaction fails with InvalidPartition', async () => {
                 await expect(
@@ -637,8 +634,8 @@ describe('Lock Tests', () => {
                         lockFacet,
                         'InvalidPartition'
                     )
-                    .withArgs(account_A, _NON_DEFAULT_PARTITION);
-            });
+                    .withArgs(account_A, _NON_DEFAULT_PARTITION)
+            })
 
             it('GIVEN a valid partition WHEN lockByPartition with insufficient balance THEN transaction fails with InsufficientBalance', async () => {
                 await erc1410Facet.issueByPartition({
@@ -646,7 +643,7 @@ describe('Lock Tests', () => {
                     tokenHolder: account_A,
                     value: _AMOUNT - 1,
                     data: '0x',
-                });
+                })
 
                 await expect(
                     lockFacet.lockByPartition(
@@ -665,8 +662,8 @@ describe('Lock Tests', () => {
                         _AMOUNT - 1,
                         _AMOUNT,
                         _NON_DEFAULT_PARTITION
-                    );
-            });
+                    )
+            })
 
             it('GIVEN a valid partition WHEN lockByPartition with enough balance THEN transaction success', async () => {
                 await erc1410Facet.issueByPartition({
@@ -674,7 +671,7 @@ describe('Lock Tests', () => {
                     tokenHolder: account_A,
                     value: _AMOUNT * 2,
                     data: '0x',
-                });
+                })
 
                 await expect(
                     lockFacet.lockByPartition(
@@ -692,20 +689,20 @@ describe('Lock Tests', () => {
                         1,
                         _AMOUNT,
                         expirationTimestamp
-                    );
+                    )
 
                 expect(
                     await lockFacet.getLockedAmountForByPartition(
                         _NON_DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(_AMOUNT);
+                ).to.equal(_AMOUNT)
                 expect(
                     await lockFacet.getLockCountForByPartition(
                         _NON_DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(1);
+                ).to.equal(1)
                 expect(
                     await lockFacet.getLocksIdForByPartition(
                         _NON_DEFAULT_PARTITION,
@@ -713,39 +710,39 @@ describe('Lock Tests', () => {
                         0,
                         1
                     )
-                ).to.deep.equal([1n]);
+                ).to.deep.equal([1n])
                 expect(
                     await lockFacet.getLockForByPartition(
                         _NON_DEFAULT_PARTITION,
                         account_A,
                         1
                     )
-                ).to.deep.equal([_AMOUNT, expirationTimestamp]);
+                ).to.deep.equal([_AMOUNT, expirationTimestamp])
 
                 expect(await lockFacet.getLockedAmountFor(account_A)).to.equal(
                     0
-                );
-                expect(await lockFacet.getLockCountFor(account_A)).to.equal(0);
+                )
+                expect(await lockFacet.getLockCountFor(account_A)).to.equal(0)
                 expect(
                     await lockFacet.getLocksIdFor(account_A, 0, 1)
-                ).to.deep.equal([]);
+                ).to.deep.equal([])
                 expect(await lockFacet.getLockFor(account_A, 1)).to.deep.equal([
                     0, 0,
-                ]);
+                ])
 
                 expect(
                     await erc1410Facet.balanceOfByPartition(
                         _NON_DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(_AMOUNT);
+                ).to.equal(_AMOUNT)
                 expect(
                     await erc1410Facet.totalSupplyByPartition(
                         _NON_DEFAULT_PARTITION
                     )
-                ).to.equal(_AMOUNT * 2);
-            });
-        });
+                ).to.equal(_AMOUNT * 2)
+            })
+        })
 
         describe('Release by partition', () => {
             it('GIVEN a non valid lockId WHEN releaseByPartition THEN transaction fails with InvalidLockId', async () => {
@@ -755,8 +752,8 @@ describe('Lock Tests', () => {
                         10,
                         account_A
                     )
-                ).to.be.revertedWithCustomError(lockFacet, 'WrongLockId');
-            });
+                ).to.be.revertedWithCustomError(lockFacet, 'WrongLockId')
+            })
 
             it('GIVEN a valid lockId but timestamp is not reached WHEN releaseByPartition THEN transaction fails with LockExpirationNotReached', async () => {
                 await erc1410Facet.issueByPartition({
@@ -764,13 +761,13 @@ describe('Lock Tests', () => {
                     tokenHolder: account_A,
                     value: _AMOUNT,
                     data: '0x',
-                });
+                })
                 await lockFacet.lockByPartition(
                     _NON_DEFAULT_PARTITION,
                     _AMOUNT,
                     account_A,
                     expirationTimestamp
-                );
+                )
 
                 await expect(
                     lockFacet.releaseByPartition(
@@ -781,8 +778,8 @@ describe('Lock Tests', () => {
                 ).to.be.revertedWithCustomError(
                     lockFacet,
                     'LockExpirationNotReached'
-                );
-            });
+                )
+            })
 
             it('GIVEN a valid lockId and timestamp is reached WHEN releaseByPartition THEN transaction success', async () => {
                 await erc1410Facet.issueByPartition({
@@ -790,15 +787,15 @@ describe('Lock Tests', () => {
                     tokenHolder: account_A,
                     value: _AMOUNT,
                     data: '0x',
-                });
+                })
                 await lockFacet.lockByPartition(
                     _NON_DEFAULT_PARTITION,
                     _AMOUNT,
                     account_A,
                     expirationTimestamp
-                );
+                )
 
-                await time.setNextBlockTimestamp(expirationTimestamp + 1);
+                await time.setNextBlockTimestamp(expirationTimestamp + 1)
                 await expect(
                     lockFacet.releaseByPartition(
                         _NON_DEFAULT_PARTITION,
@@ -807,20 +804,20 @@ describe('Lock Tests', () => {
                     )
                 )
                     .to.emit(lockFacet, 'LockByPartitionReleased')
-                    .withArgs(account_C, account_A, _NON_DEFAULT_PARTITION, 1);
+                    .withArgs(account_C, account_A, _NON_DEFAULT_PARTITION, 1)
 
                 expect(
                     await lockFacet.getLockedAmountForByPartition(
                         _NON_DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(0);
+                ).to.equal(0)
                 expect(
                     await lockFacet.getLockCountForByPartition(
                         _NON_DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(0);
+                ).to.equal(0)
                 expect(
                     await lockFacet.getLocksIdForByPartition(
                         _NON_DEFAULT_PARTITION,
@@ -828,134 +825,134 @@ describe('Lock Tests', () => {
                         0,
                         1
                     )
-                ).to.deep.equal([]);
+                ).to.deep.equal([])
                 expect(
                     await lockFacet.getLockForByPartition(
                         _NON_DEFAULT_PARTITION,
                         account_A,
                         1
                     )
-                ).to.deep.equal([0, 0]);
+                ).to.deep.equal([0, 0])
 
                 expect(await lockFacet.getLockedAmountFor(account_A)).to.equal(
                     0
-                );
-                expect(await lockFacet.getLockCountFor(account_A)).to.equal(0);
+                )
+                expect(await lockFacet.getLockCountFor(account_A)).to.equal(0)
                 expect(
                     await lockFacet.getLocksIdFor(account_A, 0, 1)
-                ).to.deep.equal([]);
+                ).to.deep.equal([])
                 expect(await lockFacet.getLockFor(account_A, 1)).to.deep.equal([
                     0, 0,
-                ]);
+                ])
 
                 expect(
                     await erc1410Facet.balanceOfByPartition(
                         _NON_DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(_AMOUNT);
+                ).to.equal(_AMOUNT)
                 expect(
                     await erc1410Facet.totalSupplyByPartition(
                         _NON_DEFAULT_PARTITION
                     )
-                ).to.equal(_AMOUNT);
-            });
-        });
+                ).to.equal(_AMOUNT)
+            })
+        })
 
         describe('Adjust Balances', () => {
             async function setPreBalanceAdjustment() {
                 // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A);
+                accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
                     ADJUSTMENT_BALANCE_ROLE,
                     account_C
-                );
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_A);
-                await accessControlFacet.grantRole(CAP_ROLE, account_A);
-                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A);
-                await accessControlFacet.grantRole(LOCKER_ROLE, account_A);
+                )
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+                await accessControlFacet.grantRole(CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+                await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
 
                 // Using account C (with role)
-                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C);
-                erc1410Facet = erc1410Facet.connect(signer_A);
-                capFacet = capFacet.connect(signer_A);
+                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+                erc1410Facet = erc1410Facet.connect(signer_A)
+                capFacet = capFacet.connect(signer_A)
 
-                await capFacet.setMaxSupply(maxSupply_Original);
+                await capFacet.setMaxSupply(maxSupply_Original)
                 await capFacet.setMaxSupplyByPartition(
                     _PARTITION_ID_1,
                     maxSupply_Partition_1_Original
-                );
+                )
                 await capFacet.setMaxSupplyByPartition(
                     _PARTITION_ID_2,
                     maxSupply_Partition_2_Original
-                );
+                )
 
                 await erc1410Facet.issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_A,
                     value: balanceOf_A_Original[0],
                     data: '0x',
-                });
+                })
                 await erc1410Facet.issueByPartition({
                     partition: _PARTITION_ID_2,
                     tokenHolder: account_A,
                     value: balanceOf_A_Original[1],
                     data: '0x',
-                });
+                })
                 await erc1410Facet.issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_B,
                     value: balanceOf_B_Original[0],
                     data: '0x',
-                });
+                })
                 await erc1410Facet.issueByPartition({
                     partition: _PARTITION_ID_2,
                     tokenHolder: account_B,
                     value: balanceOf_B_Original[1],
                     data: '0x',
-                });
+                })
             }
 
             it('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
-                await setPreBalanceAdjustment();
+                await setPreBalanceAdjustment()
 
-                const balance_Before = await erc1410Facet.balanceOf(account_A);
+                const balance_Before = await erc1410Facet.balanceOf(account_A)
                 const balance_Before_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
 
                 // LOCK
-                lockFacet = lockFacet.connect(signer_A);
+                lockFacet = lockFacet.connect(signer_A)
                 await lockFacet.lockByPartition(
                     _PARTITION_ID_1,
                     _AMOUNT,
                     account_A,
                     dateToUnixTimestamp('2030-01-01T00:00:01Z')
-                );
+                )
 
                 const lock_TotalAmount_Before =
-                    await lockFacet.getLockedAmountFor(account_A);
+                    await lockFacet.getLockedAmountFor(account_A)
                 const lock_TotalAmount_Before_Partition_1 =
                     await lockFacet.getLockedAmountForByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
                 const lock_Before = await lockFacet.getLockForByPartition(
                     _PARTITION_ID_1,
                     account_A,
                     1
-                );
+                )
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
                     adjustFactor,
                     adjustDecimals
-                );
+                )
 
                 // scheduled two balance updates
-                equityFacet = equityFacet.connect(signer_B);
+                equityFacet = equityFacet.connect(signer_B)
 
                 const balanceAdjustmentData = {
                     executionDate: dateToUnixTimestamp(
@@ -963,7 +960,7 @@ describe('Lock Tests', () => {
                     ).toString(),
                     factor: adjustFactor,
                     decimals: adjustDecimals,
-                };
+                }
 
                 const balanceAdjustmentData_2 = {
                     executionDate: dateToUnixTimestamp(
@@ -971,247 +968,247 @@ describe('Lock Tests', () => {
                     ).toString(),
                     factor: adjustFactor,
                     decimals: adjustDecimals,
-                };
+                }
                 await equityFacet.setScheduledBalanceAdjustment(
                     balanceAdjustmentData
-                );
+                )
                 await equityFacet.setScheduledBalanceAdjustment(
                     balanceAdjustmentData_2
-                );
+                )
 
                 // wait for first scheduled balance adjustment only
                 await timeTravelFacet.changeSystemTimestamp(
                     dateToUnixTimestamp('2030-01-01T00:00:03Z')
-                );
+                )
 
                 const lock_TotalAmount_After =
-                    await lockFacet.getLockedAmountFor(account_A);
+                    await lockFacet.getLockedAmountFor(account_A)
                 const lock_TotalAmount_After_Partition_1 =
                     await lockFacet.getLockedAmountForByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
                 const lock_After = await lockFacet.getLockForByPartition(
                     _PARTITION_ID_1,
                     account_A,
                     1
-                );
-                const balance_After = await erc1410Facet.balanceOf(account_A);
+                )
+                const balance_After = await erc1410Facet.balanceOf(account_A)
                 const balance_After_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
 
                 expect(lock_TotalAmount_After).to.be.equal(
                     lock_TotalAmount_Before.mul(adjustFactor * adjustFactor)
-                );
+                )
                 expect(lock_TotalAmount_After_Partition_1).to.be.equal(
                     lock_TotalAmount_Before_Partition_1.mul(
                         adjustFactor * adjustFactor
                     )
-                );
+                )
                 expect(balance_After).to.be.equal(
                     balance_Before.sub(_AMOUNT).mul(adjustFactor * adjustFactor)
-                );
+                )
                 expect(lock_TotalAmount_After).to.be.equal(
                     lock_TotalAmount_Before.mul(adjustFactor * adjustFactor)
-                );
+                )
                 expect(balance_After_Partition_1).to.be.equal(
                     balance_Before_Partition_1
                         .sub(_AMOUNT)
                         .mul(adjustFactor * adjustFactor)
-                );
+                )
                 expect(lock_After.amount_).to.be.equal(
                     lock_Before.amount_.mul(adjustFactor * adjustFactor)
-                );
-            });
+                )
+            })
 
             it('GIVEN a lock WHEN adjustBalances THEN release succeeds', async () => {
-                await setPreBalanceAdjustment();
-                const balance_Before = await erc1410Facet.balanceOf(account_A);
+                await setPreBalanceAdjustment()
+                const balance_Before = await erc1410Facet.balanceOf(account_A)
                 const balance_Before_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
 
                 // LOCK TWICE
                 const currentTimestamp = (
                     await ethers.provider.getBlock('latest')
-                ).timestamp;
+                ).timestamp
 
-                lockFacet = lockFacet.connect(signer_A);
+                lockFacet = lockFacet.connect(signer_A)
                 await lockFacet.lockByPartition(
                     _PARTITION_ID_1,
                     _AMOUNT,
                     account_A,
                     currentTimestamp + ONE_SECOND
-                );
+                )
                 await lockFacet.lockByPartition(
                     _PARTITION_ID_1,
                     _AMOUNT,
                     account_A,
                     currentTimestamp + 100 * ONE_SECOND
-                );
+                )
 
                 const locked_Amount_Before =
-                    await lockFacet.getLockedAmountFor(account_A);
+                    await lockFacet.getLockedAmountFor(account_A)
                 const locked_Amount_Before_Partition_1 =
                     await lockFacet.getLockedAmountForByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
                     adjustFactor,
                     adjustDecimals
-                );
+                )
 
                 // RELEASE LOCK
                 await time.setNextBlockTimestamp(
                     (await ethers.provider.getBlock('latest')).timestamp +
                         2 * ONE_SECOND
-                );
+                )
                 await lockFacet.releaseByPartition(
                     _PARTITION_ID_1,
                     1,
                     account_A
-                );
+                )
 
                 const balance_After_Release =
-                    await erc1410Facet.balanceOf(account_A);
+                    await erc1410Facet.balanceOf(account_A)
                 const balance_After_Release_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
                 const locked_Amount_After =
-                    await lockFacet.getLockedAmountFor(account_A);
+                    await lockFacet.getLockedAmountFor(account_A)
                 const locked_Amount_After_Partition_1 =
                     await lockFacet.getLockedAmountForByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
 
                 expect(balance_After_Release).to.be.equal(
                     balance_Before.sub(_AMOUNT).mul(adjustFactor)
-                );
+                )
                 expect(balance_After_Release_Partition_1).to.be.equal(
                     balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor)
-                );
+                )
                 expect(locked_Amount_After).to.be.equal(
                     locked_Amount_Before.sub(_AMOUNT).mul(adjustFactor)
-                );
+                )
                 expect(locked_Amount_After_Partition_1).to.be.equal(
                     locked_Amount_Before_Partition_1
                         .sub(_AMOUNT)
                         .mul(adjustFactor)
-                );
+                )
                 expect(
                     balance_After_Release.add(locked_Amount_After)
-                ).to.be.equal(balance_Before.mul(adjustFactor));
+                ).to.be.equal(balance_Before.mul(adjustFactor))
                 expect(
                     balance_After_Release_Partition_1.add(
                         locked_Amount_After_Partition_1
                     )
-                ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor));
-            });
+                ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
+            })
 
             it('GIVEN a lock WHEN adjustBalances THEN lock succeeds', async () => {
-                await setPreBalanceAdjustment();
-                const balance_Before = await erc1410Facet.balanceOf(account_A);
+                await setPreBalanceAdjustment()
+                const balance_Before = await erc1410Facet.balanceOf(account_A)
                 const balance_Before_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
 
                 // LOCK BEFORE BALANCE ADJUSTMENT
                 const currentTimestamp = (
                     await ethers.provider.getBlock('latest')
-                ).timestamp;
+                ).timestamp
 
-                lockFacet = lockFacet.connect(signer_A);
+                lockFacet = lockFacet.connect(signer_A)
                 await lockFacet.lockByPartition(
                     _PARTITION_ID_1,
                     _AMOUNT,
                     account_A,
                     currentTimestamp + 100 * ONE_SECOND
-                );
+                )
 
                 const locked_Amount_Before =
-                    await lockFacet.getLockedAmountFor(account_A);
+                    await lockFacet.getLockedAmountFor(account_A)
                 const locked_Amount_Before_Partition_1 =
                     await lockFacet.getLockedAmountForByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
                     adjustFactor,
                     adjustDecimals
-                );
+                )
 
                 // LOCK AFTER BALANCE ADJUSTMENT
-                lockFacet = lockFacet.connect(signer_A);
+                lockFacet = lockFacet.connect(signer_A)
                 await lockFacet.lockByPartition(
                     _PARTITION_ID_1,
                     _AMOUNT,
                     account_A,
                     currentTimestamp + 100 * ONE_SECOND
-                );
+                )
 
                 const balance_After_Lock =
-                    await erc1410Facet.balanceOf(account_A);
+                    await erc1410Facet.balanceOf(account_A)
                 const balance_After_Lock_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
                 const locked_Amount_After =
-                    await lockFacet.getLockedAmountFor(account_A);
+                    await lockFacet.getLockedAmountFor(account_A)
                 const locked_Amount_After_Partition_1 =
                     await lockFacet.getLockedAmountForByPartition(
                         _PARTITION_ID_1,
                         account_A
-                    );
+                    )
 
                 expect(balance_After_Lock).to.be.equal(
                     balance_Before.sub(_AMOUNT).mul(adjustFactor).sub(_AMOUNT)
-                );
+                )
                 expect(balance_After_Lock_Partition_1).to.be.equal(
                     balance_Before_Partition_1
                         .sub(_AMOUNT)
                         .mul(adjustFactor)
                         .sub(_AMOUNT)
-                );
+                )
                 expect(locked_Amount_After).to.be.equal(
                     locked_Amount_Before.mul(adjustFactor).add(_AMOUNT)
-                );
+                )
                 expect(locked_Amount_After_Partition_1).to.be.equal(
                     locked_Amount_Before_Partition_1
                         .mul(adjustFactor)
                         .add(_AMOUNT)
-                );
+                )
                 expect(balance_After_Lock.add(locked_Amount_After)).to.be.equal(
                     balance_Before.mul(adjustFactor)
-                );
+                )
                 expect(
                     balance_After_Lock_Partition_1.add(
                         locked_Amount_After_Partition_1
                     )
-                ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor));
-            });
-        });
-    });
+                ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
+            })
+        })
+    })
 
     describe('Multi-partition disabled', () => {
         beforeEach(async () => {
-            await loadFixture(deploySecurityFixtureSinglePartition);
-        });
+            await loadFixture(deploySecurityFixtureSinglePartition)
+        })
 
         describe('multi-partition transactions arent enabled', () => {
             it('GIVEN a token with multi-partition enabled GIVEN lockByPartition THEN fails with NotAllowedInMultiPartitionMode', async () => {
@@ -1227,8 +1224,8 @@ describe('Lock Tests', () => {
                         lockFacet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_NON_DEFAULT_PARTITION);
-            });
+                    .withArgs(_NON_DEFAULT_PARTITION)
+            })
 
             it('GIVEN a token with multi-partition enabled GIVEN releaseByPartition THEN fails with NotAllowedInMultiPartitionMode', async () => {
                 await expect(
@@ -1242,9 +1239,9 @@ describe('Lock Tests', () => {
                         lockFacet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_NON_DEFAULT_PARTITION);
-            });
-        });
+                    .withArgs(_NON_DEFAULT_PARTITION)
+            })
+        })
 
         describe('lock', () => {
             it('GIVEN a valid partition WHEN lockByPartition with enough balance THEN transaction success', async () => {
@@ -1253,7 +1250,7 @@ describe('Lock Tests', () => {
                     tokenHolder: account_A,
                     value: _AMOUNT * 2,
                     data: '0x',
-                });
+                })
 
                 await expect(
                     lockFacet.lockByPartition(
@@ -1271,20 +1268,20 @@ describe('Lock Tests', () => {
                         1,
                         _AMOUNT,
                         expirationTimestamp
-                    );
+                    )
 
                 expect(
                     await lockFacet.getLockedAmountForByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(_AMOUNT);
+                ).to.equal(_AMOUNT)
                 expect(
                     await lockFacet.getLockCountForByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(1);
+                ).to.equal(1)
                 expect(
                     await lockFacet.getLocksIdForByPartition(
                         _DEFAULT_PARTITION,
@@ -1292,39 +1289,39 @@ describe('Lock Tests', () => {
                         0,
                         1
                     )
-                ).to.deep.equal([1n]);
+                ).to.deep.equal([1n])
                 expect(
                     await lockFacet.getLockForByPartition(
                         _DEFAULT_PARTITION,
                         account_A,
                         1
                     )
-                ).to.deep.equal([_AMOUNT, expirationTimestamp]);
+                ).to.deep.equal([_AMOUNT, expirationTimestamp])
 
                 expect(await lockFacet.getLockedAmountFor(account_A)).to.equal(
                     _AMOUNT
-                );
-                expect(await lockFacet.getLockCountFor(account_A)).to.equal(1);
+                )
+                expect(await lockFacet.getLockCountFor(account_A)).to.equal(1)
                 expect(
                     await lockFacet.getLocksIdFor(account_A, 0, 1)
-                ).to.deep.equal([1n]);
+                ).to.deep.equal([1n])
                 expect(await lockFacet.getLockFor(account_A, 1)).to.deep.equal([
                     _AMOUNT,
                     expirationTimestamp,
-                ]);
+                ])
 
                 expect(
                     await erc1410Facet.balanceOfByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(_AMOUNT);
+                ).to.equal(_AMOUNT)
                 expect(
                     await erc1410Facet.totalSupplyByPartition(
                         _DEFAULT_PARTITION
                     )
-                ).to.equal(_AMOUNT * 2);
-            });
+                ).to.equal(_AMOUNT * 2)
+            })
 
             it('GIVEN a expiration timestamp in past WHEN lock THEN transaction fails with WrongExpirationTimestamp', async () => {
                 await expect(
@@ -1336,8 +1333,8 @@ describe('Lock Tests', () => {
                 ).to.be.revertedWithCustomError(
                     lockFacet,
                     'WrongExpirationTimestamp'
-                );
-            });
+                )
+            })
 
             it('GIVEN a valid partition WHEN lock with enough balance THEN transaction success', async () => {
                 await erc1410Facet.issueByPartition({
@@ -1345,7 +1342,7 @@ describe('Lock Tests', () => {
                     tokenHolder: account_A,
                     value: _AMOUNT * 2,
                     data: '0x',
-                });
+                })
 
                 await expect(
                     lockFacet.lock(_AMOUNT, account_A, expirationTimestamp)
@@ -1358,20 +1355,20 @@ describe('Lock Tests', () => {
                         1,
                         _AMOUNT,
                         expirationTimestamp
-                    );
+                    )
 
                 expect(
                     await lockFacet.getLockedAmountForByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(_AMOUNT);
+                ).to.equal(_AMOUNT)
                 expect(
                     await lockFacet.getLockCountForByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(1);
+                ).to.equal(1)
                 expect(
                     await lockFacet.getLocksIdForByPartition(
                         _DEFAULT_PARTITION,
@@ -1379,40 +1376,40 @@ describe('Lock Tests', () => {
                         0,
                         1
                     )
-                ).to.deep.equal([1n]);
+                ).to.deep.equal([1n])
                 expect(
                     await lockFacet.getLockForByPartition(
                         _DEFAULT_PARTITION,
                         account_A,
                         1
                     )
-                ).to.deep.equal([_AMOUNT, expirationTimestamp]);
+                ).to.deep.equal([_AMOUNT, expirationTimestamp])
 
                 expect(await lockFacet.getLockedAmountFor(account_A)).to.equal(
                     _AMOUNT
-                );
-                expect(await lockFacet.getLockCountFor(account_A)).to.equal(1);
+                )
+                expect(await lockFacet.getLockCountFor(account_A)).to.equal(1)
                 expect(
                     await lockFacet.getLocksIdFor(account_A, 0, 1)
-                ).to.deep.equal([1n]);
+                ).to.deep.equal([1n])
                 expect(await lockFacet.getLockFor(account_A, 1)).to.deep.equal([
                     _AMOUNT,
                     expirationTimestamp,
-                ]);
+                ])
 
                 expect(
                     await erc1410Facet.balanceOfByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(_AMOUNT);
+                ).to.equal(_AMOUNT)
                 expect(
                     await erc1410Facet.totalSupplyByPartition(
                         _DEFAULT_PARTITION
                     )
-                ).to.equal(_AMOUNT * 2);
-            });
-        });
+                ).to.equal(_AMOUNT * 2)
+            })
+        })
 
         describe('release', () => {
             it('GIVEN a valid lockId and timestamp is reached WHEN releaseByPartition THEN transaction success', async () => {
@@ -1421,15 +1418,15 @@ describe('Lock Tests', () => {
                     tokenHolder: account_A,
                     value: _AMOUNT,
                     data: '0x',
-                });
+                })
                 await lockFacet.lockByPartition(
                     _DEFAULT_PARTITION,
                     _AMOUNT,
                     account_A,
                     expirationTimestamp
-                );
+                )
 
-                await time.setNextBlockTimestamp(expirationTimestamp + 1);
+                await time.setNextBlockTimestamp(expirationTimestamp + 1)
                 await expect(
                     lockFacet.releaseByPartition(
                         _DEFAULT_PARTITION,
@@ -1438,20 +1435,20 @@ describe('Lock Tests', () => {
                     )
                 )
                     .to.emit(lockFacet, 'LockByPartitionReleased')
-                    .withArgs(account_C, account_A, _DEFAULT_PARTITION, 1);
+                    .withArgs(account_C, account_A, _DEFAULT_PARTITION, 1)
 
                 expect(
                     await lockFacet.getLockedAmountForByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(0);
+                ).to.equal(0)
                 expect(
                     await lockFacet.getLockCountForByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(0);
+                ).to.equal(0)
                 expect(
                     await lockFacet.getLocksIdForByPartition(
                         _DEFAULT_PARTITION,
@@ -1459,44 +1456,44 @@ describe('Lock Tests', () => {
                         0,
                         1
                     )
-                ).to.deep.equal([]);
+                ).to.deep.equal([])
                 expect(
                     await lockFacet.getLockForByPartition(
                         _DEFAULT_PARTITION,
                         account_A,
                         1
                     )
-                ).to.deep.equal([0, 0]);
+                ).to.deep.equal([0, 0])
 
                 expect(await lockFacet.getLockedAmountFor(account_A)).to.equal(
                     0
-                );
-                expect(await lockFacet.getLockCountFor(account_A)).to.equal(0);
+                )
+                expect(await lockFacet.getLockCountFor(account_A)).to.equal(0)
                 expect(
                     await lockFacet.getLocksIdFor(account_A, 0, 1)
-                ).to.deep.equal([]);
+                ).to.deep.equal([])
                 expect(await lockFacet.getLockFor(account_A, 1)).to.deep.equal([
                     0, 0,
-                ]);
+                ])
 
                 expect(
                     await erc1410Facet.balanceOfByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(_AMOUNT);
+                ).to.equal(_AMOUNT)
                 expect(
                     await erc1410Facet.totalSupplyByPartition(
                         _DEFAULT_PARTITION
                     )
-                ).to.equal(_AMOUNT);
-            });
+                ).to.equal(_AMOUNT)
+            })
 
             it('GIVEN a non valid lockId WHEN release THEN transaction fails with InvalidLockId', async () => {
                 await expect(
                     lockFacet.release(10, account_A)
-                ).to.be.revertedWithCustomError(lockFacet, 'WrongLockId');
-            });
+                ).to.be.revertedWithCustomError(lockFacet, 'WrongLockId')
+            })
 
             it('GIVEN a valid lockId but timestamp is not reached WHEN release THEN transaction fails with LockExpirationNotReached', async () => {
                 await erc1410Facet.issueByPartition({
@@ -1504,21 +1501,21 @@ describe('Lock Tests', () => {
                     tokenHolder: account_A,
                     value: _AMOUNT,
                     data: '0x',
-                });
+                })
                 await lockFacet.lockByPartition(
                     _DEFAULT_PARTITION,
                     _AMOUNT,
                     account_A,
                     expirationTimestamp
-                );
+                )
 
                 await expect(
                     lockFacet.release(1, account_A)
                 ).to.be.revertedWithCustomError(
                     lockFacet,
                     'LockExpirationNotReached'
-                );
-            });
+                )
+            })
 
             it('GIVEN a valid lockId and timestamp is reached WHEN releaseByPartition THEN transaction success', async () => {
                 await erc1410Facet.issueByPartition({
@@ -1526,7 +1523,7 @@ describe('Lock Tests', () => {
                     tokenHolder: account_A,
                     value: _AMOUNT,
                     data: '0x',
-                });
+                })
                 await expect(
                     lockFacet.lock(_AMOUNT - 1, account_A, expirationTimestamp)
                 )
@@ -1538,7 +1535,7 @@ describe('Lock Tests', () => {
                         1,
                         _AMOUNT - 1,
                         expirationTimestamp
-                    );
+                    )
                 await expect(lockFacet.lock(1, account_A, expirationTimestamp))
                     .to.emit(lockFacet, 'LockedByPartition')
                     .withArgs(
@@ -1548,28 +1545,28 @@ describe('Lock Tests', () => {
                         2,
                         1,
                         expirationTimestamp
-                    );
+                    )
 
-                await time.setNextBlockTimestamp(expirationTimestamp + 1);
+                await time.setNextBlockTimestamp(expirationTimestamp + 1)
                 await expect(lockFacet.release(1, account_A))
                     .to.emit(lockFacet, 'LockByPartitionReleased')
-                    .withArgs(account_C, account_A, _DEFAULT_PARTITION, 1);
+                    .withArgs(account_C, account_A, _DEFAULT_PARTITION, 1)
                 await expect(lockFacet.release(2, account_A))
                     .to.emit(lockFacet, 'LockByPartitionReleased')
-                    .withArgs(account_C, account_A, _DEFAULT_PARTITION, 2);
+                    .withArgs(account_C, account_A, _DEFAULT_PARTITION, 2)
 
                 expect(
                     await lockFacet.getLockedAmountForByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(0);
+                ).to.equal(0)
                 expect(
                     await lockFacet.getLockCountForByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(0);
+                ).to.equal(0)
                 expect(
                     await lockFacet.getLocksIdForByPartition(
                         _DEFAULT_PARTITION,
@@ -1577,38 +1574,38 @@ describe('Lock Tests', () => {
                         0,
                         1
                     )
-                ).to.deep.equal([]);
+                ).to.deep.equal([])
                 expect(
                     await lockFacet.getLockForByPartition(
                         _DEFAULT_PARTITION,
                         account_A,
                         1
                     )
-                ).to.deep.equal([0, 0]);
+                ).to.deep.equal([0, 0])
 
                 expect(await lockFacet.getLockedAmountFor(account_A)).to.equal(
                     0
-                );
-                expect(await lockFacet.getLockCountFor(account_A)).to.equal(0);
+                )
+                expect(await lockFacet.getLockCountFor(account_A)).to.equal(0)
                 expect(
                     await lockFacet.getLocksIdFor(account_A, 0, 1)
-                ).to.deep.equal([]);
+                ).to.deep.equal([])
                 expect(await lockFacet.getLockFor(account_A, 1)).to.deep.equal([
                     0, 0,
-                ]);
+                ])
 
                 expect(
                     await erc1410Facet.balanceOfByPartition(
                         _DEFAULT_PARTITION,
                         account_A
                     )
-                ).to.equal(_AMOUNT);
+                ).to.equal(_AMOUNT)
                 expect(
                     await erc1410Facet.totalSupplyByPartition(
                         _DEFAULT_PARTITION
                     )
-                ).to.equal(_AMOUNT);
-            });
-        });
-    });
-});
+                ).to.equal(_AMOUNT)
+            })
+        })
+    })
+})

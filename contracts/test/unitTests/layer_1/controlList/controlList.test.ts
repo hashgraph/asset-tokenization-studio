@@ -203,10 +203,10 @@
 
 */
 
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
-import { isinGenerator } from '@thomaschaplin/isin-generator';
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ControlList,
@@ -214,7 +214,7 @@ import {
     AccessControl,
     IFactory,
     BusinessLogicResolver,
-} from '@typechain';
+} from '@typechain'
 import {
     CONTROL_LIST_ROLE,
     PAUSER_ROLE,
@@ -225,61 +225,58 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '@scripts';
-import { grantRoleAndPauseToken } from '../../../common';
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 describe('Control List Tests', () => {
-    let diamond: ResolverProxy;
-    let signer_A: SignerWithAddress;
-    let signer_B: SignerWithAddress;
-    let signer_C: SignerWithAddress;
-    let signer_D: SignerWithAddress;
-    let signer_E: SignerWithAddress;
+    let diamond: ResolverProxy
+    let signer_A: SignerWithAddress
+    let signer_B: SignerWithAddress
+    let signer_C: SignerWithAddress
+    let signer_D: SignerWithAddress
+    let signer_E: SignerWithAddress
 
-    let account_A: string;
-    let account_B: string;
-    let account_C: string;
-    let account_D: string;
-    let account_E: string;
+    let account_A: string
+    let account_B: string
+    let account_C: string
+    let account_D: string
+    let account_E: string
 
-    let factory: IFactory;
-    let businessLogicResolver: BusinessLogicResolver;
-    let controlListFacet: ControlList;
-    let accessControlFacet: AccessControl;
-    let pauseFacet: Pause;
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
+    let controlListFacet: ControlList
+    let accessControlFacet: AccessControl
+    let pauseFacet: Pause
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {};
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        [signer_A, signer_B, signer_C, signer_D, signer_E] =
-            await ethers.getSigners();
-        account_A = signer_A.address;
-        account_B = signer_B.address;
-        account_C = signer_C.address;
-        account_D = signer_D.address;
-        account_E = signer_E.address;
+        console.log = () => {}
+        ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
+            await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+        account_D = signer_D.address
+        account_E = signer_E.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: false,
-                })
-            );
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: false,
+            })
+        )
 
-        factory = deployedContracts.factory.contract;
-        businessLogicResolver =
-            deployedContracts.businessLogicResolver.contract;
-    });
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
     beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
-        };
-        const init_rbacs: Rbac[] = [rbacPause];
+        }
+        const init_rbacs: Rbac[] = [rbacPause]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -311,46 +308,46 @@ describe('Control List Tests', () => {
             init_rbacs,
             businessLogicResolver: businessLogicResolver.address,
             factory: factory,
-        });
+        })
 
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
-        );
+        )
 
         controlListFacet = await ethers.getContractAt(
             'ControlList',
             diamond.address
-        );
+        )
 
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address);
-    });
+        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+    })
 
     it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
         await expect(
             controlListFacet.initialize_ControlList(true)
-        ).to.be.rejectedWith('AlreadyInitialized');
-    });
+        ).to.be.rejectedWith('AlreadyInitialized')
+    })
 
     it('GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole', async () => {
         // Using account C (non role)
-        controlListFacet = controlListFacet.connect(signer_C);
+        controlListFacet = controlListFacet.connect(signer_C)
 
         // add to list fails
         await expect(
             controlListFacet.addToControlList(account_D)
-        ).to.be.rejectedWith('AccountHasNoRole');
-    });
+        ).to.be.rejectedWith('AccountHasNoRole')
+    })
 
     it('GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole', async () => {
         // Using account C (non role)
-        controlListFacet = controlListFacet.connect(signer_C);
+        controlListFacet = controlListFacet.connect(signer_C)
 
         // remove From list fails
         await expect(
             controlListFacet.removeFromControlList(account_D)
-        ).to.be.rejectedWith('AccountHasNoRole');
-    });
+        ).to.be.rejectedWith('AccountHasNoRole')
+    })
 
     it('GIVEN a paused Token WHEN addToControlList THEN transaction fails with TokenIsPaused', async () => {
         // Granting Role to account C and Pause
@@ -361,16 +358,16 @@ describe('Control List Tests', () => {
             signer_A,
             signer_B,
             account_C
-        );
+        )
 
         // Using account C (with role)
-        controlListFacet = controlListFacet.connect(signer_C);
+        controlListFacet = controlListFacet.connect(signer_C)
 
         // add to list fails
         await expect(
             controlListFacet.addToControlList(account_D)
-        ).to.be.rejectedWith('TokenIsPaused');
-    });
+        ).to.be.rejectedWith('TokenIsPaused')
+    })
 
     it('GIVEN a paused Token WHEN removeFromControlList THEN transaction fails with TokenIsPaused', async () => {
         // Granting Role to account C and Pause
@@ -381,79 +378,76 @@ describe('Control List Tests', () => {
             signer_A,
             signer_B,
             account_C
-        );
+        )
 
         // Using account C (with role)
-        controlListFacet = controlListFacet.connect(signer_C);
+        controlListFacet = controlListFacet.connect(signer_C)
 
         // remove from list fails
         await expect(
             controlListFacet.removeFromControlList(account_D)
-        ).to.be.rejectedWith('TokenIsPaused');
-    });
+        ).to.be.rejectedWith('TokenIsPaused')
+    })
 
     it('GIVEN an account with controlList role WHEN addToControlList and removeFromControlList THEN transaction succeeds', async () => {
         // ADD TO LIST ------------------------------------------------------------------
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A);
-        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_C);
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_C)
         // Using account C (with role)
-        controlListFacet = controlListFacet.connect(signer_C);
+        controlListFacet = controlListFacet.connect(signer_C)
 
         // check that D and E are not in the list
-        let check_D = await controlListFacet.isInControlList(account_D);
-        expect(check_D).to.equal(false);
-        let check_E = await controlListFacet.isInControlList(account_E);
-        expect(check_E).to.equal(false);
+        let check_D = await controlListFacet.isInControlList(account_D)
+        expect(check_D).to.equal(false)
+        let check_E = await controlListFacet.isInControlList(account_E)
+        expect(check_E).to.equal(false)
 
         // add to list
         await expect(controlListFacet.addToControlList(account_D))
             .to.emit(controlListFacet, 'AddedToControlList')
-            .withArgs(account_C, account_D);
+            .withArgs(account_C, account_D)
         await expect(controlListFacet.addToControlList(account_E))
             .to.emit(controlListFacet, 'AddedToControlList')
-            .withArgs(account_C, account_E);
+            .withArgs(account_C, account_E)
 
         // check that D and E are in the list
-        check_D = await controlListFacet.isInControlList(account_D);
-        expect(check_D).to.equal(true);
-        check_E = await controlListFacet.isInControlList(account_E);
-        expect(check_E).to.equal(true);
+        check_D = await controlListFacet.isInControlList(account_D)
+        expect(check_D).to.equal(true)
+        check_E = await controlListFacet.isInControlList(account_E)
+        expect(check_E).to.equal(true)
         // check list members
-        let listCount = await controlListFacet.getControlListCount();
+        let listCount = await controlListFacet.getControlListCount()
         let listMembers = await controlListFacet.getControlListMembers(
             0,
             listCount
-        );
+        )
 
-        expect(listCount).to.equal(2);
-        expect(listMembers.length).to.equal(listCount);
-        expect(listMembers[0].toUpperCase()).to.equal(account_D.toUpperCase());
-        expect(listMembers[1].toUpperCase()).to.equal(account_E.toUpperCase());
+        expect(listCount).to.equal(2)
+        expect(listMembers.length).to.equal(listCount)
+        expect(listMembers[0].toUpperCase()).to.equal(account_D.toUpperCase())
+        expect(listMembers[1].toUpperCase()).to.equal(account_E.toUpperCase())
 
         // REMOVE FROM LIST ------------------------------------------------------------------
         // remove From list
         await expect(controlListFacet.removeFromControlList(account_D))
             .to.emit(controlListFacet, 'RemovedFromControlList')
-            .withArgs(account_C, account_D);
+            .withArgs(account_C, account_D)
 
         // check that D is not in the list
-        check_D = await controlListFacet.isInControlList(account_D);
-        expect(check_D).to.equal(false);
+        check_D = await controlListFacet.isInControlList(account_D)
+        expect(check_D).to.equal(false)
 
         // check list members
-        listCount = await controlListFacet.getControlListCount();
-        listMembers = await controlListFacet.getControlListMembers(
-            0,
-            listCount
-        );
+        listCount = await controlListFacet.getControlListCount()
+        listMembers = await controlListFacet.getControlListMembers(0, listCount)
 
-        expect(listCount).to.equal(1);
-        expect(listMembers.length).to.equal(listCount);
-        expect(listMembers[0].toUpperCase()).to.equal(account_E.toUpperCase());
+        expect(listCount).to.equal(1)
+        expect(listMembers.length).to.equal(listCount)
+        expect(listMembers[0].toUpperCase()).to.equal(account_E.toUpperCase())
 
         // CHECK LIST TYPE ------------------------------------------------------------------
-        const listType = await controlListFacet.getControlListType();
-        expect(listType).to.equal(false);
-    });
-});
+        const listType = await controlListFacet.getControlListType()
+        expect(listType).to.equal(false)
+    })
+})

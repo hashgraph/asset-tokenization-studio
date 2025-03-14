@@ -203,10 +203,10 @@
 
 */
 
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
-import { isinGenerator } from '@thomaschaplin/isin-generator';
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type CorporateActions,
@@ -217,7 +217,7 @@ import {
     AccessControlFacet__factory,
     CorporateActions__factory,
     PauseFacet__factory,
-} from '@typechain';
+} from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -228,60 +228,57 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
-} from '@scripts';
-import { grantRoleAndPauseToken } from '../../../common';
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const actionType =
-    '0x000000000000000000000000000000000000000000000000000000000000aa23';
-const actionData = '0x1234';
+    '0x000000000000000000000000000000000000000000000000000000000000aa23'
+const actionData = '0x1234'
 const corporateActionId_1 =
-    '0x0000000000000000000000000000000000000000000000000000000000000001';
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
 
 describe('Corporate Actions Tests', () => {
-    let diamond: ResolverProxy;
-    let signer_A: SignerWithAddress;
-    let signer_B: SignerWithAddress;
-    let signer_C: SignerWithAddress;
+    let diamond: ResolverProxy
+    let signer_A: SignerWithAddress
+    let signer_B: SignerWithAddress
+    let signer_C: SignerWithAddress
 
-    let account_A: string;
-    let account_B: string;
-    let account_C: string;
+    let account_A: string
+    let account_B: string
+    let account_C: string
 
-    let factory: IFactory;
-    let businessLogicResolver: BusinessLogicResolver;
-    let corporateActionsFacet: CorporateActions;
-    let accessControlFacet: AccessControl;
-    let pauseFacet: Pause;
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
+    let corporateActionsFacet: CorporateActions
+    let accessControlFacet: AccessControl
+    let pauseFacet: Pause
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {};
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        [signer_A, signer_B, signer_C] = await ethers.getSigners();
-        account_A = signer_A.address;
-        account_B = signer_B.address;
-        account_C = signer_C.address;
+        console.log = () => {}
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                })
-            );
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+            })
+        )
 
-        factory = deployedContracts.factory.contract;
-        businessLogicResolver =
-            deployedContracts.businessLogicResolver.contract;
-    });
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
     beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
-        };
-        const init_rbacs: Rbac[] = [rbacPause];
+        }
+        const init_rbacs: Rbac[] = [rbacPause]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -313,28 +310,28 @@ describe('Corporate Actions Tests', () => {
             init_rbacs,
             businessLogicResolver: businessLogicResolver.address,
             factory,
-        });
+        })
 
         accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
-        );
+        )
         corporateActionsFacet = CorporateActions__factory.connect(
             diamond.address,
             signer_A
-        );
-        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A);
-    });
+        )
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
+    })
 
     it('GIVEN an account without corporateActions role WHEN addCorporateAction THEN transaction fails with AccountHasNoRole', async () => {
         // Using account C (non role)
-        corporateActionsFacet = corporateActionsFacet.connect(signer_C);
+        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
 
         // add to list fails
         await expect(
             corporateActionsFacet.addCorporateAction(actionType, actionData)
-        ).to.be.rejectedWith('AccountHasNoRole');
-    });
+        ).to.be.rejectedWith('AccountHasNoRole')
+    })
 
     it('GIVEN a paused Token WHEN addCorporateAction THEN transaction fails with TokenIsPaused', async () => {
         // Granting Role to account C and Pause
@@ -345,57 +342,57 @@ describe('Corporate Actions Tests', () => {
             signer_A,
             signer_B,
             account_C
-        );
+        )
 
         // Using account C (with role)
-        corporateActionsFacet = corporateActionsFacet.connect(signer_C);
+        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
 
         // add to list fails
         await expect(
             corporateActionsFacet.addCorporateAction(actionType, actionData)
-        ).to.be.rejectedWith('TokenIsPaused');
-    });
+        ).to.be.rejectedWith('TokenIsPaused')
+    })
 
     it('GIVEN an account with corporateActions role WHEN addCorporateAction THEN transaction succeeds', async () => {
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A);
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C);
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
         // Using account C (with role)
-        corporateActionsFacet = corporateActionsFacet.connect(signer_C);
+        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
 
         // add to list
-        await corporateActionsFacet.addCorporateAction(actionType, actionData);
+        await corporateActionsFacet.addCorporateAction(actionType, actionData)
 
         // check list members
-        const listCount = await corporateActionsFacet.getCorporateActionCount();
+        const listCount = await corporateActionsFacet.getCorporateActionCount()
         const listMembers = await corporateActionsFacet.getCorporateActionIds(
             0,
             listCount
-        );
+        )
         const listCountByType =
             await corporateActionsFacet.getCorporateActionCountByType(
                 actionType
-            );
+            )
         const listMembersByType =
             await corporateActionsFacet.getCorporateActionIdsByType(
                 actionType,
                 0,
                 listCount
-            );
+            )
         const corporateAction =
-            await corporateActionsFacet.getCorporateAction(corporateActionId_1);
+            await corporateActionsFacet.getCorporateAction(corporateActionId_1)
 
-        expect(listCount).to.equal(1);
-        expect(listMembers.length).to.equal(listCount);
-        expect(listMembers[0]).to.equal(corporateActionId_1);
-        expect(listCountByType).to.equal(1);
-        expect(listMembersByType.length).to.equal(listCountByType);
-        expect(listMembersByType[0]).to.equal(corporateActionId_1);
+        expect(listCount).to.equal(1)
+        expect(listMembers.length).to.equal(listCount)
+        expect(listMembers[0]).to.equal(corporateActionId_1)
+        expect(listCountByType).to.equal(1)
+        expect(listMembersByType.length).to.equal(listCountByType)
+        expect(listMembersByType[0]).to.equal(corporateActionId_1)
         expect(corporateAction[0].toUpperCase()).to.equal(
             actionType.toUpperCase()
-        );
+        )
         expect(corporateAction[1].toUpperCase()).to.equal(
             actionData.toUpperCase()
-        );
-    });
-});
+        )
+    })
+})
