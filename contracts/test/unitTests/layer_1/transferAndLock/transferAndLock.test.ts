@@ -332,7 +332,7 @@ describe('Transfer and lock Tests', () => {
     }
 
     async function deploySecurityFixtureMultiPartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -370,7 +370,7 @@ describe('Transfer and lock Tests', () => {
     }
 
     async function deploySecurityFixtureSinglePartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,

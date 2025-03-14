@@ -20,10 +20,4 @@
             "@test": ["./test/index.ts"]
         }
     }
-
-    /*"ts-node": {
-  "require": [
-    "tsconfig-paths/register" // https://stackoverflow.com/questions/56650711/cannot-find-module-that-is-defined-in-tsconfig-paths
-  ]
-}*/
 }

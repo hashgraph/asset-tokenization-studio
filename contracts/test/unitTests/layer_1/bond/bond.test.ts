@@ -348,7 +348,7 @@ describe('Bond Tests', () => {
     }
 
     async function deploySecurityFixtureSinglePartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployBondFromFactory({
             adminAccount: account_A,

@@ -274,7 +274,7 @@ describe('Adjust Balances Tests', () => {
     let ssiManagementFacet: SsiManagement
 
     async function deploySecurityFixtureMultiPartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,

@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
@@ -226,12 +226,6 @@ import {
     IERC20,
     IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
-    ControlList__factory,
-    Equity__factory,
-    ERC1410ScheduledTasks__factory,
-    Pause__factory,
-    TimeTravel__factory,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -2629,13 +2623,12 @@ describe('ERC1410 Tests', () => {
             before(async () => {
                 // mute | mock console.log
                 console.log = () => {}
-                // eslint-disable-next-line @typescript-eslint/no-extra-semi
                 ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
                 account_A = signer_A.address
                 account_B = signer_B.address
                 account_C = signer_C.address
 
-                const { deployer, ...deployedContracts } =
+                const { ...deployedContracts } =
                     await deployAtsFullInfrastructure(
                         await DeployAtsFullInfrastructureCommand.newInstance({
                             signer: signer_A,
