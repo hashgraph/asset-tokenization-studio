@@ -18,13 +18,11 @@ import {
 import { formatDate } from "../../../../utils/format";
 import { useSecurityStore } from "../../../../store/securityStore";
 import {
+  ClearingOperationViewModel,
   GET_CLEARING_OPERATIONS_LIST,
   useGetClearingOperations,
 } from "../../../../hooks/queries/useClearingOperations";
-import {
-  ClearingViewModel,
-  ReclaimClearingOperationByPartitionRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+import { ReclaimClearingOperationByPartitionRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useWalletStore } from "../../../../store/walletStore";
 import { useReclaimClearingByPartition } from "../../../../hooks/mutations/useClearingOperations";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,7 +45,7 @@ export const ClearingOperationsList = () => {
   const { address } = useWalletStore();
   const [_isMutating, setIsMutating] = useState(false);
   const [clearOperationSelected, setClearOperationSelected] =
-    useState<ClearingViewModel>();
+    useState<ClearingOperationViewModel>();
   const [isReclaiming, setIsReclaiming] = useState(false);
 
   const { t: tList } = useTranslation("security", {
@@ -67,9 +65,7 @@ export const ClearingOperationsList = () => {
 
     const request = new ReclaimClearingOperationByPartitionRequest({
       clearingId: Number(clearOperationSelected?.id),
-      clearingOperationType: Number(
-        clearOperationSelected?.clearingOperationType,
-      ),
+      clearingOperationType: Number(clearOperationSelected?.operationType),
       partitionId: DEFAULT_PARTITION,
       securityId,
       targetId: address,
@@ -84,7 +80,7 @@ export const ClearingOperationsList = () => {
 
         queryClient.setQueryData(
           queryKey,
-          (oldData: ClearingViewModel[] | undefined) => {
+          (oldData: ClearingOperationViewModel[] | undefined) => {
             if (!oldData) return [];
             return oldData.filter((op) => op.id !== variables.clearingId);
           },
@@ -136,7 +132,7 @@ export const ClearingOperationsList = () => {
       />
       <Center h="full" bg="neutral.dark.600">
         <VStack align="flex-start" p={6} gap={4}>
-          <VStack w={600} align="center" gap={4}>
+          <VStack w={800} align="center" gap={4}>
             <Heading textStyle="HeadingMediumLG">{tList("title")}</Heading>
             <VStack gap={4} w={"full"}>
               {data?.map((op, index) => {
@@ -163,7 +159,7 @@ export const ClearingOperationsList = () => {
                         {
                           title: tList("clearingOperationType"),
                           description:
-                            ClearingOperationTypeText[op.clearingOperationType],
+                            ClearingOperationTypeText[op.operationType],
                         },
                         {
                           title: tList("amount"),
@@ -176,30 +172,30 @@ export const ClearingOperationsList = () => {
                             DATE_TIME_FORMAT,
                           ),
                         },
-                        ...(op.destinationAddress
+                        ...(op.destination
                           ? [
                               {
                                 title: tList("targetId"),
-                                description: op.destinationAddress,
+                                description: op.destination,
                               },
                             ]
                           : []),
-                        ...(op.hold.expirationDate
+                        ...(op.holdExpirationDate
                           ? [
                               {
                                 title: tList("holdExpirationDate"),
                                 description: formatDate(
-                                  Number(op.hold.expirationDate),
+                                  Number(op.holdExpirationDate),
                                   DATE_TIME_FORMAT,
                                 ),
                               },
                             ]
                           : []),
-                        ...(op.hold.escrow
+                        ...(op.holdEscrow
                           ? [
                               {
                                 title: tList("escrowAddress"),
-                                description: op.hold.escrow,
+                                description: op.holdEscrow,
                               },
                             ]
                           : []),
