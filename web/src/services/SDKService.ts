@@ -324,6 +324,7 @@ import {
   GetClearingRedeemForByPartitionRequest,
   GetClearingCreateHoldForByPartitionRequest,
   ClearingCreateHoldViewModel,
+  GetClearedAmountForRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -1001,6 +1002,13 @@ export class SDKService {
     request: IsClearingActivatedRequest,
   ): Promise<boolean> {
     const response = await Security.isClearingActivated(request);
+    return response;
+  }
+
+  public static async getClearedAmountFor(
+    req: GetClearedAmountForRequest,
+  ): Promise<number> {
+    const response = await Security.getClearedAmountFor(req);
     return response;
   }
 }
