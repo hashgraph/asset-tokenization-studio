@@ -211,6 +211,7 @@ import { useTranslation } from "react-i18next";
 import { isHederaValidAddress, required } from "../../../utils/rules";
 import {
   GetAccountBalanceRequest,
+  GetClearedAmountForRequest,
   GetHeldAmountForRequest,
   GetLocksIdRequest,
   SecurityViewModel,
@@ -220,6 +221,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useGetLockers } from "../../../hooks/queries/useGetLockers";
 import { useGetHeldAmountFor } from "../../../hooks/queries/useGetHolds";
 import { useSecurityStore } from "../../../store/securityStore";
+import { useGetClearedAmountFor } from "../../../hooks/queries/useClearingOperations";
 
 interface BalanceProps {
   id?: string;
@@ -253,6 +255,7 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingLockers, setIsLoadingLockers] = useState<boolean>(false);
   const [isLoadingHolds, setIsLoadingHolds] = useState<boolean>(false);
+  const [isLoadingCleared, setIsLoadingCleared] = useState<boolean>(false);
   const toast = useToast();
 
   const { data: balance, refetch } = useGetBalanceOf(
@@ -326,21 +329,49 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
     },
   );
 
+  const { data: clearedBalance, refetch: refetchClearedBalance } =
+    useGetClearedAmountFor(
+      new GetClearedAmountForRequest({
+        securityId: id!,
+        targetId: targetId ?? "",
+      }),
+      {
+        enabled: !!targetId,
+        refetchOnWindowFocus: false,
+        select(data) {
+          return Number(data) / Math.pow(10, Number(details?.decimals));
+        },
+        onSuccess: () => {
+          setIsLoadingCleared(false);
+        },
+        onError: () => {
+          setIsLoadingCleared(false);
+          toast.show({
+            duration: 3000,
+            title: tError("targetId"),
+            status: "error",
+          });
+        },
+      },
+    );
+
   useEffect(() => {
     if (targetId && !balance) {
       setIsLoading(true);
       setIsLoadingLockers(true);
       setIsLoadingHolds(true);
+      setIsLoadingCleared(true);
       refetch();
       refetchLockers();
       refetchHolds();
+      refetchClearedBalance();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetId]);
 
   const isLoadingTotal = useMemo(() => {
-    return isLoading || isLoadingLockers || isLoadingHolds;
-  }, [isLoading, isLoadingLockers, isLoadingHolds]);
+    return isLoading || isLoadingLockers || isLoadingHolds || isLoadingCleared;
+  }, [isLoading, isLoadingLockers, isLoadingHolds, isLoadingCleared]);
 
   const onSubmit = ({ search }: BalanceSearchFieldValue) => {
     setTargetId(search);
@@ -371,8 +402,12 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
       totalBalance += Number(heldBalance);
     }
 
+    if (Number(clearedBalance) > 0) {
+      totalBalance += Number(clearedBalance);
+    }
+
     return totalBalance;
-  }, [heldBalance, lockBalance, balance]);
+  }, [clearedBalance, heldBalance, lockBalance, balance]);
 
   return (
     <VStack gap={6}>
@@ -477,6 +512,18 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
                 </Text>
                 <Text textStyle="ElementsSemiboldSM">
                   {heldBalance ?? "-"}{" "}
+                  {tProperties(detailsResponse.symbol ?? "")}
+                </Text>
+              </VStack>
+
+              <VStack w={"1px"} h={"40px"} bgColor={"gray.500"} />
+
+              <VStack alignItems={"flex-start"}>
+                <Text textStyle="ElementsRegularXS">
+                  {tDetails("clearedBalance")}
+                </Text>
+                <Text textStyle="ElementsSemiboldSM">
+                  {clearedBalance ?? "-"}{" "}
                   {tProperties(detailsResponse.symbol ?? "")}
                 </Text>
               </VStack>

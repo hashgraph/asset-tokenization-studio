@@ -203,10 +203,12 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import { QueryResponse } from 'core/query/QueryResponse';
 
-interface IClearingStorageWrapper {
-    event ClearingActivated(address indexed operator);
-    event ClearingDeactivated(address indexed operator);
+export default interface ClearingRedeemViewModel extends QueryResponse {
+  id: number;
+  amount: string;
+  expirationDate: Date;
+  data: string;
+  operatorData: string;
 }

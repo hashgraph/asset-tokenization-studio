@@ -271,7 +271,7 @@ import {
 import { grantRoleAndPauseToken } from '../../../../common'
 import { dateToUnixTimestamp } from '../../../../dateFormatter'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ClearingFacet } from '@typechain'
+import { ClearingActionsFacet } from '@typechain'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -340,7 +340,7 @@ describe('ERC1410 Tests', () => {
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
-    let clearingFacet: ClearingFacet
+    let clearingActionsFacet: ClearingActionsFacet
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
         await grantRolesToAccounts()
@@ -736,8 +736,8 @@ describe('ERC1410 Tests', () => {
             diamond.address,
             signer_A
         )
-        clearingFacet = await ethers.getContractAt(
-            'ClearingFacet',
+        clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
             diamond.address,
             signer_A
         )
@@ -978,7 +978,7 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN a token with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
-            await clearingFacet.activateClearing()
+            await clearingActionsFacet.activateClearing()
 
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
@@ -1110,7 +1110,7 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN a token with clearing active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
-            await clearingFacet.activateClearing()
+            await clearingActionsFacet.activateClearing()
 
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
