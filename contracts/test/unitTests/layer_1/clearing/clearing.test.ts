@@ -2913,7 +2913,7 @@ describe('Clearing Tests', () => {
                     clearingIdentifier
                 )
             )
-                .to.emit(clearingFacet, 'ClearingOperationApproved')
+                .to.emit(clearingActionsFacet, 'ClearingOperationApproved')
                 .withArgs(
                     account_A,
                     account_A,
@@ -2941,7 +2941,7 @@ describe('Clearing Tests', () => {
                     clearingIdentifier
                 )
             )
-                .to.emit(clearingFacet, 'ClearingOperationApproved')
+                .to.emit(clearingActionsFacet, 'ClearingOperationApproved')
                 .withArgs(
                     account_A,
                     account_A,
@@ -2969,7 +2969,7 @@ describe('Clearing Tests', () => {
                     clearingIdentifier
                 )
             )
-                .to.emit(clearingFacet, 'ClearingOperationApproved')
+                .to.emit(clearingActionsFacet, 'ClearingOperationApproved')
                 .withArgs(
                     account_A,
                     account_A,
@@ -3023,7 +3023,7 @@ describe('Clearing Tests', () => {
                     clearingIdentifier
                 )
             )
-                .to.emit(clearingFacet, 'ClearingOperationCanceled')
+                .to.emit(clearingActionsFacet, 'ClearingOperationCanceled')
                 .withArgs(
                     account_A,
                     account_A,
@@ -3051,7 +3051,7 @@ describe('Clearing Tests', () => {
                     clearingIdentifier
                 )
             )
-                .to.emit(clearingFacet, 'ClearingOperationCanceled')
+                .to.emit(clearingActionsFacet, 'ClearingOperationCanceled')
                 .withArgs(
                     account_A,
                     account_A,
@@ -3079,7 +3079,7 @@ describe('Clearing Tests', () => {
                     clearingIdentifier
                 )
             )
-                .to.emit(clearingFacet, 'ClearingOperationCanceled')
+                .to.emit(clearingActionsFacet, 'ClearingOperationCanceled')
                 .withArgs(
                     account_A,
                     account_A,
@@ -3138,7 +3138,7 @@ describe('Clearing Tests', () => {
                     clearingIdentifier
                 )
             )
-                .to.emit(clearingFacet, 'ClearingOperationReclaimed')
+                .to.emit(clearingActionsFacet, 'ClearingOperationReclaimed')
                 .withArgs(
                     account_A,
                     account_A,
@@ -3172,7 +3172,7 @@ describe('Clearing Tests', () => {
                     clearingIdentifier
                 )
             )
-                .to.emit(clearingFacet, 'ClearingOperationReclaimed')
+                .to.emit(clearingActionsFacet, 'ClearingOperationReclaimed')
                 .withArgs(
                     account_A,
                     account_A,
@@ -3206,7 +3206,7 @@ describe('Clearing Tests', () => {
                     clearingIdentifier
                 )
             )
-                .to.emit(clearingFacet, 'ClearingOperationReclaimed')
+                .to.emit(clearingActionsFacet, 'ClearingOperationReclaimed')
                 .withArgs(
                     account_A,
                     account_A,
