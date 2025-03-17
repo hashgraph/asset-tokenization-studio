@@ -260,6 +260,14 @@ export class GetClearingCreateHoldForByPartitionQueryHandler
       security.decimals,
     );
 
+    clearing.holdEscrow = (
+      await this.mirrorNodeAdapter.getAccountInfo(clearing.holdEscrow)
+    ).id.toString();
+
+    clearing.holdTo = (
+      await this.mirrorNodeAdapter.getAccountInfo(clearing.holdTo)
+    ).id.toString();
+
     return new GetClearingCreateHoldForByPartitionQueryResponse(clearing);
   }
 }

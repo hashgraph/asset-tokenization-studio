@@ -1520,11 +1520,11 @@ describe('🧪 Security tests', () => {
       expect(clearing.data).toEqual('0x');
       expect(clearing.operatorData).toEqual('0x');
       expect(clearing.holdEscrow).toEqual(
-        CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        CLIENT_ACCOUNT_ECDSA_A.id!.toString(),
       );
       expect(clearing.holdExpirationDate).toEqual(date);
       expect(clearing.holdTo).toEqual(
-        CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        CLIENT_ACCOUNT_ECDSA.id!.toString(),
       );
       expect(clearing.holdData).toEqual('0x');
 
@@ -1773,7 +1773,7 @@ describe('🧪 Security tests', () => {
       expect(clearing.amount).toEqual(clearedAmount);
       expect(clearing.expirationDate).toEqual(date);
       expect(clearing.destination).toEqual(
-        CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        CLIENT_ACCOUNT_ECDSA.id!.toString(),
       );
       expect(clearing.data).toEqual('0x');
       expect(clearing.operatorData).toEqual('0x');
