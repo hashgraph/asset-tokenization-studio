@@ -247,8 +247,8 @@ import {
     SSI_MANAGER_ROLE,
     ZERO,
     EMPTY_STRING,
+    dateToUnixTimestamp,
 } from '@scripts'
-import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'
@@ -406,7 +406,7 @@ describe('Lock Tests', () => {
     }
 
     async function deploySecurityFixtureMultiPartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -444,7 +444,7 @@ describe('Lock Tests', () => {
     }
 
     async function deploySecurityFixtureSinglePartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -485,21 +485,19 @@ describe('Lock Tests', () => {
         snapshot = await takeSnapshot()
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
         account_D = signer_D.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    timeTravelEnabled: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                timeTravelEnabled: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -1054,9 +1052,8 @@ describe('Lock Tests', () => {
                     currentTimestamp + 100 * ONE_SECOND
                 )
 
-                const locked_Amount_Before = await lockFacet.getLockedAmountFor(
-                    account_A
-                )
+                const locked_Amount_Before =
+                    await lockFacet.getLockedAmountFor(account_A)
                 const locked_Amount_Before_Partition_1 =
                     await lockFacet.getLockedAmountForByPartition(
                         _PARTITION_ID_1,
@@ -1080,17 +1077,15 @@ describe('Lock Tests', () => {
                     account_A
                 )
 
-                const balance_After_Release = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balance_After_Release =
+                    await erc1410Facet.balanceOf(account_A)
                 const balance_After_Release_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
                     )
-                const locked_Amount_After = await lockFacet.getLockedAmountFor(
-                    account_A
-                )
+                const locked_Amount_After =
+                    await lockFacet.getLockedAmountFor(account_A)
                 const locked_Amount_After_Partition_1 =
                     await lockFacet.getLockedAmountForByPartition(
                         _PARTITION_ID_1,
@@ -1143,9 +1138,8 @@ describe('Lock Tests', () => {
                     currentTimestamp + 100 * ONE_SECOND
                 )
 
-                const locked_Amount_Before = await lockFacet.getLockedAmountFor(
-                    account_A
-                )
+                const locked_Amount_Before =
+                    await lockFacet.getLockedAmountFor(account_A)
                 const locked_Amount_Before_Partition_1 =
                     await lockFacet.getLockedAmountForByPartition(
                         _PARTITION_ID_1,
@@ -1167,17 +1161,15 @@ describe('Lock Tests', () => {
                     currentTimestamp + 100 * ONE_SECOND
                 )
 
-                const balance_After_Lock = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balance_After_Lock =
+                    await erc1410Facet.balanceOf(account_A)
                 const balance_After_Lock_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
                         account_A
                     )
-                const locked_Amount_After = await lockFacet.getLockedAmountFor(
-                    account_A
-                )
+                const locked_Amount_After =
+                    await lockFacet.getLockedAmountFor(account_A)
                 const locked_Amount_After_Partition_1 =
                     await lockFacet.getLockedAmountForByPartition(
                         _PARTITION_ID_1,

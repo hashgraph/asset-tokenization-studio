@@ -272,7 +272,7 @@ task('keccak256', 'Prints the keccak256 hash of a string')
         undefined,
         types.string
     )
-    .setAction(async ({ input }: Keccak256Args, hre) => {
+    .setAction(async ({ input }: Keccak256Args) => {
         const hash = keccak256(Buffer.from(input, 'utf-8'))
         console.log(`The keccak256 hash of the input "${input}" is: ${hash}`)
     })
@@ -290,7 +290,7 @@ task('createVC', 'Prints the VC for a given issuer and holder')
         undefined,
         types.string
     )
-    .setAction(async (args: CreateVcArgs, hre) => {
+    .setAction(async (args: CreateVcArgs) => {
         const issuer = new EthrDID(args.privatekey, 'polygon')
         const holderDid = new DID('ethr', args.holder)
 

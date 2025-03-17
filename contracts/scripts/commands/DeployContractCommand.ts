@@ -209,13 +209,13 @@ import { ContractName } from '@configuration'
 interface DeployContractCommandParams {
     name: ContractName
     signer: Signer
-    args?: Array<any>
+    args?: Array<unknown>
 }
 
 export default class DeployContractCommand {
     public readonly name: ContractName
     public readonly signer: Signer
-    public readonly args: Array<any> = []
+    public readonly args: Array<unknown> = []
 
     constructor({ name, signer, args = [] }: DeployContractCommandParams) {
         this.name = name
