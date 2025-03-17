@@ -2593,6 +2593,9 @@ describe('Clearing Tests', () => {
                     account_B,
                     clearingOperation.partition,
                     1,
+                    _AMOUNT,
+                    clearingOperation.expirationTimestamp,
+                    clearingOperation.data,
                     '0x'
                 )
 
@@ -2627,6 +2630,9 @@ describe('Clearing Tests', () => {
                     account_C,
                     clearingOperationFrom.clearingOperation.partition,
                     2,
+                    _AMOUNT,
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
                 )
 
@@ -2660,6 +2666,9 @@ describe('Clearing Tests', () => {
                     account_D,
                     clearingOperationFrom.clearingOperation.partition,
                     3,
+                    _AMOUNT,
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
                 )
 
@@ -2698,6 +2707,9 @@ describe('Clearing Tests', () => {
                     account_A,
                     clearingOperation.partition,
                     1,
+                    _AMOUNT,
+                    clearingOperation.expirationTimestamp,
+                    clearingOperation.data,
                     '0x'
                 )
 
@@ -2730,6 +2742,9 @@ describe('Clearing Tests', () => {
                     clearingOperationFrom.from,
                     clearingOperationFrom.clearingOperation.partition,
                     2,
+                    _AMOUNT,
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
                 )
 
@@ -2760,6 +2775,9 @@ describe('Clearing Tests', () => {
                     clearingOperationFrom.from,
                     clearingOperationFrom.clearingOperation.partition,
                     3,
+                    _AMOUNT,
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
                 )
 
@@ -2799,6 +2817,8 @@ describe('Clearing Tests', () => {
                     clearingOperation.partition,
                     1,
                     Object.values(hold),
+                    clearingOperation.expirationTimestamp,
+                    clearingOperation.data,
                     '0x'
                 )
             ;(clearingIdentifier.clearingId = 1),
@@ -2833,6 +2853,8 @@ describe('Clearing Tests', () => {
                     clearingOperationFrom.clearingOperation.partition,
                     2,
                     Object.values(hold),
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
                 )
 
@@ -2865,6 +2887,8 @@ describe('Clearing Tests', () => {
                     clearingOperationFrom.clearingOperation.partition,
                     3,
                     Object.values(hold),
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
                 )
 

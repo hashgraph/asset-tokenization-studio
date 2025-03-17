@@ -258,6 +258,8 @@ contract ClearingHoldCreationFacet is
             _clearingOperation.partition,
             clearingId_,
             _hold,
+            _clearingOperation.expirationTimestamp,
+            _clearingOperation.data,
             ''
         );
     }
@@ -269,11 +271,6 @@ contract ClearingHoldCreationFacet is
         external
         override
         onlyUnpaused
-        validateAddress(_clearingOperationFrom.from)
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         )
@@ -282,6 +279,14 @@ contract ClearingHoldCreationFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        {
+            _checkValidAddress(_clearingOperationFrom.from);
+            _checkValidAddress(_hold.escrow);
+            _checkDefaultPartitionWithSinglePartition(
+                _clearingOperationFrom.clearingOperation.partition
+            );
+        }
+
         address sender = _msgSender();
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
@@ -299,6 +304,8 @@ contract ClearingHoldCreationFacet is
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
             _hold,
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            _clearingOperationFrom.clearingOperation.data,
             _clearingOperationFrom.operatorData
         );
     }
@@ -310,11 +317,6 @@ contract ClearingHoldCreationFacet is
         external
         override
         onlyUnpaused
-        validateAddress(_clearingOperationFrom.from)
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         )
@@ -324,6 +326,11 @@ contract ClearingHoldCreationFacet is
         returns (bool success_, uint256 clearingId_)
     {
         {
+            _checkValidAddress(_clearingOperationFrom.from);
+            _checkValidAddress(_hold.escrow);
+            _checkDefaultPartitionWithSinglePartition(
+                _clearingOperationFrom.clearingOperation.partition
+            );
             _checkOperator(
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
@@ -346,6 +353,8 @@ contract ClearingHoldCreationFacet is
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
             _hold,
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            _clearingOperationFrom.clearingOperation.data,
             _clearingOperationFrom.operatorData
         );
     }
@@ -383,6 +392,8 @@ contract ClearingHoldCreationFacet is
             _protectedClearingOperation.clearingOperation.partition,
             clearingId_,
             _hold,
+            _protectedClearingOperation.clearingOperation.expirationTimestamp,
+            _protectedClearingOperation.clearingOperation.data,
             ''
         );
     }

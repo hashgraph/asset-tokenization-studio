@@ -251,6 +251,9 @@ contract ClearingRedeemFacet is
             sender,
             _clearingOperation.partition,
             clearingId_,
+            _amount,
+            _clearingOperation.expirationTimestamp,
+            _clearingOperation.data,
             ''
         );
     }
@@ -262,9 +265,6 @@ contract ClearingRedeemFacet is
         external
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
         onlyUnProtectedPartitionsOrWildCardRole
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
@@ -273,6 +273,12 @@ contract ClearingRedeemFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        {
+            _checkDefaultPartitionWithSinglePartition(
+                _clearingOperationFrom.clearingOperation.partition
+            );
+        }
+
         address sender = _msgSender();
 
         (success_, clearingId_) = _clearingRedeemCreation(
@@ -289,6 +295,9 @@ contract ClearingRedeemFacet is
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
+            _amount,
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            _clearingOperationFrom.clearingOperation.data,
             _clearingOperationFrom.operatorData
         );
     }
@@ -300,9 +309,6 @@ contract ClearingRedeemFacet is
         external
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
         onlyUnProtectedPartitionsOrWildCardRole
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
@@ -312,6 +318,9 @@ contract ClearingRedeemFacet is
         returns (bool success_, uint256 clearingId_)
     {
         {
+            _checkDefaultPartitionWithSinglePartition(
+                _clearingOperationFrom.clearingOperation.partition
+            );
             _checkOperator(
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
@@ -333,6 +342,9 @@ contract ClearingRedeemFacet is
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
+            _amount,
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            _clearingOperationFrom.clearingOperation.data,
             _clearingOperationFrom.operatorData
         );
     }
@@ -369,6 +381,9 @@ contract ClearingRedeemFacet is
             _protectedClearingOperation.from,
             _protectedClearingOperation.clearingOperation.partition,
             clearingId_,
+            _amount,
+            _protectedClearingOperation.clearingOperation.expirationTimestamp,
+            _protectedClearingOperation.clearingOperation.data,
             ''
         );
     }

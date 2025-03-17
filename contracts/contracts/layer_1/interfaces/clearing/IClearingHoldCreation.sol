@@ -219,6 +219,8 @@ interface IClearingHoldCreation is IClearing {
         bytes32 partition,
         uint256 clearingId,
         IHold.Hold hold,
+        uint256 expirationDate,
+        bytes data,
         bytes operatorData
     );
 

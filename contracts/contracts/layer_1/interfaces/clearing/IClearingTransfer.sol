@@ -219,6 +219,9 @@ interface IClearingTransfer is IClearing {
         address indexed to,
         bytes32 partition,
         uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
         bytes operatorData
     );
 
