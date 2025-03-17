@@ -269,7 +269,7 @@ function decodeFunctionResult(
     try {
         const jsonParsedArray = JSON.parse(JSON.stringify(decodedResult))
         return jsonParsedArray
-    } catch (e) {
+    } catch {
         return resultHex
     }
 }
