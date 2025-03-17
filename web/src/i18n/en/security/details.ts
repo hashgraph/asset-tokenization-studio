@@ -238,6 +238,10 @@ export default {
     kyc: "KYC",
     ssiManager: "SSI Manager",
     clearingOperations: "Clearing Operations",
+    configuration: "Configuration",
+    operations: "Operations",
+    control: "Control",
+    corporateActions: "Corporate Actions",
   },
   actions: {
     redeem: "Redeem",
@@ -247,10 +251,14 @@ export default {
     forceRedeem: "Force redeem",
     dangerZone: {
       title: "Danger zone",
-      subtitle: "Pause security token",
+      pauseSecurityTokenTitle: "Pause Security Token",
+      pauseSecurityTokenDescription:
+        "Pause all activity related to the security token as a protective measure. While paused, transfers and interactions will be restricted",
       buttonActive: "Active",
       buttonInactive: "Inactive",
-      clearingMode: "Clearing mode",
+      clearingModeTitle: "Clearing mode",
+      clearingModeDescription:
+        "Restrict token interactions to clearing operations only. While enabled, other types of transactions will be blocked",
       activate: "Activate",
       deactivate: "Deactivate",
     },
