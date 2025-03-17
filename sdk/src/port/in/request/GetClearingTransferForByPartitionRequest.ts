@@ -203,137 +203,35 @@
 
 */
 
-import { BigNumber } from 'ethers';
-import BigDecimal from '../shared/BigDecimal';
-import {
-  InvalidClearingOperationType,
-  InvalidClearingOperationTypeNumber,
-} from './error/InvalidClearingOperationType';
+import ValidatedRequest from './validation/ValidatedRequest.js';
+import Validation from './validation/Validation.js';
 
-export class ClearingOperation {
-  partition: string;
-  expirationTimestamp: BigNumber;
-  data: string;
-}
-
-export class ClearingOperationFrom {
-  clearingOperation: ClearingOperation;
-  from: string;
-  operatorData: string;
-}
-
-export class ProtectedClearingOperation {
-  clearingOperation: ClearingOperation;
-  from: string;
-  deadline: BigNumber;
-  nonce: BigNumber;
-}
-
-export class ClearingOperationIdentifier {
-  partition: string;
-  tokenHolder: string;
-  clearingOperationType: ClearingOperationType;
+export default class GetClearingTransferForByPartitionRequest extends ValidatedRequest<GetClearingTransferForByPartitionRequest> {
+  securityId: string;
+  targetId: string;
+  partitionId: string;
   clearingId: number;
-}
 
-export enum ClearingOperationType {
-  Transfer,
-  Redeem,
-  HoldCreation,
-}
+  constructor({
+    securityId,
+    targetId,
+    partitionId,
+    clearingId,
+  }: {
+    securityId: string;
+    targetId: string;
+    partitionId: string;
+    clearingId: number;
+  }) {
+    super({
+      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: Validation.checkBytes32Format(),
+    });
 
-export class CastClearingOperationType {
-  static fromNumber(id: number): ClearingOperationType {
-    switch (id) {
-      case 0:
-        return ClearingOperationType.Transfer;
-      case 1:
-        return ClearingOperationType.Redeem;
-      case 2:
-        return ClearingOperationType.HoldCreation;
-      default:
-        throw new InvalidClearingOperationTypeNumber(id);
-    }
-  }
-
-  static toNumber(value: ClearingOperationType): number {
-    switch (value) {
-      case ClearingOperationType.Transfer:
-        return 0;
-      case ClearingOperationType.Redeem:
-        return 1;
-      case ClearingOperationType.HoldCreation:
-        return 2;
-      default:
-        throw new InvalidClearingOperationType(value);
-    }
-  }
-}
-export class ClearingHoldCreation {
-  amount: BigDecimal;
-  expirationTimestamp: number;
-  data: string;
-  operatorData: string;
-  holdEscrow: string;
-  holdExpirationTimestamp: number;
-  holdTo: string;
-  holdData: string;
-  constructor(
-    amount: BigDecimal,
-    expirationTimestamp: number,
-    data: string,
-    operatorData: string,
-    holdEscrow: string,
-    holdExpirationTimestamp: number,
-    holdTo: string,
-    holdData: string,
-  ) {
-    this.amount = amount;
-    this.expirationTimestamp = expirationTimestamp;
-    this.data = data;
-    this.operatorData = operatorData;
-    this.holdEscrow = holdEscrow;
-    this.holdExpirationTimestamp = holdExpirationTimestamp;
-    this.holdTo = holdTo;
-    this.holdData = holdData;
-  }
-}
-
-export class ClearingRedeem {
-  amount: BigDecimal;
-  expirationTimestamp: number;
-  data: string;
-  operatorData: string;
-  constructor(
-    amount: BigDecimal,
-    expirationTimestamp: number,
-    data: string,
-    operatorData: string,
-  ) {
-    this.amount = amount;
-    this.expirationTimestamp = expirationTimestamp;
-    this.data = data;
-    this.operatorData = operatorData;
-  }
-}
-
-export class ClearingTransfer {
-  amount: BigDecimal;
-  expirationTimestamp: number;
-  destination: string;
-  data: string;
-  operatorData: string;
-  constructor(
-    amount: BigDecimal,
-    expirationTimestamp: number,
-    destination: string,
-    data: string,
-    operatorData: string,
-  ) {
-    this.expirationTimestamp = expirationTimestamp;
-    this.amount = amount;
-    this.destination = destination;
-    this.data = data;
-    this.operatorData = operatorData;
+    this.securityId = securityId;
+    this.targetId = targetId;
+    this.partitionId = partitionId;
+    this.clearingId = clearingId;
   }
 }

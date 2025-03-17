@@ -203,25 +203,12 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import {
-  Clearing,
-  ClearingOperationType,
-} from '../../../../../../domain/context/security/Clearing.js';
+import { QueryResponse } from 'core/query/QueryResponse';
 
-export class GetClearingForByPartitionQueryResponse implements QueryResponse {
-  constructor(public readonly payload: Clearing) {}
-}
-
-export class GetClearingForByPartitionQuery extends Query<GetClearingForByPartitionQueryResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly partitionId: string,
-    public readonly targetId: string,
-    public readonly clearingOperationType: ClearingOperationType,
-    public readonly clearingId: number,
-  ) {
-    super();
-  }
+export default interface ClearingRedeemViewModel extends QueryResponse {
+  id: number;
+  amount: string;
+  expirationDate: Date;
+  data: string;
+  operatorData: string;
 }
