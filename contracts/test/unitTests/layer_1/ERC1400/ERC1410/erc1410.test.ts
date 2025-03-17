@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
@@ -226,12 +226,6 @@ import {
     IERC20,
     IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
-    ControlList__factory,
-    Equity__factory,
-    ERC1410ScheduledTasks__factory,
-    Pause__factory,
-    TimeTravel__factory,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -267,11 +261,11 @@ import {
     EMPTY_STRING,
     CLEARING_ACTIVE_ERROR_ID,
     CLEARING_ROLE,
+    dateToUnixTimestamp,
 } from '@scripts'
-import { grantRoleAndPauseToken } from '../../../../common'
-import { dateToUnixTimestamp } from '../../../../dateFormatter'
+import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ClearingFacet } from '@typechain'
+import { ClearingActionsFacet } from '@typechain'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -283,7 +277,6 @@ const _PARTITION_ID_1 =
 const _PARTITION_ID =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const balanceOf_A_Original = [10 * amount, 100 * amount]
-const balanceOf_B_Original = [20 * amount, 200 * amount]
 const adjustFactor = 253
 const adjustDecimals = 2
 const decimals_Original = 6
@@ -291,8 +284,22 @@ const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_Original = ZERO
 const EMPTY_VC_ID = EMPTY_STRING
-let basicTransferInfo: any
-let operatorTransferData: any
+interface TransferInfo {
+    to: string
+    value: number
+}
+
+interface OperatorTransferData {
+    partition: string
+    from: string
+    to: string
+    value: number
+    data: string
+    operatorData: string
+}
+
+let basicTransferInfo: TransferInfo
+let operatorTransferData: OperatorTransferData
 
 interface BalanceAdjustedValues {
     maxSupply: BigNumber
@@ -340,7 +347,7 @@ describe('ERC1410 Tests', () => {
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
-    let clearingFacet: ClearingFacet
+    let clearingActionsFacet: ClearingActionsFacet
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
         await grantRolesToAccounts()
@@ -461,12 +468,10 @@ describe('ERC1410 Tests', () => {
 
     async function getMaxSupplyValues() {
         const maxSupply = await capFacet.getMaxSupply()
-        const maxSupply_Partition_1 = await capFacet.getMaxSupplyByPartition(
-            _PARTITION_ID_1
-        )
-        const maxSupply_Partition = await capFacet.getMaxSupplyByPartition(
-            _PARTITION_ID
-        )
+        const maxSupply_Partition_1 =
+            await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1)
+        const maxSupply_Partition =
+            await capFacet.getMaxSupplyByPartition(_PARTITION_ID)
 
         return {
             maxSupply,
@@ -479,9 +484,8 @@ describe('ERC1410 Tests', () => {
         const totalSupply = await erc1410Facet.totalSupply()
         const totalSupply_Partition_1 =
             await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1)
-        const totalSupply_Partition = await erc1410Facet.totalSupplyByPartition(
-            _PARTITION_ID
-        )
+        const totalSupply_Partition =
+            await erc1410Facet.totalSupplyByPartition(_PARTITION_ID)
 
         return {
             totalSupply,
@@ -736,8 +740,8 @@ describe('ERC1410 Tests', () => {
             diamond.address,
             signer_A
         )
-        clearingFacet = await ethers.getContractAt(
-            'ClearingFacet',
+        clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
             diamond.address,
             signer_A
         )
@@ -816,7 +820,6 @@ describe('ERC1410 Tests', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -825,15 +828,14 @@ describe('ERC1410 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: false,
-                        timeTravelEnabled: true,
-                    })
-                )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: false,
+                    timeTravelEnabled: true,
+                })
+            )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
@@ -984,7 +986,7 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN a token with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
-            await clearingFacet.activateClearing()
+            await clearingActionsFacet.activateClearing()
 
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
@@ -1116,7 +1118,7 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN a token with clearing active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
-            await clearingFacet.activateClearing()
+            await clearingActionsFacet.activateClearing()
 
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
@@ -1407,7 +1409,7 @@ describe('ERC1410 Tests', () => {
                     data: data,
                 })
             ).to.be.rejectedWith('InvalidKycStatus')
-            let canRedeem = await erc1410Facet.canRedeemByPartition(
+            const canRedeem = await erc1410Facet.canRedeemByPartition(
                 account_D,
                 _PARTITION_ID_1,
                 amount,
@@ -2150,9 +2152,8 @@ describe('ERC1410 Tests', () => {
                     operatorData
                 )
             totalSupply = await erc1410Facet.totalSupply()
-            totalSupplyByPartition = await erc1410Facet.totalSupplyByPartition(
-                _PARTITION_ID_1
-            )
+            totalSupplyByPartition =
+                await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1)
 
             // check amounts
             const balanceOf_C = await erc1410Facet.balanceOf(account_C)
@@ -2622,13 +2623,12 @@ describe('ERC1410 Tests', () => {
             before(async () => {
                 // mute | mock console.log
                 console.log = () => {}
-                // eslint-disable-next-line @typescript-eslint/no-extra-semi
                 ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
                 account_A = signer_A.address
                 account_B = signer_B.address
                 account_C = signer_C.address
 
-                const { deployer, ...deployedContracts } =
+                const { ...deployedContracts } =
                     await deployAtsFullInfrastructure(
                         await DeployAtsFullInfrastructureCommand.newInstance({
                             signer: signer_A,
@@ -2741,9 +2741,8 @@ describe('ERC1410 Tests', () => {
                         data: '0x',
                     })
 
-                    const balanceOf_A_Before = await erc1410Facet.balanceOf(
-                        account_A
-                    )
+                    const balanceOf_A_Before =
+                        await erc1410Facet.balanceOf(account_A)
                     const balanceOf_A_Partition_1_Before =
                         await erc1410Facet.balanceOfByPartition(
                             _PARTITION_ID_1,
@@ -2763,9 +2762,8 @@ describe('ERC1410 Tests', () => {
                         data: '0x',
                     })
 
-                    const balanceOf_A_After = await erc1410Facet.balanceOf(
-                        account_A
-                    )
+                    const balanceOf_A_After =
+                        await erc1410Facet.balanceOf(account_A)
                     const balanceOf_A_Partition_1_After =
                         await erc1410Facet.balanceOfByPartition(
                             _PARTITION_ID_1,
@@ -3052,7 +3050,6 @@ describe('ERC1410 Tests', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -3061,15 +3058,14 @@ describe('ERC1410 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                        timeTravelEnabled: false,
-                    })
-                )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: false,
+                })
+            )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
@@ -3225,9 +3221,8 @@ describe('ERC1410 Tests', () => {
                     '0x'
                 )
 
-                const balanceOf_A_Before = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balanceOf_A_Before =
+                    await erc1410Facet.balanceOf(account_A)
                 const balanceOf_A_Partition_1_Before =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
@@ -3247,9 +3242,8 @@ describe('ERC1410 Tests', () => {
                     '0x'
                 )
 
-                const balanceOf_A_After = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balanceOf_A_After =
+                    await erc1410Facet.balanceOf(account_A)
                 const balanceOf_A_Partition_1_After =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,

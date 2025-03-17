@@ -263,8 +263,14 @@ import {
     TransferAndLockTimeTravel__factory,
     TransparentUpgradeableProxy__factory,
     TimeTravel__factory,
-    ClearingFacet__factory,
-    ClearingFacetTimeTravel__factory,
+    ClearingTransferFacet__factory,
+    ClearingTransferFacetTimeTravel__factory,
+    ClearingRedeemFacet__factory,
+    ClearingRedeemFacetTimeTravel__factory,
+    ClearingHoldCreationFacet__factory,
+    ClearingHoldCreationFacetTimeTravel__factory,
+    ClearingReadFacet__factory,
+    ClearingReadFacetTimeTravel__factory,
     ClearingActionsFacet__factory,
     ClearingActionsFacetTimeTravel__factory,
 } from '@typechain'
@@ -318,9 +324,8 @@ export async function deployAtsFullInfrastructure({
         useDeployed,
         timeTravelEnabled,
     })
-    const { deployer, ...deployedContractList } = await deployAtsContracts(
-        deployCommand
-    )
+    const { deployer, ...deployedContractList } =
+        await deployAtsContracts(deployCommand)
 
     // * Check if BusinessLogicResolver is deployed correctly
     const resolver = deployedContractList.businessLogicResolver
@@ -695,14 +700,53 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        clearingFacet: new DeployContractWithFactoryCommand({
+        clearingTransferFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new ClearingFacet__factory(),
-                new ClearingFacetTimeTravel__factory()
+                new ClearingTransferFacet__factory(),
+                new ClearingTransferFacetTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ClearingFacet.addresses?.[network]
+                ? Configuration.contracts.ClearingTransferFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        clearingRedeemFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ClearingRedeemFacet__factory(),
+                new ClearingRedeemFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ClearingRedeemFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        clearingHoldCreationFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ClearingHoldCreationFacet__factory(),
+                new ClearingHoldCreationFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ClearingHoldCreationFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        clearingReadFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ClearingReadFacet__factory(),
+                new ClearingReadFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ClearingReadFacet.addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -893,10 +937,34 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
-            clearingFacet: await deployContractWithFactory(
-                commands.clearingFacet
+            clearingTransferFacet: await deployContractWithFactory(
+                commands.clearingTransferFacet
             ).then((result) => {
-                console.log('ClearingFacet has been deployed successfully')
+                console.log(
+                    'ClearingTransferFacet has been deployed successfully'
+                )
+                return result
+            }),
+            clearingRedeemFacet: await deployContractWithFactory(
+                commands.clearingRedeemFacet
+            ).then((result) => {
+                console.log(
+                    'ClearingRedeemFacet has been deployed successfully'
+                )
+                return result
+            }),
+            clearingHoldCreationFacet: await deployContractWithFactory(
+                commands.clearingHoldCreationFacet
+            ).then((result) => {
+                console.log(
+                    'ClearingHoldCreationFacet has been deployed successfully'
+                )
+                return result
+            }),
+            clearingReadFacet: await deployContractWithFactory(
+                commands.clearingReadFacet
+            ).then((result) => {
+                console.log('ClearingReadFacet has been deployed successfully')
                 return result
             }),
             clearingActionsFacet: await deployContractWithFactory(
@@ -921,7 +989,8 @@ export async function deployAtsContracts({
         })
 
     if (!timeTravelEnabled) {
-        const { timeTravel, ...atsContracts } = deployedContracts
+        const { ...atsContracts } = deployedContracts
+        delete atsContracts.timeTravel
         return atsContracts
     }
     return deployedContracts
@@ -929,7 +998,7 @@ export async function deployAtsContracts({
 
 export async function deployContractWithFactory<
     F extends ContractFactory,
-    C extends Contract = ReturnType<F['attach']>
+    C extends Contract = ReturnType<F['attach']>,
 >({
     factory,
     signer,
@@ -943,7 +1012,7 @@ export async function deployContractWithFactory<
     let implementationContract: C
     let proxyAddress: string | undefined
     let proxyAdminAddress: string | undefined
-    let txResponseList: ContractTransaction[] = []
+    const txResponseList: ContractTransaction[] = []
 
     if (deployedContract?.address) {
         implementationContract = factory.attach(deployedContract.address) as C

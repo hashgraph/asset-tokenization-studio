@@ -203,22 +203,250 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ClearingFacet} from '../../../layer_1/clearing/ClearingFacet.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {Common} from '../common/Common.sol';
 import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    IClearingHoldCreation
+} from '../interfaces/clearing/IClearingHoldCreation.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {
+    _CLEARING_HOLDCREATION_RESOLVER_KEY
+} from '../constants/resolverKeys.sol';
 
-contract ClearingFacetTimeTravel is ClearingFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
+// solhint-disable no-unused-vars, custom-errors
+contract ClearingHoldCreationFacet is
+    IStaticFunctionSelectors,
+    IClearingHoldCreation,
+    Common
+{
+    function clearingCreateHoldByPartition(
+        ClearingOperation calldata _clearingOperation,
+        IHold.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
     {
-        return TimeTravelStorageWrapper._blockTimestamp();
+        address sender = _msgSender();
+
+        (success_, clearingId_) = _clearingHoldCreationCreation(
+            _clearingOperation,
+            sender,
+            sender,
+            false,
+            _hold,
+            ''
+        );
+
+        emit ClearedHoldByPartition(
+            sender,
+            sender,
+            _clearingOperation.partition,
+            clearingId_,
+            _hold,
+            ''
+        );
+    }
+
+    function clearingCreateHoldFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        IHold.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_clearingOperationFrom.from)
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        address sender = _msgSender();
+
+        (success_, clearingId_) = _clearingHoldCreationCreation(
+            _clearingOperationFrom.clearingOperation,
+            _clearingOperationFrom.from,
+            sender,
+            true,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
+
+        emit ClearedHoldByPartition(
+            sender,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
+    }
+
+    function operatorClearingCreateHoldByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        IHold.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_clearingOperationFrom.from)
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        {
+            _checkOperator(
+                _clearingOperationFrom.clearingOperation.partition,
+                _clearingOperationFrom.from
+            );
+        }
+        address sender = _msgSender();
+
+        (success_, clearingId_) = _clearingHoldCreationCreation(
+            _clearingOperationFrom.clearingOperation,
+            _clearingOperationFrom.from,
+            sender,
+            false,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
+
+        emit ClearedHoldByPartition(
+            sender,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
+    }
+
+    function protectedClearingCreateHoldByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        IHold.Hold calldata _hold,
+        bytes calldata _signature
+    )
+        external
+        override
+        onlyUnpaused
+        onlyProtectedPartitions
+        validateAddress(_protectedClearingOperation.from)
+        onlyWithValidExpirationTimestamp(
+            _protectedClearingOperation.clearingOperation.expirationTimestamp
+        )
+        onlyRole(
+            _protectedPartitionsRole(
+                _protectedClearingOperation.clearingOperation.partition
+            )
+        )
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _protectedClearingCreateHoldByPartition(
+            _protectedClearingOperation,
+            _hold,
+            _signature
+        );
+
+        emit ClearedHoldByPartition(
+            _msgSender(),
+            _protectedClearingOperation.from,
+            _protectedClearingOperation.clearingOperation.partition,
+            clearingId_,
+            _hold,
+            ''
+        );
+    }
+
+    function getClearingCreateHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId
+    )
+        external
+        view
+        override
+        returns (ClearingHoldCreationData memory clearingHoldCreationData_)
+    {
+        return
+            _getClearingHoldCreationForByPartitionAdjusted(
+                _partition,
+                _tokenHolder,
+                _clearingId
+            );
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _CLEARING_HOLDCREATION_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingCreateHoldFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorClearingCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedClearingCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearingCreateHoldForByPartition
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IClearingHoldCreation)
+            .interfaceId;
     }
 }
+// solhint-enable no-unused-vars, custom-errors

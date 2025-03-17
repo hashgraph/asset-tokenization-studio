@@ -1,9 +1,14 @@
-// prettier.config.js or .prettierrc.js
-module.exports = {
+/**
+ * @see https://prettier.io/docs/configuration
+ * @type {import("prettier").Config}
+ */
+const config = {
     trailingComma: 'es5',
     tabWidth: 4,
-    semi: false,
     singleQuote: true,
+    printWidth: 80,
+    semi: false,
+    plugins: ['prettier-plugin-solidity'],
     overrides: [
         {
             files: 'contracts/**/*.sol',
@@ -12,4 +17,6 @@ module.exports = {
             },
         },
     ],
-}
+};
+
+export default config;

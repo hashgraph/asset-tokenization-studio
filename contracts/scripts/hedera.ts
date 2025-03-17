@@ -203,8 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios'
 import Configuration, { Network } from '@configuration'
 import { ADDRESS_ZERO } from './constants'
@@ -278,9 +276,7 @@ async function getFromMirrorNode<T>({
             }
         } catch (error) {
             console.error(
-                `Error retrieving data from Mirror Node: ${
-                    (error as Error).message
-                }`
+                `Error retrieving data from Mirror Node: ${(error as Error).message}`
             )
         }
         await delay({ time: timeBetweenRetries, unit: 'seconds' })

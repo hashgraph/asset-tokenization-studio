@@ -26,8 +26,8 @@
     "test:local": "npx jest --forceExit",
     "test": "NODE_OPTIONS=--max-old-space-size=16384 npx jest --ci --runInBand --detectOpenHandles --forceExit",
     "test:demo": "npx jest demo.test.ts",
-    "prettier": "prettier --config .prettierrc --write .",
-    "pre-commit": "lint-staged && npm run prettier",
+    "prettier": "npx -y prettier --config .prettierrc --write .",
+    "pre-commit": "npx -y lint-staged && npm run prettier",
     "prettierCheck": "prettier --config .prettierrc --check",
     "prepack": "npm run build",
     "cleanCache": "npx jest --clearCache"
