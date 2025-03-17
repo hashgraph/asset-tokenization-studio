@@ -6,12 +6,15 @@ import {
   GetClearingRedeemForByPartitionRequest,
   GetClearingTransferForByPartitionRequest,
   GetClearingCreateHoldForByPartitionRequest,
+  GetClearedAmountForRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export const GET_CLEARING_OPERATIONS_LIST = (securityId: string) =>
   `GET_CLEARING_OPERATIONS_LIST_${securityId}`;
 export const GET_CLEARING_OPERATION_MODE = (securityId: string) =>
   `GET_CLEARING_OPERATION_MODE_${securityId}`;
+export const GET_CLEARED_BALANCE = (securityId: string, targetId: string) =>
+  `GET_CLEARED_BALANCE_${securityId}_${targetId}`;
 
 interface UseGetClearingOperationsRequest {
   securityId: string;
@@ -137,6 +140,26 @@ export const useGetIsClearingActivated = (
         return isClearingActivated;
       } catch (error) {
         console.error("Error fetching clearing operations", error);
+        throw error;
+      }
+    },
+    options,
+  );
+};
+
+export const useGetClearedAmountFor = (
+  request: GetClearedAmountForRequest,
+  options?: UseQueryOptions<number, unknown, number, string[]>,
+) => {
+  return useQuery(
+    [GET_CLEARED_BALANCE(request.securityId, request.targetId)],
+    async () => {
+      try {
+        const clearedAmount = await SDKService.getClearedAmountFor(request);
+
+        return clearedAmount;
+      } catch (error) {
+        console.error("Error fetching cleared amount", error);
         throw error;
       }
     },
