@@ -316,10 +316,15 @@ import {
   ClearingCreateHoldByPartitionRequest,
   ClearingRedeemByPartitionRequest,
   ClearingTransferByPartitionRequest,
-  GetClearingForByPartitionRequest,
-  ClearingViewModel,
   GetClearingsIdForByPartitionRequest,
   IsClearingActivatedRequest,
+  ClearingTransferViewModel,
+  GetClearingTransferForByPartitionRequest,
+  ClearingRedeemViewModel,
+  GetClearingRedeemForByPartitionRequest,
+  GetClearingCreateHoldForByPartitionRequest,
+  ClearingCreateHoldViewModel,
+  GetClearedAmountForRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -914,10 +919,24 @@ export class SDKService {
     return response;
   }
 
-  public static async getClearingForByPartition(
-    request: GetClearingForByPartitionRequest,
-  ): Promise<ClearingViewModel> {
-    const response = await Security.getClearingForByPartition(request);
+  public static async getClearingTransferForByPartition(
+    request: GetClearingTransferForByPartitionRequest,
+  ): Promise<ClearingTransferViewModel> {
+    const response = await Security.getClearingTransferForByPartition(request);
+    return response;
+  }
+
+  public static async getClearingRedeemForByPartition(
+    request: GetClearingRedeemForByPartitionRequest,
+  ): Promise<ClearingRedeemViewModel> {
+    const response = await Security.getClearingRedeemForByPartition(request);
+    return response;
+  }
+  public static async getClearingCreateHoldForByPartition(
+    request: GetClearingCreateHoldForByPartitionRequest,
+  ): Promise<ClearingCreateHoldViewModel> {
+    const response =
+      await Security.getClearingCreateHoldForByPartition(request);
     return response;
   }
 
@@ -983,6 +1002,13 @@ export class SDKService {
     request: IsClearingActivatedRequest,
   ): Promise<boolean> {
     const response = await Security.isClearingActivated(request);
+    return response;
+  }
+
+  public static async getClearedAmountFor(
+    req: GetClearedAmountForRequest,
+  ): Promise<number> {
+    const response = await Security.getClearedAmountFor(req);
     return response;
   }
 }

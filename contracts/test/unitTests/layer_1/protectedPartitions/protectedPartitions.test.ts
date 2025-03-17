@@ -222,7 +222,6 @@ import {
     Kyc,
     SsiManagement,
     Hold,
-    ClearingFacet,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -413,8 +412,7 @@ describe('ProtectedPartitions Tests', () => {
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let holdFacet: Hold
-    let clearingFacet: ClearingFacet
-
+    let clearingFacet: any
     let protectedHold: any
     let hold: any
     let clearingOperation: any
@@ -468,7 +466,44 @@ describe('ProtectedPartitions Tests', () => {
             'SsiManagement',
             address
         )
-        clearingFacet = await ethers.getContractAt('ClearingFacet', address)
+        let clearingTransferFacet = await ethers.getContractAt(
+            'ClearingTransferFacet',
+            address,
+            signer_A
+        )
+
+        let clearingRedeemFacet = await ethers.getContractAt(
+            'ClearingRedeemFacet',
+            address,
+            signer_A
+        )
+        let clearingHoldCreationFacet = await ethers.getContractAt(
+            'ClearingHoldCreationFacet',
+            address,
+            signer_A
+        )
+        let clearingReadFacet = await ethers.getContractAt(
+            'ClearingReadFacet',
+            address,
+            signer_A
+        )
+        let clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
+            address,
+            signer_A
+        )
+
+        clearingFacet = new ethers.Contract(
+            address,
+            [
+                ...clearingTransferFacet.interface.fragments,
+                ...clearingRedeemFacet.interface.fragments,
+                ...clearingHoldCreationFacet.interface.fragments,
+                ...clearingReadFacet.interface.fragments,
+                ...clearingActionsFacet.interface.fragments,
+            ],
+            signer_A
+        )
     }
 
     async function grantKyc() {

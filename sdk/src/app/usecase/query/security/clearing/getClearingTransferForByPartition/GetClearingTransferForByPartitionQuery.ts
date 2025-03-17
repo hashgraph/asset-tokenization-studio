@@ -203,40 +203,23 @@
 
 */
 
-import { ClearingOperationType } from '../../../domain/context/security/Clearing.js';
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { ClearingTransfer } from '../../../../../../domain/context/security/Clearing.js';
 
-export default class GetClearingForByPartitionRequest extends ValidatedRequest<GetClearingForByPartitionRequest> {
-  securityId: string;
-  targetId: string;
-  partitionId: string;
-  clearingOperationType: ClearingOperationType;
-  clearingId: number;
+export class GetClearingTransferForByPartitionQueryResponse
+  implements QueryResponse
+{
+  constructor(public readonly payload: ClearingTransfer) {}
+}
 
-  constructor({
-    securityId,
-    targetId,
-    partitionId,
-    clearingOperationType,
-    clearingId,
-  }: {
-    securityId: string;
-    targetId: string;
-    partitionId: string;
-    clearingOperationType: ClearingOperationType;
-    clearingId: number;
-  }) {
-    super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
-    });
-
-    this.securityId = securityId;
-    this.targetId = targetId;
-    this.partitionId = partitionId;
-    this.clearingOperationType = clearingOperationType;
-    this.clearingId = clearingId;
+export class GetClearingTransferForByPartitionQuery extends Query<GetClearingTransferForByPartitionQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly partitionId: string,
+    public readonly targetId: string,
+    public readonly clearingId: number,
+  ) {
+    super();
   }
 }

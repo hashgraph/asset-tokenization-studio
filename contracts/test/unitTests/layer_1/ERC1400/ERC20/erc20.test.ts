@@ -218,7 +218,7 @@ import {
     IFactory,
     Kyc,
     SsiManagement,
-    ClearingFacet
+    ClearingActionsFacet,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -264,7 +264,7 @@ describe('ERC20 Tests', () => {
     let erc1594Facet: ERC1594
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
-    let clearingFacet: ClearingFacet
+    let clearingActionsFacet: ClearingActionsFacet
 
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
@@ -310,9 +310,13 @@ describe('ERC20 Tests', () => {
             }
             const rbacClearing: Rbac = {
                 role: CLEARING_ROLE,
-                members: [account_A]
+                members: [account_A],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacControlList, rbacClearing]
+            const init_rbacs: Rbac[] = [
+                rbacPause,
+                rbacControlList,
+                rbacClearing,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -362,8 +366,8 @@ describe('ERC20 Tests', () => {
                 diamond.address,
                 signer_A
             )
-            clearingFacet = await ethers.getContractAt(
-                'ClearingFacet',
+            clearingActionsFacet = await ethers.getContractAt(
+                'ClearingActionsFacet',
                 diamond.address,
                 signer_A
             )
@@ -434,7 +438,7 @@ describe('ERC20 Tests', () => {
         })
 
         it('GIVEN an ERC20 with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
-            await clearingFacet.activateClearing()
+            await clearingActionsFacet.activateClearing()
             await expect(
                 erc20Facet.transfer(account_E, amount)
             ).to.be.rejectedWith('ClearingIsActivated')
