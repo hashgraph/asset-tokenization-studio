@@ -259,6 +259,10 @@ export class GetClearingTransferForByPartitionQueryHandler
       security.decimals,
     );
 
+    clearing.destination = (
+      await this.mirrorNodeAdapter.getAccountInfo(clearing.destination)
+    ).id.toString();
+
     return new GetClearingTransferForByPartitionQueryResponse(clearing);
   }
 }
