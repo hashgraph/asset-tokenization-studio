@@ -203,22 +203,27 @@
 
 */
 
-import { QueryResponse } from 'core/query/QueryResponse';
-import { ClearingOperationType } from '../../../domain/context/security/Clearing';
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
 
-export default interface ClearingViewModel extends QueryResponse {
-  id: number;
-  amount: string;
-  expirationDate: Date;
-  destinationAddress: string;
-  clearingOperationType: ClearingOperationType;
-  data: string;
-  operatorData: string;
-  hold: {
-    amount: string;
-    expirationDate: Date;
-    escrow: string;
-    to: string;
-    data: string;
-  };
+import {
+    ClearingTransferFacet
+} from '../../../layer_1/clearing/ClearingTransferFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+
+contract ClearingTransferFacetTimeTravel is
+    ClearingTransferFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
+    }
 }

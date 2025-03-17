@@ -225,7 +225,7 @@ import {
     TimeTravel,
     Kyc,
     SsiManagement,
-    ClearingFacet,
+    ClearingActionsFacet,
     Equity,
     AdjustBalances,
     Cap,
@@ -302,7 +302,7 @@ describe('Hold Tests', () => {
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
-    let clearingFacet: ClearingFacet
+    let clearingActionsFacet: ClearingActionsFacet
     let equityFacet: Equity
     let accessControlFacet: AccessControl
     let capFacet: Cap
@@ -399,8 +399,8 @@ describe('Hold Tests', () => {
             diamond.address,
             signer_A
         )
-        clearingFacet = await ethers.getContractAt(
-            'ClearingFacet',
+        clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
             diamond.address,
             signer_A
         )
@@ -711,11 +711,11 @@ describe('Hold Tests', () => {
 
         describe('Clearing active', () => {
             it('GIVEN a token in clearing mode THEN hold creation fails with ClearingIsActivated', async () => {
-                await clearingFacet.activateClearing()
+                await clearingActionsFacet.activateClearing()
                 await expect(
                     holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
                 ).to.be.revertedWithCustomError(
-                    clearingFacet,
+                    holdFacet,
                     'ClearingIsActivated'
                 )
                 await expect(
@@ -726,7 +726,7 @@ describe('Hold Tests', () => {
                         '0x'
                     )
                 ).to.be.revertedWithCustomError(
-                    clearingFacet,
+                    holdFacet,
                     'ClearingIsActivated'
                 )
                 await expect(
@@ -737,7 +737,7 @@ describe('Hold Tests', () => {
                         '0x'
                     )
                 ).to.be.revertedWithCustomError(
-                    clearingFacet,
+                    holdFacet,
                     'ClearingIsActivated'
                 )
             })

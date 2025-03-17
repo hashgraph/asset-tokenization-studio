@@ -357,8 +357,10 @@ import {
   Hold__factory,
   SsiManagement__factory,
   Kyc__factory,
-  ClearingFacet__factory,
   ClearingActionsFacet__factory,
+  ClearingTransferFacet__factory,
+  ClearingRedeemFacet__factory,
+  ClearingHoldCreationFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -2206,7 +2208,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingActionsFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).activateClearing({
@@ -2222,7 +2224,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingActionsFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).deactivateClearing({
@@ -2250,7 +2252,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingTransferFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingTransferByPartition(
@@ -2288,7 +2290,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingTransferFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingTransferFromByPartition(
@@ -2330,7 +2332,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingTransferFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedClearingTransferByPartition(
@@ -2456,7 +2458,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingRedeemFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingRedeemByPartition(clearingOperation, amount.toBigNumber(), {
@@ -2488,7 +2490,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingRedeemFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingRedeemFromByPartition(
@@ -2528,7 +2530,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingRedeemFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedClearingRedeemByPartition(
@@ -2571,7 +2573,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingHoldCreationFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingCreateHoldByPartition(clearingOperation, hold, {
@@ -2614,7 +2616,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingHoldCreationFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingCreateHoldFromByPartition(clearingOperationFrom, hold, {
@@ -2661,7 +2663,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingHoldCreationFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedClearingCreateHoldByPartition(
@@ -2709,7 +2711,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingHoldCreationFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold, {
@@ -2741,7 +2743,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingRedeemFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).operatorClearingRedeemByPartition(
@@ -2778,7 +2780,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingTransferFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingTransferFromByPartition(

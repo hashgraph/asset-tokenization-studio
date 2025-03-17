@@ -263,8 +263,14 @@ import {
     TransferAndLockTimeTravel__factory,
     TransparentUpgradeableProxy__factory,
     TimeTravel__factory,
-    ClearingFacet__factory,
-    ClearingFacetTimeTravel__factory,
+    ClearingTransferFacet__factory,
+    ClearingTransferFacetTimeTravel__factory,
+    ClearingRedeemFacet__factory,
+    ClearingRedeemFacetTimeTravel__factory,
+    ClearingHoldCreationFacet__factory,
+    ClearingHoldCreationFacetTimeTravel__factory,
+    ClearingReadFacet__factory,
+    ClearingReadFacetTimeTravel__factory,
     ClearingActionsFacet__factory,
     ClearingActionsFacetTimeTravel__factory,
 } from '@typechain'
@@ -694,14 +700,53 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        clearingFacet: new DeployContractWithFactoryCommand({
+        clearingTransferFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new ClearingFacet__factory(),
-                new ClearingFacetTimeTravel__factory()
+                new ClearingTransferFacet__factory(),
+                new ClearingTransferFacetTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ClearingFacet.addresses?.[network]
+                ? Configuration.contracts.ClearingTransferFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        clearingRedeemFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ClearingRedeemFacet__factory(),
+                new ClearingRedeemFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ClearingRedeemFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        clearingHoldCreationFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ClearingHoldCreationFacet__factory(),
+                new ClearingHoldCreationFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ClearingHoldCreationFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        clearingReadFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ClearingReadFacet__factory(),
+                new ClearingReadFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ClearingReadFacet.addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -892,10 +937,34 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
-            clearingFacet: await deployContractWithFactory(
-                commands.clearingFacet
+            clearingTransferFacet: await deployContractWithFactory(
+                commands.clearingTransferFacet
             ).then((result) => {
-                console.log('ClearingFacet has been deployed successfully')
+                console.log(
+                    'ClearingTransferFacet has been deployed successfully'
+                )
+                return result
+            }),
+            clearingRedeemFacet: await deployContractWithFactory(
+                commands.clearingRedeemFacet
+            ).then((result) => {
+                console.log(
+                    'ClearingRedeemFacet has been deployed successfully'
+                )
+                return result
+            }),
+            clearingHoldCreationFacet: await deployContractWithFactory(
+                commands.clearingHoldCreationFacet
+            ).then((result) => {
+                console.log(
+                    'ClearingHoldCreationFacet has been deployed successfully'
+                )
+                return result
+            }),
+            clearingReadFacet: await deployContractWithFactory(
+                commands.clearingReadFacet
+            ).then((result) => {
+                console.log('ClearingReadFacet has been deployed successfully')
                 return result
             }),
             clearingActionsFacet: await deployContractWithFactory(

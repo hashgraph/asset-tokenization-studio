@@ -222,7 +222,6 @@ import {
     Kyc,
     SsiManagement,
     Hold,
-    ClearingFacet,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -248,6 +247,7 @@ import {
     EMPTY_STRING,
     ADDRESS_ZERO,
 } from '@scripts'
+import { Contract } from 'ethers'
 
 const amount = 1
 
@@ -455,8 +455,7 @@ describe('ProtectedPartitions Tests', () => {
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let holdFacet: Hold
-    let clearingFacet: ClearingFacet
-
+    let clearingFacet: Contract
     let protectedHold: ProtectedHoldData
     let hold: HoldData
     let clearingOperation: ClearingOperationData
@@ -509,7 +508,44 @@ describe('ProtectedPartitions Tests', () => {
             'SsiManagement',
             address
         )
-        clearingFacet = await ethers.getContractAt('ClearingFacet', address)
+        const clearingTransferFacet = await ethers.getContractAt(
+            'ClearingTransferFacet',
+            address,
+            signer_A
+        )
+
+        const clearingRedeemFacet = await ethers.getContractAt(
+            'ClearingRedeemFacet',
+            address,
+            signer_A
+        )
+        const clearingHoldCreationFacet = await ethers.getContractAt(
+            'ClearingHoldCreationFacet',
+            address,
+            signer_A
+        )
+        const clearingReadFacet = await ethers.getContractAt(
+            'ClearingReadFacet',
+            address,
+            signer_A
+        )
+        const clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
+            address,
+            signer_A
+        )
+
+        clearingFacet = new Contract(
+            address,
+            [
+                ...clearingTransferFacet.interface.fragments,
+                ...clearingRedeemFacet.interface.fragments,
+                ...clearingHoldCreationFacet.interface.fragments,
+                ...clearingReadFacet.interface.fragments,
+                ...clearingActionsFacet.interface.fragments,
+            ],
+            signer_A
+        )
     }
 
     async function grantKyc() {
