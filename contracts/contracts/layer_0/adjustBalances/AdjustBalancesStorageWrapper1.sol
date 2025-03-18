@@ -221,11 +221,6 @@ abstract contract AdjustBalancesStorageWrapper1 is
     IAdjustBalancesStorageWrapper,
     ScheduledBalanceAdjustmentsStorageWrapper
 {
-    modifier validateFactor(uint256 _factor) {
-        _checkFactor(_factor);
-        _;
-    }
-
     struct AdjustBalancesStorage {
         // Mapping from investor to their partitions labaf
         mapping(address => uint256[]) labafUserPartition;
@@ -248,11 +243,13 @@ abstract contract AdjustBalancesStorageWrapper1 is
         // Clearings
         mapping(address => uint256) labafClearedAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) labafClearedAmountByAccountAndPartition;
+        // solhint-disable-next-line
         mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => mapping(uint256 => uint256)))) labafClearedAmountByAccountPartitionTypeAndId;
     }
 
-    function _checkFactor(uint256 _factor) private pure {
-        if (_factor == 0) revert FactorIsZero();
+    modifier validateFactor(uint256 _factor) {
+        _checkFactor(_factor);
+        _;
     }
 
     function _updateAbaf(uint256 factor) internal {
@@ -461,22 +458,6 @@ abstract contract AdjustBalancesStorageWrapper1 is
         );
     }
 
-    function _calculateNewAbaf(
-        uint256 abaf,
-        uint256 factor
-    ) private pure returns (uint256) {
-        return abaf == 0 ? factor : abaf * factor;
-    }
-
-    function _calculateFactor(
-        uint256 _abaf,
-        uint256 _labaf
-    ) internal pure returns (uint256 factor_) {
-        if (_abaf == 0) return 1;
-        if (_labaf == 0) return _abaf;
-        factor_ = _abaf / _labaf;
-    }
-
     function _getAbaf() internal view returns (uint256) {
         return _adjustBalancesStorage().abaf;
     }
@@ -598,6 +579,15 @@ abstract contract AdjustBalancesStorageWrapper1 is
                 ][_clearingOperationIdentifier.clearingId];
     }
 
+    function _calculateFactor(
+        uint256 _abaf,
+        uint256 _labaf
+    ) internal pure returns (uint256 factor_) {
+        if (_abaf == 0) return 1;
+        if (_labaf == 0) return _abaf;
+        factor_ = _abaf / _labaf;
+    }
+
     function _adjustBalancesStorage()
         internal
         pure
@@ -608,5 +598,16 @@ abstract contract AdjustBalancesStorageWrapper1 is
         assembly {
             adjustBalancesStorage_.slot := position
         }
+    }
+
+    function _checkFactor(uint256 _factor) private pure {
+        if (_factor == 0) revert FactorIsZero();
+    }
+
+    function _calculateNewAbaf(
+        uint256 abaf,
+        uint256 factor
+    ) private pure returns (uint256) {
+        return abaf == 0 ? factor : abaf * factor;
     }
 }

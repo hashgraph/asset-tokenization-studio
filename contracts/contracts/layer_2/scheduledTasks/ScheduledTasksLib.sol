@@ -346,6 +346,32 @@ library ScheduledTasksLib {
         return _scheduledTasks.scheduledTasks[_index];
     }
 
+    function getScheduledTasks(
+        ScheduledTasksDataStorage storage _scheduledTasks,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
+            _pageIndex,
+            _pageLength
+        );
+
+        scheduledTask_ = new ScheduledTask[](
+            LibCommon.getSize(
+                start,
+                end,
+                getScheduledTaskCount(_scheduledTasks)
+            )
+        );
+
+        for (uint256 i = 0; i < scheduledTask_.length; i++) {
+            scheduledTask_[i] = getScheduledTasksByIndex(
+                _scheduledTasks,
+                start + i
+            );
+        }
+    }
+
     function _slideScheduledTasks(
         ScheduledTasksDataStorage storage _scheduledTasks,
         uint256 _pos
@@ -381,31 +407,5 @@ library ScheduledTasksLib {
         }
         delete (_scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
         _scheduledTasks.scheduledTaskCount--;
-    }
-
-    function getScheduledTasks(
-        ScheduledTasksDataStorage storage _scheduledTasks,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
-            _pageIndex,
-            _pageLength
-        );
-
-        scheduledTask_ = new ScheduledTask[](
-            LibCommon.getSize(
-                start,
-                end,
-                getScheduledTaskCount(_scheduledTasks)
-            )
-        );
-
-        for (uint256 i = 0; i < scheduledTask_.length; i++) {
-            scheduledTask_[i] = getScheduledTasksByIndex(
-                _scheduledTasks,
-                start + i
-            );
-        }
     }
 }

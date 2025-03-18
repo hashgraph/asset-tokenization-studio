@@ -211,14 +211,12 @@ import {
     IClearingHoldCreation
 } from '../interfaces/clearing/IClearingHoldCreation.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
-import {_CLEARING_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {
     _CLEARING_HOLDCREATION_RESOLVER_KEY
 } from '../constants/resolverKeys.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingHoldCreationFacet is

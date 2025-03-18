@@ -276,9 +276,7 @@ async function getFromMirrorNode<T>({
             }
         } catch (error) {
             console.error(
-                `Error retrieving data from Mirror Node: ${
-                    (error as Error).message
-                }`
+                `Error retrieving data from Mirror Node: ${(error as Error).message}`
             )
         }
         await delay({ time: timeBetweenRetries, unit: 'seconds' })

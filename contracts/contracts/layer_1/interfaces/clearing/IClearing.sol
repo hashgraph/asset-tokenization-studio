@@ -206,18 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IHold} from '../hold/IHold.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 interface IClearing {
-    error WrongClearingId();
-    error ClearingIsDisabled();
-    error ClearingIsActivated();
-    error ExpirationDateReached();
-    error ExpirationDateNotReached();
-
     enum ClearingOperationType {
         Transfer,
         Redeem,
@@ -282,6 +275,7 @@ interface IClearing {
         bytes holdData;
     }
 
+    // solhint-disable max-line-length
     struct ClearingDataStorage {
         bool initialized;
         bool activated;
@@ -293,4 +287,11 @@ interface IClearing {
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
     }
+    // solhint-enable max-line-length
+
+    error WrongClearingId();
+    error ClearingIsDisabled();
+    error ClearingIsActivated();
+    error ExpirationDateReached();
+    error ExpirationDateNotReached();
 }
