@@ -208,13 +208,10 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {Common} from '../common/Common.sol';
 import {IClearingTransfer} from '../interfaces/clearing/IClearingTransfer.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-import {_CLEARING_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_TRANSFER_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingTransferFacet is

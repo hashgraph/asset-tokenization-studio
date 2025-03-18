@@ -207,7 +207,6 @@
 pragma solidity 0.8.18;
 
 interface IERC1594StorageWrapper {
-    error IssuanceIsClosed();
     event Issued(
         address indexed _operator,
         address indexed _to,
@@ -220,4 +219,5 @@ interface IERC1594StorageWrapper {
         uint256 _value,
         bytes _data
     );
+    error IssuanceIsClosed();
 }

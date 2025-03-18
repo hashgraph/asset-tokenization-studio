@@ -269,49 +269,6 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         );
     }
 
-    function getLockedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 amount_) {
-        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
-    }
-
-    function getLockCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 lockCount_) {
-        return _getLockCountForByPartition(_partition, _tokenHolder);
-    }
-
-    function getLocksIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (uint256[] memory locksId_) {
-        return
-            _getLocksIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function getLockForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    )
-        external
-        view
-        override
-        returns (uint256 amount_, uint256 expirationTimestamp_)
-    {
-        return
-            _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
-    }
-
     // Uses default parititon in case Multipartition is not activated
     function lock(
         uint256 _amount,
@@ -369,6 +326,49 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
             _DEFAULT_PARTITION,
             _lockId
         );
+    }
+
+    function getLockedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view override returns (uint256 amount_) {
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function getLockCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view override returns (uint256 lockCount_) {
+        return _getLockCountForByPartition(_partition, _tokenHolder);
+    }
+
+    function getLocksIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (uint256[] memory locksId_) {
+        return
+            _getLocksIdForByPartition(
+                _partition,
+                _tokenHolder,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function getLockForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        external
+        view
+        override
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        return
+            _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
     }
 
     function getLockedAmountFor(

@@ -229,13 +229,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         erc20Storage.initialized = true;
     }
 
-    function allowance(
-        address owner,
-        address spender
-    ) external view override returns (uint256) {
-        return _allowanceAdjusted(owner, spender);
-    }
-
     // solhint-disable no-unused-vars
     function approve(
         address spender,
@@ -318,6 +311,23 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         returns (bool)
     {
         return _decreaseAllowance(spender, subtractedValue);
+    }
+
+    function allowance(
+        address owner,
+        address spender
+    ) external view override returns (uint256) {
+        return _allowanceAdjusted(owner, spender);
+    }
+
+    function decimalsAdjusted() external view returns (uint8) {
+        return _decimalsAdjusted();
+    }
+
+    function decimalsAdjustedAt(
+        uint256 _timestamp
+    ) external view returns (uint8) {
+        return _decimalsAdjustedAt(_timestamp);
     }
 
     function name() external view returns (string memory) {

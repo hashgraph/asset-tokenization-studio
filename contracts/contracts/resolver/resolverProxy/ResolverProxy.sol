@@ -233,6 +233,8 @@ contract ResolverProxy is ResolverProxyUnstructured {
         _initialize(_resolver, _resolverProxyConfigurationId, _version, _rbac);
     }
 
+    receive() external payable {}
+
     // Find facet for function that is called and execute the
     // function if a facet is found and return any value.
     // solhint-disable-next-line no-complex-fallback
@@ -261,6 +263,4 @@ contract ResolverProxy is ResolverProxyUnstructured {
             }
         }
     }
-
-    receive() external payable {}
 }

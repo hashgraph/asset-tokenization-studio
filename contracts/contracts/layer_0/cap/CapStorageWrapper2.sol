@@ -241,6 +241,54 @@ abstract contract CapStorageWrapper2 is
         _;
     }
 
+    // Internal
+    function _setMaxSupply(uint256 _maxSupply) internal {
+        uint256 previousMaxSupply = _getMaxSupply();
+        _capStorage().maxSupply = _maxSupply;
+        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
+    }
+
+    function _setMaxSupplyByPartition(
+        bytes32 _partition,
+        uint256 _maxSupply
+    ) internal {
+        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
+            _partition
+        );
+        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
+        emit MaxSupplyByPartitionSet(
+            _msgSender(),
+            _partition,
+            _maxSupply,
+            previousMaxSupplyByPartition
+        );
+    }
+
+    function _checkNewMaxSupplyByPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    ) internal view {
+        if (_newMaxSupply == 0) return;
+        uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(
+            _partition
+        );
+        if (totalSupplyForPartition > _newMaxSupply) {
+            revert NewMaxSupplyForPartitionTooLow(
+                _partition,
+                _newMaxSupply,
+                totalSupplyForPartition
+            );
+        }
+        uint256 maxSupplyOverall = _getMaxSupplyAdjusted();
+        if (_newMaxSupply > maxSupplyOverall) {
+            revert NewMaxSupplyByPartitionTooHigh(
+                _partition,
+                _newMaxSupply,
+                maxSupplyOverall
+            );
+        }
+    }
+
     function _checkWithinMaxSupply(uint256 _amount) private view {
         uint256 maxSupply = _getMaxSupply();
         if (!_isCorrectMaxSupply(_totalSupply() + _amount, maxSupply)) {
@@ -274,54 +322,6 @@ abstract contract CapStorageWrapper2 is
         if (totalSupply > _newMaxSupply) {
             revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
         }
-    }
-
-    function _checkNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) internal view {
-        if (_newMaxSupply == 0) return;
-        uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(
-            _partition
-        );
-        if (totalSupplyForPartition > _newMaxSupply) {
-            revert NewMaxSupplyForPartitionTooLow(
-                _partition,
-                _newMaxSupply,
-                totalSupplyForPartition
-            );
-        }
-        uint256 maxSupplyOverall = _getMaxSupplyAdjusted();
-        if (_newMaxSupply > maxSupplyOverall) {
-            revert NewMaxSupplyByPartitionTooHigh(
-                _partition,
-                _newMaxSupply,
-                maxSupplyOverall
-            );
-        }
-    }
-
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
-    }
-
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
-    ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
     }
 }
 // solhint-enable no-unused-vars, custom-errors

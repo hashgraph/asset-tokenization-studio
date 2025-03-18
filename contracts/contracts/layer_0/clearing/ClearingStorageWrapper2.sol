@@ -221,9 +221,6 @@ import {
     checkNounceAndDeadline
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
-import {
-    IERC1410Basic
-} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
@@ -559,133 +556,6 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 _clearingOperationIdentifier.tokenHolder,
                 _clearingOperationIdentifier.clearingId,
                 _operation
-            );
-    }
-
-    function _clearingTransferExecution(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId,
-        IClearingActions.ClearingActionType _operation
-    ) private returns (bool success_) {
-        IClearing.ClearingTransferData
-            memory clearingTransferData = _getClearingTransferForByPartition(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
-
-        address destination = _tokenHolder;
-
-        if (_operation == IClearingActions.ClearingActionType.Approve) {
-            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
-            _checkValidKycStatus(
-                IKyc.KycStatus.GRANTED,
-                clearingTransferData.destination
-            );
-            _checkControlList(_tokenHolder);
-            _checkControlList(clearingTransferData.destination);
-
-            destination = clearingTransferData.destination;
-        }
-
-        _transferClearingBalance(
-            _partition,
-            destination,
-            clearingTransferData.amount
-        );
-
-        _removeClearing(
-            _buildClearingOperationIdentifier(
-                _tokenHolder,
-                _partition,
-                _clearingId,
-                IClearing.ClearingOperationType.Transfer
-            )
-        );
-    }
-
-    function _clearingRedeemExecution(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId,
-        IClearingActions.ClearingActionType _operation
-    ) private returns (bool success_) {
-        IClearing.ClearingRedeemData
-            memory clearingRedeemData = _getClearingRedeemForByPartition(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
-
-        if (_operation == IClearingActions.ClearingActionType.Approve) {
-            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
-            _checkControlList(_tokenHolder);
-        } else
-            _transferClearingBalance(
-                _partition,
-                _tokenHolder,
-                clearingRedeemData.amount
-            );
-
-        _removeClearing(
-            _buildClearingOperationIdentifier(
-                _tokenHolder,
-                _partition,
-                _clearingId,
-                IClearing.ClearingOperationType.Redeem
-            )
-        );
-    }
-
-    function _clearingHoldCreationExecution(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId,
-        IClearingActions.ClearingActionType _operation
-    ) private returns (bool success_) {
-        IClearing.ClearingHoldCreationData
-            memory clearingHoldCreationData = _getClearingHoldCreationForByPartition(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
-
-        _transferClearingBalance(
-            _partition,
-            _tokenHolder,
-            clearingHoldCreationData.amount
-        );
-
-        if (_operation == IClearingActions.ClearingActionType.Approve) {
-            _createHoldByPartition(
-                _partition,
-                _tokenHolder,
-                _fromClearingHoldCreationDataToHold(clearingHoldCreationData),
-                clearingHoldCreationData.operatorData
-            );
-        }
-
-        _removeClearing(
-            _buildClearingOperationIdentifier(
-                _tokenHolder,
-                _partition,
-                _clearingId,
-                IClearing.ClearingOperationType.HoldCreation
-            )
-        );
-    }
-
-    function _fromClearingHoldCreationDataToHold(
-        IClearing.ClearingHoldCreationData memory _clearingHoldCreationData
-    ) private pure returns (IHold.Hold memory) {
-        return
-            IHold.Hold(
-                _clearingHoldCreationData.amount,
-                _clearingHoldCreationData.holdExpirationTimestamp,
-                _clearingHoldCreationData.holdEscrow,
-                _clearingHoldCreationData.holdTo,
-                _clearingHoldCreationData.holdData
             );
     }
 
@@ -1041,5 +911,132 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         IClearing.ClearingOperationIdentifier
             memory _clearingOperationIdentifier
     ) internal view virtual returns (uint256);
+
+    function _clearingTransferExecution(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId,
+        IClearingActions.ClearingActionType _operation
+    ) private returns (bool success_) {
+        IClearing.ClearingTransferData
+            memory clearingTransferData = _getClearingTransferForByPartition(
+                _partition,
+                _tokenHolder,
+                _clearingId
+            );
+
+        address destination = _tokenHolder;
+
+        if (_operation == IClearingActions.ClearingActionType.Approve) {
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
+            _checkValidKycStatus(
+                IKyc.KycStatus.GRANTED,
+                clearingTransferData.destination
+            );
+            _checkControlList(_tokenHolder);
+            _checkControlList(clearingTransferData.destination);
+
+            destination = clearingTransferData.destination;
+        }
+
+        _transferClearingBalance(
+            _partition,
+            destination,
+            clearingTransferData.amount
+        );
+
+        _removeClearing(
+            _buildClearingOperationIdentifier(
+                _tokenHolder,
+                _partition,
+                _clearingId,
+                IClearing.ClearingOperationType.Transfer
+            )
+        );
+    }
+
+    function _clearingRedeemExecution(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId,
+        IClearingActions.ClearingActionType _operation
+    ) private returns (bool success_) {
+        IClearing.ClearingRedeemData
+            memory clearingRedeemData = _getClearingRedeemForByPartition(
+                _partition,
+                _tokenHolder,
+                _clearingId
+            );
+
+        if (_operation == IClearingActions.ClearingActionType.Approve) {
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
+            _checkControlList(_tokenHolder);
+        } else
+            _transferClearingBalance(
+                _partition,
+                _tokenHolder,
+                clearingRedeemData.amount
+            );
+
+        _removeClearing(
+            _buildClearingOperationIdentifier(
+                _tokenHolder,
+                _partition,
+                _clearingId,
+                IClearing.ClearingOperationType.Redeem
+            )
+        );
+    }
+
+    function _clearingHoldCreationExecution(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId,
+        IClearingActions.ClearingActionType _operation
+    ) private returns (bool success_) {
+        IClearing.ClearingHoldCreationData
+            memory clearingHoldCreationData = _getClearingHoldCreationForByPartition(
+                _partition,
+                _tokenHolder,
+                _clearingId
+            );
+
+        _transferClearingBalance(
+            _partition,
+            _tokenHolder,
+            clearingHoldCreationData.amount
+        );
+
+        if (_operation == IClearingActions.ClearingActionType.Approve) {
+            _createHoldByPartition(
+                _partition,
+                _tokenHolder,
+                _fromClearingHoldCreationDataToHold(clearingHoldCreationData),
+                clearingHoldCreationData.operatorData
+            );
+        }
+
+        _removeClearing(
+            _buildClearingOperationIdentifier(
+                _tokenHolder,
+                _partition,
+                _clearingId,
+                IClearing.ClearingOperationType.HoldCreation
+            )
+        );
+    }
+
+    function _fromClearingHoldCreationDataToHold(
+        IClearing.ClearingHoldCreationData memory _clearingHoldCreationData
+    ) private pure returns (IHold.Hold memory) {
+        return
+            IHold.Hold(
+                _clearingHoldCreationData.amount,
+                _clearingHoldCreationData.holdExpirationTimestamp,
+                _clearingHoldCreationData.holdEscrow,
+                _clearingHoldCreationData.holdTo,
+                _clearingHoldCreationData.holdData
+            );
+    }
 }
 // solhint-enable no-unused-vars, custom-errors

@@ -217,12 +217,8 @@ import {
 } from '../../layer_1/interfaces/clearing/IClearingRedeem.sol';
 import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 import {
-    IClearingActions
-} from '../../layer_1/interfaces/clearing/IClearingActions.sol';
-import {
     IClearingHoldCreation
 } from '../../layer_1/interfaces/clearing/IClearingHoldCreation.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {LibCommon} from '../common/LibCommon.sol';
 import {
     EnumerableSet
@@ -271,22 +267,6 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             ][_clearingOperationIdentifier.partition][
                 _clearingOperationIdentifier.clearingOperationType
             ].contains(_clearingOperationIdentifier.clearingId);
-    }
-
-    function _checkExpirationTimestamp(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier,
-        bool _mutBeExpired
-    ) private view {
-        if (
-            _isExpired(
-                _getClearingBasicInfo(_clearingOperationIdentifier)
-                    .expirationTimestamp
-            ) != _mutBeExpired
-        ) {
-            if (_mutBeExpired) revert IClearing.ExpirationDateNotReached();
-            revert IClearing.ExpirationDateReached();
-        }
     }
 
     function _isClearingActivated() internal view returns (bool) {
@@ -501,19 +481,6 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             });
     }
 
-    function _buildClearingOperationBasicInfo(
-        uint256 _expirationTimestamp,
-        uint256 _amount,
-        address _destination
-    ) private pure returns (IClearing.ClearingOperationBasicInfo memory) {
-        return
-            IClearing.ClearingOperationBasicInfo({
-                expirationTimestamp: _expirationTimestamp,
-                amount: _amount,
-                destination: _destination
-            });
-    }
-
     function _buildClearingOperationIdentifier(
         address _from,
         bytes32 _partition,
@@ -529,6 +496,34 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             });
     }
 
+    function _clearingStorage()
+        internal
+        pure
+        returns (IClearing.ClearingDataStorage storage clearing_)
+    {
+        bytes32 position = _CLEARING_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            clearing_.slot := position
+        }
+    }
+
+    function _checkExpirationTimestamp(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier,
+        bool _mutBeExpired
+    ) private view {
+        if (
+            _isExpired(
+                _getClearingBasicInfo(_clearingOperationIdentifier)
+                    .expirationTimestamp
+            ) != _mutBeExpired
+        ) {
+            if (_mutBeExpired) revert IClearing.ExpirationDateNotReached();
+            revert IClearing.ExpirationDateReached();
+        }
+    }
+
     function _checkClearingId(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier
@@ -541,16 +536,17 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         if (!_isClearingActivated()) revert IClearing.ClearingIsDisabled();
     }
 
-    function _clearingStorage()
-        internal
-        pure
-        returns (IClearing.ClearingDataStorage storage clearing_)
-    {
-        bytes32 position = _CLEARING_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            clearing_.slot := position
-        }
+    function _buildClearingOperationBasicInfo(
+        uint256 _expirationTimestamp,
+        uint256 _amount,
+        address _destination
+    ) private pure returns (IClearing.ClearingOperationBasicInfo memory) {
+        return
+            IClearing.ClearingOperationBasicInfo({
+                expirationTimestamp: _expirationTimestamp,
+                amount: _amount,
+                destination: _destination
+            });
     }
 }
 // solhint-enable no-unused-vars, custom-errors
