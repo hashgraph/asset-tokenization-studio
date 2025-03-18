@@ -432,30 +432,6 @@ abstract contract ClearingStorageWrapper2 is
         );
     }
 
-    function _emitClearedTransferEvent(
-        address _operator,
-        address _tokenHolder,
-        address _to,
-        bytes32 _partition,
-        uint256 _clearingId,
-        uint256 _amount,
-        uint256 _expirationDate,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) private {
-        emit ClearedTransferByPartition(
-            _operator,
-            _tokenHolder,
-            _to,
-            _partition,
-            _clearingId,
-            _amount,
-            _expirationDate,
-            _data,
-            _operatorData
-        );
-    }
-
     function _clearingRedeemCreation(
         IClearing.ClearingOperation memory _clearingOperation,
         uint256 _amount,
@@ -1091,6 +1067,74 @@ abstract contract ClearingStorageWrapper2 is
                 _clearingId,
                 IClearing.ClearingOperationType.HoldCreation
             )
+        );
+    }
+
+    function _emitClearedTransferEvent(
+        address _operator,
+        address _tokenHolder,
+        address _to,
+        bytes32 _partition,
+        uint256 _clearingId,
+        uint256 _amount,
+        uint256 _expirationDate,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) private {
+        emit ClearedTransferByPartition(
+            _operator,
+            _tokenHolder,
+            _to,
+            _partition,
+            _clearingId,
+            _amount,
+            _expirationDate,
+            _data,
+            _operatorData
+        );
+    }
+
+    function _emitClearedRedeemEvent(
+        address _operator,
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _clearingId,
+        uint256 _amount,
+        uint256 _expirationDate,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) private {
+        emit ClearedRedeemByPartition(
+            _operator,
+            _tokenHolder,
+            _partition,
+            _clearingId,
+            _amount,
+            _expirationDate,
+            _data,
+            _operatorData
+        );
+    }
+
+    function _emitClearedHoldByPartitionEvent(
+        address _operator,
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _clearingId,
+        IHold.Hold calldata _hold,
+        uint256 _expirationDate,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) private {
+        emit ClearedHoldByPartition(
+            _operator,
+            _tokenHolder,
+            _partition,
+            _clearingId,
+            _hold,
+            _expirationDate,
+            _data,
+            _operatorData
         );
     }
 
