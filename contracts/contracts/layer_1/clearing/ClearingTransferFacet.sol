@@ -230,18 +230,13 @@ contract ClearingTransferFacet is
         external
         override
         onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         validateAddress(_to)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        {
-            _checkDefaultPartitionWithSinglePartition(
-                _clearingOperation.partition
-            );
-        }
-
         address sender = _msgSender();
 
         (success_, clearingId_) = _clearingTransferCreation(
@@ -251,18 +246,6 @@ contract ClearingTransferFacet is
             sender,
             sender,
             false,
-            ''
-        );
-
-        emit ClearedTransferByPartition(
-            sender,
-            sender,
-            _to,
-            _clearingOperation.partition,
-            clearingId_,
-            _amount,
-            _clearingOperation.expirationTimestamp,
-            _clearingOperation.data,
             ''
         );
     }
@@ -275,19 +258,19 @@ contract ClearingTransferFacet is
         external
         override
         onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
             _checkValidAddress(_clearingOperationFrom.from);
             _checkValidAddress(_to);
-            _checkDefaultPartitionWithSinglePartition(
-                _clearingOperationFrom.clearingOperation.partition
-            );
-            _checkExpirationTimestamp(
-                _clearingOperationFrom.clearingOperation.expirationTimestamp
-            );
         }
         address sender = _msgSender();
 
@@ -300,18 +283,6 @@ contract ClearingTransferFacet is
             true,
             _clearingOperationFrom.operatorData
         );
-
-        emit ClearedTransferByPartition(
-            sender,
-            _clearingOperationFrom.from,
-            _to,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            _amount,
-            _clearingOperationFrom.clearingOperation.expirationTimestamp,
-            _clearingOperationFrom.clearingOperation.data,
-            _clearingOperationFrom.operatorData
-        );
     }
 
     function operatorClearingTransferByPartition(
@@ -322,19 +293,19 @@ contract ClearingTransferFacet is
         external
         override
         onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
             _checkValidAddress(_clearingOperationFrom.from);
             _checkValidAddress(_to);
-            _checkDefaultPartitionWithSinglePartition(
-                _clearingOperationFrom.clearingOperation.partition
-            );
-            _checkExpirationTimestamp(
-                _clearingOperationFrom.clearingOperation.expirationTimestamp
-            );
             _checkOperator(
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
@@ -351,18 +322,6 @@ contract ClearingTransferFacet is
             false,
             _clearingOperationFrom.operatorData
         );
-
-        emit ClearedTransferByPartition(
-            sender,
-            _clearingOperationFrom.from,
-            _to,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            _amount,
-            _clearingOperationFrom.clearingOperation.expirationTimestamp,
-            _clearingOperationFrom.clearingOperation.data,
-            _clearingOperationFrom.operatorData
-        );
     }
 
     function protectedClearingTransferByPartition(
@@ -375,6 +334,11 @@ contract ClearingTransferFacet is
         override
         onlyUnpaused
         onlyProtectedPartitions
+        validateAddress(_protectedClearingOperation.from)
+        validateAddress(_to)
+        onlyWithValidExpirationTimestamp(
+            _protectedClearingOperation.clearingOperation.expirationTimestamp
+        )
         onlyRole(
             _protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
@@ -383,32 +347,11 @@ contract ClearingTransferFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        {
-            _checkValidAddress(_protectedClearingOperation.from);
-            _checkValidAddress(_to);
-            _checkExpirationTimestamp(
-                _protectedClearingOperation
-                    .clearingOperation
-                    .expirationTimestamp
-            );
-        }
         (success_, clearingId_) = _protectedClearingTransferByPartition(
             _protectedClearingOperation,
             _amount,
             _to,
             _signature
-        );
-
-        emit ClearedTransferByPartition(
-            _msgSender(),
-            _protectedClearingOperation.from,
-            _to,
-            _protectedClearingOperation.clearingOperation.partition,
-            clearingId_,
-            _amount,
-            _protectedClearingOperation.clearingOperation.expirationTimestamp,
-            _protectedClearingOperation.clearingOperation.data,
-            ''
         );
     }
 

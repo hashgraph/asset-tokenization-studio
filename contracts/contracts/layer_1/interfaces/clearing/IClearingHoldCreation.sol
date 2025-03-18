@@ -213,17 +213,6 @@ import {
 import {IClearing} from './IClearing.sol';
 
 interface IClearingHoldCreation is IClearing {
-    event ClearedHoldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 clearingId,
-        IHold.Hold hold,
-        uint256 expirationDate,
-        bytes data,
-        bytes operatorData
-    );
-
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
         IHold.Hold calldata _hold

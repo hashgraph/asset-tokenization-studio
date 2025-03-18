@@ -215,6 +215,9 @@ import {
     IClearingTransfer
 } from '../../layer_1/interfaces/clearing/IClearingTransfer.sol';
 import {
+    IClearingStorageWrapper
+} from '../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol';
+import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
@@ -227,7 +230,10 @@ import {
 import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
-abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
+abstract contract ClearingStorageWrapper2 is
+    IClearingStorageWrapper,
+    HoldStorageWrapper2
+{
     using EnumerableSet for EnumerableSet.UintSet;
 
     function _protectedClearingTransferByPartition(
@@ -392,6 +398,9 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         bool _reduceAllowance,
         bytes memory _operatorData
     ) internal returns (bool success_, uint256 clearingId_) {
+        bytes memory data = _clearingOperation.data;
+        uint256 expirationTimestamp = _clearingOperation.expirationTimestamp;
+
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
@@ -405,12 +414,49 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _clearingOperation.partition
         ][clearingId_] = _buildClearingTransferData(
             _amount,
-            _clearingOperation.expirationTimestamp,
+            expirationTimestamp,
             _to,
-            _clearingOperation.data,
+            data,
             _operatorData
         );
+
         success_ = true;
+
+        _emitClearedTransferEvent(
+            _operator,
+            _from,
+            _to,
+            _clearingOperation.partition,
+            clearingId_,
+            _amount,
+            expirationTimestamp,
+            data,
+            _operatorData
+        );
+    }
+
+    function _emitClearedTransferEvent(
+        address _operator,
+        address _tokenHolder,
+        address _to,
+        bytes32 _partition,
+        uint256 _clearingId,
+        uint256 _amount,
+        uint256 _expirationDate,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) private {
+        emit ClearedTransferByPartition(
+            _operator,
+            _tokenHolder,
+            _to,
+            _partition,
+            _clearingId,
+            _amount,
+            _expirationDate,
+            _data,
+            _operatorData
+        );
     }
 
     function _clearingRedeemCreation(
@@ -440,6 +486,17 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         );
 
         success_ = true;
+
+        _emitClearedRedeemEvent(
+            _operator,
+            _from,
+            _clearingOperation.partition,
+            clearingId_,
+            _amount,
+            _clearingOperation.expirationTimestamp,
+            _clearingOperation.data,
+            _operatorData
+        );
     }
 
     function _clearingHoldCreationCreation(
@@ -473,6 +530,17 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         );
 
         success_ = true;
+
+        _emitClearedHoldByPartitionEvent(
+            _operator,
+            _from,
+            _clearingOperation.partition,
+            clearingId_,
+            _hold,
+            _clearingOperation.expirationTimestamp,
+            _clearingOperation.data,
+            _operatorData
+        );
     }
 
     function _approveClearingOperationByPartition(
@@ -673,6 +741,50 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 _clearingId,
                 IClearing.ClearingOperationType.HoldCreation
             )
+        );
+    }
+
+    function _emitClearedRedeemEvent(
+        address _operator,
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _clearingId,
+        uint256 _amount,
+        uint256 _expirationDate,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) private {
+        emit ClearedRedeemByPartition(
+            _operator,
+            _tokenHolder,
+            _partition,
+            _clearingId,
+            _amount,
+            _expirationDate,
+            _data,
+            _operatorData
+        );
+    }
+
+    function _emitClearedHoldByPartitionEvent(
+        address _operator,
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _clearingId,
+        IHold.Hold calldata _hold,
+        uint256 _expirationDate,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) private {
+        emit ClearedHoldByPartition(
+            _operator,
+            _tokenHolder,
+            _partition,
+            _clearingId,
+            _hold,
+            _expirationDate,
+            _data,
+            _operatorData
         );
     }
 

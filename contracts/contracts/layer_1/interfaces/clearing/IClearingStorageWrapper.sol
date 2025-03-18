@@ -212,31 +212,38 @@ import {
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {IClearing} from './IClearing.sol';
 
-interface IClearingRedeem is IClearing {
-    function clearingRedeemByPartition(
-        ClearingOperation calldata _clearingOperation,
-        uint256 _amount
-    ) external returns (bool success_, uint256 clearingId_);
-
-    function clearingRedeemFromByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount
-    ) external returns (bool success_, uint256 clearingId_);
-
-    function operatorClearingRedeemByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount
-    ) external returns (bool success_, uint256 clearingId_);
-
-    function protectedClearingRedeemByPartition(
-        ProtectedClearingOperation calldata _protectedClearingOperation,
-        uint256 _amount,
-        bytes calldata _signature
-    ) external returns (bool success_, uint256 clearingId_);
-
-    function getClearingRedeemForByPartition(
+interface IClearingStorageWrapper {
+    event ClearedRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
         bytes32 partition,
-        address tokenHolder,
-        uint256 clearingId
-    ) external view returns (ClearingRedeemData memory clearingRedeemData_);
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        IHold.Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 }

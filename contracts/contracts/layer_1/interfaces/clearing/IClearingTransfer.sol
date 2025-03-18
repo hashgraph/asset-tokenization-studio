@@ -213,18 +213,6 @@ import {
 import {IClearing} from './IClearing.sol';
 
 interface IClearingTransfer is IClearing {
-    event ClearedTransferByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        address indexed to,
-        bytes32 partition,
-        uint256 clearingId,
-        uint256 amount,
-        uint256 expirationDate,
-        bytes data,
-        bytes operatorData
-    );
-
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
