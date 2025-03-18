@@ -220,35 +220,6 @@ import {
 abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     // solhint-disable func-name-mixedcase
     // solhint-disable-next-line private-vars-leading-underscore
-    function _initialize_bond(
-        BondDetailsData calldata _bondDetailsData,
-        CouponDetailsData calldata _couponDetailsData
-    )
-        internal
-        validateDates(
-            _bondDetailsData.startingDate,
-            _bondDetailsData.maturityDate
-        )
-        onlyValidTimestamp(_bondDetailsData.startingDate)
-    {
-        BondDataStorage storage bondStorage = _bondStorage();
-        bondStorage.initialized = true;
-        _storeBondDetails(_bondDetailsData);
-        _storeCouponDetails(
-            _couponDetailsData,
-            _bondDetailsData.startingDate,
-            _bondDetailsData.maturityDate
-        );
-    }
-
-    function getBondDetails()
-        external
-        view
-        override
-        returns (BondDetailsData memory bondDetailsData_)
-    {
-        return _getBondDetails();
-    }
 
     function setCoupon(
         Coupon calldata _newCoupon
@@ -296,6 +267,15 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         return success_;
     }
 
+    function getBondDetails()
+        external
+        view
+        override
+        returns (BondDetailsData memory bondDetailsData_)
+    {
+        return _getBondDetails();
+    }
+
     function getCouponDetails()
         external
         view
@@ -337,5 +317,26 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         returns (uint256 couponCount_)
     {
         return _getCouponCount();
+    }
+
+    function _initialize_bond(
+        BondDetailsData calldata _bondDetailsData,
+        CouponDetailsData calldata _couponDetailsData
+    )
+        internal
+        validateDates(
+            _bondDetailsData.startingDate,
+            _bondDetailsData.maturityDate
+        )
+        onlyValidTimestamp(_bondDetailsData.startingDate)
+    {
+        BondDataStorage storage bondStorage = _bondStorage();
+        bondStorage.initialized = true;
+        _storeBondDetails(_bondDetailsData);
+        _storeCouponDetails(
+            _couponDetailsData,
+            _bondDetailsData.startingDate,
+            _bondDetailsData.maturityDate
+        );
     }
 }

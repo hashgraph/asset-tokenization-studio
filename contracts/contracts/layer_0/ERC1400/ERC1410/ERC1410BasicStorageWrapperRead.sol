@@ -331,6 +331,20 @@ abstract contract ERC1410BasicStorageWrapperRead is
         _erc1410BasicStorage().totalSupplyByPartition[_partition] *= _factor;
     }
 
+    function _adjustTotalSupply(uint256 factor) internal {
+        _erc1410BasicStorage().totalSupply *= factor;
+    }
+
+    function _adjustTotalBalanceAndPartitionBalanceFor(
+        bytes32 partition,
+        address account
+    ) internal {
+        uint256 abaf = _getAbaf();
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
+        _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
+        _adjustTotalBalanceFor(basicStorage, abaf, account);
+    }
+
     function _totalSupply() internal view returns (uint256) {
         return _erc1410BasicStorage().totalSupply;
     }
@@ -407,18 +421,23 @@ abstract contract ERC1410BasicStorageWrapperRead is
         return index != 0;
     }
 
-    function _adjustTotalSupply(uint256 factor) internal {
-        _erc1410BasicStorage().totalSupply *= factor;
+    function _checkDefaultPartitionWithSinglePartition(
+        bytes32 partition
+    ) internal view {
+        if (!_isMultiPartition() && partition != _DEFAULT_PARTITION)
+            revert PartitionNotAllowedInSinglePartitionMode(partition);
     }
 
-    function _adjustTotalBalanceAndPartitionBalanceFor(
-        bytes32 partition,
-        address account
-    ) internal {
-        uint256 abaf = _getAbaf();
-        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
-        _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
-        _adjustTotalBalanceFor(basicStorage, abaf, account);
+    function _erc1410BasicStorage()
+        internal
+        pure
+        returns (ERC1410BasicStorage storage erc1410BasicStorage_)
+    {
+        bytes32 position = _ERC1410_BASIC_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1410BasicStorage_.slot := position
+        }
     }
 
     function _checkValidAddress(address account) internal pure {
@@ -460,24 +479,5 @@ abstract contract ERC1410BasicStorageWrapperRead is
 
     function _checkWithoutMultiPartition() private view {
         if (_isMultiPartition()) revert NotAllowedInMultiPartitionMode();
-    }
-
-    function _checkDefaultPartitionWithSinglePartition(
-        bytes32 partition
-    ) internal view {
-        if (!_isMultiPartition() && partition != _DEFAULT_PARTITION)
-            revert PartitionNotAllowedInSinglePartitionMode(partition);
-    }
-
-    function _erc1410BasicStorage()
-        internal
-        pure
-        returns (ERC1410BasicStorage storage erc1410BasicStorage_)
-    {
-        bytes32 position = _ERC1410_BASIC_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1410BasicStorage_.slot := position
-        }
     }
 }

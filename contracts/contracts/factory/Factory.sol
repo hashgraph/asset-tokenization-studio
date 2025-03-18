@@ -366,6 +366,16 @@ contract Factory is IFactory, LocalContext {
         );
     }
 
+    function getAppliedRegulationData(
+        RegulationType _regulationType,
+        RegulationSubType _regulationSubType
+    ) external pure override returns (RegulationData memory regulationData_) {
+        regulationData_ = buildRegulationData(
+            _regulationType,
+            _regulationSubType
+        );
+    }
+
     function _deploySecurity(
         SecurityData calldata _securityData,
         SecurityType _securityType
@@ -417,16 +427,6 @@ contract Factory is IFactory, LocalContext {
 
         IClearingActions(securityAddress_).initializeClearing(
             _securityData.clearingActive
-        );
-    }
-
-    function getAppliedRegulationData(
-        RegulationType _regulationType,
-        RegulationSubType _regulationSubType
-    ) external pure override returns (RegulationData memory regulationData_) {
-        regulationData_ = buildRegulationData(
-            _regulationType,
-            _regulationSubType
         );
     }
 }

@@ -225,6 +225,10 @@ abstract contract LocalContext is Context {
         return _blockTimestamp() > _expirationTimestamp;
     }
 
+    function _blockChainid() internal view returns (uint256 chainid_) {
+        chainid_ = block.chainid;
+    }
+
     function _blockTimestamp()
         internal
         view
@@ -232,9 +236,5 @@ abstract contract LocalContext is Context {
         returns (uint256 blockTimestamp_)
     {
         blockTimestamp_ = block.timestamp;
-    }
-
-    function _blockChainid() internal view returns (uint256 chainid_) {
-        chainid_ = block.chainid;
     }
 }

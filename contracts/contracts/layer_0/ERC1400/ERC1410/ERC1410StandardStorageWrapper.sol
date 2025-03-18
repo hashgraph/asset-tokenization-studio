@@ -230,6 +230,7 @@ import {
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
 {
+    // solhint-disable no-unused-vars
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -241,17 +242,18 @@ abstract contract ERC1410StandardStorageWrapper is
         if (from == address(0)) {
             // mint
             _updateAccountSnapshot(to, partition);
-            _updateTotalSupplySnapshot(partition);
-        } else if (to == address(0)) {
+            return _updateTotalSupplySnapshot(partition);
+        }
+        if (to == address(0)) {
             // burn
             _updateAccountSnapshot(from, partition);
-            _updateTotalSupplySnapshot(partition);
-        } else {
-            // transfer
-            _updateAccountSnapshot(from, partition);
-            _updateAccountSnapshot(to, partition);
+            return _updateTotalSupplySnapshot(partition);
         }
+        // transfer
+        _updateAccountSnapshot(from, partition);
+        _updateAccountSnapshot(to, partition);
     }
+    // solhint-enable no-unused-vars
 
     function _triggerAndSyncAll(
         bytes32 _partition,
@@ -382,14 +384,16 @@ abstract contract ERC1410StandardStorageWrapper is
         erc1410Storage.totalSupplyByPartition[_partition] += _value;
     }
 
-    function _validateParams(bytes32 _partition, uint256 _value) internal pure {
-        if (_value == uint256(0)) {
-            revert ZeroValue();
-        }
-        if (_partition == bytes32(0)) {
-            revert ZeroPartition();
-        }
-    }
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual;
+
+    function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
+
+    function _adjustTotalAndMaxSupplyForPartition(
+        bytes32 _partition
+    ) internal virtual;
 
     function _canRedeemByPartition(
         address _from,
@@ -500,19 +504,17 @@ abstract contract ERC1410StandardStorageWrapper is
         return _balanceOfByPartition(_partition, _tokenHolder) * factor;
     }
 
-    function _updateAccountSnapshot(
-        address account,
-        bytes32 partition
-    ) internal virtual;
-
-    function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
-
     function _getLabafByUserAndPartition(
         bytes32 _partition,
         address _account
     ) internal view virtual returns (uint256);
 
-    function _adjustTotalAndMaxSupplyForPartition(
-        bytes32 _partition
-    ) internal virtual;
+    function _validateParams(bytes32 _partition, uint256 _value) internal pure {
+        if (_value == uint256(0)) {
+            revert ZeroValue();
+        }
+        if (_partition == bytes32(0)) {
+            revert ZeroPartition();
+        }
+    }
 }
