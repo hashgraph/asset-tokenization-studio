@@ -206,37 +206,44 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {IHold} from '../hold/IHold.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {IClearing} from './IClearing.sol';
 
-interface IClearingTransfer is IClearing {
-    function clearingTransferByPartition(
-        ClearingOperation calldata _clearingOperation,
-        uint256 _amount,
-        address _to
-    ) external returns (bool success_, uint256 clearingId_);
+interface IClearingStorageWrapper {
+    event ClearedRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 
-    function clearingTransferFromByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount,
-        address _to
-    ) external returns (bool success_, uint256 clearingId_);
+    event ClearedHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        IHold.Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 
-    function operatorClearingTransferByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount,
-        address _to
-    ) external returns (bool success_, uint256 clearingId_);
-
-    function protectedClearingTransferByPartition(
-        ProtectedClearingOperation calldata _protectedClearingOperation,
-        uint256 _amount,
-        address _to,
-        bytes calldata _signature
-    ) external returns (bool success_, uint256 clearingId_);
-
-    function getClearingTransferForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId
-    ) external view returns (ClearingTransferData memory clearingTransferData_);
+    event ClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 }

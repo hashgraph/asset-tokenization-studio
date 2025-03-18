@@ -209,14 +209,6 @@ pragma solidity 0.8.18;
 import {IClearing} from './IClearing.sol';
 
 interface IClearingRedeem is IClearing {
-    event ClearedRedeemByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 clearingId,
-        bytes operatorData
-    );
-
     function clearingRedeemByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount

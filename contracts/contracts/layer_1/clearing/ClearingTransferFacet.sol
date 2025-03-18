@@ -245,15 +245,6 @@ contract ClearingTransferFacet is
             false,
             ''
         );
-
-        emit ClearedTransferByPartition(
-            sender,
-            sender,
-            _to,
-            _clearingOperation.partition,
-            clearingId_,
-            ''
-        );
     }
 
     function clearingTransferFromByPartition(
@@ -287,15 +278,6 @@ contract ClearingTransferFacet is
             _clearingOperationFrom.from,
             sender,
             true,
-            _clearingOperationFrom.operatorData
-        );
-
-        emit ClearedTransferByPartition(
-            sender,
-            _clearingOperationFrom.from,
-            _to,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
             _clearingOperationFrom.operatorData
         );
     }
@@ -337,15 +319,6 @@ contract ClearingTransferFacet is
             false,
             _clearingOperationFrom.operatorData
         );
-
-        emit ClearedTransferByPartition(
-            sender,
-            _clearingOperationFrom.from,
-            _to,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            _clearingOperationFrom.operatorData
-        );
     }
 
     function protectedClearingTransferByPartition(
@@ -376,15 +349,6 @@ contract ClearingTransferFacet is
             _amount,
             _to,
             _signature
-        );
-
-        emit ClearedTransferByPartition(
-            _msgSender(),
-            _protectedClearingOperation.from,
-            _to,
-            _protectedClearingOperation.clearingOperation.partition,
-            clearingId_,
-            ''
         );
     }
 
