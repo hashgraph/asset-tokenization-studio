@@ -431,7 +431,8 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         uint256 _expirationTimestamp,
         address _to,
         bytes memory _data,
-        bytes memory _operatorData
+        bytes memory _operatorData,
+        IClearing.Operator memory _operator
     ) internal pure returns (IClearing.ClearingTransferData memory) {
         return
             IClearing.ClearingTransferData({
@@ -439,7 +440,8 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
                 expirationTimestamp: _expirationTimestamp,
                 destination: _to,
                 data: _data,
-                operatorData: _operatorData
+                operatorData: _operatorData,
+                operator: _operator
             });
     }
 
@@ -447,14 +449,16 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         uint256 _amount,
         uint256 _expirationTimestamp,
         bytes memory _data,
-        bytes memory _operatorData
+        bytes memory _operatorData,
+        IClearing.Operator memory _operator
     ) internal pure returns (IClearing.ClearingRedeemData memory) {
         return
             IClearing.ClearingRedeemData({
                 amount: _amount,
                 expirationTimestamp: _expirationTimestamp,
                 data: _data,
-                operatorData: _operatorData
+                operatorData: _operatorData,
+                operator: _operator
             });
     }
 
@@ -466,7 +470,8 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         bytes memory _holdData,
         address _escrow,
         address _to,
-        bytes memory _operatorData
+        bytes memory _operatorData,
+        IClearing.Operator memory _operator
     ) internal pure returns (IClearing.ClearingHoldCreationData memory) {
         return
             IClearing.ClearingHoldCreationData({
@@ -477,7 +482,8 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
                 holdEscrow: _escrow,
                 holdExpirationTimestamp: _holdExpirationTimestamp,
                 holdTo: _to,
-                holdData: _holdData
+                holdData: _holdData,
+                operator: _operator
             });
     }
 
@@ -512,7 +518,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier,
         bool _mutBeExpired
-    ) private view {
+    ) internal view {
         if (
             _isExpired(
                 _getClearingBasicInfo(_clearingOperationIdentifier)

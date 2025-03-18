@@ -217,6 +217,12 @@ interface IClearing {
         HoldCreation
     }
 
+    enum OperatorType {
+        None,
+        ERC20,
+        ERC1410
+    }
+
     struct ClearingOperationBasicInfo {
         uint256 expirationTimestamp;
         uint256 amount;
@@ -249,12 +255,18 @@ interface IClearing {
         uint256 clearingId;
     }
 
+    struct Operator {
+        OperatorType operatorType;
+        address operatorAddress;
+    }
+
     struct ClearingTransferData {
         uint256 amount;
         uint256 expirationTimestamp;
         address destination;
         bytes data;
         bytes operatorData;
+        Operator operator;
     }
 
     struct ClearingRedeemData {
@@ -262,6 +274,7 @@ interface IClearing {
         uint256 expirationTimestamp;
         bytes data;
         bytes operatorData;
+        Operator operator;
     }
 
     struct ClearingHoldCreationData {
@@ -273,6 +286,7 @@ interface IClearing {
         uint256 holdExpirationTimestamp;
         address holdTo;
         bytes holdData;
+        Operator operator;
     }
 
     // solhint-disable max-line-length

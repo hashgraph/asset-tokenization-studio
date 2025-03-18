@@ -3161,6 +3161,99 @@ describe('Clearing Tests', () => {
                 balance_A_original.toNumber()
             )
         })
+
+        it('GIVEN a token WHEN clearing operation reclaimed or canceled THEN allowance is restored', async () => {
+            // RECLAIM
+            await erc20Facet
+                .connect(signer_A)
+                .increaseAllowance(account_B, 3 * _AMOUNT)
+
+            await clearingFacet
+                .connect(signer_B)
+                .clearingTransferFromByPartition(
+                    clearingOperationFrom,
+                    _AMOUNT,
+                    account_C
+                )
+            await clearingFacet
+                .connect(signer_B)
+                .clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT)
+            await clearingFacet
+                .connect(signer_B)
+                .clearingCreateHoldFromByPartition(clearingOperationFrom, hold)
+            let allowance_B_Before = await erc20Facet.allowance(
+                account_A,
+                account_B
+            )
+
+            await timeTravelFacet.changeSystemTimestamp(
+                clearingOperationFrom.clearingOperation.expirationTimestamp + 1
+            )
+
+            await clearingActionsFacet.reclaimClearingOperationByPartition(
+                clearingIdentifier
+            )
+
+            clearingIdentifier.clearingOperationType =
+                ClearingOperationType.Redeem
+            await clearingActionsFacet.reclaimClearingOperationByPartition(
+                clearingIdentifier
+            )
+            clearingIdentifier.clearingOperationType =
+                ClearingOperationType.HoldCreation
+            await clearingActionsFacet.reclaimClearingOperationByPartition(
+                clearingIdentifier
+            )
+
+            expect(
+                await erc20Facet.allowance(account_A, account_B)
+            ).to.be.equal(3 * _AMOUNT)
+            expect(allowance_B_Before).to.be.equal(ZERO)
+
+            // CANCEL
+            await timeTravelFacet.resetSystemTimestamp()
+
+            await clearingFacet
+                .connect(signer_B)
+                .clearingTransferFromByPartition(
+                    clearingOperationFrom,
+                    _AMOUNT,
+                    account_C
+                )
+            await clearingFacet
+                .connect(signer_B)
+                .clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT)
+            await clearingFacet
+                .connect(signer_B)
+                .clearingCreateHoldFromByPartition(clearingOperationFrom, hold)
+
+            allowance_B_Before = await erc20Facet.allowance(
+                account_A,
+                account_B
+            )
+
+            clearingIdentifier.clearingOperationType =
+                ClearingOperationType.Transfer
+            clearingIdentifier.clearingId = 2
+            await clearingActionsFacet.cancelClearingOperationByPartition(
+                clearingIdentifier
+            )
+            clearingIdentifier.clearingOperationType =
+                ClearingOperationType.Redeem
+            await clearingActionsFacet.cancelClearingOperationByPartition(
+                clearingIdentifier
+            )
+            clearingIdentifier.clearingOperationType =
+                ClearingOperationType.HoldCreation
+            await clearingActionsFacet.cancelClearingOperationByPartition(
+                clearingIdentifier
+            )
+
+            expect(
+                await erc20Facet.allowance(account_A, account_B)
+            ).to.be.equal(3 * _AMOUNT)
+            expect(allowance_B_Before).to.be.equal(ZERO)
+        })
     })
 
     describe('Balance Adjustments', () => {

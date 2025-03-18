@@ -240,12 +240,15 @@ contract ClearingHoldCreationFacet is
         returns (bool success_, uint256 clearingId_)
     {
         address sender = _msgSender();
+        Operator memory operator = Operator({
+            operatorType: OperatorType.None,
+            operatorAddress: sender
+        });
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperation,
             sender,
-            sender,
-            false,
+            operator,
             _hold,
             ''
         );
@@ -275,18 +278,23 @@ contract ClearingHoldCreationFacet is
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         )
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
+        {
+            _checkExpirationTimestamp(_hold.expirationTimestamp);
+            _checkUnProtectedPartitionsOrWildCardRole();
+        }
         address sender = _msgSender();
+        Operator memory operator = Operator({
+            operatorType: OperatorType.ERC20,
+            operatorAddress: sender
+        });
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
-            sender,
-            true,
+            operator,
             _hold,
             _clearingOperationFrom.operatorData
         );
@@ -316,8 +324,6 @@ contract ClearingHoldCreationFacet is
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         )
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -326,14 +332,19 @@ contract ClearingHoldCreationFacet is
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
             );
+            _checkExpirationTimestamp(_hold.expirationTimestamp);
+            _checkUnProtectedPartitionsOrWildCardRole();
         }
         address sender = _msgSender();
+        Operator memory operator = Operator({
+            operatorType: OperatorType.ERC1410,
+            operatorAddress: sender
+        });
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
-            sender,
-            false,
+            operator,
             _hold,
             _clearingOperationFrom.operatorData
         );

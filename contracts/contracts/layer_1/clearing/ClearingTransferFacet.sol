@@ -235,14 +235,17 @@ contract ClearingTransferFacet is
         returns (bool success_, uint256 clearingId_)
     {
         address sender = _msgSender();
+        Operator memory operator = Operator({
+            operatorType: OperatorType.None,
+            operatorAddress: sender
+        });
 
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperation,
             _amount,
             _to,
             sender,
-            sender,
-            false,
+            operator,
             ''
         );
 
@@ -279,14 +282,17 @@ contract ClearingTransferFacet is
             _checkValidAddress(_to);
         }
         address sender = _msgSender();
+        Operator memory operator = Operator({
+            operatorType: OperatorType.ERC20,
+            operatorAddress: sender
+        });
 
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
             _clearingOperationFrom.from,
-            sender,
-            true,
+            operator,
             _clearingOperationFrom.operatorData
         );
 
@@ -327,14 +333,17 @@ contract ClearingTransferFacet is
             );
         }
         address sender = _msgSender();
+        Operator memory operator = Operator({
+            operatorType: OperatorType.ERC1410,
+            operatorAddress: sender
+        });
 
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
             _clearingOperationFrom.from,
-            sender,
-            false,
+            operator,
             _clearingOperationFrom.operatorData
         );
 

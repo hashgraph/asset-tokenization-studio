@@ -233,13 +233,16 @@ contract ClearingRedeemFacet is
         returns (bool success_, uint256 clearingId_)
     {
         address sender = _msgSender();
+        Operator memory operator = Operator({
+            operatorType: OperatorType.None,
+            operatorAddress: sender
+        });
 
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperation,
             _amount,
             sender,
-            sender,
-            false,
+            operator,
             ''
         );
 
@@ -271,13 +274,16 @@ contract ClearingRedeemFacet is
         returns (bool success_, uint256 clearingId_)
     {
         address sender = _msgSender();
+        Operator memory operator = Operator({
+            operatorType: OperatorType.ERC20,
+            operatorAddress: sender
+        });
 
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
-            sender,
-            true,
+            operator,
             _clearingOperationFrom.operatorData
         );
 
@@ -315,13 +321,16 @@ contract ClearingRedeemFacet is
             );
         }
         address sender = _msgSender();
+        Operator memory operator = Operator({
+            operatorType: OperatorType.ERC1410,
+            operatorAddress: sender
+        });
 
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
-            sender,
-            false,
+            operator,
             _clearingOperationFrom.operatorData
         );
 
