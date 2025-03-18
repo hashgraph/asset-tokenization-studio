@@ -2593,10 +2593,10 @@ describe('Clearing Tests', () => {
                     account_B,
                     clearingOperation.partition,
                     1,
+                    _AMOUNT,
+                    clearingOperation.expirationTimestamp,
+                    clearingOperation.data,
                     '0x'
-                    // EXPIRATION DATE?????
-                    // AMOUNT????
-                    // DATA????
                 )
 
             clearingIdentifier.clearingId = 1
@@ -2630,10 +2630,10 @@ describe('Clearing Tests', () => {
                     account_C,
                     clearingOperationFrom.clearingOperation.partition,
                     2,
+                    _AMOUNT,
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
-                    // EXPIRATION DATE?????
-                    // AMOUNT????
-                    // DATA????
                 )
 
             clearingIdentifier.clearingId = 2
@@ -2666,10 +2666,10 @@ describe('Clearing Tests', () => {
                     account_D,
                     clearingOperationFrom.clearingOperation.partition,
                     3,
+                    _AMOUNT,
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
-                    // EXPIRATION DATE?????
-                    // AMOUNT????
-                    // DATA????
                 )
 
             clearingIdentifier.clearingId = 3
@@ -2707,10 +2707,10 @@ describe('Clearing Tests', () => {
                     account_A,
                     clearingOperation.partition,
                     1,
+                    _AMOUNT,
+                    clearingOperation.expirationTimestamp,
+                    clearingOperation.data,
                     '0x'
-                    // EXPIRATION DATE?????
-                    // AMOUNT????
-                    // DATA????
                 )
 
             clearingIdentifier.clearingId = 1
@@ -2742,10 +2742,10 @@ describe('Clearing Tests', () => {
                     clearingOperationFrom.from,
                     clearingOperationFrom.clearingOperation.partition,
                     2,
+                    _AMOUNT,
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
-                    // EXPIRATION DATE?????
-                    // AMOUNT????
-                    // DATA????
                 )
 
             clearingIdentifier.clearingId = 2
@@ -2775,10 +2775,10 @@ describe('Clearing Tests', () => {
                     clearingOperationFrom.from,
                     clearingOperationFrom.clearingOperation.partition,
                     3,
+                    _AMOUNT,
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
-                    // EXPIRATION DATE?????
-                    // AMOUNT????
-                    // DATA????
                 )
 
             clearingIdentifier.clearingId = 3
@@ -2817,10 +2817,9 @@ describe('Clearing Tests', () => {
                     clearingOperation.partition,
                     1,
                     Object.values(hold),
+                    clearingOperation.expirationTimestamp,
+                    clearingOperation.data,
                     '0x'
-                    // EXPIRATION DATE?????
-                    // AMOUNT????
-                    // DATA????
                 )
             ;(clearingIdentifier.clearingId = 1),
                 await checkCreatedClearingValues(
@@ -2854,10 +2853,9 @@ describe('Clearing Tests', () => {
                     clearingOperationFrom.clearingOperation.partition,
                     2,
                     Object.values(hold),
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
-                    // EXPIRATION DATE?????
-                    // AMOUNT????
-                    // DATA????
                 )
 
             clearingIdentifier.clearingId = 2
@@ -2889,10 +2887,9 @@ describe('Clearing Tests', () => {
                     clearingOperationFrom.clearingOperation.partition,
                     3,
                     Object.values(hold),
+                    clearingOperationFrom.clearingOperation.expirationTimestamp,
+                    clearingOperationFrom.clearingOperation.data,
                     clearingOperationFrom.operatorData
-                    // EXPIRATION DATE?????
-                    // AMOUNT????
-                    // DATA????
                 )
 
             clearingIdentifier.clearingId = 3
@@ -2934,9 +2931,21 @@ describe('Clearing Tests', () => {
             clearingIdentifier.clearingId = 1
             clearingIdentifier.clearingOperationType =
                 ClearingOperationType.Transfer
-            await clearingActionsFacet.approveClearingOperationByPartition(
-                clearingIdentifier
+
+            await expect(
+                clearingActionsFacet.approveClearingOperationByPartition(
+                    clearingIdentifier
+                )
             )
+                .to.emit(clearingActionsFacet, 'ClearingOperationApproved')
+                .withArgs(
+                    account_A,
+                    account_A,
+                    _PARTITION_ID_1,
+                    1,
+                    ClearingOperationType.Transfer
+                )
+
             const balance_A_final_Transfer =
                 await erc1410Facet.balanceOf(account_A)
             const balance_B_final_Transfer =
@@ -2950,9 +2959,21 @@ describe('Clearing Tests', () => {
             )
             clearingIdentifier.clearingOperationType =
                 ClearingOperationType.Redeem
-            await clearingActionsFacet.approveClearingOperationByPartition(
-                clearingIdentifier
+
+            await expect(
+                clearingActionsFacet.approveClearingOperationByPartition(
+                    clearingIdentifier
+                )
             )
+                .to.emit(clearingActionsFacet, 'ClearingOperationApproved')
+                .withArgs(
+                    account_A,
+                    account_A,
+                    _PARTITION_ID_1,
+                    1,
+                    ClearingOperationType.Redeem
+                )
+
             const balance_A_final_Redeem =
                 await erc1410Facet.balanceOf(account_A)
             const balance_B_final_Redeem =
@@ -2966,9 +2987,21 @@ describe('Clearing Tests', () => {
 
             clearingIdentifier.clearingOperationType =
                 ClearingOperationType.HoldCreation
-            await clearingActionsFacet.approveClearingOperationByPartition(
-                clearingIdentifier
+
+            await expect(
+                clearingActionsFacet.approveClearingOperationByPartition(
+                    clearingIdentifier
+                )
             )
+                .to.emit(clearingActionsFacet, 'ClearingOperationApproved')
+                .withArgs(
+                    account_A,
+                    account_A,
+                    _PARTITION_ID_1,
+                    1,
+                    ClearingOperationType.HoldCreation
+                )
+
             const balance_A_final_HoldCreation =
                 await erc1410Facet.balanceOf(account_A)
             const balance_B_final_HoldCreation =
@@ -3008,9 +3041,21 @@ describe('Clearing Tests', () => {
             clearingIdentifier.clearingId = 1
             clearingIdentifier.clearingOperationType =
                 ClearingOperationType.Transfer
-            await clearingActionsFacet.cancelClearingOperationByPartition(
-                clearingIdentifier
+
+            await expect(
+                clearingActionsFacet.cancelClearingOperationByPartition(
+                    clearingIdentifier
+                )
             )
+                .to.emit(clearingActionsFacet, 'ClearingOperationCanceled')
+                .withArgs(
+                    account_A,
+                    account_A,
+                    _PARTITION_ID_1,
+                    1,
+                    ClearingOperationType.Transfer
+                )
+
             const balance_A_final_Transfer =
                 await erc1410Facet.balanceOf(account_A)
             const balance_B_final_Transfer =
@@ -3024,9 +3069,21 @@ describe('Clearing Tests', () => {
             )
             clearingIdentifier.clearingOperationType =
                 ClearingOperationType.Redeem
-            await clearingActionsFacet.cancelClearingOperationByPartition(
-                clearingIdentifier
+
+            await expect(
+                clearingActionsFacet.cancelClearingOperationByPartition(
+                    clearingIdentifier
+                )
             )
+                .to.emit(clearingActionsFacet, 'ClearingOperationCanceled')
+                .withArgs(
+                    account_A,
+                    account_A,
+                    _PARTITION_ID_1,
+                    1,
+                    ClearingOperationType.Redeem
+                )
+
             const balance_A_final_Redeem =
                 await erc1410Facet.balanceOf(account_A)
             const balance_B_final_Redeem =
@@ -3040,9 +3097,21 @@ describe('Clearing Tests', () => {
 
             clearingIdentifier.clearingOperationType =
                 ClearingOperationType.HoldCreation
-            await clearingActionsFacet.cancelClearingOperationByPartition(
-                clearingIdentifier
+
+            await expect(
+                clearingActionsFacet.cancelClearingOperationByPartition(
+                    clearingIdentifier
+                )
             )
+                .to.emit(clearingActionsFacet, 'ClearingOperationCanceled')
+                .withArgs(
+                    account_A,
+                    account_A,
+                    _PARTITION_ID_1,
+                    1,
+                    ClearingOperationType.HoldCreation
+                )
+
             const balance_A_final_HoldCreation =
                 await erc1410Facet.balanceOf(account_A)
             const balance_B_final_HoldCreation =
@@ -3088,9 +3157,20 @@ describe('Clearing Tests', () => {
                 clearingOperation.expirationTimestamp + 1
             )
 
-            await clearingActionsFacet.reclaimClearingOperationByPartition(
-                clearingIdentifier
+            await expect(
+                clearingActionsFacet.reclaimClearingOperationByPartition(
+                    clearingIdentifier
+                )
             )
+                .to.emit(clearingActionsFacet, 'ClearingOperationReclaimed')
+                .withArgs(
+                    account_A,
+                    account_A,
+                    _PARTITION_ID_1,
+                    1,
+                    ClearingOperationType.Transfer
+                )
+
             const balance_A_final_Transfer =
                 await erc1410Facet.balanceOf(account_A)
             const balance_B_final_Transfer =
@@ -3111,9 +3191,20 @@ describe('Clearing Tests', () => {
                 clearingOperation.expirationTimestamp + 1
             )
 
-            await clearingActionsFacet.reclaimClearingOperationByPartition(
-                clearingIdentifier
+            await expect(
+                clearingActionsFacet.reclaimClearingOperationByPartition(
+                    clearingIdentifier
+                )
             )
+                .to.emit(clearingActionsFacet, 'ClearingOperationReclaimed')
+                .withArgs(
+                    account_A,
+                    account_A,
+                    _PARTITION_ID_1,
+                    1,
+                    ClearingOperationType.Redeem
+                )
+
             const balance_A_final_Redeem =
                 await erc1410Facet.balanceOf(account_A)
             const balance_B_final_Redeem =
@@ -3134,9 +3225,20 @@ describe('Clearing Tests', () => {
                 clearingOperation.expirationTimestamp + 1
             )
 
-            await clearingActionsFacet.reclaimClearingOperationByPartition(
-                clearingIdentifier
+            await expect(
+                clearingActionsFacet.reclaimClearingOperationByPartition(
+                    clearingIdentifier
+                )
             )
+                .to.emit(clearingActionsFacet, 'ClearingOperationReclaimed')
+                .withArgs(
+                    account_A,
+                    account_A,
+                    _PARTITION_ID_1,
+                    1,
+                    ClearingOperationType.HoldCreation
+                )
+
             const balance_A_final_HoldCreation =
                 await erc1410Facet.balanceOf(account_A)
             const balance_B_final_HoldCreation =

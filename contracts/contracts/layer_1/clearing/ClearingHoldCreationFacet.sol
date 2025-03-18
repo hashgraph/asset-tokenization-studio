@@ -249,15 +249,6 @@ contract ClearingHoldCreationFacet is
             _hold,
             ''
         );
-
-        emit ClearedHoldByPartition(
-            sender,
-            sender,
-            _clearingOperation.partition,
-            clearingId_,
-            _hold,
-            ''
-        );
     }
 
     function clearingCreateHoldFromByPartition(
@@ -287,15 +278,6 @@ contract ClearingHoldCreationFacet is
             _clearingOperationFrom.from,
             sender,
             true,
-            _hold,
-            _clearingOperationFrom.operatorData
-        );
-
-        emit ClearedHoldByPartition(
-            sender,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
             _hold,
             _clearingOperationFrom.operatorData
         );
@@ -337,15 +319,6 @@ contract ClearingHoldCreationFacet is
             _hold,
             _clearingOperationFrom.operatorData
         );
-
-        emit ClearedHoldByPartition(
-            sender,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            _hold,
-            _clearingOperationFrom.operatorData
-        );
     }
 
     function protectedClearingCreateHoldByPartition(
@@ -373,15 +346,6 @@ contract ClearingHoldCreationFacet is
             _protectedClearingOperation,
             _hold,
             _signature
-        );
-
-        emit ClearedHoldByPartition(
-            _msgSender(),
-            _protectedClearingOperation.from,
-            _protectedClearingOperation.clearingOperation.partition,
-            clearingId_,
-            _hold,
-            ''
         );
     }
 

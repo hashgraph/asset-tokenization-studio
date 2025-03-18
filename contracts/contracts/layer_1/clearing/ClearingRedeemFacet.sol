@@ -242,14 +242,6 @@ contract ClearingRedeemFacet is
             false,
             ''
         );
-
-        emit ClearedRedeemByPartition(
-            sender,
-            sender,
-            _clearingOperation.partition,
-            clearingId_,
-            ''
-        );
     }
 
     function clearingRedeemFromByPartition(
@@ -278,14 +270,6 @@ contract ClearingRedeemFacet is
             _clearingOperationFrom.from,
             sender,
             true,
-            _clearingOperationFrom.operatorData
-        );
-
-        emit ClearedRedeemByPartition(
-            sender,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
             _clearingOperationFrom.operatorData
         );
     }
@@ -324,14 +308,6 @@ contract ClearingRedeemFacet is
             false,
             _clearingOperationFrom.operatorData
         );
-
-        emit ClearedRedeemByPartition(
-            sender,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            _clearingOperationFrom.operatorData
-        );
     }
 
     function protectedClearingRedeemByPartition(
@@ -359,14 +335,6 @@ contract ClearingRedeemFacet is
             _protectedClearingOperation,
             _amount,
             _signature
-        );
-
-        emit ClearedRedeemByPartition(
-            _msgSender(),
-            _protectedClearingOperation.from,
-            _protectedClearingOperation.clearingOperation.partition,
-            clearingId_,
-            ''
         );
     }
 
