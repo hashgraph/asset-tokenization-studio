@@ -206,15 +206,25 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {HoldStorageWrapper2} from "../hold/HoldStorageWrapper2.sol";
-import {IClearing} from "../../layer_1/interfaces/clearing/IClearing.sol";
-import {IClearingActions} from "../../layer_1/interfaces/clearing/IClearingActions.sol";
-import {IClearingTransfer} from "../../layer_1/interfaces/clearing/IClearingTransfer.sol";
-import {IClearingStorageWrapper} from "../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {checkNounceAndDeadline} from "../../layer_1/protectedPartitions/signatureVerification.sol";
-import {IHold} from "../../layer_1/interfaces/hold/IHold.sol";
-import {IKyc} from "../../layer_1/interfaces/kyc/IKyc.sol";
+import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
+import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
+import {
+    IClearingActions
+} from '../../layer_1/interfaces/clearing/IClearingActions.sol';
+import {
+    IClearingTransfer
+} from '../../layer_1/interfaces/clearing/IClearingTransfer.sol';
+import {
+    IClearingStorageWrapper
+} from '../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    checkNounceAndDeadline
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
+import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 abstract contract ClearingStorageWrapper2 is
@@ -257,7 +267,7 @@ abstract contract ClearingStorageWrapper2 is
             _protectedClearingOperation.from,
             _msgSender(),
             false,
-            ""
+            ''
         );
     }
 
@@ -291,7 +301,7 @@ abstract contract ClearingStorageWrapper2 is
             _msgSender(),
             false,
             _hold,
-            ""
+            ''
         );
     }
 
@@ -326,7 +336,7 @@ abstract contract ClearingStorageWrapper2 is
             _protectedClearingOperation.from,
             _msgSender(),
             false,
-            ""
+            ''
         );
     }
 

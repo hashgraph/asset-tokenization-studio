@@ -588,15 +588,6 @@ abstract contract AdjustBalancesStorageWrapper1 is
         factor_ = _abaf / _labaf;
     }
 
-    function _calculateFactor(
-        uint256 _abaf,
-        uint256 _labaf
-    ) internal pure returns (uint256 factor_) {
-        if (_abaf == 0) return 1;
-        if (_labaf == 0) return _abaf;
-        factor_ = _abaf / _labaf;
-    }
-
     function _adjustBalancesStorage()
         internal
         pure
