@@ -206,37 +206,141 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IClearing} from './IClearing.sol';
+import {IHold} from '../hold/IHold.sol';
 
-interface IClearingTransfer is IClearing {
-    function clearingTransferByPartition(
-        ClearingOperation calldata _clearingOperation,
-        uint256 _amount,
-        address _to
-    ) external returns (bool success_, uint256 clearingId_);
+interface IClearingStorageWrapper {
+    event ClearedRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 
-    function clearingTransferFromByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount,
-        address _to
-    ) external returns (bool success_, uint256 clearingId_);
+    event ClearedRedeemFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 
-    function operatorClearingTransferByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount,
-        address _to
-    ) external returns (bool success_, uint256 clearingId_);
+    event ClearedOperatorRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 
-    function protectedClearingTransferByPartition(
-        ProtectedClearingOperation calldata _protectedClearingOperation,
-        uint256 _amount,
-        address _to,
-        bytes calldata _signature
-    ) external returns (bool success_, uint256 clearingId_);
+    event ProtectedClearedRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+    event ClearedHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        IHold.Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 
-    function getClearingTransferForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId
-    ) external view returns (ClearingTransferData memory clearingTransferData_);
+    event ClearedHoldFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        IHold.Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedOperatorHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        IHold.Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ProtectedClearedHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        IHold.Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedTransferFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedOperatorTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ProtectedClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 }

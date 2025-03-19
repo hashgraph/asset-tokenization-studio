@@ -210,42 +210,6 @@ import {IHold} from '../hold/IHold.sol';
 import {IClearing} from './IClearing.sol';
 
 interface IClearingHoldCreation is IClearing {
-    event ClearedHoldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 clearingId,
-        IHold.Hold hold,
-        bytes operatorData
-    );
-
-    event ClearedHoldFromByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 clearingId,
-        IHold.Hold hold,
-        bytes operatorData
-    );
-
-    event ClearedOperatorHoldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 clearingId,
-        IHold.Hold hold,
-        bytes operatorData
-    );
-
-    event ProtectedClearedHoldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 clearingId,
-        IHold.Hold hold,
-        bytes operatorData
-    );
-
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
         IHold.Hold calldata _hold
