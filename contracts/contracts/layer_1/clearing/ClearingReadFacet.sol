@@ -259,6 +259,20 @@ contract ClearingReadFacet is IStaticFunctionSelectors, IClearingRead, Common {
             );
     }
 
+    function getClearingOperator(
+        bytes32 _partition,
+        address _tokenHolder,
+        ClearingOperationType _clearingOpeartionType,
+        uint256 _clearingId
+    ) external view override returns (ClearingOperator memory operator_) {
+        operator_ = _getClearingOperator(
+            _partition,
+            _tokenHolder,
+            _clearingOpeartionType,
+            _clearingId
+        );
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -275,7 +289,7 @@ contract ClearingReadFacet is IStaticFunctionSelectors, IClearingRead, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_ = new bytes4[](5);
         staticFunctionSelectors_[selectorIndex++] = this
             .getClearedAmountFor
             .selector;
@@ -287,6 +301,9 @@ contract ClearingReadFacet is IStaticFunctionSelectors, IClearingRead, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getClearingsIdForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearingOperator
             .selector;
     }
 

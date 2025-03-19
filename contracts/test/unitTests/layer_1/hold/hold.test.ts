@@ -1533,6 +1533,34 @@ describe('Hold Tests', () => {
                     0
                 )
             })
+
+            it('GIVEN a hold created by an approved user WHEN releaseHoldByPartition THEN allowance is restored', async () => {
+                await erc20Facet.increaseAllowance(account_B, _AMOUNT)
+                await holdFacet
+                    .connect(signer_B)
+                    .createHoldFromByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        '0x'
+                    )
+
+                expect(
+                    await erc20Facet.allowance(account_A, account_B)
+                ).to.be.equal(ZERO)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .releaseHoldByPartition(holdIdentifier, _AMOUNT)
+                )
+                    .to.emit(holdFacet, 'Approval')
+                    .withArgs(account_A, account_B, _AMOUNT)
+
+                expect(
+                    await erc20Facet.allowance(account_A, account_B)
+                ).to.be.equal(_AMOUNT)
+            })
         })
 
         describe('Reclaim OK', () => {
@@ -1576,6 +1604,34 @@ describe('Hold Tests', () => {
                     0
                 )
             })
+        })
+
+        it('GIVEN a hold created by an approved user WHEN reclaimHoldByPartition THEN allowance is restored', async () => {
+            await erc20Facet.increaseAllowance(account_B, _AMOUNT)
+            await holdFacet
+                .connect(signer_B)
+                .createHoldFromByPartition(
+                    _DEFAULT_PARTITION,
+                    account_A,
+                    hold,
+                    '0x'
+                )
+
+            expect(
+                await erc20Facet.allowance(account_A, account_B)
+            ).to.be.equal(ZERO)
+
+            await timeTravelFacet.changeSystemTimestamp(
+                hold.expirationTimestamp + 1
+            )
+
+            await expect(holdFacet.reclaimHoldByPartition(holdIdentifier))
+                .to.emit(holdFacet, 'Approval')
+                .withArgs(account_A, account_B, _AMOUNT)
+
+            expect(
+                await erc20Facet.allowance(account_A, account_B)
+            ).to.be.equal(_AMOUNT)
         })
     })
 

@@ -235,18 +235,15 @@ contract ClearingTransferFacet is
         returns (bool success_, uint256 clearingId_)
     {
         address sender = _msgSender();
-        Operator memory operator = Operator({
-            operatorType: OperatorType.None,
-            operatorAddress: sender
-        });
 
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperation,
             _amount,
             _to,
             sender,
-            operator,
-            ''
+            '',
+            address(0),
+            OperatorType.NULL
         );
 
         emit ClearedTransferByPartition(
@@ -282,21 +279,18 @@ contract ClearingTransferFacet is
             _checkValidAddress(_to);
         }
         address sender = _msgSender();
-        Operator memory operator = Operator({
-            operatorType: OperatorType.ERC20,
-            operatorAddress: sender
-        });
 
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
             _clearingOperationFrom.from,
-            operator,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            sender,
+            OperatorType.AUTHORIZED
         );
 
-        emit ClearedTransferByPartition(
+        emit ClearedTransferFromByPartition(
             sender,
             _clearingOperationFrom.from,
             _to,
@@ -333,21 +327,18 @@ contract ClearingTransferFacet is
             );
         }
         address sender = _msgSender();
-        Operator memory operator = Operator({
-            operatorType: OperatorType.ERC1410,
-            operatorAddress: sender
-        });
 
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
             _clearingOperationFrom.from,
-            operator,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            sender,
+            OperatorType.OPERATOR
         );
 
-        emit ClearedTransferByPartition(
+        emit ClearedOperatorTransferByPartition(
             sender,
             _clearingOperationFrom.from,
             _to,
@@ -387,7 +378,7 @@ contract ClearingTransferFacet is
             _signature
         );
 
-        emit ClearedTransferByPartition(
+        emit ProtectedClearedTransferByPartition(
             _msgSender(),
             _protectedClearingOperation.from,
             _to,

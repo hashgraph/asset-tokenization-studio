@@ -254,18 +254,14 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.from
         );
 
-        IClearing.Operator memory operator = IClearing.Operator({
-            operatorType: IClearing.OperatorType.None,
-            operatorAddress: _msgSender()
-        });
-
         (success_, clearingId_) = _clearingTransferCreation(
             _protectedClearingOperation.clearingOperation,
             _amount,
             _to,
             _protectedClearingOperation.from,
-            operator,
-            ''
+            '',
+            address(0),
+            IClearing.OperatorType.PROTECTED
         );
     }
 
@@ -293,17 +289,13 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.from
         );
 
-        IClearing.Operator memory operator = IClearing.Operator({
-            operatorType: IClearing.OperatorType.None,
-            operatorAddress: _msgSender()
-        });
-
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _protectedClearingOperation.clearingOperation,
             _protectedClearingOperation.from,
-            operator,
             _hold,
-            ''
+            '',
+            address(0),
+            IClearing.OperatorType.PROTECTED
         );
     }
 
@@ -332,30 +324,26 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.from
         );
 
-        IClearing.Operator memory operator = IClearing.Operator({
-            operatorType: IClearing.OperatorType.None,
-            operatorAddress: _msgSender()
-        });
-
         (success_, clearingId_) = _clearingRedeemCreation(
             _protectedClearingOperation.clearingOperation,
             _amount,
             _protectedClearingOperation.from,
-            operator,
-            ''
+            '',
+            address(0),
+            IClearing.OperatorType.PROTECTED
         );
     }
 
     function _operateClearingCreation(
         IClearing.ClearingOperation memory _clearingOperation,
         address _from,
-        address _operator,
-        bool _reduceAllowance,
+        address _thirdPartyAddress,
+        IClearing.OperatorType _operatorType,
         uint256 _amount,
         IClearing.ClearingOperationType _operationType
     ) internal returns (uint256 clearingId_) {
-        if (_reduceAllowance) {
-            _decreaseAllowedBalance(_from, _operator, _amount);
+        if (_operatorType == IClearing.OperatorType.AUTHORIZED) {
+            _decreaseAllowedBalance(_from, _thirdPartyAddress, _amount);
         }
 
         bytes32 partition = _clearingOperation.partition;
@@ -397,17 +385,15 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         uint256 _amount,
         address _to,
         address _from,
-        IClearing.Operator memory _operator,
-        bytes memory _operatorData
+        bytes memory _operatorData,
+        address _thirdPartyAddress,
+        IClearing.OperatorType _operatorType
     ) internal returns (bool success_, uint256 clearingId_) {
-        bool reduceAllowance = _operator.operatorType ==
-            IClearing.OperatorType.ERC20;
-
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
-            _operator.operatorAddress,
-            reduceAllowance,
+            _thirdPartyAddress,
+            _operatorType,
             _amount,
             IClearing.ClearingOperationType.Transfer
         );
@@ -419,9 +405,15 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _clearingOperation.expirationTimestamp,
             _to,
             _clearingOperation.data,
-            _operatorData,
-            _operator
+            _operatorType
         );
+
+        _clearingStorage().clearingOperator[_from][
+            _clearingOperation.partition
+        ][IClearing.ClearingOperationType.Transfer][
+                clearingId_
+            ] = _buildOperator(_operatorData, _thirdPartyAddress);
+
         success_ = true;
     }
 
@@ -429,17 +421,15 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         IClearing.ClearingOperation memory _clearingOperation,
         uint256 _amount,
         address _from,
-        IClearing.Operator memory _operator,
-        bytes memory _operatorData
+        bytes memory _operatorData,
+        address _thirdPartyAddress,
+        IClearing.OperatorType _operatorType
     ) internal returns (bool success_, uint256 clearingId_) {
-        bool reduceAllowance = _operator.operatorType ==
-            IClearing.OperatorType.ERC20;
-
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
-            _operator.operatorAddress,
-            reduceAllowance,
+            _thirdPartyAddress,
+            _operatorType,
             _amount,
             IClearing.ClearingOperationType.Redeem
         );
@@ -450,8 +440,14 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _amount,
             _clearingOperation.expirationTimestamp,
             _clearingOperation.data,
+            _operatorType
+        );
+
+        _clearingStorage().clearingOperator[_from][
+            _clearingOperation.partition
+        ][IClearing.ClearingOperationType.Redeem][clearingId_] = _buildOperator(
             _operatorData,
-            _operator
+            _thirdPartyAddress
         );
 
         success_ = true;
@@ -460,18 +456,16 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
     function _clearingHoldCreationCreation(
         IClearing.ClearingOperation memory _clearingOperation,
         address _from,
-        IClearing.Operator memory _operator,
         IHold.Hold calldata _hold,
-        bytes memory _operatorData
+        bytes memory _operatorData,
+        address _thirdPartyAddress,
+        IClearing.OperatorType _operatorType
     ) internal returns (bool success_, uint256 clearingId_) {
-        bool reduceAllowance = _operator.operatorType ==
-            IClearing.OperatorType.ERC20;
-
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
-            _operator.operatorAddress,
-            reduceAllowance,
+            _thirdPartyAddress,
+            _operatorType,
             _hold.amount,
             IClearing.ClearingOperationType.HoldCreation
         );
@@ -486,9 +480,14 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _hold.data,
             _hold.escrow,
             _hold.to,
-            _operatorData,
-            _operator
+            _operatorType
         );
+
+        _clearingStorage().clearingOperator[_from][
+            _clearingOperation.partition
+        ][IClearing.ClearingOperationType.HoldCreation][
+                clearingId_
+            ] = _buildOperator(_operatorData, _thirdPartyAddress);
 
         success_ = true;
     }
@@ -816,16 +815,23 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
     function _restoreAllowance(
         address _tokenHolder,
-        address _operator,
+        bytes32 _partition,
+        IClearing.ClearingOperationType _clearingOperationType,
+        uint256 _clearingId,
         uint256 _amount
     ) internal {
-        _beforeAllowanceUpdate(_tokenHolder, _operator);
+        address thirdPartyAddress = _clearingStorage()
+        .clearingOperator[_tokenHolder][_partition][_clearingOperationType][
+            _clearingId
+        ].thirdPartyAddress;
 
-        _erc20Storage().allowed[_tokenHolder][_operator] += _amount;
+        _beforeAllowanceUpdate(_tokenHolder, thirdPartyAddress);
+
+        _erc20Storage().allowed[_tokenHolder][thirdPartyAddress] += _amount;
         emit Approval(
             _tokenHolder,
-            _operator,
-            _erc20Storage().allowed[_tokenHolder][_operator]
+            thirdPartyAddress,
+            _erc20Storage().allowed[_tokenHolder][thirdPartyAddress]
         );
     }
 
@@ -992,12 +998,14 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         if (
             _operation != IClearingActions.ClearingActionType.Approve &&
-            clearingTransferData.operator.operatorType ==
-            IClearing.OperatorType.ERC20
+            clearingTransferData.operatorType ==
+            IClearing.OperatorType.AUTHORIZED
         ) {
             _restoreAllowance(
                 _tokenHolder,
-                clearingTransferData.operator.operatorAddress,
+                _partition,
+                IClearing.ClearingOperationType.Transfer,
+                _clearingId,
                 clearingTransferData.amount
             );
         }
@@ -1034,15 +1042,15 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 IClearing.ClearingOperationType.Redeem
             )
         );
-
         if (
             _operation != IClearingActions.ClearingActionType.Approve &&
-            clearingRedeemData.operator.operatorType ==
-            IClearing.OperatorType.ERC20
+            clearingRedeemData.operatorType == IClearing.OperatorType.AUTHORIZED
         ) {
             _restoreAllowance(
                 _tokenHolder,
-                clearingRedeemData.operator.operatorAddress,
+                _partition,
+                IClearing.ClearingOperationType.Redeem,
+                _clearingId,
                 clearingRedeemData.amount
             );
         }
@@ -1072,7 +1080,10 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 _partition,
                 _tokenHolder,
                 _fromClearingHoldCreationDataToHold(clearingHoldCreationData),
-                clearingHoldCreationData.operatorData
+                _clearingStorage()
+                .clearingOperator[_tokenHolder][_partition][
+                    IClearing.ClearingOperationType.HoldCreation
+                ][_clearingId].operatorData
             );
         }
 
@@ -1087,12 +1098,14 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         if (
             _operation != IClearingActions.ClearingActionType.Approve &&
-            clearingHoldCreationData.operator.operatorType ==
-            IClearing.OperatorType.ERC20
+            clearingHoldCreationData.operatorType ==
+            IClearing.OperatorType.AUTHORIZED
         ) {
             _restoreAllowance(
                 _tokenHolder,
-                clearingHoldCreationData.operator.operatorAddress,
+                _partition,
+                IClearing.ClearingOperationType.HoldCreation,
+                _clearingId,
                 clearingHoldCreationData.amount
             );
         }

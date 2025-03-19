@@ -269,14 +269,26 @@ enum ClearingOperationType {
     HoldCreation,
 }
 
+enum OperatorType {
+    NULL,
+    AUTHORIZED,
+    OPERATOR,
+    PROTECTED,
+}
+
 interface Clearing {
     amount_: BigNumber
     expirationTimestamp_: BigNumber
     destination_: string
     clearingOperationType_: ClearingOperationType
     data_: string
-    operatorData_?: string
+    operatorType_: number
     hold_?: Hold
+}
+
+interface ClearingOperator {
+    operatorData: string
+    thirdPartyAddress: string
 }
 
 interface ClearingIdentifier {
@@ -310,6 +322,7 @@ let clearingIdentifier: ClearingIdentifier
 let clearingOperation: ClearingOperation
 let clearingOperationFrom: ClearingOperationFrom
 let hold: Hold
+let clearingOperator: ClearingOperator
 
 describe('Clearing Tests', () => {
     let diamond: ResolverProxy
@@ -668,7 +681,8 @@ describe('Clearing Tests', () => {
         amount: number,
         expirationTimestamp: number,
         data: string,
-        operatorData?: string,
+        operatorType: OperatorType,
+        clearingOperator: ClearingOperator,
         hold?: Hold
     ) {
         let clearing
@@ -692,26 +706,37 @@ describe('Clearing Tests', () => {
             )
         else throw new Error('Unrecognize ClearingOperationType')
 
+        const createdClearingOperator = await clearingFacet.getClearingOperator(
+            clearingIdentifier.partition,
+            clearingIdentifier.tokenHolder,
+            clearingType,
+            clearingIdentifier.clearingId
+        )
+
         checkClearingValues(
             clearing,
+            createdClearingOperator,
             clearingIdentifier,
             to,
             amount,
             expirationTimestamp,
             data,
-            operatorData,
+            operatorType,
+            clearingOperator,
             hold
         )
     }
 
     async function checkClearingValues(
         clearing: Clearing,
+        createdClearingOperator: ClearingOperator,
         clearingIdentifier: ClearingIdentifier,
         to: string,
         amount: number,
         expirationTimestamp: number,
         data: string,
-        operatorData?: string,
+        operatorType: OperatorType,
+        clearingOperator: ClearingOperator,
         hold?: Hold
     ) {
         expect(clearing.amount_).to.equal(amount)
@@ -721,7 +746,8 @@ describe('Clearing Tests', () => {
             clearingIdentifier.clearingOperationType
         )
         expect(clearing.data_).to.equal(data)
-        if (operatorData) expect(clearing.operatorData_).to.equal(operatorData)
+        expect(clearing.operatorType_).to.equal(operatorType)
+        expect(createdClearingOperator).to.equal(clearingOperator)
         if (hold) {
             expect(clearing.hold_!.amount).to.equal(hold.amount)
             expect(clearing.hold_!.expirationTimestamp).to.equal(
@@ -770,6 +796,12 @@ describe('Clearing Tests', () => {
             clearingId: 1,
             clearingOperationType: ClearingOperationType.Transfer,
         }
+
+        clearingOperator = {
+            operatorData: EMPTY_STRING,
+            thirdPartyAddress: ADDRESS_ZERO,
+        }
+
         await deployAll(false)
     })
 
@@ -2606,7 +2638,9 @@ describe('Clearing Tests', () => {
                 account_B,
                 _AMOUNT,
                 clearingOperation.expirationTimestamp,
-                clearingOperation.data
+                clearingOperation.data,
+                OperatorType.NULL,
+                clearingOperator
             )
 
             // increase allowance
@@ -2623,7 +2657,7 @@ describe('Clearing Tests', () => {
                         account_C
                     )
             )
-                .to.emit(clearingFacet, 'ClearedTransferByPartition')
+                .to.emit(clearingFacet, 'ClearedTransferFromByPartition')
                 .withArgs(
                     account_B,
                     clearingOperationFrom.from,
@@ -2637,6 +2671,9 @@ describe('Clearing Tests', () => {
                 )
 
             clearingIdentifier.clearingId = 2
+            clearingOperator.thirdPartyAddress = account_B
+            clearingOperator.operatorData =
+                clearingOperationFrom.clearingOperation.data
             await checkCreatedClearingValues(
                 clearingIdentifier,
                 ClearingOperationType.Transfer,
@@ -2644,7 +2681,8 @@ describe('Clearing Tests', () => {
                 _AMOUNT,
                 clearingOperationFrom.clearingOperation.expirationTimestamp,
                 clearingOperationFrom.clearingOperation.data,
-                clearingOperationFrom.operatorData
+                OperatorType.AUTHORIZED,
+                clearingOperator
             )
 
             // authorize operator
@@ -2659,7 +2697,7 @@ describe('Clearing Tests', () => {
                         account_D
                     )
             )
-                .to.emit(clearingFacet, 'ClearedTransferByPartition')
+                .to.emit(clearingFacet, 'ClearedOperatorTransferByPartition')
                 .withArgs(
                     account_C,
                     clearingOperationFrom.from,
@@ -2673,6 +2711,7 @@ describe('Clearing Tests', () => {
                 )
 
             clearingIdentifier.clearingId = 3
+            clearingOperator.thirdPartyAddress = ADDRESS_ZERO
             await checkCreatedClearingValues(
                 clearingIdentifier,
                 ClearingOperationType.Transfer,
@@ -2680,7 +2719,8 @@ describe('Clearing Tests', () => {
                 _AMOUNT,
                 clearingOperationFrom.clearingOperation.expirationTimestamp,
                 clearingOperationFrom.clearingOperation.data,
-                clearingOperationFrom.operatorData
+                OperatorType.OPERATOR,
+                clearingOperator
             )
 
             await checkCreatedClearingAmounts(
@@ -2720,7 +2760,9 @@ describe('Clearing Tests', () => {
                 ADDRESS_ZERO,
                 _AMOUNT,
                 clearingOperation.expirationTimestamp,
-                clearingOperation.data
+                clearingOperation.data,
+                OperatorType.NULL,
+                clearingOperator
             )
 
             // increase allowance
@@ -2736,7 +2778,7 @@ describe('Clearing Tests', () => {
                         _AMOUNT
                     )
             )
-                .to.emit(clearingFacet, 'ClearedRedeemByPartition')
+                .to.emit(clearingFacet, 'ClearedRedeemFromByPartition')
                 .withArgs(
                     account_B,
                     clearingOperationFrom.from,
@@ -2749,6 +2791,8 @@ describe('Clearing Tests', () => {
                 )
 
             clearingIdentifier.clearingId = 2
+            clearingOperator.thirdPartyAddress = account_B
+            clearingOperator.operatorData = _DATA
             await checkCreatedClearingValues(
                 clearingIdentifier,
                 ClearingOperationType.Redeem,
@@ -2756,7 +2800,8 @@ describe('Clearing Tests', () => {
                 _AMOUNT,
                 clearingOperationFrom.clearingOperation.expirationTimestamp,
                 clearingOperationFrom.clearingOperation.data,
-                clearingOperationFrom.operatorData
+                OperatorType.AUTHORIZED,
+                clearingOperator
             )
             // authorize operator
             await erc1410Facet.connect(signer_A).authorizeOperator(account_C)
@@ -2769,7 +2814,7 @@ describe('Clearing Tests', () => {
                         _AMOUNT
                     )
             )
-                .to.emit(clearingFacet, 'ClearedRedeemByPartition')
+                .to.emit(clearingFacet, 'ClearedOperatorRedeemByPartition')
                 .withArgs(
                     account_C,
                     clearingOperationFrom.from,
@@ -2782,6 +2827,7 @@ describe('Clearing Tests', () => {
                 )
 
             clearingIdentifier.clearingId = 3
+            clearingOperator.thirdPartyAddress = ADDRESS_ZERO
             await checkCreatedClearingValues(
                 clearingIdentifier,
                 ClearingOperationType.Redeem,
@@ -2789,7 +2835,8 @@ describe('Clearing Tests', () => {
                 _AMOUNT,
                 clearingOperationFrom.clearingOperation.expirationTimestamp,
                 clearingOperationFrom.clearingOperation.data,
-                clearingOperationFrom.operatorData
+                OperatorType.AUTHORIZED,
+                clearingOperator
             )
 
             await checkCreatedClearingAmounts(
@@ -2830,7 +2877,8 @@ describe('Clearing Tests', () => {
                     _AMOUNT,
                     clearingOperation.expirationTimestamp,
                     clearingOperation.data,
-                    '0x',
+                    OperatorType.NULL,
+                    clearingOperator,
                     hold
                 )
 
@@ -2847,7 +2895,7 @@ describe('Clearing Tests', () => {
                         hold
                     )
             )
-                .to.emit(clearingFacet, 'ClearedHoldByPartition')
+                .to.emit(clearingFacet, 'ClearedHoldFromByPartition')
                 .withArgs(
                     account_B,
                     clearingOperationFrom.from,
@@ -2861,6 +2909,8 @@ describe('Clearing Tests', () => {
                 )
 
             clearingIdentifier.clearingId = 2
+            clearingOperator.thirdPartyAddress = account_B
+            clearingOperator.operatorData = _DATA
             await checkCreatedClearingValues(
                 clearingIdentifier,
                 ClearingOperationType.HoldCreation,
@@ -2868,7 +2918,8 @@ describe('Clearing Tests', () => {
                 _AMOUNT,
                 clearingOperationFrom.clearingOperation.expirationTimestamp,
                 clearingOperationFrom.clearingOperation.data,
-                clearingOperationFrom.operatorData,
+                OperatorType.AUTHORIZED,
+                clearingOperator,
                 hold
             )
             // authorize operator
@@ -2882,7 +2933,7 @@ describe('Clearing Tests', () => {
                         hold
                     )
             )
-                .to.emit(clearingFacet, 'ClearedHoldByPartition')
+                .to.emit(clearingFacet, 'ClearedOperatorHoldByPartition')
                 .withArgs(
                     account_C,
                     clearingOperationFrom.from,
@@ -2896,6 +2947,7 @@ describe('Clearing Tests', () => {
                 )
 
             clearingIdentifier.clearingId = 3
+            clearingOperator.thirdPartyAddress = ADDRESS_ZERO
             await checkCreatedClearingValues(
                 clearingIdentifier,
                 ClearingOperationType.HoldCreation,
@@ -2903,7 +2955,8 @@ describe('Clearing Tests', () => {
                 _AMOUNT,
                 clearingOperationFrom.clearingOperation.expirationTimestamp,
                 clearingOperationFrom.clearingOperation.data,
-                clearingOperationFrom.operatorData,
+                OperatorType.OPERATOR,
+                clearingOperator,
                 hold
             )
 

@@ -218,6 +218,33 @@ interface IClearingTransfer is IClearing {
         bytes operatorData
     );
 
+    event ClearedTransferFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        bytes operatorData
+    );
+
+    event ClearedOperatorTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        bytes operatorData
+    );
+
+    event ProtectedClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        bytes operatorData
+    );
+
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,

@@ -217,6 +217,30 @@ interface IClearingRedeem is IClearing {
         bytes operatorData
     );
 
+    event ClearedRedeemFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        bytes operatorData
+    );
+
+    event ClearedOperatorRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        bytes operatorData
+    );
+
+    event ProtectedClearedRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        bytes operatorData
+    );
+
     function clearingRedeemByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount

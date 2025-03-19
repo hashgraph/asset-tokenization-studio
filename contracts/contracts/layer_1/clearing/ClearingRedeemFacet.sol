@@ -233,17 +233,14 @@ contract ClearingRedeemFacet is
         returns (bool success_, uint256 clearingId_)
     {
         address sender = _msgSender();
-        Operator memory operator = Operator({
-            operatorType: OperatorType.None,
-            operatorAddress: sender
-        });
 
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperation,
             _amount,
             sender,
-            operator,
-            ''
+            '',
+            address(0),
+            OperatorType.NULL
         );
 
         emit ClearedRedeemByPartition(
@@ -274,20 +271,17 @@ contract ClearingRedeemFacet is
         returns (bool success_, uint256 clearingId_)
     {
         address sender = _msgSender();
-        Operator memory operator = Operator({
-            operatorType: OperatorType.ERC20,
-            operatorAddress: sender
-        });
 
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
-            operator,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            sender,
+            OperatorType.AUTHORIZED
         );
 
-        emit ClearedRedeemByPartition(
+        emit ClearedRedeemFromByPartition(
             sender,
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
@@ -321,20 +315,17 @@ contract ClearingRedeemFacet is
             );
         }
         address sender = _msgSender();
-        Operator memory operator = Operator({
-            operatorType: OperatorType.ERC1410,
-            operatorAddress: sender
-        });
 
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
-            operator,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            address(0),
+            OperatorType.OPERATOR
         );
 
-        emit ClearedRedeemByPartition(
+        emit ClearedOperatorRedeemByPartition(
             sender,
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
@@ -370,7 +361,7 @@ contract ClearingRedeemFacet is
             _signature
         );
 
-        emit ClearedRedeemByPartition(
+        emit ProtectedClearedRedeemByPartition(
             _msgSender(),
             _protectedClearingOperation.from,
             _protectedClearingOperation.clearingOperation.partition,

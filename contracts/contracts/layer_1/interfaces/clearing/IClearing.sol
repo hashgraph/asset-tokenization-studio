@@ -218,9 +218,10 @@ interface IClearing {
     }
 
     enum OperatorType {
-        None,
-        ERC20,
-        ERC1410
+        NULL,
+        AUTHORIZED,
+        OPERATOR,
+        PROTECTED
     }
 
     struct ClearingOperationBasicInfo {
@@ -255,38 +256,35 @@ interface IClearing {
         uint256 clearingId;
     }
 
-    struct Operator {
-        OperatorType operatorType;
-        address operatorAddress;
-    }
-
     struct ClearingTransferData {
         uint256 amount;
         uint256 expirationTimestamp;
         address destination;
         bytes data;
-        bytes operatorData;
-        Operator operator;
+        OperatorType operatorType;
     }
 
     struct ClearingRedeemData {
         uint256 amount;
         uint256 expirationTimestamp;
         bytes data;
-        bytes operatorData;
-        Operator operator;
+        OperatorType operatorType;
     }
 
     struct ClearingHoldCreationData {
         uint256 amount;
         uint256 expirationTimestamp;
         bytes data;
-        bytes operatorData;
         address holdEscrow;
         uint256 holdExpirationTimestamp;
         address holdTo;
         bytes holdData;
-        Operator operator;
+        OperatorType operatorType;
+    }
+
+    struct ClearingOperator {
+        bytes operatorData;
+        address thirdPartyAddress;
     }
 
     // solhint-disable max-line-length
@@ -300,6 +298,7 @@ interface IClearing {
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingTransferData))) clearingTransferByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
+        mapping(address => mapping(bytes32 => mapping(ClearingOperationType => mapping(uint256 => ClearingOperator)))) clearingOperator;
     }
     // solhint-enable max-line-length
 

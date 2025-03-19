@@ -240,17 +240,14 @@ contract ClearingHoldCreationFacet is
         returns (bool success_, uint256 clearingId_)
     {
         address sender = _msgSender();
-        Operator memory operator = Operator({
-            operatorType: OperatorType.None,
-            operatorAddress: sender
-        });
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperation,
             sender,
-            operator,
             _hold,
-            ''
+            '',
+            address(0),
+            OperatorType.NULL
         );
 
         emit ClearedHoldByPartition(
@@ -286,20 +283,17 @@ contract ClearingHoldCreationFacet is
             _checkUnProtectedPartitionsOrWildCardRole();
         }
         address sender = _msgSender();
-        Operator memory operator = Operator({
-            operatorType: OperatorType.ERC20,
-            operatorAddress: sender
-        });
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
-            operator,
             _hold,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            sender,
+            OperatorType.AUTHORIZED
         );
 
-        emit ClearedHoldByPartition(
+        emit ClearedHoldFromByPartition(
             sender,
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
@@ -336,20 +330,17 @@ contract ClearingHoldCreationFacet is
             _checkUnProtectedPartitionsOrWildCardRole();
         }
         address sender = _msgSender();
-        Operator memory operator = Operator({
-            operatorType: OperatorType.ERC1410,
-            operatorAddress: sender
-        });
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
-            operator,
             _hold,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            address(0),
+            OperatorType.OPERATOR
         );
 
-        emit ClearedHoldByPartition(
+        emit ClearedOperatorHoldByPartition(
             sender,
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
@@ -386,7 +377,7 @@ contract ClearingHoldCreationFacet is
             _signature
         );
 
-        emit ClearedHoldByPartition(
+        emit ProtectedClearedHoldByPartition(
             _msgSender(),
             _protectedClearingOperation.from,
             _protectedClearingOperation.clearingOperation.partition,
