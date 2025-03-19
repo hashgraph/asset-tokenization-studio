@@ -1,8 +1,8 @@
 // @ts-check
 
-import eslint from '@eslint/js';
-import { globalIgnores } from 'eslint/config';
-import tseslint from 'typescript-eslint';
+import eslint from '@eslint/js'
+import { globalIgnores } from 'eslint/config'
+import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
     eslint.configs.recommended,
@@ -21,4 +21,4 @@ export default tseslint.config(
             '@typescript-eslint/no-unused-expressions': 'off', // Disable the rule for test files
         },
     }
-);
+)

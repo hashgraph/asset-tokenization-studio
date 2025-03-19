@@ -29,6 +29,7 @@
     "prettier:sdk": "cd sdk && npm run prettier",
     "prettier:web": "cd web && npm run prettier",
     "prettier:contracts": "cd contracts && npm run prettier",
+    "pre-commit:contracts": "cd contracts && npm run pre-commit",
     "pre-commit:sdk": "cd sdk && npm run pre-commit",
     "prepare": "husky"
   },
