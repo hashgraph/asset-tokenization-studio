@@ -203,40 +203,27 @@
 
 */
 
-import { ClearingOperationType } from '../../../domain/context/security/Clearing.js';
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
 
-export default class GetClearingForByPartitionRequest extends ValidatedRequest<GetClearingForByPartitionRequest> {
-  securityId: string;
-  targetId: string;
-  partitionId: string;
-  clearingOperationType: ClearingOperationType;
-  clearingId: number;
+import {
+    ClearingHoldCreationFacet
+} from '../../../layer_1/clearing/ClearingHoldCreationFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-  constructor({
-    securityId,
-    targetId,
-    partitionId,
-    clearingOperationType,
-    clearingId,
-  }: {
-    securityId: string;
-    targetId: string;
-    partitionId: string;
-    clearingOperationType: ClearingOperationType;
-    clearingId: number;
-  }) {
-    super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
-    });
-
-    this.securityId = securityId;
-    this.targetId = targetId;
-    this.partitionId = partitionId;
-    this.clearingOperationType = clearingOperationType;
-    this.clearingId = clearingId;
-  }
+contract ClearingHoldCreationFacetTimeTravel is
+    ClearingHoldCreationFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
+    }
 }

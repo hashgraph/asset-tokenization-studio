@@ -222,7 +222,6 @@ import {
     Kyc,
     SsiManagement,
     Hold,
-    ClearingFacet,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -248,6 +247,7 @@ import {
     EMPTY_STRING,
     ADDRESS_ZERO,
 } from '@scripts'
+import { Contract } from 'ethers'
 
 const amount = 1
 
@@ -381,13 +381,55 @@ const clearingRedeemType = {
     ],
 }
 
-let basicTransferInfo: any
-let operatorTransferData: any
-enum ClearingOperationType {
-    Transfer,
-    Redeem,
-    HoldCreation,
+interface BasicTransferInfo {
+    to: string
+    value: number
 }
+
+interface OperatorTransferData {
+    partition: string
+    from: string
+    to: string
+    value: number
+    data: string
+    operatorData: string
+}
+
+interface HoldData {
+    amount: number
+    expirationTimestamp: bigint
+    escrow: string
+    to: string
+    data: string
+}
+
+interface ProtectedHoldData {
+    hold: HoldData
+    deadline: bigint
+    nonce: number
+}
+
+interface ClearingOperationData {
+    partition: string
+    expirationTimestamp: bigint
+    data: string
+}
+
+interface ClearingOperationFromData {
+    clearingOperation: ClearingOperationData
+    from: string
+    operatorData: string
+}
+
+interface ProtectedClearingOperationData {
+    clearingOperation: ClearingOperationData
+    from: string
+    deadline: bigint
+    nonce: number
+}
+
+let basicTransferInfo: BasicTransferInfo
+let operatorTransferData: OperatorTransferData
 
 describe('ProtectedPartitions Tests', () => {
     let diamond_UnprotectedPartitions: ResolverProxy
@@ -413,14 +455,12 @@ describe('ProtectedPartitions Tests', () => {
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let holdFacet: Hold
-    let clearingFacet: ClearingFacet
-
-    let protectedHold: any
-    let hold: any
-    let clearingOperation: any
-    let clearingOperationFrom: any
-    let clearingIdentifier: any
-    let protectedClearingOperation: any
+    let clearingFacet: Contract
+    let protectedHold: ProtectedHoldData
+    let hold: HoldData
+    let clearingOperation: ClearingOperationData
+    let clearingOperationFrom: ClearingOperationFromData
+    let protectedClearingOperation: ProtectedClearingOperationData
 
     async function grant_WILD_CARD_ROLE_and_issue_tokens(
         wildCard_Account: string,
@@ -468,7 +508,44 @@ describe('ProtectedPartitions Tests', () => {
             'SsiManagement',
             address
         )
-        clearingFacet = await ethers.getContractAt('ClearingFacet', address)
+        const clearingTransferFacet = await ethers.getContractAt(
+            'ClearingTransferFacet',
+            address,
+            signer_A
+        )
+
+        const clearingRedeemFacet = await ethers.getContractAt(
+            'ClearingRedeemFacet',
+            address,
+            signer_A
+        )
+        const clearingHoldCreationFacet = await ethers.getContractAt(
+            'ClearingHoldCreationFacet',
+            address,
+            signer_A
+        )
+        const clearingReadFacet = await ethers.getContractAt(
+            'ClearingReadFacet',
+            address,
+            signer_A
+        )
+        const clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
+            address,
+            signer_A
+        )
+
+        clearingFacet = new Contract(
+            address,
+            [
+                ...clearingTransferFacet.interface.fragments,
+                ...clearingRedeemFacet.interface.fragments,
+                ...clearingHoldCreationFacet.interface.fragments,
+                ...clearingReadFacet.interface.fragments,
+                ...clearingActionsFacet.interface.fragments,
+            ],
+            signer_A
+        )
     }
 
     async function grantKyc() {
@@ -499,21 +576,19 @@ describe('ProtectedPartitions Tests', () => {
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: false,
-                    timeTravelEnabled: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: false,
+                timeTravelEnabled: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -637,7 +712,7 @@ describe('ProtectedPartitions Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        let expirationTimestamp = MAX_UINT256
+        const expirationTimestamp = MAX_UINT256
 
         hold = {
             amount: 1,
@@ -677,13 +752,6 @@ describe('ProtectedPartitions Tests', () => {
             clearingOperation: clearingOperation,
             from: account_A,
             operatorData: '0x1234',
-        }
-
-        clearingIdentifier = {
-            partition: DEFAULT_PARTITION,
-            tokenHolder: account_A,
-            clearingId: 1,
-            clearingOperationType: ClearingOperationType.Transfer,
         }
 
         protectedClearingOperation = {
@@ -1003,7 +1071,7 @@ describe('ProtectedPartitions Tests', () => {
         it('GIVEN a wrong expiration date WHEN performing a protected hold from it THEN transaction fails with WrongExpirationTimestamp', async () => {
             await setProtected()
 
-            protectedHold.hold.expirationTimestamp = 1
+            protectedHold.hold.expirationTimestamp = 1n
 
             await expect(
                 holdFacet
@@ -1667,7 +1735,7 @@ describe('ProtectedPartitions Tests', () => {
             })
 
             it('GIVEN a wrong deadline WHEN performing a protected hold THEN transaction fails with ExpiredDeadline', async () => {
-                protectedHold.deadline = 1
+                protectedHold.deadline = 1n
 
                 await expect(
                     holdFacet
@@ -1842,7 +1910,7 @@ describe('ProtectedPartitions Tests', () => {
             })
 
             it('GIVEN a wrong deadline WHEN performing a protected clearing THEN transaction fails with ExpiredDeadline', async () => {
-                protectedClearingOperation.deadline = 1
+                protectedClearingOperation.deadline = 1n
                 //TRANSFER
                 await expect(
                     clearingFacet

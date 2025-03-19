@@ -206,7 +206,44 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {IHold} from '../hold/IHold.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {IClearing} from './IClearing.sol';
+
 interface IClearingStorageWrapper {
-    event ClearingActivated(address indexed operator);
-    event ClearingDeactivated(address indexed operator);
+    event ClearedRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        IHold.Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 }

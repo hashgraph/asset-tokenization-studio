@@ -244,9 +244,9 @@ import {
     ZERO,
     MAX_UINT256,
     EMPTY_STRING,
+    dateToUnixTimestamp,
 } from '@scripts'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -338,7 +338,7 @@ describe('Cap Tests', () => {
     }
 
     async function deploySecurityFixtureMultiPartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -375,62 +375,22 @@ describe('Cap Tests', () => {
         await setFacets({ diamond })
     }
 
-    async function deploySecurityFixtureSinglePartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
-
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            isMultiPartition: false,
-            name: 'TEST_Lock',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: BigInt(maxSupply * 2),
-            nominalValue: 100,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_B,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
-
-        await setFacets({ diamond })
-    }
-
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                    timeTravelEnabled: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+                timeTravelEnabled: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -651,9 +611,8 @@ describe('Cap Tests', () => {
                 .to.emit(capFacet, 'MaxSupplyByPartitionSet')
                 .withArgs(account_C, _PARTITION_ID_1, maxSupply * 2, 0)
 
-            const currentMaxSupply = await capFacet.getMaxSupplyByPartition(
-                _PARTITION_ID_1
-            )
+            const currentMaxSupply =
+                await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1)
 
             expect(currentMaxSupply).to.equal(maxSupply * 2)
         })

@@ -273,7 +273,7 @@ describe('BusinessLogicResolver', () => {
 
     beforeEach(async () => {
         //await loadFixture(deployBusinessLogicResolverFixture)
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_B = signer_B.address
 

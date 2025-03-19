@@ -1,28 +1,23 @@
 {
-  "compilerOptions": {
-      "target": "ES2022",
-      "module": "commonjs",
-      "declaration": true,
-      "esModuleInterop": true,
-      "forceConsistentCasingInFileNames": true,
-      "allowSyntheticDefaultImports": true,
-      "skipLibCheck": true, // Skip type checking all .d.ts files.
-      "importHelpers": true,
-      "alwaysStrict": true,
-      "strict": true,
-      "outDir": "./build",
-      "resolveJsonModule": true,
-      "paths": {
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "commonjs",
+        "declaration": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true, // Skip type checking all .d.ts files.
+        "importHelpers": true,
+        "alwaysStrict": true,
+        "strict": true,
+        "outDir": "./build",
+        "resolveJsonModule": true,
+        "paths": {
             "@configuration": ["./Configuration"],
             "@typechain": ["./typechain-types/*", "./typechain-types/index.ts"],
             "@scripts": ["./scripts/index"],
-            "@tasks": ["./tasks/index.ts"]
-      }
-  }
-
-  /*"ts-node": {
-  "require": [
-    "tsconfig-paths/register" // https://stackoverflow.com/questions/56650711/cannot-find-module-that-is-defined-in-tsconfig-paths
-  ]
-}*/
+            "@tasks": ["./tasks/index.ts"],
+            "@test": ["./test/index.ts"]
+        }
+    }
 }

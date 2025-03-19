@@ -219,7 +219,7 @@ import {
     BusinessLogicResolver,
     Kyc,
     SsiManagement,
-    ClearingFacet,
+    ClearingActionsFacet,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -279,13 +279,12 @@ describe('ERC1594 Tests', () => {
     let controlList: ControlList
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
-    let clearingFacet: ClearingFacet
+    let clearingActionsFacet: ClearingActionsFacet
 
     describe('Multi partition mode', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -294,15 +293,14 @@ describe('ERC1594 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                        timeTravelEnabled: true,
-                    })
-                )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
@@ -369,8 +367,8 @@ describe('ERC1594 Tests', () => {
                 diamond.address
             )
 
-            clearingFacet = await ethers.getContractAt(
-                'ClearingFacet',
+            clearingActionsFacet = await ethers.getContractAt(
+                'ClearingActionsFacet',
                 diamond.address,
                 signer_B
             )
@@ -452,7 +450,7 @@ describe('ERC1594 Tests', () => {
 
         describe('Clearing', () => {
             beforeEach(async () => {
-                await clearingFacet.activateClearing()
+                await clearingActionsFacet.activateClearing()
             })
             it('GIVEN a token with clearing mode active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
                 // Using account C (with role)
@@ -780,7 +778,6 @@ describe('ERC1594 Tests', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -789,14 +786,13 @@ describe('ERC1594 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                    })
-                )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =

@@ -203,22 +203,23 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { ClearingTransfer } from '../../../../../../domain/context/security/Clearing.js';
 
-import {ClearingFacet} from '../../../layer_1/clearing/ClearingFacet.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+export class GetClearingTransferForByPartitionQueryResponse
+  implements QueryResponse
+{
+  constructor(public readonly payload: ClearingTransfer) {}
+}
 
-contract ClearingFacetTimeTravel is ClearingFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
+export class GetClearingTransferForByPartitionQuery extends Query<GetClearingTransferForByPartitionQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly partitionId: string,
+    public readonly targetId: string,
+    public readonly clearingId: number,
+  ) {
+    super();
+  }
 }
