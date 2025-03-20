@@ -218,10 +218,11 @@ import {IERC1644} from '../layer_1/interfaces/ERC1400/IERC1644.sol';
 import {IERC1410Basic} from '../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 import {ICap} from '../layer_1/interfaces/cap/ICap.sol';
 import {IERC1594} from '../layer_1/interfaces/ERC1400/IERC1594.sol';
+import {IClearing} from '../layer_1/interfaces/clearing/IClearing.sol';
 import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {LocalContext} from '../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../layer_0/context/LocalContext.sol';
 import {
     FactoryRegulationData,
     buildRegulationData,
@@ -410,6 +411,10 @@ contract Factory is IFactory, LocalContext {
 
         IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(
             _securityData.arePartitionsProtected
+        );
+
+        IClearing(securityAddress_).initialize_Clearing(
+            _securityData.clearingActive
         );
     }
 

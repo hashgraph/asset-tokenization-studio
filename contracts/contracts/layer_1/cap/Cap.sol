@@ -213,24 +213,17 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {Common} from '../common/Common.sol';
-import {CapStorageWrapper} from './CapStorageWrapper.sol';
 
-abstract contract Cap is
-    ICap,
-    IStaticFunctionSelectors,
-    CapStorageWrapper,
-    Common
-{
+contract Cap is ICap, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
         uint256 maxSupply,
         PartitionCap[] calldata partitionCap
     )
         external
-        virtual
         override
         onlyUninitialized(_capStorage().initialized)
-        checkNewMaxSupply(maxSupply)
+        onlyValidNewMaxSupply(maxSupply)
     {
         CapDataStorage storage capStorage = _capStorage();
 
@@ -249,11 +242,10 @@ abstract contract Cap is
         uint256 _maxSupply
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        checkNewMaxSupply(_maxSupply)
+        onlyValidNewMaxSupply(_maxSupply)
         returns (bool success_)
     {
         _setMaxSupply(_maxSupply);
@@ -265,21 +257,34 @@ abstract contract Cap is
         uint256 _maxSupply
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        checkNewMaxSupplyForPartition(_partition, _maxSupply)
+        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply)
         returns (bool success_)
     {
         _setMaxSupplyByPartition(_partition, _maxSupply);
         success_ = true;
     }
 
+    function getMaxSupply()
+        external
+        view
+        override
+        returns (uint256 maxSupply_)
+    {
+        return _getMaxSupplyAdjusted();
+    }
+
+    function getMaxSupplyByPartition(
+        bytes32 _partition
+    ) external view override returns (uint256 maxSupply_) {
+        return _getMaxSupplyByPartitionAdjusted(_partition);
+    }
+
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -289,7 +294,6 @@ abstract contract Cap is
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -311,7 +315,6 @@ abstract contract Cap is
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

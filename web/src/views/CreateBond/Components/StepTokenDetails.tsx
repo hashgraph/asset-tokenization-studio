@@ -335,7 +335,7 @@ export const StepTokenDetails = () => {
           size="md"
           rules={{
             required,
-            validate: isISINValid(12),
+            validate: isISINValid,
           }}
         />
       </Stack>

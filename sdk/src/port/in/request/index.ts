@@ -249,6 +249,7 @@ import ReleaseRequest from './ReleaseRequest.js';
 import GetLockCountRequest from './GetLockCountRequest.js';
 import GetLocksIdRequest from './GetLocksIdRequest.js';
 import GetLockRequest from './GetLockRequest.js';
+import ExecuteHoldByPartitionRequest from './ExecuteHoldByPartitionRequest.js';
 
 import GetControlListTypeRequest from './GetControlListTypeRequest.js';
 import InitializationRequest from './InitializationRequest.js';
@@ -270,6 +271,50 @@ import ProtectedRedeemFromByPartitionRequest from './ProtectedRedeemFromByPartit
 import GetNounceRequest from './GetNounceRequest.js';
 import PartitionsProtectedRequest from './PartitionsProtectedRequest.js';
 import ProtectedTransferAndLockByPartitionRequest from './ProtectedTransferAndLockByPartitionRequest.js';
+import CreateHoldByPartitionRequest from './CreateHoldByPartition.js';
+import CreateHoldFromByPartitionRequest from './CreateHoldFromByPartition.js';
+import ControllerCreateHoldByPartitionRequest from './ControllerCreateHoldFromByPartition.js';
+import ProtectedCreateHoldByPartitionRequest from './ProtectedCreateHoldFromByPartition.js';
+import GetHeldAmountForRequest from './GetHeldAmountForRequest.js';
+import GetHeldAmountForByPartitionRequest from './GetHeldAmountForByPartitionRequest.js';
+import GetHoldCountForByPartitionRequest from './GetHoldCountForByPartitionRequest.js';
+import GetHoldsIdForByPartitionRequest from './GetHoldsIdForByPartitionRequest.js';
+import GetHoldForByPartitionRequest from './GetHoldForByPartitionRequest.js';
+import ReleaseHoldByPartitionRequest from './ReleaseHoldByPartitionRequest.js';
+import ReclaimHoldByPartitionRequest from './ReclaimHoldByPartitionRequest.js';
+import AddIssuerRequest from './AddIssuerRequest.js';
+import SetRevocationRegistryAddressRequest from './SetRevocationRegistryAddressRequest.js';
+import RemoveIssuerRequest from './RemoveIssuerRequest.js';
+import GetRevocationRegistryAddressRequest from './GetRevocationRegistryAddressRequest.js';
+import GetIssuerListCountRequest from './GetIssuerListCountRequest.js';
+import GetIssuerListMembersRequest from './GetIssuerListMembersRequest.js';
+import IsIssuerRequest from './IsIssuerRequest.js';
+import GetKYCAccountsCountRequest from './GetKYCAccountsCountRequest.js';
+import GetKYCForRequest from './GetKYCForRequest.js';
+import RevokeKYCRequest from './RevokeKYCRequest.js';
+import GrantKYCRequest from './GrantKYCRequest.js';
+import GetKYCAccountsDataRequest from './GetKYCAccountsDataRequest.js';
+import GetKYCStatusForRequest from './GetKYCStatusForRequest.js';
+import ActivateClearingRequest from './ActivateClearingRequest.js';
+import DeactivateClearingRequest from './DeactivateClearingRequest.js';
+import ClearingTransferByPartitionRequest from './ClearingTransferByPartitionRequest.js';
+import ClearingTransferFromByPartitionRequest from './ClearingTransferFromByPartitionRequest.js';
+import ProtectedClearingTransferByPartitionRequest from './ProtectedClearingTransferByPartitionRequest.js';
+import ApproveClearingOperationByPartitionRequest from './ApproveClearingOperationByPartitionRequest.js';
+import CancelClearingOperationByPartitionRequest from './CancelClearingOperationByPartitionRequest.js';
+import ReclaimClearingOperationByPartitionRequest from './ReclaimClearingOperationByPartitionRequest.js';
+import ClearingRedeemByPartitionRequest from './ClearingRedeemByPartitionRequest.js';
+import ClearingRedeemFromByPartitionRequest from './ClearingRedeemFromByPartitionRequest.js';
+import ProtectedClearingRedeemByPartitionRequest from './ProtectedClearingRedeemByPartitionRequest.js';
+import ClearingCreateHoldByPartitionRequest from './ClearingCreateHoldByPartitionRequest.js';
+import ClearingCreateHoldFromByPartitionRequest from './ClearingCreateHoldFromByPartitionRequest.js';
+import ProtectedClearingCreateHoldByPartitionRequest from './ProtectedClearingCreateHoldByPartitionRequest.js';
+import GetClearedAmountForByPartitionRequest from './GetClearedAmountForByPartitionRequest.js';
+import GetClearedAmountForRequest from './GetClearedAmountForRequest.js';
+import GetClearingCountForByPartitionRequest from './GetClearingCountForByPartitionRequest.js';
+import GetClearingForByPartitionRequest from './GetClearingForByPartitionRequest.js';
+import GetClearingsIdForByPartitionRequest from './GetClearingsIdForByPartitionRequest.js';
+import IsClearingActivatedRequest from './IsClearingActivatedRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -339,4 +384,49 @@ export {
   GetNounceRequest,
   PartitionsProtectedRequest,
   ProtectedTransferAndLockByPartitionRequest,
+  CreateHoldByPartitionRequest,
+  CreateHoldFromByPartitionRequest,
+  ControllerCreateHoldByPartitionRequest,
+  ProtectedCreateHoldByPartitionRequest,
+  GetHeldAmountForRequest,
+  GetHeldAmountForByPartitionRequest,
+  GetHoldCountForByPartitionRequest,
+  GetHoldsIdForByPartitionRequest,
+  GetHoldForByPartitionRequest,
+  ReleaseHoldByPartitionRequest,
+  ReclaimHoldByPartitionRequest,
+  ExecuteHoldByPartitionRequest,
+  AddIssuerRequest,
+  SetRevocationRegistryAddressRequest,
+  RemoveIssuerRequest,
+  GetRevocationRegistryAddressRequest,
+  GetIssuerListCountRequest,
+  GetIssuerListMembersRequest,
+  IsIssuerRequest,
+  GetKYCAccountsCountRequest,
+  GetKYCForRequest,
+  RevokeKYCRequest,
+  GrantKYCRequest,
+  GetKYCAccountsDataRequest,
+  GetKYCStatusForRequest,
+  ActivateClearingRequest,
+  DeactivateClearingRequest,
+  ClearingTransferByPartitionRequest,
+  ClearingTransferFromByPartitionRequest,
+  ProtectedClearingTransferByPartitionRequest,
+  ApproveClearingOperationByPartitionRequest,
+  CancelClearingOperationByPartitionRequest,
+  ReclaimClearingOperationByPartitionRequest,
+  ClearingRedeemByPartitionRequest,
+  ClearingRedeemFromByPartitionRequest,
+  ProtectedClearingRedeemByPartitionRequest,
+  ClearingCreateHoldByPartitionRequest,
+  ClearingCreateHoldFromByPartitionRequest,
+  ProtectedClearingCreateHoldByPartitionRequest,
+  GetClearedAmountForByPartitionRequest,
+  GetClearedAmountForRequest,
+  GetClearingCountForByPartitionRequest,
+  GetClearingForByPartitionRequest,
+  GetClearingsIdForByPartitionRequest,
+  IsClearingActivatedRequest,
 };

@@ -215,18 +215,20 @@ import {
     type ERC1410ScheduledTasks,
     type AccessControl,
     TimeTravel,
-    Lock_2,
+    Lock,
     Equity,
-    Cap_2,
+    Cap,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
     ERC1410ScheduledTasks__factory,
     AdjustBalances__factory,
-    Cap_2__factory,
-    Lock_2__factory,
+    Cap__factory,
+    Lock__factory,
     Equity__factory,
     TimeTravel__factory,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -235,6 +237,8 @@ import {
     CAP_ROLE,
     CONTROLLER_ROLE,
     LOCKER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
@@ -243,8 +247,10 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
     MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const amount = 1
 const balanceOf_A_Original = [10 * amount, 100 * amount]
@@ -260,6 +266,7 @@ const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
 const ONE_SECOND = 1
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Locks Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -276,10 +283,12 @@ describe('Locks Layer 2 Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
     let adjustBalancesFacet: AdjustBalances
     let accessControlFacet: AccessControl
-    let capFacet: Cap_2
+    let capFacet: Cap
     let equityFacet: Equity
-    let lockFacet: Lock_2
+    let lockFacet: Lock
     let timeTravelFacet: TimeTravel
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     async function deployAsset(multiPartition: boolean) {
         const init_rbacs: Rbac[] = set_initRbacs()
@@ -337,12 +346,18 @@ describe('Locks Layer 2 Tests', () => {
             diamond.address,
             defaultSigner
         )
-        capFacet = Cap_2__factory.connect(diamond.address, defaultSigner)
-        lockFacet = Lock_2__factory.connect(diamond.address, defaultSigner)
+        capFacet = Cap__factory.connect(diamond.address, defaultSigner)
+        lockFacet = Lock__factory.connect(diamond.address, defaultSigner)
         equityFacet = Equity__factory.connect(diamond.address, defaultSigner)
         timeTravelFacet = TimeTravel__factory.connect(
             diamond.address,
             defaultSigner
+        )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
         )
     }
 
@@ -355,7 +370,15 @@ describe('Locks Layer 2 Tests', () => {
             role: CORPORATE_ACTION_ROLE,
             members: [account_B],
         }
-        return [rbacPause, corporateActionPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        return [rbacPause, corporateActionPause, rbacKYC, rbacSSI]
     }
 
     async function setPreBalanceAdjustment() {
@@ -382,30 +405,45 @@ describe('Locks Layer 2 Tests', () => {
             maxSupply_Partition_2_Original
         )
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
             account_A,
-            balanceOf_A_Original[0],
-            '0x'
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
         )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_A,
-            balanceOf_A_Original[1],
-            '0x'
-        )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
+        await kycFacet.grantKyc(
             account_B,
-            balanceOf_B_Original[0],
-            '0x'
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
         )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_B,
-            balanceOf_B_Original[1],
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            value: balanceOf_A_Original[0],
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_A,
+            value: balanceOf_A_Original[1],
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original[0],
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original[1],
+            data: '0x',
+        })
     }
 
     before(async () => {
@@ -700,7 +738,7 @@ describe('Locks Layer 2 Tests', () => {
             currentTimestamp + ONE_SECOND
         )
         const TotalLockLABAF_Before =
-            await adjustBalancesFacet.getTotalLockLABAFByPartition(
+            await adjustBalancesFacet.getTotalLockLabafByPartition(
                 _PARTITION_ID_1,
                 account_A
             )
@@ -717,7 +755,7 @@ describe('Locks Layer 2 Tests', () => {
         )
 
         const LockLABAF_Before =
-            await adjustBalancesFacet.getLockLABAFByPartition(
+            await adjustBalancesFacet.getLockLabafByPartition(
                 _PARTITION_ID_1,
                 2,
                 account_A
@@ -731,12 +769,12 @@ describe('Locks Layer 2 Tests', () => {
         await lockFacet.releaseByPartition(_PARTITION_ID_1, 1, account_A)
 
         const TotalLockLABAF_After =
-            await adjustBalancesFacet.getTotalLockLABAFByPartition(
+            await adjustBalancesFacet.getTotalLockLabafByPartition(
                 _PARTITION_ID_1,
                 account_A
             )
         const LockLABAF_After =
-            await adjustBalancesFacet.getLockLABAFByPartition(
+            await adjustBalancesFacet.getLockLabafByPartition(
                 _PARTITION_ID_1,
                 2,
                 account_A

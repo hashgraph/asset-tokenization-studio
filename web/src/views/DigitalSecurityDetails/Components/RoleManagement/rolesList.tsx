@@ -274,4 +274,24 @@ export const rolesList: TRole[] = [
     value: SecurityRole._CAP_ROLE,
     allowedSecurities: ["BOND", "EQUITY"],
   },
+  {
+    label: "kyc",
+    value: SecurityRole._KYC_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
+  },
+  {
+    label: "ssiManager",
+    value: SecurityRole._SSI_MANAGER_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
+  },
+  {
+    label: "clearing",
+    value: SecurityRole._CLEARING_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
+  },
+  {
+    label: "clearingValidator",
+    value: SecurityRole._CLEARING_VALIDATOR_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
+  },
 ];

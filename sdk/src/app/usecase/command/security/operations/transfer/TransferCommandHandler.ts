@@ -222,6 +222,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import { AccountInBlackList } from '../../error/AccountInBlackList.js';
 import { AccountNotInWhiteList } from '../../error/AccountNotInWhiteList.js';
 import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
+import ValidationService from '../../../../../../app/service/ValidationService.js';
 
 @CommandHandler(TransferCommand)
 export class TransferCommandHandler
@@ -238,10 +239,16 @@ export class TransferCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(command: TransferCommand): Promise<TransferCommandResponse> {
     const { securityId, targetId, amount } = command;
+
+    await this.validationService.validateClearingDeactivated(securityId);
+    await this.validationService.validateKycAddresses(securityId, [targetId]);
+
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
 

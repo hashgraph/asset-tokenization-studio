@@ -242,6 +242,10 @@ import {
   Security__factory,
   DiamondFacet__factory,
   ProtectedPartitions__factory,
+  Hold__factory,
+  SsiManagement__factory,
+  Kyc__factory,
+  ClearingFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -262,6 +266,15 @@ import {
 import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
 import { VotingFor } from '../../../domain/context/equity/VotingFor';
+import { HoldDetails } from '../../../domain/context/security/HoldDetails.js';
+import { KYC } from '../../../domain/context/kyc/KYC.js';
+import { KycAccountData } from '../../../domain/context/kyc/KycAccountData.js';
+import {
+  CastClearingOperationType,
+  Clearing,
+  ClearingOperationIdentifier,
+  ClearingOperationType,
+} from '../../../domain/context/security/Clearing.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -1166,5 +1179,354 @@ export class RPCQueryAdapter {
     );
     //TODO implement factory to call the method
     return 1;
+  }
+
+  async getHeldAmountFor(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting Held Amount For ${targetId}`);
+
+    const heldAmountFor = await this.connect(
+      Hold__factory,
+      address.toString(),
+    ).getHeldAmountFor(targetId.toString());
+
+    return heldAmountFor.toNumber();
+  }
+
+  async getHeldAmountForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting Held Amount For ${targetId} by partition ${partitionId}`,
+    );
+
+    const heldAmountForByPartition = await this.connect(
+      Hold__factory,
+      address.toString(),
+    ).getHeldAmountForByPartition(partitionId, targetId.toString());
+
+    return heldAmountForByPartition.toNumber();
+  }
+
+  async getHoldCountForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting Hold Count For ${address} by partition ${partitionId}`,
+    );
+
+    const holdCountForByPartition = await this.connect(
+      Hold__factory,
+      address.toString(),
+    ).getHoldCountForByPartition(partitionId, targetId.toString());
+
+    return holdCountForByPartition.toNumber();
+  }
+
+  async getHoldsIdForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    target: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<number[]> {
+    LogService.logTrace(
+      `Getting Holds Id For ${target} by partition ${partitionId} from ${start} to ${end}`,
+    );
+
+    const holdsIdForByPartition = await this.connect(
+      Hold__factory,
+      address.toString(),
+    ).getHoldsIdForByPartition(partitionId, target.toString(), start, end);
+
+    return holdsIdForByPartition.map((id) => id.toNumber());
+  }
+
+  async getHoldForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    holdId: number,
+  ): Promise<HoldDetails> {
+    LogService.logTrace(
+      `Getting hold details for ${targetId} id ${holdId} by partition ${partitionId}`,
+    );
+
+    const hold = await this.connect(
+      Hold__factory,
+      address.toString(),
+    ).getHoldForByPartition({
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      holdId,
+    });
+
+    return new HoldDetails(
+      hold.expirationTimestamp_.toNumber(),
+      new BigDecimal(hold.amount_.toString()),
+      hold.escrow_,
+      targetId.toString(),
+      hold.destination_,
+      hold.data_,
+      hold.operatorData_,
+    );
+  }
+
+  async getRevocationRegistryAddress(address: EvmAddress): Promise<string> {
+    LogService.logTrace(
+      `Getting Revocation Registry Address of ${address.toString()}`,
+    );
+
+    return await this.connect(
+      SsiManagement__factory,
+      address.toString(),
+    ).getRevocationRegistryAddress();
+  }
+
+  async getIssuerListCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting Issuer List Count of ${address.toString()}`);
+
+    const count = await this.connect(
+      SsiManagement__factory,
+      address.toString(),
+    ).getIssuerListCount();
+
+    return count.toNumber();
+  }
+
+  async getIssuerListMembers(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting Issuer List Count of ${address.toString()} from ${start} to ${end}`,
+    );
+
+    return await this.connect(
+      SsiManagement__factory,
+      address.toString(),
+    ).getIssuerListMembers(start, end);
+  }
+
+  async isIssuer(address: EvmAddress, issuer: EvmAddress): Promise<boolean> {
+    LogService.logTrace(`Getting if ${issuer.toString()} is an Issuer`);
+
+    return await this.connect(
+      SsiManagement__factory,
+      address.toString(),
+    ).isIssuer(issuer.toString());
+  }
+
+  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<KYC> {
+    LogService.logTrace(`Getting KYC details for ${targetId}}`);
+
+    const kycData = await this.connect(
+      Kyc__factory,
+      address.toString(),
+    ).getKycFor(targetId.toString());
+
+    return new KYC(
+      kycData.validFrom.toString(),
+      kycData.validTo.toString(),
+      kycData.vcId,
+      kycData.issuer,
+      kycData.status,
+    );
+  }
+
+  async getKYCStatusFor(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting KYC status for ${targetId}}`);
+
+    const kycData = await this.connect(
+      Kyc__factory,
+      address.toString(),
+    ).getKycStatusFor(targetId.toString());
+
+    return kycData;
+  }
+
+  async getKYCAccountsData(
+    address: EvmAddress,
+    kycStatus: number,
+    start: number,
+    end: number,
+  ): Promise<KycAccountData[]> {
+    LogService.logTrace(`Getting accounts data with KYC status ${kycStatus}`);
+
+    const [accounts, kycAccountsData] = await this.connect(
+      Kyc__factory,
+      address.toString(),
+    ).getKycAccountsData(kycStatus, start, end);
+
+    return accounts.map(
+      (account, index) =>
+        new KycAccountData(
+          account,
+          kycAccountsData[index].validFrom.toString(),
+          kycAccountsData[index].validTo.toString(),
+          kycAccountsData[index].vcId,
+          kycAccountsData[index].issuer,
+          kycAccountsData[index].status,
+        ),
+    );
+  }
+
+  async getKYCAccountsCount(
+    address: EvmAddress,
+    kycStatus: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting count of accounts with KYC status ${kycStatus}}`,
+    );
+    const kycAccountsCount = await this.connect(
+      Kyc__factory,
+      address.toString(),
+    ).getKycAccountsCount(kycStatus);
+
+    return kycAccountsCount.toNumber();
+  }
+
+  async getClearedAmountFor(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting Cleared Amount For ${targetId}`);
+
+    const clearedAmountFor = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).getClearedAmountFor(targetId.toString());
+
+    return clearedAmountFor.toNumber();
+  }
+
+  async getClearedAmountForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting Cleared Amount For ${targetId} by partition ${partitionId}`,
+    );
+
+    const clearedAmountForByPartition = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).getClearedAmountForByPartition(partitionId, targetId.toString());
+
+    return clearedAmountForByPartition.toNumber();
+  }
+
+  async getClearingCountForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingOperationType: ClearingOperationType,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting Clearing Count For ${address} by partition ${partitionId}`,
+    );
+
+    const clearingCountForByPartition = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).getClearingCountForByPartition(
+      partitionId,
+      targetId.toString(),
+      CastClearingOperationType.toNumber(clearingOperationType),
+    );
+
+    return clearingCountForByPartition.toNumber();
+  }
+
+  async getClearingsIdForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    target: EvmAddress,
+    clearingOperationType: ClearingOperationType,
+    start: number,
+    end: number,
+  ): Promise<number[]> {
+    LogService.logTrace(
+      `Getting Clearings Id For ${target} by partition ${partitionId} from ${start} to ${end}`,
+    );
+
+    const clearingsIdForByPartition = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).getClearingsIdForByPartition(
+      partitionId,
+      target.toString(),
+      CastClearingOperationType.toNumber(clearingOperationType),
+      start,
+      end,
+    );
+
+    return clearingsIdForByPartition.map((id) => id.toNumber());
+  }
+
+  async getClearingForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingOperationType: ClearingOperationType,
+    clearingId: number,
+  ): Promise<Clearing> {
+    LogService.logTrace(
+      `Getting Clearing details for ${targetId} id ${clearingId} by partition ${partitionId}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
+      clearingId: clearingId,
+    };
+
+    const clearing = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).getClearingForByPartition(clearingOperationIdentifier);
+
+    return new Clearing(
+      clearing.expirationTimestamp_.toNumber(),
+      new BigDecimal(clearing.amount_.toString()),
+      clearing.destination_,
+      CastClearingOperationType.fromNumber(clearing.clearingOperationType_),
+      clearing.data_,
+      clearing.operatorData_,
+      {
+        amount: new BigDecimal(clearing.hold_.amount.toString()),
+        expirationTimestamp: new BigDecimal(
+          clearing.hold_.expirationTimestamp.toString(),
+        ),
+        escrow: clearing.hold_.escrow,
+        to: clearing.hold_.to,
+        data: clearing.hold_.data,
+      },
+    );
+  }
+
+  async isClearingActivated(address: EvmAddress): Promise<boolean> {
+    LogService.logTrace(
+      `Getting if clearing is activated to security ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).isClearingActivated();
   }
 }

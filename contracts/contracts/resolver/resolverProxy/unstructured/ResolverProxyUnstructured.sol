@@ -217,10 +217,10 @@ import {
 } from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
 import {
     AccessControlStorageWrapper
-} from '../../../layer_1/accessControl/AccessControlStorageWrapper.sol';
+} from '../../../layer_0/core/accessControl/AccessControlStorageWrapper.sol';
 import {
     PauseStorageWrapper
-} from '../../../layer_1/pause/PauseStorageWrapper.sol';
+} from '../../../layer_0/core/pause/PauseStorageWrapper.sol';
 import {
     _RESOLVER_PROXY_STORAGE_POSITION
 } from '../../../layer_1/constants/storagePositions.sol';
@@ -243,7 +243,7 @@ abstract contract ResolverProxyUnstructured is
         // AccessControl instead of owned. Only DEFAULT_ADMIN role.
     }
 
-    function _getResolverProxyStorage()
+    function _resolverProxyStorage()
         internal
         pure
         returns (ResolverProxyStorage storage ds)
@@ -265,7 +265,7 @@ abstract contract ResolverProxyUnstructured is
             _resolverProxyConfigurationId,
             _version
         );
-        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         _updateResolver(ds, _resolver);
         _updateConfigId(ds, _resolverProxyConfigurationId);
         _updateVersion(ds, _version);
