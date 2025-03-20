@@ -209,19 +209,13 @@ pragma solidity 0.8.18;
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
 
 interface IClearing {
     enum ClearingOperationType {
         Transfer,
         Redeem,
         HoldCreation
-    }
-
-    enum OperatorType {
-        NULL,
-        AUTHORIZED,
-        OPERATOR,
-        PROTECTED
     }
 
     struct ClearingOperationBasicInfo {
@@ -261,14 +255,16 @@ interface IClearing {
         uint256 expirationTimestamp;
         address destination;
         bytes data;
-        OperatorType operatorType;
+        bytes operatorData;
+        ThirdPartyType operatorType;
     }
 
     struct ClearingRedeemData {
         uint256 amount;
         uint256 expirationTimestamp;
         bytes data;
-        OperatorType operatorType;
+        bytes operatorData;
+        ThirdPartyType operatorType;
     }
 
     struct ClearingHoldCreationData {
@@ -279,12 +275,8 @@ interface IClearing {
         uint256 holdExpirationTimestamp;
         address holdTo;
         bytes holdData;
-        OperatorType operatorType;
-    }
-
-    struct ClearingOperator {
         bytes operatorData;
-        address thirdPartyAddress;
+        ThirdPartyType operatorType;
     }
 
     // solhint-disable max-line-length
@@ -298,7 +290,7 @@ interface IClearing {
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingTransferData))) clearingTransferByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
-        mapping(address => mapping(bytes32 => mapping(ClearingOperationType => mapping(uint256 => ClearingOperator)))) clearingOperator;
+        mapping(address => mapping(bytes32 => mapping(ClearingOperationType => mapping(uint256 => address)))) clearingThirdParty;
     }
     // solhint-enable max-line-length
 

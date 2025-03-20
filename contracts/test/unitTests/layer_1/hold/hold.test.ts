@@ -253,6 +253,7 @@ import {
     EMPTY_STRING,
     CLEARING_ROLE,
     dateToUnixTimestamp,
+    EMPTY_HEX_BYTES,
 } from '@scripts'
 
 const _DEFAULT_PARTITION =
@@ -277,6 +278,14 @@ const adjustDecimals = 2
 const decimals_Original = 6
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let holdIdentifier: any
+enum ThirdPartyType {
+    NULL,
+    AUTHORIZED,
+    OPERATOR,
+    PROTECTED,
+    CONTROLLER,
+    CLEARING,
+}
 
 describe('Hold Tests', () => {
     let diamond: ResolverProxy
@@ -449,7 +458,7 @@ describe('Hold Tests', () => {
             partition: _DEFAULT_PARTITION,
             tokenHolder: account_A,
             value: _AMOUNT,
-            data: '0x',
+            data: EMPTY_HEX_BYTES,
         })
     }
 
@@ -573,7 +582,9 @@ describe('Hold Tests', () => {
             holdDestination_expected: string,
             holdExpirationTimestamp_expected: string,
             holdsLength_expected: number,
-            holdId_expected: number
+            holdId_expected: number,
+            holdThirdPartyType_expected: ThirdPartyType,
+            holdThirdPartyAddress_expected: string
         ) {
             const balance = await erc1410Facet.balanceOf(account_A)
             const heldAmount = await holdFacet.getHeldAmountForByPartition(
@@ -599,6 +610,8 @@ describe('Hold Tests', () => {
             if (holdCount_expected > 0) {
                 const retrieved_hold =
                     await holdFacet.getHoldForByPartition(holdIdentifier)
+                const holdThirdParty =
+                    await holdFacet.getHoldThirdParty(holdIdentifier)
 
                 expect(retrieved_hold.amount_).to.equal(holdAmount_expected)
                 expect(retrieved_hold.escrow_).to.equal(holdEscrow_expected)
@@ -613,6 +626,10 @@ describe('Hold Tests', () => {
                     holdExpirationTimestamp_expected
                 )
                 expect(holdIds[0]).to.equal(holdId_expected)
+                expect(retrieved_hold.thirdPartyType_).to.equal(
+                    holdThirdPartyType_expected
+                )
+                expect(holdThirdParty).to.equal(holdThirdPartyAddress_expected)
             }
         }
 
@@ -656,7 +673,7 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
@@ -667,7 +684,7 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
@@ -678,7 +695,7 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
@@ -723,7 +740,7 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -734,7 +751,7 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -753,7 +770,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc20Facet,
@@ -769,7 +786,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(holdFacet, 'Unauthorized')
             })
@@ -782,7 +799,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(holdFacet, 'AccountHasNoRole')
             })
@@ -875,7 +892,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc20Facet,
@@ -899,7 +916,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc20Facet,
@@ -917,7 +934,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc20Facet,
@@ -957,7 +974,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -981,7 +998,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -999,7 +1016,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -1040,7 +1057,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -1064,7 +1081,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -1082,7 +1099,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -1111,7 +1128,7 @@ describe('Hold Tests', () => {
                             _WRONG_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc1410Facet,
@@ -1135,7 +1152,7 @@ describe('Hold Tests', () => {
                             _WRONG_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc1410Facet,
@@ -1153,7 +1170,7 @@ describe('Hold Tests', () => {
                             _WRONG_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc1410Facet,
@@ -1164,7 +1181,11 @@ describe('Hold Tests', () => {
 
         describe('Create Holds OK', () => {
             // Create
-            async function checkCreatedHold(operatorData?: string) {
+            async function checkCreatedHold(
+                thirdPartyType: ThirdPartyType,
+                thirdPartyAddress?: string,
+                operatorData?: string
+            ) {
                 await checkCreatedHold_expected(
                     0,
                     _AMOUNT,
@@ -1172,11 +1193,13 @@ describe('Hold Tests', () => {
                     hold.amount,
                     hold.escrow,
                     hold.data,
-                    operatorData ?? '0x',
+                    operatorData ?? EMPTY_HEX_BYTES,
                     hold.to,
                     hold.expirationTimestamp,
                     1,
-                    1
+                    1,
+                    thirdPartyType,
+                    thirdPartyAddress ?? ADDRESS_ZERO
                 )
             }
 
@@ -1191,16 +1214,16 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         1,
                         Object.values(hold),
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
 
-                await checkCreatedHold()
+                await checkCreatedHold(ThirdPartyType.NULL)
             })
 
             it('GIVEN a Token WHEN createHoldFromByPartition hold THEN transaction succeeds', async () => {
                 await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
 
-                const operatorData = '0x'
+                const operatorData = EMPTY_HEX_BYTES
 
                 await expect(
                     holdFacet
@@ -1212,7 +1235,7 @@ describe('Hold Tests', () => {
                             operatorData
                         )
                 )
-                    .to.emit(holdFacet, 'HeldByPartition')
+                    .to.emit(holdFacet, 'HeldFromByPartition')
                     .withArgs(
                         account_B,
                         account_A,
@@ -1222,7 +1245,11 @@ describe('Hold Tests', () => {
                         operatorData
                     )
 
-                await checkCreatedHold(operatorData)
+                await checkCreatedHold(
+                    ThirdPartyType.AUTHORIZED,
+                    account_B,
+                    operatorData
+                )
             })
 
             it('GIVEN a Token WHEN operatorCreateHoldByPartition hold THEN transaction succeeds', async () => {
@@ -1242,7 +1269,7 @@ describe('Hold Tests', () => {
                             operatorData
                         )
                 )
-                    .to.emit(holdFacet, 'HeldByPartition')
+                    .to.emit(holdFacet, 'OperatorHeldByPartition')
                     .withArgs(
                         account_B,
                         account_A,
@@ -1254,7 +1281,11 @@ describe('Hold Tests', () => {
 
                 await erc1410Facet.connect(signer_A).revokeOperator(account_B)
 
-                await checkCreatedHold(operatorData)
+                await checkCreatedHold(
+                    ThirdPartyType.OPERATOR,
+                    ADDRESS_ZERO,
+                    operatorData
+                )
             })
 
             it('GIVEN a Token WHEN controllerCreateHoldByPartition hold THEN transaction succeeds', async () => {
@@ -1270,7 +1301,7 @@ describe('Hold Tests', () => {
                             operatorData
                         )
                 )
-                    .to.emit(holdFacet, 'HeldByPartition')
+                    .to.emit(holdFacet, 'ControllerHeldByPartition')
                     .withArgs(
                         account_C,
                         account_A,
@@ -1280,7 +1311,11 @@ describe('Hold Tests', () => {
                         operatorData
                     )
 
-                await checkCreatedHold(operatorData)
+                await checkCreatedHold(
+                    ThirdPartyType.CONTROLLER,
+                    ADDRESS_ZERO,
+                    operatorData
+                )
             })
         })
 
@@ -1490,13 +1525,15 @@ describe('Hold Tests', () => {
                     0,
                     0,
                     0,
-                    '-',
-                    '0x',
-                    '0x',
-                    '-',
-                    '-',
+                    EMPTY_STRING,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_STRING,
+                    EMPTY_STRING,
                     0,
-                    0
+                    0,
+                    ThirdPartyType.NULL,
+                    ADDRESS_ZERO
                 )
 
                 const balance_after = await erc1410Facet.balanceOf(account_C)
@@ -1524,44 +1561,45 @@ describe('Hold Tests', () => {
                     0,
                     0,
                     0,
-                    '-',
-                    '0x',
-                    '0x',
-                    '-',
-                    '-',
+                    EMPTY_STRING,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_STRING,
+                    EMPTY_STRING,
                     0,
-                    0
+                    0,
+                    ThirdPartyType.NULL,
+                    ADDRESS_ZERO
                 )
             })
 
-            //TODO: add after adding hold allowance restore 
-            // it('GIVEN a hold created by an approved user WHEN releaseHoldByPartition THEN allowance is restored', async () => {
-            //     await erc20Facet.increaseAllowance(account_B, _AMOUNT)
-            //     await holdFacet
-            //         .connect(signer_B)
-            //         .createHoldFromByPartition(
-            //             _DEFAULT_PARTITION,
-            //             account_A,
-            //             hold,
-            //             '0x'
-            //         )
+            it('GIVEN a hold created by an approved user WHEN releaseHoldByPartition THEN allowance is restored', async () => {
+                await erc20Facet.increaseAllowance(account_B, _AMOUNT)
+                await holdFacet
+                    .connect(signer_B)
+                    .createHoldFromByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        EMPTY_HEX_BYTES
+                    )
 
-            //     expect(
-            //         await erc20Facet.allowance(account_A, account_B)
-            //     ).to.be.equal(ZERO)
+                expect(
+                    await erc20Facet.allowance(account_A, account_B)
+                ).to.be.equal(ZERO)
 
-            //     await expect(
-            //         holdFacet
-            //             .connect(signer_B)
-            //             .releaseHoldByPartition(holdIdentifier, _AMOUNT)
-            //     )
-            //         .to.emit(holdFacet, 'Approval')
-            //         .withArgs(account_A, account_B, _AMOUNT)
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .releaseHoldByPartition(holdIdentifier, _AMOUNT)
+                )
+                    .to.emit(holdFacet, 'Approval')
+                    .withArgs(account_A, account_B, _AMOUNT)
 
-            //     expect(
-            //         await erc20Facet.allowance(account_A, account_B)
-            //     ).to.be.equal(_AMOUNT)
-            // })
+                expect(
+                    await erc20Facet.allowance(account_A, account_B)
+                ).to.be.equal(_AMOUNT)
+            })
         })
 
         describe('Reclaim OK', () => {
@@ -1596,45 +1634,46 @@ describe('Hold Tests', () => {
                     0,
                     0,
                     0,
-                    '-',
-                    '0x',
-                    '0x',
-                    '-',
-                    '-',
+                    EMPTY_STRING,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_STRING,
+                    EMPTY_STRING,
                     0,
-                    0
+                    0,
+                    ThirdPartyType.NULL,
+                    ADDRESS_ZERO
                 )
             })
         })
 
-        // TODO: add after adding hold allowance restore 
-        // it('GIVEN a hold created by an approved user WHEN reclaimHoldByPartition THEN allowance is restored', async () => {
-        //     await erc20Facet.increaseAllowance(account_B, _AMOUNT)
-        //     await holdFacet
-        //         .connect(signer_B)
-        //         .createHoldFromByPartition(
-        //             _DEFAULT_PARTITION,
-        //             account_A,
-        //             hold,
-        //             '0x'
-        //         )
+        it('GIVEN a hold created by an approved user WHEN reclaimHoldByPartition THEN allowance is restored', async () => {
+            await erc20Facet.increaseAllowance(account_B, _AMOUNT)
+            await holdFacet
+                .connect(signer_B)
+                .createHoldFromByPartition(
+                    _DEFAULT_PARTITION,
+                    account_A,
+                    hold,
+                    EMPTY_HEX_BYTES
+                )
 
-        //     expect(
-        //         await erc20Facet.allowance(account_A, account_B)
-        //     ).to.be.equal(ZERO)
+            expect(
+                await erc20Facet.allowance(account_A, account_B)
+            ).to.be.equal(ZERO)
 
-        //     await timeTravelFacet.changeSystemTimestamp(
-        //         hold.expirationTimestamp + 1
-        //     )
+            await timeTravelFacet.changeSystemTimestamp(
+                hold.expirationTimestamp + 1
+            )
 
-        //     await expect(holdFacet.reclaimHoldByPartition(holdIdentifier))
-        //         .to.emit(holdFacet, 'Approval')
-        //         .withArgs(account_A, account_B, _AMOUNT)
+            await expect(holdFacet.reclaimHoldByPartition(holdIdentifier))
+                .to.emit(holdFacet, 'Approval')
+                .withArgs(account_A, account_B, _AMOUNT)
 
-        //     expect(
-        //         await erc20Facet.allowance(account_A, account_B)
-        //     ).to.be.equal(_AMOUNT)
-        // })
+            expect(
+                await erc20Facet.allowance(account_A, account_B)
+            ).to.be.equal(_AMOUNT)
+        })
     })
 
     describe('Multi-partition enabled', () => {
@@ -1662,7 +1701,7 @@ describe('Hold Tests', () => {
                         _WRONG_PARTITION,
                         account_A,
                         hold,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
             ).to.be.revertedWithCustomError(erc1410Facet, 'InvalidPartition')
 
@@ -1677,7 +1716,7 @@ describe('Hold Tests', () => {
                         _WRONG_PARTITION,
                         account_A,
                         hold,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
             ).to.be.revertedWithCustomError(erc1410Facet, 'InvalidPartition')
         })
@@ -1713,25 +1752,25 @@ describe('Hold Tests', () => {
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_A,
                     value: balanceOf_A_Original[0],
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 })
                 await erc1410Facet.issueByPartition({
                     partition: _PARTITION_ID_2,
                     tokenHolder: account_A,
                     value: balanceOf_A_Original[1],
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 })
                 await erc1410Facet.issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_B,
                     value: balanceOf_B_Original[0],
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 })
                 await erc1410Facet.issueByPartition({
                     partition: _PARTITION_ID_2,
                     tokenHolder: account_B,
                     value: balanceOf_B_Original[1],
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 })
             }
 
@@ -1754,7 +1793,7 @@ describe('Hold Tests', () => {
                     ),
                     escrow: account_B,
                     to: ADDRESS_ZERO,
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 }
 
                 await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
@@ -1871,7 +1910,7 @@ describe('Hold Tests', () => {
                     expirationTimestamp: currentTimestamp + 10 * ONE_SECOND,
                     escrow: account_B,
                     to: ADDRESS_ZERO,
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 }
 
                 await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
@@ -1979,7 +2018,7 @@ describe('Hold Tests', () => {
                     expirationTimestamp: currentTimestamp + 10 * ONE_SECOND,
                     escrow: account_B,
                     to: ADDRESS_ZERO,
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 }
 
                 await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
@@ -2068,7 +2107,7 @@ describe('Hold Tests', () => {
                     expirationTimestamp: currentTimestamp + ONE_SECOND,
                     escrow: account_B,
                     to: ADDRESS_ZERO,
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 }
 
                 await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
@@ -2156,7 +2195,7 @@ describe('Hold Tests', () => {
                     expirationTimestamp: currentTimestamp + 100 * ONE_SECOND,
                     escrow: account_B,
                     to: ADDRESS_ZERO,
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 }
 
                 await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)

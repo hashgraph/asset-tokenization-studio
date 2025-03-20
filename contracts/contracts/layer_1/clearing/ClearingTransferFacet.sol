@@ -212,6 +212,7 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_TRANSFER_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingTransferFacet is
@@ -243,7 +244,7 @@ contract ClearingTransferFacet is
             sender,
             '',
             address(0),
-            OperatorType.NULL
+            ThirdPartyType.NULL
         );
     }
 
@@ -278,7 +279,7 @@ contract ClearingTransferFacet is
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData,
             sender,
-            OperatorType.AUTHORIZED
+            ThirdPartyType.AUTHORIZED
         );
     }
 
@@ -317,7 +318,7 @@ contract ClearingTransferFacet is
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData,
             sender,
-            OperatorType.OPERATOR
+            ThirdPartyType.OPERATOR
         );
     }
 

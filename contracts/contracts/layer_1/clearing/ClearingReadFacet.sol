@@ -259,13 +259,13 @@ contract ClearingReadFacet is IStaticFunctionSelectors, IClearingRead, Common {
             );
     }
 
-    function getClearingOperator(
+    function getClearingThirdParty(
         bytes32 _partition,
         address _tokenHolder,
         ClearingOperationType _clearingOpeartionType,
         uint256 _clearingId
-    ) external view override returns (ClearingOperator memory operator_) {
-        operator_ = _getClearingOperator(
+    ) external view override returns (address thirdParty_) {
+        thirdParty_ = _getClearingThirdParty(
             _partition,
             _tokenHolder,
             _clearingOpeartionType,
@@ -303,7 +303,7 @@ contract ClearingReadFacet is IStaticFunctionSelectors, IClearingRead, Common {
             .getClearingsIdForByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingOperator
+            .getClearingThirdParty
             .selector;
     }
 

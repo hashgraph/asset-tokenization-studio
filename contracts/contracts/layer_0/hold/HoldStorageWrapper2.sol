@@ -216,6 +216,7 @@ import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
     checkNounceAndDeadline
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 
 abstract contract HoldStorageWrapper2 is
     ERC1410ProtectedPartitionsStorageWrapper
@@ -226,8 +227,14 @@ abstract contract HoldStorageWrapper2 is
         bytes32 _partition,
         address _from,
         IHold.Hold memory _hold,
-        bytes memory _operatorData
+        bytes memory _operatorData,
+        address _thirdPartyAddress,
+        ThirdPartyType _thirdPartyType
     ) internal returns (bool success_, uint256 holdId_) {
+        if (_thirdPartyType == ThirdPartyType.AUTHORIZED) {
+            _decreaseAllowedBalance(_from, _thirdPartyAddress, _hold.amount);
+        }
+
         _triggerAndSyncAll(_partition, _from, address(0));
 
         uint256 abaf = _updateTotalHold(_partition, _from);
@@ -244,7 +251,8 @@ abstract contract HoldStorageWrapper2 is
         IHold.HoldData memory hold = IHold.HoldData(
             holdId_,
             _hold,
-            _operatorData
+            _operatorData,
+            _thirdPartyType
         );
         _setHeldLabafById(_partition, _from, holdId_, abaf);
 
@@ -259,18 +267,11 @@ abstract contract HoldStorageWrapper2 is
         ] += _hold.amount;
         holdStorage.totalHeldAmountByAccount[_from] += _hold.amount;
 
+        holdStorage.holdThirdParty[_from][_partition][
+            holdId_
+        ] = _thirdPartyAddress;
+
         success_ = true;
-    }
-
-    function _createHoldFromByPartition(
-        bytes32 _partition,
-        address _from,
-        IHold.Hold memory _hold,
-        bytes memory _operatorData
-    ) internal returns (bool success_, uint256 holdId_) {
-        _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
-
-        return _createHoldByPartition(_partition, _from, _hold, _operatorData);
     }
 
     function _protectedCreateHoldByPartition(
@@ -301,7 +302,9 @@ abstract contract HoldStorageWrapper2 is
                 _partition,
                 _from,
                 _protectedHold.hold,
-                '0x'
+                '0x',
+                address(0),
+                ThirdPartyType.PROTECTED
             );
     }
 
@@ -336,14 +339,23 @@ abstract contract HoldStorageWrapper2 is
     ) internal returns (bool success_) {
         _beforeReleaseHold(_holdIdentifier);
 
+        IHold.HoldData memory holdData = _getHold(_holdIdentifier);
+
+        if (holdData.thirdPartyType == ThirdPartyType.AUTHORIZED) {
+            _restoreAllowance(
+                _holdIdentifier.tokenHolder,
+                _holdIdentifier.partition,
+                _holdIdentifier.holdId,
+                _amount
+            );
+        }
+
         success_ = _operateHoldByPartition(
             _holdIdentifier,
             _holdIdentifier.tokenHolder,
             _amount,
             IHold.OperationType.Release
         );
-
-        IHold.HoldData memory holdData = _getHold(_holdIdentifier);
 
         if (holdData.hold.amount == 0) {
             _removeLabafHold(
@@ -361,6 +373,15 @@ abstract contract HoldStorageWrapper2 is
 
         IHold.HoldData memory holdData = _getHold(_holdIdentifier);
         amount_ = holdData.hold.amount;
+
+        if (holdData.thirdPartyType == ThirdPartyType.AUTHORIZED) {
+            _restoreAllowance(
+                _holdIdentifier.tokenHolder,
+                _holdIdentifier.partition,
+                _holdIdentifier.holdId,
+                amount_
+            );
+        }
 
         success_ = _operateHoldByPartition(
             _holdIdentifier,
@@ -467,10 +488,35 @@ abstract contract HoldStorageWrapper2 is
         delete holdStorage.holdsByAccountPartitionAndId[
             _holdIdentifier.tokenHolder
         ][_holdIdentifier.partition][_holdIdentifier.holdId];
+
+        delete holdStorage.holdThirdParty[_holdIdentifier.tokenHolder][
+            _holdIdentifier.partition
+        ][_holdIdentifier.holdId];
+
         _removeLabafHold(
             _holdIdentifier.partition,
             _holdIdentifier.tokenHolder,
             _holdIdentifier.holdId
+        );
+    }
+
+    function _restoreAllowance(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _holdId,
+        uint256 _amount
+    ) internal {
+        address thirdParty = _holdStorage().holdThirdParty[_tokenHolder][
+            _partition
+        ][_holdId];
+
+        _beforeAllowanceUpdate(_tokenHolder, thirdParty);
+
+        _erc20Storage().allowed[_tokenHolder][thirdParty] += _amount;
+        emit Approval(
+            _tokenHolder,
+            thirdParty,
+            _erc20Storage().allowed[_tokenHolder][thirdParty]
         );
     }
 
@@ -659,7 +705,8 @@ abstract contract HoldStorageWrapper2 is
             address escrow_,
             address destination_,
             bytes memory data_,
-            bytes memory operatorData_
+            bytes memory operatorData_,
+            ThirdPartyType thirdPartType_
         )
     {
         uint256 factor = _calculateFactor(
@@ -677,9 +724,20 @@ abstract contract HoldStorageWrapper2 is
             escrow_,
             destination_,
             data_,
-            operatorData_
+            operatorData_,
+            thirdPartType_
         ) = _getHoldForByPartition(_holdIdentifier);
         amount_ *= factor;
+    }
+
+    function _getHoldThirdParty(
+        IHold.HoldIdentifier calldata _holdIdentifier
+    ) internal view returns (address thirdParty_) {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        thirdParty_ = holdStorage.holdThirdParty[_holdIdentifier.tokenHolder][
+            _holdIdentifier.partition
+        ][_holdIdentifier.holdId];
     }
 
     function _getHoldLabafByPartition(

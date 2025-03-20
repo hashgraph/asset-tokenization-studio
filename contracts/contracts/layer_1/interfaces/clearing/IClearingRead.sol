@@ -232,10 +232,10 @@ interface IClearingRead is IClearing {
         uint256 _pageLength
     ) external view returns (uint256[] memory clearingsId_);
 
-    function getClearingOperator(
+    function getClearingThirdParty(
         bytes32 _partition,
         address _tokenHolder,
         ClearingOperationType _clearingOperationType,
         uint256 clearingId_
-    ) external view returns (ClearingOperator memory clearingOperator_);
+    ) external view returns (address thirdParty_);
 }

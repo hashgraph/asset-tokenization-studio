@@ -248,6 +248,7 @@ import {
     deployAtsFullInfrastructure,
     ADDRESS_ZERO,
     ZERO,
+    EMPTY_HEX_BYTES,
     EMPTY_STRING,
     ADJUSTMENT_BALANCE_ROLE,
     CORPORATE_ACTION_ROLE,
@@ -272,11 +273,13 @@ enum ClearingOperationType {
     HoldCreation,
 }
 
-enum OperatorType {
+enum ThirdPartyType {
     NULL,
     AUTHORIZED,
     OPERATOR,
     PROTECTED,
+    CONTROLLER,
+    CLEARING,
 }
 
 interface Clearing {
@@ -285,13 +288,9 @@ interface Clearing {
     destination_: string
     clearingOperationType_: ClearingOperationType
     data_: string
-    operatorType_: number
+    operatorData_: string
+    thirdPartyType_: ThirdPartyType
     hold_?: Hold
-}
-
-interface ClearingOperator {
-    operatorData: string
-    thirdPartyAddress: string
 }
 
 interface ClearingIdentifier {
@@ -325,7 +324,6 @@ let clearingIdentifier: ClearingIdentifier
 let clearingOperation: ClearingOperation
 let clearingOperationFrom: ClearingOperationFrom
 let hold: Hold
-let clearingOperator: ClearingOperator
 
 describe('Clearing Tests', () => {
     let diamond: ResolverProxy
@@ -527,14 +525,14 @@ describe('Clearing Tests', () => {
             partition: _DEFAULT_PARTITION,
             tokenHolder: account_A,
             value: 3 * _AMOUNT,
-            data: '0x',
+            data: EMPTY_HEX_BYTES,
         })
 
         await erc1410Facet.issueByPartition({
             partition: _DEFAULT_PARTITION,
             tokenHolder: account_B,
             value: 3 * _AMOUNT,
-            data: '0x',
+            data: EMPTY_HEX_BYTES,
         })
     }
 
@@ -731,8 +729,9 @@ describe('Clearing Tests', () => {
         amount: number,
         expirationTimestamp: number,
         data: string,
-        operatorType: OperatorType,
-        clearingOperator: ClearingOperator,
+        operatorData: string,
+        operatorType: ThirdPartyType,
+        thirdParty: string,
         hold?: Hold
     ) {
         let clearing
@@ -756,7 +755,7 @@ describe('Clearing Tests', () => {
             )
         else throw new Error('Unrecognize ClearingOperationType')
 
-        const createdClearingOperator = await clearingFacet.getClearingOperator(
+        const clearingThirdParty = await clearingFacet.getClearingThirdParty(
             clearingIdentifier.partition,
             clearingIdentifier.tokenHolder,
             clearingType,
@@ -765,28 +764,30 @@ describe('Clearing Tests', () => {
 
         checkClearingValues(
             clearing,
-            createdClearingOperator,
+            clearingThirdParty,
             clearingIdentifier,
             to,
             amount,
             expirationTimestamp,
             data,
+            operatorData,
             operatorType,
-            clearingOperator,
+            thirdParty,
             hold
         )
     }
 
     async function checkClearingValues(
         clearing: Clearing,
-        createdClearingOperator: ClearingOperator,
+        clearingThirdParty: string,
         clearingIdentifier: ClearingIdentifier,
         to: string,
         amount: number,
         expirationTimestamp: number,
         data: string,
-        operatorType: OperatorType,
-        clearingOperator: ClearingOperator,
+        operatorData: string,
+        operatorType: ThirdPartyType,
+        thirdParty: string,
         hold?: Hold
     ) {
         expect(clearing.amount_).to.equal(amount)
@@ -796,8 +797,9 @@ describe('Clearing Tests', () => {
             clearingIdentifier.clearingOperationType
         )
         expect(clearing.data_).to.equal(data)
-        expect(clearing.operatorType_).to.equal(operatorType)
-        expect(createdClearingOperator).to.equal(clearingOperator)
+        expect(clearing.thirdPartyType_).to.equal(operatorType)
+        expect(clearingThirdParty).to.equal(thirdParty)
+        expect(clearing.operatorData_).to.equal(operatorData)
         if (hold) {
             expect(clearing.hold_!.amount).to.equal(hold.amount)
             expect(clearing.hold_!.expirationTimestamp).to.equal(
@@ -846,20 +848,15 @@ describe('Clearing Tests', () => {
             clearingId: 1,
             clearingOperationType: ClearingOperationType.Transfer,
         }
+    })
 
-        clearingOperator = {
-            operatorData: EMPTY_STRING,
-            thirdPartyAddress: ADDRESS_ZERO,
-        }
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     describe('Single Partition', async () => {
         beforeEach(async () => {
             await loadFixture(deploySecurityFixtureSinglePartition)
-        })
-
-        afterEach(async () => {
-            await timeTravelFacet.resetSystemTimestamp()
         })
 
         describe('Not in clearing mode', () => {
@@ -1391,6 +1388,7 @@ describe('Clearing Tests', () => {
             })
 
             // // Holds
+            // TODO: Should we check control list when approving hold?
             // it('GIVEN a blacklisted destination account WHEN approveClearingOperationByPartition with operation type Hold THEN transaction fails with AccountIsBlocked', async () => {
             //     await clearingFacet
             //         .connect(signer_A)
@@ -2472,7 +2470,7 @@ describe('Clearing Tests', () => {
                         _AMOUNT,
                         clearingOperation.expirationTimestamp,
                         clearingOperation.data,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
 
                 clearingIdentifier.clearingId = 1
@@ -2483,8 +2481,9 @@ describe('Clearing Tests', () => {
                     _AMOUNT,
                     clearingOperation.expirationTimestamp,
                     clearingOperation.data,
-                    OperatorType.NULL,
-                    clearingOperator
+                    EMPTY_HEX_BYTES,
+                    ThirdPartyType.NULL,
+                    ADDRESS_ZERO
                 )
 
                 // increase allowance
@@ -2516,9 +2515,6 @@ describe('Clearing Tests', () => {
                     )
 
                 clearingIdentifier.clearingId = 2
-                clearingOperator.thirdPartyAddress = account_B
-                clearingOperator.operatorData =
-                    clearingOperationFrom.clearingOperation.data
                 await checkCreatedClearingValues(
                     clearingIdentifier,
                     ClearingOperationType.Transfer,
@@ -2526,8 +2522,9 @@ describe('Clearing Tests', () => {
                     _AMOUNT,
                     clearingOperationFrom.clearingOperation.expirationTimestamp,
                     clearingOperationFrom.clearingOperation.data,
-                    OperatorType.AUTHORIZED,
-                    clearingOperator
+                    clearingOperationFrom.operatorData,
+                    ThirdPartyType.AUTHORIZED,
+                    account_B
                 )
 
                 // authorize operator
@@ -2562,7 +2559,6 @@ describe('Clearing Tests', () => {
                     )
 
                 clearingIdentifier.clearingId = 3
-                clearingOperator.thirdPartyAddress = ADDRESS_ZERO
                 await checkCreatedClearingValues(
                     clearingIdentifier,
                     ClearingOperationType.Transfer,
@@ -2570,8 +2566,9 @@ describe('Clearing Tests', () => {
                     _AMOUNT,
                     clearingOperationFrom.clearingOperation.expirationTimestamp,
                     clearingOperationFrom.clearingOperation.data,
-                    OperatorType.OPERATOR,
-                    clearingOperator
+                    clearingOperationFrom.operatorData,
+                    ThirdPartyType.OPERATOR,
+                    ADDRESS_ZERO
                 )
 
                 await checkCreatedClearingAmounts(
@@ -2601,7 +2598,7 @@ describe('Clearing Tests', () => {
                         _AMOUNT,
                         clearingOperation.expirationTimestamp,
                         clearingOperation.data,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
 
                 clearingIdentifier.clearingId = 1
@@ -2612,8 +2609,9 @@ describe('Clearing Tests', () => {
                     _AMOUNT,
                     clearingOperation.expirationTimestamp,
                     clearingOperation.data,
-                    OperatorType.NULL,
-                    clearingOperator
+                    EMPTY_HEX_BYTES,
+                    ThirdPartyType.NULL,
+                    ADDRESS_ZERO
                 )
 
                 // increase allowance
@@ -2643,8 +2641,6 @@ describe('Clearing Tests', () => {
                     )
 
                 clearingIdentifier.clearingId = 2
-                clearingOperator.thirdPartyAddress = account_B
-                clearingOperator.operatorData = _DATA
                 await checkCreatedClearingValues(
                     clearingIdentifier,
                     ClearingOperationType.Redeem,
@@ -2652,8 +2648,9 @@ describe('Clearing Tests', () => {
                     _AMOUNT,
                     clearingOperationFrom.clearingOperation.expirationTimestamp,
                     clearingOperationFrom.clearingOperation.data,
-                    OperatorType.AUTHORIZED,
-                    clearingOperator
+                    clearingOperationFrom.operatorData,
+                    ThirdPartyType.AUTHORIZED,
+                    account_B
                 )
                 // authorize operator
                 await erc1410Facet
@@ -2682,7 +2679,6 @@ describe('Clearing Tests', () => {
                     )
 
                 clearingIdentifier.clearingId = 3
-                clearingOperator.thirdPartyAddress = ADDRESS_ZERO
                 await checkCreatedClearingValues(
                     clearingIdentifier,
                     ClearingOperationType.Redeem,
@@ -2690,8 +2686,9 @@ describe('Clearing Tests', () => {
                     _AMOUNT,
                     clearingOperationFrom.clearingOperation.expirationTimestamp,
                     clearingOperationFrom.clearingOperation.data,
-                    OperatorType.AUTHORIZED,
-                    clearingOperator
+                    clearingOperationFrom.operatorData,
+                    ThirdPartyType.AUTHORIZED,
+                    ADDRESS_ZERO
                 )
 
                 await checkCreatedClearingAmounts(
@@ -2721,7 +2718,7 @@ describe('Clearing Tests', () => {
                         Object.values(hold),
                         clearingOperation.expirationTimestamp,
                         clearingOperation.data,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
                 ;(clearingIdentifier.clearingId = 1),
                     await checkCreatedClearingValues(
@@ -2731,8 +2728,9 @@ describe('Clearing Tests', () => {
                         _AMOUNT,
                         clearingOperation.expirationTimestamp,
                         clearingOperation.data,
-                        OperatorType.NULL,
-                        clearingOperator,
+                        EMPTY_HEX_BYTES,
+                        ThirdPartyType.NULL,
+                        ADDRESS_ZERO,
                         hold
                     )
 
@@ -2763,8 +2761,6 @@ describe('Clearing Tests', () => {
                     )
 
                 clearingIdentifier.clearingId = 2
-                clearingOperator.thirdPartyAddress = account_B
-                clearingOperator.operatorData = _DATA
                 await checkCreatedClearingValues(
                     clearingIdentifier,
                     ClearingOperationType.HoldCreation,
@@ -2772,8 +2768,9 @@ describe('Clearing Tests', () => {
                     _AMOUNT,
                     clearingOperationFrom.clearingOperation.expirationTimestamp,
                     clearingOperationFrom.clearingOperation.data,
-                    OperatorType.AUTHORIZED,
-                    clearingOperator,
+                    clearingOperationFrom.operatorData,
+                    ThirdPartyType.AUTHORIZED,
+                    account_B,
                     hold
                 )
                 // authorize operator
@@ -2803,7 +2800,6 @@ describe('Clearing Tests', () => {
                     )
 
                 clearingIdentifier.clearingId = 3
-                clearingOperator.thirdPartyAddress = ADDRESS_ZERO
                 await checkCreatedClearingValues(
                     clearingIdentifier,
                     ClearingOperationType.HoldCreation,
@@ -2811,8 +2807,9 @@ describe('Clearing Tests', () => {
                     _AMOUNT,
                     clearingOperationFrom.clearingOperation.expirationTimestamp,
                     clearingOperationFrom.clearingOperation.data,
-                    OperatorType.OPERATOR,
-                    clearingOperator,
+                    clearingOperationFrom.operatorData,
+                    ThirdPartyType.OPERATOR,
+                    ADDRESS_ZERO,
                     hold
                 )
 
@@ -3313,7 +3310,7 @@ describe('Clearing Tests', () => {
                     partition: _DEFAULT_PARTITION,
                     tokenHolder: account_A,
                     value: 7 * _AMOUNT,
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 })
 
                 const balance_Before = await erc1410Facet.balanceOf(account_A)
@@ -3487,7 +3484,7 @@ describe('Clearing Tests', () => {
                     partition: _DEFAULT_PARTITION,
                     tokenHolder: account_A,
                     value: 7 * _AMOUNT,
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 })
 
                 const balance_Before_A = await erc1410Facet.balanceOf(account_A)
@@ -3681,7 +3678,7 @@ describe('Clearing Tests', () => {
                     partition: _DEFAULT_PARTITION,
                     tokenHolder: account_A,
                     value: 7 * _AMOUNT,
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 })
 
                 const balance_Before_A = await erc1410Facet.balanceOf(account_A)
@@ -3863,7 +3860,7 @@ describe('Clearing Tests', () => {
                     partition: _DEFAULT_PARTITION,
                     tokenHolder: account_A,
                     value: 7 * _AMOUNT,
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 })
 
                 const balance_Before_A = await erc1410Facet.balanceOf(account_A)
@@ -4047,7 +4044,7 @@ describe('Clearing Tests', () => {
                     partition: _DEFAULT_PARTITION,
                     tokenHolder: account_A,
                     value: 15 * _AMOUNT,
-                    data: '0x',
+                    data: EMPTY_HEX_BYTES,
                 })
                 await setPreBalanceAdjustment()
                 const balance_Before = await erc1410Facet.balanceOf(account_A)

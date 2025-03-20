@@ -217,6 +217,7 @@ import {
 import {
     _CLEARING_HOLDCREATION_RESOLVER_KEY
 } from '../constants/resolverKeys.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingHoldCreationFacet is
@@ -247,7 +248,7 @@ contract ClearingHoldCreationFacet is
             _hold,
             '',
             address(0),
-            OperatorType.NULL
+            ThirdPartyType.NULL
         );
     }
 
@@ -281,7 +282,7 @@ contract ClearingHoldCreationFacet is
             _hold,
             _clearingOperationFrom.operatorData,
             sender,
-            OperatorType.AUTHORIZED
+            ThirdPartyType.AUTHORIZED
         );
     }
 
@@ -311,7 +312,6 @@ contract ClearingHoldCreationFacet is
             _checkExpirationTimestamp(_hold.expirationTimestamp);
             _checkUnProtectedPartitionsOrWildCardRole();
         }
-        address sender = _msgSender();
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
@@ -319,7 +319,7 @@ contract ClearingHoldCreationFacet is
             _hold,
             _clearingOperationFrom.operatorData,
             address(0),
-            OperatorType.OPERATOR
+            ThirdPartyType.OPERATOR
         );
     }
 

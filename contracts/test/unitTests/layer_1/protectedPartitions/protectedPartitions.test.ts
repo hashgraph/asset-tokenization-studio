@@ -248,6 +248,7 @@ import {
     ADDRESS_ZERO,
 } from '@scripts'
 import { Contract } from 'ethers'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const amount = 1
 
@@ -573,28 +574,7 @@ describe('ProtectedPartitions Tests', () => {
         await grantKyc()
     }
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: false,
-                timeTravelEnabled: true,
-            })
-        )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
+    function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
@@ -635,7 +615,8 @@ describe('ProtectedPartitions Tests', () => {
             role: CLEARING_VALIDATOR_ROLE,
             members: [account_A],
         }
-        const init_rbacs: Rbac[] = [
+
+        return [
             rbacPause,
             rbacControlList,
             rbacIssuer,
@@ -647,6 +628,10 @@ describe('ProtectedPartitions Tests', () => {
             rbacClearing,
             rbacClearingValidator,
         ]
+    }
+
+    async function deploySecurityFixtureUnprotectedPartitions() {
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond_UnprotectedPartitions = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -680,6 +665,12 @@ describe('ProtectedPartitions Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
+        await setFacets(diamond_UnprotectedPartitions.address)
+    }
+
+    async function deploySecurityFixtureProtectedPartitions() {
+        const init_rbacs: Rbac[] = set_initRbacs()
+
         diamond_ProtectedPartitions = await deployEquityFromFactory({
             adminAccount: account_A,
             isWhiteList: false,
@@ -711,6 +702,34 @@ describe('ProtectedPartitions Tests', () => {
             factory,
             businessLogicResolver: businessLogicResolver.address,
         })
+
+        await setFacets(diamond_ProtectedPartitions.address)
+    }
+
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: false,
+                timeTravelEnabled: true,
+            })
+        )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
+        await loadFixture(deploySecurityFixtureProtectedPartitions)
+        await loadFixture(deploySecurityFixtureUnprotectedPartitions)
 
         const expirationTimestamp = MAX_UINT256
 

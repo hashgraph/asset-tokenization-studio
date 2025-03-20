@@ -212,6 +212,7 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_REDEEM_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingRedeemFacet is
@@ -240,7 +241,7 @@ contract ClearingRedeemFacet is
             sender,
             '',
             address(0),
-            OperatorType.NULL
+            ThirdPartyType.NULL
         );
     }
 
@@ -270,7 +271,7 @@ contract ClearingRedeemFacet is
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData,
             sender,
-            OperatorType.AUTHORIZED
+            ThirdPartyType.AUTHORIZED
         );
     }
 
@@ -298,7 +299,6 @@ contract ClearingRedeemFacet is
                 _clearingOperationFrom.from
             );
         }
-        address sender = _msgSender();
 
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
@@ -306,7 +306,7 @@ contract ClearingRedeemFacet is
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData,
             address(0),
-            OperatorType.OPERATOR
+            ThirdPartyType.OPERATOR
         );
     }
 
