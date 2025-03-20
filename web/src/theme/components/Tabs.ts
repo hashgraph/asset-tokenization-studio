@@ -265,23 +265,41 @@ export const Tabs: TabsThemeConfiguration = {
       },
     },
     secondary: {
+      tab: {
+        pb: 1,
+        _focus: {
+          boxShadow: 0,
+        },
+        _selected: {
+          borderBottomWidth: "4px",
+          borderColor: "primary.500",
+          mb: 0,
+          _hover: {
+            _before: {
+              height: 0,
+            },
+          },
+        },
+        _hover: {
+          borderWidth: 0,
+        },
+      },
       tablist: {
         position: "relative",
         bgColor: "neutral.50",
+        borderBottom: "1px solid",
         "& button[aria-selected=true]": {
-          borderColor: "primary.500",
+          borderColor: "none",
           mb: 0,
         },
       },
       tabpanels: {
         h: "full",
-        w: "full",
         py: 6,
         bgColor: "neutral.50",
       },
       tabpanel: {
         h: "full",
-        w: "full",
         py: 0,
       },
     },
