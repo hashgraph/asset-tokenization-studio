@@ -284,9 +284,8 @@ export async function deployProxyForBusinessLogicResolver({
         signer,
         overrides,
     })
-    const { contract: businessLogicResolver } = await deployContractWithFactory(
-        deployProxyCommand
-    )
+    const { contract: businessLogicResolver } =
+        await deployContractWithFactory(deployProxyCommand)
 
     const txResponse =
         await businessLogicResolver.initialize_BusinessLogicResolver({

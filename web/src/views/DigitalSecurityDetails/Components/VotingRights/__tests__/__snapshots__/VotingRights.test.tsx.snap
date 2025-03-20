@@ -10,13 +10,13 @@ exports[`VotingRights should render correctly 1`] = `
     >
       <div
         aria-orientation="horizontal"
-        class="chakra-tabs__tablist css-3o7rpu"
+        class="chakra-tabs__tablist css-ctgkh0"
         role="tablist"
       >
         <button
           aria-controls="tabs-:r0:--tabpanel-0"
           aria-selected="true"
-          class="chakra-tabs__tab css-1ng85ee"
+          class="chakra-tabs__tab css-1wqiuq4"
           data-index="0"
           id="tabs-:r0:--tab-0"
           role="tab"
@@ -28,7 +28,7 @@ exports[`VotingRights should render correctly 1`] = `
         <button
           aria-controls="tabs-:r0:--tabpanel-1"
           aria-selected="false"
-          class="chakra-tabs__tab css-1ng85ee"
+          class="chakra-tabs__tab css-1wqiuq4"
           data-index="1"
           id="tabs-:r0:--tab-1"
           role="tab"
@@ -43,7 +43,7 @@ exports[`VotingRights should render correctly 1`] = `
         style="position: absolute; transition-property: left, right, top, bottom, height, width; transition-duration: 0ms; transition-timing-function: cubic-bezier(0, 0, 0.2, 1); left: 0px; width: 0px;"
       />
       <div
-        class="chakra-tabs__tab-panels css-1akcp04"
+        class="chakra-tabs__tab-panels css-1o5uxli"
       >
         <div
           aria-labelledby="tabs-:r0:--tab-0"

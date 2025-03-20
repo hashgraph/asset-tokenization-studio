@@ -208,10 +208,6 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 interface IAccessControl {
-    error AccountAssignedToRole(bytes32 role, address account);
-    error AccountNotAssignedToRole(bytes32 role, address account);
-    error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
-
     /**
      * @dev Emitted when a role is granted to an account
      *
@@ -254,6 +250,10 @@ interface IAccessControl {
      * @param account The account that renouced to the role
      */
     event RolesApplied(bytes32[] roles, bool[] actives, address account);
+
+    error AccountAssignedToRole(bytes32 role, address account);
+    error AccountNotAssignedToRole(bytes32 role, address account);
+    error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
 
     /**
      * @dev Grants a role

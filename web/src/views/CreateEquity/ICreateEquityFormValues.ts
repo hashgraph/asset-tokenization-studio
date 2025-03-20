@@ -211,6 +211,7 @@ export interface ICreateEquityFormValues {
   isControllable: boolean;
   isBlocklist: boolean;
   isApproval: boolean;
+  isClearing: boolean;
   nominalValue: number;
   currency: string;
   numberOfShares: string;

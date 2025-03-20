@@ -221,8 +221,8 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    dateToUnixTimestamp,
 } from '@scripts'
-import { dateToUnixTimestamp } from '../../dateFormatter'
 
 describe('Time Travel Tests', () => {
     let factory: IFactory,
@@ -238,6 +238,7 @@ describe('Time Travel Tests', () => {
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             isMultiPartition: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
@@ -269,19 +270,17 @@ describe('Time Travel Tests', () => {
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A] = await ethers.getSigners()
         account_A = signer_A.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: false,
-                    timeTravelEnabled: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: false,
+                timeTravelEnabled: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -297,7 +296,7 @@ describe('Time Travel Tests', () => {
 
     it('GIVEN succesful deployment THEN chainId is hardhat network id', async () => {
         const chainId = 1337
-        expect(await timeTravelFacet.checkBlockChainid(chainId)).to.not.be
+        await expect(timeTravelFacet.checkBlockChainid(chainId)).to.not.be
             .reverted
     })
 

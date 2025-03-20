@@ -210,7 +210,9 @@ export default {
     manage: "Manage",
   },
   list: {
-    title: "Clearing Operations List",
+    clearingOperationsTransfer: "Clearing Operations Transfer",
+    clearingOperationsRedeem: "Clearing Operations Redeem",
+    clearingOperationsHold: "Clearing Operations Hold",
     add: "Add",
     transfer: "Transfer",
     redeem: "Redeem",
@@ -223,6 +225,8 @@ export default {
     sourceAccount: "Source Account",
     targetId: "Target ID",
     clearingOperationType: "Clearing Operation Type",
+    actions: "Actions",
+    reclaim: "Reclaim",
   },
   create: {
     title: "Create Clearing Operation",

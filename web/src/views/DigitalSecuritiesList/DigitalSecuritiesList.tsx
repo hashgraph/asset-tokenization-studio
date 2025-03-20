@@ -245,7 +245,7 @@ interface SecurityStoreWithRemove extends SecurityStore {
 
 export const DigitalSecuritiesList = () => {
   const { setType } = useUserStore();
-  const { securities } = useSecurityStore();
+  const { securities, setDetails } = useSecurityStore();
   const columnsHelper = createColumnHelper<SecurityStoreWithRemove>();
   const { t: tHeader } = useTranslation("security", {
     keyPrefix: "list.header",
@@ -280,6 +280,7 @@ export const DigitalSecuritiesList = () => {
 
   useEffect(() => {
     setType(type as User);
+    setDetails(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

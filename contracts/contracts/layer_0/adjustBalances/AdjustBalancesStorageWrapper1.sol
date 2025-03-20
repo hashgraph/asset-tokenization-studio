@@ -215,16 +215,12 @@ import {
 import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 
 abstract contract AdjustBalancesStorageWrapper1 is
     IAdjustBalancesStorageWrapper,
     ScheduledBalanceAdjustmentsStorageWrapper
 {
-    modifier validateFactor(uint256 _factor) {
-        _checkFactor(_factor);
-        _;
-    }
-
     struct AdjustBalancesStorage {
         // Mapping from investor to their partitions labaf
         mapping(address => uint256[]) labafUserPartition;
@@ -247,11 +243,13 @@ abstract contract AdjustBalancesStorageWrapper1 is
         // Clearings
         mapping(address => uint256) labafClearedAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) labafClearedAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) labafClearedAmountByAccountPartitionAndId;
+        // solhint-disable-next-line
+        mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => mapping(uint256 => uint256)))) labafClearedAmountByAccountPartitionTypeAndId;
     }
 
-    function _checkFactor(uint256 _factor) private pure {
-        if (_factor == 0) revert FactorIsZero();
+    modifier validateFactor(uint256 _factor) {
+        _checkFactor(_factor);
+        _;
     }
 
     function _updateAbaf(uint256 factor) internal {
@@ -302,14 +300,15 @@ abstract contract AdjustBalancesStorageWrapper1 is
     }
 
     function _removeLabafClearing(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId
+        IClearing.ClearingOperationIdentifier
+            memory _clearingOperationIdentifier
     ) internal {
         delete _adjustBalancesStorage()
-            .labafClearedAmountByAccountPartitionAndId[_tokenHolder][
-                _partition
-            ][_clearingId];
+            .labafClearedAmountByAccountPartitionTypeAndId[
+                _clearingOperationIdentifier.tokenHolder
+            ][_clearingOperationIdentifier.partition][
+                _clearingOperationIdentifier.clearingOperationType
+            ][_clearingOperationIdentifier.clearingId];
     }
 
     function _setLockLabafById(
@@ -351,14 +350,15 @@ abstract contract AdjustBalancesStorageWrapper1 is
     }
 
     function _setClearedLabafById(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId,
+        IClearing.ClearingOperationIdentifier
+            memory _clearingOperationIdentifier,
         uint256 _labaf
     ) internal {
-        _adjustBalancesStorage().labafClearedAmountByAccountPartitionAndId[
-            _tokenHolder
-        ][_partition][_clearingId] = _labaf;
+        _adjustBalancesStorage().labafClearedAmountByAccountPartitionTypeAndId[
+            _clearingOperationIdentifier.tokenHolder
+        ][_clearingOperationIdentifier.partition][
+                _clearingOperationIdentifier.clearingOperationType
+            ][_clearingOperationIdentifier.clearingId] = _labaf;
     }
 
     function _setTotalClearedLabaf(
@@ -456,22 +456,6 @@ abstract contract AdjustBalancesStorageWrapper1 is
             _getAbafAdjustedAt(timestamp),
             _adjustBalancesStorage().labafLockedAmountByAccount[tokenHolder]
         );
-    }
-
-    function _calculateNewAbaf(
-        uint256 abaf,
-        uint256 factor
-    ) private pure returns (uint256) {
-        return abaf == 0 ? factor : abaf * factor;
-    }
-
-    function _calculateFactor(
-        uint256 _abaf,
-        uint256 _labaf
-    ) internal pure returns (uint256 factor_) {
-        if (_abaf == 0) return 1;
-        if (_labaf == 0) return _abaf;
-        factor_ = _abaf / _labaf;
     }
 
     function _getAbaf() internal view returns (uint256) {
@@ -583,14 +567,25 @@ abstract contract AdjustBalancesStorageWrapper1 is
     }
 
     function _getClearingLabafById(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId
+        IClearing.ClearingOperationIdentifier
+            memory _clearingOperationIdentifier
     ) internal view returns (uint256) {
         return
-            _adjustBalancesStorage().labafClearedAmountByAccountPartitionAndId[
-                _tokenHolder
-            ][_partition][_clearingId];
+            _adjustBalancesStorage()
+                .labafClearedAmountByAccountPartitionTypeAndId[
+                    _clearingOperationIdentifier.tokenHolder
+                ][_clearingOperationIdentifier.partition][
+                    _clearingOperationIdentifier.clearingOperationType
+                ][_clearingOperationIdentifier.clearingId];
+    }
+
+    function _calculateFactor(
+        uint256 _abaf,
+        uint256 _labaf
+    ) internal pure returns (uint256 factor_) {
+        if (_abaf == 0) return 1;
+        if (_labaf == 0) return _abaf;
+        factor_ = _abaf / _labaf;
     }
 
     function _adjustBalancesStorage()
@@ -603,5 +598,16 @@ abstract contract AdjustBalancesStorageWrapper1 is
         assembly {
             adjustBalancesStorage_.slot := position
         }
+    }
+
+    function _checkFactor(uint256 _factor) private pure {
+        if (_factor == 0) revert FactorIsZero();
+    }
+
+    function _calculateNewAbaf(
+        uint256 abaf,
+        uint256 factor
+    ) private pure returns (uint256) {
+        return abaf == 0 ? factor : abaf * factor;
     }
 }

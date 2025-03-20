@@ -210,6 +210,7 @@ import {ClearingStorageWrapper2} from '../clearing/ClearingStorageWrapper2.sol';
 import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 
 abstract contract AdjustBalancesStorageWrapper2 is
     IAdjustBalancesStorageWrapper,
@@ -253,11 +254,10 @@ abstract contract AdjustBalancesStorageWrapper2 is
     }
 
     function _getClearingLabafByPartition(
-        bytes32 _partition,
-        uint256 _clearingId,
-        address _tokenHolder
+        IClearing.ClearingOperationIdentifier
+            memory _clearingOperationIdentifier
     ) internal view override returns (uint256) {
-        return _getClearingLabafById(_partition, _tokenHolder, _clearingId);
+        return _getClearingLabafById(_clearingOperationIdentifier);
     }
 
     function _getLabafByUserAndPartition(
