@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-dapp",
-  "version": "1.10.0",
+  "version": "1.12.0",
   "license": "Apache-2.0",
   "scripts": {
     "clean:node": "npx --yes rimraf node_modules",
@@ -20,7 +20,7 @@
   "dependencies": {
     "@chakra-ui/react": "2.6.1",
     "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.12.0",
+    "@emotion/styled": "^11.11.0",
     "@hashgraph/asset-tokenization-sdk": "file:./../sdk",
     "@tanstack/react-query": "^4.35.3",
     "framer-motion": "^10.16.4",
