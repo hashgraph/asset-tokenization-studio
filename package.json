@@ -1,5 +1,5 @@
 {
-  "name": "hashgraph/hedera-asset-tokenization",
+  "name": "@hashgraph/hedera-asset-tokenization",
   "version": "1.10.0",
   "description": "asset tokenization",
   "scripts": {
