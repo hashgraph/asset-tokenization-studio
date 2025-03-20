@@ -3661,11 +3661,7 @@
   version "1.12.0"
   dependencies:
     "@ethersproject/contracts" "^5.7.0"
-<<<<<<< HEAD
-    "@hashgraph/asset-tokenization-contracts" "file:../../../Library/Caches/Yarn/v6/npm-@hashgraph-asset-tokenization-sdk-1.10.0-c5b46458-d5c5-4199-a7a9-013b608a374f-1741351472916/node_modules/@hashgraph/contracts"
-=======
-    "@hashgraph/asset-tokenization-contracts" "file:../../../.cache/yarn/v6/npm-@hashgraph-asset-tokenization-sdk-1.12.0-f3e8db7a-6a63-47af-9a63-1430b1bcc80e-1742473592324/node_modules/@hashgraph/contracts"
->>>>>>> e01cb362 (chore: fix versioning)
+    "@hashgraph/asset-tokenization-contracts" "file:../../../.cache/yarn/v6/npm-@hashgraph-asset-tokenization-sdk-1.12.0-974cfafc-c217-4965-a42e-77d3dbd506f3-1742486888746/node_modules/@hashgraph/contracts"
     "@hashgraph/hedera-custodians-integration" "^1.4.1"
     "@hashgraph/hedera-wallet-connect" "1.3.1"
     "@hashgraph/sdk" "2.51.0"
