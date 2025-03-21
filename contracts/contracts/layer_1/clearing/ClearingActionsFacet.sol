@@ -319,7 +319,6 @@ contract ClearingActionsFacet is
     )
         external
         override
-        onlyRole(_CLEARING_VALIDATOR_ROLE)
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationIdentifier.partition

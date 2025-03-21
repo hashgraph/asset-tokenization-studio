@@ -219,10 +219,11 @@ import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 import {
     IClearingHoldCreation
 } from '../../layer_1/interfaces/clearing/IClearingHoldCreation.sol';
-import {LibCommon} from '../common/LibCommon.sol';
+import {LibCommon} from '../common/libraries/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
@@ -360,6 +361,17 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             ].getFromSet(_pageIndex, _pageLength);
     }
 
+    function _getClearingThirdParty(
+        bytes32 _partition,
+        address _tokenHolder,
+        IClearing.ClearingOperationType _operationType,
+        uint256 _clearingId
+    ) internal view returns (address thirdParty_) {
+        thirdParty_ = _clearingStorage().clearingThirdParty[_tokenHolder][
+            _partition
+        ][_operationType][_clearingId];
+    }
+
     function _getClearingTransferForByPartition(
         bytes32 _partition,
         address _tokenHolder,
@@ -426,12 +438,29 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             ][_partition];
     }
 
+    function _checkExpirationTimestamp(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier,
+        bool _mutBeExpired
+    ) internal view {
+        if (
+            _isExpired(
+                _getClearingBasicInfo(_clearingOperationIdentifier)
+                    .expirationTimestamp
+            ) != _mutBeExpired
+        ) {
+            if (_mutBeExpired) revert IClearing.ExpirationDateNotReached();
+            revert IClearing.ExpirationDateReached();
+        }
+    }
+
     function _buildClearingTransferData(
         uint256 _amount,
         uint256 _expirationTimestamp,
         address _to,
         bytes memory _data,
-        bytes memory _operatorData
+        bytes memory _operatorData,
+        ThirdPartyType _operatorType
     ) internal pure returns (IClearing.ClearingTransferData memory) {
         return
             IClearing.ClearingTransferData({
@@ -439,7 +468,8 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
                 expirationTimestamp: _expirationTimestamp,
                 destination: _to,
                 data: _data,
-                operatorData: _operatorData
+                operatorData: _operatorData,
+                operatorType: _operatorType
             });
     }
 
@@ -447,14 +477,16 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         uint256 _amount,
         uint256 _expirationTimestamp,
         bytes memory _data,
-        bytes memory _operatorData
+        bytes memory _operatorData,
+        ThirdPartyType _operatorType
     ) internal pure returns (IClearing.ClearingRedeemData memory) {
         return
             IClearing.ClearingRedeemData({
                 amount: _amount,
                 expirationTimestamp: _expirationTimestamp,
                 data: _data,
-                operatorData: _operatorData
+                operatorData: _operatorData,
+                operatorType: _operatorType
             });
     }
 
@@ -466,18 +498,20 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         bytes memory _holdData,
         address _escrow,
         address _to,
-        bytes memory _operatorData
+        bytes memory _operatorData,
+        ThirdPartyType _operatorType
     ) internal pure returns (IClearing.ClearingHoldCreationData memory) {
         return
             IClearing.ClearingHoldCreationData({
                 amount: _amount,
                 expirationTimestamp: _expirationTimestamp,
                 data: _data,
-                operatorData: _operatorData,
                 holdEscrow: _escrow,
                 holdExpirationTimestamp: _holdExpirationTimestamp,
                 holdTo: _to,
-                holdData: _holdData
+                holdData: _holdData,
+                operatorData: _operatorData,
+                operatorType: _operatorType
             });
     }
 
@@ -505,22 +539,6 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             clearing_.slot := position
-        }
-    }
-
-    function _checkExpirationTimestamp(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier,
-        bool _mutBeExpired
-    ) private view {
-        if (
-            _isExpired(
-                _getClearingBasicInfo(_clearingOperationIdentifier)
-                    .expirationTimestamp
-            ) != _mutBeExpired
-        ) {
-            if (_mutBeExpired) revert IClearing.ExpirationDateNotReached();
-            revert IClearing.ExpirationDateReached();
         }
     }
 

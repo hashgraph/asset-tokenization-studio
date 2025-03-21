@@ -214,7 +214,7 @@ import {
     ICorporateActionsStorageWrapper,
     CorporateActionDataStorage
 } from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';

@@ -213,6 +213,7 @@ import {Common} from '../common/Common.sol';
 import {_CONTROLLER_ROLE} from '../constants/roles.sol';
 import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -235,7 +236,9 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             _msgSender(),
             _hold,
-            ''
+            '',
+            address(0),
+            ThirdPartyType.NULL
         );
 
         emit HeldByPartition(
@@ -265,15 +268,19 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
-        (success_, holdId_) = _createHoldFromByPartition(
+        address sender = _msgSender();
+
+        (success_, holdId_) = _createHoldByPartition(
             _partition,
             _from,
             _hold,
-            _operatorData
+            _operatorData,
+            sender,
+            ThirdPartyType.AUTHORIZED
         );
 
-        emit HeldByPartition(
-            _msgSender(),
+        emit HeldFromByPartition(
+            sender,
             _from,
             _partition,
             holdId_,
@@ -304,10 +311,12 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             _from,
             _hold,
-            _operatorData
+            _operatorData,
+            address(0),
+            ThirdPartyType.OPERATOR
         );
 
-        emit HeldByPartition(
+        emit OperatorHeldByPartition(
             _msgSender(),
             _from,
             _partition,
@@ -338,10 +347,12 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             _from,
             _hold,
-            _operatorData
+            _operatorData,
+            address(0),
+            ThirdPartyType.CONTROLLER
         );
 
-        emit HeldByPartition(
+        emit ControllerHeldByPartition(
             _msgSender(),
             _from,
             _partition,
@@ -377,7 +388,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _signature
         );
 
-        emit HeldByPartition(
+        emit ProtectedHeldByPartition(
             _msgSender(),
             _from,
             _partition,
@@ -501,10 +512,17 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             address escrow_,
             address destination_,
             bytes memory data_,
-            bytes memory operatorData_
+            bytes memory operatorData_,
+            ThirdPartyType thirdPartyType_
         )
     {
         return _getHoldForByPartitionAdjusted(_holdIdentifier);
+    }
+
+    function getHoldThirdParty(
+        HoldIdentifier calldata _holdIdentifier
+    ) external view override returns (address) {
+        return _getHoldThirdParty(_holdIdentifier);
     }
 
     function getStaticResolverKey()
@@ -523,7 +541,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](13);
+        staticFunctionSelectors_ = new bytes4[](14);
         staticFunctionSelectors_[selectorIndex++] = this
             .createHoldByPartition
             .selector;
@@ -562,6 +580,9 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getHeldAmountFor
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldThirdParty
             .selector;
     }
 
