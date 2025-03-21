@@ -206,26 +206,16 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
-import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
-import {
-    IClearingActions
-} from '../../layer_1/interfaces/clearing/IClearingActions.sol';
-import {
-    IClearingTransfer
-} from '../../layer_1/interfaces/clearing/IClearingTransfer.sol';
-import {
-    IClearingStorageWrapper
-} from '../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    checkNounceAndDeadline
-} from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
-import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
-import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
+import {HoldStorageWrapper2} from "../hold/HoldStorageWrapper2.sol";
+import {IClearing} from "../../layer_1/interfaces/clearing/IClearing.sol";
+import {IClearingActions} from "../../layer_1/interfaces/clearing/IClearingActions.sol";
+import {IClearingTransfer} from "../../layer_1/interfaces/clearing/IClearingTransfer.sol";
+import {IClearingStorageWrapper} from "../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {checkNounceAndDeadline} from "../../layer_1/protectedPartitions/signatureVerification.sol";
+import {IHold} from "../../layer_1/interfaces/hold/IHold.sol";
+import {IKyc} from "../../layer_1/interfaces/kyc/IKyc.sol";
+import {ThirdPartyType} from "../common/types/ThirdPartyType.sol";
 
 // solhint-disable no-unused-vars, custom-errors
 abstract contract ClearingStorageWrapper2 is
@@ -266,8 +256,7 @@ abstract contract ClearingStorageWrapper2 is
             _amount,
             _to,
             _protectedClearingOperation.from,
-            '',
-            address(0),
+            "",
             ThirdPartyType.PROTECTED
         );
     }
@@ -300,8 +289,7 @@ abstract contract ClearingStorageWrapper2 is
             _protectedClearingOperation.clearingOperation,
             _protectedClearingOperation.from,
             _hold,
-            '',
-            address(0),
+            "",
             ThirdPartyType.PROTECTED
         );
     }
@@ -335,8 +323,7 @@ abstract contract ClearingStorageWrapper2 is
             _protectedClearingOperation.clearingOperation,
             _amount,
             _protectedClearingOperation.from,
-            '',
-            address(0),
+            "",
             ThirdPartyType.PROTECTED
         );
     }
@@ -344,15 +331,9 @@ abstract contract ClearingStorageWrapper2 is
     function _operateClearingCreation(
         IClearing.ClearingOperation memory _clearingOperation,
         address _from,
-        address _thirdPartyAddress,
-        ThirdPartyType _thirdPartyType,
         uint256 _amount,
         IClearing.ClearingOperationType _operationType
     ) internal returns (uint256 clearingId_) {
-        if (_thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            _decreaseAllowedBalance(_from, _thirdPartyAddress, _amount);
-        }
-
         bytes32 partition = _clearingOperation.partition;
 
         IClearing.ClearingDataStorage
@@ -394,7 +375,6 @@ abstract contract ClearingStorageWrapper2 is
         address _to,
         address _from,
         bytes memory _operatorData,
-        address _thirdPartyAddress,
         ThirdPartyType _thirdPartyType
     ) internal returns (bool success_, uint256 clearingId_) {
         bytes memory data = _clearingOperation.data;
@@ -403,8 +383,53 @@ abstract contract ClearingStorageWrapper2 is
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
-            _thirdPartyAddress,
-            _thirdPartyType,
+            _amount,
+            IClearing.ClearingOperationType.Transfer
+        );
+
+        _clearingStorage().clearingTransferByAccountPartitionAndId[_from][
+            _clearingOperation.partition
+        ][clearingId_] = _buildClearingTransferData(
+            _amount,
+            expirationTimestamp,
+            _to,
+            data,
+            _operatorData,
+            _thirdPartyType
+        );
+
+        _emitClearedTransferEvent(
+            _from,
+            _to,
+            _clearingOperation.partition,
+            clearingId_,
+            _amount,
+            expirationTimestamp,
+            data,
+            _operatorData,
+            _thirdPartyType
+        );
+
+        success_ = true;
+    }
+
+    function _clearingTransferFromCreation(
+        IClearing.ClearingOperation memory _clearingOperation,
+        uint256 _amount,
+        address _to,
+        address _from,
+        bytes memory _operatorData,
+        address _thirdPartyAddress,
+        ThirdPartyType _thirdPartyType
+    ) internal returns (bool success_, uint256 clearingId_) {
+        bytes memory data = _clearingOperation.data;
+        uint256 expirationTimestamp = _clearingOperation.expirationTimestamp;
+
+        _decreaseAllowedBalance(_from, _thirdPartyAddress, _amount);
+
+        clearingId_ = _operateClearingCreation(
+            _clearingOperation,
+            _from,
             _amount,
             IClearing.ClearingOperationType.Transfer
         );
@@ -446,14 +471,52 @@ abstract contract ClearingStorageWrapper2 is
         uint256 _amount,
         address _from,
         bytes memory _operatorData,
-        address _thirdPartyAddress,
         ThirdPartyType _thirdPartyType
     ) internal returns (bool success_, uint256 clearingId_) {
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
-            _thirdPartyAddress,
-            _thirdPartyType,
+            _amount,
+            IClearing.ClearingOperationType.Redeem
+        );
+
+        _clearingStorage().clearingRedeemByAccountPartitionAndId[_from][
+            _clearingOperation.partition
+        ][clearingId_] = _buildClearingRedeemData(
+            _amount,
+            _clearingOperation.expirationTimestamp,
+            _clearingOperation.data,
+            _operatorData,
+            _thirdPartyType
+        );
+
+        _emitClearedRedeemEvent(
+            _from,
+            _clearingOperation.partition,
+            clearingId_,
+            _amount,
+            _clearingOperation.expirationTimestamp,
+            _clearingOperation.data,
+            _operatorData,
+            _thirdPartyType
+        );
+
+        success_ = true;
+    }
+
+    function _clearingRedeemFromCreation(
+        IClearing.ClearingOperation memory _clearingOperation,
+        uint256 _amount,
+        address _from,
+        bytes memory _operatorData,
+        address _thirdPartyAddress,
+        ThirdPartyType _thirdPartyType
+    ) internal returns (bool success_, uint256 clearingId_) {
+        _decreaseAllowedBalance(_from, _thirdPartyAddress, _amount);
+
+        clearingId_ = _operateClearingCreation(
+            _clearingOperation,
+            _from,
             _amount,
             IClearing.ClearingOperationType.Redeem
         );
@@ -493,14 +556,11 @@ abstract contract ClearingStorageWrapper2 is
         address _from,
         IHold.Hold calldata _hold,
         bytes memory _operatorData,
-        address _thirdPartyAddress,
         ThirdPartyType _thirdPartyType
     ) internal returns (bool success_, uint256 clearingId_) {
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
-            _thirdPartyAddress,
-            _thirdPartyType,
             _hold.amount,
             IClearing.ClearingOperationType.HoldCreation
         );
@@ -509,6 +569,52 @@ abstract contract ClearingStorageWrapper2 is
             _clearingOperation.partition
         ][clearingId_] = _buildClearingHoldCreationData(
             _hold.amount,
+            _clearingOperation.expirationTimestamp,
+            _hold.expirationTimestamp,
+            _clearingOperation.data,
+            _hold.data,
+            _hold.escrow,
+            _hold.to,
+            _operatorData,
+            _thirdPartyType
+        );
+
+        _emitClearedHoldByPartitionEvent(
+            _from,
+            _clearingOperation.partition,
+            clearingId_,
+            _hold,
+            _clearingOperation.expirationTimestamp,
+            _clearingOperation.data,
+            _operatorData,
+            _thirdPartyType
+        );
+
+        success_ = true;
+    }
+
+    function _clearingHoldCreationFromCreation(
+        IClearing.ClearingOperation memory _clearingOperation,
+        address _from,
+        IHold.Hold calldata _hold,
+        bytes memory _operatorData,
+        address _thirdPartyAddress,
+        ThirdPartyType _thirdPartyType
+    ) internal returns (bool success_, uint256 clearingId_) {
+        uint256 amount = _hold.amount;
+        _decreaseAllowedBalance(_from, _thirdPartyAddress, amount);
+
+        clearingId_ = _operateClearingCreation(
+            _clearingOperation,
+            _from,
+            amount,
+            IClearing.ClearingOperationType.HoldCreation
+        );
+
+        _clearingStorage().clearingHoldCreationByAccountPartitionAndId[_from][
+            _clearingOperation.partition
+        ][clearingId_] = _buildClearingHoldCreationData(
+            amount,
             _clearingOperation.expirationTimestamp,
             _hold.expirationTimestamp,
             _clearingOperation.data,
@@ -866,27 +972,6 @@ abstract contract ClearingStorageWrapper2 is
         ].add(_clearingId);
     }
 
-    function _restoreAllowance(
-        address _tokenHolder,
-        bytes32 _partition,
-        IClearing.ClearingOperationType _clearingOperationType,
-        uint256 _clearingId,
-        uint256 _amount
-    ) internal {
-        address thirdParty = _clearingStorage().clearingThirdParty[
-            _tokenHolder
-        ][_partition][_clearingOperationType][_clearingId];
-
-        _beforeAllowanceUpdate(_tokenHolder, thirdParty);
-
-        _erc20Storage().allowed[_tokenHolder][thirdParty] += _amount;
-        emit Approval(
-            _tokenHolder,
-            thirdParty,
-            _erc20Storage().allowed[_tokenHolder][thirdParty]
-        );
-    }
-
     function _getClearedAmountForAdjusted(
         address _tokenHolder
     ) internal view virtual override returns (uint256 amount_) {
@@ -1043,7 +1128,7 @@ abstract contract ClearingStorageWrapper2 is
             _operation != IClearingActions.ClearingActionType.Approve &&
             clearingTransferData.operatorType == ThirdPartyType.AUTHORIZED
         ) {
-            _restoreAllowance(
+            _restoreClearingAllowance(
                 _tokenHolder,
                 _partition,
                 IClearing.ClearingOperationType.Transfer,
@@ -1091,7 +1176,7 @@ abstract contract ClearingStorageWrapper2 is
             _operation != IClearingActions.ClearingActionType.Approve &&
             clearingRedeemData.operatorType == ThirdPartyType.AUTHORIZED
         ) {
-            _restoreAllowance(
+            _restoreClearingAllowance(
                 _tokenHolder,
                 _partition,
                 IClearing.ClearingOperationType.Redeem,
@@ -1146,7 +1231,7 @@ abstract contract ClearingStorageWrapper2 is
             _operation != IClearingActions.ClearingActionType.Approve &&
             clearingHoldCreationData.operatorType == ThirdPartyType.AUTHORIZED
         ) {
-            _restoreAllowance(
+            _restoreClearingAllowance(
                 _tokenHolder,
                 _partition,
                 IClearing.ClearingOperationType.HoldCreation,
@@ -1165,6 +1250,20 @@ abstract contract ClearingStorageWrapper2 is
         );
 
         success_ = true;
+    }
+
+    function _restoreClearingAllowance(
+        address _tokenHolder,
+        bytes32 _partition,
+        IClearing.ClearingOperationType _clearingOperationType,
+        uint256 _clearingId,
+        uint256 _amount
+    ) private {
+        address thirdParty = _clearingStorage().clearingThirdParty[
+            _tokenHolder
+        ][_partition][_clearingOperationType][_clearingId];
+
+        _increaseAllowedBalance(_tokenHolder, thirdParty, _amount);
     }
 
     function _emitClearedTransferEvent(

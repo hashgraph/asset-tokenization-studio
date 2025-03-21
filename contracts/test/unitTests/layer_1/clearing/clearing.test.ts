@@ -3214,20 +3214,33 @@ describe('Clearing Tests', () => {
                         .expirationTimestamp + 1
                 )
 
-                await clearingActionsFacet.reclaimClearingOperationByPartition(
-                    clearingIdentifier
+                await expect(
+                    clearingActionsFacet.reclaimClearingOperationByPartition(
+                        clearingIdentifier
+                    )
                 )
+                    .to.emit(holdFacet, 'Approval')
+                    .withArgs(account_A, account_B, _AMOUNT)
 
                 clearingIdentifier.clearingOperationType =
                     ClearingOperationType.Redeem
-                await clearingActionsFacet.reclaimClearingOperationByPartition(
-                    clearingIdentifier
+                await expect(
+                    clearingActionsFacet.reclaimClearingOperationByPartition(
+                        clearingIdentifier
+                    )
                 )
+                    .to.emit(holdFacet, 'Approval')
+                    .withArgs(account_A, account_B, 2 * _AMOUNT)
+
                 clearingIdentifier.clearingOperationType =
                     ClearingOperationType.HoldCreation
-                await clearingActionsFacet.reclaimClearingOperationByPartition(
-                    clearingIdentifier
+                await expect(
+                    clearingActionsFacet.reclaimClearingOperationByPartition(
+                        clearingIdentifier
+                    )
                 )
+                    .to.emit(holdFacet, 'Approval')
+                    .withArgs(account_A, account_B, 3 * _AMOUNT)
 
                 expect(
                     await erc20Facet.allowance(account_A, account_B)
@@ -3265,19 +3278,33 @@ describe('Clearing Tests', () => {
                 clearingIdentifier.clearingOperationType =
                     ClearingOperationType.Transfer
                 clearingIdentifier.clearingId = 2
-                await clearingActionsFacet.cancelClearingOperationByPartition(
-                    clearingIdentifier
+                await expect(
+                    clearingActionsFacet.cancelClearingOperationByPartition(
+                        clearingIdentifier
+                    )
                 )
+                    .to.emit(holdFacet, 'Approval')
+                    .withArgs(account_A, account_B, _AMOUNT)
+
                 clearingIdentifier.clearingOperationType =
                     ClearingOperationType.Redeem
-                await clearingActionsFacet.cancelClearingOperationByPartition(
-                    clearingIdentifier
+                await expect(
+                    clearingActionsFacet.cancelClearingOperationByPartition(
+                        clearingIdentifier
+                    )
                 )
+                    .to.emit(holdFacet, 'Approval')
+                    .withArgs(account_A, account_B, 2 * _AMOUNT)
+
                 clearingIdentifier.clearingOperationType =
                     ClearingOperationType.HoldCreation
-                await clearingActionsFacet.cancelClearingOperationByPartition(
-                    clearingIdentifier
+                await expect(
+                    clearingActionsFacet.cancelClearingOperationByPartition(
+                        clearingIdentifier
+                    )
                 )
+                    .to.emit(holdFacet, 'Approval')
+                    .withArgs(account_A, account_B, 3 * _AMOUNT)
 
                 expect(
                     await erc20Facet.allowance(account_A, account_B)

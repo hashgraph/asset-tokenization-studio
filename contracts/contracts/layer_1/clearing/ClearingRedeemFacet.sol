@@ -233,14 +233,11 @@ contract ClearingRedeemFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
-
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperation,
             _amount,
-            sender,
+            _msgSender(),
             '',
-            address(0),
             ThirdPartyType.NULL
         );
     }
@@ -263,14 +260,12 @@ contract ClearingRedeemFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
-
-        (success_, clearingId_) = _clearingRedeemCreation(
+        (success_, clearingId_) = _clearingRedeemFromCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData,
-            sender,
+            _msgSender(),
             ThirdPartyType.AUTHORIZED
         );
     }
@@ -305,7 +300,6 @@ contract ClearingRedeemFacet is
             _amount,
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData,
-            address(0),
             ThirdPartyType.OPERATOR
         );
     }

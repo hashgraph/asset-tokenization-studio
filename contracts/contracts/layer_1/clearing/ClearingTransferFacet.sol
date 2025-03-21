@@ -235,15 +235,12 @@ contract ClearingTransferFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
-
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperation,
             _amount,
             _to,
-            sender,
+            _msgSender(),
             '',
-            address(0),
             ThirdPartyType.NULL
         );
     }
@@ -270,15 +267,14 @@ contract ClearingTransferFacet is
             _checkValidAddress(_clearingOperationFrom.from);
             _checkValidAddress(_to);
         }
-        address sender = _msgSender();
 
-        (success_, clearingId_) = _clearingTransferCreation(
+        (success_, clearingId_) = _clearingTransferFromCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData,
-            sender,
+            _msgSender(),
             ThirdPartyType.AUTHORIZED
         );
     }
@@ -309,7 +305,6 @@ contract ClearingTransferFacet is
                 _clearingOperationFrom.from
             );
         }
-        address sender = _msgSender();
 
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
@@ -317,7 +312,6 @@ contract ClearingTransferFacet is
             _to,
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData,
-            sender,
             ThirdPartyType.OPERATOR
         );
     }

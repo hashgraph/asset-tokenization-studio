@@ -342,7 +342,7 @@ abstract contract HoldStorageWrapper2 is
         IHold.HoldData memory holdData = _getHold(_holdIdentifier);
 
         if (holdData.thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            _restoreAllowance(
+            _restoreHoldAllowance(
                 _holdIdentifier.tokenHolder,
                 _holdIdentifier.partition,
                 _holdIdentifier.holdId,
@@ -375,7 +375,7 @@ abstract contract HoldStorageWrapper2 is
         amount_ = holdData.hold.amount;
 
         if (holdData.thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            _restoreAllowance(
+            _restoreHoldAllowance(
                 _holdIdentifier.tokenHolder,
                 _holdIdentifier.partition,
                 _holdIdentifier.holdId,
@@ -500,7 +500,7 @@ abstract contract HoldStorageWrapper2 is
         );
     }
 
-    function _restoreAllowance(
+    function _restoreHoldAllowance(
         address _tokenHolder,
         bytes32 _partition,
         uint256 _holdId,
@@ -510,14 +510,7 @@ abstract contract HoldStorageWrapper2 is
             _partition
         ][_holdId];
 
-        _beforeAllowanceUpdate(_tokenHolder, thirdParty);
-
-        _erc20Storage().allowed[_tokenHolder][thirdParty] += _amount;
-        emit Approval(
-            _tokenHolder,
-            thirdParty,
-            _erc20Storage().allowed[_tokenHolder][thirdParty]
-        );
+        _increaseAllowedBalance(_tokenHolder, thirdParty, _amount);
     }
 
     function _updateTotalHold(

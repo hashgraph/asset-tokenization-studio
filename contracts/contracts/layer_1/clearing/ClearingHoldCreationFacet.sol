@@ -240,14 +240,11 @@ contract ClearingHoldCreationFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
-
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperation,
-            sender,
+            _msgSender(),
             _hold,
             '',
-            address(0),
             ThirdPartyType.NULL
         );
     }
@@ -274,14 +271,13 @@ contract ClearingHoldCreationFacet is
             _checkExpirationTimestamp(_hold.expirationTimestamp);
             _checkUnProtectedPartitionsOrWildCardRole();
         }
-        address sender = _msgSender();
 
-        (success_, clearingId_) = _clearingHoldCreationCreation(
+        (success_, clearingId_) = _clearingHoldCreationFromCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
             _hold,
             _clearingOperationFrom.operatorData,
-            sender,
+            _msgSender(),
             ThirdPartyType.AUTHORIZED
         );
     }
@@ -318,7 +314,6 @@ contract ClearingHoldCreationFacet is
             _clearingOperationFrom.from,
             _hold,
             _clearingOperationFrom.operatorData,
-            address(0),
             ThirdPartyType.OPERATOR
         );
     }
