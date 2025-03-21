@@ -243,19 +243,15 @@ export async function deployEnvironment({
     timeTravelEnabled?: boolean
 }) {
     if (!environmentInitialized) {
-        const {
-            deployer,
-            factory,
-            businessLogicResolver,
-            ...deployedContracts
-        } = await deployAtsFullInfrastructure(
-            new DeployAtsFullInfrastructureCommand({
-                signer: signer,
-                network: network.name as Network,
-                useDeployed: false,
-                timeTravelEnabled: timeTravelEnabled,
-            })
-        )
+        const { deployer, factory, businessLogicResolver } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer,
+                    network: network.name as Network,
+                    useDeployed: false,
+                    timeTravelEnabled: timeTravelEnabled,
+                })
+            )
 
         environment.proxyAdmin = ProxyAdmin__factory.connect(
             businessLogicResolver.proxyAdminAddress!,

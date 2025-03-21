@@ -218,7 +218,8 @@ import {
     _IS_NOT_OPERATOR_ERROR_ID,
     _WRONG_PARTITION_ERROR_ID,
     _SUCCESS,
-    _FROM_ACCOUNT_KYC_ERROR_ID
+    _FROM_ACCOUNT_KYC_ERROR_ID,
+    _CLEARING_ACTIVE_ERROR_ID
 } from '../../constants/values.sol';
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
@@ -229,6 +230,7 @@ import {
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
 {
+    // solhint-disable no-unused-vars
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -240,17 +242,18 @@ abstract contract ERC1410StandardStorageWrapper is
         if (from == address(0)) {
             // mint
             _updateAccountSnapshot(to, partition);
-            _updateTotalSupplySnapshot(partition);
-        } else if (to == address(0)) {
+            return _updateTotalSupplySnapshot(partition);
+        }
+        if (to == address(0)) {
             // burn
             _updateAccountSnapshot(from, partition);
-            _updateTotalSupplySnapshot(partition);
-        } else {
-            // transfer
-            _updateAccountSnapshot(from, partition);
-            _updateAccountSnapshot(to, partition);
+            return _updateTotalSupplySnapshot(partition);
         }
+        // transfer
+        _updateAccountSnapshot(from, partition);
+        _updateAccountSnapshot(to, partition);
     }
+    // solhint-enable no-unused-vars
 
     function _triggerAndSyncAll(
         bytes32 _partition,
@@ -381,14 +384,16 @@ abstract contract ERC1410StandardStorageWrapper is
         erc1410Storage.totalSupplyByPartition[_partition] += _value;
     }
 
-    function _validateParams(bytes32 _partition, uint256 _value) internal pure {
-        if (_value == uint256(0)) {
-            revert ZeroValue();
-        }
-        if (_partition == bytes32(0)) {
-            revert ZeroPartition();
-        }
-    }
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual;
+
+    function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
+
+    function _adjustTotalAndMaxSupplyForPartition(
+        bytes32 _partition
+    ) internal virtual;
 
     function _canRedeemByPartition(
         address _from,
@@ -399,6 +404,9 @@ abstract contract ERC1410StandardStorageWrapper is
     ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
+        if (_isClearingActivated()) {
+            return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
         }
         if (_from == address(0)) {
             return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
@@ -496,19 +504,17 @@ abstract contract ERC1410StandardStorageWrapper is
         return _balanceOfByPartition(_partition, _tokenHolder) * factor;
     }
 
-    function _updateAccountSnapshot(
-        address account,
-        bytes32 partition
-    ) internal virtual;
-
-    function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
-
     function _getLabafByUserAndPartition(
         bytes32 _partition,
         address _account
     ) internal view virtual returns (uint256);
 
-    function _adjustTotalAndMaxSupplyForPartition(
-        bytes32 _partition
-    ) internal virtual;
+    function _validateParams(bytes32 _partition, uint256 _value) internal pure {
+        if (_value == uint256(0)) {
+            revert ZeroValue();
+        }
+        if (_partition == bytes32(0)) {
+            revert ZeroPartition();
+        }
+    }
 }

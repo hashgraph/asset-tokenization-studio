@@ -213,16 +213,19 @@ import { User } from "../../utils/constants";
 import { useAccountStore } from "../../store/accountStore";
 import { useRolesStore } from "../../store/rolesStore";
 import { useWalletStore } from "../../store/walletStore";
+import { useSecurityStore } from "../../store/securityStore";
 
 export const Dashboard = () => {
   const { setType } = useUserStore();
   const { adminSecurities, holderSecurities } = useAccountStore();
   const { setRoles } = useRolesStore();
   const { address } = useWalletStore();
+  const { setDetails } = useSecurityStore();
 
   useEffect(() => {
     setRoles([]);
     setType(User.general);
+    setDetails(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

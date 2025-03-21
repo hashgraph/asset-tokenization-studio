@@ -207,9 +207,6 @@
 pragma solidity 0.8.18;
 
 interface IControlList {
-    error ListedAccount(address account);
-    error UnlistedAccount(address account);
-
     /**
      * @dev Emitted when an account is added to the controllist
      *
@@ -228,6 +225,9 @@ interface IControlList {
         address indexed operator,
         address indexed account
     );
+
+    error ListedAccount(address account);
+    error UnlistedAccount(address account);
 
     /**
      * @dev Initial configuration

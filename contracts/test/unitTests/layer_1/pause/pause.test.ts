@@ -243,20 +243,18 @@ describe('Pause Tests', () => {
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: false,
-                    timeTravelEnabled: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: false,
+                timeTravelEnabled: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -268,6 +266,7 @@ describe('Pause Tests', () => {
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             isMultiPartition: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',

@@ -335,7 +335,6 @@ describe('ResolverProxy Tests', () => {
     }
 
     beforeEach(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A] = await ethers.getSigners()
         account_A = signer_A.address
 
@@ -408,8 +407,8 @@ describe('ResolverProxy Tests', () => {
         await expect(accessControl.grantRole(DEFAULT_ADMIN_ROLE, account_A))
             .to.be.revertedWithCustomError(resolverProxy, 'FunctionNotFound')
             .withArgs(GRANT_ROLE_SIGNATURE)
-        expect(await diamondLoupe.supportsInterface(GRANT_ROLE_SIGNATURE)).to.be
-            .false
+        await expect(await diamondLoupe.supportsInterface(GRANT_ROLE_SIGNATURE))
+            .to.be.false
     })
 
     it('GIVEN deployed facets WHEN deploy a diamond to latestVersion and one to a specific version THEN only the latest version one will get updated', async () => {

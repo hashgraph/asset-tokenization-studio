@@ -357,6 +357,26 @@ abstract contract AccessControlStorageWrapper is
         }
     }
 
+    function _has(
+        RoleDataStorage storage _rolesStorageData,
+        bytes32 _role,
+        address _account
+    ) internal view returns (bool hasRole_) {
+        hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
+    }
+
+    function _rolesStorage()
+        internal
+        pure
+        returns (RoleDataStorage storage roles_)
+    {
+        bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            roles_.slot := position
+        }
+    }
+
     function _grant(
         RoleDataStorage storage _roleDataStorage,
         bytes32 _role,
@@ -377,32 +397,12 @@ abstract contract AccessControlStorageWrapper is
             _roleDataStorage.memberRoles[_account].remove(_role);
     }
 
-    function _has(
-        RoleDataStorage storage _rolesStorageData,
-        bytes32 _role,
-        address _account
-    ) internal view returns (bool hasRole_) {
-        hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
-    }
-
     function _checkSameRolesAndActivesLength(
         uint256 _rolesLength,
         uint256 _activesLength
     ) private pure {
         if (_rolesLength != _activesLength) {
             revert RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
-        }
-    }
-
-    function _rolesStorage()
-        internal
-        pure
-        returns (RoleDataStorage storage roles_)
-    {
-        bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            roles_.slot := position
         }
     }
 }

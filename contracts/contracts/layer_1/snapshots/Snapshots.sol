@@ -228,12 +228,6 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         snapshotID_ = _takeSnapshot();
     }
 
-    function abafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 abaf_) {
-        abaf_ = _abafAtSnapshot(_snapshotID);
-    }
-
     function decimalsAtSnapshot(
         uint256 _snapshotID
     ) external view returns (uint8 decimals_) {
@@ -355,7 +349,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](14);
+        staticFunctionSelectors_ = new bytes4[](13);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAtSnapshot
@@ -389,9 +383,6 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .clearedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .abafAtSnapshot
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .decimalsAtSnapshot

@@ -211,6 +211,7 @@ export interface ICreateBondFormValues {
   isControllable: boolean;
   isBlocklist: boolean;
   isApproval: boolean;
+  isClearing: boolean;
   currency: string;
   numberOfUnits: string;
   nominalValue: number;

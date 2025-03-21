@@ -251,21 +251,19 @@ describe('Access Control Tests', () => {
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
         account_D = signer_D.address
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -284,6 +282,7 @@ describe('Access Control Tests', () => {
             isControllable: true,
             isMultiPartition: false,
             arePartitionsProtected: false,
+            clearingActive: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,
@@ -461,9 +460,8 @@ describe('Access Control Tests', () => {
         check_C = await accessControlFacet.hasRole(PAUSER_ROLE, account_C)
         expect(check_C).to.equal(true)
         // check roles and members count and lists
-        const roleCountFor_C = await accessControlFacet.getRoleCountFor(
-            account_C
-        )
+        const roleCountFor_C =
+            await accessControlFacet.getRoleCountFor(account_C)
         const rolesFor_C = await accessControlFacet.getRolesFor(
             account_C,
             0,
@@ -505,9 +503,8 @@ describe('Access Control Tests', () => {
         check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
         expect(check_B).to.equal(false)
         // check roles and members count and lists
-        const roleCountFor_B = await accessControlFacet.getRoleCountFor(
-            account_B
-        )
+        const roleCountFor_B =
+            await accessControlFacet.getRoleCountFor(account_B)
         const rolesFor_B = await accessControlFacet.getRolesFor(
             account_B,
             0,
@@ -542,9 +539,8 @@ describe('Access Control Tests', () => {
         check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
         expect(check_B).to.equal(false)
         // check roles and members count and lists
-        const roleCountFor_B = await accessControlFacet.getRoleCountFor(
-            account_B
-        )
+        const roleCountFor_B =
+            await accessControlFacet.getRoleCountFor(account_B)
         const rolesFor_B = await accessControlFacet.getRolesFor(
             account_B,
             0,
@@ -592,9 +588,8 @@ describe('Access Control Tests', () => {
             await accessControlFacet.hasRole(DEFAULT_ADMIN_ROLE, account_C)
         ).to.equal(true)
         // check roles and members count and lists
-        const roleCountFor_C = await accessControlFacet.getRoleCountFor(
-            account_C
-        )
+        const roleCountFor_C =
+            await accessControlFacet.getRoleCountFor(account_C)
         const rolesFor_C = await accessControlFacet.getRolesFor(
             account_C,
             0,
@@ -660,9 +655,8 @@ describe('Access Control Tests', () => {
             await accessControlFacet.hasRole(DEFAULT_ADMIN_ROLE, account_C)
         ).to.equal(false)
         // check roles and members count and lists
-        const roleCountFor_C = await accessControlFacet.getRoleCountFor(
-            account_C
-        )
+        const roleCountFor_C =
+            await accessControlFacet.getRoleCountFor(account_C)
         const rolesFor_C = await accessControlFacet.getRolesFor(
             account_C,
             0,

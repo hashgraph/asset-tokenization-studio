@@ -261,13 +261,6 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
     }
 
     /**
-     * @dev Total number of tokens in existence
-     */
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupply();
-    }
-
-    /**
      * @return
      *  true : the token allows multiple partitions to be set and managed
      *  false : the token contains only one partition, the default one

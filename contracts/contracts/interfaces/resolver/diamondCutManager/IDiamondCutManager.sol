@@ -229,21 +229,6 @@ interface IDiamondCutManager {
         uint256 version;
     }
 
-    // @notice Not able to use bytes32(0) with configurationId
-    error DefaultValueForConfigurationIdNotPermitted();
-
-    /// @notice Not able to use a facetId unregistered
-    error FacetIdNotRegistered(bytes32 configurationId, bytes32 facetId);
-
-    /// @notice Not able to duplicate facetId in list
-    error DuplicatedFacetInConfiguration(bytes32 facetId);
-
-    /// @notice error that occurs when try to create a configuration and the configuration key doesn't exists
-    error ResolverProxyConfigurationNoRegistered(
-        bytes32 resolverProxyConfigurationId,
-        uint256 version
-    );
-
     /// @notice emited when createConfiguration is executed
     event DiamondConfigurationCreated(
         bytes32 configurationId,
@@ -261,6 +246,21 @@ interface IDiamondCutManager {
 
     /// @notice emited when cancelBatchConfiguration is executed
     event DiamondBatchConfigurationCanceled(bytes32 configurationId);
+
+    // @notice Not able to use bytes32(0) with configurationId
+    error DefaultValueForConfigurationIdNotPermitted();
+
+    /// @notice Not able to use a facetId unregistered
+    error FacetIdNotRegistered(bytes32 configurationId, bytes32 facetId);
+
+    /// @notice Not able to duplicate facetId in list
+    error DuplicatedFacetInConfiguration(bytes32 facetId);
+
+    /// @notice error that occurs when try to create a configuration and the configuration key doesn't exists
+    error ResolverProxyConfigurationNoRegistered(
+        bytes32 resolverProxyConfigurationId,
+        uint256 version
+    );
 
     /// @notice Create a new configuration to the latest version of all facets.
     /// @param _configurationId unused identifier to the configuration.
@@ -285,6 +285,14 @@ interface IDiamondCutManager {
     /// @notice Cancel a current batch configuration.
     /// @param _configurationId unused identifier to the configuration.
     function cancelBatchConfiguration(bytes32 _configurationId) external;
+
+    /// @notice check if a resolverProxy is registered. If not revert.
+    /// @param _configurationId the configuration key to be checked.
+    /// @param _version configured version in the resolverProxy.
+    function checkResolverProxyConfigurationRegistered(
+        bytes32 _configurationId,
+        uint256 _version
+    ) external;
 
     /// @notice Resolve the facet address knowing configuration, version and selector.
     /// @param _configurationId configured key in the resolverProxy.
@@ -316,14 +324,6 @@ interface IDiamondCutManager {
         bytes32 _configurationId,
         uint256 _version
     ) external view returns (bool);
-
-    /// @notice check if a resolverProxy is registered. If not revert.
-    /// @param _configurationId the configuration key to be checked.
-    /// @param _version configured version in the resolverProxy.
-    function checkResolverProxyConfigurationRegistered(
-        bytes32 _configurationId,
-        uint256 _version
-    ) external;
 
     /// @notice Returns the length of configuration keys
     /// @return configurationsLength_
