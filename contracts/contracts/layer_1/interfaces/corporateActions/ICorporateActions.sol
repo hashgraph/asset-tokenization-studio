@@ -207,8 +207,6 @@
 pragma solidity 0.8.18;
 
 interface ICorporateActions {
-    error DuplicatedCorporateAction(bytes32 actionType, bytes data);
-
     /**
      * @dev Emitted when a corporate action gets added
      *
@@ -225,6 +223,8 @@ interface ICorporateActions {
         uint256 corporateActionIndexByType,
         bytes data
     );
+
+    error DuplicatedCorporateAction(bytes32 actionType, bytes data);
 
     function addCorporateAction(
         bytes32 _actionType,

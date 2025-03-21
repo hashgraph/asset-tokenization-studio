@@ -326,6 +326,7 @@ describe('🧪 Management tests', () => {
         isWhiteList: false,
         isControllable: true,
         arePartitionsProtected: false,
+        clearingActive: false,
         isMultiPartition: false,
         diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
         votingRight,

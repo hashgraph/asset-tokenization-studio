@@ -207,6 +207,6 @@ import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 export class AccountNotKycd extends BaseError {
   constructor(account: string) {
-    super(ErrorCode.AccountNotKycd, `The account ${account} is in black list`);
+    super(ErrorCode.AccountNotKycd, `The account ${account} does not have Kyc`);
   }
 }

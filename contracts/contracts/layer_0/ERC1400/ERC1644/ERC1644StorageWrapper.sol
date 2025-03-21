@@ -282,10 +282,6 @@ abstract contract ERC1644StorageWrapper is
         return _erc1644Storage().isControllable;
     }
 
-    function _checkControllable() private view {
-        if (!_isControllable()) revert TokenIsNotControllable();
-    }
-
     function _erc1644Storage()
         internal
         pure
@@ -296,5 +292,9 @@ abstract contract ERC1644StorageWrapper is
         assembly {
             erc1644Storage_.slot := position
         }
+    }
+
+    function _checkControllable() private view {
+        if (!_isControllable()) revert TokenIsNotControllable();
     }
 }

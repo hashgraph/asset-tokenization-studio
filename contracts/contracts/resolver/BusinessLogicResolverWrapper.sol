@@ -396,6 +396,20 @@ abstract contract BusinessLogicResolverWrapper is
         return businessLogicVersion.businessLogicAddress;
     }
 
+    function _businessLogicResolverStorage()
+        internal
+        pure
+        returns (
+            BusinessLogicResolverDataStorage storage businessLogicResolverData_
+        )
+    {
+        bytes32 position = _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            businessLogicResolverData_.slot := position
+        }
+    }
+
     function _checkValidVersion(uint256 _version) private view {
         if (
             _version == 0 ||
@@ -444,19 +458,5 @@ abstract contract BusinessLogicResolverWrapper is
             activesBusinessLogicsKeys !=
             businessLogicResolverDataStorage.activeBusinessLogics.length
         ) revert AllBusinessLogicKeysMustBeenInformed();
-    }
-
-    function _businessLogicResolverStorage()
-        internal
-        pure
-        returns (
-            BusinessLogicResolverDataStorage storage businessLogicResolverData_
-        )
-    {
-        bytes32 position = _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            businessLogicResolverData_.slot := position
-        }
     }
 }

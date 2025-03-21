@@ -312,9 +312,14 @@ import ProtectedClearingCreateHoldByPartitionRequest from './ProtectedClearingCr
 import GetClearedAmountForByPartitionRequest from './GetClearedAmountForByPartitionRequest.js';
 import GetClearedAmountForRequest from './GetClearedAmountForRequest.js';
 import GetClearingCountForByPartitionRequest from './GetClearingCountForByPartitionRequest.js';
-import GetClearingForByPartitionRequest from './GetClearingForByPartitionRequest.js';
 import GetClearingsIdForByPartitionRequest from './GetClearingsIdForByPartitionRequest.js';
 import IsClearingActivatedRequest from './IsClearingActivatedRequest.js';
+import OperatorClearingCreateHoldByPartitionRequest from './OperatorClearingCreateHoldByPartitionRequest.js';
+import OperatorClearingRedeemByPartitionRequest from './OperatorClearingRedeemByPartitionRequest.js';
+import OperatorClearingTransferByPartitionRequest from './OperatorClearingTransferByPartitionRequest.js';
+import GetClearingCreateHoldForByPartitionRequest from './GetClearingCreateHoldForByPartitionRequest.js';
+import GetClearingRedeemForByPartitionRequest from './GetClearingRedeemForByPartitionRequest.js';
+import GetClearingTransferForByPartitionRequest from './GetClearingTransferForByPartitionRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -426,7 +431,12 @@ export {
   GetClearedAmountForByPartitionRequest,
   GetClearedAmountForRequest,
   GetClearingCountForByPartitionRequest,
-  GetClearingForByPartitionRequest,
+  GetClearingCreateHoldForByPartitionRequest,
+  GetClearingRedeemForByPartitionRequest,
+  GetClearingTransferForByPartitionRequest,
   GetClearingsIdForByPartitionRequest,
   IsClearingActivatedRequest,
+  OperatorClearingCreateHoldByPartitionRequest,
+  OperatorClearingRedeemByPartitionRequest,
+  OperatorClearingTransferByPartitionRequest,
 };

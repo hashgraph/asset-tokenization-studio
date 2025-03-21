@@ -257,12 +257,12 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldFromByPartition(
@@ -291,13 +291,13 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyOperator(_partition, _from)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
@@ -332,7 +332,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyRole(_CONTROLLER_ROLE)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyControllable
-        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
@@ -361,6 +360,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_protectedHold.hold.escrow)
         onlyRole(_protectedPartitionsRole(_partition))
@@ -368,7 +368,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _protectedHold.hold.expirationTimestamp
         )
         onlyProtectedPartitions
-        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _protectedCreateHoldByPartition(
@@ -458,14 +457,14 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     function getHeldAmountFor(
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        return _getHeldAmountFor(_tokenHolder);
+        return _getHeldAmountForAdjusted(_tokenHolder);
     }
 
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        return _getHeldAmountForByPartition(_partition, _tokenHolder);
+        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getHoldCountForByPartition(
@@ -505,36 +504,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             bytes memory operatorData_
         )
     {
-        return _getHoldForByPartition(_holdIdentifier);
-    }
-
-    function getHeldAmountForAdjusted(
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getHeldAmountForAdjusted(_tokenHolder);
-    }
-
-    function getHeldAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
-    }
-
-    function getHoldForByPartitionAdjusted(
-        IHold.HoldIdentifier calldata _holdIdentifier
-    )
-        external
-        view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        )
-    {
         return _getHoldForByPartitionAdjusted(_holdIdentifier);
     }
 
@@ -554,7 +523,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](16);
+        staticFunctionSelectors_ = new bytes4[](13);
         staticFunctionSelectors_[selectorIndex++] = this
             .createHoldByPartition
             .selector;
@@ -592,16 +561,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             .getHoldForByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getHeldAmountForAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHeldAmountForByPartitionAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
             .getHeldAmountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldForByPartitionAdjusted
             .selector;
     }
 

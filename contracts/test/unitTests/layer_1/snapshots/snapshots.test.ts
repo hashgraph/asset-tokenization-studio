@@ -219,6 +219,8 @@ import {
     BusinessLogicResolver,
     SsiManagement,
     Kyc,
+    Equity,
+    TimeTravel,
 } from '@typechain'
 import {
     SNAPSHOT_ROLE,
@@ -237,8 +239,11 @@ import {
     ZERO,
     EMPTY_STRING,
     ADDRESS_ZERO,
+    CORPORATE_ACTION_ROLE,
+    dateToUnixTimestamp,
 } from '@scripts'
-import { grantRoleAndPauseToken } from '../../../common'
+import { grantRoleAndPauseToken } from '@test'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const amount = 1000
 const balanceOf_C_Original = 2 * amount
@@ -253,6 +258,8 @@ const heldAmountOf_A_Partition_1 = 4
 const heldAmountOf_A_Partition_2 = 5
 const heldAmountOf_C_Partition_1 = 6
 const EMPTY_VC_ID = EMPTY_STRING
+const balanceOf_B_Original = 2 * amount
+const DECIMALS = 6
 
 describe('Snapshots Tests', () => {
     let diamond: ResolverProxy
@@ -274,39 +281,11 @@ describe('Snapshots Tests', () => {
     let holdFacet: Hold
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
+    let equityFacet: Equity
+    let timeTravelFacet: TimeTravel
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const rbacLock: Rbac = {
-            role: LOCKER_ROLE,
-            members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause, rbacLock]
+    async function deploySecurityFixtureMultiPartition() {
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -314,6 +293,7 @@ describe('Snapshots Tests', () => {
             isControllable: true,
             isMultiPartition: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,
@@ -339,6 +319,10 @@ describe('Snapshots Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
+        await setFacets(diamond)
+    }
+
+    async function setFacets(diamond: ResolverProxy) {
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
@@ -361,6 +345,60 @@ describe('Snapshots Tests', () => {
             diamond.address,
             signer_A
         )
+        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
+            diamond.address
+        )
+    }
+
+    function set_initRbacs(): Rbac[] {
+        const rbacPause: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_B],
+        }
+        const rbacLock: Rbac = {
+            role: LOCKER_ROLE,
+            members: [account_B],
+        }
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        return [rbacPause, rbacLock, rbacKYC, rbacSSI]
+    }
+
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+                timeTravelEnabled: true,
+            })
+        )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
+        await loadFixture(deploySecurityFixtureMultiPartition)
+    })
+
+    afterEach(async () => {
+        timeTravelFacet.resetSystemTimestamp()
     })
 
     it('GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole', async () => {
@@ -434,8 +472,6 @@ describe('Snapshots Tests', () => {
         accessControlFacet = accessControlFacet.connect(signer_A)
         await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_C)
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
-        await accessControlFacet.grantRole(KYC_ROLE, account_B)
 
         await ssiManagementFacet.addIssuer(account_A)
         await kycFacet.grantKyc(
@@ -484,7 +520,7 @@ describe('Snapshots Tests', () => {
         })
         erc1410Facet = erc1410Facet.connect(signer_C)
 
-        let basicTransferInfo = {
+        const basicTransferInfo = {
             to: account_A,
             value: amount,
         }
@@ -499,24 +535,24 @@ describe('Snapshots Tests', () => {
             _PARTITION_ID_1,
             lockedAmountOf_A_Partition_1,
             account_A,
-            9999999999
+            MAX_UINT256
         )
         await lockFacet.lockByPartition(
             _PARTITION_ID_1,
             lockedAmountOf_C_Partition_1,
             account_C,
-            9999999999
+            MAX_UINT256
         )
         await lockFacet.lockByPartition(
             _PARTITION_ID_2,
             lockedAmountOf_A_Partition_2,
             account_A,
-            9999999999
+            MAX_UINT256
         )
 
-        let hold = {
+        const hold = {
             amount: 0,
-            expirationTimestamp: 999999999999,
+            expirationTimestamp: MAX_UINT256,
             escrow: account_B,
             to: ADDRESS_ZERO,
             data: '0x',
@@ -756,13 +792,9 @@ describe('Snapshots Tests', () => {
                 2
             )
 
-        const current_Balance_Of_A = await erc1410Facet.balanceOfAdjusted(
-            account_A
-        )
-        const current_Balance_Of_C = await erc1410Facet.balanceOfAdjusted(
-            account_C
-        )
-        const current_TotalSupply = await erc1410Facet.totalSupplyAdjusted()
+        const current_Balance_Of_A = await erc1410Facet.balanceOf(account_A)
+        const current_Balance_Of_C = await erc1410Facet.balanceOf(account_C)
+        const current_TotalSupply = await erc1410Facet.totalSupply()
 
         expect(snapshot_Balance_Of_A_1).to.equal(0)
         expect(snapshot_Balance_Of_A_1_Partition_1).to.equal(0)
@@ -871,5 +903,292 @@ describe('Snapshots Tests', () => {
             balanceOf_C_Original + amount
         )
         expect(snapshot_TotalSupply_2_Partition_2).to.equal(amount)
+    })
+
+    describe('Scheduled tasks', async () => {
+        it('GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
+
+            await ssiManagementFacet.addIssuer(account_A)
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_STRING,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
+            await kycFacet.grantKyc(
+                account_B,
+                EMPTY_STRING,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
+
+            snapshotFacet = snapshotFacet.connect(signer_A)
+            erc1410Facet = erc1410Facet.connect(signer_A)
+            equityFacet = equityFacet.connect(signer_A)
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_C,
+                value: balanceOf_C_Original,
+                data: '0x',
+            })
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_2,
+                tokenHolder: account_B,
+                value: balanceOf_B_Original,
+                data: '0x',
+            })
+
+            // schedule tasks
+            const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+                '2030-01-01T00:00:06Z'
+            )
+            const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp(
+                '2030-01-01T00:00:12Z'
+            )
+            const dividendsRecordDateInSeconds_3 = dateToUnixTimestamp(
+                '2030-01-01T00:00:18Z'
+            )
+            const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:01:00Z'
+            )
+            const dividendsAmountPerEquity = 1
+            const dividendData_1 = {
+                recordDate: dividendsRecordDateInSeconds_1.toString(),
+                executionDate: dividendsExecutionDateInSeconds.toString(),
+                amount: dividendsAmountPerEquity,
+            }
+            const dividendData_2 = {
+                recordDate: dividendsRecordDateInSeconds_2.toString(),
+                executionDate: dividendsExecutionDateInSeconds.toString(),
+                amount: dividendsAmountPerEquity,
+            }
+            const dividendData_3 = {
+                recordDate: dividendsRecordDateInSeconds_3.toString(),
+                executionDate: dividendsExecutionDateInSeconds.toString(),
+                amount: dividendsAmountPerEquity,
+            }
+            await equityFacet.setDividends(dividendData_1)
+            await equityFacet.setDividends(dividendData_2)
+            await equityFacet.setDividends(dividendData_3)
+
+            const balanceAdjustmentExecutionDateInSeconds_1 =
+                dateToUnixTimestamp('2030-01-01T00:00:07Z')
+            const balanceAdjustmentExecutionDateInSeconds_2 =
+                dateToUnixTimestamp('2030-01-01T00:00:13Z')
+            const balanceAdjustmentExecutionDateInSeconds_3 =
+                dateToUnixTimestamp('2030-01-01T00:00:19Z')
+
+            const balanceAdjustmentsFactor_1 = 5
+            const balanceAdjustmentsDecimals_1 = 2
+            const balanceAdjustmentsFactor_2 = 6
+            const balanceAdjustmentsDecimals_2 = 0
+            const balanceAdjustmentsFactor_3 = 7
+            const balanceAdjustmentsDecimals_3 = 1
+
+            const balanceAdjustmentData_1 = {
+                executionDate:
+                    balanceAdjustmentExecutionDateInSeconds_1.toString(),
+                factor: balanceAdjustmentsFactor_1,
+                decimals: balanceAdjustmentsDecimals_1,
+            }
+            const balanceAdjustmentData_2 = {
+                executionDate:
+                    balanceAdjustmentExecutionDateInSeconds_2.toString(),
+                factor: balanceAdjustmentsFactor_2,
+                decimals: balanceAdjustmentsDecimals_2,
+            }
+            const balanceAdjustmentData_3 = {
+                executionDate:
+                    balanceAdjustmentExecutionDateInSeconds_3.toString(),
+                factor: balanceAdjustmentsFactor_3,
+                decimals: balanceAdjustmentsDecimals_3,
+            }
+            await equityFacet.setScheduledBalanceAdjustment(
+                balanceAdjustmentData_1
+            )
+            await equityFacet.setScheduledBalanceAdjustment(
+                balanceAdjustmentData_2
+            )
+            await equityFacet.setScheduledBalanceAdjustment(
+                balanceAdjustmentData_3
+            )
+
+            //-------------------------
+            await timeTravelFacet.changeSystemTimestamp(
+                balanceAdjustmentExecutionDateInSeconds_3 + 1
+            )
+
+            // snapshot
+            await snapshotFacet.takeSnapshot()
+
+            const adjustmentFactor_1 = balanceAdjustmentsFactor_1
+            const adjustmentFactor_2 =
+                adjustmentFactor_1 * balanceAdjustmentsFactor_2
+            const adjustmentFactor_3 =
+                adjustmentFactor_2 * balanceAdjustmentsFactor_3
+
+            const decimalFactor_1 = balanceAdjustmentsDecimals_1
+            const decimalFactor_2 =
+                decimalFactor_1 + balanceAdjustmentsDecimals_2
+            const decimalFactor_3 =
+                decimalFactor_2 + balanceAdjustmentsDecimals_3
+
+            // check
+            const dividendFor_C_1 = await equityFacet.getDividendsFor(
+                1,
+                account_C
+            )
+            const dividendFor_C_2 = await equityFacet.getDividendsFor(
+                2,
+                account_C
+            )
+            const dividendFor_C_3 = await equityFacet.getDividendsFor(
+                3,
+                account_C
+            )
+            const balance_C_At_Snapshot_4 =
+                await snapshotFacet.balanceOfAtSnapshot(4, account_C)
+
+            expect(dividendFor_C_1.tokenBalance).to.be.equal(
+                balanceOf_C_Original
+            )
+            expect(dividendFor_C_1.decimals).to.be.equal(DECIMALS)
+            expect(dividendFor_C_2.tokenBalance).to.be.equal(
+                balanceOf_C_Original * adjustmentFactor_1
+            )
+            expect(dividendFor_C_2.decimals).to.be.equal(
+                DECIMALS + decimalFactor_1
+            )
+
+            expect(dividendFor_C_3.tokenBalance).to.be.equal(
+                balanceOf_C_Original * adjustmentFactor_2
+            )
+            expect(dividendFor_C_3.decimals).to.be.equal(
+                DECIMALS + decimalFactor_2
+            )
+            expect(balance_C_At_Snapshot_4).to.be.equal(
+                balanceOf_C_Original * adjustmentFactor_3
+            )
+
+            const balance_C_At_Snapshot_1_partition_1 =
+                await snapshotFacet.balanceOfAtSnapshotByPartition(
+                    _PARTITION_ID_1,
+                    1,
+                    account_C
+                )
+            const balance_C_At_Snapshot_2_partition_1 =
+                await snapshotFacet.balanceOfAtSnapshotByPartition(
+                    _PARTITION_ID_1,
+                    2,
+                    account_C
+                )
+            const balance_C_At_Snapshot_3_partition_1 =
+                await snapshotFacet.balanceOfAtSnapshotByPartition(
+                    _PARTITION_ID_1,
+                    3,
+                    account_C
+                )
+            const balance_C_At_Snapshot_4_partition_1 =
+                await snapshotFacet.balanceOfAtSnapshotByPartition(
+                    _PARTITION_ID_1,
+                    4,
+                    account_C
+                )
+
+            expect(balance_C_At_Snapshot_1_partition_1).to.be.equal(
+                balanceOf_C_Original
+            )
+            expect(balance_C_At_Snapshot_2_partition_1).to.be.equal(
+                balanceOf_C_Original * adjustmentFactor_1
+            )
+            expect(balance_C_At_Snapshot_3_partition_1).to.be.equal(
+                balanceOf_C_Original * adjustmentFactor_2
+            )
+            expect(balance_C_At_Snapshot_4_partition_1).to.be.equal(
+                balanceOf_C_Original * adjustmentFactor_3
+            )
+
+            const balance_C_At_Snapshot_1_partition_2 =
+                await snapshotFacet.balanceOfAtSnapshotByPartition(
+                    _PARTITION_ID_2,
+                    1,
+                    account_C
+                )
+            const balance_C_At_Snapshot_2_partition_2 =
+                await snapshotFacet.balanceOfAtSnapshotByPartition(
+                    _PARTITION_ID_2,
+                    2,
+                    account_C
+                )
+            const balance_C_At_Snapshot_3_partition_2 =
+                await snapshotFacet.balanceOfAtSnapshotByPartition(
+                    _PARTITION_ID_2,
+                    3,
+                    account_C
+                )
+            const balance_C_At_Snapshot_4_partition_2 =
+                await snapshotFacet.balanceOfAtSnapshotByPartition(
+                    _PARTITION_ID_2,
+                    4,
+                    account_C
+                )
+
+            expect(balance_C_At_Snapshot_1_partition_2).to.be.equal(0)
+            expect(balance_C_At_Snapshot_2_partition_2).to.be.equal(0)
+            expect(balance_C_At_Snapshot_3_partition_2).to.be.equal(0)
+            expect(balance_C_At_Snapshot_4_partition_2).to.be.equal(0)
+
+            const decimals_At_Snapshot_1 =
+                await snapshotFacet.decimalsAtSnapshot(1)
+            const decimals_At_Snapshot_2 =
+                await snapshotFacet.decimalsAtSnapshot(2)
+            const decimals_At_Snapshot_3 =
+                await snapshotFacet.decimalsAtSnapshot(3)
+            const decimals_At_Snapshot_4 =
+                await snapshotFacet.decimalsAtSnapshot(4)
+
+            expect(decimals_At_Snapshot_1).to.be.equal(DECIMALS)
+            expect(decimals_At_Snapshot_2).to.be.equal(
+                DECIMALS + decimalFactor_1
+            )
+            expect(decimals_At_Snapshot_3).to.be.equal(
+                DECIMALS + decimalFactor_2
+            )
+            expect(decimals_At_Snapshot_4).to.be.equal(
+                DECIMALS + decimalFactor_3
+            )
+
+            const totalSupply_At_Snapshot_1 =
+                await snapshotFacet.totalSupplyAtSnapshot(1)
+            const totalSupply_At_Snapshot_2 =
+                await snapshotFacet.totalSupplyAtSnapshot(2)
+            const totalSupply_At_Snapshot_3 =
+                await snapshotFacet.totalSupplyAtSnapshot(3)
+            const totalSupply_At_Snapshot_4 =
+                await snapshotFacet.totalSupplyAtSnapshot(4)
+
+            expect(totalSupply_At_Snapshot_1).to.be.equal(
+                balanceOf_C_Original + balanceOf_B_Original
+            )
+            expect(totalSupply_At_Snapshot_2).to.be.equal(
+                (balanceOf_C_Original + balanceOf_B_Original) *
+                    adjustmentFactor_1
+            )
+            expect(totalSupply_At_Snapshot_3).to.be.equal(
+                (balanceOf_C_Original + balanceOf_B_Original) *
+                    adjustmentFactor_2
+            )
+            expect(totalSupply_At_Snapshot_4).to.be.equal(
+                (balanceOf_C_Original + balanceOf_B_Original) *
+                    adjustmentFactor_3
+            )
+        })
     })
 })

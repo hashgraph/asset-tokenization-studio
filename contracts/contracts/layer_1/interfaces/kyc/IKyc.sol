@@ -220,11 +220,6 @@ interface IKyc {
         GRANTED
     }
 
-    error InvalidDates();
-    error InvalidKycStatus();
-    error KycIsNotGranted();
-    error InvalidZeroAddress();
-
     /**
      * @dev Emitted when a Kyc is granted
      *
@@ -242,6 +237,11 @@ interface IKyc {
      */
     event KycRevoked(address indexed account, address indexed issuer);
 
+    error InvalidDates();
+    error InvalidKycStatus();
+    error KycIsNotGranted();
+    error InvalidZeroAddress();
+
     /**
      * @dev Grant kyc to an address
      *
@@ -252,7 +252,6 @@ interface IKyc {
      * @param _issuer issurer of the Kyc
      * @return success_ true or false
      */
-
     function grantKyc(
         address _account,
         string memory _vcId,
