@@ -245,7 +245,11 @@ import {
   Hold__factory,
   SsiManagement__factory,
   Kyc__factory,
-  ClearingFacet__factory,
+  ClearingReadFacet__factory,
+  ClearingActionsFacet__factory,
+  ClearingHoldCreationFacet__factory,
+  ClearingRedeemFacet__factory,
+  ClearingTransferFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -271,9 +275,10 @@ import { KYC } from '../../../domain/context/kyc/KYC.js';
 import { KycAccountData } from '../../../domain/context/kyc/KycAccountData.js';
 import {
   CastClearingOperationType,
-  Clearing,
-  ClearingOperationIdentifier,
+  ClearingHoldCreation,
   ClearingOperationType,
+  ClearingRedeem,
+  ClearingTransfer,
 } from '../../../domain/context/security/Clearing.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
@@ -544,6 +549,10 @@ export class RPCQueryAdapter {
       ProtectedPartitions__factory,
       address.toString(),
     ).arePartitionsProtected();
+    const clearingActive = await this.connect(
+      ClearingActionsFacet__factory,
+      address.toString(),
+    ).isClearingActivated();
     const isMultiPartition = await this.connect(
       ERC1410ScheduledTasks__factory,
       address.toString(),
@@ -596,6 +605,7 @@ export class RPCQueryAdapter {
       isWhiteList: isWhiteList,
       isControllable: isControllable,
       arePartitionsProtected: arePartitionsProtected,
+      clearingActive: clearingActive,
       isMultiPartition: isMultiPartition,
       isIssuable: isIssuable,
       totalSupply: new BigDecimal(totalSupply.toString()),
@@ -1403,7 +1413,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Cleared Amount For ${targetId}`);
 
     const clearedAmountFor = await this.connect(
-      ClearingFacet__factory,
+      ClearingReadFacet__factory,
       address.toString(),
     ).getClearedAmountFor(targetId.toString());
 
@@ -1420,7 +1430,7 @@ export class RPCQueryAdapter {
     );
 
     const clearedAmountForByPartition = await this.connect(
-      ClearingFacet__factory,
+      ClearingReadFacet__factory,
       address.toString(),
     ).getClearedAmountForByPartition(partitionId, targetId.toString());
 
@@ -1438,7 +1448,7 @@ export class RPCQueryAdapter {
     );
 
     const clearingCountForByPartition = await this.connect(
-      ClearingFacet__factory,
+      ClearingReadFacet__factory,
       address.toString(),
     ).getClearingCountForByPartition(
       partitionId,
@@ -1462,7 +1472,7 @@ export class RPCQueryAdapter {
     );
 
     const clearingsIdForByPartition = await this.connect(
-      ClearingFacet__factory,
+      ClearingReadFacet__factory,
       address.toString(),
     ).getClearingsIdForByPartition(
       partitionId,
@@ -1475,47 +1485,89 @@ export class RPCQueryAdapter {
     return clearingsIdForByPartition.map((id) => id.toNumber());
   }
 
-  async getClearingForByPartition(
+  async getClearingCreateHoldForByPartition(
     address: EvmAddress,
     partitionId: string,
     targetId: EvmAddress,
-    clearingOperationType: ClearingOperationType,
     clearingId: number,
-  ): Promise<Clearing> {
+  ): Promise<ClearingHoldCreation> {
     LogService.logTrace(
-      `Getting Clearing details for ${targetId} id ${clearingId} by partition ${partitionId}`,
+      `Getting Clearing Create Hold details for ${targetId} id ${clearingId} by partition ${partitionId}`,
     );
 
-    const clearingOperationIdentifier: ClearingOperationIdentifier = {
-      partition: partitionId,
-      tokenHolder: targetId.toString(),
-      clearingOperationType: CastClearingOperationType.toNumber(
-        clearingOperationType,
-      ),
-      clearingId: clearingId,
-    };
+    const clearing = await this.connect(
+      ClearingHoldCreationFacet__factory,
+      address.toString(),
+    ).getClearingCreateHoldForByPartition(
+      partitionId,
+      targetId.toString(),
+      clearingId,
+    );
+
+    return new ClearingHoldCreation(
+      new BigDecimal(clearing.amount.toString()),
+      clearing.expirationTimestamp.toNumber(),
+      clearing.data,
+      clearing.operatorData,
+      clearing.holdEscrow,
+      clearing.holdExpirationTimestamp.toNumber(),
+      clearing.holdTo,
+      clearing.holdData,
+    );
+  }
+
+  async getClearingRedeemForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+  ): Promise<ClearingRedeem> {
+    LogService.logTrace(
+      `Getting Clearing Redeem details for ${targetId} id ${clearingId} by partition ${partitionId}`,
+    );
 
     const clearing = await this.connect(
-      ClearingFacet__factory,
+      ClearingRedeemFacet__factory,
       address.toString(),
-    ).getClearingForByPartition(clearingOperationIdentifier);
+    ).getClearingRedeemForByPartition(
+      partitionId,
+      targetId.toString(),
+      clearingId,
+    );
 
-    return new Clearing(
-      clearing.expirationTimestamp_.toNumber(),
-      new BigDecimal(clearing.amount_.toString()),
-      clearing.destination_,
-      CastClearingOperationType.fromNumber(clearing.clearingOperationType_),
-      clearing.data_,
-      clearing.operatorData_,
-      {
-        amount: new BigDecimal(clearing.hold_.amount.toString()),
-        expirationTimestamp: new BigDecimal(
-          clearing.hold_.expirationTimestamp.toString(),
-        ),
-        escrow: clearing.hold_.escrow,
-        to: clearing.hold_.to,
-        data: clearing.hold_.data,
-      },
+    return new ClearingRedeem(
+      new BigDecimal(clearing.amount.toString()),
+      clearing.expirationTimestamp.toNumber(),
+      clearing.data,
+      clearing.operatorData,
+    );
+  }
+
+  async getClearingTransferForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+  ): Promise<ClearingTransfer> {
+    LogService.logTrace(
+      `Getting Clearing Transfer details for ${targetId} id ${clearingId} by partition ${partitionId}`,
+    );
+
+    const clearing = await this.connect(
+      ClearingTransferFacet__factory,
+      address.toString(),
+    ).getClearingTransferForByPartition(
+      partitionId,
+      targetId.toString(),
+      clearingId,
+    );
+
+    return new ClearingTransfer(
+      new BigDecimal(clearing.amount.toString()),
+      clearing.expirationTimestamp.toNumber(),
+      clearing.destination,
+      clearing.data,
+      clearing.operatorData,
     );
   }
 
@@ -1525,7 +1577,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ClearingFacet__factory,
+      ClearingActionsFacet__factory,
       address.toString(),
     ).isClearingActivated();
   }

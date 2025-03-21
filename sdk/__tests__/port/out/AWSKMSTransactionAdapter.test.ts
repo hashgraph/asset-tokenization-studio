@@ -300,6 +300,7 @@ describe('AWSKMS Transaction Adapter test', () => {
       isWhiteList: false,
       isControllable: true,
       arePartitionsProtected: false,
+      clearingActive: false,
       isMultiPartition: false,
       diamondOwnerAccount: AWS_KMS_SETTINGS.hederaAccountId,
       currency: currency,

@@ -300,6 +300,7 @@ describe('Fireblocks Transaction Adapter test', () => {
       isWhiteList: false,
       isControllable: true,
       arePartitionsProtected: false,
+      clearingActive: false,
       isMultiPartition: false,
       diamondOwnerAccount: FIREBLOCKS_SETTINGS.hederaAccountId,
       currency: currency,

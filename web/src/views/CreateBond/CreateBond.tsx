@@ -231,6 +231,7 @@ export const CreateBond = () => {
       isControllable: true,
       isBlocklist: true,
       isApproval: false,
+      isClearing: false,
       regulationType: 1,
       regulationSubType: 0,
       countriesListType: 1,

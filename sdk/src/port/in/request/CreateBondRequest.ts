@@ -255,7 +255,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     isControllable,
     arePartitionsProtected,
     isMultiPartition,
-    clearingActive = false,
+    clearingActive,
     diamondOwnerAccount,
     currency,
     numberOfUnits,
@@ -281,7 +281,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     isControllable: boolean;
     arePartitionsProtected: boolean;
     isMultiPartition: boolean;
-    clearingActive?: boolean;
+    clearingActive: boolean;
     diamondOwnerAccount?: string;
     currency: string;
     numberOfUnits: string;

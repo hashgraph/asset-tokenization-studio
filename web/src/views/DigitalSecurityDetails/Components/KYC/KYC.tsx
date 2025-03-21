@@ -17,6 +17,8 @@ import { useParams } from "react-router-dom";
 import { useRevokeKYC } from "../../../../hooks/mutations/useKYC";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { SecurityRole } from "../../../../utils/SecurityRole";
+import { DATE_TIME_FORMAT } from "../../../../utils/constants";
+import { formatDate } from "../../../../utils/format";
 
 const STATUS = {
   VALID: { status: "Valid", color: "green" },
@@ -27,9 +29,12 @@ const STATUS = {
 };
 
 const getStatus = ({ kyc }: { kyc: KycAccountDataViewModelResponse }) => {
-  const validToDate = new Date(Number(kyc.validTo));
-  const validFromDate = new Date(Number(kyc.validFrom));
-  const currentDate = new Date();
+  const validToDate = formatDate(Number(kyc.validTo) * 1000, DATE_TIME_FORMAT);
+  const validFromDate = formatDate(
+    Number(kyc.validFrom) * 1000,
+    DATE_TIME_FORMAT,
+  );
+  const currentDate = new Date().toLocaleString();
 
   if (!kyc.isIssuer) return STATUS.UNTRUSTED;
   if (currentDate < validFromDate) return STATUS.PENDING;
@@ -99,30 +104,24 @@ export const KYC = () => {
       header: tTable("fields.validFrom"),
       enableSorting: false,
       cell({ getValue }) {
-        const date = Number(getValue());
+        const formattedDate = formatDate(
+          Number(getValue()) * 1000,
+          DATE_TIME_FORMAT,
+        );
 
-        if (date > 1e13) {
-          return "-";
-        }
-
-        const formatDate = new Date(date);
-
-        return <Box>{formatDate.toLocaleString()}</Box>;
+        return <Box>{formattedDate}</Box>;
       },
     }),
     columnsHelper.accessor("validTo", {
       header: tTable("fields.validTo"),
       enableSorting: false,
       cell({ getValue }) {
-        const date = Number(getValue());
+        const formattedDate = formatDate(
+          Number(getValue()) * 1000,
+          DATE_TIME_FORMAT,
+        );
 
-        if (date > 1e13) {
-          return "-";
-        }
-
-        const formatDate = new Date(date);
-
-        return <Box>{formatDate.toLocaleString()}</Box>;
+        return <Box>{formattedDate}</Box>;
       },
     }),
     columnsHelper.accessor("VCid", {

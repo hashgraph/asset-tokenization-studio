@@ -278,6 +278,7 @@ export const WRONG_PARTITION_ERROR_ID = '0x48'
 export const ALLOWANCE_REACHED_ERROR_ID = '0x49'
 export const FROM_ACCOUNT_KYC_ERROR_ID = '0x50'
 export const TO_ACCOUNT_KYC_ERROR_ID = '0x51'
+export const CLEARING_ACTIVE_ERROR_ID = '0x52'
 
 export const SUCCESS = '0x00'
 

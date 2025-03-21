@@ -269,49 +269,6 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         );
     }
 
-    function getLockedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 amount_) {
-        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
-    }
-
-    function getLockCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 lockCount_) {
-        return _getLockCountForByPartition(_partition, _tokenHolder);
-    }
-
-    function getLocksIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (uint256[] memory locksId_) {
-        return
-            _getLocksIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function getLockForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    )
-        external
-        view
-        override
-        returns (uint256 amount_, uint256 expirationTimestamp_)
-    {
-        return
-            _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
-    }
-
     // Uses default parititon in case Multipartition is not activated
     function lock(
         uint256 _amount,
@@ -371,6 +328,49 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         );
     }
 
+    function getLockedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view override returns (uint256 amount_) {
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function getLockCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view override returns (uint256 lockCount_) {
+        return _getLockCountForByPartition(_partition, _tokenHolder);
+    }
+
+    function getLocksIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (uint256[] memory locksId_) {
+        return
+            _getLocksIdForByPartition(
+                _partition,
+                _tokenHolder,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function getLockForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        external
+        view
+        override
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        return
+            _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
+    }
+
     function getLockedAmountFor(
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
@@ -418,19 +418,6 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
             );
     }
 
-    function getLockedAmountForAdjusted(
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getLockedAmountFor(_tokenHolder);
-    }
-
-    function getLockedAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
-    }
-
     function getStaticResolverKey()
         external
         pure
@@ -447,7 +434,7 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](14);
+        staticFunctionSelectors_ = new bytes4[](12);
         staticFunctionSelectors_[selectorIndex++] = this
             .lockByPartition
             .selector;
@@ -476,13 +463,6 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this.getLocksIdFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getLockFor.selector;
-        //TODO: Check if these (ADJUSTED) are necessary
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockedAmountForAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockedAmountForByPartitionAdjusted
-            .selector;
     }
 
     function getStaticInterfaceIds()

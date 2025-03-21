@@ -325,12 +325,6 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
             revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
     }
 
-    function _checkHoldId(
-        IHold.HoldIdentifier calldata _holdIdentifier
-    ) private view {
-        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
-    }
-
     function _holdStorage()
         internal
         pure
@@ -341,5 +335,11 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
         assembly {
             hold_.slot := position
         }
+    }
+
+    function _checkHoldId(
+        IHold.HoldIdentifier calldata _holdIdentifier
+    ) private view {
+        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
     }
 }

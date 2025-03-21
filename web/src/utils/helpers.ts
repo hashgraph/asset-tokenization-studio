@@ -205,6 +205,7 @@
 
 import isBefore from "date-fns/isBefore";
 import { toDate } from "./format";
+import { SecurityRole } from "./SecurityRole";
 
 export const checkIsApprovalError = (error: unknown) => {
   if (typeof error !== "object" || error === null) return false;
@@ -239,3 +240,6 @@ export const checkError = (error: unknown) => {
 export const isBeforeDate = (maxDate: Date) => (val: string | Date) => {
   return isBefore(toDate(val), toDate(maxDate));
 };
+
+export const hasRole = (roles: string[], role: SecurityRole) =>
+  roles.includes(role);

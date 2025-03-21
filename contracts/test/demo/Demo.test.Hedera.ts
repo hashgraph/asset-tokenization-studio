@@ -1160,7 +1160,7 @@ describe('Demo RedSwam', () => {
         console.log('Check token name, symbol and decimals')
         const retrieved_name = await erc20Facet.name()
         const retrieved_symbol = await erc20Facet.symbol()
-        const retrieved_decimals = await erc20Facet.decimalsAdjusted()
+        const retrieved_decimals = await erc20Facet.decimals()
 
         expect(retrieved_name).to.equal(TokenName)
         expect(retrieved_symbol).to.equal(TokenSymbol)

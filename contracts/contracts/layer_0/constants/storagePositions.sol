@@ -237,7 +237,6 @@ bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION = 0xaf4aaa3de47
 
 // keccak256('security.token.standard.scheduledTasks.storage');
 bytes32 constant _SCHEDULED_TASKS_STORAGE_POSITION = 0x2352c39c61abb4e922588a7d46fb5c925b9a205577be135537479031648c86fe;
-// solhint-enable max-line-length
 
 // keccak256('security.token.standard.hold.storage');
 bytes32 constant _HOLD_STORAGE_POSITION = 0x80346b80475a6f26abb9f460d81c6dbe6a8dd5d1acfb0827cfe37c4263a562ca;
@@ -274,3 +273,4 @@ bytes32 constant _KYC_STORAGE_POSITION = 0x589d3365cb6f9141f65f568666d0e4cb837c3
 
 // keccak256('security.token.standard.clearing.storage');
 bytes32 constant _CLEARING_STORAGE_POSITION = 0xf5d5af29c37f2085b9f37cfb2259d4e3b957777d47ffc1949a7596cb1d37ba90;
+// solhint-enable max-line-length

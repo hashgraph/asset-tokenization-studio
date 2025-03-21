@@ -221,13 +221,20 @@ import {
     PauseFacet__factory,
     Kyc,
     SsiManagement,
+    Equity__factory,
+    Equity,
+    Snapshots__factory,
+    Snapshots,
+    TimeTravel,
 } from '@typechain'
 import {
     CAP_ROLE,
+    CORPORATE_ACTION_ROLE,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     ISSUER_ROLE,
     PAUSER_ROLE,
+    SNAPSHOT_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
@@ -237,14 +244,27 @@ import {
     ZERO,
     MAX_UINT256,
     EMPTY_STRING,
+    dateToUnixTimestamp,
 } from '@scripts'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
-const maxSupply = 1
-const maxSupplyByPartition = 1
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
+const maxSupply = 3
+const maxSupplyByPartition = 2
+const issueAmount = 2
+const _PARTITION_ID_2 =
+    '0x0000000000000000000000000000000000000000000000000000000000000002'
+const TIME = 6000
 const EMPTY_VC_ID = EMPTY_STRING
-describe('CAP Tests', () => {
+
+interface Adjustment {
+    executionDate: string
+    factor: number
+    decimals: number
+}
+
+describe('Cap Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -257,35 +277,16 @@ describe('CAP Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let capFacet: Cap
-    let accessControl: AccessControl
+    let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
+    let equityFacet: Equity
+    let snapshotFacet: Snapshots
+    let timeTravelFacet: TimeTravel
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
+    function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
@@ -298,15 +299,55 @@ describe('CAP Tests', () => {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
         }
-        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
+        return [rbacPause, rbacKYC, rbacSSI]
+    }
+
+    async function setFacets({ diamond }: { diamond: ResolverProxy }) {
+        capFacet = Cap__factory.connect(diamond.address, signer_A)
+        accessControlFacet = AccessControlFacet__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        snapshotFacet = Snapshots__factory.connect(diamond.address, signer_A)
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+    }
+
+    async function deploySecurityFixtureMultiPartition() {
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
-            isMultiPartition: false,
-            name: 'TEST_AccessControl',
+            isMultiPartition: true,
+            clearingActive: false,
+            name: 'TEST_Lock',
             symbol: 'TAC',
             decimals: 6,
             isin: isinGenerator(),
@@ -327,35 +368,36 @@ describe('CAP Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            factory,
             businessLogicResolver: businessLogicResolver.address,
-            factory: factory,
         })
 
-        capFacet = Cap__factory.connect(diamond.address, signer_A)
-        accessControl = AccessControlFacet__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
-        ssiManagementFacet = await ethers.getContractAt(
-            'SsiManagement',
-            diamond.address,
-            signer_A
+        await setFacets({ diamond })
+    }
+
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+                timeTravelEnabled: true,
+            })
         )
 
-        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKyc(
-            account_A,
-            EMPTY_VC_ID,
-            ZERO,
-            MAX_UINT256,
-            account_A
-        )
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
+        await loadFixture(deploySecurityFixtureMultiPartition)
     })
 
     it('GIVEN setting 0 to max supply WHEN trying to initialize THEN transaction fails', async () => {
@@ -370,6 +412,7 @@ describe('CAP Tests', () => {
                 isWhiteList: false,
                 isControllable: true,
                 arePartitionsProtected: false,
+                clearingActive: false,
                 isMultiPartition: false,
                 name: 'TEST_AccessControl',
                 symbol: 'TAC',
@@ -459,8 +502,8 @@ describe('CAP Tests', () => {
 
     describe('New Max Supply Too low or 0', () => {
         it('GIVEN a token WHEN setMaxSupply to 0 THEN transaction fails with NewMaxSupplyCannotBeZero', async () => {
-            accessControl = accessControl.connect(signer_A)
-            await accessControl.grantRole(CAP_ROLE, account_C)
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             // Using account C (non role)
             capFacet = capFacet.connect(signer_C)
@@ -474,9 +517,9 @@ describe('CAP Tests', () => {
             )
         })
         it('GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow', async () => {
-            accessControl = accessControl.connect(signer_A)
-            await accessControl.grantRole(ISSUER_ROLE, account_C)
-            await accessControl.grantRole(CAP_ROLE, account_C)
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
             await erc1410Facet.issueByPartition({
@@ -496,9 +539,9 @@ describe('CAP Tests', () => {
         })
 
         it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow', async () => {
-            accessControl = accessControl.connect(signer_A)
-            await accessControl.grantRole(ISSUER_ROLE, account_C)
-            await accessControl.grantRole(CAP_ROLE, account_C)
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
             await erc1410Facet.issueByPartition({
@@ -523,9 +566,9 @@ describe('CAP Tests', () => {
 
     describe('New Max Supply By Partition Too High', () => {
         it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh', async () => {
-            accessControl = accessControl.connect(signer_A)
-            await accessControl.grantRole(ISSUER_ROLE, account_C)
-            await accessControl.grantRole(CAP_ROLE, account_C)
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             // Using account C (non role)
             capFacet = capFacet.connect(signer_C)
@@ -542,8 +585,8 @@ describe('CAP Tests', () => {
 
     describe('New Max Supply OK', () => {
         it('GIVEN a token WHEN setMaxSupply THEN transaction succeeds', async () => {
-            accessControl = accessControl.connect(signer_A)
-            await accessControl.grantRole(CAP_ROLE, account_C)
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             capFacet = capFacet.connect(signer_C)
 
@@ -557,8 +600,8 @@ describe('CAP Tests', () => {
         })
 
         it('GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds', async () => {
-            accessControl = accessControl.connect(signer_A)
-            await accessControl.grantRole(CAP_ROLE, account_C)
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             capFacet = capFacet.connect(signer_C)
 
@@ -568,11 +611,162 @@ describe('CAP Tests', () => {
                 .to.emit(capFacet, 'MaxSupplyByPartitionSet')
                 .withArgs(account_C, _PARTITION_ID_1, maxSupply * 2, 0)
 
-            const currentMaxSupply = await capFacet.getMaxSupplyByPartition(
-                _PARTITION_ID_1
-            )
+            const currentMaxSupply =
+                await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1)
 
             expect(currentMaxSupply).to.equal(maxSupply * 2)
+        })
+    })
+
+    describe('Adjust balances', () => {
+        beforeEach(async () => {
+            await setPreBalanceAdjustment()
+        })
+
+        const setupScheduledBalanceAdjustments = async (
+            adjustments: Adjustment[]
+        ) => {
+            for (const adjustment of adjustments) {
+                await equityFacet
+                    .connect(signer_C)
+                    .setScheduledBalanceAdjustment(adjustment)
+            }
+        }
+
+        const createAdjustmentData = (
+            currentTime: number,
+            intervals: number[],
+            factors: number[],
+            decimals: number[]
+        ): Adjustment[] => {
+            return intervals.map((interval, index) => ({
+                executionDate: (currentTime + interval).toString(),
+                factor: factors[index],
+                decimals: decimals[index],
+            }))
+        }
+
+        const testBalanceAdjustments = async (
+            adjustments: Adjustment[],
+            expectedFactors: number[]
+        ) => {
+            await setupScheduledBalanceAdjustments(adjustments)
+
+            // Execute adjustments and verify
+            for (let i = 0; i < adjustments.length; i++) {
+                await timeTravelFacet.changeSystemTimestamp(
+                    dateToUnixTimestamp(`2030-01-01T00:00:00Z`) +
+                        ((i + 1) * TIME) / 1000 +
+                        1
+                )
+                await snapshotFacet.takeSnapshot()
+            }
+
+            const currentMaxSupply = await capFacet.getMaxSupply()
+            const currentMaxSupplyByPartition_1 =
+                await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1)
+
+            const adjustmentFactor = expectedFactors.reduce(
+                (acc, val) => acc * val,
+                1
+            )
+            expect(currentMaxSupply).to.equal(maxSupply * adjustmentFactor)
+            expect(currentMaxSupplyByPartition_1).to.equal(
+                maxSupplyByPartition * adjustmentFactor
+            )
+        }
+
+        async function setPreBalanceAdjustment() {
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+
+            capFacet = capFacet.connect(signer_C)
+            equityFacet = equityFacet.connect(signer_C)
+            snapshotFacet = snapshotFacet.connect(signer_A)
+
+            await capFacet.setMaxSupply(maxSupply)
+            await capFacet.setMaxSupplyByPartition(
+                _PARTITION_ID_1,
+                maxSupplyByPartition
+            )
+
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
+
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_C,
+                value: issueAmount,
+                data: '0x',
+            })
+        }
+
+        it('GIVEN a token WHEN getMaxSupply or getMaxSupplyByPartition THEN balance adjustments are included', async () => {
+            const adjustments = createAdjustmentData(
+                dateToUnixTimestamp('2030-01-01T00:00:00Z'),
+                [TIME / 1000, (2 * TIME) / 1000, (3 * TIME) / 1000],
+                [5, 6, 7],
+                [2, 0, 1]
+            )
+            const currentMaxSupplyByPartition_2 =
+                await capFacet.getMaxSupplyByPartition(_PARTITION_ID_2)
+            expect(currentMaxSupplyByPartition_2).to.equal(0)
+            await testBalanceAdjustments(adjustments, [5, 6, 7])
+        })
+
+        it('GIVEN a token WHEN setMaxSupply THEN balance adjustments are included', async () => {
+            const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
+            const adjustments = createAdjustmentData(
+                currentTime,
+                [TIME / 1000],
+                [5],
+                [0]
+            )
+
+            await setupScheduledBalanceAdjustments(adjustments)
+
+            // Execute adjustments and verify reversion case
+            await timeTravelFacet.changeSystemTimestamp(
+                adjustments[0].executionDate + 1
+            )
+
+            await expect(
+                capFacet.setMaxSupply(maxSupplyByPartition)
+            ).to.eventually.be.rejectedWith('NewMaxSupplyTooLow')
+        })
+
+        it('GIVEN a token WHEN max supply and partition max supply are set THEN balance adjustments occur and resetting partition max supply fails with NewMaxSupplyForPartitionTooLow', async () => {
+            // scheduled balance adjustments
+            const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
+            const adjustments = createAdjustmentData(
+                currentTime,
+                [TIME / 1000],
+                [5],
+                [0]
+            )
+
+            await setupScheduledBalanceAdjustments(adjustments)
+            //-------------------------
+            // wait for first balance adjustment
+            await timeTravelFacet.changeSystemTimestamp(
+                adjustments[0].executionDate + 1
+            )
+
+            // Attempt to change the max supply by partition with the same value as before
+            await expect(
+                capFacet.setMaxSupplyByPartition(
+                    _PARTITION_ID_1,
+                    maxSupplyByPartition
+                )
+            ).to.eventually.be.rejectedWith('NewMaxSupplyForPartitionTooLow')
         })
     })
 })
