@@ -206,10 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {ThirdPartyType} from "../../../layer_0/common/types/ThirdPartyType.sol";
 
 interface IHold {
     enum OperationType {
@@ -251,7 +249,7 @@ interface IHold {
         mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
         mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdParty;
+        mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
     }
 
     event HeldByPartition(

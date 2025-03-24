@@ -206,24 +206,16 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {_CLEARING_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {HoldStorageWrapper1} from '../hold/HoldStorageWrapper1.sol';
-import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
-import {
-    IClearingTransfer
-} from '../../layer_1/interfaces/clearing/IClearingTransfer.sol';
-import {
-    IClearingRedeem
-} from '../../layer_1/interfaces/clearing/IClearingRedeem.sol';
-import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
-import {
-    IClearingHoldCreation
-} from '../../layer_1/interfaces/clearing/IClearingHoldCreation.sol';
-import {LibCommon} from '../common/libraries/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
+import {_CLEARING_STORAGE_POSITION} from "../constants/storagePositions.sol";
+import {HoldStorageWrapper1} from "../hold/HoldStorageWrapper1.sol";
+import {IClearing} from "../../layer_1/interfaces/clearing/IClearing.sol";
+import {IClearingTransfer} from "../../layer_1/interfaces/clearing/IClearingTransfer.sol";
+import {IClearingRedeem} from "../../layer_1/interfaces/clearing/IClearingRedeem.sol";
+import {IClearing} from "../../layer_1/interfaces/clearing/IClearing.sol";
+import {IClearingHoldCreation} from "../../layer_1/interfaces/clearing/IClearingHoldCreation.sol";
+import {LibCommon} from "../common/libraries/LibCommon.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {ThirdPartyType} from "../common/types/ThirdPartyType.sol";
 
 // solhint-disable no-unused-vars, custom-errors
 abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
@@ -367,9 +359,10 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         IClearing.ClearingOperationType _operationType,
         uint256 _clearingId
     ) internal view returns (address thirdParty_) {
-        thirdParty_ = _clearingStorage().clearingThirdParty[_tokenHolder][
-            _partition
-        ][_operationType][_clearingId];
+        thirdParty_ = _clearingStorage()
+            .clearingThirdPartyByAccountPartitionTypeAndId[_tokenHolder][
+                _partition
+            ][_operationType][_clearingId];
     }
 
     function _getClearingTransferForByPartition(

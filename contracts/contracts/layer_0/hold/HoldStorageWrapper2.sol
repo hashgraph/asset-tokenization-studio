@@ -206,17 +206,11 @@
 
 pragma solidity 0.8.18;
 
-import {
-    ERC1410ProtectedPartitionsStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
-import {
-    checkNounceAndDeadline
-} from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
+import {ERC1410ProtectedPartitionsStorageWrapper} from "../ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {IHold} from "../../layer_1/interfaces/hold/IHold.sol";
+import {checkNounceAndDeadline} from "../../layer_1/protectedPartitions/signatureVerification.sol";
+import {ThirdPartyType} from "../common/types/ThirdPartyType.sol";
 
 abstract contract HoldStorageWrapper2 is
     ERC1410ProtectedPartitionsStorageWrapper
@@ -273,9 +267,9 @@ abstract contract HoldStorageWrapper2 is
     ) internal {
         address thirdPartyAddress = _msgSender();
         _decreaseAllowedBalance(_from, thirdPartyAddress, _amount);
-        _holdStorage().holdThirdParty[_from][_partition][
-            _holdId
-        ] = thirdPartyAddress;
+        _holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][
+                _holdId
+            ] = thirdPartyAddress;
     }
 
     function _protectedCreateHoldByPartition(
@@ -306,7 +300,7 @@ abstract contract HoldStorageWrapper2 is
                 _partition,
                 _from,
                 _protectedHold.hold,
-                '',
+                "",
                 ThirdPartyType.PROTECTED
             );
     }
@@ -486,9 +480,9 @@ abstract contract HoldStorageWrapper2 is
             _holdIdentifier.tokenHolder
         ][_holdIdentifier.partition][_holdIdentifier.holdId];
 
-        delete holdStorage.holdThirdParty[_holdIdentifier.tokenHolder][
-            _holdIdentifier.partition
-        ][_holdIdentifier.holdId];
+        delete holdStorage.holdThirdPartyByAccountPartitionAndId[
+            _holdIdentifier.tokenHolder
+        ][_holdIdentifier.partition][_holdIdentifier.holdId];
 
         _removeLabafHold(
             _holdIdentifier.partition,
@@ -550,8 +544,8 @@ abstract contract HoldStorageWrapper2 is
         if (_factor == 1) return;
 
         _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
-            _partition
-        ] *= _factor;
+                _partition
+            ] *= _factor;
         _setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
@@ -712,9 +706,9 @@ abstract contract HoldStorageWrapper2 is
     ) internal view returns (address thirdParty_) {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-        thirdParty_ = holdStorage.holdThirdParty[_holdIdentifier.tokenHolder][
-            _holdIdentifier.partition
-        ][_holdIdentifier.holdId];
+        thirdParty_ = holdStorage.holdThirdPartyByAccountPartitionAndId[
+            _holdIdentifier.tokenHolder
+        ][_holdIdentifier.partition][_holdIdentifier.holdId];
     }
 
     function _getHoldLabafByPartition(
@@ -731,9 +725,9 @@ abstract contract HoldStorageWrapper2 is
         if (_thirdPartyType != ThirdPartyType.AUTHORIZED) return;
         _increaseAllowedBalance(
             _holdIdentifier.tokenHolder,
-            _holdStorage().holdThirdParty[_holdIdentifier.tokenHolder][
-                _holdIdentifier.partition
-            ][_holdIdentifier.holdId],
+            _holdStorage().holdThirdPartyByAccountPartitionAndId[
+                _holdIdentifier.tokenHolder
+            ][_holdIdentifier.partition][_holdIdentifier.holdId],
             _amount
         );
     }

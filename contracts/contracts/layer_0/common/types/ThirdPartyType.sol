@@ -216,6 +216,5 @@ enum ThirdPartyType {
     AUTHORIZED,
     OPERATOR,
     PROTECTED,
-    CONTROLLER,
-    CLEARING
+    CONTROLLER
 }

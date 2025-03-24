@@ -206,10 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {ThirdPartyType} from "../../../layer_0/common/types/ThirdPartyType.sol";
 
 interface IClearing {
     enum ClearingOperationType {
@@ -290,7 +288,7 @@ interface IClearing {
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingTransferData))) clearingTransferByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
-        mapping(address => mapping(bytes32 => mapping(ClearingOperationType => mapping(uint256 => address)))) clearingThirdParty;
+        mapping(address => mapping(bytes32 => mapping(ClearingOperationType => mapping(uint256 => address)))) clearingThirdPartyByAccountPartitionTypeAndId;
     }
     // solhint-enable max-line-length
 
