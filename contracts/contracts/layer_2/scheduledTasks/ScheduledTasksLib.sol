@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
 
 library ScheduledTasksLib {
     struct ScheduledTask {
