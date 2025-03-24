@@ -206,12 +206,18 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from "../common/Common.sol";
-import {IClearingHoldCreation} from "../interfaces/clearing/IClearingHoldCreation.sol";
-import {IHold} from "../interfaces/hold/IHold.sol";
-import {IStaticFunctionSelectors} from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import {_CLEARING_HOLDCREATION_RESOLVER_KEY} from "../constants/resolverKeys.sol";
-import {ThirdPartyType} from "../../layer_0/common/types/ThirdPartyType.sol";
+import {Common} from '../common/Common.sol';
+import {
+    IClearingHoldCreation
+} from '../interfaces/clearing/IClearingHoldCreation.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {
+    _CLEARING_HOLDCREATION_RESOLVER_KEY
+} from '../constants/resolverKeys.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingHoldCreationFacet is
@@ -238,7 +244,7 @@ contract ClearingHoldCreationFacet is
             _clearingOperation,
             _msgSender(),
             _hold,
-            "",
+            '',
             ThirdPartyType.NULL
         );
     }

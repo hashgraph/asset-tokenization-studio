@@ -206,11 +206,17 @@
 
 pragma solidity 0.8.18;
 
-import {ERC1410ProtectedPartitionsStorageWrapper} from "../ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {IHold} from "../../layer_1/interfaces/hold/IHold.sol";
-import {checkNounceAndDeadline} from "../../layer_1/protectedPartitions/signatureVerification.sol";
-import {ThirdPartyType} from "../common/types/ThirdPartyType.sol";
+import {
+    ERC1410ProtectedPartitionsStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
+import {
+    checkNounceAndDeadline
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 
 abstract contract HoldStorageWrapper2 is
     ERC1410ProtectedPartitionsStorageWrapper
@@ -300,7 +306,7 @@ abstract contract HoldStorageWrapper2 is
                 _partition,
                 _from,
                 _protectedHold.hold,
-                "",
+                '',
                 ThirdPartyType.PROTECTED
             );
     }
@@ -544,8 +550,8 @@ abstract contract HoldStorageWrapper2 is
         if (_factor == 1) return;
 
         _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
-                _partition
-            ] *= _factor;
+            _partition
+        ] *= _factor;
         _setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 

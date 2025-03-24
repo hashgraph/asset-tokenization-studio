@@ -206,11 +206,13 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from "../common/Common.sol";
-import {IClearingRedeem} from "../interfaces/clearing/IClearingRedeem.sol";
-import {IStaticFunctionSelectors} from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import {_CLEARING_REDEEM_RESOLVER_KEY} from "../constants/resolverKeys.sol";
-import {ThirdPartyType} from "../../layer_0/common/types/ThirdPartyType.sol";
+import {Common} from '../common/Common.sol';
+import {IClearingRedeem} from '../interfaces/clearing/IClearingRedeem.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_CLEARING_REDEEM_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingRedeemFacet is
@@ -235,7 +237,7 @@ contract ClearingRedeemFacet is
             _clearingOperation,
             _amount,
             _msgSender(),
-            "",
+            '',
             ThirdPartyType.NULL
         );
     }
