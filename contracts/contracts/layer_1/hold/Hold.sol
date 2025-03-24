@@ -205,15 +205,13 @@
 
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-import {Common} from '../common/Common.sol';
-import {_CONTROLLER_ROLE} from '../constants/roles.sol';
-import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import {IStaticFunctionSelectors} from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import {IHold} from "../interfaces/hold/IHold.sol";
+import {Common} from "../common/Common.sol";
+import {_CONTROLLER_ROLE} from "../constants/roles.sol";
+import {_HOLD_RESOLVER_KEY} from "../constants/resolverKeys.sol";
+import {IKyc} from "../../layer_1/interfaces/kyc/IKyc.sol";
+import {ThirdPartyType} from "../../layer_0/common/types/ThirdPartyType.sol";
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -236,7 +234,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             _msgSender(),
             _hold,
-            '',
+            "",
             ThirdPartyType.NULL
         );
 
@@ -246,7 +244,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             holdId_,
             _hold,
-            ''
+            ""
         );
     }
 
@@ -275,7 +273,12 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             ThirdPartyType.AUTHORIZED
         );
 
-        _decreaseAllowanceForHold(_partition, _from, _hold.amount, holdId_);
+        _decreaseAllowedBalanceForHold(
+            _partition,
+            _from,
+            _hold.amount,
+            holdId_
+        );
 
         emit HeldFromByPartition(
             _msgSender(),
@@ -390,7 +393,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             holdId_,
             _protectedHold.hold,
-            ''
+            ""
         );
     }
 
