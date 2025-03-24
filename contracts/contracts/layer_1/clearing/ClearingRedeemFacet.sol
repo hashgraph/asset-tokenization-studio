@@ -265,8 +265,14 @@ contract ClearingRedeemFacet is
             _amount,
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData,
-            _msgSender(),
             ThirdPartyType.AUTHORIZED
+        );
+        _decreaseAllowedBalanceForClearing(
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ClearingOperationType.Redeem,
+            _clearingOperationFrom.from,
+            _amount
         );
     }
 

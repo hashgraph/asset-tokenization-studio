@@ -228,13 +228,8 @@ abstract contract HoldStorageWrapper2 is
         address _from,
         IHold.Hold memory _hold,
         bytes memory _operatorData,
-        address _thirdPartyAddress,
         ThirdPartyType _thirdPartyType
     ) internal returns (bool success_, uint256 holdId_) {
-        if (_thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            _decreaseAllowedBalance(_from, _thirdPartyAddress, _hold.amount);
-        }
-
         _triggerAndSyncAll(_partition, _from, address(0));
 
         uint256 abaf = _updateTotalHold(_partition, _from);
@@ -267,11 +262,20 @@ abstract contract HoldStorageWrapper2 is
         ] += _hold.amount;
         holdStorage.totalHeldAmountByAccount[_from] += _hold.amount;
 
-        holdStorage.holdThirdParty[_from][_partition][
-            holdId_
-        ] = _thirdPartyAddress;
-
         success_ = true;
+    }
+
+    function _decreaseAllowanceForHold(
+        bytes32 _partition,
+        address _from,
+        uint256 _amount,
+        uint256 _holdId
+    ) internal {
+        address thirdPartyAddress = _msgSender();
+        _decreaseAllowedBalance(_from, thirdPartyAddress, _amount);
+        _holdStorage().holdThirdParty[_from][_partition][
+            _holdId
+        ] = thirdPartyAddress;
     }
 
     function _protectedCreateHoldByPartition(
@@ -302,8 +306,7 @@ abstract contract HoldStorageWrapper2 is
                 _partition,
                 _from,
                 _protectedHold.hold,
-                '0x',
-                address(0),
+                '',
                 ThirdPartyType.PROTECTED
             );
     }
@@ -341,14 +344,11 @@ abstract contract HoldStorageWrapper2 is
 
         IHold.HoldData memory holdData = _getHold(_holdIdentifier);
 
-        if (holdData.thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            _restoreHoldAllowance(
-                _holdIdentifier.tokenHolder,
-                _holdIdentifier.partition,
-                _holdIdentifier.holdId,
-                _amount
-            );
-        }
+        _restoreHoldAllowance(
+            holdData.thirdPartyType,
+            _holdIdentifier,
+            _amount
+        );
 
         success_ = _operateHoldByPartition(
             _holdIdentifier,
@@ -374,14 +374,11 @@ abstract contract HoldStorageWrapper2 is
         IHold.HoldData memory holdData = _getHold(_holdIdentifier);
         amount_ = holdData.hold.amount;
 
-        if (holdData.thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            _restoreHoldAllowance(
-                _holdIdentifier.tokenHolder,
-                _holdIdentifier.partition,
-                _holdIdentifier.holdId,
-                amount_
-            );
-        }
+        _restoreHoldAllowance(
+            holdData.thirdPartyType,
+            _holdIdentifier,
+            amount_
+        );
 
         success_ = _operateHoldByPartition(
             _holdIdentifier,
@@ -498,19 +495,6 @@ abstract contract HoldStorageWrapper2 is
             _holdIdentifier.tokenHolder,
             _holdIdentifier.holdId
         );
-    }
-
-    function _restoreHoldAllowance(
-        address _tokenHolder,
-        bytes32 _partition,
-        uint256 _holdId,
-        uint256 _amount
-    ) internal {
-        address thirdParty = _holdStorage().holdThirdParty[_tokenHolder][
-            _partition
-        ][_holdId];
-
-        _increaseAllowedBalance(_tokenHolder, thirdParty, _amount);
     }
 
     function _updateTotalHold(
@@ -738,4 +722,19 @@ abstract contract HoldStorageWrapper2 is
         uint256 _holdId,
         address _tokenHolder
     ) internal view virtual returns (uint256);
+
+    function _restoreHoldAllowance(
+        ThirdPartyType _thirdPartyType,
+        IHold.HoldIdentifier calldata _holdIdentifier,
+        uint256 _amount
+    ) private {
+        if (_thirdPartyType != ThirdPartyType.AUTHORIZED) return;
+        _increaseAllowedBalance(
+            _holdIdentifier.tokenHolder,
+            _holdStorage().holdThirdParty[_holdIdentifier.tokenHolder][
+                _holdIdentifier.partition
+            ][_holdIdentifier.holdId],
+            _amount
+        );
+    }
 }

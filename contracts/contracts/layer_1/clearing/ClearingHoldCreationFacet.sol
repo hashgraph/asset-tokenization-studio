@@ -277,8 +277,15 @@ contract ClearingHoldCreationFacet is
             _clearingOperationFrom.from,
             _hold,
             _clearingOperationFrom.operatorData,
-            _msgSender(),
             ThirdPartyType.AUTHORIZED
+        );
+
+        _decreaseAllowedBalanceForClearing(
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ClearingOperationType.HoldCreation,
+            _clearingOperationFrom.from,
+            _hold.amount
         );
     }
 

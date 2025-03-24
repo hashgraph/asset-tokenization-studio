@@ -237,7 +237,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _msgSender(),
             _hold,
             '',
-            address(0),
             ThirdPartyType.NULL
         );
 
@@ -268,19 +267,18 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
-        address sender = _msgSender();
-
         (success_, holdId_) = _createHoldByPartition(
             _partition,
             _from,
             _hold,
             _operatorData,
-            sender,
             ThirdPartyType.AUTHORIZED
         );
 
+        _decreaseAllowanceForHold(_partition, _from, _hold.amount, holdId_);
+
         emit HeldFromByPartition(
-            sender,
+            _msgSender(),
             _from,
             _partition,
             holdId_,
@@ -312,7 +310,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _from,
             _hold,
             _operatorData,
-            address(0),
             ThirdPartyType.OPERATOR
         );
 
@@ -348,7 +345,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _from,
             _hold,
             _operatorData,
-            address(0),
             ThirdPartyType.CONTROLLER
         );
 
@@ -454,14 +450,14 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyWithValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
-        uint256 amount_;
-        (success_, amount_) = _reclaimHoldByPartition(_holdIdentifier);
+        uint256 amount;
+        (success_, amount) = _reclaimHoldByPartition(_holdIdentifier);
         emit HoldByPartitionReclaimed(
             _msgSender(),
             _holdIdentifier.tokenHolder,
             _holdIdentifier.partition,
             _holdIdentifier.holdId,
-            amount_
+            amount
         );
     }
 

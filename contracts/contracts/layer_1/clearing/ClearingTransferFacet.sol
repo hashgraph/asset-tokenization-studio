@@ -267,15 +267,20 @@ contract ClearingTransferFacet is
             _checkValidAddress(_clearingOperationFrom.from);
             _checkValidAddress(_to);
         }
-
         (success_, clearingId_) = _clearingTransferFromCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData,
-            _msgSender(),
             ThirdPartyType.AUTHORIZED
+        );
+        _decreaseAllowedBalanceForClearing(
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ClearingOperationType.Transfer,
+            _clearingOperationFrom.from,
+            _amount
         );
     }
 
