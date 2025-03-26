@@ -257,6 +257,7 @@ describe('Factory Tests', () => {
     const isControllable = true
     const isMultiPartition = false
     const arePartitionsProtected = false
+    const clearingActive = false
 
     const votingRight = true
     const informationRight = false
@@ -323,22 +324,20 @@ describe('Factory Tests', () => {
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
 
         listOfMembers = [account_A, account_B]
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                    timeTravelEnabled: true,
-                })
-            )
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+                timeTravelEnabled: true,
+            })
+        )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -359,6 +358,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -399,6 +399,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -445,6 +446,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -485,6 +487,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -530,6 +533,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -575,6 +579,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -676,6 +681,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -713,6 +719,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -754,6 +761,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -793,6 +801,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -848,6 +857,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -899,6 +909,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -942,6 +953,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -1048,6 +1060,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -1088,6 +1101,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,
@@ -1134,6 +1148,7 @@ describe('Factory Tests', () => {
                 isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
+                clearingActive,
                 isMultiPartition,
                 name,
                 symbol,

@@ -208,8 +208,7 @@ import {
     BaseAtsContractListCommandParams,
 } from '../index'
 
-interface RegisterBusinessLogicsCommandParams
-    extends BaseAtsContractListCommandParams {}
+type RegisterBusinessLogicsCommandParams = BaseAtsContractListCommandParams
 
 export default class RegisterBusinessLogicsCommand extends BaseAtsContractListCommand {
     constructor({

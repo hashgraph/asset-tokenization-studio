@@ -355,19 +355,19 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
             revert IKyc.InvalidKycStatus();
     }
 
-    function _checkValidDates(
-        uint256 _validFrom,
-        uint256 _validTo
-    ) private view {
-        if (_validFrom > _validTo || _validTo < _blockTimestamp())
-            revert IKyc.InvalidDates();
-    }
-
     function _kycStorage() internal pure returns (KycStorage storage kyc_) {
         bytes32 position = _KYC_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             kyc_.slot := position
         }
+    }
+
+    function _checkValidDates(
+        uint256 _validFrom,
+        uint256 _validTo
+    ) private view {
+        if (_validFrom > _validTo || _validTo < _blockTimestamp())
+            revert IKyc.InvalidDates();
     }
 }

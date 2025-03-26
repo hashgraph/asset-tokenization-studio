@@ -282,6 +282,19 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
         _controllerRedeem(_tokenHolder, _value, _data, _operatorData);
     }
 
+    /**
+     * @notice It is used to end the controller feature from the token
+     * @dev It only be called by the `owner/issuer` of the token
+     */
+    function finalizeControllable()
+        external
+        override
+        onlyRole(_DEFAULT_ADMIN_ROLE)
+        onlyControllable
+    {
+        _finalizeControllable();
+    }
+
     // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars
 
@@ -339,18 +352,5 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC1644).interfaceId;
-    }
-
-    /**
-     * @notice It is used to end the controller feature from the token
-     * @dev It only be called by the `owner/issuer` of the token
-     */
-    function finalizeControllable()
-        external
-        override
-        onlyRole(_DEFAULT_ADMIN_ROLE)
-        onlyControllable
-    {
-        _finalizeControllable();
     }
 }

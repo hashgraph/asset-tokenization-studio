@@ -218,6 +218,7 @@ import {
     IFactory,
     Kyc,
     SsiManagement,
+    ClearingActionsFacet,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -236,6 +237,7 @@ import {
     SSI_MANAGER_ROLE,
     ZERO,
     EMPTY_STRING,
+    CLEARING_ROLE,
 } from '@scripts'
 import { assertObject } from '../../../../common'
 
@@ -262,6 +264,7 @@ describe('ERC20 Tests', () => {
     let erc1594Facet: ERC1594
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
+    let clearingActionsFacet: ClearingActionsFacet
 
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
@@ -273,7 +276,6 @@ describe('ERC20 Tests', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -281,15 +283,14 @@ describe('ERC20 Tests', () => {
             account_C = signer_C.address
             account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                        timeTravelEnabled: true,
-                    })
-                )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
@@ -305,13 +306,22 @@ describe('ERC20 Tests', () => {
                 role: CONTROL_LIST_ROLE,
                 members: [account_A],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacControlList]
+            const rbacClearing: Rbac = {
+                role: CLEARING_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [
+                rbacPause,
+                rbacControlList,
+                rbacClearing,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
                 isWhiteList: false,
                 isControllable: true,
                 arePartitionsProtected: false,
+                clearingActive: false,
                 isMultiPartition: true,
                 name,
                 symbol,
@@ -354,6 +364,11 @@ describe('ERC20 Tests', () => {
                 diamond.address,
                 signer_A
             )
+            clearingActionsFacet = await ethers.getContractAt(
+                'ClearingActionsFacet',
+                diamond.address,
+                signer_A
+            )
         })
 
         it('GIVEN a initialized ERC20 WHEN initialize again THEN transaction fails with AlreadyInitialized', async () => {
@@ -389,7 +404,7 @@ describe('ERC20 Tests', () => {
             // initialize fails
             const retrieved_name = await erc20Facet.name()
             const retrieved_symbol = await erc20Facet.symbol()
-            const retrieved_decimals = await erc20Facet.decimalsAdjusted()
+            const retrieved_decimals = await erc20Facet.decimals()
 
             expect(retrieved_name).to.equal(name)
             expect(retrieved_symbol).to.equal(symbol)
@@ -418,6 +433,17 @@ describe('ERC20 Tests', () => {
             await expect(
                 erc20Facet.decreaseAllowance(account_C, amount)
             ).to.be.rejectedWith('TokenIsPaused')
+        })
+
+        it('GIVEN an ERC20 with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
+            await clearingActionsFacet.activateClearing()
+            await expect(
+                erc20Facet.transfer(account_E, amount)
+            ).to.be.rejectedWith('ClearingIsActivated')
+
+            await expect(
+                erc20Facet.transferFrom(account_C, account_E, amount)
+            ).to.be.rejectedWith('ClearingIsActivated')
         })
 
         it('GIVEN a initializer ERC20 WHEN try to use a non authorized account THEN transaction fails with AccountIsBlocked', async () => {
@@ -495,7 +521,6 @@ describe('ERC20 Tests', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -503,14 +528,13 @@ describe('ERC20 Tests', () => {
             account_C = signer_C.address
             account_E = signer_E.address
 
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                    })
-                )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
@@ -537,6 +561,7 @@ describe('ERC20 Tests', () => {
                 isWhiteList: false,
                 isControllable: true,
                 arePartitionsProtected: false,
+                clearingActive: false,
                 isMultiPartition: false,
                 name,
                 symbol,
