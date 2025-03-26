@@ -203,7 +203,13 @@
 
 */
 
-import { FormControl, HStack, SimpleGrid, Stack } from "@chakra-ui/react";
+import {
+  FormControl,
+  HStack,
+  SimpleGrid,
+  Stack,
+  VStack,
+} from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { Info } from "@phosphor-icons/react";
 import {
@@ -213,6 +219,7 @@ import {
   InputController,
   InputNumberController,
   ToggleController,
+  InfoDivider,
 } from "io-bricks-ui";
 import {
   greaterOrEqualThan,
@@ -247,9 +254,10 @@ export const StepTokenDetails = () => {
           {t("stepTokenDetails.mandatoryFields")}
         </Text>
       </Stack>
-      <Text textStyle="HeadingMediumMD">
-        {t("stepTokenDetails.generalInformation")}
-      </Text>
+      <InfoDivider
+        title={t("stepTokenDetails.generalInformation")}
+        type="main"
+      />
       <Stack w="full">
         <HStack justifySelf="flex-start">
           <Text textStyle="BodyTextRegularSM">
@@ -339,10 +347,8 @@ export const StepTokenDetails = () => {
           }}
         />
       </Stack>
+      <InfoDivider title={t("stepTokenDetails.bondPermissions")} type="main" />
       <Stack w="full" gap={6}>
-        <Text textStyle="HeadingMediumMD">
-          {t("stepTokenDetails.bondPermissions")}
-        </Text>
         <FormControl gap={6} as={SimpleGrid} columns={{ base: 3, lg: 1 }}>
           <HStack justifySelf="flex-start">
             <ToggleController
@@ -387,7 +393,24 @@ export const StepTokenDetails = () => {
           </HStack>
         </FormControl>
       </Stack>
-
+      <InfoDivider title={t("stepTokenDetails.configuration")} type="main" />
+      <VStack w="full">
+        <FormControl gap="15px" as={SimpleGrid} columns={{ base: 3, lg: 1 }}>
+          <HStack justifySelf="flex-start">
+            <ToggleController
+              control={control}
+              id="isClearing"
+              label={t("stepTokenDetails.isClearing")}
+            />
+            <Tooltip
+              label={t("stepTokenDetails.isClearingTooltip")}
+              placement="right"
+            >
+              <PhosphorIcon as={Info} />
+            </Tooltip>
+          </HStack>
+        </FormControl>
+      </VStack>
       <HStack
         gap={4}
         w="full"

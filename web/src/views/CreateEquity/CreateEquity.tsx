@@ -230,6 +230,7 @@ export const CreateEquity = () => {
       isControllable: true,
       isBlocklist: true,
       isApproval: false,
+      isClearing: false,
       isVotingRight: false,
       isInformationRight: false,
       isLiquidationRight: false,

@@ -243,18 +243,6 @@ abstract contract ResolverProxyUnstructured is
         // AccessControl instead of owned. Only DEFAULT_ADMIN role.
     }
 
-    function _resolverProxyStorage()
-        internal
-        pure
-        returns (ResolverProxyStorage storage ds)
-    {
-        bytes32 position = _RESOLVER_PROXY_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            ds.slot := position
-        }
-    }
-
     function _initialize(
         IBusinessLogicResolver _resolver,
         bytes32 _resolverProxyConfigurationId,
@@ -431,5 +419,17 @@ abstract contract ResolverProxyUnstructured is
             _ds.version,
             _interfaceId
         );
+    }
+
+    function _resolverProxyStorage()
+        internal
+        pure
+        returns (ResolverProxyStorage storage ds)
+    {
+        bytes32 position = _RESOLVER_PROXY_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ds.slot := position
+        }
     }
 }

@@ -211,6 +211,46 @@ import {
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 interface IHold {
+    enum OperationType {
+        Execute,
+        Release,
+        Reclaim
+    }
+
+    struct HoldIdentifier {
+        bytes32 partition;
+        address tokenHolder;
+        uint256 holdId;
+    }
+
+    struct Hold {
+        uint256 amount;
+        uint256 expirationTimestamp;
+        address escrow;
+        address to;
+        bytes data;
+    }
+
+    struct ProtectedHold {
+        Hold hold;
+        uint256 deadline;
+        uint256 nonce;
+    }
+
+    struct HoldData {
+        uint256 id;
+        Hold hold;
+        bytes operatorData;
+    }
+
+    struct HoldDataStorage {
+        mapping(address => uint256) totalHeldAmountByAccount;
+        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
+        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
+    }
+
     event HeldByPartition(
         address indexed operator,
         address indexed tokenHolder,
@@ -249,46 +289,6 @@ interface IHold {
     error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
     error HoldExpirationReached();
     error IsNotEscrow();
-
-    struct HoldIdentifier {
-        bytes32 partition;
-        address tokenHolder;
-        uint256 holdId;
-    }
-
-    struct Hold {
-        uint256 amount;
-        uint256 expirationTimestamp;
-        address escrow;
-        address to;
-        bytes data;
-    }
-
-    struct ProtectedHold {
-        Hold hold;
-        uint256 deadline;
-        uint256 nonce;
-    }
-
-    struct HoldData {
-        uint256 id;
-        Hold hold;
-        bytes operatorData;
-    }
-
-    struct HoldDataStorage {
-        mapping(address => uint256) totalHeldAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
-        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
-    }
-
-    enum OperationType {
-        Execute,
-        Release,
-        Reclaim
-    }
 
     function createHoldByPartition(
         bytes32 _partition,

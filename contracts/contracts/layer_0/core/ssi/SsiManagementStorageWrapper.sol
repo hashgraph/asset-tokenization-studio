@@ -282,11 +282,6 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
         return _ssiManagementStorage().issuerList.contains(_issuer);
     }
 
-    function _checkIssuer(address _issuer) private view {
-        if (!_isIssuer(_issuer))
-            revert ISsiManagement.AccountIsNotIssuer(_issuer);
-    }
-
     function _ssiManagementStorage()
         internal
         pure
@@ -297,5 +292,10 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
         assembly {
             ssiManagement_.slot := position
         }
+    }
+
+    function _checkIssuer(address _issuer) private view {
+        if (!_isIssuer(_issuer))
+            revert ISsiManagement.AccountIsNotIssuer(_issuer);
     }
 }

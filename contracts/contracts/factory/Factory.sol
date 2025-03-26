@@ -218,7 +218,9 @@ import {IERC1644} from '../layer_1/interfaces/ERC1400/IERC1644.sol';
 import {IERC1410Basic} from '../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 import {ICap} from '../layer_1/interfaces/cap/ICap.sol';
 import {IERC1594} from '../layer_1/interfaces/ERC1400/IERC1594.sol';
-import {IClearing} from '../layer_1/interfaces/clearing/IClearing.sol';
+import {
+    IClearingActions
+} from '../layer_1/interfaces/clearing/IClearingActions.sol';
 import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
@@ -364,6 +366,16 @@ contract Factory is IFactory, LocalContext {
         );
     }
 
+    function getAppliedRegulationData(
+        RegulationType _regulationType,
+        RegulationSubType _regulationSubType
+    ) external pure override returns (RegulationData memory regulationData_) {
+        regulationData_ = buildRegulationData(
+            _regulationType,
+            _regulationSubType
+        );
+    }
+
     function _deploySecurity(
         SecurityData calldata _securityData,
         SecurityType _securityType
@@ -413,18 +425,8 @@ contract Factory is IFactory, LocalContext {
             _securityData.arePartitionsProtected
         );
 
-        IClearing(securityAddress_).initialize_Clearing(
+        IClearingActions(securityAddress_).initializeClearing(
             _securityData.clearingActive
-        );
-    }
-
-    function getAppliedRegulationData(
-        RegulationType _regulationType,
-        RegulationSubType _regulationSubType
-    ) external pure override returns (RegulationData memory regulationData_) {
-        regulationData_ = buildRegulationData(
-            _regulationType,
-            _regulationSubType
         );
     }
 }

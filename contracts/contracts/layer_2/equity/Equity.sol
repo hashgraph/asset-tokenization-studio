@@ -230,22 +230,6 @@ abstract contract Equity is
 
     // solhint-disable func-name-mixedcase
     // solhint-disable-next-line private-vars-leading-underscore
-    function _initializeEquity(
-        EquityDetailsData calldata _equityDetailsData
-    ) internal {
-        EquityDataStorage storage equityStorage = _equityStorage();
-        equityStorage.initialized = true;
-        _storeEquityDetails(_equityDetailsData);
-    }
-
-    function getEquityDetails()
-        external
-        view
-        override
-        returns (EquityDetailsData memory equityDetailsData_)
-    {
-        return _getEquityDetails();
-    }
 
     function setDividends(
         Dividend calldata _newDividend
@@ -270,6 +254,63 @@ abstract contract Equity is
             _newDividend.executionDate,
             _newDividend.amount
         );
+    }
+
+    function setVoting(
+        Voting calldata _newVoting
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyValidTimestamp(_newVoting.recordDate)
+        returns (bool success_, uint256 voteID_)
+    {
+        bytes32 corporateActionID;
+        (success_, corporateActionID, voteID_) = _setVoting(_newVoting);
+        emit VotingSet(
+            corporateActionID,
+            voteID_,
+            _msgSender(),
+            _newVoting.recordDate,
+            _newVoting.data
+        );
+    }
+
+    function setScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyValidTimestamp(_newBalanceAdjustment.executionDate)
+        validateFactor(_newBalanceAdjustment.factor)
+        returns (bool success_, uint256 balanceAdjustmentID_)
+    {
+        bytes32 corporateActionID;
+        (
+            success_,
+            corporateActionID,
+            balanceAdjustmentID_
+        ) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
+        emit ScheduledBalanceAdjustmentSet(
+            corporateActionID,
+            balanceAdjustmentID_,
+            _msgSender(),
+            _newBalanceAdjustment.executionDate,
+            _newBalanceAdjustment.factor,
+            _newBalanceAdjustment.decimals
+        );
+    }
+
+    function getEquityDetails()
+        external
+        view
+        override
+        returns (EquityDetailsData memory equityDetailsData_)
+    {
+        return _getEquityDetails();
     }
 
     /**
@@ -321,27 +362,6 @@ abstract contract Equity is
         return _getDividendsCount();
     }
 
-    function setVoting(
-        Voting calldata _newVoting
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        onlyValidTimestamp(_newVoting.recordDate)
-        returns (bool success_, uint256 voteID_)
-    {
-        bytes32 corporateActionID;
-        (success_, corporateActionID, voteID_) = _setVoting(_newVoting);
-        emit VotingSet(
-            corporateActionID,
-            voteID_,
-            _msgSender(),
-            _newVoting.recordDate,
-            _newVoting.data
-        );
-    }
-
     function getVoting(
         uint256 _voteID
     )
@@ -376,33 +396,6 @@ abstract contract Equity is
         return _getVotingCount();
     }
 
-    function setScheduledBalanceAdjustment(
-        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        onlyValidTimestamp(_newBalanceAdjustment.executionDate)
-        validateFactor(_newBalanceAdjustment.factor)
-        returns (bool success_, uint256 balanceAdjustmentID_)
-    {
-        bytes32 corporateActionID;
-        (
-            success_,
-            corporateActionID,
-            balanceAdjustmentID_
-        ) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
-        emit ScheduledBalanceAdjustmentSet(
-            corporateActionID,
-            balanceAdjustmentID_,
-            _msgSender(),
-            _newBalanceAdjustment.executionDate,
-            _newBalanceAdjustment.factor,
-            _newBalanceAdjustment.decimals
-        );
-    }
-
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
     )
@@ -425,5 +418,13 @@ abstract contract Equity is
         returns (uint256 balanceAdjustmentCount_)
     {
         return _getScheduledBalanceAdjustmentsCount();
+    }
+
+    function _initializeEquity(
+        EquityDetailsData calldata _equityDetailsData
+    ) internal {
+        EquityDataStorage storage equityStorage = _equityStorage();
+        equityStorage.initialized = true;
+        _storeEquityDetails(_equityDetailsData);
     }
 }

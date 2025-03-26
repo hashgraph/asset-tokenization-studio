@@ -219,11 +219,12 @@ interface IERC1643 {
         bytes32 documentHash
     );
 
-    // Document Management
-    function getDocument(
-        bytes32 _name
-    ) external view returns (string memory, bytes32, uint256);
+    error EmptyName();
+    error EmptyURI();
+    error EmptyHASH();
+    error DocumentDoesNotExist(bytes32 name);
 
+    // Document Management
     function setDocument(
         bytes32 _name,
         string calldata _uri,
@@ -232,10 +233,9 @@ interface IERC1643 {
 
     function removeDocument(bytes32 _name) external;
 
-    function getAllDocuments() external view returns (bytes32[] memory);
+    function getDocument(
+        bytes32 _name
+    ) external view returns (string memory, bytes32, uint256);
 
-    error EmptyName();
-    error EmptyURI();
-    error EmptyHASH();
-    error DocumentDoesNotExist(bytes32 name);
+    function getAllDocuments() external view returns (bytes32[] memory);
 }

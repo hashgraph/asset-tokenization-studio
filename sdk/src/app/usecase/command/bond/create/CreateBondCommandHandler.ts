@@ -322,7 +322,7 @@ export class CreateBondCommandHandler
       configId,
       configVersion,
       diamondOwnerAccountEvmAddress,
-      factory.toString()
+      factory.toString(),
     );
 
     if (!res.id) throw new Error('Create Command Handler response id empty');

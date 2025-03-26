@@ -205,7 +205,6 @@
 
 import { BigNumber } from 'ethers';
 import BigDecimal from '../shared/BigDecimal';
-import { Hold } from './Hold';
 import {
   InvalidClearingOperationType,
   InvalidClearingOperationTypeNumber,
@@ -270,29 +269,71 @@ export class CastClearingOperationType {
     }
   }
 }
-export class Clearing {
-  expirationTimeStamp: number;
+export class ClearingHoldCreation {
   amount: BigDecimal;
-  destination: string;
-  clearingOperationType: ClearingOperationType;
+  expirationTimestamp: number;
   data: string;
   operatorData: string;
-  hold: Hold<BigDecimal>;
+  holdEscrow: string;
+  holdExpirationTimestamp: number;
+  holdTo: string;
+  holdData: string;
   constructor(
-    executionTimeStamp: number,
     amount: BigDecimal,
-    destination: string,
-    clearingOperationType: ClearingOperationType,
+    expirationTimestamp: number,
     data: string,
     operatorData: string,
-    hold: Hold<BigDecimal>,
+    holdEscrow: string,
+    holdExpirationTimestamp: number,
+    holdTo: string,
+    holdData: string,
   ) {
-    this.expirationTimeStamp = executionTimeStamp;
     this.amount = amount;
-    this.destination = destination;
-    this.clearingOperationType = clearingOperationType;
+    this.expirationTimestamp = expirationTimestamp;
     this.data = data;
     this.operatorData = operatorData;
-    this.hold = hold;
+    this.holdEscrow = holdEscrow;
+    this.holdExpirationTimestamp = holdExpirationTimestamp;
+    this.holdTo = holdTo;
+    this.holdData = holdData;
+  }
+}
+
+export class ClearingRedeem {
+  amount: BigDecimal;
+  expirationTimestamp: number;
+  data: string;
+  operatorData: string;
+  constructor(
+    amount: BigDecimal,
+    expirationTimestamp: number,
+    data: string,
+    operatorData: string,
+  ) {
+    this.amount = amount;
+    this.expirationTimestamp = expirationTimestamp;
+    this.data = data;
+    this.operatorData = operatorData;
+  }
+}
+
+export class ClearingTransfer {
+  amount: BigDecimal;
+  expirationTimestamp: number;
+  destination: string;
+  data: string;
+  operatorData: string;
+  constructor(
+    amount: BigDecimal,
+    expirationTimestamp: number,
+    destination: string,
+    data: string,
+    operatorData: string,
+  ) {
+    this.expirationTimestamp = expirationTimestamp;
+    this.amount = amount;
+    this.destination = destination;
+    this.data = data;
+    this.operatorData = operatorData;
   }
 }

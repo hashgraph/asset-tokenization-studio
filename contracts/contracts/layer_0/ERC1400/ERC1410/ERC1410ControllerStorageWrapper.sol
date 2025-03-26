@@ -221,7 +221,8 @@ import {
     _WRONG_PARTITION_ERROR_ID,
     _SUCCESS,
     _FROM_ACCOUNT_KYC_ERROR_ID,
-    _TO_ACCOUNT_KYC_ERROR_ID
+    _TO_ACCOUNT_KYC_ERROR_ID,
+    _CLEARING_ACTIVE_ERROR_ID
 } from '../../constants/values.sol';
 
 abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
@@ -235,6 +236,9 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
     ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
+        if (_isClearingActivated()) {
+            return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
         }
         if (_from == address(0)) {
             return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));

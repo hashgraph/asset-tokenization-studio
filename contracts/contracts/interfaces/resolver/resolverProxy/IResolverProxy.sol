@@ -208,11 +208,11 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 interface IResolverProxy {
-    // When no function exists for function called
-    error FunctionNotFound(bytes4 _functionSelector);
-
     struct Rbac {
         bytes32 role;
         address[] members;
     }
+
+    // When no function exists for function called
+    error FunctionNotFound(bytes4 _functionSelector);
 }

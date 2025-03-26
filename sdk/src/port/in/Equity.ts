@@ -342,6 +342,7 @@ class EquityInPort implements IEquityInPort {
       isWhiteList: req.isWhiteList,
       isControllable: req.isControllable,
       arePartitionsProtected: req.arePartitionsProtected,
+      clearingActive: req.clearingActive,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfShares),
       regulationType: CastRegulationType.fromNumber(req.regulationType),

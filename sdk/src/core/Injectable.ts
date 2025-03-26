@@ -348,10 +348,17 @@ import { ClearingCreateHoldFromByPartitionCommandHandler } from '../app/usecase/
 import { ProtectedClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommandHandler.js';
 import { IsClearingActivatedQueryHandler } from '../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQueryHandler.js';
 import { GetClearingsIdForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQueryHandler.js';
-import { GetClearingForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingForByPartition/GetClearingForByPartitionQueryHandler.js';
 import { GetClearingCountForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQueryHandler.js';
 import { GetClearedAmountForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQueryHandler.js';
 import { GetClearedAmountForQueryHandler } from '../app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQueryHandler.js';
+import { IsOperatorForPartitionQueryHandler } from '../app/usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQueryHandler.js';
+import { IsOperatorQueryHandler } from '../app/usecase/query/security/operator/isOperator/IsOperatorQueryHandler.js';
+import { OperatorClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommandHandler.js';
+import { OperatorClearingRedeemByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommandHandler.js';
+import { OperatorClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommandHandler.js';
+import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler.js';
+import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
+import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -616,6 +623,18 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: ProtectedClearingCreateHoldByPartitionCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingRedeemByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingTransferByPartitionCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [
@@ -858,7 +877,15 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetClearingForByPartitionQueryHandler,
+    useClass: GetClearingCreateHoldForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingTransferForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingRedeemForByPartitionQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
@@ -867,6 +894,14 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsClearingActivatedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsOperatorForPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsOperatorQueryHandler,
   },
 ];
 
