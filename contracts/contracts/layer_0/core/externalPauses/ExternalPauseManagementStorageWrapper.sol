@@ -219,6 +219,9 @@ import {
 import {
     IExternalPauseManagement
 } from '../../../layer_1/interfaces/externalPauses/IExternalPauseManagement.sol';
+import {
+    IExternalPause
+} from '../../../layer_1/interfaces/externalPauses/IExternalPause.sol';
 
 abstract contract ExternalPauseManagementStorageWrapper is
     ControlListStorageWrapper
@@ -302,6 +305,19 @@ abstract contract ExternalPauseManagementStorageWrapper is
                 _pageIndex,
                 _pageLength
             );
+    }
+
+    function _isExternallyPaused() internal view returns (bool) {
+        ExternalPauseDataStorage
+            storage externalPauseDataStorage = _externalPauseStorage();
+        uint256 length = _getExternalPausesCount();
+        for (uint256 index = 0; index < length; ++index) {
+            if (
+                IExternalPause(externalPauseDataStorage.pauseList.at(index))
+                    .isPaused()
+            ) return true;
+        }
+        return false;
     }
 
     function _externalPauseStorage()
