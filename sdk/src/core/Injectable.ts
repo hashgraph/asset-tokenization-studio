@@ -261,7 +261,6 @@ import { ConcreteCommandHandler } from '../../__tests__/core/command/__mocks__/C
 import TransactionAdapter from '../port/out/TransactionAdapter.js';
 import { RuntimeError } from './error/RuntimeError.js';
 import { BalanceOfQueryHandler } from '../app/usecase/query/security/balanceof/BalanceOfQueryHandler.js';
-import { GetAccountSecurityRelationshipQueryHandler } from '../app/usecase/query/account/securityRelationship/GetAccountSecurityRelationshipQueryHandler.js';
 import { IsPausedQueryHandler } from '../app/usecase/query/security/isPaused/IsPausedQueryHandler';
 import { GetDividendsQueryHandler } from '../app/usecase/query/equity/dividends/getDividends/GetDividendsQueryHandler.js';
 import { GetDividendsCountQueryHandler } from '../app/usecase/query/equity/dividends/getDividendsCount/GetDividendsCountQueryHandler.js';
@@ -737,10 +736,6 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetVotingCountQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetAccountSecurityRelationshipQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,

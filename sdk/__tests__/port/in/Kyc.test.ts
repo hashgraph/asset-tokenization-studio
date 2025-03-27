@@ -246,7 +246,7 @@ import { ethers, Wallet } from 'ethers';
 import SSIManagement from '../../../src/port/in/SSIManagement';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
 import createVcT3 from '../../utils/verifiableCredentials';
-import { Terminal3VC } from '../../../src/domain/context/kyc/terminal3.js';
+import { Terminal3VC } from '../../../src/domain/context/kyc/Terminal3.js';
 import { HederaId } from '../../../src/domain/context/shared/HederaId.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
