@@ -203,42 +203,18 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+import { createFixture } from '../config.js';
+import { Regulation } from '../../../src/domain/context/factory/Regulation.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
-  }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
-
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
-
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
-
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
-      });
-    }
-  }
-}
+export const RegulationFixture = createFixture<Regulation>((props) => {
+  props.type.faker((faker) => faker.lorem.sentence());
+  props.subType.faker((faker) => faker.lorem.sentence());
+  props.dealSize.faker((faker) => faker.lorem.sentence());
+  props.accreditedInvestors.faker((faker) => faker.lorem.sentence());
+  props.maxNonAccreditedInvestors.faker((faker) =>
+    faker.number.int({ min: 0, max: 10 }),
+  );
+  props.manualInvestorVerification.faker((faker) => faker.lorem.sentence());
+  props.internationalInvestors.faker((faker) => faker.lorem.sentence());
+  props.resaleHoldPeriod.faker((faker) => faker.lorem.sentence());
+});

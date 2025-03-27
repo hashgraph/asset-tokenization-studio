@@ -203,42 +203,65 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+import { createFixture } from '../config.js';
+import { SecurityProps } from '../../../src/domain/context/security/Security.js';
+import { SecurityType } from '../../../src/domain/context/factory/SecurityType.js';
+import BigDecimal from '../../../src/domain/context/shared/BigDecimal.js';
+import {
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType.js';
+import { RegulationFixture } from './RegulationFixture.js';
+import { EvmAddressFixture, HederaIdFixture } from './IdentifierFixture.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
-  }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
-
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
-
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
-
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
-      });
-    }
-  }
-}
+export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
+  security.name.faker((faker) => faker.company.name());
+  security.symbol.faker((faker) =>
+    faker.string.alpha({ length: 3, casing: 'upper' }),
+  );
+  security.isin.faker((faker) => `US${faker.string.numeric(9)}`);
+  security.type?.faker((faker) =>
+    faker.helpers.arrayElement(Object.values(SecurityType)),
+  );
+  security.decimals.faker((faker) => faker.number.int({ min: 0, max: 18 }));
+  security.isWhiteList.faker((faker) => faker.datatype.boolean());
+  security.isControllable.faker((faker) => faker.datatype.boolean());
+  security.arePartitionsProtected.faker((faker) => faker.datatype.boolean());
+  security.clearingActive.faker((faker) => faker.datatype.boolean());
+  security.isMultiPartition.faker((faker) => faker.datatype.boolean());
+  security.isIssuable?.faker((faker) => faker.datatype.boolean());
+  security.totalSupply?.faker((faker) =>
+    BigDecimal.fromString(
+      faker.finance.amount({ min: 1000, max: 1000000, dec: 0 }),
+    ),
+  );
+  security.maxSupply?.faker((faker) =>
+    BigDecimal.fromString(
+      faker.finance.amount({ min: 1000000, max: 10000000, dec: 0 }),
+    ),
+  );
+  security.diamondAddress?.fromFixture(HederaIdFixture);
+  security.evmDiamondAddress?.fromFixture(EvmAddressFixture);
+  security.paused?.faker((faker) => faker.datatype.boolean());
+  security.regulationType?.faker((faker) =>
+    faker.helpers.arrayElement(Object.values(RegulationType)),
+  );
+  security.regulationsubType?.faker((faker) =>
+    faker.helpers.arrayElement(Object.values(RegulationSubType)),
+  );
+  security.regulation?.fromFixture(RegulationFixture);
+  security.isCountryControlListWhiteList.faker((faker) =>
+    faker.datatype.boolean(),
+  );
+  security.countries?.faker((faker) =>
+    faker.helpers
+      .arrayElements(
+        Array.from({ length: 5 }, () =>
+          faker.location.countryCode({ variant: 'alpha-2' }),
+        ),
+        { min: 1, max: 5 },
+      )
+      .join(','),
+  );
+  security.info?.faker((faker) => faker.lorem.sentence());
+});

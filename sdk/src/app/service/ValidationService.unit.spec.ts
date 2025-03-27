@@ -203,42 +203,175 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+import ValidationService from './ValidationService';
+import { QueryBus } from '../../core/query/QueryBus';
+import Injectable from '../../core/Injectable';
+import { createMock } from '@golevelup/ts-jest';
+import BaseError from '../../core/error/BaseError';
+import {
+  HederaIdFixture,
+  PartitionIdFixture,
+} from '../../../test/fixtures/shared/IdentifierFixture';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
-  }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
+describe('ValidationService', () => {
+  let service: ValidationService;
 
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
+  const queryBusMock = createMock<QueryBus>();
 
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
+  const securityId = HederaIdFixture.create();
+  const issuerId = HederaIdFixture.create();
+  const operatorId = HederaIdFixture.create();
+  const targetId = HederaIdFixture.create();
+  const firstAddress = HederaIdFixture.create();
+  const secondAddress = HederaIdFixture.create();
+  const partitionId = PartitionIdFixture.create();
 
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
-      });
-    }
-  }
-}
+  beforeEach(() => {
+    service = new ValidationService();
+    jest.spyOn(Injectable, 'resolve').mockReturnValue(queryBusMock);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('validateIssuer', () => {
+    it('should return true when issuer is valid', async () => {
+      queryBusMock.execute.mockResolvedValue({ payload: true });
+
+      const result = await service.validateIssuer(
+        securityId.value,
+        issuerId.value,
+      );
+
+      expect(result).toBe(true);
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          securityId: securityId.value,
+          issuerId: issuerId.value,
+        }),
+      );
+    });
+
+    it('should throw UnlistedIssuer when issuer is invalid', async () => {
+      queryBusMock.execute.mockResolvedValue({ payload: false });
+      await expect(
+        service.validateIssuer(securityId.value, issuerId.value),
+      ).rejects.toThrow(BaseError);
+    });
+  });
+
+  describe('validateKycAddresses', () => {
+    it('should return true when all addresses are KYCd', async () => {
+      queryBusMock.execute.mockResolvedValue({ payload: 1 });
+
+      const result = await service.validateKycAddresses(securityId.value, [
+        firstAddress.value,
+        secondAddress.value,
+      ]);
+
+      expect(result).toBe(true);
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw AccountNotKycd when an address is not KYCd', async () => {
+      queryBusMock.execute
+        .mockResolvedValueOnce({ payload: 1 })
+        .mockResolvedValueOnce({ payload: 0 });
+
+      await expect(
+        service.validateKycAddresses(securityId.value, [
+          firstAddress.value,
+          secondAddress.value,
+        ]),
+      ).rejects.toThrow(BaseError);
+    });
+  });
+
+  describe('validateClearingActivated', () => {
+    it('should return true when clearing is activated', async () => {
+      queryBusMock.execute.mockResolvedValue({ payload: true });
+
+      const result = await service.validateClearingActivated(securityId.value);
+
+      expect(result).toBe(true);
+    });
+
+    it('should throw ClearingDeactivated when clearing is not activated', async () => {
+      queryBusMock.execute.mockResolvedValue({ payload: false });
+
+      await expect(
+        service.validateClearingActivated(securityId.value),
+      ).rejects.toThrow(BaseError);
+    });
+  });
+
+  describe('validateClearingDeactivated', () => {
+    it('should return false when clearing is deactivated', async () => {
+      queryBusMock.execute.mockResolvedValue({ payload: false });
+
+      const result = await service.validateClearingDeactivated(
+        securityId.value,
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should throw ClearingActivated when clearing is activated', async () => {
+      queryBusMock.execute.mockResolvedValue({ payload: true });
+
+      await expect(
+        service.validateClearingDeactivated(securityId.value),
+      ).rejects.toThrow(BaseError);
+    });
+  });
+
+  describe('validateOperator', () => {
+    it('should return true when operator is valid via IsOperatorQuery', async () => {
+      queryBusMock.execute
+        .mockResolvedValueOnce({ payload: true })
+        .mockResolvedValueOnce({ payload: false });
+
+      const result = await service.validateOperator(
+        securityId.value,
+        partitionId.value,
+        operatorId.value,
+        targetId.value,
+      );
+
+      expect(result).toBe(true);
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return true when operator is valid via IsOperatorForPartitionQuery', async () => {
+      queryBusMock.execute
+        .mockResolvedValueOnce({ payload: false })
+        .mockResolvedValueOnce({ payload: true });
+
+      const result = await service.validateOperator(
+        securityId.value,
+        partitionId.value,
+        operatorId.value,
+        targetId.value,
+      );
+
+      expect(result).toBe(true);
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw AccountIsNotOperator when neither query validates', async () => {
+      queryBusMock.execute
+        .mockResolvedValueOnce({ payload: false })
+        .mockResolvedValueOnce({ payload: false });
+
+      await expect(
+        service.validateOperator(
+          securityId.value,
+          partitionId.value,
+          operatorId.value,
+          targetId.value,
+        ),
+      ).rejects.toThrow(BaseError);
+    });
+  });
+});

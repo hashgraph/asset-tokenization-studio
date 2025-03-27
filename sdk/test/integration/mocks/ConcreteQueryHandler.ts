@@ -203,42 +203,37 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Query } from '../../../src/core/query/Query.js';
+import { IQueryHandler } from '../../../src/core/query/QueryHandler.js';
+import { QueryResponse } from '../../../src/core/query/QueryResponse.js';
+import { QueryHandler } from '../../../src/core/decorator/QueryHandlerDecorator.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
+export class ConcreteQueryResponse implements QueryResponse {
+  constructor(public readonly payload: number) {}
+}
+
+export class ConcreteQuery extends Query<ConcreteQueryResponse> {
+  constructor(
+    public readonly itemId: string,
+    public readonly payload: number,
+  ) {
+    super();
   }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
+}
 
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
+export class ConcreteQueryRepository {
+  public map = new Map<ConcreteQuery, any>();
+}
 
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
+@QueryHandler(ConcreteQuery)
+export class ConcreteQueryHandler implements IQueryHandler<ConcreteQuery> {
+  constructor(
+    public readonly repo: ConcreteQueryRepository = new ConcreteQueryRepository(),
+  ) {}
 
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
-      });
-    }
+  execute(query: ConcreteQuery): Promise<ConcreteQueryResponse> {
+    this.repo.map.set(query, 'Hello world');
+    return Promise.resolve(new ConcreteQueryResponse(query.payload));
   }
 }

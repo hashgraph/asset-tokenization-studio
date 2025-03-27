@@ -203,42 +203,152 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+import {
+  SetCouponCommand,
+  SetCouponCommandResponse,
+} from './SetCouponCommand.js';
+import { SetCouponCommandHandler } from './SetCouponCommandHandler.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { SetCouponCommandFixture } from '../../../../../../../test/fixtures/bond/BondFixture.js';
+import { createMock } from '@golevelup/ts-jest';
+import TransactionService from '../../../../../../app/service/TransactionService.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import {
+  CouponIdFixture,
+  EvmAddressFixture,
+  GetContractInvalidStringFixture,
+  HederaIdZeroAddressFixture,
+  TransactionIdFixture,
+} from '../../../../../../../test/fixtures/shared/IdentifierFixture.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
-  }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
+describe('SetCouponCommandHandler', () => {
+  let handler: SetCouponCommandHandler;
+  let command: SetCouponCommand;
+  const transactionServiceMock = createMock<TransactionService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
 
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
+  const evmAddress = EvmAddressFixture.create();
+  const transactionId = TransactionIdFixture.create().id;
+  const couponId = CouponIdFixture.create().id;
+  const getResultInvalid = GetContractInvalidStringFixture.create().value;
+  const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
 
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
+  beforeEach(() => {
+    handler = new SetCouponCommandHandler(
+      transactionServiceMock,
+      mirrorNodeAdapterMock,
+    );
+    command = SetCouponCommandFixture.create();
+  });
 
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws error when transaction response id is missing', async () => {
+        setupContractInfoMock();
+        transactionServiceMock
+          .getHandler()
+          .setCoupon.mockResolvedValue({ id: undefined });
+
+        await expect(handler.execute(command)).rejects.toThrow(
+          'Set coupon Command Handler response id empty',
+        );
       });
-    }
+
+      it('throws error when mirror node returns invalid results', async () => {
+        setupContractInfoMock();
+        transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
+          id: transactionId,
+          response: null,
+        });
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
+          getResultInvalid,
+        ]);
+
+        await expect(handler.execute(command)).rejects.toThrow(
+          'Invalid data structure',
+        );
+      });
+    });
+
+    describe('success cases', () => {
+      it('successfully sets coupon with couponID in response', async () => {
+        setupContractInfoMock();
+        setupSuccessfulTransactionMock();
+
+        const result = await handler.execute(command);
+
+        expectSuccessfulResponse(result);
+        expectTransactionServiceCall(command, evmAddress);
+      });
+
+      it('recovers coupon ID from mirror node when not in response', async () => {
+        setupContractInfoMock();
+        transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
+          id: transactionId,
+          response: null,
+        });
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
+          getResultInvalid,
+          couponId,
+        ]);
+
+        const result = await handler.execute(command);
+
+        expectSuccessfulResponse(result);
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
+          transactionId,
+          2,
+        );
+      });
+
+      it('handles non-Hedera address format correctly', async () => {
+        command = SetCouponCommandFixture.create({
+          address: evmAddress.value,
+        });
+        setupSuccessfulTransactionMock();
+        const result = await handler.execute(command);
+
+        expectSuccessfulResponse(result);
+        expect(mirrorNodeAdapterMock.getContractInfo).not.toHaveBeenCalled();
+        expectTransactionServiceCall(command, { value: command.address });
+      });
+    });
+  });
+
+  function setupContractInfoMock(): void {
+    mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
+      id: hederaIdZeroAddress,
+      evmAddress: evmAddress.value,
+    });
   }
-}
+
+  function setupSuccessfulTransactionMock(): void {
+    transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
+      id: transactionId,
+      response: { couponID: couponId },
+    });
+  }
+
+  function expectSuccessfulResponse(result: SetCouponCommandResponse): void {
+    expect(result).toBeInstanceOf(SetCouponCommandResponse);
+    expect(result.payload).toBe(parseInt(couponId, 16));
+    expect(result.transactionId).toBe(transactionId);
+  }
+
+  function expectTransactionServiceCall(
+    command: ReturnType<typeof SetCouponCommandFixture.create>,
+    expectedAddress: { value: string },
+  ): void {
+    expect(transactionServiceMock.getHandler().setCoupon).toHaveBeenCalledWith(
+      expectedAddress,
+      BigDecimal.fromString(command.recordDate),
+      BigDecimal.fromString(command.executionDate),
+      BigDecimal.fromString(command.rate),
+      command.address,
+    );
+  }
+});

@@ -203,42 +203,22 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+/* eslint-disable jest/no-mocks-import */
+import { CommandBus } from '../../src/core/command/CommandBus.js';
+import {
+  ConcreteCommand,
+  ConcreteCommandResponse,
+} from './mocks/ConcreteCommandHandler.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
-  }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
+const commandBus = new CommandBus();
 
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
-
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
-
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
-      });
-    }
-  }
-}
+describe('CommandHandler Test', () => {
+  it('Executes a simple command successfully', async () => {
+    const execSpy = jest.spyOn(commandBus, 'execute');
+    const command = new ConcreteCommand('1', 4);
+    const res = await commandBus.execute(command);
+    expect(res).toBeInstanceOf(ConcreteCommandResponse);
+    expect(res.payload).toBe(command.payload);
+    expect(execSpy).toHaveBeenCalled();
+  });
+});

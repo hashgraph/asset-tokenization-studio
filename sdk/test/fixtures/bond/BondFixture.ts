@@ -203,42 +203,80 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+import { CreateBondCommand } from '../../../src/app/usecase/command/bond/create/CreateBondCommand.js';
+import { SetCouponCommand } from '../../../src/app/usecase/command/bond/coupon/set/SetCouponCommand.js';
+import { createFixture } from '../config.js';
+import ContractId from '../../../src/domain/context/contract/ContractId.js';
+import {
+  ContractIdFixture,
+  HederaIdFixture,
+} from '../shared/IdentifierFixture.js';
+import { SecurityPropsFixture } from '../shared/SecurityFixture.js';
+import { UpdateMaturityDateCommand } from 'app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand.js';
+import { BondDetails } from 'domain/context/bond/BondDetails.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
-  }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
+export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
+  (command) => {
+    command.address.as(() => HederaIdFixture.create().value);
+    command.recordDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.executionDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.rate.faker((faker) =>
+      faker.number.int({ min: 100, max: 999 }).toString(),
+    );
+  },
+);
 
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
+export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
+  (command) => {
+    command.security.fromFixture(SecurityPropsFixture);
+    command.currency.faker((faker) => faker.finance.currencyCode());
+    command.nominalValue.faker((faker) =>
+      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    command.startingDate.faker((faker) =>
+      faker.date.recent().getTime().toString(),
+    );
+    command.maturityDate.faker((faker) =>
+      faker.date.future({ years: 2 }).getTime().toString(),
+    );
+    command.couponFrequency.faker((faker) =>
+      faker.number.int({ min: 1, max: 12 }).toString(),
+    );
+    command.couponRate.faker((faker) =>
+      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    command.firstCouponDate.faker((faker) =>
+      faker.date.soon({ days: 30 }).getTime().toString(),
+    );
+    command.factory?.as(() => new ContractId(ContractIdFixture.create().value));
+    command.resolver?.as(
+      () => new ContractId(ContractIdFixture.create().value),
+    );
+    command.configId?.as(() => HederaIdFixture.create().value);
+    command.configVersion?.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
+    command.diamondOwnerAccount?.as(() => HederaIdFixture.create().value);
+  },
+);
 
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
+export const UpdateMaturityDateCommandFixture =
+  createFixture<UpdateMaturityDateCommand>((command) => {
+    command.maturityDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.securityId.as(() => HederaIdFixture.create().value);
+  });
 
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
-      });
-    }
-  }
-}
+export const BondDetailsFixture = createFixture<BondDetails>((props) => {
+  props.currency.faker((faker) => faker.finance.currencyCode());
+  props.nominalValue.faker((faker) =>
+    faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+  );
+  props.startingDate.faker((faker) => faker.date.past());
+  props.maturityDate.faker((faker) => faker.date.recent());
+});

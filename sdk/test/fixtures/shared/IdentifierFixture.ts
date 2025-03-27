@@ -203,42 +203,50 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+import EvmAddress from '../../../src/domain/context/contract/EvmAddress.js';
+import { createFixture } from '../config.js';
+import ContractId from '../../../src/domain/context/contract/ContractId.js';
+import { HederaId } from '../../../src/domain/context/shared/HederaId.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
-  }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
+export const EvmAddressFixture = createFixture<EvmAddress>((props) => {
+  props.value.faker((faker) =>
+    faker.string.hexadecimal({ length: 40, casing: 'lower' }),
+  );
+});
 
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
+export const HederaIdFixture = createFixture<HederaId>((props) => {
+  props.value.faker(
+    (faker) => `0.0.${faker.number.int({ min: 100, max: 999 })}`,
+  );
+});
 
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
+export const HederaIdZeroAddressFixture = createFixture<{ address: string }>(
+  (props) => {
+    props.address.faker(() => '0.0.0');
+  },
+);
 
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
-      });
-    }
-  }
-}
+export const ContractIdFixture = createFixture<ContractId>((props) => {
+  props.value.as(() => HederaIdFixture.create().value);
+});
+
+export const TransactionIdFixture = createFixture<{ id: string }>((props) => {
+  props.id.as(() => HederaIdFixture.create().value);
+});
+
+export const CouponIdFixture = createFixture<{ id: string }>((props) => {
+  props.id.faker((faker) => faker.number.hex({ min: 1, max: 1000 }));
+});
+
+export const GetContractInvalidStringFixture = createFixture<{ value: string }>(
+  (props) => {
+    props.value.faker((faker) => faker.string.alpha(5));
+  },
+);
+
+export const PartitionIdFixture = createFixture<{ value: string }>((props) => {
+  props.value.faker(
+    (faker) =>
+      `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 1, max: 9 })}`,
+  );
+});

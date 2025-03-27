@@ -31,7 +31,7 @@
     "prebuild": "npm run lint && npm run prettier",
     "build": "rimraf build && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
     "prepack": "npm run build",
-    "test:local": "npx --yes jest --forceExit",
+    "test:local": "jest --logHeapUsage --no-compilation-cache --workerIdleMemoryLimit=0.6",
     "test": "NODE_OPTIONS=--max-old-space-size=16384 npx jest --ci --runInBand --detectOpenHandles --forceExit",
     "test:demo": "npx --yes jest demo.test.ts",
     "test:clear:cache": "npx --yes jest --clearCache",
@@ -44,6 +44,8 @@
     "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.4",
+    "@faker-js/faker": "^9.6.0",
+    "@golevelup/ts-jest": "^0.6.2",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-jest": "^27.2.3",
@@ -80,7 +82,9 @@
     "tsyringe": "^4.8.0",
     "uuid": "^9.0.0",
     "winston": "^3.8.2",
-    "winston-daily-rotate-file": "^4.7.1"
+    "winston-daily-rotate-file": "^4.7.1",
+    "efate": "1.5.1",
+    "tsarch": "5.4.0"
   },
   "overrides": {
     "ws": "7.5.10",

@@ -203,42 +203,151 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+import TransactionService from '../../../../service/TransactionService.js';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { createMock } from '@golevelup/ts-jest';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import {
+  BondDetailsFixture,
+  UpdateMaturityDateCommandFixture,
+} from '../../../../../../test/fixtures/bond/BondFixture.js';
+import {
+  EvmAddressFixture,
+  HederaIdFixture,
+  TransactionIdFixture,
+} from '../../../../../../test/fixtures/shared/IdentifierFixture.js';
+import { UpdateMaturityDateCommandHandler } from './UpdateMaturityDateCommandHandler.js';
+import {
+  UpdateMaturityDateCommand,
+  UpdateMaturityDateCommandResponse,
+} from './UpdateMaturityDateCommand.js';
+import { faker } from '@faker-js/faker';
+import { OperationNotAllowed } from '../../security/error/OperationNotAllowed.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
-  }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
+describe('UpdateMaturityDateCommandHandler', () => {
+  let handler: UpdateMaturityDateCommandHandler;
+  let command: UpdateMaturityDateCommand;
+  const transactionServiceMock = createMock<TransactionService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+  const rpcQueryAdapterMock = createMock<RPCQueryAdapter>();
 
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
+  const evmAddress = EvmAddressFixture.create();
+  const transactionId = TransactionIdFixture.create().id;
+  const hederaId = HederaIdFixture.create();
+
+  beforeEach(() => {
+    handler = new UpdateMaturityDateCommandHandler(
+      transactionServiceMock,
+      rpcQueryAdapterMock,
+      mirrorNodeAdapterMock,
+    );
+    command = UpdateMaturityDateCommandFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('should throw OperationNotAllowed if the date is in the past', async () => {
+        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(
+          evmAddress,
+        );
+
+        mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
+          id: hederaId.value,
+          evmAddress: evmAddress.value,
         });
-      }
 
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
+        rpcQueryAdapterMock.getBondDetails.mockResolvedValue(
+          BondDetailsFixture.create({
+            maturityDate: faker.date
+              .between({
+                from: parseInt(command.maturityDate),
+                to: parseInt(command.maturityDate),
+              })
+              .getTime(),
+          }),
+        );
 
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
+        await expect(handler.execute(command)).rejects.toThrow(
+          new OperationNotAllowed(
+            'The maturity date cannot be earlier or equal than the current one',
+          ),
+        );
       });
-    }
-  }
-}
+    });
+
+    describe('success cases', () => {
+      it('should successfully update maturity date in response', async () => {
+        mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
+          id: hederaId.value,
+          evmAddress: evmAddress.value,
+        });
+
+        rpcQueryAdapterMock.getBondDetails.mockResolvedValue(
+          BondDetailsFixture.create(),
+        );
+
+        transactionServiceMock
+          .getHandler()
+          .updateMaturityDate.mockResolvedValue({
+            id: transactionId,
+          });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(UpdateMaturityDateCommandResponse);
+        expect(mirrorNodeAdapterMock.getContractInfo).toHaveBeenCalledTimes(1);
+        expect(rpcQueryAdapterMock.getBondDetails).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().updateMaturityDate,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().updateMaturityDate,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          parseInt(command.maturityDate),
+          command.securityId,
+        );
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+      });
+
+      it('should successfully update maturity date with non-Hedera address format', async () => {
+        command = UpdateMaturityDateCommandFixture.create({
+          securityId: evmAddress.value,
+        });
+
+        rpcQueryAdapterMock.getBondDetails.mockResolvedValue(
+          BondDetailsFixture.create(),
+        );
+
+        transactionServiceMock
+          .getHandler()
+          .updateMaturityDate.mockResolvedValue({
+            id: transactionId,
+          });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(UpdateMaturityDateCommandResponse);
+        expect(rpcQueryAdapterMock.getBondDetails).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().updateMaturityDate,
+        ).toHaveBeenCalledTimes(1);
+        expect(mirrorNodeAdapterMock.getContractInfo).not.toHaveBeenCalled();
+        expect(
+          transactionServiceMock.getHandler().updateMaturityDate,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          parseInt(command.maturityDate),
+          command.securityId,
+        );
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+      });
+    });
+  });
+});
