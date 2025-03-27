@@ -203,19 +203,27 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
-library ArrayLib {
-    function getSlotForDynamicArrayItem(
-        uint256 _dynamicArraySlot,
-        uint256 _itemIndex,
-        uint256 _itemsSize
-    ) internal pure returns (uint256) {
-        uint256 dynamicArrayBaseSlot = uint256(
-            keccak256(abi.encode(_dynamicArraySlot))
-        );
+import {
+    ExternalPauseManagement
+} from '../../../layer_1/externalPauses/ExternalPauseManagement.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-        return dynamicArrayBaseSlot + _itemIndex * _itemsSize;
+contract ExternalPauseManagementTimeTravel is
+    ExternalPauseManagement,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

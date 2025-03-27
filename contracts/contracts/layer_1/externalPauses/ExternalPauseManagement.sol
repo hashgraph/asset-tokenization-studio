@@ -203,65 +203,156 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-// solhint-disable var-name-mixedcase, no-inline-assembly
-library MappingLib {
-    function getSlotForBytes32MappingKey(
-        mapping(bytes32 => uint256) storage _mapping,
-        bytes32 _key
-    ) internal pure returns (uint256) {
-        uint256 MappingSlot;
+    IExternalPauseManagement
+} from '../interfaces/externalPauses/IExternalPauseManagement.sol';
+import {Common} from '../common/Common.sol';
+import {_PAUSE_MANAGER_ROLE} from '../constants/roles.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_PAUSE_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
-        assembly {
-            MappingSlot := _mapping.slot
+contract ExternalPauseManagement is
+    IExternalPauseManagement,
+    IStaticFunctionSelectors,
+    Common
+{
+    function initialize_ExternalPauses(
+        address[] calldata _pauses
+    ) external override onlyUninitialized(_externalPauseStorage().initialized) {
+        ExternalPauseDataStorage
+            storage externalPauseDataStorage = _externalPauseStorage();
+        uint256 length = _pauses.length;
+        for (uint256 index = 0; index < length; ++index) {
+            _addExternalPause(_pauses[index]);
         }
-
-        return uint256(keccak256(abi.encode(_key, MappingSlot)));
+        externalPauseDataStorage.initialized = true;
     }
 
-    function getSlotForAddressMappingKey(
-        mapping(address => uint256) storage _mapping,
-        address _key
-    ) internal pure returns (uint256) {
-        uint256 MappingSlot;
-
-        assembly {
-            MappingSlot := _mapping.slot
+    function updateExternalPauses(
+        address[] calldata _pauses,
+        bool[] calldata _actives
+    )
+        external
+        override
+        onlyRole(_PAUSE_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _updateExternalPauses(_pauses, _actives);
+        if (!success_) {
+            revert ExternalPausesNotUpdated(_pauses, _actives);
         }
-
-        return uint256(keccak256(abi.encode(_key, MappingSlot)));
+        emit ExternalPausesUpdated(_msgSender(), _pauses, _actives);
     }
 
-    function getSlotForAddressMappingKey(
-        mapping(address => uint256[]) storage _mapping,
-        address _key
-    ) internal pure returns (uint256) {
-        uint256 MappingSlot;
-
-        assembly {
-            MappingSlot := _mapping.slot
+    function addExternalPause(
+        address _pause
+    )
+        external
+        override
+        onlyRole(_PAUSE_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _addExternalPause(_pause);
+        if (!success_) {
+            revert ListedPause(_pause);
         }
-
-        return uint256(keccak256(abi.encode(_key, MappingSlot)));
+        emit AddedToExternalPauses(_msgSender(), _pause);
     }
 
-    function getSlotForAddressMappingKey(
-        mapping(address => ERC1410BasicStorageWrapperRead.Partition[])
-            storage _mapping,
-        address _key
-    ) internal pure returns (uint256) {
-        uint256 MappingSlot;
-
-        assembly {
-            MappingSlot := _mapping.slot
+    function removeExternalPause(
+        address _pause
+    )
+        external
+        override
+        onlyRole(_PAUSE_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _removeExternalPause(_pause);
+        if (!success_) {
+            revert UnlistedPause(_pause);
         }
+        emit RemovedFromExternalPauses(_msgSender(), _pause);
+    }
 
-        return uint256(keccak256(abi.encode(_key, MappingSlot)));
+    function isExternalPause(
+        address _pause
+    ) external view override returns (bool) {
+        return _isExternalPause(_pause);
+    }
+
+    function getExternalPausesCount()
+        external
+        view
+        override
+        returns (uint256 externalPausesCount_)
+    {
+        return _getExternalPausesCount();
+    }
+
+    function getExternalPausesMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (address[] memory members_) {
+        return _getExternalPausesMembers(_pageIndex, _pageLength);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _PAUSE_MANAGEMENT_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .initialize_ExternalPauses
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .updateExternalPauses
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .addExternalPause
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .removeExternalPause
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isExternalPause
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getExternalPausesCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getExternalPausesMembers
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IExternalPauseManagement)
+            .interfaceId;
     }
 }
-// solhint-enable var-name-mixedcase, no-inline-assembly

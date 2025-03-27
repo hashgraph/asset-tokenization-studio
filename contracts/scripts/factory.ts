@@ -283,6 +283,7 @@ export interface SecurityData {
     maxSupply: bigint
     erc20MetadataInfo: ERC20MetadataInfo
     clearingActive: boolean
+    externalPauses: string[]
 }
 
 export interface EquityData {
@@ -367,6 +368,7 @@ export async function setEquityData({
     init_rbacs,
     addAdmin = true,
     businessLogicResolver,
+    externalPauses,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -392,6 +394,7 @@ export async function setEquityData({
     init_rbacs?: Rbac[]
     addAdmin?: boolean
     businessLogicResolver: string
+    externalPauses?: string[]
 }) {
     let rbacs: Rbac[] = []
 
@@ -430,6 +433,7 @@ export async function setEquityData({
         maxSupply: numberOfShares,
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: clearingActive,
+        externalPauses: externalPauses ? externalPauses : [],
     }
 
     const equityDetails: EquityDetailsData = {
@@ -475,6 +479,7 @@ export async function setBondData({
     init_rbacs,
     addAdmin = true,
     businessLogicResolver,
+    externalPauses,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -497,6 +502,7 @@ export async function setBondData({
     init_rbacs?: Rbac[]
     addAdmin: boolean
     businessLogicResolver: string
+    externalPauses?: string[]
 }) {
     let rbacs: Rbac[] = []
 
@@ -535,6 +541,7 @@ export async function setBondData({
         maxSupply: numberOfUnits,
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: clearingActive,
+        externalPauses: externalPauses ? externalPauses : [],
     }
 
     const bondDetails: BondDetailsData = {
