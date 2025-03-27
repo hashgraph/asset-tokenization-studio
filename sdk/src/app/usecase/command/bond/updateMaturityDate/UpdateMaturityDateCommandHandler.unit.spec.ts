@@ -251,9 +251,7 @@ describe('UpdateMaturityDateCommandHandler', () => {
   describe('execute', () => {
     describe('error cases', () => {
       it('should throw OperationNotAllowed if the date is in the past', async () => {
-        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(
-          evmAddress,
-        );
+        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(evmAddress);
 
         mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
           id: hederaId.value,

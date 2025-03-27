@@ -227,7 +227,7 @@ import {
 describe('CreateBondCommandHandler', () => {
   let handler: CreateBondCommandHandler;
   let command: CreateBondCommand;
-  
+
   const transactionServiceMock = createMock<TransactionService>();
   const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
   const accountServiceMock = createMock<AccountService>();
@@ -304,9 +304,7 @@ describe('CreateBondCommandHandler', () => {
       });
 
       it('throws error when transaction response id is missing', async () => {
-        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(
-          evmAddress,
-        );
+        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(evmAddress);
 
         mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
           id: hederaId.value,
@@ -325,9 +323,7 @@ describe('CreateBondCommandHandler', () => {
 
     describe('success cases', () => {
       it('should successfully create a bond with bondAddress in response', async () => {
-        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(
-          evmAddress,
-        );
+        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(evmAddress);
 
         mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
           id: hederaId.value,
@@ -383,9 +379,7 @@ describe('CreateBondCommandHandler', () => {
       });
 
       it('should recover contract ID from mirror node if bondAddress is not in response', async () => {
-        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(
-          evmAddress,
-        );
+        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(evmAddress);
         mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
           id: hederaId.value,
           evmAddress: evmAddress.value,
@@ -415,9 +409,7 @@ describe('CreateBondCommandHandler', () => {
       });
 
       it('should handle error and return fallback response if response code is 1', async () => {
-        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(
-          evmAddress,
-        );
+        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(evmAddress);
 
         mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
           id: hederaId.value,
