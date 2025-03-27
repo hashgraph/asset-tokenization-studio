@@ -207,9 +207,8 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import AccountService from '../../../../../service/AccountService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   GetKYCStatusForQuery,
@@ -225,8 +224,8 @@ export class GetKYCStatusForQueryHandler
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -234,15 +233,10 @@ export class GetKYCStatusForQueryHandler
   ): Promise<GetKYCStatusForQueryResponse> {
     const { securityId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
 
     const res = await this.queryAdapter.getKYCStatusFor(
       securityEvmAddress,

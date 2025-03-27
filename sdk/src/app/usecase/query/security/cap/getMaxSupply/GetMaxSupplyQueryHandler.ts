@@ -203,111 +203,49 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import {
-  ExecuteHoldByPartitionCommand,
-  ExecuteHoldByPartitionCommandResponse,
-} from './ExecuteHoldByPartitionCommand.js';
-import TransactionService from '../../../../../service/TransactionService.js';
+  GetMaxSupplyQuery,
+  GetMaxSupplyQueryResponse,
+} from './GetMaxSupplyQuery.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/SecurityService.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../error/DecimalsOverRange.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../error/SecurityPaused.js';
-import { InsufficientHoldBalance } from '../../error/InsufficientHoldBalance.js';
-import { EVM_ZERO_ADDRESS } from '../../../../../../core/Constants.js';
-import ValidationService from '../../../../../../app/service/ValidationService.js';
 
-@CommandHandler(ExecuteHoldByPartitionCommand)
-export class ExecuteHoldByPartitionCommandHandler
-  implements ICommandHandler<ExecuteHoldByPartitionCommand>
+@QueryHandler(GetMaxSupplyQuery)
+export class GetMaxSupplyQueryHandler
+  implements IQueryHandler<GetMaxSupplyQuery>
 {
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
   ) {}
 
-  async execute(
-    command: ExecuteHoldByPartitionCommand,
-  ): Promise<ExecuteHoldByPartitionCommandResponse> {
-    const { securityId, sourceId, amount, holdId, targetId, partitionId } =
-      command;
-
-    await this.validationService.validateKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
-
-    const handler = this.transactionService.getHandler();
+  async execute(query: GetMaxSupplyQuery): Promise<GetMaxSupplyQueryResponse> {
+    const { securityId } = query;
     const security = await this.securityService.get(securityId);
+    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
+      HEDERA_FORMAT_ID_REGEX.exec(securityId)
         ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
         : securityId.toString(),
     );
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const targetEvmAddress: EvmAddress =
-      targetId === '0.0.0'
-        ? new EvmAddress(EVM_ZERO_ADDRESS)
-        : HEDERA_FORMAT_ID_REGEX.exec(targetId)
-          ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-          : new EvmAddress(targetId);
-
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
-
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
-
-    const holdDetails = await this.queryAdapter.getHoldForByPartition(
-      securityEvmAddress,
-      partitionId,
-      sourceEvmAddress,
-      holdId,
+    const res = await this.queryAdapter.getMaxSupply(securityEvmAddress);
+    const amount = BigDecimal.fromStringFixed(
+      res.toString(),
+      security.decimals,
     );
-
-    if (holdDetails.amount.toBigNumber().lt(amountBd.toBigNumber())) {
-      throw new InsufficientHoldBalance();
-    }
-
-    const res = await handler.executeHoldByPartition(
-      securityEvmAddress,
-      sourceEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      partitionId,
-      holdId,
-      securityId,
-    );
-
-    return Promise.resolve(
-      new ExecuteHoldByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+    return new GetMaxSupplyQueryResponse(amount);
   }
 }

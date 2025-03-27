@@ -214,7 +214,7 @@ import {
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import AccountService from '../../../../../service/AccountService';
 import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
 
 @QueryHandler(GetControlListTypeQuery)
@@ -228,6 +228,8 @@ export class GetControlListTypeQueryHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -237,12 +239,8 @@ export class GetControlListTypeQueryHandler
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getControlListType(securityEvmAddress);
 
     return new GetControlListTypeQueryResponse(

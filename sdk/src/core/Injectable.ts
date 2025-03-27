@@ -248,7 +248,7 @@ import { ReleaseCommandHandler } from '../app/usecase/command/security/operation
 import { LockCountQueryHandler } from '../app/usecase/query/security/lockCount/LockCountQueryHandler.js';
 import { GetLockQueryHandler } from '../app/usecase/query/security/getLock/GetLockQueryHandler.js';
 import { LocksIdQueryHandler } from '../app/usecase/query/security/locksId/LocksIdQueryHandler.js';
-import { ExecuteHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/executeHoldByPartition/ExecuteHoldByPartitionCommandHandler.js';
+import { ExecuteHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommandHandler.js';
 
 import { WalletEvents } from '../app/service/event/WalletEvent.js';
 import { CommandHandlerType } from './command/CommandBus.js';
@@ -283,7 +283,11 @@ import { GetCouponDetailsQueryHandler } from '../app/usecase/query/bond/get/getC
 import { GetCouponQueryHandler } from '../app/usecase/query/bond/coupons/getCoupon/GetCouponQueryHandler.js';
 import { GetCouponCountQueryHandler } from '../app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQueryHandler.js';
 import { GetCouponForQueryHandler } from '../app/usecase/query/bond/coupons/getCouponFor/GetCouponForQueryHandler.js';
-import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/GetMaxSupplyQueryHandler.js';
+import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/getMaxSupply/GetMaxSupplyQueryHandler.js';
+import { GetMaxSupplyByPartitionQueryHandler } from '../app/usecase/query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQueryHandler.js';
+import { CanTransferByPartitionQueryHandler } from '../app/usecase/query/security/canTransferByPartition/CanTransferByPartitionQueryHandler.js';
+import { CanTransferQueryHandler } from '../app/usecase/query/security/canTransfer/CanTransferQueryHandler.js';
+import { CanRedeemByPartitionQueryHandler } from '../app/usecase/query/security/canRedeemByPartition/CanRedeemByPartitionQueryHandler.js';
 
 import { SDK } from '../port/in/Common.js';
 import { HederaWalletConnectTransactionAdapter } from '../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
@@ -784,6 +788,10 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
+    useClass: GetMaxSupplyByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
     useClass: GetConfigInfoQueryHandler,
   },
   {
@@ -902,6 +910,18 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsOperatorQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: CanTransferByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: CanTransferQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: CanRedeemByPartitionQueryHandler,
   },
 ];
 

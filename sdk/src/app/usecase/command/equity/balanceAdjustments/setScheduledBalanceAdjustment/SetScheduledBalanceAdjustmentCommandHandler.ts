@@ -211,7 +211,6 @@ import {
 } from './SetScheduledBalanceAdjustmentCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
@@ -241,12 +240,8 @@ export class SetScheduledBalanceAdjustmentCommandHandler
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId,
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     if (await this.queryAdapter.isPaused(securityEvmAddress)) {
       throw new Error('The security is currently paused');
     }

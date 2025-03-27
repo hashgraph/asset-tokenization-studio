@@ -214,11 +214,9 @@ import {
   AddToControlListCommand,
   AddToControlListCommandResponse,
 } from './AddToControlListCommand.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { SecurityPaused } from '../../error/SecurityPaused.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { AccountAlreadyInControlList } from '../../error/AccountAlreadyInControlList.js';
+import ValidationService from '../../../../../service/ValidationService.js';
 
 @CommandHandler(AddToControlListCommand)
 export class AddToControlListCommandHandler
@@ -231,8 +229,8 @@ export class AddToControlListCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
   ) {}
@@ -243,19 +241,12 @@ export class AddToControlListCommandHandler
     const { targetId, securityId } = command;
     const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
 
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.test(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
-
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
+    await this.validationService.checkPause(securityId);
 
     const isAlready = await this.queryAdapter.isAccountInControlList(
       securityEvmAddress,

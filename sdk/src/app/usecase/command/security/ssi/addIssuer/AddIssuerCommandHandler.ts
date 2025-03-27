@@ -208,15 +208,11 @@ import { AddIssuerCommand, AddIssuerCommandResponse } from './AddIssuerCommand';
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../../service/TransactionService';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { SecurityPaused } from '../../../security/error/SecurityPaused';
-import { AccountIsAlreadyAnIssuer } from '../../error/AccountAlreadyIsAnIssuer';
 import AccountService from '../../../../../service/AccountService';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import { NotGrantedRole } from '../../error/NotGrantedRole';
+import ValidationService from '../../../../../service/ValidationService';
 
 @CommandHandler(AddIssuerCommand)
 export class AddIssuerCommandHandler
@@ -227,10 +223,10 @@ export class AddIssuerCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
   ) {}
 
   async execute(command: AddIssuerCommand): Promise<AddIssuerCommandResponse> {
@@ -238,39 +234,24 @@ export class AddIssuerCommandHandler
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkRole(
+      SecurityRole._SSI_MANAGER_ROLE,
+      account.id.toString(),
+      securityId,
     );
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
+    const issuerEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(issuerId);
 
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._SSI_MANAGER_ROLE,
-      ))
-    ) {
-      throw new NotGrantedRole(SecurityRole._SSI_MANAGER_ROLE);
-    }
-
-    const issuerEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.test(issuerId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(issuerId)
-      : new EvmAddress(issuerId);
-
-    const isIssuer = await this.queryAdapter.isIssuer(
-      securityEvmAddress,
-      issuerEvmAddress,
+    await this.validationService.checkAccountInIssuersList(
+      securityId,
+      issuerId,
+      true,
     );
-
-    if (isIssuer) {
-      throw new AccountIsAlreadyAnIssuer(issuerId);
-    }
 
     const res = await handler.addIssuer(
       securityEvmAddress,

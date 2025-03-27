@@ -205,11 +205,11 @@
 
 import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class UnlistedIssuer extends BaseError {
+export class OnlyDefaultPartitionAllowed extends BaseError {
   constructor() {
     super(
-      ErrorCode.UnlistedIssuer,
-      `The issuer is not registered in the system`,
+      ErrorCode.OnlyDefaultPartitionAllowed,
+      `only default partition allowed in single mode`,
     );
   }
 }

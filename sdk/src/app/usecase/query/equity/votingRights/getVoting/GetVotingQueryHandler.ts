@@ -211,7 +211,7 @@ import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeA
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import SecurityService from '../../../../../service/SecurityService.js';
 import { GetVotingQuery, GetVotingQueryResponse } from './GetVotingQuery.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import AccountService from '../../../../../service/AccountService.js';
 
 @QueryHandler(GetVotingQuery)
 export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
@@ -222,6 +222,8 @@ export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(query: GetVotingQuery): Promise<GetVotingQueryResponse> {
@@ -230,12 +232,8 @@ export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId,
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getVoting(securityEvmAddress, votingId);
 
     return Promise.resolve(new GetVotingQueryResponse(res));

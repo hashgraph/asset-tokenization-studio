@@ -203,16 +203,60 @@
 
 */
 
-import { Query } from '../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../core/query/QueryResponse.js';
+import {
+  CanTransferQuery,
+  CanTransferQueryResponse,
+} from './CanTransferQuery.js';
+import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../service/SecurityService.js';
+import ValidationService from '../../../../service/ValidationService.js';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../service/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { EMPTY_BYTES } from '../../../../../core/Constants.js';
 
-export class GetMaxSupplyQueryResponse implements QueryResponse {
-  constructor(public readonly payload: BigDecimal) {}
-}
+@QueryHandler(CanTransferQuery)
+export class CanTransferQueryHandler
+  implements IQueryHandler<CanTransferQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
+  ) {}
 
-export class GetMaxSupplyQuery extends Query<GetMaxSupplyQueryResponse> {
-  constructor(public readonly securityId: string) {
-    super();
+  async execute(query: CanTransferQuery): Promise<CanTransferQueryResponse> {
+    const { securityId, targetId, amount } = query;
+
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
+
+    const security = await this.securityService.get(securityId);
+
+    await this.validationService.checkDecimals(security, amount);
+
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    const [, res] = await this.queryAdapter.canTransfer(
+      securityEvmAddress,
+      targetEvmAddress,
+      amountBd,
+      EMPTY_BYTES,
+    );
+
+    return new CanTransferQueryResponse(res);
   }
 }

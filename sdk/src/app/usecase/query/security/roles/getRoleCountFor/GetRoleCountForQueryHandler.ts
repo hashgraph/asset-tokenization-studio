@@ -214,7 +214,7 @@ import {
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import AccountService from '../../../../../service/AccountService';
 
 @QueryHandler(GetRoleCountForQuery)
 export class GetRoleCountForQueryHandler
@@ -227,6 +227,8 @@ export class GetRoleCountForQueryHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -236,15 +238,10 @@ export class GetRoleCountForQueryHandler
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
 
     const res = await this.queryAdapter.getRoleCountFor(
       securityEvmAddress,

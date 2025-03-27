@@ -214,7 +214,7 @@ import {
   GetDividendsQuery,
   GetDividendsQueryResponse,
 } from './GetDividendsQuery.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import AccountService from '../../../../../service/AccountService.js';
 
 @QueryHandler(GetDividendsQuery)
 export class GetDividendsQueryHandler
@@ -227,6 +227,8 @@ export class GetDividendsQueryHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(query: GetDividendsQuery): Promise<GetDividendsQueryResponse> {
@@ -235,12 +237,8 @@ export class GetDividendsQueryHandler
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId,
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getDividends(
       securityEvmAddress,
       dividendId,

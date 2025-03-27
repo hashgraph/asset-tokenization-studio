@@ -210,21 +210,13 @@ import SecurityService from '../../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../../error/SecurityPaused.js';
 import {
   ClearingRedeemByPartitionCommand,
   ClearingRedeemByPartitionCommandResponse,
 } from './ClearingRedeemByPartitionCommand.js';
-import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
-import { SecurityControlListType } from '../../../../../../../domain/context/security/SecurityControlListType.js';
-import { AccountInBlackList } from '../../../error/AccountInBlackList.js';
-import { AccountNotInWhiteList } from '../../../error/AccountNotInWhiteList.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 
 @CommandHandler(ClearingRedeemByPartitionCommand)
@@ -254,69 +246,25 @@ export class ClearingRedeemByPartitionCommandHandler
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
+    await this.validationService.checkPause(securityId);
 
     await this.validationService.validateClearingActivated(securityId);
+
     await this.validationService.validateKycAddresses(securityId, [
       account.id.toString(),
     ]);
 
-    const controListType = (await this.queryAdapter.getControlListType(
-      securityEvmAddress,
-    ))
-      ? SecurityControlListType.WHITELIST
-      : SecurityControlListType.BLACKLIST;
-    const controlListCount =
-      await this.queryAdapter.getControlListCount(securityEvmAddress);
-    const controlListMembers = (
-      await this.queryAdapter.getControlListMembers(
-        securityEvmAddress,
-        0,
-        controlListCount,
-      )
-    ).map(function (x) {
-      return x.toUpperCase();
-    });
+    await this.validationService.checkDecimals(security, amount);
 
-    if (
-      controListType === SecurityControlListType.BLACKLIST &&
-      controlListMembers.includes(account.evmAddress!.toString().toUpperCase())
-    ) {
-      throw new AccountInBlackList(account.evmAddress!.toString());
-    }
-
-    if (
-      controListType === SecurityControlListType.WHITELIST &&
-      !controlListMembers.includes(account.evmAddress!.toString().toUpperCase())
-    ) {
-      throw new AccountNotInWhiteList(account.evmAddress!.toString());
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
-
-    if (
-      account.evmAddress &&
-      (
-        await this.queryAdapter.balanceOf(
-          securityEvmAddress,
-          new EvmAddress(account.evmAddress),
-        )
-      ).lt(amountBd.toBigNumber())
-    ) {
-      throw new InsufficientBalance();
-    }
+    await this.validationService.checkBalance(
+      securityId,
+      account.id.toString(),
+      amountBd,
+    );
 
     const res = await handler.clearingRedeemByPartition(
       securityEvmAddress,

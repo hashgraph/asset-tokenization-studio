@@ -203,25 +203,59 @@
 
 */
 
-import { Command } from '../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
+import {
+  CanRedeemByPartitionQuery,
+  CanRedeemByPartitionQueryResponse,
+} from './CanRedeemByPartitionQuery.js';
+import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../service/SecurityService.js';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../service/AccountService.js';
+import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { EMPTY_BYTES } from '../../../../../core/Constants.js';
 
-export class ExecuteHoldByPartitionCommandResponse implements CommandResponse {
+@QueryHandler(CanRedeemByPartitionQuery)
+export class CanRedeemByPartitionQueryHandler
+  implements IQueryHandler<CanRedeemByPartitionQuery>
+{
   constructor(
-    public readonly payload: boolean,
-    public readonly transactionId: string,
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
-}
 
-export class ExecuteHoldByPartitionCommand extends Command<ExecuteHoldByPartitionCommandResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly sourceId: string,
-    public readonly amount: string,
-    public readonly holdId: number,
-    public readonly targetId: string,
-    public readonly partitionId: string,
-  ) {
-    super();
+  async execute(
+    query: CanRedeemByPartitionQuery,
+  ): Promise<CanRedeemByPartitionQueryResponse> {
+    const { securityId, sourceId, partitionId, amount } = query;
+
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    const sourceEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(sourceId);
+
+    const security = await this.securityService.get(securityId);
+
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    const [, res] = await this.queryAdapter.canRedeemByPartition(
+      securityEvmAddress,
+      sourceEvmAddress,
+      amountBd,
+      partitionId,
+      EMPTY_BYTES,
+      EMPTY_BYTES,
+    );
+
+    return new CanRedeemByPartitionQueryResponse(res);
   }
 }

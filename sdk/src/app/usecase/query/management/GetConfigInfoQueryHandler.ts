@@ -214,7 +214,7 @@ import { MirrorNodeAdapter } from '../../../../port/out/mirror/MirrorNodeAdapter
 import { RPCQueryAdapter } from '../../../../port/out/rpc/RPCQueryAdapter';
 import SecurityService from '../../../service/SecurityService';
 import EvmAddress from '../../../../domain/context/contract/EvmAddress';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../domain/context/shared/HederaId';
+import AccountService from '../../../service/AccountService.js';
 import { DiamondConfiguration } from '../../../../domain/context/security/DiamondConfiguration';
 
 @QueryHandler(GetConfigInfoQuery)
@@ -228,6 +228,8 @@ export class GetConfigInfoQueryHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -238,12 +240,8 @@ export class GetConfigInfoQueryHandler
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId,
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     const [resolverAddress, configId, configVersion] =
       await this.queryAdapter.getConfigInfo(securityEvmAddress);
 

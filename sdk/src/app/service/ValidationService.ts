@@ -205,7 +205,7 @@
 
 import Injectable from '../../core/Injectable.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
-import { UnlistedIssuer } from '../usecase/command/security/error/UnlistedIssuer.js';
+import { UnlistedKycIssuer } from '../usecase/command/security/error/UnlistedKycIssuer.js';
 import Service from './Service.js';
 import { singleton } from 'tsyringe';
 import { AccountNotKycd } from '../usecase/command/security/error/AccountNotKycd.js';
@@ -215,8 +215,50 @@ import { IsClearingActivatedQuery } from '../usecase/query/security/clearing/isC
 import { ClearingDeactivated } from '../usecase/command/security/error/ClearingDeactivated.js';
 import { ClearingActivated } from '../usecase/command/security/error/ClearingActivated.js';
 import { IsOperatorForPartitionQuery } from '../usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQuery.js';
+import { HasRoleQuery } from '../usecase/query/security/roles/hasRole/HasRoleQuery.js';
+import { IsPausedQuery } from '../usecase/query/security/isPaused/IsPausedQuery.js';
 import { IsOperatorQuery } from '../usecase/query/security/operator/isOperator/IsOperatorQuery.js';
 import { AccountIsNotOperator } from '../usecase/command/security/error/AccountIsNotOperator.js';
+import { NotGrantedRole } from '../usecase/command/security/error/NotGrantedRole';
+import { SecurityPaused } from '../usecase/command/security/error/SecurityPaused.js';
+import { DecimalsOverRange } from '../usecase/command/security/error/DecimalsOverRange.js';
+import { PartitionsUnProtected } from '../usecase/command/security/error/PartitionsUnprotected.js';
+import { ContractsErrorMapper } from '../usecase/command/security/error/contractsErrorsMapper/ContractsErrorMapper.js';
+import { CanTransferByPartitionQuery } from '../usecase/query/security/canTransferByPartition/CanTransferByPartitionQuery.js';
+import { CanTransferQuery } from '../usecase/query/security/canTransfer/CanTransferQuery.js';
+import { Security } from '../../domain/context/security/Security.js';
+import CheckNums from '../../core/checks/numbers/CheckNums.js';
+import { getProtectedPartitionRole } from '../../domain/context/security/SecurityRole.js';
+import { GetNounceQuery } from '../usecase/query/security/protectedPartitions/getNounce/GetNounceQuery.js';
+import { NounceAlreadyUsed } from '../usecase/command/security/error/NounceAlreadyUsed.js';
+import { IsInControlListQuery } from '../usecase/query/account/controlList/IsInControlListQuery.js';
+import { AccountNotInControlList } from '../usecase/command/security/error/AccountNotInControlList.js';
+import { AccountAlreadyInControlList } from '../usecase/command/security/error/AccountAlreadyInControlList.js';
+import { AccountIsAlreadyAnIssuer } from '../usecase/command/security/error/AccountAlreadyIsAnIssuer.js';
+import { CanRedeemByPartitionQuery } from '../usecase/query/security/canRedeemByPartition/CanRedeemByPartitionQuery.js';
+import BigDecimal from '../../domain/context/shared/BigDecimal.js';
+import { InsufficientHoldBalance } from '../usecase/command/security/error/InsufficientHoldBalance.js';
+import { BalanceOfQuery } from '../usecase/query/security/balanceof/BalanceOfQuery.js';
+import { InsufficientBalance } from '../usecase/command/security/error/InsufficientBalance.js';
+import { GetHoldForByPartitionQuery } from '../usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery.js';
+import { GetControlListTypeQuery } from '../usecase/query/security/controlList/getControlListType/GetControlListTypeQuery.js';
+import { SecurityControlListType } from '../../domain/context/security/SecurityControlListType.js';
+import { GetControlListCountQuery } from '../usecase/query/security/controlList/getControlListCount/GetControlListCountQuery.js';
+import { GetControlListMembersQuery } from '../usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery.js';
+import { AccountInBlackList } from '../usecase/command/security/error/AccountInBlackList.js';
+import { AccountNotInWhiteList } from '../usecase/command/security/error/AccountNotInWhiteList.js';
+import { GetMaxSupplyQuery } from '../usecase/query/security/cap/getMaxSupply/GetMaxSupplyQuery.js';
+import { GetMaxSupplyByPartitionQuery } from '../usecase/query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQuery.js';
+import { MaxSupplyByPartitionReached } from '../usecase/command/security/error/MaxSupplyByPartitionReached.js';
+import { MaxSupplyReached } from '../usecase/command/security/error/MaxSupplyReached.js';
+import { NotAllowedInMultiPartition } from '../usecase/command/security/error/NotAllowedInMultiPartition.js';
+import { OnlyDefaultPartitionAllowed } from '../usecase/command/security/error/OnlyDefaultPartitionAllowed.js';
+import { NotIssuable } from '../usecase/command/security/error/NotIssuable.js';
+import { _PARTITION_ID_1 } from '../../core/Constants.js';
+import { Terminal3VC } from '../../domain/context/kyc/terminal3.js';
+import { SignedCredential } from '@terminal3/vc_core';
+import { InvalidVCHolder } from '../usecase/command/security/error/InvalidVCHolder.js';
+import EvmAddress from '../../domain/context/contract/EvmAddress';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -231,7 +273,7 @@ export default class ValidationService extends Service {
       new IsIssuerQuery(securityId, issuer),
     );
     if (!res.payload) {
-      throw new UnlistedIssuer();
+      throw new UnlistedKycIssuer(issuer);
     } else {
       return true;
     }
@@ -307,5 +349,327 @@ export default class ValidationService extends Service {
     }
 
     throw new AccountIsNotOperator(operatorId, targetId);
+  }
+
+  async checkRole(
+    role: string,
+    accountId: string,
+    securityId: string,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const res = await this.queryBus.execute(
+      new HasRoleQuery(role, accountId, securityId),
+    );
+    if (!res.payload) {
+      throw new NotGrantedRole(role);
+    }
+    return true;
+  }
+
+  async checkPause(securityId: string): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const res = await this.queryBus.execute(new IsPausedQuery(securityId));
+    if (res.payload) {
+      throw new SecurityPaused();
+    }
+    return true;
+  }
+
+  async checkProtectedPartitions(security: Security): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    if (!security.arePartitionsProtected) {
+      throw new PartitionsUnProtected();
+    }
+    return true;
+  }
+
+  async checkCanTransfer(
+    securityId: string,
+    targetId: string,
+    amount: string,
+    sourceId?: string,
+    partitionId?: string,
+    operatorId?: string,
+  ): Promise<boolean> {
+    let res;
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    if (operatorId) {
+      res = await this.queryBus.execute(
+        new CanTransferByPartitionQuery(
+          securityId,
+          sourceId!,
+          targetId,
+          partitionId!,
+          amount,
+        ),
+      );
+    } else {
+      res = await this.queryBus.execute(
+        new CanTransferQuery(securityId, targetId, amount),
+      );
+    }
+
+    if (res.payload != '0x00') {
+      throw ContractsErrorMapper.mapError(
+        res.payload,
+        sourceId,
+        targetId,
+        operatorId,
+      );
+    }
+    return true;
+  }
+
+  async checkCanRedeem(
+    securityId: string,
+    sourceId: string,
+    amount: string,
+    partitionId: string,
+    operatorId?: string,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const res = await this.queryBus.execute(
+      new CanRedeemByPartitionQuery(securityId, sourceId, partitionId, amount),
+    );
+
+    if (res.payload != '0x00') {
+      throw ContractsErrorMapper.mapError(
+        res.payload,
+        sourceId,
+        undefined,
+        operatorId,
+      );
+    }
+
+    return true;
+  }
+
+  async checkMaxSupply(
+    securityId: string,
+    amount: BigDecimal,
+    security: Security,
+    partitionId?: string,
+  ): Promise<boolean> {
+    let res;
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    if (partitionId) {
+      res = await this.queryBus.execute(
+        new GetMaxSupplyByPartitionQuery(securityId, partitionId),
+      );
+      if (
+        res.payload
+          .toBigNumber()
+          .lt(amount.toBigNumber().add(security.totalSupply!.toBigNumber()))
+      ) {
+        throw new MaxSupplyByPartitionReached();
+      }
+    }
+    res = await this.queryBus.execute(new GetMaxSupplyQuery(securityId));
+    if (
+      res.payload
+        .toBigNumber()
+        .lt(amount.toBigNumber().add(security.totalSupply!.toBigNumber()))
+    ) {
+      throw new MaxSupplyReached();
+    }
+    return true;
+  }
+
+  async checkDecimals(security: Security, amount: string): Promise<boolean> {
+    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
+      throw new DecimalsOverRange(security.decimals);
+    }
+    return true;
+  }
+
+  async checkProtectedPartitionRole(
+    partitionId: string,
+    accountId: string,
+    securityId: string,
+  ): Promise<boolean> {
+    const protectedPartitionRole = getProtectedPartitionRole(partitionId);
+
+    await this.checkRole(protectedPartitionRole, accountId, securityId);
+
+    return true;
+  }
+
+  async checkValidNounce(
+    securityId: string,
+    targetId: string,
+    nounce: number,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const nextNounce = (
+      await this.queryBus.execute(new GetNounceQuery(securityId, targetId))
+    ).payload;
+
+    if (nounce <= nextNounce) {
+      throw new NounceAlreadyUsed(nounce);
+    }
+    return true;
+  }
+
+  async checkAccountInControlList(
+    securityId: string,
+    targetId: string,
+    add: boolean,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const res = await this.queryBus.execute(
+      new IsInControlListQuery(securityId, targetId),
+    );
+    if (add && res.payload) {
+      throw new AccountAlreadyInControlList(targetId.toString());
+    } else if (!add && !res.payload) {
+      throw new AccountNotInControlList(targetId.toString());
+    }
+    return true;
+  }
+
+  async checkAccountInIssuersList(
+    securityId: string,
+    targetId: string,
+    add: boolean,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const res = await this.queryBus.execute(
+      new IsIssuerQuery(securityId, targetId),
+    );
+    if (add && res.payload) {
+      throw new AccountIsAlreadyAnIssuer(targetId.toString());
+    } else if (!add && !res.payload) {
+      throw new UnlistedKycIssuer(targetId.toString());
+    }
+    return true;
+  }
+
+  async checkHoldBalance(
+    securityId: string,
+    partitionId: string,
+    sourceId: string,
+    holdId: number,
+    amount: BigDecimal,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const holdDetails = await this.queryBus.execute(
+      new GetHoldForByPartitionQuery(securityId, partitionId, sourceId, holdId),
+    );
+    if (holdDetails.payload.amount.toBigNumber().lt(amount.toBigNumber())) {
+      throw new InsufficientHoldBalance();
+    }
+    return true;
+  }
+
+  async checkBalance(
+    securityId: string,
+    accountId: string,
+    amount: BigDecimal,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const res = await this.queryBus.execute(
+      new BalanceOfQuery(securityId, accountId),
+    );
+    if (res.payload.toBigNumber().lt(amount.toBigNumber())) {
+      throw new InsufficientBalance();
+    }
+    return true;
+  }
+
+  async checkControlList(
+    securityId: string,
+    sourceEvmAddress?: string,
+    targetEvmAddress?: string,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const controListType = (
+      await this.queryBus.execute(new GetControlListTypeQuery(securityId))
+    ).payload;
+    const controlListCount = (
+      await this.queryBus.execute(new GetControlListCountQuery(securityId))
+    ).payload;
+    const controlListMembers = (
+      await this.queryBus.execute(
+        new GetControlListMembersQuery(securityId, 0, controlListCount),
+      )
+    ).payload.map(function (x) {
+      return x.toUpperCase();
+    });
+
+    if (sourceEvmAddress) {
+      if (
+        controListType === SecurityControlListType.BLACKLIST &&
+        controlListMembers.includes(sourceEvmAddress.toString().toUpperCase())
+      ) {
+        throw new AccountInBlackList(sourceEvmAddress.toString());
+      }
+
+      if (
+        controListType === SecurityControlListType.WHITELIST &&
+        !controlListMembers.includes(sourceEvmAddress.toString().toUpperCase())
+      ) {
+        throw new AccountNotInWhiteList(sourceEvmAddress.toString());
+      }
+    }
+
+    if (targetEvmAddress) {
+      if (
+        controListType === SecurityControlListType.BLACKLIST &&
+        controlListMembers.includes(targetEvmAddress.toString().toUpperCase())
+      ) {
+        throw new AccountInBlackList(targetEvmAddress.toString());
+      }
+
+      if (
+        controListType === SecurityControlListType.WHITELIST &&
+        !controlListMembers.includes(targetEvmAddress.toString().toUpperCase())
+      ) {
+        throw new AccountNotInWhiteList(targetEvmAddress.toString());
+      }
+    }
+
+    return true;
+  }
+
+  async checkMultiPartition(
+    security: Security,
+    partitionId?: string,
+  ): Promise<boolean> {
+    if (!partitionId && security.isMultiPartition) {
+      throw new NotAllowedInMultiPartition();
+    }
+    if (
+      partitionId &&
+      partitionId != _PARTITION_ID_1 &&
+      !security.isMultiPartition
+    ) {
+      throw new OnlyDefaultPartitionAllowed();
+    }
+    return true;
+  }
+
+  async checkIssuable(security: Security): Promise<boolean> {
+    if (!security.isIssuable) {
+      throw new NotIssuable();
+    }
+    return true;
+  }
+
+  async checkValidVC(
+    signedCredential: SignedCredential,
+    targetEvmAddress: EvmAddress,
+    securityId: string,
+  ): Promise<[string, SignedCredential]> {
+    const issuer = Terminal3VC.extractIssuer(signedCredential);
+    signedCredential = Terminal3VC.checkValidDates(signedCredential);
+    const holder = Terminal3VC.extractHolder(signedCredential);
+
+    if (targetEvmAddress.toString().toLowerCase() !== holder.toLowerCase()) {
+      throw new InvalidVCHolder();
+    }
+
+    await this.validateIssuer(securityId, issuer);
+
+    return [issuer, signedCredential];
   }
 }

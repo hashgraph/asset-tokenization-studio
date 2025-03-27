@@ -214,7 +214,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import SecurityService from '../../../../../service/SecurityService.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import AccountService from '../../../../../service/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 
 @QueryHandler(GetClearingTransferForByPartitionQuery)
@@ -228,6 +228,8 @@ export class GetClearingTransferForByPartitionQueryHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -237,15 +239,10 @@ export class GetClearingTransferForByPartitionQueryHandler
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
 
     const clearing = await this.queryAdapter.getClearingTransferForByPartition(
       securityEvmAddress,

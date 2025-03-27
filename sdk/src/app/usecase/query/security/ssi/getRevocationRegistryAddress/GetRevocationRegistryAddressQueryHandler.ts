@@ -209,7 +209,7 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter'
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import SecurityService from '../../../../../service/SecurityService';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
+import AccountService from '../../../../../service/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetRevocationRegistryAddressQuery,
@@ -227,6 +227,8 @@ export class GetRevocationRegistryAddressQueryHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -236,12 +238,8 @@ export class GetRevocationRegistryAddressQueryHandler
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     const res =
       await this.queryAdapter.getRevocationRegistryAddress(securityEvmAddress);
 

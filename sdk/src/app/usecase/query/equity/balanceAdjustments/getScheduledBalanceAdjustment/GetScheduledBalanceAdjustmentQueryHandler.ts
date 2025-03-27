@@ -210,7 +210,7 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import SecurityService from '../../../../../service/SecurityService.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import AccountService from '../../../../../service/AccountService.js';
 import {
   GetScheduledBalanceAdjustmentQuery,
   GetScheduledBalanceAdjustmentQueryResponse,
@@ -227,6 +227,8 @@ export class GetScheduledBalanceAdjustmentQueryHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -237,12 +239,8 @@ export class GetScheduledBalanceAdjustmentQueryHandler
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId,
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getScheduledBalanceAdjustment(
       securityEvmAddress,
       balanceAdjustmentId,

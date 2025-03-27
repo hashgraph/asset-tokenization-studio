@@ -214,13 +214,8 @@ import {
   UnprotectPartitionsCommand,
   UnprotectPartitionsCommandResponse,
 } from './UnprotectPartitionsCommand.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { NotGrantedRole } from '../../error/NotGrantedRole.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { SecurityPaused } from '../../error/SecurityPaused.js';
-import { PartitionsUnProtected } from '../../error/PartitionsUnprotected';
+import ValidationService from '../../../../../service/ValidationService.js';
 
 @CommandHandler(UnprotectPartitionsCommand)
 export class UnprotectPartitionsCommandHandler
@@ -233,10 +228,8 @@ export class UnprotectPartitionsCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(RPCQueryAdapter)
-    private readonly rpcQueryAdapter: RPCQueryAdapter,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -247,30 +240,17 @@ export class UnprotectPartitionsCommandHandler
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    await this.validationService.checkRole(
+      SecurityRole._PROTECTED_PARTITION_ROLE,
+      account.id.toString(),
+      securityId,
     );
 
-    if (
-      account.evmAddress &&
-      !(await this.rpcQueryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._PROTECTED_PARTITION_ROLE,
-      ))
-    ) {
-      throw new NotGrantedRole(SecurityRole._PROTECTED_PARTITION_ROLE);
-    }
+    await this.validationService.checkPause(securityId);
 
-    if (await this.rpcQueryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (!security.arePartitionsProtected) {
-      throw new PartitionsUnProtected();
-    }
+    await this.validationService.checkProtectedPartitions(security);
 
     const res = await handler.unprotectPartitions(securityEvmAddress);
     return Promise.resolve(
