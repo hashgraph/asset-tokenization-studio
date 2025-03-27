@@ -207,10 +207,6 @@
 pragma solidity 0.8.18;
 
 import {IHold} from '../hold/IHold.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {IClearing} from './IClearing.sol';
 
 interface IClearingStorageWrapper {
     event ClearedRedeemByPartition(
