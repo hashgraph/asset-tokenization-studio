@@ -225,6 +225,8 @@ interface IExternalPauseManagement {
         address pauseContract
     );
 
+    error ExternalPausesNotUpdated(address[] pauses, bool[] actives);
+
     function initialize_ExternalPauses(address[] calldata _pauses) external;
 
     function updateExternalPauses(

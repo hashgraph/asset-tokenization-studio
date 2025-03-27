@@ -244,6 +244,10 @@ contract ExternalPauseManagement is
         returns (bool success_)
     {
         success_ = _updateExternalPauses(_pauses, _actives);
+        if (!success_) {
+            revert ExternalPausesNotUpdated(_pauses, _actives);
+        }
+        emit ExternalPausesUpdated(_msgSender(), _pauses, _actives);
     }
 
     function addExternalPause(
@@ -256,6 +260,10 @@ contract ExternalPauseManagement is
         returns (bool success_)
     {
         success_ = _addExternalPause(_pause);
+        if (!success_) {
+            revert ListedPause(_pause);
+        }
+        emit AddedToExternalPauses(_msgSender(), _pause);
     }
 
     function removeExternalPause(
@@ -268,6 +276,10 @@ contract ExternalPauseManagement is
         returns (bool success_)
     {
         success_ = _removeExternalPause(_pause);
+        if (!success_) {
+            revert UnlistedPause(_pause);
+        }
+        emit RemovedFromExternalPauses(_msgSender(), _pause);
     }
 
     function isExternalPause(
