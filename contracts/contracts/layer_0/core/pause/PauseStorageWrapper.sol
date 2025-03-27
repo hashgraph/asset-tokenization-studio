@@ -211,12 +211,12 @@ import {
 } from '../../../layer_1/interfaces/pause/IPauseStorageWrapper.sol';
 import {_PAUSE_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
+    ExternalPauseManagementStorageWrapper
+} from '../externalPauses/ExternalPauseManagementStorageWrapper.sol';
 
 abstract contract PauseStorageWrapper is
     IPauseStorageWrapper,
-    ControlListStorageWrapper
+    ExternalPauseManagementStorageWrapper
 {
     struct PauseDataStorage {
         bool paused;
