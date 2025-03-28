@@ -234,9 +234,9 @@ import { MirrorNode } from '../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
 import { HederaWalletConnectTransactionAdapter } from '../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
 import { DFNSTransactionAdapter } from '../out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import DfnsSettings from '../../domain/context/custodialWalletSettings/DfnsSettings.js';
+import DfnsSettings from '../../core/settings/custodialWalletSettings/DfnsSettings.js';
 import { FireblocksTransactionAdapter } from '../out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import FireblocksSettings from '../../domain/context/custodialWalletSettings/FireblocksSettings.js';
+import FireblocksSettings from '../../core/settings/custodialWalletSettings/FireblocksSettings.js';
 import { AWSKMSTransactionAdapter } from '../out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
 
 export { InitializationData, NetworkData, SupportedWallets };

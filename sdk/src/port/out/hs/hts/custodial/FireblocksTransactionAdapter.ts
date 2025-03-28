@@ -211,7 +211,7 @@ import { singleton } from 'tsyringe';
 import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
 import LogService from '../../../../../app/service/LogService';
 import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
-import FireblocksSettings from '../../../../../domain/context/custodialWalletSettings/FireblocksSettings';
+import FireblocksSettings from '../../../../../core/settings/custodialWalletSettings/FireblocksSettings';
 
 import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
 

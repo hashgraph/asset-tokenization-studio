@@ -203,14 +203,24 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+export class Kyc {
+  validFrom: string;
+  validTo: string;
+  VCid: string;
+  issuer: string;
+  status: number;
 
-export class PublicKeyNotValid extends BaseError {
-  constructor(val: string, type?: string) {
-    let msg = `Public Key ${val} is not a valid key`;
-    if (type) {
-      msg = `Public Key ${val} of type ${type}, is not a valid key`;
-    }
-    super(ErrorCode.PublicKeyInvalid, msg);
+  constructor(
+    validFrom: string,
+    validTo: string,
+    VCid: string,
+    issuer: string,
+    status: number,
+  ) {
+    this.validFrom = validFrom;
+    this.validTo = validTo;
+    this.VCid = VCid;
+    this.issuer = issuer;
+    this.status = status;
   }
 }

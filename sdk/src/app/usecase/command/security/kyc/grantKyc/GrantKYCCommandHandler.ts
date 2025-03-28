@@ -218,7 +218,7 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter'
 import { SecurityPaused } from '../../error/SecurityPaused';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import { NotGrantedRole } from '../../error/NotGrantedRole';
-import { Terminal3VC } from '../../../../../../domain/context/kyc/terminal3';
+import { Terminal3VC } from '../../../../../../domain/context/kyc/Terminal3';
 import { verifyVc } from '@terminal3/verify_vc';
 import { SignedCredential } from '@terminal3/vc_core';
 import { InvalidVCHolder } from '../../error/InvalidVCHolder';

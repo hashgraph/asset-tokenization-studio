@@ -203,7 +203,7 @@
 
 */
 
-import { HoldDetails } from '../../../../../../domain/context/security/HoldDetails.js';
+import { HoldDetails } from '../../../../../../domain/context/security/Hold.js';
 import { Query } from '../../../../../../core/query/Query.js';
 import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 

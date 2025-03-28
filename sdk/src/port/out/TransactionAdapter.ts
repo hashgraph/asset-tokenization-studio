@@ -217,11 +217,11 @@ import EvmAddress from '../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
 import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
-import HWCSettings from '../../domain/context/walletConnect/HWCSettings';
+import HWCSettings from '../../core/settings/walletConnect/HWCSettings.js';
 import { ContractId } from '@hashgraph/sdk';
-import DfnsSettings from '../../domain/context/custodialWalletSettings/DfnsSettings.js';
-import FireblocksSettings from '../../domain/context/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../domain/context/custodialWalletSettings/AWSKMSSettings.js';
+import DfnsSettings from '../../core/settings/custodialWalletSettings/DfnsSettings.js';
+import FireblocksSettings from '../../core/settings/custodialWalletSettings/FireblocksSettings.js';
+import AWSKMSSettings from '../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
 import { ClearingOperationType } from '../../domain/context/security/Clearing.js';
 
 export interface InitializationData {
