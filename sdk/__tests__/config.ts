@@ -207,7 +207,7 @@ import {
   AWSKMSConfigRequest,
   DFNSConfigRequest,
   FireblocksConfigRequest,
-} from '../src/port/in/request/ConnectRequest.js';
+} from '../src/port/in/request/network/ConnectRequest.js';
 import Account from '../src/domain/context/account/Account.js';
 import PrivateKey from '../src/domain/context/account/PrivateKey.js';
 import PublicKey from '../src/domain/context/account/PublicKey.js';

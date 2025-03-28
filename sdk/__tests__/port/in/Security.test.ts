@@ -260,8 +260,8 @@ import {
   GetClearingCreateHoldForByPartitionRequest,
   GetClearingTransferForByPartitionRequest,
 } from '../../../src/index.js';
-import TransferRequest from '../../../src/port/in/request/TransferRequest.js';
-import RedeemRequest from '../../../src/port/in/request/RedeemRequest.js';
+import TransferRequest from '../../../src/port/in/request/security/operations/transfer/TransferRequest.js';
+import RedeemRequest from '../../../src/port/in/request/security/operations/redeem/RedeemRequest.js';
 import Injectable from '../../../src/core/Injectable.js';
 import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
 import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter.js';
@@ -277,7 +277,7 @@ import NetworkService from '../../../src/app/service/NetworkService.js';
 import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
 import { ethers, Wallet } from 'ethers';
 import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
-import GetSecurityDetailsRequest from '../../../src/port/in/request/GetSecurityDetailsRequest.js';
+import GetSecurityDetailsRequest from '../../../src/port/in/request/security/GetSecurityDetailsRequest.js';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole.js';
 import { SecurityControlListType } from '../../../src/domain/context/security/SecurityControlListType.js';
 import {

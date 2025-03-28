@@ -216,7 +216,7 @@ import {
   DFNSConfigRequest,
   FireblocksConfigRequest,
   HWCRequestSettings,
-} from '../ConnectRequest';
+} from '../network/ConnectRequest.js';
 import HWCSettings from '../../../../domain/context/walletConnect/HWCSettings';
 import DfnsSettings from '../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
 import FireblocksSettings from '../../../../domain/context/custodialWalletSettings/FireblocksSettings.js';

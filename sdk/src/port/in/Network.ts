@@ -213,22 +213,22 @@ import ConnectRequest, {
   DFNSConfigRequest,
   FireblocksConfigRequest,
   SupportedWallets,
-} from './request/ConnectRequest.js';
+} from './request/network/ConnectRequest.js';
 import RequestMapper from './request/mapping/RequestMapper.js';
 import TransactionService from '../../app/service/TransactionService.js';
 import NetworkService from '../../app/service/NetworkService.js';
-import SetNetworkRequest from './request/SetNetworkRequest.js';
+import SetNetworkRequest from './request/network/SetNetworkRequest.js';
 import { SetNetworkCommand } from '../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
 import { SetConfigurationCommand } from '../../app/usecase/command/network/setConfiguration/SetConfigurationCommand.js';
 import {
   Environment,
   unrecognized,
 } from '../../domain/context/network/Environment.js';
-import InitializationRequest from './request/InitializationRequest.js';
+import InitializationRequest from './request/network/InitializationRequest.js';
 import Event from './Event.js';
 import { RPCTransactionAdapter } from '../out/rpc/RPCTransactionAdapter.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import SetConfigurationRequest from './request/SetConfigurationRequest.js';
+import SetConfigurationRequest from './request/management/SetConfigurationRequest.js';
 import { handleValidation } from './Common.js';
 import { MirrorNode } from '../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
