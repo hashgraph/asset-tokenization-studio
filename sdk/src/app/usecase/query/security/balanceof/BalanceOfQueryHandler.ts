@@ -230,7 +230,6 @@ export class BalanceOfQueryHandler implements IQueryHandler<BalanceOfQuery> {
   async execute(query: BalanceOfQuery): Promise<BalanceOfQueryResponse> {
     const { targetId, securityId } = query;
     const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);

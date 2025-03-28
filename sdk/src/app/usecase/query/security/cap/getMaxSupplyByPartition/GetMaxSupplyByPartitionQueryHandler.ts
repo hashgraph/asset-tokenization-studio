@@ -235,7 +235,6 @@ export class GetMaxSupplyByPartitionQueryHandler
   ): Promise<GetMaxSupplyByPartitionQueryResponse> {
     const { securityId, partitionId } = query;
     const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.exec(securityId)

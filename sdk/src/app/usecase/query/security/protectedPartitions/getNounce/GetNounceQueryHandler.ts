@@ -226,9 +226,6 @@ export class GetNounceQueryHandler implements IQueryHandler<GetNounceQuery> {
   async execute(query: GetNounceQuery): Promise<GetNounceQueryResponse> {
     const { securityId, targetId } = query;
 
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
-
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =

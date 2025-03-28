@@ -232,8 +232,6 @@ export class IsOperatorForPartitionQueryHandler
     query: IsOperatorForPartitionQuery,
   ): Promise<IsOperatorForPartitionQueryResponse> {
     const { securityId, partitionId, operatorId, targetId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);

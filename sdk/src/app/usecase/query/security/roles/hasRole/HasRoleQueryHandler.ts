@@ -226,9 +226,6 @@ export class HasRoleQueryHandler implements IQueryHandler<HasRoleQuery> {
   async execute(query: HasRoleQuery): Promise<HasRoleQueryResponse> {
     const { role, targetId, securityId } = query;
 
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
-
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =

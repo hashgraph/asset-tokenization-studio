@@ -236,8 +236,6 @@ export class GetControlListTypeQueryHandler
     query: GetControlListTypeQuery,
   ): Promise<GetControlListTypeQueryResponse> {
     const { securityId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);

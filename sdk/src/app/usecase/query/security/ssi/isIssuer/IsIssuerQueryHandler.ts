@@ -225,8 +225,6 @@ export class IsIssuerQueryHandler implements IQueryHandler<IsIssuerQuery> {
 
   async execute(query: IsIssuerQuery): Promise<IsIssuerQueryResponse> {
     const { securityId, issuerId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);

@@ -231,7 +231,6 @@ export class GetLockQueryHandler implements IQueryHandler<GetLockQuery> {
   async execute(query: GetLockQuery): Promise<GetLockQueryResponse> {
     const { targetId, securityId, id } = query;
     const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);

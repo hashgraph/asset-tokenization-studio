@@ -233,7 +233,6 @@ export class GetMaxSupplyQueryHandler
   async execute(query: GetMaxSupplyQuery): Promise<GetMaxSupplyQueryResponse> {
     const { securityId } = query;
     const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.exec(securityId)

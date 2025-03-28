@@ -236,11 +236,9 @@ export class GetScheduledBalanceAdjustmentQueryHandler
   ): Promise<GetScheduledBalanceAdjustmentQueryResponse> {
     const { securityId, balanceAdjustmentId } = query;
 
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
-
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);
+
     const res = await this.queryAdapter.getScheduledBalanceAdjustment(
       securityEvmAddress,
       balanceAdjustmentId,

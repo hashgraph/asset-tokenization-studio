@@ -229,9 +229,6 @@ export class GetCouponQueryHandler implements IQueryHandler<GetCouponQuery> {
   async execute(query: GetCouponQuery): Promise<GetCouponQueryResponse> {
     const { securityId, couponId } = query;
 
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
-
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getCoupon(securityEvmAddress, couponId);

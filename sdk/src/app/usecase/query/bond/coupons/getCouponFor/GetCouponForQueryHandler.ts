@@ -234,8 +234,6 @@ export class GetCouponForQueryHandler
 
   async execute(query: GetCouponForQuery): Promise<GetCouponForQueryResponse> {
     const { targetId, securityId, couponId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);

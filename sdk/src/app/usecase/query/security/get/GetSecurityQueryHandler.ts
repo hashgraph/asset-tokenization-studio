@@ -237,8 +237,6 @@ export class GetSecurityQueryHandler
       await this.accountService.getContractEvmAddress(securityId);
     const security: Security =
       await this.queryAdapter.getSecurity(securityEvmAddress);
-    if (!security.evmDiamondAddress)
-      throw new Error('Invalid security address');
 
     if (security.maxSupply)
       security.maxSupply = BigDecimal.fromStringFixed(

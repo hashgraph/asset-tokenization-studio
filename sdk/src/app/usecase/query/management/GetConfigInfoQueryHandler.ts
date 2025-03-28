@@ -237,9 +237,6 @@ export class GetConfigInfoQueryHandler
   ): Promise<GetConfigInfoQueryResponse> {
     const securityId = query.securityId;
 
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
-
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);
     const [resolverAddress, configId, configVersion] =

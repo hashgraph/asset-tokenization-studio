@@ -210,7 +210,6 @@ import SecurityService from '../../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
@@ -271,9 +270,8 @@ export class OperatorClearingCreateHoldByPartitionCommandHandler
 
     await this.validationService.checkDecimals(security, amount);
 
-    const escrowEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(escrow)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
-      : new EvmAddress(escrow);
+    const escrowEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(escrow);
 
     const sourceEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(sourceId);

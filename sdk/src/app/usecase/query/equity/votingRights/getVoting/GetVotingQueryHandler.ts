@@ -229,9 +229,6 @@ export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
   async execute(query: GetVotingQuery): Promise<GetVotingQueryResponse> {
     const { securityId, votingId } = query;
 
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
-
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getVoting(securityEvmAddress, votingId);

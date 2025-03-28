@@ -225,8 +225,6 @@ export class IsOperatorQueryHandler implements IQueryHandler<IsOperatorQuery> {
 
   async execute(query: IsOperatorQuery): Promise<IsOperatorQueryResponse> {
     const { securityId, operatorId, targetId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress =
       await this.accountService.getContractEvmAddress(securityId);
