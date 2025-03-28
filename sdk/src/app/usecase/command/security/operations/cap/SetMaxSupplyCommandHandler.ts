@@ -215,9 +215,10 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import CheckNums from '../../../../../../core/checks/numbers/CheckNums.js';
 import { DecimalsOverRange } from '../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../../service/AccountService.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 
 @CommandHandler(SetMaxSupplyCommand)
 export class SetMaxSupplyCommandHandler
@@ -228,8 +229,10 @@ export class SetMaxSupplyCommandHandler
     public readonly securityService: SecurityService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -237,16 +240,17 @@ export class SetMaxSupplyCommandHandler
   ): Promise<SetMaxSupplyCommandResponse> {
     const { securityId, maxSupply } = command;
     const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     const security = await this.securityService.get(securityId);
 
-    // TODO: Check if queryAdapter has _CAP_ROLE
+    await this.validationService.checkRole(
+      SecurityRole._CAP_ROLE,
+      account.id.toString(),
+      securityId,
+    );
 
     if (CheckNums.hasMoreDecimals(maxSupply, security.decimals)) {
       throw new DecimalsOverRange(security.decimals);

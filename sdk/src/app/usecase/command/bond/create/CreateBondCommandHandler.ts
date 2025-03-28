@@ -281,9 +281,7 @@ export class CreateBondCommandHandler
     }
 
     const diamondOwnerAccountEvmAddress: EvmAddress =
-      HEDERA_FORMAT_ID_REGEX.test(diamondOwnerAccount!)
-        ? await this.mirrorNodeAdapter.accountToEvmAddress(diamondOwnerAccount!)
-        : new EvmAddress(diamondOwnerAccount!);
+      await this.accountService.getContractEvmAddress(diamondOwnerAccount!);
 
     const factoryEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.test(factory.toString())

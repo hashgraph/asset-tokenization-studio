@@ -209,13 +209,10 @@ import AccountService from '../../../../../service/AccountService';
 import { RevokeKYCCommand, RevokeKYCCommandResponse } from './RevokeKYCCommand';
 import TransactionService from '../../../../../service/TransactionService';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { SecurityPaused } from '../../error/SecurityPaused';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import { NotGrantedRole } from '../../error/NotGrantedRole';
+import ValidationService from '../../../../../service/ValidationService';
 
 @CommandHandler(RevokeKYCCommand)
 export class RevokeKYCCommandHandler
@@ -228,8 +225,8 @@ export class RevokeKYCCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
   ) {}
 
   async execute(command: RevokeKYCCommand): Promise<RevokeKYCCommandResponse> {
@@ -237,30 +234,18 @@ export class RevokeKYCCommandHandler
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
+
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkRole(
+      SecurityRole._KYC_ROLE,
+      account.id.toString(),
+      securityId,
     );
-
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._KYC_ROLE,
-      ))
-    ) {
-      throw new NotGrantedRole(SecurityRole._KYC_ROLE);
-    }
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
 
     const res = await handler.revokeKYC(
       securityEvmAddress,

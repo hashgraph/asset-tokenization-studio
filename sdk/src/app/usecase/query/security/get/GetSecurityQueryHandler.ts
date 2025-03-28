@@ -214,7 +214,7 @@ import {
   GetSecurityQueryResponse,
 } from './GetSecurityQuery.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId.js';
+import AccountService from '../../../../service/AccountService';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 
 @QueryHandler(GetSecurityQuery)
@@ -226,21 +226,17 @@ export class GetSecurityQueryHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(query: GetSecurityQuery): Promise<GetSecurityQueryResponse> {
     const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     const security: Security =
       await this.queryAdapter.getSecurity(securityEvmAddress);
-    if (!security.evmDiamondAddress)
-      throw new Error('Invalid security address');
 
     if (security.maxSupply)
       security.maxSupply = BigDecimal.fromStringFixed(

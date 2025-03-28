@@ -386,6 +386,7 @@ import {
   UpdateResolverCommand,
   UpdateResolverCommandResponse,
 } from './updateResolverCommand';
+import AccountService from '../../../../service/AccountService';
 
 @CommandHandler(UpdateResolverCommand)
 export class UpdateResolverCommandHandler
@@ -396,6 +397,8 @@ export class UpdateResolverCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -404,12 +407,8 @@ export class UpdateResolverCommandHandler
     const { configVersion, securityId, resolver, configId } = command;
     const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     const resolverEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.test(resolver.toString())
         ? (await this.mirrorNodeAdapter.getContractInfo(resolver.toString()))

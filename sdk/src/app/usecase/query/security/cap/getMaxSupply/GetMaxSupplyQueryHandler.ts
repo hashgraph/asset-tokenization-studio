@@ -203,25 +203,48 @@
 
 */
 
-import { Command } from '../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
+import {
+  GetMaxSupplyQuery,
+  GetMaxSupplyQueryResponse,
+} from './GetMaxSupplyQuery.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 
-export class ExecuteHoldByPartitionCommandResponse implements CommandResponse {
+@QueryHandler(GetMaxSupplyQuery)
+export class GetMaxSupplyQueryHandler
+  implements IQueryHandler<GetMaxSupplyQuery>
+{
   constructor(
-    public readonly payload: boolean,
-    public readonly transactionId: string,
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
   ) {}
-}
 
-export class ExecuteHoldByPartitionCommand extends Command<ExecuteHoldByPartitionCommandResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly sourceId: string,
-    public readonly amount: string,
-    public readonly holdId: number,
-    public readonly targetId: string,
-    public readonly partitionId: string,
-  ) {
-    super();
+  async execute(query: GetMaxSupplyQuery): Promise<GetMaxSupplyQueryResponse> {
+    const { securityId } = query;
+    const security = await this.securityService.get(securityId);
+
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.exec(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    const res = await this.queryAdapter.getMaxSupply(securityEvmAddress);
+    const amount = BigDecimal.fromStringFixed(
+      res.toString(),
+      security.decimals,
+    );
+    return new GetMaxSupplyQueryResponse(amount);
   }
 }

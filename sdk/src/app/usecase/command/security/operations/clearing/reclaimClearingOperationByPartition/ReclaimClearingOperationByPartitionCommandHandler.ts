@@ -208,18 +208,14 @@ import { CommandHandler } from '../../../../../../../core/decorator/CommandHandl
 import AccountService from '../../../../../../service/AccountService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../../error/SecurityPaused.js';
 import {
   ReclaimClearingOperationByPartitionCommand,
   ReclaimClearingOperationByPartitionCommandResponse,
 } from './ReclaimClearingOperationByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 
 @CommandHandler(ReclaimClearingOperationByPartitionCommand)
 export class ReclaimClearingOperationByPartitionCommandHandler
@@ -249,35 +245,16 @@ export class ReclaimClearingOperationByPartitionCommandHandler
       clearingOperationType,
     } = command;
     const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
+    await this.validationService.checkPause(securityId);
 
     await this.validationService.validateClearingActivated(securityId);
     await this.validationService.validateKycAddresses(securityId, [targetId]);
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
-
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._CLEARING_VALIDATOR_ROLE,
-      ))
-    ) {
-      throw new NotGrantedRole(SecurityRole._CLEARING_VALIDATOR_ROLE);
-    }
 
     const res = await handler.reclaimClearingOperationByPartition(
       securityEvmAddress,

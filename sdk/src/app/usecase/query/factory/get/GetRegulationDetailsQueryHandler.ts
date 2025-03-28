@@ -214,7 +214,7 @@ import {
   GetRegulationDetailsQueryResponse,
 } from './GetRegulationDetailsQuery.js';
 import { Regulation } from '../../../../../domain/context/factory/Regulation.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId.js';
+import AccountService from '../../../../service/AccountService.js';
 import { InvalidRequest } from '../../error/InvalidRequest.js';
 
 @QueryHandler(GetRegulationDetailsQuery)
@@ -226,6 +226,8 @@ export class GetRegulationDetailsQueryHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -237,12 +239,8 @@ export class GetRegulationDetailsQueryHandler
       throw new InvalidRequest('Factory not found in request');
     }
 
-    const factoryEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(factory.toString())
-        ? (await this.mirrorNodeAdapter.getContractInfo(factory.toString()))
-            .evmAddress
-        : factory.toString(),
-    );
+    const factoryEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(factory.toString());
 
     const regulation: Regulation = await this.queryAdapter.getRegulationDetails(
       type,

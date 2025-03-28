@@ -247,11 +247,13 @@ import {
   ClearingRedeem,
   ClearingTransfer,
 } from '../src/domain/context/security/Clearing.js';
+import AccountService from '../src/app/service/AccountService.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
 //* Mock isWeb() method
 Injectable.isWeb = jest.fn(() => true);
+const accountService = Injectable.resolve(AccountService);
 
 function hexToDecimal(hexString: string): number {
   if (!/^0x[a-fA-F0-9]+$|^[a-fA-F0-9]+$/.test(hexString)) {
@@ -308,7 +310,7 @@ const lastLockIds = new Map<string, number>();
 const lastHoldIds = new Map<string, number>();
 const lastClearingIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
-const nonces = new Map<string, number>();
+const nonces = new Map<string, BigNumber>();
 const kycAccountsData = new Map<string, KYC>();
 const kycAccountsByStatus = new Map<number, string[]>();
 
@@ -329,7 +331,6 @@ let configVersion: number;
 let configId: string;
 let resolverAddress: string;
 let revocationRegistryAddress: string;
-let isClearingActivated: boolean = false;
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -984,7 +985,131 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       data: string,
       operatorData: string,
     ) => {
-      return [false, '', ''];
+      const operator = accountService.getCurrentAccount().evmAddress;
+
+      if (securityInfo.paused) return [false, '0x40', ''];
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, operator))
+        )
+          return [false, '0x41', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, operator))
+          return [false, '0x41', ''];
+      }
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, sourceId))
+        )
+          return [false, '0x42', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, sourceId))
+          return [false, '0x42', ''];
+      }
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, targetId))
+        )
+          return [false, '0x43', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, targetId))
+          return [false, '0x43', ''];
+      }
+
+      if (!sourceId) return [false, '0x44', ''];
+      if (!targetId) return [false, '0x45', ''];
+
+      const balance = await singletonInstance.balanceOfByPartition(
+        address,
+        sourceId,
+        partitionId,
+      );
+
+      if (amount.isLowerThan(balance)) return [false, '0x46', ''];
+
+      if (
+        sourceId.toString().toUpperCase != operator!.toString().toUpperCase &&
+        !singletonInstance.hasRole(SecurityRole._CONTROLLIST_ROLE)
+      ) {
+        if (
+          !(
+            singletonInstance.isOperatorForPartition(
+              address,
+              partitionId,
+              operator,
+              sourceId,
+            ) || singletonInstance.isOperator(address, operator, sourceId)
+          )
+        )
+          return [false, '0x47', ''];
+      }
+
+      if (!balance) return [false, '0x48', ''];
+
+      if (!singletonInstance.getKYCStatusFor(address, sourceId))
+        return [false, '0x50', ''];
+
+      if (!singletonInstance.getKYCStatusFor(address, targetId))
+        return [false, '0x51', ''];
+
+      if (securityInfo.clearingActive) return [false, '0x52', ''];
+
+      return [true, '0x00', ''];
+    },
+  );
+
+  singletonInstance.canTransfer = jest.fn(
+    async (
+      address: EvmAddress,
+      targetId: EvmAddress,
+      amount: BigDecimal,
+      data: string,
+    ) => {
+      const operator = accountService.getCurrentAccount().evmAddress;
+
+      if (securityInfo.paused) return [false, '0x40', ''];
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, operator))
+        )
+          return [false, '0x42', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, operator))
+          return [false, '0x42', ''];
+      }
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, targetId))
+        )
+          return [false, '0x43', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, targetId))
+          return [false, '0x43', ''];
+      }
+
+      if (!targetId) return [false, '0x45', ''];
+
+      const balance = await singletonInstance.balanceOfByPartition(
+        address,
+        operator,
+      );
+
+      if (amount.isLowerThan(balance)) return [false, '0x46', ''];
+
+      if (!singletonInstance.getKYCStatusFor(address, operator))
+        return [false, '0x50', ''];
+
+      if (!singletonInstance.getKYCStatusFor(address, targetId))
+        return [false, '0x51', ''];
+
+      if (securityInfo.clearingActive) return [false, '0x52', ''];
+
+      return [true, '0x00', ''];
     },
   );
 
@@ -997,7 +1122,65 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       data: string,
       operatorData: string,
     ) => {
-      return [false, '', ''];
+      const operator = accountService.getCurrentAccount().evmAddress;
+
+      if (securityInfo.paused) return [false, '0x40', ''];
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, operator))
+        )
+          return [false, '0x41', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, operator))
+          return [false, '0x41', ''];
+      }
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, sourceId))
+        )
+          return [false, '0x42', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, sourceId))
+          return [false, '0x42', ''];
+      }
+
+      if (!sourceId) return [false, '0x44', ''];
+
+      const balance = await singletonInstance.balanceOfByPartition(
+        address,
+        sourceId,
+        partitionId,
+      );
+
+      if (amount.isLowerThan(balance)) return [false, '0x46', ''];
+
+      if (
+        sourceId.toString().toUpperCase != operator!.toString().toUpperCase &&
+        !singletonInstance.hasRole(SecurityRole._CONTROLLIST_ROLE)
+      ) {
+        if (
+          !(
+            singletonInstance.isOperatorForPartition(
+              address,
+              partitionId,
+              operator,
+              sourceId,
+            ) || singletonInstance.isOperator(address, operator, sourceId)
+          )
+        )
+          return [false, '0x47', ''];
+      }
+
+      if (!balance) return [false, '0x48', ''];
+
+      if (!singletonInstance.getKYCStatusFor(address, sourceId))
+        return [false, '0x50', ''];
+
+      if (securityInfo.clearingActive) return [false, '0x52', ''];
+
+      return [true, '0x00', ''];
     },
   );
 
@@ -1041,7 +1224,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   );
 
   singletonInstance.getMaxSupply = jest.fn(async (address: EvmAddress) => {
-    return BigNumber.from(0);
+    return securityInfo.maxSupply;
   });
 
   singletonInstance.getRegulationDetails = jest.fn(
@@ -1162,7 +1345,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   singletonInstance.getNounceFor = jest.fn(
     async (address: EvmAddress, target: EvmAddress) => {
       const account = '0x' + target.toString().toUpperCase().substring(2);
-      return nonces.get(account) ?? 0;
+      return nonces.get(account) ?? new BigDecimal('0').toBigNumber();
     },
   );
 
@@ -1333,7 +1516,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
 
   singletonInstance.isClearingActivated = jest.fn(
     async (address: EvmAddress) => {
-      return isClearingActivated;
+      return securityInfo.clearingActive;
     },
   );
 
@@ -1818,12 +2001,15 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     } as TransactionResponse;
   });
 
-  singletonInstance.setMaxSupply = jest.fn(async () => {
-    return {
-      status: 'success',
-      id: transactionId,
-    } as TransactionResponse;
-  });
+  singletonInstance.setMaxSupply = jest.fn(
+    async (address: EvmAddress, amount: BigDecimal) => {
+      securityInfo.maxSupply = amount;
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
 
   singletonInstance.lock = jest.fn(async () => {
     return {
@@ -2445,7 +2631,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
   );
 
   singletonInstance.activateClearing = jest.fn(async (address: EvmAddress) => {
-    isClearingActivated = true;
+    securityInfo.clearingActive = true;
     return {
       status: 'success',
       id: transactionId,
@@ -2454,7 +2640,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
   singletonInstance.deactivateClearing = jest.fn(
     async (address: EvmAddress) => {
-      isClearingActivated = false;
+      securityInfo.clearingActive = false;
       return {
         status: 'success',
         id: transactionId,

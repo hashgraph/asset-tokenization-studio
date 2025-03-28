@@ -211,9 +211,8 @@ import {
 import { ICommandHandler } from '../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../service/TransactionService';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
+import AccountService from '../../../../service/AccountService';
 
 @CommandHandler(UpdateConfigVersionCommand)
 export class UpdateConfigVersionCommandHandler
@@ -222,8 +221,8 @@ export class UpdateConfigVersionCommandHandler
   constructor(
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -232,12 +231,8 @@ export class UpdateConfigVersionCommandHandler
     const { configVersion, securityId } = command;
     const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
     const res = await handler.updateConfigVersion(
       securityEvmAddress,
       configVersion,

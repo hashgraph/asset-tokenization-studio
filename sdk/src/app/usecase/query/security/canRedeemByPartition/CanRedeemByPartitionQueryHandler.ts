@@ -203,111 +203,59 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import {
-  ExecuteHoldByPartitionCommand,
-  ExecuteHoldByPartitionCommandResponse,
-} from './ExecuteHoldByPartitionCommand.js';
-import TransactionService from '../../../../../service/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../error/SecurityPaused.js';
-import { InsufficientHoldBalance } from '../../error/InsufficientHoldBalance.js';
-import { EVM_ZERO_ADDRESS } from '../../../../../../core/Constants.js';
-import ValidationService from '../../../../../../app/service/ValidationService.js';
+  CanRedeemByPartitionQuery,
+  CanRedeemByPartitionQueryResponse,
+} from './CanRedeemByPartitionQuery.js';
+import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../service/SecurityService.js';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../service/AccountService.js';
+import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { EMPTY_BYTES } from '../../../../../core/Constants.js';
 
-@CommandHandler(ExecuteHoldByPartitionCommand)
-export class ExecuteHoldByPartitionCommandHandler
-  implements ICommandHandler<ExecuteHoldByPartitionCommand>
+@QueryHandler(CanRedeemByPartitionQuery)
+export class CanRedeemByPartitionQueryHandler
+  implements IQueryHandler<CanRedeemByPartitionQuery>
 {
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
-    command: ExecuteHoldByPartitionCommand,
-  ): Promise<ExecuteHoldByPartitionCommandResponse> {
-    const { securityId, sourceId, amount, holdId, targetId, partitionId } =
-      command;
+    query: CanRedeemByPartitionQuery,
+  ): Promise<CanRedeemByPartitionQueryResponse> {
+    const { securityId, sourceId, partitionId, amount } = query;
 
-    await this.validationService.validateKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getContractEvmAddress(securityId);
+    const sourceEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(sourceId);
 
-    const handler = this.transactionService.getHandler();
     const security = await this.securityService.get(securityId);
-
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const targetEvmAddress: EvmAddress =
-      targetId === '0.0.0'
-        ? new EvmAddress(EVM_ZERO_ADDRESS)
-        : HEDERA_FORMAT_ID_REGEX.exec(targetId)
-          ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-          : new EvmAddress(targetId);
-
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
 
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const holdDetails = await this.queryAdapter.getHoldForByPartition(
-      securityEvmAddress,
-      partitionId,
-      sourceEvmAddress,
-      holdId,
-    );
-
-    if (holdDetails.amount.toBigNumber().lt(amountBd.toBigNumber())) {
-      throw new InsufficientHoldBalance();
-    }
-
-    const res = await handler.executeHoldByPartition(
+    const [, res] = await this.queryAdapter.canRedeemByPartition(
       securityEvmAddress,
       sourceEvmAddress,
-      targetEvmAddress,
       amountBd,
       partitionId,
-      holdId,
-      securityId,
+      EMPTY_BYTES,
+      EMPTY_BYTES,
     );
 
-    return Promise.resolve(
-      new ExecuteHoldByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+    return new CanRedeemByPartitionQueryResponse(res);
   }
 }
