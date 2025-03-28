@@ -216,7 +216,7 @@ import {
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
 } from '../../config.js';
-import ConnectRequest from '../../../src/port/in/request/ConnectRequest.js';
+import ConnectRequest from '../../../src/port/in/request/network/ConnectRequest.js';
 import { Wallet, ethers } from 'ethers';
 import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
