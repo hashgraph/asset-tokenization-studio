@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {LibCommon} from '../layer_1/common/LibCommon.sol';
+import {LibCommon} from '../layer_0/common/LibCommon.sol';
 import {
     IBusinessLogicResolverWrapper
 } from '../interfaces/resolver/IBusinessLogicResolverWrapper.sol';
@@ -219,17 +219,21 @@ import {
 import {
     _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
-import {
-    _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
 
-contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
+abstract contract BusinessLogicResolverWrapper is
+    IBusinessLogicResolverWrapper
+{
     struct BusinessLogicResolverDataStorage {
         uint256 latestVersion;
+        // list of facetIds
         bytes32[] activeBusinessLogics;
+        // facetId -> bool
         mapping(bytes32 => bool) businessLogicActive;
+        // facetId -> pos (one per vesion) -> version + status + address
         mapping(bytes32 => IBusinessLogicResolver.BusinessLogicVersion[]) businessLogics;
+        // keccaak256(facetId, version) -> position
         mapping(bytes32 => uint256) businessLogicVersionIndex;
+        // version to status
         mapping(uint256 => IBusinessLogicResolver.VersionStatus) versionStatuses;
         bool initialized;
     }
@@ -250,7 +254,7 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     function _registerBusinessLogics(
         IBusinessLogicResolver.BusinessLogicRegistryData[]
             calldata _businessLogicsRegistryDatas
-    ) internal virtual returns (uint256 latestVersion_) {
+    ) internal returns (uint256 latestVersion_) {
         BusinessLogicResolverDataStorage
             storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
 
@@ -312,19 +316,13 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
 
     function _getVersionStatus(
         uint256 _version
-    )
-        internal
-        view
-        virtual
-        returns (IBusinessLogicResolver.VersionStatus status_)
-    {
+    ) internal view returns (IBusinessLogicResolver.VersionStatus status_) {
         status_ = _businessLogicResolverStorage().versionStatuses[_version];
     }
 
     function _getLatestVersion()
         internal
         view
-        virtual
         returns (uint256 latestVersion_)
     {
         latestVersion_ = _businessLogicResolverStorage().latestVersion;
@@ -332,7 +330,7 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
 
     function _resolveLatestBusinessLogic(
         bytes32 _businessLogicKey
-    ) internal view virtual returns (address businessLogicAddress_) {
+    ) internal view returns (address businessLogicAddress_) {
         businessLogicAddress_ = _resolveBusinessLogicByVersion(
             _businessLogicKey,
             _businessLogicResolverStorage().latestVersion
@@ -342,7 +340,6 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     function _getBusinessLogicCount()
         internal
         view
-        virtual
         returns (uint256 businessLogicCount_)
     {
         businessLogicCount_ = _businessLogicResolverStorage()
@@ -353,7 +350,7 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     function _getBusinessLogicKeys(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory businessLogicKeys_) {
+    ) internal view returns (bytes32[] memory businessLogicKeys_) {
         BusinessLogicResolverDataStorage
             storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
 
@@ -399,13 +396,25 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
         return businessLogicVersion.businessLogicAddress;
     }
 
+    function _businessLogicResolverStorage()
+        internal
+        pure
+        returns (
+            BusinessLogicResolverDataStorage storage businessLogicResolverData_
+        )
+    {
+        bytes32 position = _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            businessLogicResolverData_.slot := position
+        }
+    }
+
     function _checkValidVersion(uint256 _version) private view {
         if (
             _version == 0 ||
             _version > _businessLogicResolverStorage().latestVersion
-        ) {
-            revert BusinessLogicVersionDoesNotExist(_version);
-        }
+        ) revert BusinessLogicVersionDoesNotExist(_version);
     }
 
     function _checkValidKeys(
@@ -419,54 +428,35 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
         // Check non duplicated keys.
         uint256 activesBusinessLogicsKeys;
         bytes32 currentKey;
-
-        for (
-            uint256 index;
-            index < _businessLogicsRegistryDatas.length;
-            index++
-        ) {
+        uint256 length = _businessLogicsRegistryDatas.length;
+        uint256 innerIndex;
+        for (uint256 index; index < length; ) {
             currentKey = _businessLogicsRegistryDatas[index].businessLogicKey;
-            if (uint256(currentKey) == 0) {
+            if (uint256(currentKey) == 0)
                 revert ZeroKeyNotValidForBusinessLogic();
-            }
+
             if (
                 businessLogicResolverDataStorage.businessLogicActive[currentKey]
-            ) {
-                activesBusinessLogicsKeys++;
+            ) ++activesBusinessLogicsKeys;
+            unchecked {
+                innerIndex = index + 1;
             }
-            for (
-                uint256 innerIndex = index + 1;
-                innerIndex < _businessLogicsRegistryDatas.length;
-                innerIndex++
-            ) {
+            for (; innerIndex < length; ) {
                 if (
                     currentKey ==
                     _businessLogicsRegistryDatas[innerIndex].businessLogicKey
-                ) {
-                    revert BusinessLogicKeyDuplicated(currentKey);
+                ) revert BusinessLogicKeyDuplicated(currentKey);
+                unchecked {
+                    ++innerIndex;
                 }
+            }
+            unchecked {
+                ++index;
             }
         }
         if (
             activesBusinessLogicsKeys !=
             businessLogicResolverDataStorage.activeBusinessLogics.length
-        ) {
-            revert AllBusinessLogicKeysMustBeenInformed();
-        }
-    }
-
-    function _businessLogicResolverStorage()
-        internal
-        pure
-        virtual
-        returns (
-            BusinessLogicResolverDataStorage storage businessLogicResolverData_
-        )
-    {
-        bytes32 position = _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            businessLogicResolverData_.slot := position
-        }
+        ) revert AllBusinessLogicKeysMustBeenInformed();
     }
 }

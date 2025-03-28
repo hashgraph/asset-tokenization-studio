@@ -210,22 +210,20 @@ import {ICap} from '../interfaces/cap/ICap.sol';
 import {_CAP_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {Common} from '../common/Common.sol';
-import {CapStorageWrapper} from './CapStorageWrapper.sol';
 
-contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
+contract Cap is ICap, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
         uint256 maxSupply,
         PartitionCap[] calldata partitionCap
     )
         external
-        virtual
         override
         onlyUninitialized(_capStorage().initialized)
-        returns (bool success_)
+        onlyValidNewMaxSupply(maxSupply)
     {
         CapDataStorage storage capStorage = _capStorage();
 
@@ -238,18 +236,16 @@ contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
         }
 
         capStorage.initialized = true;
-        success_ = true;
     }
 
     function setMaxSupply(
         uint256 _maxSupply
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        checkNewMaxSupply(_maxSupply)
+        onlyValidNewMaxSupply(_maxSupply)
         returns (bool success_)
     {
         _setMaxSupply(_maxSupply);
@@ -261,11 +257,10 @@ contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
         uint256 _maxSupply
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        checkNewMaxSupplyForPartition(_partition, _maxSupply)
+        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply)
         returns (bool success_)
     {
         _setMaxSupplyByPartition(_partition, _maxSupply);
@@ -275,23 +270,21 @@ contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
     function getMaxSupply()
         external
         view
-        virtual
         override
         returns (uint256 maxSupply_)
     {
-        return _getMaxSupply();
+        return _getMaxSupplyAdjusted();
     }
 
     function getMaxSupplyByPartition(
         bytes32 _partition
-    ) external view virtual override returns (uint256 maxSupply_) {
-        return _getMaxSupplyByPartition(_partition);
+    ) external view override returns (uint256 maxSupply_) {
+        return _getMaxSupplyByPartitionAdjusted(_partition);
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -301,7 +294,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -323,7 +315,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

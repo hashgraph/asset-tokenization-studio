@@ -3,21 +3,20 @@
 exports[`Dividends should render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-dst8ij"
+    class="chakra-stack css-r8fju2"
   >
     <div
       class="chakra-tabs css-1bx5ylf"
     >
       <div
         aria-orientation="horizontal"
-        class="chakra-tabs__tablist css-3o7rpu"
+        class="chakra-tabs__tablist css-ctgkh0"
         role="tablist"
       >
         <button
           aria-controls="tabs-:r0:--tabpanel-0"
-          aria-disabled="false"
           aria-selected="true"
-          class="chakra-tabs__tab css-1ng85ee"
+          class="chakra-tabs__tab css-1wqiuq4"
           data-index="0"
           id="tabs-:r0:--tab-0"
           role="tab"
@@ -28,9 +27,8 @@ exports[`Dividends should render correctly 1`] = `
         </button>
         <button
           aria-controls="tabs-:r0:--tabpanel-1"
-          aria-disabled="false"
           aria-selected="false"
-          class="chakra-tabs__tab css-1ng85ee"
+          class="chakra-tabs__tab css-1wqiuq4"
           data-index="1"
           id="tabs-:r0:--tab-1"
           role="tab"
@@ -45,7 +43,7 @@ exports[`Dividends should render correctly 1`] = `
         style="position: absolute; transition-property: left, right, top, bottom, height, width; transition-duration: 0ms; transition-timing-function: cubic-bezier(0, 0, 0.2, 1); left: 0px; width: 0px;"
       />
       <div
-        class="chakra-tabs__tab-panels css-1akcp04"
+        class="chakra-tabs__tab-panels css-1o5uxli"
       >
         <div
           aria-labelledby="tabs-:r0:--tab-0"
@@ -58,14 +56,14 @@ exports[`Dividends should render correctly 1`] = `
             class="css-3d6uxt"
           >
             <form
-              class="chakra-stack css-acgahh"
+              class="chakra-stack css-ip7fdm"
               data-testid="dividends-form"
             >
               <div
-                class="chakra-stack css-ppmla1"
+                class="chakra-stack css-1h0sumw"
               >
                 <div
-                  class="chakra-stack css-e7xy2r"
+                  class="chakra-stack css-1nqqhpy"
                 >
                   <p
                     class="css-0"
@@ -103,7 +101,7 @@ exports[`Dividends should render correctly 1`] = `
                       data-group="true"
                     >
                       <div
-                        class="chakra-input__left-element css-1ni45n2"
+                        class="chakra-input__left-element css-irrpsr"
                       >
                         <svg
                           class="chakra-icon css-kpbtv0"
@@ -125,7 +123,7 @@ exports[`Dividends should render correctly 1`] = `
                         aria-haspopup="dialog"
                         aria-label="Date"
                         autocomplete="off"
-                        class="chakra-input css-1tvm2ue"
+                        class="chakra-input css-p6x41e"
                         data-testid="recordTimestamp"
                         id="popover-trigger-:r5:"
                         name="recordTimestamp"
@@ -133,7 +131,7 @@ exports[`Dividends should render correctly 1`] = `
                         value=""
                       />
                       <div
-                        class="chakra-input__right-element css-17uv17e"
+                        class="chakra-input__right-element css-1akgnmh"
                       >
                         <svg
                           aria-label="Select a date"
@@ -167,10 +165,10 @@ exports[`Dividends should render correctly 1`] = `
                 </div>
               </div>
               <div
-                class="chakra-stack css-ppmla1"
+                class="chakra-stack css-1h0sumw"
               >
                 <div
-                  class="chakra-stack css-e7xy2r"
+                  class="chakra-stack css-1nqqhpy"
                 >
                   <p
                     class="css-0"
@@ -208,7 +206,7 @@ exports[`Dividends should render correctly 1`] = `
                       data-group="true"
                     >
                       <div
-                        class="chakra-input__left-element css-1ni45n2"
+                        class="chakra-input__left-element css-irrpsr"
                       >
                         <svg
                           class="chakra-icon css-kpbtv0"
@@ -230,7 +228,7 @@ exports[`Dividends should render correctly 1`] = `
                         aria-haspopup="dialog"
                         aria-label="Date"
                         autocomplete="off"
-                        class="chakra-input css-1tvm2ue"
+                        class="chakra-input css-p6x41e"
                         data-testid="executionTimestamp"
                         id="popover-trigger-:ra:"
                         name="executionTimestamp"
@@ -238,7 +236,7 @@ exports[`Dividends should render correctly 1`] = `
                         value=""
                       />
                       <div
-                        class="chakra-input__right-element css-17uv17e"
+                        class="chakra-input__right-element css-1akgnmh"
                       >
                         <svg
                           aria-label="Select a date"
@@ -272,10 +270,10 @@ exports[`Dividends should render correctly 1`] = `
                 </div>
               </div>
               <div
-                class="chakra-stack css-ppmla1"
+                class="chakra-stack css-1h0sumw"
               >
                 <div
-                  class="chakra-stack css-e7xy2r"
+                  class="chakra-stack css-1nqqhpy"
                 >
                   <p
                     class="css-0"
@@ -312,7 +310,7 @@ exports[`Dividends should render correctly 1`] = `
                       data-group="true"
                     >
                       <input
-                        class="chakra-input css-w4jx8b"
+                        class="chakra-input css-ifstuv"
                         data-testid="amountPerUnitOfSecurity"
                         id="field-:rd:"
                         inputmode="numeric"
@@ -349,17 +347,17 @@ exports[`Dividends should render correctly 1`] = `
             class="css-3d6uxt"
           >
             <div
-              class="chakra-stack css-tl3ftk"
+              class="chakra-stack css-owjkmg"
             >
               <form
-                class="chakra-stack css-acgahh"
+                class="chakra-stack css-ip7fdm"
                 data-testid="dividends-form"
               >
                 <div
-                  class="chakra-stack css-ppmla1"
+                  class="chakra-stack css-1h0sumw"
                 >
                   <div
-                    class="chakra-stack css-e7xy2r"
+                    class="chakra-stack css-1nqqhpy"
                   >
                     <p
                       class="css-0"
@@ -396,7 +394,7 @@ exports[`Dividends should render correctly 1`] = `
                         data-group="true"
                       >
                         <input
-                          class="chakra-input css-w4jx8b"
+                          class="chakra-input css-ifstuv"
                           data-testid="dividendId"
                           id="field-:rg:"
                           inputmode="numeric"
@@ -410,10 +408,10 @@ exports[`Dividends should render correctly 1`] = `
                   </div>
                 </div>
                 <div
-                  class="chakra-stack css-ppmla1"
+                  class="chakra-stack css-1h0sumw"
                 >
                   <div
-                    class="chakra-stack css-e7xy2r"
+                    class="chakra-stack css-1nqqhpy"
                   >
                     <p
                       class="css-0"
@@ -451,7 +449,7 @@ exports[`Dividends should render correctly 1`] = `
                         data-group="true"
                       >
                         <input
-                          class="chakra-input css-w4jx8b"
+                          class="chakra-input css-ifstuv"
                           data-testid="targetId"
                           id="targetId"
                           name="targetId"

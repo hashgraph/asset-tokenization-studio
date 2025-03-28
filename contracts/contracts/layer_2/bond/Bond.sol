@@ -207,55 +207,29 @@
 pragma solidity 0.8.18;
 
 import {IBond} from '../interfaces/bond/IBond.sol';
-import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
-import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
 import {BondStorageWrapper} from './BondStorageWrapper.sol';
+import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
+import {
+    _CORPORATE_ACTION_ROLE,
+    _BOND_MANAGER_ROLE
+} from '../../layer_1/constants/roles.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     // solhint-disable func-name-mixedcase
     // solhint-disable-next-line private-vars-leading-underscore
-    function _initialize_bond(
-        BondDetailsData calldata _bondDetailsData,
-        CouponDetailsData calldata _couponDetailsData
-    )
-        internal
-        checkDates(_bondDetailsData.startingDate, _bondDetailsData.maturityDate)
-        checkTimestamp(_bondDetailsData.startingDate)
-        returns (bool success_)
-    {
-        BondDataStorage storage bondStorage = _bondStorage();
-        bondStorage.initialized = true;
-        success_ =
-            _storeBondDetails(_bondDetailsData) &&
-            _storeCouponDetails(
-                _couponDetailsData,
-                _bondDetailsData.startingDate,
-                _bondDetailsData.maturityDate
-            );
-    }
-
-    function getBondDetails()
-        external
-        view
-        override
-        returns (BondDetailsData memory bondDetailsData_)
-    {
-        return _getBondDetails();
-    }
 
     function setCoupon(
         Coupon calldata _newCoupon
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        checkDates(_newCoupon.recordDate, _newCoupon.executionDate)
-        checkTimestamp(_newCoupon.recordDate)
+        validateDates(_newCoupon.recordDate, _newCoupon.executionDate)
+        onlyValidTimestamp(_newCoupon.recordDate)
         returns (bool success_, uint256 couponID_)
     {
         bytes32 corporateActionID;
@@ -268,6 +242,38 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
             _newCoupon.executionDate,
             _newCoupon.rate
         );
+    }
+
+    /**
+     * @dev Updates the maturity date of the bond.
+     * @param _newMaturityDate The new maturity date to be set.
+     */
+    function updateMaturityDate(
+        uint256 _newMaturityDate
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_BOND_MANAGER_ROLE)
+        onlyAfterCurrentMaturityDate(_newMaturityDate)
+        returns (bool success_)
+    {
+        emit MaturityDateUpdated(
+            address(this),
+            _newMaturityDate,
+            _getMaturityDate()
+        );
+        success_ = _setMaturityDate(_newMaturityDate);
+        return success_;
+    }
+
+    function getBondDetails()
+        external
+        view
+        override
+        returns (BondDetailsData memory bondDetailsData_)
+    {
+        return _getBondDetails();
     }
 
     function getCouponDetails()
@@ -284,12 +290,8 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
-            COUPON_CORPORATE_ACTION_TYPE,
-            _couponID - 1
-        )
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
         returns (RegisteredCoupon memory registeredCoupon_)
     {
         return _getCoupon(_couponID);
@@ -301,12 +303,8 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
-            COUPON_CORPORATE_ACTION_TYPE,
-            _couponID - 1
-        )
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
         returns (CouponFor memory couponFor_)
     {
         return _getCouponFor(_couponID, _account);
@@ -315,10 +313,30 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     function getCouponCount()
         external
         view
-        virtual
         override
         returns (uint256 couponCount_)
     {
         return _getCouponCount();
+    }
+
+    function _initialize_bond(
+        BondDetailsData calldata _bondDetailsData,
+        CouponDetailsData calldata _couponDetailsData
+    )
+        internal
+        validateDates(
+            _bondDetailsData.startingDate,
+            _bondDetailsData.maturityDate
+        )
+        onlyValidTimestamp(_bondDetailsData.startingDate)
+    {
+        BondDataStorage storage bondStorage = _bondStorage();
+        bondStorage.initialized = true;
+        _storeBondDetails(_bondDetailsData);
+        _storeCouponDetails(
+            _couponDetailsData,
+            _bondDetailsData.startingDate,
+            _bondDetailsData.maturityDate
+        );
     }
 }

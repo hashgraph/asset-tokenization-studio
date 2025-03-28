@@ -3,10 +3,10 @@
 exports[`Dashboard Header should render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1153lrp"
+    class="chakra-stack css-t3mtkc"
   >
     <div
-      class="chakra-stack css-1vbflsr"
+      class="chakra-stack css-94x0m1"
     >
       <p
         class="css-r0wbil"
@@ -20,7 +20,7 @@ exports[`Dashboard Header should render correctly 1`] = `
       </p>
     </div>
     <div
-      class="chakra-stack css-1lpnvx5"
+      class="chakra-stack css-1cadweg"
     >
       <div
         class="css-b0rmsk"

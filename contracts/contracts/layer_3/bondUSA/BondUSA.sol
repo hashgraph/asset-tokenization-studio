@@ -225,21 +225,14 @@ contract BondUSA is IBondUSA, Bond, Security {
         CouponDetailsData calldata _couponDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    )
-        external
-        override
-        onlyUninitialized(_bondStorage().initialized)
-        returns (bool)
-    {
-        return
-            _initialize_bond(_bondDetailsData, _couponDetailsData) &&
-            _initializeSecurity(_regulationData, _additionalSecurityData);
+    ) external override onlyUninitialized(_bondStorage().initialized) {
+        _initialize_bond(_bondDetailsData, _couponDetailsData);
+        _initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -249,16 +242,18 @@ contract BondUSA is IBondUSA, Bond, Security {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](8);
+        staticFunctionSelectors_ = new bytes4[](9);
         staticFunctionSelectors_[selectorIndex++] = this
             ._initialize_bondUSA
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .updateMaturityDate
+            .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getBondDetails
             .selector;
@@ -278,7 +273,6 @@ contract BondUSA is IBondUSA, Bond, Security {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

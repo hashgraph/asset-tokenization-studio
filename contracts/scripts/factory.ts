@@ -204,33 +204,23 @@
 */
 
 import { ethers } from 'hardhat'
-import { IFactory } from '../typechain-types'
+import { IFactory } from '@typechain'
 import {
-    transparentUpgradableProxy,
-    deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
-import {
-    EquityDeployedEvent,
-    _DEFAULT_ADMIN_ROLE,
-    BondDeployedEvent,
+    DEFAULT_ADMIN_ROLE,
+    EQUITY_CONFIG_ID,
+    BOND_CONFIG_ID,
+    EVENTS,
+    GAS_LIMIT,
 } from './constants'
-import { environment } from './deployEnvironmentByRpc'
-
-export let factory: IFactory
-
-export async function deployProxyToFactory(
-    factoryBusinessLogicAddress: string
-) {
-    await deployTransparentUpgradeableProxy(factoryBusinessLogicAddress)
-    factory = await ethers.getContractAt(
-        'Factory',
-        transparentUpgradableProxy.address
-    )
-}
 
 export interface Rbac {
     role: string
     members: string[]
+}
+
+export interface ResolverProxyConfiguration {
+    key: string
+    version: number
 }
 
 export interface ERC20MetadataInfo {
@@ -261,7 +251,7 @@ export interface EquityDetailsData {
     informationRight: boolean
     liquidationRight: boolean
     subscriptionRight: boolean
-    convertionRight: boolean
+    conversionRight: boolean
     redemptionRight: boolean
     putRight: boolean
     dividendRight: DividendType
@@ -283,14 +273,16 @@ export interface CouponDetailsData {
 }
 
 export interface SecurityData {
+    arePartitionsProtected: boolean
     isMultiPartition: boolean
     resolver: string
-    businessLogicKeys: string[]
+    resolverProxyConfiguration: ResolverProxyConfiguration
     rbacs: Rbac[]
     isControllable: boolean
     isWhiteList: boolean
-    maxSupply: number
+    maxSupply: bigint
     erc20MetadataInfo: ERC20MetadataInfo
+    clearingActive: boolean
 }
 
 export interface EquityData {
@@ -350,36 +342,62 @@ export async function setFactoryRegulationData(
     return factoryRegulationData
 }
 
-export async function setEquityData(
-    adminAccount: string,
-    isWhiteList: boolean,
-    isControllable: boolean,
-    isMultiPartition: boolean,
-    name: string,
-    symbol: string,
-    decimals: number,
-    isin: string,
-    votingRight: boolean,
-    informationRight: boolean,
-    liquidationRight: boolean,
-    subscriptionRight: boolean,
-    convertionRight: boolean,
-    redemptionRight: boolean,
-    putRight: boolean,
-    dividendRight: DividendType,
-    currency: string,
-    numberOfShares: number,
-    nominalValue: number,
-    init_rbacs?: Rbac[],
+export async function setEquityData({
+    adminAccount,
+    isWhiteList,
+    isControllable,
+    isMultiPartition,
+    arePartitionsProtected,
+    clearingActive,
+    name,
+    symbol,
+    decimals,
+    isin,
+    votingRight,
+    informationRight,
+    liquidationRight,
+    subscriptionRight,
+    conversionRight,
+    redemptionRight,
+    putRight,
+    dividendRight,
+    currency,
+    numberOfShares,
+    nominalValue,
+    init_rbacs,
     addAdmin = true,
-    initBusinessLogicKeys?: string[],
-    initResolver?: string
-) {
+    businessLogicResolver,
+}: {
+    adminAccount: string
+    isWhiteList: boolean
+    isControllable: boolean
+    isMultiPartition: boolean
+    arePartitionsProtected: boolean
+    clearingActive: boolean
+    name: string
+    symbol: string
+    decimals: number
+    isin: string
+    votingRight: boolean
+    informationRight: boolean
+    liquidationRight: boolean
+    subscriptionRight: boolean
+    conversionRight: boolean
+    redemptionRight: boolean
+    putRight: boolean
+    dividendRight: DividendType
+    currency: string
+    numberOfShares: bigint
+    nominalValue: number
+    init_rbacs?: Rbac[]
+    addAdmin?: boolean
+    businessLogicResolver: string
+}) {
     let rbacs: Rbac[] = []
 
     if (addAdmin) {
         const rbacAdmin: Rbac = {
-            role: _DEFAULT_ADMIN_ROLE,
+            role: DEFAULT_ADMIN_ROLE,
             members: [adminAccount],
         }
         rbacs = [rbacAdmin]
@@ -389,27 +407,10 @@ export async function setEquityData(
         rbacs = rbacs.concat(init_rbacs)
     }
 
-    const businessLogicKeys: string[] = initBusinessLogicKeys
-        ? initBusinessLogicKeys
-        : [
-              await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.accessControl.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.pause.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.controlList.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC20.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1644.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1410ScheduledSnapshot.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1594.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.snapshots.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.cap.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.lock.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey(),
-          ]
-    const resolver = initResolver ? initResolver : environment.resolver.address
+    const resolverProxyConfiguration: ResolverProxyConfiguration = {
+        key: EQUITY_CONFIG_ID,
+        version: 1,
+    }
 
     const erc20MetadataInfo: ERC20MetadataInfo = {
         name,
@@ -419,14 +420,16 @@ export async function setEquityData(
     }
 
     const security: SecurityData = {
+        arePartitionsProtected: arePartitionsProtected,
         isMultiPartition: isMultiPartition,
-        resolver: resolver,
-        businessLogicKeys: businessLogicKeys,
+        resolver: businessLogicResolver,
+        resolverProxyConfiguration: resolverProxyConfiguration,
         rbacs: rbacs,
         isControllable: isControllable,
         isWhiteList: isWhiteList,
         maxSupply: numberOfShares,
         erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: clearingActive,
     }
 
     const equityDetails: EquityDetailsData = {
@@ -434,7 +437,7 @@ export async function setEquityData(
         informationRight: informationRight,
         liquidationRight: liquidationRight,
         subscriptionRight: subscriptionRight,
-        convertionRight: convertionRight,
+        conversionRight: conversionRight,
         redemptionRight: redemptionRight,
         putRight: putRight,
         dividendRight: dividendRight,
@@ -450,33 +453,56 @@ export async function setEquityData(
     return equityData
 }
 
-export async function setBondData(
-    adminAccount: string,
-    isWhiteList: boolean,
-    isControllable: boolean,
-    isMultiPartition: boolean,
-    name: string,
-    symbol: string,
-    decimals: number,
-    isin: string,
-    currency: string,
-    numberOfUnits: number,
-    nominalValue: number,
-    startingDate: number,
-    maturityDate: number,
-    couponFrequency: number,
-    couponRate: number,
-    firstCouponDate: number,
-    init_rbacs?: Rbac[],
+export async function setBondData({
+    adminAccount,
+    isWhiteList,
+    isControllable,
+    isMultiPartition,
+    arePartitionsProtected,
+    clearingActive,
+    name,
+    symbol,
+    decimals,
+    isin,
+    currency,
+    numberOfUnits,
+    nominalValue,
+    startingDate,
+    maturityDate,
+    couponFrequency,
+    couponRate,
+    firstCouponDate,
+    init_rbacs,
     addAdmin = true,
-    initBusinessLogicKeys?: string[],
-    initResolver?: string
-) {
+    businessLogicResolver,
+}: {
+    adminAccount: string
+    isWhiteList: boolean
+    isControllable: boolean
+    isMultiPartition: boolean
+    arePartitionsProtected: boolean
+    clearingActive: boolean
+    name: string
+    symbol: string
+    decimals: number
+    isin: string
+    currency: string
+    numberOfUnits: bigint
+    nominalValue: number
+    startingDate: number
+    maturityDate: number
+    couponFrequency: number
+    couponRate: number
+    firstCouponDate: number
+    init_rbacs?: Rbac[]
+    addAdmin: boolean
+    businessLogicResolver: string
+}) {
     let rbacs: Rbac[] = []
 
     if (addAdmin) {
         const rbacAdmin: Rbac = {
-            role: _DEFAULT_ADMIN_ROLE,
+            role: DEFAULT_ADMIN_ROLE,
             members: [adminAccount],
         }
         rbacs = [rbacAdmin]
@@ -486,26 +512,10 @@ export async function setBondData(
         rbacs = rbacs.concat(init_rbacs)
     }
 
-    const businessLogicKeys: string[] = initBusinessLogicKeys
-        ? initBusinessLogicKeys
-        : [
-              await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.accessControl.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.pause.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.controlList.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC20.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1644.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1410ScheduledSnapshot.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1594.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.bondUSA.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.snapshots.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.cap.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.lock.getStaticResolverKey(),
-          ]
-    const resolver = initResolver ? initResolver : environment.resolver.address
+    const resolverProxyConfiguration: ResolverProxyConfiguration = {
+        key: BOND_CONFIG_ID,
+        version: 1,
+    }
 
     const erc20MetadataInfo: ERC20MetadataInfo = {
         name,
@@ -515,14 +525,16 @@ export async function setBondData(
     }
 
     const security: SecurityData = {
+        arePartitionsProtected: arePartitionsProtected,
         isMultiPartition: isMultiPartition,
-        resolver: resolver,
-        businessLogicKeys: businessLogicKeys,
+        resolver: businessLogicResolver,
+        resolverProxyConfiguration: resolverProxyConfiguration,
         rbacs: rbacs,
         isControllable: isControllable,
         isWhiteList: isWhiteList,
         maxSupply: numberOfUnits,
         erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: clearingActive,
     }
 
     const bondDetails: BondDetailsData = {
@@ -547,41 +559,76 @@ export async function setBondData(
     return bondData
 }
 
-export async function deployEquityFromFactory(
-    adminAccount: string,
-    isWhiteList: boolean,
-    isControllable: boolean,
-    isMultiPartition: boolean,
-    name: string,
-    symbol: string,
-    decimals: number,
-    isin: string,
-    votingRight: boolean,
-    informationRight: boolean,
-    liquidationRight: boolean,
-    subscriptionRight: boolean,
-    convertionRight: boolean,
-    redemptionRight: boolean,
-    putRight: boolean,
-    dividendRight: DividendType,
-    currency: string,
-    numberOfShares: number,
-    nominalValue: number,
-    regulationType: number,
-    regulationSubType: number,
-    countriesControlListType: boolean,
-    listOfCountries: string,
-    info: string,
-    init_rbacs?: Rbac[],
+export async function deployEquityFromFactory({
+    adminAccount,
+    isWhiteList,
+    isControllable,
+    isMultiPartition,
+    arePartitionsProtected,
+    clearingActive,
+    name,
+    symbol,
+    decimals,
+    isin,
+    votingRight,
+    informationRight,
+    liquidationRight,
+    subscriptionRight,
+    conversionRight,
+    redemptionRight,
+    putRight,
+    dividendRight,
+    currency,
+    numberOfShares,
+    nominalValue,
+    regulationType,
+    regulationSubType,
+    countriesControlListType,
+    listOfCountries,
+    info,
+    init_rbacs,
     addAdmin = true,
-    initBusinessLogicKeys?: string[],
-    initResolver?: string
-) {
-    const equityData = await setEquityData(
+    businessLogicResolver,
+    factory,
+}: {
+    adminAccount: string
+    isWhiteList: boolean
+    isControllable: boolean
+    isMultiPartition: boolean
+    arePartitionsProtected: boolean
+    clearingActive: boolean
+    name: string
+    symbol: string
+    decimals: number
+    isin: string
+    votingRight: boolean
+    informationRight: boolean
+    liquidationRight: boolean
+    subscriptionRight: boolean
+    conversionRight: boolean
+    redemptionRight: boolean
+    putRight: boolean
+    dividendRight: DividendType
+    currency: string
+    numberOfShares: bigint
+    nominalValue: number
+    regulationType: number
+    regulationSubType: number
+    countriesControlListType: boolean
+    listOfCountries: string
+    info: string
+    init_rbacs?: Rbac[]
+    addAdmin?: boolean
+    businessLogicResolver: string
+    factory: IFactory
+}) {
+    const equityData = await setEquityData({
         adminAccount,
         isWhiteList,
         isControllable,
+        arePartitionsProtected,
         isMultiPartition,
+        clearingActive,
         name,
         symbol,
         decimals,
@@ -590,7 +637,7 @@ export async function deployEquityFromFactory(
         informationRight,
         liquidationRight,
         subscriptionRight,
-        convertionRight,
+        conversionRight,
         redemptionRight,
         putRight,
         dividendRight,
@@ -599,9 +646,8 @@ export async function deployEquityFromFactory(
         nominalValue,
         init_rbacs,
         addAdmin,
-        initBusinessLogicKeys,
-        initResolver
-    )
+        businessLogicResolver,
+    })
 
     const factoryRegulationData = await setFactoryRegulationData(
         regulationType,
@@ -611,57 +657,92 @@ export async function deployEquityFromFactory(
         info
     )
 
-    const result = await environment.factory.deployEquity(
+    const result = await factory.deployEquity(
         equityData,
-        factoryRegulationData
+        factoryRegulationData,
+        {
+            gasLimit: GAS_LIMIT.high,
+        }
     )
     const events = (await result.wait()).events!
     const deployedEquityEvent = events.find(
-        (e) => e.event == EquityDeployedEvent
+        (e) => e.event == EVENTS.equity.deployed
     )
     const equityAddress = deployedEquityEvent!.args!.equityAddress
 
     return await ethers.getContractAt('Equity', equityAddress)
 }
 
-export async function deployBondFromFactory(
-    adminAccount: string,
-    isWhiteList: boolean,
-    isControllable: boolean,
-    isMultiPartition: boolean,
-    name: string,
-    symbol: string,
-    decimals: number,
-    isin: string,
-    currency: string,
-    numberOfUnits: number,
-    nominalValue: number,
-    startingDate: number,
-    maturityDate: number,
-    couponFrequency: number,
-    couponRate: number,
-    firstCouponDate: number,
-    regulationType: number,
-    regulationSubType: number,
-    countriesControlListType: boolean,
-    listOfCountries: string,
-    info: string,
-    init_rbacs?: Rbac[],
+export async function deployBondFromFactory({
+    adminAccount,
+    isWhiteList,
+    isControllable,
+    isMultiPartition,
+    arePartitionsProtected,
+    clearingActive,
+    name,
+    symbol,
+    decimals,
+    isin,
+    currency,
+    numberOfUnits,
+    nominalValue,
+    startingDate,
+    maturityDate,
+    couponFrequency,
+    couponRate,
+    firstCouponDate,
+    regulationType,
+    regulationSubType,
+    countriesControlListType,
+    listOfCountries,
+    info,
+    init_rbacs,
     addAdmin = true,
-    initBusinessLogicKeys?: string[],
-    initResolver?: string
-) {
-    const bondData = await setBondData(
+    factory,
+    businessLogicResolver,
+}: {
+    adminAccount: string
+    isWhiteList: boolean
+    isControllable: boolean
+    isMultiPartition: boolean
+    arePartitionsProtected: boolean
+    clearingActive: boolean
+    name: string
+    symbol: string
+    decimals: number
+    isin: string
+    currency: string
+    numberOfUnits: number
+    nominalValue: number
+    startingDate: number
+    maturityDate: number
+    couponFrequency: number
+    couponRate: number
+    firstCouponDate: number
+    regulationType: number
+    regulationSubType: number
+    countriesControlListType: boolean
+    listOfCountries: string
+    info: string
+    init_rbacs?: Rbac[]
+    addAdmin?: boolean
+    factory: IFactory
+    businessLogicResolver: string
+}) {
+    const bondData = await setBondData({
         adminAccount,
         isWhiteList,
         isControllable,
+        arePartitionsProtected,
+        clearingActive,
         isMultiPartition,
         name,
         symbol,
         decimals,
         isin,
         currency,
-        numberOfUnits,
+        numberOfUnits: BigInt(numberOfUnits),
         nominalValue,
         startingDate,
         maturityDate,
@@ -670,9 +751,8 @@ export async function deployBondFromFactory(
         firstCouponDate,
         init_rbacs,
         addAdmin,
-        initBusinessLogicKeys,
-        initResolver
-    )
+        businessLogicResolver,
+    })
 
     const factoryRegulationData = await setFactoryRegulationData(
         regulationType,
@@ -682,12 +762,13 @@ export async function deployBondFromFactory(
         info
     )
 
-    const result = await environment.factory.deployBond(
-        bondData,
-        factoryRegulationData
-    )
+    const result = await factory.deployBond(bondData, factoryRegulationData, {
+        gasLimit: GAS_LIMIT.max,
+    })
     const events = (await result.wait()).events!
-    const deployedBondEvent = events.find((e) => e.event == BondDeployedEvent)
+    const deployedBondEvent = events.find(
+        (e) => e.event == EVENTS.bond.deployed
+    )
     const bondAddress = deployedBondEvent!.args!.bondAddress
 
     return await ethers.getContractAt('Bond', bondAddress)

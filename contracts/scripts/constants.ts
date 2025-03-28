@@ -201,45 +201,164 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-*/
+   */
 
-export const _DEFAULT_ADMIN_ROLE =
-    '0x0000000000000000000000000000000000000000000000000000000000000000'
-export const _CONTROL_LIST_ROLE =
-    '0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3'
-export const _CORPORATE_ACTION_ROLE =
-    '0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6'
-export const _ISSUER_ROLE =
-    '0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842'
-export const _DOCUMENTER_ROLE =
-    '0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41'
-export const _CONTROLLER_ROLE =
-    '0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f'
-export const _PAUSER_ROLE =
-    '0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb'
-export const _CAP_ROLE =
-    '0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571'
-export const _SNAPSHOT_ROLE =
-    '0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da'
-export const _LOCKER_ROLE =
-    '0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88'
-export const _DEFAULT_PARTITION =
+import { HashZero, AddressZero, Zero } from '@ethersproject/constants'
+
+// * General
+export const ZERO = Zero
+export const HASH_ZERO = HashZero
+export const ADDRESS_ZERO = AddressZero
+export const EMPTY_STRING = ''
+export const MAX_UINT256 = BigInt(
+    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+)
+export const DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
-export const _IS_PAUSED_ERROR_ID = '0x40'
-export const _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = '0x41'
-export const _FROM_ACCOUNT_BLOCKED_ERROR_ID = '0x42'
-export const _TO_ACCOUNT_BLOCKED_ERROR_ID = '0x43'
-export const _FROM_ACCOUNT_NULL_ERROR_ID = '0x44'
-export const _TO_ACCOUNT_NULL_ERROR_ID = '0x45'
-export const _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = '0x46'
-export const _IS_NOT_OPERATOR_ERROR_ID = '0x47'
-export const _WRONG_PARTITION_ERROR_ID = '0x48'
-export const _ALLOWANCE_REACHED_ERROR_ID = '0x49'
+export const EQUITY_CONFIG_ID =
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
+export const BOND_CONFIG_ID =
+    '0x0000000000000000000000000000000000000000000000000000000000000002'
 
-export const _SUCCESS = '0x00'
+// * Roles
+export const DEFAULT_ADMIN_ROLE =
+    '0x0000000000000000000000000000000000000000000000000000000000000000'
+export const CONTROL_LIST_ROLE =
+    '0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3'
+export const CORPORATE_ACTION_ROLE =
+    '0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6'
+export const ISSUER_ROLE =
+    '0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842'
+export const DOCUMENTER_ROLE =
+    '0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41'
+export const CONTROLLER_ROLE =
+    '0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f'
+export const PAUSER_ROLE =
+    '0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb'
+export const CAP_ROLE =
+    '0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571'
+export const SNAPSHOT_ROLE =
+    '0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da'
+export const LOCKER_ROLE =
+    '0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88'
+export const ADJUSTMENT_BALANCE_ROLE =
+    '0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9'
+export const BOND_MANAGER_ROLE =
+    '0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d'
+export const PROTECTED_PARTITIONS_ROLE =
+    '0x8e359333991af626d1f6087d9bc57221ef1207a053860aaa78b7609c2c8f96b6'
+export const PROTECTED_PARTITIONS_PARTICIPANT_ROLE =
+    '0xdaba153046c65d49da6a7597abc24374aa681e3eee7004426ca6185b3927a3f5'
+export const WILD_CARD_ROLE =
+    '0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46'
+export const SSI_MANAGER_ROLE =
+    '0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0'
+export const KYC_ROLE =
+    '0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d'
+export const CLEARING_ROLE =
+    '0x2292383e7bb988fb281e5195ab88da11e62fec74cf43e8685cff613d6b906450'
+export const CLEARING_VALIDATOR_ROLE =
+    '0x7b688898673e16c47810f5da9ce1262a3d7d022dfe27c8ff9305371cd435c619'
+// * Tasks
+export const BALANCE_ADJUSTMENT_TASK_TYPE =
+    '0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d'
+export const SNAPSHOT_TASK_TYPE =
+    '0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c'
 
-export const ADDRESS_0 = '0x0000000000000000000000000000000000000000'
+// * Errors
+export const IS_PAUSED_ERROR_ID = '0x40'
+export const OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = '0x41'
+export const FROM_ACCOUNT_BLOCKED_ERROR_ID = '0x42'
+export const TO_ACCOUNT_BLOCKED_ERROR_ID = '0x43'
+export const FROM_ACCOUNT_NULL_ERROR_ID = '0x44'
+export const TO_ACCOUNT_NULL_ERROR_ID = '0x45'
+export const NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = '0x46'
+export const IS_NOT_OPERATOR_ERROR_ID = '0x47'
+export const WRONG_PARTITION_ERROR_ID = '0x48'
+export const ALLOWANCE_REACHED_ERROR_ID = '0x49'
+export const FROM_ACCOUNT_KYC_ERROR_ID = '0x50'
+export const TO_ACCOUNT_KYC_ERROR_ID = '0x51'
+export const CLEARING_ACTIVE_ERROR_ID = '0x52'
 
-export const EquityDeployedEvent = 'EquityDeployed'
+export const SUCCESS = '0x00'
 
-export const BondDeployedEvent = 'BondDeployed'
+// * Events
+export const EVENTS = {
+    businessLogicResolver: {
+        registered: 'BusinessLogicsRegistered',
+        configurationCreated: 'DiamondBatchConfigurationCreated',
+    },
+    equity: {
+        deployed: 'EquityDeployed',
+    },
+    bond: {
+        deployed: 'BondDeployed',
+    },
+}
+
+// * Regular expressions
+export const REGEX = {
+    contractId: /^0\.0\.\d+$/,
+    address: /^0x[a-fA-F0-9]{40}$/,
+    bytes32: /^0x[a-fA-F0-9]{64}$/,
+    bytes: /^0x[a-fA-F0-9]*$/,
+}
+
+// * Gas
+export const GAS_LIMIT = {
+    max: 30_000_000,
+    default: 3_000_000,
+    low: 1_000_000,
+    high: 10_000_000,
+    initilize: {
+        businessLogicResolver: 8_000_000,
+    },
+    proxyAdmin: {
+        upgrade: 150_000,
+    },
+    businessLogicResolver: {
+        getStaticResolverKey: 60_000,
+        registerBusinessLogics: 7_800_000,
+        createConfiguration: 15_000_000,
+    },
+}
+
+// * Messages
+export const MESSAGES = {
+    blockchain: {
+        validateTxResponse: {
+            error: ['Error validating transaction response.', ' Tx Hash: '],
+        },
+    },
+    deploy: {
+        success: 'Contract deployed successfully',
+        error: 'Error deploying contract',
+    },
+    businessLogicResolver: {
+        info: {
+            initializing:
+                'Initializing business logic resolver. please wait...',
+            registering: 'Registering business logics. please wait...',
+            creatingConfigurations: 'Creating configurations. please wait...',
+            configured: 'Business logic resolver configured successfully',
+        },
+        error: {
+            notFound: 'Business logic resolver not found',
+            proxyNotFound: 'Business logic resolver proxy not found',
+            initializing: 'Error initializing business logic resolver',
+            registering: 'Error registering business logics',
+            creatingConfigurations: 'Error creating configurations',
+        },
+    },
+    factory: {
+        info: {
+            deploying: 'Deploying factory. please wait...',
+            deployed: 'Factory deployed successfully',
+        },
+    },
+    timeTravel: {
+        error: {
+            notSupported: 'Time travel not supported in production',
+        },
+    },
+}

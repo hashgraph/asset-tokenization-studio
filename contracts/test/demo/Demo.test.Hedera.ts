@@ -203,15 +203,14 @@
 
 */
 
-import { expect } from 'chai'
+/*import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
     type BusinessLogicResolver,
     BusinessLogicResolver__factory,
     type Factory,
     Factory__factory,
-    type Diamond,
-    type DiamondFacet,
+    type ResolverProxy,
     type DiamondLoupeFacet,
     DiamondLoupeFacet__factory,
     type AccessControl,
@@ -219,7 +218,7 @@ import {
     type ControlList,
     type ERC20,
     type ERC1644,
-    type ERC1410ScheduledSnapshot,
+    type ERC1410ScheduledTasks,
     type ERC1594,
     type ERC1643,
     type Equity,
@@ -232,25 +231,24 @@ import {
     BondUSA__factory,
     ERC1644__factory,
     ControlList__factory,
-    Pause__factory,
-    AccessControl__factory,
+    PauseFacet__factory,
+    AccessControlFacet__factory,
     ERC1643__factory,
     ERC20__factory,
-    ERC1410ScheduledSnapshot__factory,
+    ERC1410ScheduledTasks__factory,
     CorporateActionsSecurity__factory,
     ScheduledSnapshots__factory,
-    DiamondFacet__factory,
-    Diamond__factory,
+    ResolverProxy__factory,
     type Cap,
     type Bond,
     Cap__factory,
     Lock__factory,
     Lock,
     TransferAndLock,
-} from '../../typechain-types'
+} from '@typechain'
 import { Wallet } from 'ethers'
-import { getClient, toEvmAddress } from '../../scripts/utils'
-import { toHashgraphKey } from '../../scripts/deploy'
+import { getClient, toEvmAddress } from '@scripts/utils'
+import { toHashgraphKey } from '@scripts/deploy'
 import {
     _DEFAULT_ADMIN_ROLE,
     _CONTROL_LIST_ROLE,
@@ -258,7 +256,7 @@ import {
     _ISSUER_ROLE,
     _CONTROLLER_ROLE,
     _PAUSER_ROLE,
-} from '../../scripts/constants'
+} from '@scripts/constants'
 import {
     SecurityData,
     Rbac,
@@ -270,7 +268,8 @@ import {
     FactoryRegulationData,
     RegulationType,
     RegulationSubType,
-} from '../../scripts/factory'
+} from '@scripts/factory'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const _MINUTE_1 = 6000
 const _BUSINESS_LOGIC_COUNT = 17
@@ -311,8 +310,8 @@ const transferandLockAddress = '0.0.3532194'
 describe('Demo RedSwam', () => {
     let businessLogicResolver: BusinessLogicResolver,
         factory: Factory,
-        diamond: Diamond,
-        diamondFacet: DiamondFacet,
+        diamond: ResolverProxy,
+        diamondFacet: DiamondLoupeFacet,
         cap: Cap,
         diamondLoupeFacet: DiamondLoupeFacet,
         accessControl: AccessControl,
@@ -320,7 +319,7 @@ describe('Demo RedSwam', () => {
         controlList: ControlList,
         erc20: ERC20,
         erc1644: ERC1644,
-        erc1410: ERC1410ScheduledSnapshot,
+        erc1410: ERC1410ScheduledTasks,
         erc1594: ERC1594,
         erc1643: ERC1643,
         equity: Equity,
@@ -345,7 +344,7 @@ describe('Demo RedSwam', () => {
         informationRight: boolean,
         liquidationRight: boolean,
         subscriptionRight: boolean,
-        convertionRight: boolean,
+        conversionRight: boolean,
         redemptionRight: boolean,
         putRight: boolean,
         dividendRight: DividendType,
@@ -401,7 +400,7 @@ describe('Demo RedSwam', () => {
             informationRight: informationRight,
             liquidationRight: liquidationRight,
             subscriptionRight: subscriptionRight,
-            convertionRight: convertionRight,
+            conversionRight: conversionRight,
             redemptionRight: redemptionRight,
             putRight: putRight,
             dividendRight: dividendRight,
@@ -441,9 +440,9 @@ describe('Demo RedSwam', () => {
 
         diamond = new ethers.Contract(
             await toEvmAddress(equityAddress, true),
-            Diamond__factory.abi,
+            ResolverProxy__factory.abi,
             signer_A
-        ) as Diamond
+        ) as ResolverProxy
     }
 
     it('Demo RedSwam', async () => {
@@ -550,12 +549,12 @@ describe('Demo RedSwam', () => {
         ) as DiamondLoupeFacet
         accessControl = new ethers.Contract(
             await toEvmAddress(accessControlAddress, true),
-            AccessControl__factory.abi,
+            AccessControlFacet__factory.abi,
             signer_A
         ) as AccessControl
         pause = new ethers.Contract(
             await toEvmAddress(pauseAddress, true),
-            Pause__factory.abi,
+            PauseFacet__factory.abi,
             signer_A
         ) as Pause
         cap = new ethers.Contract(
@@ -580,9 +579,9 @@ describe('Demo RedSwam', () => {
         ) as ERC1644
         erc1410 = new ethers.Contract(
             await toEvmAddress(erc1410Address, true),
-            ERC1410ScheduledSnapshot__factory.abi,
+            ERC1410ScheduledTasks__factory.abi,
             signer_A
-        ) as ERC1410ScheduledSnapshot
+        ) as ERC1410ScheduledTasks
         erc1594 = new ethers.Contract(
             await toEvmAddress(erc1594Address, true),
             ERC1594__factory.abi,
@@ -633,97 +632,97 @@ describe('Demo RedSwam', () => {
         Deployed contracts:
             BusinessLogicResolver: ${businessLogicResolver.address},
             Factory: ${factory.address},
-            DiamondFacet: 
+            DiamondFacet:
                 address: ${diamondFacet.address},
                 key: ${await diamondFacet.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await diamondFacet.getStaticFunctionSelectors()
                 )},
-            DiamondLoupeFacet: 
+            DiamondLoupeFacet:
                 address: ${diamondLoupeFacet.address},
                 key: ${await diamondLoupeFacet.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await diamondLoupeFacet.getStaticFunctionSelectors()
                 )},
-            AccessControl: 
+            AccessControl:
                 address: ${accessControl.address},
                 key: ${await accessControl.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await accessControl.getStaticFunctionSelectors()
                 )},
-            Cap: 
+            Cap:
                 address: ${cap.address},
                 key: ${await cap.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await cap.getStaticFunctionSelectors()
                 )},
-            Pause: 
+            Pause:
                 address: ${pause.address},
                 key: ${await pause.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await pause.getStaticFunctionSelectors()
                 )},
-            ControlList: 
+            ControlList:
                 address: ${controlList.address},
                 key: ${await controlList.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await controlList.getStaticFunctionSelectors()
                 )},
-            ERC20: 
+            ERC20:
                 address: ${erc20.address},
                 key: ${await erc20.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await erc20.getStaticFunctionSelectors()
                 )},
-            ERC1644: 
+            ERC1644:
                 address: ${erc1644.address},
                 key: ${await erc1644.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await erc1644.getStaticFunctionSelectors()
                 )},
-            ERC1410: 
+            ERC1410:
                 address: ${erc1410.address},
                 key: ${await erc1410.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await erc1410.getStaticFunctionSelectors()
                 )},
-            ERC1594: 
+            ERC1594:
                 address: ${erc1594.address},
                 key: ${await erc1594.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await erc1594.getStaticFunctionSelectors()
                 )},
-            ERC1643: 
+            ERC1643:
                 address: ${erc1643.address},
                 key: ${await erc1643.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await erc1643.getStaticFunctionSelectors()
                 )},
-            Equity: 
+            Equity:
                 address: ${await equity.address},
                 key: ${await equity.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await equity.getStaticFunctionSelectors()
                 )},
-            Bond: 
+            Bond:
                 address: ${await bond.address},
                 key: ${await bond.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await bond.getStaticFunctionSelectors()
                 )},
-            Snapshots: 
+            Snapshots:
                 address: ${await snapshots.address},
                 key: ${await snapshots.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await snapshots.getStaticFunctionSelectors()
                 )},
-            ScheduledSnapshots: 
+            ScheduledSnapshots:
                 address: ${await scheduledSnapshots.address},
                 key: ${await scheduledSnapshots.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await scheduledSnapshots.getStaticFunctionSelectors()
                 )},
-            CorporateActions: 
+            CorporateActions:
                 address: ${await corporateActions.address},
                 key: ${await corporateActions.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
@@ -965,7 +964,7 @@ describe('Demo RedSwam', () => {
         const TokenName = 'TEST_DEMO'
         const TokenSymbol = 'TD'
         const TokenDecimals = 6
-        const TokenISIN = 'ABCDEF123456'
+        const TokenISIN = isinGenerator()
         const TokenType = 1 // equity
         const isWhiteList = false
         const isControllable = true
@@ -974,7 +973,7 @@ describe('Demo RedSwam', () => {
         const informationRight = false
         const liquidationRight = true
         const subscriptionRight = false
-        const convertionRight = true
+        const conversionRight = true
         const redemptionRight = false
         const putRight = true
         const dividendRight = DividendType.PREFERRED
@@ -996,7 +995,7 @@ describe('Demo RedSwam', () => {
             informationRight,
             liquidationRight,
             subscriptionRight,
-            convertionRight,
+            conversionRight,
             redemptionRight,
             putRight,
             dividendRight,
@@ -1112,7 +1111,7 @@ describe('Demo RedSwam', () => {
             DiamondLoupe.supportsInterface(0xb8fb063e): ${JSON.stringify(
                 await loupeFacet.supportsInterface('0xb8fb063e')
             )}
-            
+
             `)
 
         let accessControlFacet = accessControl.attach(diamond.address)
@@ -1142,12 +1141,12 @@ describe('Demo RedSwam', () => {
         // --------------------------------------------
 
         console.log(`
-        
-        
+
+
                 --------------------------------
-                    DEMO STEPS 
+                    DEMO STEPS
                 --------------------------------
-        
+
                 `)
 
         console.log('Check token metadata')
@@ -1173,7 +1172,7 @@ describe('Demo RedSwam', () => {
         expect(equityMetadata.informationRight).to.equal(informationRight)
         expect(equityMetadata.liquidationRight).to.equal(liquidationRight)
         expect(equityMetadata.subscriptionRight).to.equal(subscriptionRight)
-        expect(equityMetadata.convertionRight).to.equal(convertionRight)
+        expect(equityMetadata.conversionRight).to.equal(conversionRight)
         expect(equityMetadata.redemptionRight).to.equal(redemptionRight)
         expect(equityMetadata.putRight).to.equal(putRight)
         expect(equityMetadata.dividendRight).to.equal(dividendRight)
@@ -1660,12 +1659,12 @@ describe('Demo RedSwam', () => {
         expect(accountCBalanceByPartition).to.be.equal(accountCBalance)
 
         console.log(`
-        
-        
+
+
                 --------------------------------
-                    DEMO OVER 
+                    DEMO OVER
                 --------------------------------
-                
+
                 `)
     })
-})
+})*/

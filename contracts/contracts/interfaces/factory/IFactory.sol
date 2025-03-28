@@ -206,7 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IDiamond} from '../../interfaces/diamond/IDiamond.sol';
+import {IResolverProxy} from '../resolver/resolverProxy/IResolverProxy.sol';
 import {IBusinessLogicResolver} from '../resolver/IBusinessLogicResolver.sol';
 import {ERC20} from '../../layer_1/ERC1400/ERC20/ERC20.sol';
 import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
@@ -224,16 +224,23 @@ interface IFactory {
         Equity
     }
 
+    struct ResolverProxyConfiguration {
+        bytes32 key;
+        uint256 version;
+    }
+
     // TODO: Separete common data in new struct
     struct SecurityData {
+        bool arePartitionsProtected;
         bool isMultiPartition;
         IBusinessLogicResolver resolver;
-        bytes32[] businessLogicKeys;
-        IDiamond.Rbac[] rbacs;
+        ResolverProxyConfiguration resolverProxyConfiguration;
+        IResolverProxy.Rbac[] rbacs;
         bool isControllable;
         bool isWhiteList;
         uint256 maxSupply;
         ERC20.ERC20MetadataInfo erc20MetadataInfo;
+        bool clearingActive;
     }
 
     struct EquityData {
@@ -262,7 +269,6 @@ interface IFactory {
     );
 
     error EmptyResolver(IBusinessLogicResolver resolver);
-    error WrongISIN(string isin);
     error NoInitialAdmins();
 
     function deployEquity(

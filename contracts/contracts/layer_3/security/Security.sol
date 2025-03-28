@@ -215,14 +215,6 @@ import {
 import {Common} from '../../layer_1/common/Common.sol';
 
 abstract contract Security is ISecurity, SecurityStorageWrapper, Common {
-    function _initializeSecurity(
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) internal returns (bool) {
-        _storeRegulationData(_regulationData, _additionalSecurityData);
-        return true;
-    }
-
     function getSecurityRegulationData()
         external
         view
@@ -230,5 +222,12 @@ abstract contract Security is ISecurity, SecurityStorageWrapper, Common {
         returns (SecurityRegulationData memory securityRegulationData_)
     {
         securityRegulationData_ = _getSecurityRegulationData();
+    }
+
+    function _initializeSecurity(
+        RegulationData memory _regulationData,
+        AdditionalSecurityData calldata _additionalSecurityData
+    ) internal {
+        _storeRegulationData(_regulationData, _additionalSecurityData);
     }
 }

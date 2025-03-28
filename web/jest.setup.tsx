@@ -1,6 +1,11 @@
 process.env.VITE_API_URL = "http://localhost:8080/api/v1";
 import Select from "react-select";
 
+// Polyfill for TextEncoder and TextDecoder
+const { TextEncoder, TextDecoder } = require("util");
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 jest.doMock("chakra-react-select", () => ({
   ...jest.requireActual("chakra-react-select"),
   // @ts-ignore

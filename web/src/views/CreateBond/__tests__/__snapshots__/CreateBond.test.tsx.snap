@@ -3,10 +3,10 @@
 exports[`CreateBond render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-ahthbn"
+    class="chakra-stack css-c097x0"
   >
     <div
-      class="chakra-stack css-1yfjds0"
+      class="chakra-stack css-1qyhq9w"
     >
       <div
         class="css-k5rr6j"
@@ -67,7 +67,7 @@ exports[`CreateBond render correctly 1`] = `
       </nav>
     </div>
     <div
-      class="chakra-stack css-t8v5g3"
+      class="chakra-stack css-108xwcg"
     >
       <form
         class="css-re2v6r"
@@ -247,10 +247,10 @@ exports[`CreateBond render correctly 1`] = `
             </div>
           </div>
           <div
-            class="chakra-stack css-dlb2qh"
+            class="chakra-stack css-1jjeqci"
           >
             <div
-              class="chakra-stack css-2xph3x"
+              class="chakra-stack css-87qygf"
             >
               <p
                 class="css-1mk5tlk"
@@ -268,16 +268,29 @@ exports[`CreateBond render correctly 1`] = `
                 *Mandatory fields
               </p>
             </div>
-            <p
-              class="css-1q63bbb"
-            >
-              General information
-            </p>
             <div
-              class="chakra-stack css-ppmla1"
+              class="css-7xu97p"
+              data-testid="info-divider"
             >
               <div
-                class="chakra-stack css-e7xy2r"
+                class="css-1vakbk4"
+              >
+                <p
+                  class="css-au6g18"
+                >
+                  General information
+                </p>
+              </div>
+              <hr
+                aria-orientation="horizontal"
+                class="chakra-divider css-17lr3d7"
+              />
+            </div>
+            <div
+              class="chakra-stack css-1h0sumw"
+            >
+              <div
+                class="chakra-stack css-1nqqhpy"
               >
                 <p
                   class="css-0"
@@ -315,7 +328,7 @@ exports[`CreateBond render correctly 1`] = `
                     data-group="true"
                   >
                     <input
-                      class="chakra-input css-o43sva"
+                      class="chakra-input css-ixs4pt"
                       data-testid="name"
                       id="name"
                       name="name"
@@ -327,10 +340,10 @@ exports[`CreateBond render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-ppmla1"
+              class="chakra-stack css-1h0sumw"
             >
               <div
-                class="chakra-stack css-e7xy2r"
+                class="chakra-stack css-1nqqhpy"
               >
                 <p
                   class="css-0"
@@ -368,7 +381,7 @@ exports[`CreateBond render correctly 1`] = `
                     data-group="true"
                   >
                     <input
-                      class="chakra-input css-o43sva"
+                      class="chakra-input css-ixs4pt"
                       data-testid="symbol"
                       id="symbol"
                       name="symbol"
@@ -380,10 +393,10 @@ exports[`CreateBond render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-ppmla1"
+              class="chakra-stack css-1h0sumw"
             >
               <div
-                class="chakra-stack css-e7xy2r"
+                class="chakra-stack css-1nqqhpy"
               >
                 <p
                   class="css-0"
@@ -420,7 +433,7 @@ exports[`CreateBond render correctly 1`] = `
                     data-group="true"
                   >
                     <input
-                      class="chakra-input css-o43sva"
+                      class="chakra-input css-ixs4pt"
                       data-testid="decimals"
                       id="field-:r8:"
                       inputmode="numeric"
@@ -434,10 +447,10 @@ exports[`CreateBond render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-ppmla1"
+              class="chakra-stack css-1h0sumw"
             >
               <div
-                class="chakra-stack css-e7xy2r"
+                class="chakra-stack css-1nqqhpy"
               >
                 <p
                   class="css-0"
@@ -475,7 +488,7 @@ exports[`CreateBond render correctly 1`] = `
                     data-group="true"
                   >
                     <input
-                      class="chakra-input css-o43sva"
+                      class="chakra-input css-ixs4pt"
                       data-testid="isin"
                       id="isin"
                       name="isin"
@@ -487,19 +500,32 @@ exports[`CreateBond render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-14ragls"
+              class="css-7xu97p"
+              data-testid="info-divider"
             >
-              <p
-                class="css-1q63bbb"
+              <div
+                class="css-1vakbk4"
               >
-                Bond permissions
-              </p>
+                <p
+                  class="css-au6g18"
+                >
+                  Bond permissions
+                </p>
+              </div>
+              <hr
+                aria-orientation="horizontal"
+                class="chakra-divider css-17lr3d7"
+              />
+            </div>
+            <div
+              class="chakra-stack css-1fixchz"
+            >
               <div
                 class="chakra-form-control css-1dq7dcw"
                 role="group"
               >
                 <div
-                  class="chakra-stack css-e7xy2r"
+                  class="chakra-stack css-1nqqhpy"
                 >
                   <div
                     class="chakra-form-control css-1kxonj9"
@@ -563,7 +589,7 @@ exports[`CreateBond render correctly 1`] = `
                   </div>
                 </div>
                 <div
-                  class="chakra-stack css-e7xy2r"
+                  class="chakra-stack css-1nqqhpy"
                 >
                   <div
                     class="chakra-form-control css-1kxonj9"
@@ -627,7 +653,7 @@ exports[`CreateBond render correctly 1`] = `
                   </div>
                 </div>
                 <div
-                  class="chakra-stack css-e7xy2r"
+                  class="chakra-stack css-1nqqhpy"
                 >
                   <div
                     class="chakra-form-control css-1kxonj9"
@@ -689,7 +715,94 @@ exports[`CreateBond render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-q5mzwg"
+              class="css-7xu97p"
+              data-testid="info-divider"
+            >
+              <div
+                class="css-1vakbk4"
+              >
+                <p
+                  class="css-au6g18"
+                >
+                  Bond configuration
+                </p>
+              </div>
+              <hr
+                aria-orientation="horizontal"
+                class="chakra-divider css-17lr3d7"
+              />
+            </div>
+            <div
+              class="chakra-stack css-b1sb84"
+            >
+              <div
+                class="chakra-form-control css-1usebt7"
+                role="group"
+              >
+                <div
+                  class="chakra-stack css-1nqqhpy"
+                >
+                  <div
+                    class="chakra-form-control css-1kxonj9"
+                    role="group"
+                  >
+                    <div
+                      class="css-70qvj9"
+                    >
+                      <label
+                        class="chakra-switch css-ghot30"
+                        data-testid="isClearing"
+                      >
+                        <input
+                          aria-disabled="false"
+                          aria-invalid="false"
+                          class="chakra-switch__input"
+                          id="isClearing"
+                          name="isClearing"
+                          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+                          type="checkbox"
+                          value=""
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="chakra-switch__track css-18ihtw3"
+                        >
+                          <span
+                            class="chakra-switch__thumb css-9hrcr1"
+                          />
+                        </span>
+                      </label>
+                      <label
+                        class="chakra-form__label css-1ii0m7i"
+                        for="isClearing"
+                        id="field-:rn:-label"
+                      >
+                        Clearing mode enabled
+                      </label>
+                    </div>
+                  </div>
+                  <div
+                    class="css-k008qs"
+                  >
+                    <svg
+                      class="chakra-icon css-kpbtv0"
+                      fill="currentColor"
+                      focusable="false"
+                      height="1em"
+                      viewBox="0 0 256 256"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="chakra-stack css-10qrfti"
             >
               <a
                 class="chakra-button css-vueqt9"

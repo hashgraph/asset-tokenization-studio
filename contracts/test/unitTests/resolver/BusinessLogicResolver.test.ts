@@ -206,12 +206,8 @@
 //import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ethers } from 'hardhat'
 import { expect } from 'chai'
-import {
-    AccessControl,
-    Pause,
-    BusinessLogicResolver,
-} from '../../../typechain-types'
-import { _PAUSER_ROLE } from '../../../scripts/constants'
+import { AccessControl, Pause, BusinessLogicResolver } from '@typechain'
+import { PAUSER_ROLE } from '@scripts'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 
 describe('BusinessLogicResolver', () => {
@@ -267,7 +263,7 @@ describe('BusinessLogicResolver', () => {
             businessLogicResolver.address
         )
         accessControl = accessControl.connect(signer_A)
-        await accessControl.grantRole(_PAUSER_ROLE, account_B)
+        await accessControl.grantRole(PAUSER_ROLE, account_B)
 
         pause = await ethers.getContractAt(
             'Pause',
@@ -277,7 +273,7 @@ describe('BusinessLogicResolver', () => {
 
     beforeEach(async () => {
         //await loadFixture(deployBusinessLogicResolverFixture)
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_B = signer_B.address
 
@@ -288,11 +284,6 @@ describe('BusinessLogicResolver', () => {
         await expect(
             businessLogicResolver.initialize_BusinessLogicResolver()
         ).to.be.rejectedWith('AlreadyInitialized')
-    })
-
-    it('Check interface Id', async () => {
-        const Id = await businessLogicResolver.getStaticInterfaceIds()
-        expect(Id.length).to.be.equals(3)
     })
 
     describe('Paused', () => {

@@ -224,21 +224,14 @@ contract EquityUSA is IEquityUSA, Equity, Security {
         EquityDetailsData calldata _equityDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    )
-        external
-        override
-        onlyUninitialized(_equityStorage().initialized)
-        returns (bool)
-    {
-        return
-            _initializeEquity(_equityDetailsData) &&
-            _initializeSecurity(_regulationData, _additionalSecurityData);
+    ) external override onlyUninitialized(_equityStorage().initialized) {
+        _initializeEquity(_equityDetailsData);
+        _initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -248,12 +241,11 @@ contract EquityUSA is IEquityUSA, Equity, Security {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](11);
+        staticFunctionSelectors_ = new bytes4[](14);
         staticFunctionSelectors_[selectorIndex++] = this
             ._initialize_equityUSA
             .selector;
@@ -275,6 +267,15 @@ contract EquityUSA is IEquityUSA, Equity, Security {
             .getVotingCount
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
+            .setScheduledBalanceAdjustment
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getScheduledBalanceAdjustment
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getScheduledBalanceAdjustmentCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
             .getSecurityRegulationData
             .selector;
     }
@@ -282,7 +283,6 @@ contract EquityUSA is IEquityUSA, Equity, Security {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

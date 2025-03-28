@@ -236,17 +236,22 @@ interface IBond {
         uint256 rate;
         uint256 recordDate;
         uint256 executionDate;
+        uint8 decimals;
         bool recordDateReached;
     }
+
+    function setCoupon(
+        Coupon calldata _newCoupon
+    ) external returns (bool success_, uint256 couponID_);
+
+    function updateMaturityDate(
+        uint256 _maturityDate
+    ) external returns (bool success_);
 
     function getBondDetails()
         external
         view
         returns (BondDetailsData memory bondDetailsData_);
-
-    function setCoupon(
-        Coupon calldata _newCoupon
-    ) external returns (bool success_, uint256 couponID_);
 
     function getCouponDetails()
         external

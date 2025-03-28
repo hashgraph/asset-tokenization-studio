@@ -211,7 +211,7 @@ import {Common} from '../common/Common.sol';
 import {_CONTROL_LIST_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CONTROL_LIST_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 contract ControlList is IControlList, IStaticFunctionSelectors, Common {
@@ -219,24 +219,16 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ControlList(
         bool _isWhiteList
-    )
-        external
-        virtual
-        override
-        onlyUninitialized(_controlListStorage().initialized)
-        returns (bool success_)
-    {
+    ) external override onlyUninitialized(_controlListStorage().initialized) {
         ControlListStorage storage controlListStorage = _controlListStorage();
         controlListStorage.isWhiteList = _isWhiteList;
         controlListStorage.initialized = true;
-        success_ = true;
     }
 
     function addToControlList(
         address _account
     )
         external
-        virtual
         override
         onlyRole(_CONTROL_LIST_ROLE)
         onlyUnpaused
@@ -253,7 +245,6 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
         address _account
     )
         external
-        virtual
         override
         onlyRole(_CONTROL_LIST_ROLE)
         onlyUnpaused
@@ -266,26 +257,19 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
         emit RemovedFromControlList(_msgSender(), _account);
     }
 
-    function getControlListType()
-        external
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function getControlListType() external view override returns (bool) {
         return _getControlListType();
     }
 
     function isInControlList(
         address _account
-    ) external view virtual override returns (bool) {
+    ) external view override returns (bool) {
         return _isInControlList(_account);
     }
 
     function getControlListCount()
         external
         view
-        virtual
         override
         returns (uint256 controlListCount_)
     {
@@ -296,14 +280,13 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
     function getControlListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view virtual override returns (address[] memory members_) {
+    ) external view override returns (address[] memory members_) {
         members_ = _getControlListMembers(_pageIndex, _pageLength);
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -313,7 +296,6 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -345,7 +327,6 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

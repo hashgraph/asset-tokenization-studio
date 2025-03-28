@@ -204,12 +204,15 @@
 */
 
 import { Client, ContractId } from '@hashgraph/sdk'
-import { contractCall } from './contractsLifeCycle/utils'
 import {
     ProxyAdmin__factory,
     BusinessLogicResolver__factory,
     IStaticFunctionSelectors__factory,
-} from '../typechain-types'
+    DiamondCutManager__factory,
+} from '@typechain'
+import { contractCall } from './contractsLifeCycle/utils'
+import { FacetConfiguration } from './resolverDiamondCut'
+import { GAS_LIMIT } from './constants'
 
 export async function getProxyImplementation(
     proxyAdminAddress: ContractId,
@@ -263,6 +266,141 @@ export async function registerBusinessLogics(
         client,
         7800000,
         BusinessLogicResolver__factory.abi
+    )
+}
+
+export async function createConfiguration(
+    configId: string,
+    facetIds: string[],
+    facetVersions: number[],
+    proxyAddress: ContractId,
+    client: Client
+) {
+    const facetConfigurations: FacetConfiguration[] = []
+    facetIds.forEach((id, index) =>
+        facetConfigurations.push({ id, version: facetVersions[index] })
+    )
+
+    const params = [configId, facetConfigurations]
+
+    await contractCall(
+        proxyAddress,
+        'createConfiguration',
+        params,
+        client,
+        GAS_LIMIT.businessLogicResolver.createConfiguration,
+        DiamondCutManager__factory.abi
+    )
+}
+
+export async function getConfigurationsLength(
+    proxyAddress: ContractId,
+    client: Client
+) {
+    const params: string[] = []
+
+    return await contractCall(
+        proxyAddress,
+        'getConfigurationsLength',
+        params,
+        client,
+        70000,
+        DiamondCutManager__factory.abi
+    )
+}
+
+export async function getLatestVersionByConfiguration(
+    configId: string,
+    proxyAddress: ContractId,
+    client: Client
+) {
+    const params = [configId]
+
+    return await contractCall(
+        proxyAddress,
+        'getLatestVersionByConfiguration',
+        params,
+        client,
+        7800000,
+        DiamondCutManager__factory.abi
+    )
+}
+
+export async function getFacetsLengthByConfigurationIdAndVersion(
+    configId: string,
+    version: number,
+    proxyAddress: ContractId,
+    client: Client
+) {
+    const params = [configId, version]
+
+    return await contractCall(
+        proxyAddress,
+        'getFacetsLengthByConfigurationIdAndVersion',
+        params,
+        client,
+        70000,
+        DiamondCutManager__factory.abi
+    )
+}
+
+export async function getFacetsByConfigurationIdAndVersion(
+    configId: string,
+    version: number,
+    pageIndex: number,
+    pageLength: number,
+    proxyAddress: ContractId,
+    client: Client
+) {
+    const params = [configId, version, pageIndex, pageLength]
+
+    return await contractCall(
+        proxyAddress,
+        'getFacetsByConfigurationIdAndVersion',
+        params,
+        client,
+        7800000,
+        DiamondCutManager__factory.abi
+    )
+}
+
+export async function getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
+    configId: string,
+    version: number,
+    facet: string,
+    proxyAddress: ContractId,
+    client: Client
+) {
+    const params = [configId, version, facet]
+
+    return await contractCall(
+        proxyAddress,
+        'getFacetSelectorsLengthByConfigurationIdVersionAndFacetId',
+        params,
+        client,
+        70000,
+        DiamondCutManager__factory.abi
+    )
+}
+
+export async function getFacetSelectorsByConfigurationIdVersionAndFacetId(
+    configId: string,
+    version: number,
+    facet: string,
+    pageIndex: number,
+    pageLength: number,
+    proxyAddress: ContractId,
+    client: Client
+) {
+    const params = [configId, version, facet, pageIndex, pageLength]
+
+    return await contractCall(
+        proxyAddress,
+        'getFacetSelectorsByConfigurationIdVersionAndFacetId',
+        params,
+        client,
+        7800000,
+        DiamondCutManager__factory.abi
     )
 }
 

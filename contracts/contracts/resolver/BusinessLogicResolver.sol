@@ -209,25 +209,14 @@ pragma solidity 0.8.18;
 import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {AccessControl} from '../layer_1/accessControl/AccessControl.sol';
-import {Pause} from '../layer_1/pause/Pause.sol';
-import {BusinessLogicResolverWrapper} from './BusinessLogicResolverWrapper.sol';
+import {DiamondCutManager} from './diamondCutManager/DiamondCutManager.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../layer_1/constants/roles.sol';
-import {IPause} from '../layer_1/interfaces/pause/IPause.sol';
-import {
-    IAccessControl
-} from '../layer_1/interfaces/accessControl/IAccessControl.sol';
 
-contract BusinessLogicResolver is
-    IBusinessLogicResolver,
-    AccessControl,
-    Pause,
-    BusinessLogicResolverWrapper
-{
+contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
+    error Unimplemented();
     // solhint-disable-next-line func-name-mixedcase
     function initialize_BusinessLogicResolver()
         external
-        virtual
         override
         onlyUninitialized(_businessLogicResolverStorage().initialized)
         returns (bool success_)
@@ -242,10 +231,9 @@ contract BusinessLogicResolver is
         BusinessLogicRegistryData[] calldata _businessLogics
     )
         external
-        virtual
         override
         onlyValidKeys(_businessLogics)
-        onlyRole(_getRoleAdmin(_DEFAULT_ADMIN_ROLE))
+        onlyRole(_DEFAULT_ADMIN_ROLE)
         onlyUnpaused
     {
         uint256 latestVersion = _registerBusinessLogics(_businessLogics);
@@ -258,7 +246,6 @@ contract BusinessLogicResolver is
     )
         external
         view
-        virtual
         override
         validVersion(_version)
         returns (VersionStatus status_)
@@ -269,7 +256,6 @@ contract BusinessLogicResolver is
     function getLatestVersion()
         external
         view
-        virtual
         override
         returns (uint256 latestVersion_)
     {
@@ -278,7 +264,7 @@ contract BusinessLogicResolver is
 
     function resolveLatestBusinessLogic(
         bytes32 _businessLogicKey
-    ) external view virtual override returns (address businessLogicAddress_) {
+    ) external view override returns (address businessLogicAddress_) {
         businessLogicAddress_ = _resolveLatestBusinessLogic(_businessLogicKey);
     }
 
@@ -288,7 +274,6 @@ contract BusinessLogicResolver is
     )
         external
         view
-        virtual
         override
         validVersion(_version)
         returns (address businessLogicAddress_)
@@ -302,7 +287,6 @@ contract BusinessLogicResolver is
     function getBusinessLogicCount()
         external
         view
-        virtual
         override
         returns (uint256 businessLogicCount_)
     {
@@ -312,48 +296,7 @@ contract BusinessLogicResolver is
     function getBusinessLogicKeys(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        virtual
-        override
-        returns (bytes32[] memory businessLogicKeys_)
-    {
+    ) external view override returns (bytes32[] memory businessLogicKeys_) {
         businessLogicKeys_ = _getBusinessLogicKeys(_pageIndex, _pageLength);
-    }
-
-    // solhint-disable no-empty-blocks
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override(AccessControl, Pause)
-        returns (bytes32 staticResolverKey_)
-    {}
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override(AccessControl, Pause)
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {}
-
-    // solhint-enable no-empty-blocks
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override(AccessControl, Pause)
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](3);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IPause).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IAccessControl)
-            .interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IBusinessLogicResolver)
-            .interfaceId;
     }
 }

@@ -207,8 +207,10 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {IFactory} from '../interfaces/factory/IFactory.sol';
-import {Diamond} from '../diamond/Diamond.sol';
-import {IDiamond} from '../interfaces/diamond/IDiamond.sol';
+import {ResolverProxy} from '../resolver/resolverProxy/ResolverProxy.sol';
+import {
+    IResolverProxy
+} from '../interfaces/resolver/resolverProxy/IResolverProxy.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../layer_1/constants/roles.sol';
 import {IControlList} from '../layer_1/interfaces/controlList/IControlList.sol';
 import {IERC20} from '../layer_1/interfaces/ERC1400/IERC20.sol';
@@ -217,10 +219,12 @@ import {IERC1410Basic} from '../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 import {ICap} from '../layer_1/interfaces/cap/ICap.sol';
 import {IERC1594} from '../layer_1/interfaces/ERC1400/IERC1594.sol';
 import {
+    IClearingActions
+} from '../layer_1/interfaces/clearing/IClearingActions.sol';
+import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {LocalContext} from '../layer_1/context/LocalContext.sol';
-import {_ISIN_LENGTH} from '../layer_1/constants/values.sol';
+import {LocalContext} from '../layer_0/context/LocalContext.sol';
 import {
     FactoryRegulationData,
     buildRegulationData,
@@ -231,6 +235,10 @@ import {
 } from '../layer_3/constants/regulation.sol';
 import {IEquityUSA} from '../layer_3/interfaces/IEquityUSA.sol';
 import {IBondUSA} from '../layer_3/interfaces/IBondUSA.sol';
+import {
+    IProtectedPartitions
+} from '../layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol';
+import {validateISIN} from './isinValidator.sol';
 
 contract Factory is IFactory, LocalContext {
     modifier checkResolver(IBusinessLogicResolver resolver) {
@@ -241,13 +249,11 @@ contract Factory is IFactory, LocalContext {
     }
 
     modifier checkISIN(string calldata isin) {
-        if (bytes(isin).length != _ISIN_LENGTH) {
-            revert WrongISIN(isin);
-        }
+        validateISIN(isin);
         _;
     }
 
-    modifier checkAdmins(IDiamond.Rbac[] calldata rbacs) {
+    modifier checkAdmins(IResolverProxy.Rbac[] calldata rbacs) {
         bool adminFound;
 
         // Looking for admin role within initialization rbacas in order to add the factory
@@ -360,13 +366,24 @@ contract Factory is IFactory, LocalContext {
         );
     }
 
+    function getAppliedRegulationData(
+        RegulationType _regulationType,
+        RegulationSubType _regulationSubType
+    ) external pure override returns (RegulationData memory regulationData_) {
+        regulationData_ = buildRegulationData(
+            _regulationType,
+            _regulationSubType
+        );
+    }
+
     function _deploySecurity(
         SecurityData calldata _securityData,
         SecurityType _securityType
     ) private returns (address securityAddress_) {
-        Diamond equity = new Diamond(
+        ResolverProxy equity = new ResolverProxy(
             _securityData.resolver,
-            _securityData.businessLogicKeys,
+            _securityData.resolverProxyConfiguration.key,
+            _securityData.resolverProxyConfiguration.version,
             _securityData.rbacs
         );
 
@@ -403,15 +420,13 @@ contract Factory is IFactory, LocalContext {
             _securityData.maxSupply,
             new ICap.PartitionCap[](0)
         );
-    }
 
-    function getAppliedRegulationData(
-        RegulationType _regulationType,
-        RegulationSubType _regulationSubType
-    ) external pure override returns (RegulationData memory regulationData_) {
-        regulationData_ = buildRegulationData(
-            _regulationType,
-            _regulationSubType
+        IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(
+            _securityData.arePartitionsProtected
+        );
+
+        IClearingActions(securityAddress_).initializeClearing(
+            _securityData.clearingActive
         );
     }
 }

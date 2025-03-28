@@ -206,26 +206,58 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    AccessControlStorageWrapper
-} from '../accessControl/AccessControlStorageWrapper.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
-import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
+import {CapStorageWrapper2} from '../../layer_0/cap/CapStorageWrapper2.sol';
+import {_WILD_CARD_ROLE} from '../constants/roles.sol';
+import {IClearing} from '../interfaces/clearing/IClearing.sol';
 
 // solhint-disable no-empty-blocks
-abstract contract Common is
-    AccessControlStorageWrapper,
-    PauseStorageWrapper,
-    ControlListStorageWrapper
-{
+abstract contract Common is CapStorageWrapper2 {
     error AlreadyInitialized();
+    error OnlyDelegateAllowed();
 
-    modifier onlyUninitialized(bool initialized) {
-        if (initialized) {
-            revert AlreadyInitialized();
-        }
+    modifier onlyUninitialized(bool _initialized) {
+        _checkUninitialized(_initialized);
         _;
+    }
+
+    modifier onlyDelegate() {
+        _checkDelegate();
+        _;
+    }
+
+    modifier onlyUnProtectedPartitionsOrWildCardRole() {
+        _checkUnProtectedPartitionsOrWildCardRole();
+        _;
+    }
+
+    modifier onlyClearingDisabled() {
+        _checkClearingDisabled();
+        _;
+    }
+
+    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
+        if (
+            _arePartitionsProtected() &&
+            !_hasRole(_WILD_CARD_ROLE, _msgSender())
+        ) {
+            revert PartitionsAreProtectedAndNoRole(
+                _msgSender(),
+                _WILD_CARD_ROLE
+            );
+        }
+    }
+
+    function _checkDelegate() private view {
+        if (_msgSender() != address(this)) revert OnlyDelegateAllowed();
+    }
+
+    function _checkClearingDisabled() private view {
+        if (_isClearingActivated()) {
+            revert IClearing.ClearingIsActivated();
+        }
+    }
+
+    function _checkUninitialized(bool _initialized) private pure {
+        if (_initialized) revert AlreadyInitialized();
     }
 }

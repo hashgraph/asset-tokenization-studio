@@ -205,26 +205,34 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
-    type Diamond,
+    type ResolverProxy,
     type AccessControl,
     type Pause,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    IFactory,
+    BusinessLogicResolver,
+} from '@typechain'
 import {
-    _DEFAULT_ADMIN_ROLE,
-    _PAUSER_ROLE,
-} from '../../../../scripts/constants'
-import {
+    DEFAULT_ADMIN_ROLE,
+    PAUSER_ROLE,
+    CAP_ROLE,
+    CONTROLLER_ROLE,
+    CORPORATE_ACTION_ROLE,
+    DOCUMENTER_ROLE,
+    LOCKER_ROLE,
+    MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '@scripts'
 
 describe('Access Control Tests', () => {
-    let diamond: Diamond
+    let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress
@@ -235,52 +243,70 @@ describe('Access Control Tests', () => {
     let account_C: string
     let account_D: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
-    beforeEach(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
         account_D = signer_D.address
 
-        await deployEnvironment()
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+            })
+        )
 
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            'TEST_AccessControl',
-            'TAC',
-            6,
-            'ABCDEF123456',
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            0,
-            100,
-            RegulationType.REG_S,
-            RegulationSubType.NONE,
-            true,
-            'ES,FR,CH',
-            'nothing',
-            init_rbacs
-        )
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            isMultiPartition: false,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_S,
+            regulationSubType: RegulationSubType.NONE,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory: factory,
+        })
 
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
@@ -296,7 +322,7 @@ describe('Access Control Tests', () => {
 
         // grant role fails
         await expect(
-            accessControlFacet.grantRole(_PAUSER_ROLE, account_D)
+            accessControlFacet.grantRole(PAUSER_ROLE, account_D)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
@@ -306,7 +332,7 @@ describe('Access Control Tests', () => {
 
         // revoke role fails
         await expect(
-            accessControlFacet.revokeRole(_DEFAULT_ADMIN_ROLE, account_B)
+            accessControlFacet.revokeRole(DEFAULT_ADMIN_ROLE, account_B)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
@@ -317,21 +343,49 @@ describe('Access Control Tests', () => {
         // revoke role fails
         await expect(
             accessControlFacet.applyRoles(
-                [_DEFAULT_ADMIN_ROLE],
+                [DEFAULT_ADMIN_ROLE],
                 [true],
                 account_B
             )
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
-    it('GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch', async () => {
+    it('GIVEN a list of roles and actives that is not equally long WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch', async () => {
         // Using account C (non admin)
         accessControlFacet = accessControlFacet.connect(signer_C)
 
         // revoke role fails
         await expect(
-            accessControlFacet.applyRoles([_DEFAULT_ADMIN_ROLE], [], account_B)
+            accessControlFacet.applyRoles([DEFAULT_ADMIN_ROLE], [], account_B)
         ).to.be.rejectedWith('RolesAndActivesLengthMismatch')
+    })
+
+    it('GIVEN a list of contradictory roles (enable and disbale) role WHEN applyRoles THEN transaction fails with ApplyRoleContradiction', async () => {
+        // Using account C (non admin)
+        accessControlFacet = accessControlFacet.connect(signer_A)
+
+        const Roles_1 = [
+            DEFAULT_ADMIN_ROLE,
+            PAUSER_ROLE,
+            CAP_ROLE,
+            CONTROLLER_ROLE,
+            CORPORATE_ACTION_ROLE,
+            DOCUMENTER_ROLE,
+            CONTROLLER_ROLE,
+            LOCKER_ROLE,
+        ]
+
+        const actives_1 = [true, true, true, true, true, true, false, true]
+        const actives_2 = [true, true, true, false, true, true, true, true]
+
+        // revoke role fails
+        await expect(
+            accessControlFacet.applyRoles(Roles_1, actives_1, account_B)
+        ).to.be.rejectedWith('ApplyRoleContradiction')
+
+        await expect(
+            accessControlFacet.applyRoles(Roles_1, actives_2, account_B)
+        ).to.be.rejectedWith('ApplyRoleContradiction')
     })
 
     it('GIVEN a paused Token WHEN grantRole THEN transaction fails with TokenIsPaused', async () => {
@@ -343,7 +397,7 @@ describe('Access Control Tests', () => {
 
         // grant role fails
         await expect(
-            accessControlFacet.grantRole(_PAUSER_ROLE, account_D)
+            accessControlFacet.grantRole(PAUSER_ROLE, account_D)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
@@ -356,7 +410,7 @@ describe('Access Control Tests', () => {
 
         // revoke role fails
         await expect(
-            accessControlFacet.revokeRole(_PAUSER_ROLE, account_B)
+            accessControlFacet.revokeRole(PAUSER_ROLE, account_B)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
@@ -369,7 +423,7 @@ describe('Access Control Tests', () => {
 
         // revoke role fails
         await expect(
-            accessControlFacet.renounceRole(_PAUSER_ROLE)
+            accessControlFacet.renounceRole(PAUSER_ROLE)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
@@ -383,7 +437,7 @@ describe('Access Control Tests', () => {
         // revoke role fails
         await expect(
             accessControlFacet.applyRoles(
-                [_DEFAULT_ADMIN_ROLE],
+                [DEFAULT_ADMIN_ROLE],
                 [true],
                 account_B
             )
@@ -394,36 +448,35 @@ describe('Access Control Tests', () => {
         // Using account A (admin)
         accessControlFacet = accessControlFacet.connect(signer_A)
         // check that C does not have the role
-        let check_C = await accessControlFacet.hasRole(_PAUSER_ROLE, account_C)
+        let check_C = await accessControlFacet.hasRole(PAUSER_ROLE, account_C)
         expect(check_C).to.equal(false)
 
         // grant Role
-        await expect(accessControlFacet.grantRole(_PAUSER_ROLE, account_C))
+        await expect(accessControlFacet.grantRole(PAUSER_ROLE, account_C))
             .to.emit(accessControlFacet, 'RoleGranted')
-            .withArgs(account_A, account_C, _PAUSER_ROLE)
+            .withArgs(account_A, account_C, PAUSER_ROLE)
 
         // check that C has the role
-        check_C = await accessControlFacet.hasRole(_PAUSER_ROLE, account_C)
+        check_C = await accessControlFacet.hasRole(PAUSER_ROLE, account_C)
         expect(check_C).to.equal(true)
         // check roles and members count and lists
-        const roleCountFor_C = await accessControlFacet.getRoleCountFor(
-            account_C
-        )
+        const roleCountFor_C =
+            await accessControlFacet.getRoleCountFor(account_C)
         const rolesFor_C = await accessControlFacet.getRolesFor(
             account_C,
             0,
             roleCountFor_C
         )
         const memberCountFor_Pause =
-            await accessControlFacet.getRoleMemberCount(_PAUSER_ROLE)
+            await accessControlFacet.getRoleMemberCount(PAUSER_ROLE)
         const membersFor_Pause = await accessControlFacet.getRoleMembers(
-            _PAUSER_ROLE,
+            PAUSER_ROLE,
             0,
             memberCountFor_Pause
         )
         expect(roleCountFor_C).to.equal(1)
         expect(rolesFor_C.length).to.equal(roleCountFor_C)
-        expect(rolesFor_C[0].toUpperCase()).to.equal(_PAUSER_ROLE.toUpperCase())
+        expect(rolesFor_C[0].toUpperCase()).to.equal(PAUSER_ROLE.toUpperCase())
         expect(memberCountFor_Pause).to.equal(2)
         expect(membersFor_Pause.length).to.equal(memberCountFor_Pause)
         expect(membersFor_Pause[0].toUpperCase()).to.equal(
@@ -438,30 +491,29 @@ describe('Access Control Tests', () => {
         // Using account A (admin)
         accessControlFacet = accessControlFacet.connect(signer_A)
         // check that B has the role
-        let check_B = await accessControlFacet.hasRole(_PAUSER_ROLE, account_B)
+        let check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
         expect(check_B).to.equal(true)
 
         // revoke Role
-        await expect(accessControlFacet.revokeRole(_PAUSER_ROLE, account_B))
+        await expect(accessControlFacet.revokeRole(PAUSER_ROLE, account_B))
             .to.emit(accessControlFacet, 'RoleRevoked')
-            .withArgs(account_A, account_B, _PAUSER_ROLE)
+            .withArgs(account_A, account_B, PAUSER_ROLE)
 
         // check that B does not have the role
-        check_B = await accessControlFacet.hasRole(_PAUSER_ROLE, account_B)
+        check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
         expect(check_B).to.equal(false)
         // check roles and members count and lists
-        const roleCountFor_B = await accessControlFacet.getRoleCountFor(
-            account_B
-        )
+        const roleCountFor_B =
+            await accessControlFacet.getRoleCountFor(account_B)
         const rolesFor_B = await accessControlFacet.getRolesFor(
             account_B,
             0,
             roleCountFor_B
         )
         const memberCountFor_Pause =
-            await accessControlFacet.getRoleMemberCount(_PAUSER_ROLE)
+            await accessControlFacet.getRoleMemberCount(PAUSER_ROLE)
         const membersFor_Pause = await accessControlFacet.getRoleMembers(
-            _PAUSER_ROLE,
+            PAUSER_ROLE,
             0,
             memberCountFor_Pause
         )
@@ -475,30 +527,29 @@ describe('Access Control Tests', () => {
         // Using account A (admin)
         accessControlFacet = accessControlFacet.connect(signer_B)
         // check that B has the role
-        let check_B = await accessControlFacet.hasRole(_PAUSER_ROLE, account_B)
+        let check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
         expect(check_B).to.equal(true)
 
         // revoke Role
-        await expect(accessControlFacet.renounceRole(_PAUSER_ROLE))
+        await expect(accessControlFacet.renounceRole(PAUSER_ROLE))
             .to.emit(accessControlFacet, 'RoleRenounced')
-            .withArgs(account_B, _PAUSER_ROLE)
+            .withArgs(account_B, PAUSER_ROLE)
 
         // check that B does not have the role
-        check_B = await accessControlFacet.hasRole(_PAUSER_ROLE, account_B)
+        check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
         expect(check_B).to.equal(false)
         // check roles and members count and lists
-        const roleCountFor_B = await accessControlFacet.getRoleCountFor(
-            account_B
-        )
+        const roleCountFor_B =
+            await accessControlFacet.getRoleCountFor(account_B)
         const rolesFor_B = await accessControlFacet.getRolesFor(
             account_B,
             0,
             roleCountFor_B
         )
         const memberCountFor_Pause =
-            await accessControlFacet.getRoleMemberCount(_PAUSER_ROLE)
+            await accessControlFacet.getRoleMemberCount(PAUSER_ROLE)
         const membersFor_Pause = await accessControlFacet.getRoleMembers(
-            _PAUSER_ROLE,
+            PAUSER_ROLE,
             0,
             memberCountFor_Pause
         )
@@ -512,57 +563,56 @@ describe('Access Control Tests', () => {
         // Using account A (admin)
         accessControlFacet = accessControlFacet.connect(signer_A)
         // check that C does not have the role
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_C)
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_C)
 
         // grant Role
         await expect(
             accessControlFacet.applyRoles(
-                [_PAUSER_ROLE, _DEFAULT_ADMIN_ROLE],
+                [PAUSER_ROLE, DEFAULT_ADMIN_ROLE],
                 [false, true],
                 account_C
             )
         )
             .to.emit(accessControlFacet, 'RolesApplied')
             .withArgs(
-                [_PAUSER_ROLE, _DEFAULT_ADMIN_ROLE],
+                [PAUSER_ROLE, DEFAULT_ADMIN_ROLE],
                 [false, true],
                 account_C
             )
 
         // check that C has the role
         expect(
-            await accessControlFacet.hasRole(_PAUSER_ROLE, account_C)
+            await accessControlFacet.hasRole(PAUSER_ROLE, account_C)
         ).to.equal(false)
         expect(
-            await accessControlFacet.hasRole(_DEFAULT_ADMIN_ROLE, account_C)
+            await accessControlFacet.hasRole(DEFAULT_ADMIN_ROLE, account_C)
         ).to.equal(true)
         // check roles and members count and lists
-        const roleCountFor_C = await accessControlFacet.getRoleCountFor(
-            account_C
-        )
+        const roleCountFor_C =
+            await accessControlFacet.getRoleCountFor(account_C)
         const rolesFor_C = await accessControlFacet.getRolesFor(
             account_C,
             0,
             roleCountFor_C
         )
         const memberCountFor_Pause =
-            await accessControlFacet.getRoleMemberCount(_PAUSER_ROLE)
+            await accessControlFacet.getRoleMemberCount(PAUSER_ROLE)
         const membersFor_Pause = await accessControlFacet.getRoleMembers(
-            _PAUSER_ROLE,
+            PAUSER_ROLE,
             0,
             memberCountFor_Pause
         )
         const memberCountFor_Default =
-            await accessControlFacet.getRoleMemberCount(_DEFAULT_ADMIN_ROLE)
+            await accessControlFacet.getRoleMemberCount(DEFAULT_ADMIN_ROLE)
         const membersFor_Default = await accessControlFacet.getRoleMembers(
-            _DEFAULT_ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             0,
             memberCountFor_Default
         )
         expect(roleCountFor_C).to.equal(1)
         expect(rolesFor_C.length).to.equal(roleCountFor_C)
         expect(rolesFor_C[0].toUpperCase()).to.equal(
-            _DEFAULT_ADMIN_ROLE.toUpperCase()
+            DEFAULT_ADMIN_ROLE.toUpperCase()
         )
         expect(memberCountFor_Pause).to.equal(1)
         expect(membersFor_Pause.length).to.equal(memberCountFor_Pause)
@@ -574,5 +624,47 @@ describe('Access Control Tests', () => {
         expect(membersFor_Default[1].toUpperCase()).to.equal(
             account_C.toUpperCase()
         )
+    })
+
+    it('GIVEN an account with administrative role, if roles are duplicated but not contradictory WHEN applyRoles THEN transaction succeeds', async () => {
+        // Using account A (admin)
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        // check that C does not have the role
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_C)
+
+        // grant Role
+        await expect(
+            accessControlFacet.applyRoles(
+                [PAUSER_ROLE, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE],
+                [true, false, false],
+                account_C
+            )
+        )
+            .to.emit(accessControlFacet, 'RolesApplied')
+            .withArgs(
+                [PAUSER_ROLE, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE],
+                [true, false, false],
+                account_C
+            )
+
+        // check that C has the role
+        expect(
+            await accessControlFacet.hasRole(PAUSER_ROLE, account_C)
+        ).to.equal(true)
+        expect(
+            await accessControlFacet.hasRole(DEFAULT_ADMIN_ROLE, account_C)
+        ).to.equal(false)
+        // check roles and members count and lists
+        const roleCountFor_C =
+            await accessControlFacet.getRoleCountFor(account_C)
+        const rolesFor_C = await accessControlFacet.getRolesFor(
+            account_C,
+            0,
+            roleCountFor_C
+        )
+
+        expect(roleCountFor_C).to.equal(1)
+        expect(rolesFor_C.length).to.equal(roleCountFor_C)
+        expect(rolesFor_C[0].toUpperCase()).to.equal(PAUSER_ROLE.toUpperCase())
     })
 })

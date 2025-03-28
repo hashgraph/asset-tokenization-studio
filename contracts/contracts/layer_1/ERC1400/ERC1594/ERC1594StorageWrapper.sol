@@ -219,31 +219,28 @@ import {
     _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
     _TO_ACCOUNT_NULL_ERROR_ID,
     _ALLOWANCE_REACHED_ERROR_ID,
-    _SUCCESS
+    _SUCCESS,
+    _FROM_ACCOUNT_KYC_ERROR_ID,
+    _TO_ACCOUNT_KYC_ERROR_ID
 } from '../../constants/values.sol';
-import {ERC20StorageWrapper} from '../ERC20/ERC20StorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
-abstract contract ERC1594StorageWrapper is
-    ERC20StorageWrapper,
-    IERC1594StorageWrapper
-{
+abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
     struct ERC1594Storage {
         bool issuance;
         bool initialized;
     }
 
     modifier onlyIssuable() {
-        if (!_isIssuable()) {
-            revert IssuanceIsClosed();
-        }
+        _checkIssuable();
         _;
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC1594() internal virtual returns (bool success_) {
-        _getErc1594Storage().issuance = true;
-        _getErc1594Storage().initialized = true;
-        success_ = true;
+    function _initialize_ERC1594() internal {
+        _erc1594Storage().issuance = true;
+        _erc1594Storage().initialized = true;
     }
 
     /**
@@ -260,7 +257,7 @@ abstract contract ERC1594StorageWrapper is
         address _tokenHolder,
         uint256 _value,
         bytes calldata _data
-    ) internal virtual {
+    ) internal {
         // Add a function to validate the `_data` parameter
         _mint(_tokenHolder, _value);
         emit Issued(_msgSender(), _tokenHolder, _value, _data);
@@ -273,7 +270,7 @@ abstract contract ERC1594StorageWrapper is
      * @param _value The amount of tokens need to be redeemed
      * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
      */
-    function _redeem(uint256 _value, bytes calldata _data) internal virtual {
+    function _redeem(uint256 _value, bytes calldata _data) internal {
         // Add a function to validate the `_data` parameter
         _burn(_msgSender(), _value);
         emit Redeemed(address(0), _msgSender(), _value, _data);
@@ -292,7 +289,7 @@ abstract contract ERC1594StorageWrapper is
         address _tokenHolder,
         uint256 _value,
         bytes calldata _data
-    ) internal virtual {
+    ) internal {
         // Add a function to validate the `_data` parameter
         _burnFrom(_tokenHolder, _value);
         emit Redeemed(_msgSender(), _tokenHolder, _value, _data);
@@ -305,8 +302,8 @@ abstract contract ERC1594StorageWrapper is
      * If a token returns FALSE for `isIssuable()` then it MUST never allow additional tokens to be issued.
      * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
      */
-    function _isIssuable() internal view virtual returns (bool) {
-        return _getErc1594Storage().issuance;
+    function _isIssuable() internal view returns (bool) {
+        return _erc1594Storage().issuance;
     }
 
     /**
@@ -324,21 +321,27 @@ abstract contract ERC1594StorageWrapper is
         address _to,
         uint256 _value,
         bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
+    ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
         if (_to == address(0)) {
             return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_msgSender())) {
+        if (!_isAbleToAccess(_msgSender())) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_to)) {
+        if (!_isAbleToAccess(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (_getERC1410BasicStorage().balances[_msgSender()] < _value) {
+        if (_balanceOfAdjusted(_msgSender()) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
 
         return (true, _SUCCESS, bytes32(0));
@@ -361,7 +364,7 @@ abstract contract ERC1594StorageWrapper is
         address _to,
         uint256 _value,
         bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
+    ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
@@ -371,29 +374,34 @@ abstract contract ERC1594StorageWrapper is
         if (_from == address(0)) {
             return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_msgSender())) {
+        if (!_isAbleToAccess(_msgSender())) {
             return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_from)) {
+        if (!_isAbleToAccess(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_to)) {
+        if (!_isAbleToAccess(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (_getErc20Storage().allowed[_from][_msgSender()] < _value) {
+        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
             return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
         }
-        if (_getERC1410BasicStorage().balances[_from] < _value) {
+        if (_balanceOfAdjusted(_from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
 
         return (true, _SUCCESS, bytes32(0));
     }
 
-    function _getErc1594Storage()
+    function _erc1594Storage()
         internal
         pure
-        virtual
         returns (ERC1594Storage storage erc1594Storage_)
     {
         bytes32 position = _ERC1594_STORAGE_POSITION;
@@ -401,5 +409,9 @@ abstract contract ERC1594StorageWrapper is
         assembly {
             erc1594Storage_.slot := position
         }
+    }
+
+    function _checkIssuable() private view {
+        if (!_isIssuable()) revert IssuanceIsClosed();
     }
 }

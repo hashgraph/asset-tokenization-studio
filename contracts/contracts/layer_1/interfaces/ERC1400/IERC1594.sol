@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 
 interface IERC1594 {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594() external returns (bool success_);
+    function initialize_ERC1594() external;
 
     // Transfers
     function transferWithData(
@@ -225,8 +225,6 @@ interface IERC1594 {
     ) external;
 
     // Token Issuance
-    function isIssuable() external view returns (bool);
-
     function issue(
         address _tokenHolder,
         uint256 _value,
@@ -241,6 +239,8 @@ interface IERC1594 {
         uint256 _value,
         bytes calldata _data
     ) external;
+
+    function isIssuable() external view returns (bool);
 
     // Transfer Validity
     function canTransfer(
