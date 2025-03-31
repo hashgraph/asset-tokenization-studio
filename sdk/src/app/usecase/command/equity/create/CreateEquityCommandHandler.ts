@@ -224,6 +224,7 @@ import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { EquityDetails } from '../../../../../domain/context/equity/EquityDetails.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../service/ContractService.js';
+import AccountService from '../../../../service/AccountService.js';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler
@@ -238,6 +239,8 @@ export class CreateEquityCommandHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ContractService)
     public readonly contractService: ContractService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -279,7 +282,7 @@ export class CreateEquityCommandHandler
     }
 
     const diamondOwnerAccountEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(diamondOwnerAccount!);
+      await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
 
     const factoryEvmAddress: EvmAddress =
       await this.contractService.getContractEvmAddress(factory.toString());
