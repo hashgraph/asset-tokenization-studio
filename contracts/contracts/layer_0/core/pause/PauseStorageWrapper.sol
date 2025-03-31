@@ -244,7 +244,8 @@ abstract contract PauseStorageWrapper is
     }
 
     function _isPaused() internal view returns (bool) {
-        return _pauseStorage().paused || _isExternallyPaused();
+        if (_isExternallyPaused()) return true;
+        return _pauseStorage().paused;
     }
 
     function _checkUnpaused() internal view {

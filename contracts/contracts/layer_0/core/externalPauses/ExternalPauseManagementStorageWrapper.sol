@@ -239,29 +239,36 @@ abstract contract ExternalPauseManagementStorageWrapper is
         bool[] calldata _actives
     ) internal returns (bool success_) {
         uint256 length = _pauses.length;
-        unchecked {
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_addExternalPause(_pauses[index])) {
-                        revert IExternalPauseManagement
-                            .UpdateExternalPausesContradiction(
-                                _pauses,
-                                _actives,
-                                _pauses[index]
-                            );
-                    }
-                } else {
-                    if (!_removeExternalPause(_pauses[index])) {
-                        revert IExternalPauseManagement
-                            .UpdateExternalPausesContradiction(
-                                _pauses,
-                                _actives,
-                                _pauses[index]
-                            );
-                    }
-                }
+
+        for (uint256 index; index < length; ++index) {
+            if (_actives[index]) {
+                if (!_isExternalPause(_pauses[index]))
+                    _addExternalPause(_pauses[index]);
+                continue;
             }
+            if (_isExternalPause(_pauses[index]))
+                _removeExternalPause(_pauses[index]);
         }
+        for (uint256 index; index < length; ++index) {
+            if (_actives[index]) {
+                if (!_isExternalPause(_pauses[index]))
+                    revert IExternalPauseManagement
+                        .UpdateExternalPausesContradiction(
+                            _pauses,
+                            _actives,
+                            _pauses[index]
+                        );
+                continue;
+            }
+            if (_isExternalPause(_pauses[index]))
+                revert IExternalPauseManagement
+                    .UpdateExternalPausesContradiction(
+                        _pauses,
+                        _actives,
+                        _pauses[index]
+                    );
+        }
+
         success_ = true;
     }
 
@@ -304,15 +311,11 @@ abstract contract ExternalPauseManagementStorageWrapper is
         ExternalPauseDataStorage
             storage externalPauseDataStorage = _externalPauseStorage();
         uint256 length = _getExternalPausesCount();
-        unchecked {
-            for (uint256 index = 0; index < length; ++index) {
-                if (
-                    IExternalPause(externalPauseDataStorage.pauseList.at(index))
-                        .isPaused()
-                ) {
-                    return true;
-                }
-            }
+        for (uint256 index = 0; index < length; ++index) {
+            if (
+                IExternalPause(externalPauseDataStorage.pauseList.at(index))
+                    .isPaused()
+            ) return true;
         }
         return false;
     }
