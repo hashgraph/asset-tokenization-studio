@@ -212,7 +212,6 @@ import TransactionService from '../../../../../service/TransactionService';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import { Terminal3VC } from '../../../../../../domain/context/kyc/terminal3';
 import { verifyVc } from '@terminal3/verify_vc';
@@ -231,8 +230,6 @@ export class GrantKYCCommandHandler
     public readonly contractService: ContractService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
   ) {}

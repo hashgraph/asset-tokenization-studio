@@ -206,7 +206,6 @@
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import { PauseCommand, PauseCommandResponse } from './PauseCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
@@ -218,8 +217,6 @@ import ContractService from '../../../../../service/ContractService.js';
 @CommandHandler(PauseCommand)
 export class PauseCommandHandler implements ICommandHandler<PauseCommand> {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)

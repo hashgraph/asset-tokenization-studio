@@ -209,7 +209,6 @@ import AccountService from '../../../../../../service/AccountService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   ReclaimClearingOperationByPartitionCommand,
   ReclaimClearingOperationByPartitionCommandResponse,
@@ -226,8 +225,6 @@ export class ReclaimClearingOperationByPartitionCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
     @lazyInject(ValidationService)

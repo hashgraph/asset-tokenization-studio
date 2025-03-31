@@ -220,7 +220,6 @@ import {
   BYTES_32_LENGTH,
 } from '../../../../../core/Constants.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { EquityDetails } from '../../../../../domain/context/equity/EquityDetails.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
@@ -237,8 +236,6 @@ export class CreateEquityCommandHandler
     public readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
     public readonly contractService: ContractService,
   ) {}

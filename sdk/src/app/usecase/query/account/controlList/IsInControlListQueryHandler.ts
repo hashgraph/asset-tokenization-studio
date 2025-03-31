@@ -211,7 +211,6 @@ import {
   IsInControlListQuery,
   IsInControlListQueryResponse,
 } from './IsInControlListQuery.js';
-import SecurityService from '../../../../../app/service/SecurityService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import AccountService from '../../../../../app/service/AccountService.js';
 import ContractService from '../../../../../app/service/ContractService.js';
@@ -221,8 +220,6 @@ export class IsInControlListQueryHandler
   implements IQueryHandler<IsInControlListQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)

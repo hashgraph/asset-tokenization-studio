@@ -208,7 +208,6 @@ import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorato
 import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../service/SecurityService.js';
 import AccountService from '../../../../service/AccountService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../service/ContractService.js';
@@ -216,8 +215,6 @@ import ContractService from '../../../../service/ContractService.js';
 @QueryHandler(LockCountQuery)
 export class LockCountQueryHandler implements IQueryHandler<LockCountQuery> {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(RPCQueryAdapter)

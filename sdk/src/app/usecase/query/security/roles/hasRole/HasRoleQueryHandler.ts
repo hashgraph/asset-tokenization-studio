@@ -206,7 +206,6 @@
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import { HasRoleQuery, HasRoleQueryResponse } from './HasRoleQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import AccountService from '../../../../../service/AccountService';
@@ -216,8 +215,6 @@ import ContractService from '../../../../../service/ContractService.js';
 @QueryHandler(HasRoleQuery)
 export class HasRoleQueryHandler implements IQueryHandler<HasRoleQuery> {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)

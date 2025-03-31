@@ -207,7 +207,6 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
 import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import SecurityService from '../../../../service/SecurityService.js';
 import {
   GetAccountSecurityRelationshipQuery,
   GetAccountSecurityRelationshipQueryResponse,
@@ -221,8 +220,6 @@ export class GetAccountSecurityRelationshipQueryHandler
 {
   [x: string]: any;
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)

@@ -210,7 +210,6 @@ import { RevokeKYCCommand, RevokeKYCCommandResponse } from './RevokeKYCCommand';
 import TransactionService from '../../../../../service/TransactionService';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import ValidationService from '../../../../../service/ValidationService';
 import ContractService from '../../../../../service/ContractService';
@@ -226,8 +225,6 @@ export class RevokeKYCCommandHandler
     public readonly contractService: ContractService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
   ) {}

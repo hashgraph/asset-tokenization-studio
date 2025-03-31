@@ -206,7 +206,6 @@
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import {
   GetDividendsForQuery,
   GetDividendsForQueryResponse,
@@ -221,8 +220,6 @@ export class GetDividendsForQueryHandler
   implements IQueryHandler<GetDividendsForQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)

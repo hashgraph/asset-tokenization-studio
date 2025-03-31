@@ -206,7 +206,6 @@
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import {
   GetControlListCountQuery,
   GetControlListCountQueryResponse,
@@ -220,8 +219,6 @@ export class GetControlListCountQueryHandler
   implements IQueryHandler<GetControlListCountQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)

@@ -263,6 +263,8 @@ import { GetTotalSupplyByPartitionQuery } from '../usecase/query/security/cap/ge
 import { BigNumber } from 'ethers';
 import { SecurityUnPaused } from '../usecase/command/security/error/SecurityUnPaused.js';
 import { PartitionsProtected } from '../usecase/command/security/error/PartitionsProtected.js';
+import { GetBondDetailsQuery } from '../usecase/query/bond/get/getBondDetails/GetBondDetailsQuery.js';
+import { OperationNotAllowed } from '../usecase/command/security/error/OperationNotAllowed.js';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -711,5 +713,21 @@ export default class ValidationService extends Service {
     await this.checkIssuer(securityId, issuer);
 
     return [issuer, signedCredential];
+  }
+
+  async checkMaturityDate(
+    securityId: string,
+    maturityDate: string,
+  ): Promise<boolean> {
+    const bondDetails = (
+      await this.queryBus.execute(new GetBondDetailsQuery(securityId))
+    ).bond;
+
+    if (parseInt(maturityDate) <= bondDetails.maturityDate) {
+      throw new OperationNotAllowed(
+        'The maturity date cannot be earlier or equal than the current one',
+      );
+    }
+    return true;
   }
 }

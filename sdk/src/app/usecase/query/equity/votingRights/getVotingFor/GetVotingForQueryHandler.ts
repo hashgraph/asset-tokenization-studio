@@ -206,7 +206,6 @@
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import {
   GetVotingForQuery,
   GetVotingForQueryResponse,
@@ -221,8 +220,6 @@ export class GetVotingForQueryHandler
   implements IQueryHandler<GetVotingForQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(ContractService)
     public readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)

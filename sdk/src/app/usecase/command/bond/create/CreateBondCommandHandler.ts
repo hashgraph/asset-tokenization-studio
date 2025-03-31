@@ -219,9 +219,7 @@ import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
 import AccountService from '../../../../service/AccountService.js';
 import TransactionService from '../../../../service/TransactionService.js';
-import NetworkService from '../../../../service/NetworkService.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
@@ -237,12 +235,8 @@ export class CreateBondCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
     public readonly contractService: ContractService,
   ) {}

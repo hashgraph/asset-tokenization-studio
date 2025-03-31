@@ -205,7 +205,6 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import SecurityService from '../../../../../../service/SecurityService.js';
 import {
   ActivateClearingCommand,
   ActivateClearingCommandResponse,
@@ -213,7 +212,6 @@ import {
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import AccountService from '../../../../../../service/AccountService.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
@@ -224,14 +222,10 @@ export class ActivateClearingCommandHandler
   implements ICommandHandler<ActivateClearingCommand>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(ContractService)

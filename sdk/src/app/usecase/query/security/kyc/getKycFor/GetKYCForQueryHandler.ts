@@ -205,7 +205,6 @@
 
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
@@ -216,8 +215,6 @@ import ContractService from '../../../../../service/ContractService.js';
 @QueryHandler(GetKYCForQuery)
 export class GetKYCForQueryHandler implements IQueryHandler<GetKYCForQuery> {
   constructor(
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)

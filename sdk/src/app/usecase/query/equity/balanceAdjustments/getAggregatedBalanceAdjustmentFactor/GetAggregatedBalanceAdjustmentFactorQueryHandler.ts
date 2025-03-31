@@ -206,7 +206,6 @@
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import SecurityService from '../../../../../service/SecurityService';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import ContractService from '../../../../../service/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
@@ -220,8 +219,6 @@ export class GetAggregatedBalanceAdjustmentFactorQueryHandler
   implements IQueryHandler<GetAggregatedBalanceAdjustmentFactorQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)

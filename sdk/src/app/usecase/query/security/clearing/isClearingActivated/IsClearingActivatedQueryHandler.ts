@@ -207,7 +207,6 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import SecurityService from '../../../../../service/SecurityService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   IsClearingActivatedQuery,
@@ -220,8 +219,6 @@ export class IsClearingActivatedQueryHandler
   implements IQueryHandler<IsClearingActivatedQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)

@@ -208,7 +208,6 @@ import { ICommandHandler } from '../../../../../../core/command/CommandHandler.j
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import {
   GrantRoleCommand,
@@ -222,8 +221,6 @@ export class GrantRoleCommandHandler
   implements ICommandHandler<GrantRoleCommand>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)

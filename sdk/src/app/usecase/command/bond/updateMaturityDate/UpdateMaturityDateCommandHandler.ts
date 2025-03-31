@@ -384,9 +384,8 @@ import {
   UpdateMaturityDateCommand,
   UpdateMaturityDateCommandResponse,
 } from './UpdateMaturityDateCommand';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter';
-import { OperationNotAllowed } from '../../security/error/OperationNotAllowed';
 import ContractService from '../../../../service/ContractService';
+import ValidationService from '../../../../service/ValidationService';
 
 @CommandHandler(UpdateMaturityDateCommand)
 export class UpdateMaturityDateCommandHandler
@@ -395,10 +394,10 @@ export class UpdateMaturityDateCommandHandler
   constructor(
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -409,14 +408,8 @@ export class UpdateMaturityDateCommandHandler
 
     const securityEvmAddress: EvmAddress =
       await this.contractService.getContractEvmAddress(securityId);
-    const bondDetails =
-      await this.queryAdapter.getBondDetails(securityEvmAddress);
 
-    if (parseInt(maturityDate) <= bondDetails.maturityDate) {
-      throw new OperationNotAllowed(
-        'The maturity date cannot be earlier or equal than the current one',
-      );
-    }
+    await this.validationService.checkMaturityDate(securityId, maturityDate);
 
     const res = await handler.updateMaturityDate(
       securityEvmAddress,

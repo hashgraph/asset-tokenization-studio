@@ -208,7 +208,6 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import { GetNounceQuery, GetNounceQueryResponse } from './GetNounceQuery.js';
-import SecurityService from '../../../../../../app/service/SecurityService.js';
 import AccountService from '../../../../../service/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService.js';
@@ -216,8 +215,6 @@ import ContractService from '../../../../../service/ContractService.js';
 @QueryHandler(GetNounceQuery)
 export class GetNounceQueryHandler implements IQueryHandler<GetNounceQuery> {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)

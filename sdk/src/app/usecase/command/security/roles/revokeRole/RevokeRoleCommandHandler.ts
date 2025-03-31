@@ -208,13 +208,11 @@ import { ICommandHandler } from '../../../../../../core/command/CommandHandler.j
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import {
   RevokeRoleCommand,
   RevokeRoleCommandResponse,
 } from './RevokeRoleCommand.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
 
@@ -223,14 +221,10 @@ export class RevokeRoleCommandHandler
   implements ICommandHandler<RevokeRoleCommand>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(ContractService)

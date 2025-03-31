@@ -207,7 +207,6 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import SecurityService from '../../../../../service/SecurityService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { IsIssuerQuery, IsIssuerQueryResponse } from './IsIssuerQuery';
 import ContractService from '../../../../../service/ContractService';
@@ -216,8 +215,6 @@ import AccountService from '../../../../../service/AccountService';
 @QueryHandler(IsIssuerQuery)
 export class IsIssuerQueryHandler implements IQueryHandler<IsIssuerQuery> {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
