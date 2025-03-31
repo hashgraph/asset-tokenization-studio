@@ -423,17 +423,17 @@ export async function setEquityData({
     }
 
     const security: SecurityData = {
-        arePartitionsProtected: arePartitionsProtected,
-        isMultiPartition: isMultiPartition,
+        arePartitionsProtected,
+        isMultiPartition,
         resolver: businessLogicResolver,
-        resolverProxyConfiguration: resolverProxyConfiguration,
-        rbacs: rbacs,
-        isControllable: isControllable,
-        isWhiteList: isWhiteList,
+        resolverProxyConfiguration,
+        rbacs,
+        isControllable,
+        isWhiteList,
         maxSupply: numberOfShares,
-        erc20MetadataInfo: erc20MetadataInfo,
-        clearingActive: clearingActive,
-        externalPauses: externalPauses ? externalPauses : [],
+        erc20MetadataInfo,
+        clearingActive,
+        externalPauses: externalPauses ?? [],
     }
 
     const equityDetails: EquityDetailsData = {
@@ -531,17 +531,17 @@ export async function setBondData({
     }
 
     const security: SecurityData = {
-        arePartitionsProtected: arePartitionsProtected,
-        isMultiPartition: isMultiPartition,
+        arePartitionsProtected,
+        isMultiPartition,
         resolver: businessLogicResolver,
-        resolverProxyConfiguration: resolverProxyConfiguration,
-        rbacs: rbacs,
-        isControllable: isControllable,
-        isWhiteList: isWhiteList,
+        resolverProxyConfiguration,
+        rbacs,
+        isControllable,
+        isWhiteList,
         maxSupply: numberOfUnits,
-        erc20MetadataInfo: erc20MetadataInfo,
-        clearingActive: clearingActive,
-        externalPauses: externalPauses ? externalPauses : [],
+        erc20MetadataInfo,
+        clearingActive,
+        externalPauses: externalPauses ?? [],
     }
 
     const bondDetails: BondDetailsData = {
