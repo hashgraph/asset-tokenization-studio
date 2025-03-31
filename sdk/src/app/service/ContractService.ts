@@ -203,41 +203,40 @@
 
 */
 
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import SecurityService from '../../../../../service/SecurityService.js';
-import {
-  GetDividendsQuery,
-  GetDividendsQueryResponse,
-} from './GetDividendsQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import { singleton } from 'tsyringe';
+import Injectable from '../../core/Injectable.js';
+import { QueryBus } from '../../core/query/QueryBus.js';
+import NetworkService from './NetworkService.js';
+import Service from './Service.js';
+import TransactionService from './TransactionService.js';
+import EvmAddress from '../../domain/context/contract/EvmAddress.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../domain/context/shared/HederaId.js';
+import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter.js';
+@singleton()
+export default class ContractService extends Service {
+  queryBus: QueryBus;
 
-@QueryHandler(GetDividendsQuery)
-export class GetDividendsQueryHandler
-  implements IQueryHandler<GetDividendsQuery>
-{
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(ContractService)
-    public readonly contractService: ContractService,
-  ) {}
+    public readonly networkService: NetworkService = Injectable.resolve(
+      NetworkService,
+    ),
+    public readonly transactionService: TransactionService = Injectable.resolve(
+      TransactionService,
+    ),
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
+      MirrorNodeAdapter,
+    ),
+  ) {
+    super();
+  }
 
-  async execute(query: GetDividendsQuery): Promise<GetDividendsQueryResponse> {
-    const { securityId, dividendId } = query;
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getDividends(
-      securityEvmAddress,
-      dividendId,
+  async getContractEvmAddress(contractId: string): Promise<EvmAddress> {
+    const evmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(contractId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(contractId)).evmAddress
+        : contractId.toString(),
     );
 
-    return Promise.resolve(new GetDividendsQueryResponse(res));
+    return evmAddress;
   }
 }

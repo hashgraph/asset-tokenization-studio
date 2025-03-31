@@ -213,7 +213,6 @@ import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDeco
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
-import AccountService from '../../../../service/AccountService.js';
 import TransactionService from '../../../../service/TransactionService.js';
 import NetworkService from '../../../../service/NetworkService.js';
 import {
@@ -225,14 +224,13 @@ import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js'
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { EquityDetails } from '../../../../../domain/context/equity/EquityDetails.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import ContractService from '../../../../service/ContractService.js';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler
   implements ICommandHandler<CreateEquityCommand>
 {
   constructor(
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
     @lazyInject(NetworkService)
@@ -241,6 +239,8 @@ export class CreateEquityCommandHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -282,13 +282,13 @@ export class CreateEquityCommandHandler
     }
 
     const diamondOwnerAccountEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(diamondOwnerAccount!);
+      await this.contractService.getContractEvmAddress(diamondOwnerAccount!);
 
     const factoryEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(factory.toString());
+      await this.contractService.getContractEvmAddress(factory.toString());
 
     const resolverEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(resolver.toString());
+      await this.contractService.getContractEvmAddress(resolver.toString());
 
     const handler = this.transactionService.getHandler();
 

@@ -217,8 +217,8 @@ import {
   CreateHoldFromByPartitionCommand,
   CreateHoldFromByPartitionCommandResponse,
 } from './CreateHoldFromByPartitionCommand.js';
-import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
-import ValidationService from '../../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(CreateHoldFromByPartitionCommand)
 export class CreateHoldFromByPartitionCommandHandler
@@ -237,6 +237,8 @@ export class CreateHoldFromByPartitionCommandHandler
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -255,7 +257,7 @@ export class CreateHoldFromByPartitionCommandHandler
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const escrowEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(escrow);
 
@@ -263,17 +265,14 @@ export class CreateHoldFromByPartitionCommandHandler
       await this.accountService.getAccountEvmAddress(sourceId);
 
     const targetEvmAddress: EvmAddress =
-      targetId === '0.0.0'
-        ? new EvmAddress(EVM_ZERO_ADDRESS)
-        : await this.accountService.getAccountEvmAddress(targetId);
-
+      await this.accountService.getAccountEvmAddressOrNull(targetId);
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
     await this.validationService.checkPause(securityId);
 
     await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.validateClearingDeactivated(securityId);
+    await this.validationService.checkClearingDeactivated(securityId);
 
     await this.validationService.checkBalance(securityId, sourceId, amountBd);
 

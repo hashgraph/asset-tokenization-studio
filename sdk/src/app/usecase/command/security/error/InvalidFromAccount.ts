@@ -207,6 +207,6 @@ import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 export class InvalidFromAccount extends BaseError {
   constructor() {
-    super(ErrorCode.InvalidFromAccount, `invalid null from account`);
+    super(ErrorCode.InvalidFromAccount, `Invalid null from account`);
   }
 }

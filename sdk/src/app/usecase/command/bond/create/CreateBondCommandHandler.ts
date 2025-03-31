@@ -223,10 +223,10 @@ import NetworkService from '../../../../service/NetworkService.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId.js';
 import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import ContractService from '../../../../service/ContractService.js';
 
 @CommandHandler(CreateBondCommand)
 export class CreateBondCommandHandler
@@ -243,6 +243,8 @@ export class CreateBondCommandHandler
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -281,21 +283,14 @@ export class CreateBondCommandHandler
     }
 
     const diamondOwnerAccountEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(diamondOwnerAccount!);
+      await this.contractService.getContractEvmAddress(diamondOwnerAccount!);
 
-    const factoryEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(factory.toString())
-        ? (await this.mirrorNodeAdapter.getContractInfo(factory.toString()))
-            .evmAddress
-        : factory.toString(),
-    );
+    const factoryEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(factory.toString());
 
-    const resolverEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(resolver.toString())
-        ? (await this.mirrorNodeAdapter.getContractInfo(resolver.toString()))
-            .evmAddress
-        : resolver.toString(),
-    );
+    const resolverEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(resolver.toString());
+
     const handler = this.transactionService.getHandler();
 
     const bondInfo = new BondDetails(

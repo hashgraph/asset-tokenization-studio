@@ -214,6 +214,7 @@ import {
 import SecurityService from '../../../../../app/service/SecurityService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import AccountService from '../../../../../app/service/AccountService.js';
+import ContractService from '../../../../../app/service/ContractService.js';
 
 @QueryHandler(IsInControlListQuery)
 export class IsInControlListQueryHandler
@@ -226,6 +227,8 @@ export class IsInControlListQueryHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -234,7 +237,7 @@ export class IsInControlListQueryHandler
     const { securityId, targetId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

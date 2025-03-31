@@ -209,7 +209,7 @@ export class InsufficientAllowance extends BaseError {
   constructor(fromId: string, spenderId: string) {
     super(
       ErrorCode.InsufficientAllowance,
-      `insufficient allowance from ${fromId} to ${spenderId}`,
+      `Insufficient allowance from ${fromId} to ${spenderId}`,
     );
   }
 }

@@ -216,6 +216,7 @@ import {
 } from './CancelClearingOperationByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(CancelClearingOperationByPartitionCommand)
 export class CancelClearingOperationByPartitionCommandHandler
@@ -230,6 +231,8 @@ export class CancelClearingOperationByPartitionCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -246,15 +249,15 @@ export class CancelClearingOperationByPartitionCommandHandler
     const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 
     await this.validationService.checkPause(securityId);
 
-    await this.validationService.validateClearingActivated(securityId);
+    await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.validateKycAddresses(securityId, [targetId]);
+    await this.validationService.checkKycAddresses(securityId, [targetId]);
 
     await this.validationService.checkRole(
       SecurityRole._CLEARING_VALIDATOR_ROLE,

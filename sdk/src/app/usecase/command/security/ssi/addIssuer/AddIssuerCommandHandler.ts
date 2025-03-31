@@ -209,10 +209,10 @@ import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../../service/TransactionService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import AccountService from '../../../../../service/AccountService';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import ValidationService from '../../../../../service/ValidationService';
+import ContractService from '../../../../../service/ContractService';
 
 @CommandHandler(AddIssuerCommand)
 export class AddIssuerCommandHandler
@@ -223,8 +223,8 @@ export class AddIssuerCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
   ) {}
@@ -235,7 +235,7 @@ export class AddIssuerCommandHandler
     const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     await this.validationService.checkPause(securityId);
 
     await this.validationService.checkRole(

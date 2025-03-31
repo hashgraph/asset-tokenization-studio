@@ -212,9 +212,9 @@ import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(LockCommand)
 export class LockCommandHandler implements ICommandHandler<LockCommand> {
@@ -225,10 +225,10 @@ export class LockCommandHandler implements ICommandHandler<LockCommand> {
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(command: LockCommand): Promise<LockCommandResponse> {
@@ -238,7 +238,7 @@ export class LockCommandHandler implements ICommandHandler<LockCommand> {
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const sourceEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(sourceId);
 

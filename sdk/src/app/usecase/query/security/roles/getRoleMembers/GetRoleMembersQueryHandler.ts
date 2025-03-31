@@ -212,8 +212,7 @@ import {
   GetRoleMembersQueryResponse,
 } from './GetRoleMembersQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import AccountService from '../../../../../service/AccountService';
+import ContractService from '../../../../../service/ContractService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 
 @QueryHandler(GetRoleMembersQuery)
@@ -225,10 +224,8 @@ export class GetRoleMembersQueryHandler
     public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -237,7 +234,7 @@ export class GetRoleMembersQueryHandler
     const { role, securityId, start, end } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getRoleMembers(
       securityEvmAddress,
       role,

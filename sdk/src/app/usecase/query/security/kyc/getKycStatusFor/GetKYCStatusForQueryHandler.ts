@@ -214,6 +214,7 @@ import {
   GetKYCStatusForQuery,
   GetKYCStatusForQueryResponse,
 } from './GetKYCStatusForQuery.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @QueryHandler(GetKYCStatusForQuery)
 export class GetKYCStatusForQueryHandler
@@ -226,6 +227,8 @@ export class GetKYCStatusForQueryHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -234,7 +237,7 @@ export class GetKYCStatusForQueryHandler
     const { securityId, targetId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

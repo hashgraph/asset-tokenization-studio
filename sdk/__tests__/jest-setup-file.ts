@@ -247,13 +247,11 @@ import {
   ClearingRedeem,
   ClearingTransfer,
 } from '../src/domain/context/security/Clearing.js';
-import AccountService from '../src/app/service/AccountService.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
 //* Mock isWeb() method
 Injectable.isWeb = jest.fn(() => true);
-const accountService = Injectable.resolve(AccountService);
 
 function hexToDecimal(hexString: string): number {
   if (!/^0x[a-fA-F0-9]+$|^[a-fA-F0-9]+$/.test(hexString)) {
@@ -985,7 +983,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       data: string,
       operatorData: string,
     ) => {
-      const operator = accountService.getCurrentAccount().evmAddress;
+      const operator = user_account.evmAddress;
 
       if (securityInfo.paused) return [false, '0x40', ''];
 
@@ -1068,7 +1066,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       amount: BigDecimal,
       data: string,
     ) => {
-      const operator = accountService.getCurrentAccount().evmAddress;
+      const operator = user_account.evmAddress;
 
       if (securityInfo.paused) return [false, '0x40', ''];
 
@@ -1122,7 +1120,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       data: string,
       operatorData: string,
     ) => {
-      const operator = accountService.getCurrentAccount().evmAddress;
+      const operator = user_account.evmAddress;
 
       if (securityInfo.paused) return [false, '0x40', ''];
 

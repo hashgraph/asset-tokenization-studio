@@ -211,6 +211,7 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import SecurityService from '../../../../service/SecurityService.js';
 import AccountService from '../../../../service/AccountService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../service/ContractService.js';
 
 @QueryHandler(LockCountQuery)
 export class LockCountQueryHandler implements IQueryHandler<LockCountQuery> {
@@ -221,13 +222,15 @@ export class LockCountQueryHandler implements IQueryHandler<LockCountQuery> {
     public readonly accountService: AccountService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(query: LockCountQuery): Promise<LockCountQueryResponse> {
     const { targetId, securityId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

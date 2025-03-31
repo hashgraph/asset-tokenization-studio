@@ -211,11 +211,10 @@ import { RedeemCommand, RedeemCommandResponse } from './RedeemCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import ValidationService from '../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../service/ValidationService.js';
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(RedeemCommand)
 export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
@@ -226,12 +225,11 @@ export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
     public readonly transactionService: TransactionService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(command: RedeemCommand): Promise<RedeemCommandResponse> {
@@ -239,10 +237,10 @@ export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
 
-    await this.validationService.validateClearingDeactivated(securityId);
+    await this.validationService.checkClearingDeactivated(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     await this.validationService.checkCanRedeem(
       securityId,
       account.id.toString(),

@@ -217,6 +217,7 @@ import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapt
 import AccountService from '../../../../../../service/AccountService.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(ActivateClearingCommand)
 export class ActivateClearingCommandHandler
@@ -233,6 +234,8 @@ export class ActivateClearingCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -243,7 +246,7 @@ export class ActivateClearingCommandHandler
     const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     await this.validationService.checkPause(securityId);
 
     await this.validationService.checkRole(

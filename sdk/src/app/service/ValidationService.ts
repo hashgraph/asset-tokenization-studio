@@ -259,6 +259,10 @@ import { Terminal3VC } from '../../domain/context/kyc/terminal3.js';
 import { SignedCredential } from '@terminal3/vc_core';
 import { InvalidVCHolder } from '../usecase/command/security/error/InvalidVCHolder.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress';
+import { GetTotalSupplyByPartitionQuery } from '../usecase/query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery.js';
+import { BigNumber } from 'ethers';
+import { SecurityUnPaused } from '../usecase/command/security/error/SecurityUnPaused.js';
+import { PartitionsProtected } from '../usecase/command/security/error/PartitionsProtected.js';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -267,19 +271,15 @@ export default class ValidationService extends Service {
     super();
   }
 
-  async validateIssuer(securityId: string, issuer: string): Promise<boolean> {
-    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+  async checkIssuer(securityId: string, issuer: string): Promise<boolean> {
     const res = await this.queryBus.execute(
       new IsIssuerQuery(securityId, issuer),
     );
-    if (!res.payload) {
-      throw new UnlistedKycIssuer(issuer);
-    } else {
-      return true;
-    }
+    if (!res.payload) throw new UnlistedKycIssuer(issuer);
+    return true;
   }
 
-  async validateKycAddresses(
+  async checkKycAddresses(
     securityId: string,
     addresses: string[],
   ): Promise<boolean> {
@@ -296,7 +296,7 @@ export default class ValidationService extends Service {
     return true;
   }
 
-  async validateClearingActivated(securityId: string): Promise<boolean> {
+  async checkClearingActivated(securityId: string): Promise<boolean> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const result = (
       await this.queryBus.execute(new IsClearingActivatedQuery(securityId))
@@ -308,7 +308,7 @@ export default class ValidationService extends Service {
     return result;
   }
 
-  async validateClearingDeactivated(securityId: string): Promise<boolean> {
+  async checkClearingDeactivated(securityId: string): Promise<boolean> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const result = (
       await this.queryBus.execute(new IsClearingActivatedQuery(securityId))
@@ -320,7 +320,7 @@ export default class ValidationService extends Service {
     return result;
   }
 
-  async validateOperator(
+  async checkOperator(
     securityId: string,
     partitionId: string,
     operatorId: string,
@@ -363,7 +363,7 @@ export default class ValidationService extends Service {
     if (!res.payload) {
       throw new NotGrantedRole(role);
     }
-    return true;
+    return res.payload;
   }
 
   async checkPause(securityId: string): Promise<boolean> {
@@ -372,13 +372,30 @@ export default class ValidationService extends Service {
     if (res.payload) {
       throw new SecurityPaused();
     }
-    return true;
+    return false;
+  }
+
+  async checkUnpause(securityId: string): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const res = await this.queryBus.execute(new IsPausedQuery(securityId));
+    if (!res.payload) {
+      throw new SecurityUnPaused();
+    }
+    return false;
   }
 
   async checkProtectedPartitions(security: Security): Promise<boolean> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     if (!security.arePartitionsProtected) {
       throw new PartitionsUnProtected();
+    }
+    return true;
+  }
+
+  async checkUnprotectedPartitions(security: Security): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    if (security.arePartitionsProtected) {
+      throw new PartitionsProtected();
     }
     return true;
   }
@@ -456,23 +473,38 @@ export default class ValidationService extends Service {
       res = await this.queryBus.execute(
         new GetMaxSupplyByPartitionQuery(securityId, partitionId),
       );
+      const partitionTotalSupply = await this.queryBus.execute(
+        new GetTotalSupplyByPartitionQuery(securityId, partitionId),
+      );
       if (
-        res.payload
-          .toBigNumber()
-          .lt(amount.toBigNumber().add(security.totalSupply!.toBigNumber()))
+        this.isMaxSupplyExceeded(
+          res.payload.toBigNumber(),
+          amount.toBigNumber(),
+          partitionTotalSupply.payload.toBigNumber(),
+        )
       ) {
         throw new MaxSupplyByPartitionReached();
       }
     }
     res = await this.queryBus.execute(new GetMaxSupplyQuery(securityId));
     if (
-      res.payload
-        .toBigNumber()
-        .lt(amount.toBigNumber().add(security.totalSupply!.toBigNumber()))
+      this.isMaxSupplyExceeded(
+        res.payload.toBigNumber(),
+        amount.toBigNumber(),
+        security.totalSupply!.toBigNumber(),
+      )
     ) {
       throw new MaxSupplyReached();
     }
     return true;
+  }
+
+  private isMaxSupplyExceeded(
+    maxSupply: BigNumber,
+    amount: BigNumber,
+    totalSupply: BigNumber,
+  ): boolean {
+    return maxSupply.lt(totalSupply.add(amount));
   }
 
   async checkDecimals(security: Security, amount: string): Promise<boolean> {
@@ -521,7 +553,8 @@ export default class ValidationService extends Service {
     );
     if (add && res.payload) {
       throw new AccountAlreadyInControlList(targetId.toString());
-    } else if (!add && !res.payload) {
+    }
+    if (!add && !res.payload) {
       throw new AccountNotInControlList(targetId.toString());
     }
     return true;
@@ -538,7 +571,8 @@ export default class ValidationService extends Service {
     );
     if (add && res.payload) {
       throw new AccountIsAlreadyAnIssuer(targetId.toString());
-    } else if (!add && !res.payload) {
+    }
+    if (!add && !res.payload) {
       throw new UnlistedKycIssuer(targetId.toString());
     }
     return true;
@@ -597,38 +631,44 @@ export default class ValidationService extends Service {
     });
 
     if (sourceEvmAddress) {
-      if (
-        controListType === SecurityControlListType.BLACKLIST &&
-        controlListMembers.includes(sourceEvmAddress.toString().toUpperCase())
-      ) {
-        throw new AccountInBlackList(sourceEvmAddress.toString());
-      }
-
-      if (
-        controListType === SecurityControlListType.WHITELIST &&
-        !controlListMembers.includes(sourceEvmAddress.toString().toUpperCase())
-      ) {
-        throw new AccountNotInWhiteList(sourceEvmAddress.toString());
-      }
+      await this.checkUserInControlList(
+        controListType,
+        controlListMembers,
+        sourceEvmAddress,
+      );
     }
 
     if (targetEvmAddress) {
-      if (
-        controListType === SecurityControlListType.BLACKLIST &&
-        controlListMembers.includes(targetEvmAddress.toString().toUpperCase())
-      ) {
-        throw new AccountInBlackList(targetEvmAddress.toString());
-      }
-
-      if (
-        controListType === SecurityControlListType.WHITELIST &&
-        !controlListMembers.includes(targetEvmAddress.toString().toUpperCase())
-      ) {
-        throw new AccountNotInWhiteList(targetEvmAddress.toString());
-      }
+      await this.checkUserInControlList(
+        controListType,
+        controlListMembers,
+        targetEvmAddress,
+      );
     }
 
     return true;
+  }
+
+  private async checkUserInControlList(
+    controListType: SecurityControlListType,
+    controlListMembers: string[],
+    user: string,
+  ): Promise<boolean> {
+    if (
+      controListType === SecurityControlListType.BLACKLIST &&
+      controlListMembers.includes(user.toString().toUpperCase())
+    ) {
+      throw new AccountInBlackList(user.toString());
+    }
+
+    if (
+      controListType === SecurityControlListType.WHITELIST &&
+      !controlListMembers.includes(user.toString().toUpperCase())
+    ) {
+      throw new AccountNotInWhiteList(user.toString());
+    }
+
+    return false;
   }
 
   async checkMultiPartition(
@@ -655,7 +695,7 @@ export default class ValidationService extends Service {
     return true;
   }
 
-  async checkValidVC(
+  async checkValidVc(
     signedCredential: SignedCredential,
     targetEvmAddress: EvmAddress,
     securityId: string,
@@ -668,7 +708,7 @@ export default class ValidationService extends Service {
       throw new InvalidVCHolder();
     }
 
-    await this.validateIssuer(securityId, issuer);
+    await this.checkIssuer(securityId, issuer);
 
     return [issuer, signedCredential];
   }

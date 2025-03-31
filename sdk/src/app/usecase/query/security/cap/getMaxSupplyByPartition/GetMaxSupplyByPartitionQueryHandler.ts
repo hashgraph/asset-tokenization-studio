@@ -213,9 +213,8 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../../service/SecurityService.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../../service/AccountService.js';
 
 @QueryHandler(GetMaxSupplyByPartitionQuery)
 export class GetMaxSupplyByPartitionQueryHandler
@@ -224,10 +223,10 @@ export class GetMaxSupplyByPartitionQueryHandler
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -236,11 +235,8 @@ export class GetMaxSupplyByPartitionQueryHandler
     const { securityId, partitionId } = query;
     const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(securityId);
 
     const res = await this.queryAdapter.getMaxSupplyByPartition(
       securityEvmAddress,

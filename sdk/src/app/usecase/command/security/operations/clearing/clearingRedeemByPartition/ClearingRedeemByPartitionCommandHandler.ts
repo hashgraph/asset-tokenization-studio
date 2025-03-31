@@ -218,6 +218,7 @@ import {
   ClearingRedeemByPartitionCommandResponse,
 } from './ClearingRedeemByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(ClearingRedeemByPartitionCommand)
 export class ClearingRedeemByPartitionCommandHandler
@@ -236,6 +237,8 @@ export class ClearingRedeemByPartitionCommandHandler
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -247,14 +250,14 @@ export class ClearingRedeemByPartitionCommandHandler
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
     await this.validationService.checkPause(securityId);
 
-    await this.validationService.validateClearingActivated(securityId);
+    await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.validateKycAddresses(securityId, [
+    await this.validationService.checkKycAddresses(securityId, [
       account.id.toString(),
     ]);
 

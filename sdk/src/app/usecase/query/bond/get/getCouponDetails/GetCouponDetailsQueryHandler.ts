@@ -207,7 +207,6 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import {
   GetCouponDetailsQuery,
   GetCouponDetailsQueryResponse,
@@ -221,8 +220,6 @@ export class GetCouponDetailsQueryHandler
   implements IQueryHandler<GetCouponDetailsQuery>
 {
   constructor(
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)

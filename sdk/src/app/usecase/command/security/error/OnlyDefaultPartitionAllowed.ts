@@ -209,7 +209,7 @@ export class OnlyDefaultPartitionAllowed extends BaseError {
   constructor() {
     super(
       ErrorCode.OnlyDefaultPartitionAllowed,
-      `only default partition allowed in single mode`,
+      `Only default partition allowed in single mode`,
     );
   }
 }

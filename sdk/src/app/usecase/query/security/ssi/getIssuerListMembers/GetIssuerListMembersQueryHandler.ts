@@ -212,9 +212,9 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import SecurityService from '../../../../../service/SecurityService';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
 import AccountService from '../../../../../service/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import ContractService from '../../../../../service/ContractService';
 
 @QueryHandler(GetIssuerListMembersQuery)
 export class GetIssuerListMembersQueryHandler
@@ -223,12 +223,12 @@ export class GetIssuerListMembersQueryHandler
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -237,7 +237,7 @@ export class GetIssuerListMembersQueryHandler
     const { securityId, start, end } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getIssuerListMembers(
       securityEvmAddress,
       start,
@@ -246,7 +246,7 @@ export class GetIssuerListMembersQueryHandler
 
     const hederaIds = await Promise.all(
       res.map(async (t) =>
-        (await this.mirrorNodeAdapter.getAccountInfo(t)).id.toString(),
+        (await this.accountService.getAccountInfo(t)).id.toString(),
       ),
     );
 

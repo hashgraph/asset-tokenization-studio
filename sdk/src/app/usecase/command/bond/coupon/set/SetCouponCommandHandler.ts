@@ -213,7 +213,7 @@ import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import AccountService from '../../../../../service/AccountService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(SetCouponCommand)
 export class SetCouponCommandHandler
@@ -224,8 +224,8 @@ export class SetCouponCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(command: SetCouponCommand): Promise<SetCouponCommandResponse> {
@@ -233,7 +233,7 @@ export class SetCouponCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress =
-      await this.accountService.getContractEvmAddress(address);
+      await this.contractService.getContractEvmAddress(address);
 
     const res = await handler.setCoupon(
       securityEvmAddress,

@@ -208,7 +208,7 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService.js';
+import ContractService from '../../../../../service/ContractService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   GetKYCAccountsCountQuery,
@@ -224,8 +224,8 @@ export class GetKYCAccountsCountQueryHandler
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -234,7 +234,7 @@ export class GetKYCAccountsCountQueryHandler
     const { securityId, kycStatus } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getKYCAccountsCount(
       securityEvmAddress,
       kycStatus,

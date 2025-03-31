@@ -1052,6 +1052,20 @@ export class RPCQueryAdapter {
     ).getMaxSupplyByPartition(partitionId);
   }
 
+  async getTotalSupplyByPartition(
+    address: EvmAddress,
+    partitionId: string,
+  ): Promise<BigNumber> {
+    LogService.logTrace(
+      `Getting max supply by partition for ${address.toString()} security`,
+    );
+
+    return await this.connect(
+      ERC1410ScheduledTasks__factory,
+      address.toString(),
+    ).totalSupplyByPartition(partitionId);
+  }
+
   async getRegulationDetails(
     type: number,
     subType: number,

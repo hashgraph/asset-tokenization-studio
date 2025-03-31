@@ -213,6 +213,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(PauseCommand)
 export class PauseCommandHandler implements ICommandHandler<PauseCommand> {
@@ -225,6 +226,8 @@ export class PauseCommandHandler implements ICommandHandler<PauseCommand> {
     public readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(command: PauseCommand): Promise<PauseCommandResponse> {
@@ -233,7 +236,7 @@ export class PauseCommandHandler implements ICommandHandler<PauseCommand> {
     const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     await this.validationService.checkRole(
       SecurityRole._PAUSER_ROLE,
       account.id.toString(),

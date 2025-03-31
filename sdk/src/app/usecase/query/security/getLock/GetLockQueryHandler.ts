@@ -210,18 +210,18 @@ import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js'
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../service/SecurityService.js';
 import { Lock } from '../../../../../domain/context/security/Lock.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import AccountService from '../../../../service/AccountService';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import ContractService from '../../../../service/ContractService.js';
 
 @QueryHandler(GetLockQuery)
 export class GetLockQueryHandler implements IQueryHandler<GetLockQuery> {
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
@@ -233,7 +233,7 @@ export class GetLockQueryHandler implements IQueryHandler<GetLockQuery> {
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

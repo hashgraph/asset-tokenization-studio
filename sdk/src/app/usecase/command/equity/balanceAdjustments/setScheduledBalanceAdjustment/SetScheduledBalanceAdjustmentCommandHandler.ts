@@ -217,6 +217,8 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import AccountService from '../../../../../service/AccountService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(SetScheduledBalanceAdjustmentCommand)
 export class SetScheduledBalanceAdjustmentCommandHandler
@@ -231,6 +233,10 @@ export class SetScheduledBalanceAdjustmentCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -241,23 +247,15 @@ export class SetScheduledBalanceAdjustmentCommandHandler
     const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new Error('The security is currently paused');
-    }
+      await this.contractService.getContractEvmAddress(securityId);
 
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._CORPORATEACTIONS_ROLE,
-      ))
-    ) {
-      throw new Error(
-        `The account trying to perform the operation doesn't have the needed role (${SecurityRole._CORPORATEACTIONS_ROLE})`,
-      );
-    }
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkRole(
+      SecurityRole._CORPORATEACTIONS_ROLE,
+      account.evmAddress!,
+      securityId,
+    );
 
     const res = await handler.setScheduledBalanceAdjustment(
       securityEvmAddress,

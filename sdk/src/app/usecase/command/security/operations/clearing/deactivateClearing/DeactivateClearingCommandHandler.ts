@@ -210,14 +210,14 @@ import TransactionService from '../../../../../../service/TransactionService.js'
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import AccountService from '../../../../../../../app/service/AccountService.js';
+import AccountService from '../../../../../../service/AccountService.js';
 import {
   DeactivateClearingCommand,
   DeactivateClearingCommandResponse,
 } from './DeactivateClearingCommand.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
-import ValidationService from '../../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(DeactivateClearingCommand)
 export class DeactivateClearingCommandHandler
@@ -234,6 +234,8 @@ export class DeactivateClearingCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -244,19 +246,14 @@ export class DeactivateClearingCommandHandler
     const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     await this.validationService.checkPause(securityId);
 
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._CLEARING_ROLE,
-      ))
-    ) {
-      throw new NotGrantedRole(SecurityRole._CLEARING_ROLE);
-    }
+    await this.validationService.checkRole(
+      SecurityRole._CLEARING_ROLE,
+      account.id.toString(),
+      securityId,
+    );
 
     const res = await handler.deactivateClearing(securityEvmAddress);
     return Promise.resolve(

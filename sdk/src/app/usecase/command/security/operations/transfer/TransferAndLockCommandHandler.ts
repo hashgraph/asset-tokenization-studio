@@ -215,9 +215,9 @@ import TransactionService from '../../../../../service/TransactionService.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(TransferAndLockCommand)
 export class TransferAndLockCommandHandler
@@ -230,12 +230,12 @@ export class TransferAndLockCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -245,7 +245,7 @@ export class TransferAndLockCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

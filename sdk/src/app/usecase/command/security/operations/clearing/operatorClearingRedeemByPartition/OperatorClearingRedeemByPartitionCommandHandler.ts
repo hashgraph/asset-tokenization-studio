@@ -218,6 +218,7 @@ import {
   OperatorClearingRedeemByPartitionCommandResponse,
 } from './OperatorClearingRedeemByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(OperatorClearingRedeemByPartitionCommand)
 export class OperatorClearingRedeemByPartitionCommandHandler
@@ -236,6 +237,8 @@ export class OperatorClearingRedeemByPartitionCommandHandler
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -248,7 +251,7 @@ export class OperatorClearingRedeemByPartitionCommandHandler
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const sourceEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(sourceId);
 
@@ -264,16 +267,18 @@ export class OperatorClearingRedeemByPartitionCommandHandler
 
     await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    await this.validationService.validateOperator(
+    await this.validationService.checkOperator(
       securityId,
       partitionId,
       account.id.toString(),
       sourceId,
     );
-    await this.validationService.validateClearingActivated(securityId);
+
     await this.validationService.checkPause(securityId);
 
-    await this.validationService.validateKycAddresses(securityId, [
+    await this.validationService.checkClearingActivated(securityId);
+
+    await this.validationService.checkKycAddresses(securityId, [
       account.id.toString(),
       sourceId,
     ]);

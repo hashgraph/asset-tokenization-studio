@@ -214,8 +214,8 @@ import {
   GrantRoleCommand,
   GrantRoleCommandResponse,
 } from './GrantRoleCommand.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(GrantRoleCommand)
 export class GrantRoleCommandHandler
@@ -228,10 +228,10 @@ export class GrantRoleCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(command: GrantRoleCommand): Promise<GrantRoleCommandResponse> {
@@ -239,7 +239,7 @@ export class GrantRoleCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

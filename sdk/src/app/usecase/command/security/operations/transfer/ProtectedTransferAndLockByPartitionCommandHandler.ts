@@ -214,10 +214,10 @@ import {
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(ProtectedTransferAndLockByPartitionCommand)
 export class ProtectedTransferAndLockByPartitionCommandHandler
@@ -230,12 +230,12 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -257,7 +257,7 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
     const sourceEvmAddress: EvmAddress =
@@ -267,11 +267,11 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
       security.decimals,
     );
 
-    await this.validationService.checkDecimals(security, amount);
-
     await this.validationService.checkPause(securityId);
 
-    await this.validationService.validateKycAddresses(securityId, [
+    await this.validationService.checkDecimals(security, amount);
+
+    await this.validationService.checkKycAddresses(securityId, [
       sourceId,
       targetId,
     ]);

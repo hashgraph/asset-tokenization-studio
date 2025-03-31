@@ -212,9 +212,9 @@ import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(IssueCommand)
 export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
@@ -225,10 +225,10 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(command: IssueCommand): Promise<IssueCommandResponse> {
@@ -241,7 +241,7 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 
@@ -251,7 +251,7 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
 
     await this.validationService.checkControlList(securityId, targetId);
 
-    await this.validationService.validateKycAddresses(securityId, [targetId]);
+    await this.validationService.checkKycAddresses(securityId, [targetId]);
 
     await this.validationService.checkRole(
       SecurityRole._ISSUER_ROLE,

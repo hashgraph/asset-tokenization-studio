@@ -214,6 +214,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import SecurityService from '../../../../../service/SecurityService.js';
 import AccountService from '../../../../../service/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @QueryHandler(IsOperatorForPartitionQuery)
 export class IsOperatorForPartitionQueryHandler
@@ -226,6 +227,8 @@ export class IsOperatorForPartitionQueryHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -234,7 +237,7 @@ export class IsOperatorForPartitionQueryHandler
     const { securityId, partitionId, operatorId, targetId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const operatorEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(operatorId);
 

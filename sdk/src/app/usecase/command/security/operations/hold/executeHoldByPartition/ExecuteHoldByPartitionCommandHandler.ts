@@ -215,9 +215,9 @@ import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecora
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import AccountService from '../../../../../../service/AccountService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(ExecuteHoldByPartitionCommand)
 export class ExecuteHoldByPartitionCommandHandler
@@ -232,6 +232,8 @@ export class ExecuteHoldByPartitionCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
   ) {}
@@ -246,12 +248,9 @@ export class ExecuteHoldByPartitionCommandHandler
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
-      targetId === '0.0.0'
-        ? new EvmAddress(EVM_ZERO_ADDRESS)
-        : await this.accountService.getAccountEvmAddress(targetId);
-
+      await this.accountService.getAccountEvmAddressOrNull(targetId);
     const sourceEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(sourceId);
 
@@ -269,7 +268,7 @@ export class ExecuteHoldByPartitionCommandHandler
       amountBd,
     );
 
-    await this.validationService.validateKycAddresses(securityId, [
+    await this.validationService.checkKycAddresses(securityId, [
       sourceId,
       targetId,
     ]);

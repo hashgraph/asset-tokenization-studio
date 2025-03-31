@@ -209,7 +209,7 @@ export class InvalidDestinationAccount extends BaseError {
   constructor() {
     super(
       ErrorCode.InvalidDestinationAccount,
-      `invalid null destination account`,
+      `Invalid null destination account`,
     );
   }
 }

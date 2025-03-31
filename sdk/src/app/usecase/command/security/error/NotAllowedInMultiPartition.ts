@@ -209,7 +209,7 @@ export class NotAllowedInMultiPartition extends BaseError {
   constructor() {
     super(
       ErrorCode.NotAllowedInMultiPartition,
-      `operation not allowed in multi partition mode`,
+      `Operation not allowed in multi partition mode`,
     );
   }
 }

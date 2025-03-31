@@ -209,13 +209,13 @@ import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   GetKYCAccountsDataQuery,
   GetKYCAccountsDataQueryResponse,
 } from './GetKYCAccountsDataQuery.js';
 import { KycAccountData } from '../../../../../../domain/context/kyc/KycAccountData.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @QueryHandler(GetKYCAccountsDataQuery)
 export class GetKYCAccountsDataQueryHandler
@@ -226,10 +226,10 @@ export class GetKYCAccountsDataQueryHandler
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -238,7 +238,7 @@ export class GetKYCAccountsDataQueryHandler
     const { securityId, kycStatus, start, end } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const kycAccountsData = await this.queryAdapter.getKYCAccountsData(
       securityEvmAddress,
       kycStatus,
@@ -250,10 +250,10 @@ export class GetKYCAccountsDataQueryHandler
       kycAccountsData.map(async (item) => ({
         ...item,
         issuer: (
-          await this.mirrorNodeAdapter.getAccountInfo(item.issuer)
+          await this.accountService.getAccountInfo(item.issuer)
         ).id.toString(),
         account: (
-          await this.mirrorNodeAdapter.getAccountInfo(item.account)
+          await this.accountService.getAccountInfo(item.account)
         ).id.toString(),
       })),
     )) as KycAccountData[];

@@ -216,6 +216,7 @@ import {
 } from './RevokeRoleCommand.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(RevokeRoleCommand)
 export class RevokeRoleCommandHandler
@@ -232,6 +233,8 @@ export class RevokeRoleCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -241,7 +244,7 @@ export class RevokeRoleCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

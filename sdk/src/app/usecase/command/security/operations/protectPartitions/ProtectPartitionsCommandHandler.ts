@@ -215,8 +215,8 @@ import SecurityService from '../../../../..//service/SecurityService';
 import TransactionService from '../../../../..//service/TransactionService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import { PartitionsProtected } from '../../error/PartitionsProtected';
-import ValidationService from '../../../../..//service/ValidationService';
+import ValidationService from '../../../../../service/ValidationService';
+import ContractService from '../../../../../service/ContractService';
 
 @CommandHandler(ProtectPartitionsCommand)
 export class ProtectPartitionsCommandHandler
@@ -231,6 +231,8 @@ export class ProtectPartitionsCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -242,18 +244,17 @@ export class ProtectPartitionsCommandHandler
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
+
+    await this.validationService.checkPause(securityId);
+
     await this.validationService.checkRole(
       SecurityRole._PROTECTED_PARTITION_ROLE,
       account.id.toString(),
       securityId,
     );
 
-    await this.validationService.checkPause(securityId);
-
-    if (security.arePartitionsProtected) {
-      throw new PartitionsProtected();
-    }
+    await this.validationService.checkUnprotectedPartitions(security);
 
     const res = await handler.protectPartitions(securityEvmAddress);
     return Promise.resolve(

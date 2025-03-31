@@ -203,41 +203,19 @@
 
 */
 
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import SecurityService from '../../../../../service/SecurityService.js';
-import {
-  GetDividendsQuery,
-  GetDividendsQueryResponse,
-} from './GetDividendsQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 
-@QueryHandler(GetDividendsQuery)
-export class GetDividendsQueryHandler
-  implements IQueryHandler<GetDividendsQuery>
-{
+export class GetTotalSupplyByPartitionQueryResponse implements QueryResponse {
+  constructor(public readonly payload: BigDecimal) {}
+}
+
+export class GetTotalSupplyByPartitionQuery extends Query<GetTotalSupplyByPartitionQueryResponse> {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(ContractService)
-    public readonly contractService: ContractService,
-  ) {}
-
-  async execute(query: GetDividendsQuery): Promise<GetDividendsQueryResponse> {
-    const { securityId, dividendId } = query;
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getDividends(
-      securityEvmAddress,
-      dividendId,
-    );
-
-    return Promise.resolve(new GetDividendsQueryResponse(res));
+    public readonly securityId: string,
+    public readonly partitionId: string,
+  ) {
+    super();
   }
 }

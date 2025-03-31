@@ -213,7 +213,7 @@ import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import AccountService from '../../../../../service/AccountService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(SetVotingRightsCommand)
 export class SetVotingRightsCommandHandler
@@ -224,8 +224,8 @@ export class SetVotingRightsCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -235,7 +235,7 @@ export class SetVotingRightsCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress =
-      await this.accountService.getContractEvmAddress(address);
+      await this.contractService.getContractEvmAddress(address);
     const res = await handler.setVotingRights(
       securityEvmAddress,
       BigDecimal.fromString(recordDate),

@@ -203,41 +203,49 @@
 
 */
 
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import {
+  GetTotalSupplyByPartitionQuery,
+  GetTotalSupplyByPartitionQueryResponse,
+} from './GetTotalSupplyByPartitionQuery.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../../service/SecurityService.js';
-import {
-  GetDividendsQuery,
-  GetDividendsQueryResponse,
-} from './GetDividendsQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../../service/AccountService.js';
 
-@QueryHandler(GetDividendsQuery)
-export class GetDividendsQueryHandler
-  implements IQueryHandler<GetDividendsQuery>
+@QueryHandler(GetTotalSupplyByPartitionQuery)
+export class GetMaxSupplyByPartitionQueryHandler
+  implements IQueryHandler<GetTotalSupplyByPartitionQuery>
 {
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
-  async execute(query: GetDividendsQuery): Promise<GetDividendsQueryResponse> {
-    const { securityId, dividendId } = query;
+  async execute(
+    query: GetTotalSupplyByPartitionQuery,
+  ): Promise<GetTotalSupplyByPartitionQueryResponse> {
+    const { securityId, partitionId } = query;
+    const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getDividends(
-      securityEvmAddress,
-      dividendId,
-    );
+      await this.accountService.getAccountEvmAddress(securityId);
 
-    return Promise.resolve(new GetDividendsQueryResponse(res));
+    const res = await this.queryAdapter.getTotalSupplyByPartition(
+      securityEvmAddress,
+      partitionId,
+    );
+    const amount = BigDecimal.fromStringFixed(
+      res.toString(),
+      security.decimals,
+    );
+    return new GetTotalSupplyByPartitionQueryResponse(amount);
   }
 }

@@ -211,9 +211,9 @@ import { TransferCommand, TransferCommandResponse } from './TransferCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(TransferCommand)
 export class TransferCommandHandler
@@ -226,22 +226,22 @@ export class TransferCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(command: TransferCommand): Promise<TransferCommandResponse> {
     const { securityId, targetId, amount } = command;
 
-    await this.validationService.validateClearingDeactivated(securityId);
-    await this.validationService.validateKycAddresses(securityId, [targetId]);
+    await this.validationService.checkClearingDeactivated(securityId);
+    await this.validationService.checkKycAddresses(securityId, [targetId]);
 
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

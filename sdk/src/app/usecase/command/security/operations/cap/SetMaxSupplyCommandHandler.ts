@@ -213,12 +213,11 @@ import {
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../error/DecimalsOverRange.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import AccountService from '../../../../../service/AccountService.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(SetMaxSupplyCommand)
 export class SetMaxSupplyCommandHandler
@@ -231,6 +230,8 @@ export class SetMaxSupplyCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
   ) {}
@@ -243,8 +244,13 @@ export class SetMaxSupplyCommandHandler
     const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const security = await this.securityService.get(securityId);
+
+    const maxSupplyBd: BigDecimal = BigDecimal.fromString(
+      maxSupply,
+      security.decimals,
+    );
 
     await this.validationService.checkRole(
       SecurityRole._CAP_ROLE,
@@ -252,14 +258,7 @@ export class SetMaxSupplyCommandHandler
       securityId,
     );
 
-    if (CheckNums.hasMoreDecimals(maxSupply, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const maxSupplyBd: BigDecimal = BigDecimal.fromString(
-      maxSupply,
-      security.decimals,
-    );
+    await this.validationService.checkDecimals(security, maxSupply);
 
     const res = await handler.setMaxSupply(securityEvmAddress, maxSupplyBd);
     return Promise.resolve(

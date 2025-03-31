@@ -217,8 +217,8 @@ import {
   CreateHoldByPartitionCommand,
   CreateHoldByPartitionCommandResponse,
 } from './CreateHoldByPartitionCommand.js';
-import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
-import ValidationService from '../../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(CreateHoldByPartitionCommand)
 export class CreateHoldByPartitionCommandHandler
@@ -229,6 +229,8 @@ export class CreateHoldByPartitionCommandHandler
     public readonly securityService: SecurityService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
@@ -254,18 +256,15 @@ export class CreateHoldByPartitionCommandHandler
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
-    await this.validationService.validateClearingDeactivated(securityId);
+    await this.validationService.checkClearingDeactivated(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const escrowEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(escrow);
 
     const targetEvmAddress: EvmAddress =
-      targetId === '0.0.0'
-        ? new EvmAddress(EVM_ZERO_ADDRESS)
-        : await this.accountService.getAccountEvmAddress(targetId);
-
+      await this.accountService.getAccountEvmAddressOrNull(targetId);
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
     await this.validationService.checkPause(securityId);

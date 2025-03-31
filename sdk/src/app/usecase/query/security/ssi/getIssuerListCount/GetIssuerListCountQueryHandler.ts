@@ -208,7 +208,7 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import SecurityService from '../../../../../service/SecurityService';
-import AccountService from '../../../../../service/AccountService';
+import ContractService from '../../../../../service/ContractService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetIssuerListCountQuery,
@@ -224,8 +224,8 @@ export class GetIssuerListCountQueryHandler
     public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -234,7 +234,7 @@ export class GetIssuerListCountQueryHandler
     const { securityId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getIssuerListCount(securityEvmAddress);
 
     return new GetIssuerListCountQueryResponse(res);

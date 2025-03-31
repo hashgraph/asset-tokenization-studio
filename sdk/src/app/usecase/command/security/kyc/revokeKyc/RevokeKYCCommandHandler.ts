@@ -213,6 +213,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import ValidationService from '../../../../../service/ValidationService';
+import ContractService from '../../../../../service/ContractService';
 
 @CommandHandler(RevokeKYCCommand)
 export class RevokeKYCCommandHandler
@@ -221,6 +222,8 @@ export class RevokeKYCCommandHandler
   constructor(
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
@@ -235,7 +238,7 @@ export class RevokeKYCCommandHandler
     const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

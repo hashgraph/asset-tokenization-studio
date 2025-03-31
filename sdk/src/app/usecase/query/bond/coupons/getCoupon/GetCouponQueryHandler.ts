@@ -207,30 +207,27 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import SecurityService from '../../../../../service/SecurityService.js';
 import { GetCouponQuery, GetCouponQueryResponse } from './GetCouponQuery.js';
-import AccountService from '../../../../../service/AccountService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @QueryHandler(GetCouponQuery)
 export class GetCouponQueryHandler implements IQueryHandler<GetCouponQuery> {
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetCouponQuery): Promise<GetCouponQueryResponse> {
     const { securityId, couponId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getCoupon(securityEvmAddress, couponId);
 
     return Promise.resolve(new GetCouponQueryResponse(res));

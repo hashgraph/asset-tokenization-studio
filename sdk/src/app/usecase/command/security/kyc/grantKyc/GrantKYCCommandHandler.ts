@@ -218,6 +218,7 @@ import { Terminal3VC } from '../../../../../../domain/context/kyc/terminal3';
 import { verifyVc } from '@terminal3/verify_vc';
 import { SignedCredential } from '@terminal3/vc_core';
 import { InvalidVC } from '../../error/InvalidVC';
+import ContractService from '../../../../../service/ContractService';
 
 @CommandHandler(GrantKYCCommand)
 export class GrantKYCCommandHandler
@@ -226,6 +227,8 @@ export class GrantKYCCommandHandler
   constructor(
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
@@ -248,12 +251,12 @@ export class GrantKYCCommandHandler
     const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 
     const [issuer, updatedSignedCredential] =
-      await this.validationService.checkValidVC(
+      await this.validationService.checkValidVc(
         signedCredential,
         targetEvmAddress,
         securityId,

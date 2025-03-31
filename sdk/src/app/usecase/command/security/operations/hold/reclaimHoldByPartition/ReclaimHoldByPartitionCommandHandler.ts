@@ -176,13 +176,13 @@ import SecurityService from '../../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   ReclaimHoldByPartitionCommand,
   ReclaimHoldByPartitionCommandResponse,
 } from './ReclaimHoldByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import AccountService from '../../../../../../service/AccountService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(ReclaimHoldByPartitionCommand)
 export class ReclaimHoldByPartitionCommandHandler
@@ -193,12 +193,12 @@ export class ReclaimHoldByPartitionCommandHandler
     public readonly securityService: SecurityService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -208,7 +208,7 @@ export class ReclaimHoldByPartitionCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     await this.validationService.checkPause(securityId);
 
     const targetEvmAddress: EvmAddress =

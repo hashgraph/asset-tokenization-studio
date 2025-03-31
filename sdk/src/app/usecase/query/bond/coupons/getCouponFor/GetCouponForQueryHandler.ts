@@ -212,10 +212,10 @@ import {
   GetCouponForQueryResponse,
 } from './GetCouponForQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import AccountService from '../../../../../service/AccountService.js';
+import ContractService from '../../../../../service/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../../service/AccountService.js';
 
 @QueryHandler(GetCouponForQuery)
 export class GetCouponForQueryHandler
@@ -224,19 +224,19 @@ export class GetCouponForQueryHandler
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetCouponForQuery): Promise<GetCouponForQueryResponse> {
     const { targetId, securityId, couponId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

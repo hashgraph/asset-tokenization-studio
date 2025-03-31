@@ -216,6 +216,7 @@ import {
 } from './UnprotectPartitionsCommand.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(UnprotectPartitionsCommand)
 export class UnprotectPartitionsCommandHandler
@@ -230,6 +231,8 @@ export class UnprotectPartitionsCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -241,7 +244,7 @@ export class UnprotectPartitionsCommandHandler
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     await this.validationService.checkRole(
       SecurityRole._PROTECTED_PARTITION_ROLE,
       account.id.toString(),

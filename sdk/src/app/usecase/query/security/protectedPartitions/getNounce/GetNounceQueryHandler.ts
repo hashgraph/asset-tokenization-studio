@@ -211,6 +211,7 @@ import { GetNounceQuery, GetNounceQueryResponse } from './GetNounceQuery.js';
 import SecurityService from '../../../../../../app/service/SecurityService.js';
 import AccountService from '../../../../../service/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @QueryHandler(GetNounceQuery)
 export class GetNounceQueryHandler implements IQueryHandler<GetNounceQuery> {
@@ -221,13 +222,15 @@ export class GetNounceQueryHandler implements IQueryHandler<GetNounceQuery> {
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetNounceQuery): Promise<GetNounceQueryResponse> {
     const { securityId, targetId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

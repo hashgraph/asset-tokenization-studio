@@ -217,7 +217,8 @@ import {
   ProtectedClearingTransferByPartitionCommand,
   ProtectedClearingTransferByPartitionCommandResponse,
 } from './ProtectedClearingTransferByPartitionCommand.js';
-import ValidationService from '../../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(ProtectedClearingTransferByPartitionCommand)
 export class ProtectedClearingTransferByPartitionCommandHandler
@@ -236,6 +237,8 @@ export class ProtectedClearingTransferByPartitionCommandHandler
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -257,7 +260,7 @@ export class ProtectedClearingTransferByPartitionCommandHandler
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const sourceEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(sourceId);
 
@@ -266,13 +269,13 @@ export class ProtectedClearingTransferByPartitionCommandHandler
 
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.validateClearingActivated(securityId);
-    await this.validationService.validateKycAddresses(securityId, [
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkClearingActivated(securityId);
+    await this.validationService.checkKycAddresses(securityId, [
       sourceId,
       targetId,
     ]);
-
-    await this.validationService.checkPause(securityId);
 
     await this.validationService.checkProtectedPartitions(security);
 

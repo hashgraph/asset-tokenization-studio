@@ -212,9 +212,10 @@ import {
   GetAccountBalanceQueryResponse,
 } from './GetAccountBalanceQuery.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import SecurityService from '../../../../../app/service/SecurityService.js';
+import SecurityService from '../../../../service/SecurityService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../app/service/AccountService.js';
+import AccountService from '../../../../service/AccountService.js';
+import ContractService from '../../../../service/ContractService.js';
 
 @QueryHandler(GetAccountBalanceQuery)
 export class GetAccountBalanceQueryHandler
@@ -227,6 +228,8 @@ export class GetAccountBalanceQueryHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -237,7 +240,7 @@ export class GetAccountBalanceQueryHandler
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

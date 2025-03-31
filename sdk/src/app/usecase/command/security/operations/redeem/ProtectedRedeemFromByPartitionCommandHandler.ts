@@ -211,12 +211,12 @@ import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   ProtectedRedeemFromByPartitionCommand,
   ProtectedRedeemFromByPartitionCommandResponse,
 } from './ProtectedRedeemFromByPartitionCommand';
-import ValidationService from '../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(ProtectedRedeemFromByPartitionCommand)
 export class ProtectedRedeemFromByPartitionCommandHandler
@@ -229,10 +229,10 @@ export class ProtectedRedeemFromByPartitionCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -248,15 +248,15 @@ export class ProtectedRedeemFromByPartitionCommandHandler
       signature,
     } = command;
 
-    await this.validationService.validateClearingDeactivated(securityId);
-    await this.validationService.validateKycAddresses(securityId, [sourceId]);
+    await this.validationService.checkClearingDeactivated(securityId);
+    await this.validationService.checkKycAddresses(securityId, [sourceId]);
 
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const sourceEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(sourceId);
 

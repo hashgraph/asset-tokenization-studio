@@ -207,6 +207,6 @@ import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 export class InvalidPartition extends BaseError {
   constructor() {
-    super(ErrorCode.InvalidPartition, `partition not valid`);
+    super(ErrorCode.InvalidPartition, `Partition not valid`);
   }
 }

@@ -209,7 +209,7 @@ export class MaxSupplyByPartitionReached extends BaseError {
   constructor() {
     super(
       ErrorCode.MaxSupplyByPartitionReached,
-      `max supply by partition reached`,
+      `Max supply by partition reached`,
     );
   }
 }

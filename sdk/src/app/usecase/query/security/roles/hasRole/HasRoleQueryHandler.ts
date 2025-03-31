@@ -211,6 +211,7 @@ import { HasRoleQuery, HasRoleQueryResponse } from './HasRoleQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import AccountService from '../../../../../service/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @QueryHandler(HasRoleQuery)
 export class HasRoleQueryHandler implements IQueryHandler<HasRoleQuery> {
@@ -221,13 +222,15 @@ export class HasRoleQueryHandler implements IQueryHandler<HasRoleQuery> {
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(query: HasRoleQuery): Promise<HasRoleQueryResponse> {
     const { role, targetId, securityId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

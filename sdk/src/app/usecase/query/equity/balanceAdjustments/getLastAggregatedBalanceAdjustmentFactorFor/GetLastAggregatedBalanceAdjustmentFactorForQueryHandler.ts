@@ -208,13 +208,13 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import SecurityService from '../../../../../service/SecurityService';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
 import AccountService from '../../../../../service/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetLastAggregatedBalanceAdjustmentFactorForQuery,
   GetLastAggregatedBalanceAdjustmentFactorForQueryResponse,
 } from './GetLastAggregatedBalanceAdjustmentFactorForQuery';
+import ContractService from '../../../../../service/ContractService';
 
 @QueryHandler(GetLastAggregatedBalanceAdjustmentFactorForQuery)
 export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler
@@ -225,10 +225,10 @@ export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler
     public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -237,7 +237,7 @@ export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler
     const { securityId, targetId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 

@@ -215,8 +215,8 @@ import {
   AddToControlListCommandResponse,
 } from './AddToControlListCommand.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { AccountAlreadyInControlList } from '../../error/AccountAlreadyInControlList.js';
 import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(AddToControlListCommand)
 export class AddToControlListCommandHandler
@@ -227,6 +227,8 @@ export class AddToControlListCommandHandler
     public readonly securityService: SecurityService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
@@ -242,20 +244,17 @@ export class AddToControlListCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 
     await this.validationService.checkPause(securityId);
 
-    const isAlready = await this.queryAdapter.isAccountInControlList(
-      securityEvmAddress,
-      targetEvmAddress,
+    await this.validationService.checkAccountInControlList(
+      securityId,
+      targetId,
+      true,
     );
-
-    if (isAlready) {
-      throw new AccountAlreadyInControlList(targetId.toString());
-    }
 
     const res = await handler.addToControlList(
       securityEvmAddress,

@@ -212,9 +212,8 @@ import {
   GetControlListTypeQueryResponse,
 } from './GetControlListTypeQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService';
+import ContractService from '../../../../../service/ContractService';
 import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
 
 @QueryHandler(GetControlListTypeQuery)
@@ -226,10 +225,8 @@ export class GetControlListTypeQueryHandler
     public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -238,7 +235,7 @@ export class GetControlListTypeQueryHandler
     const { securityId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getControlListType(securityEvmAddress);
 
     return new GetControlListTypeQueryResponse(

@@ -209,13 +209,13 @@ import AccountService from '../../../../../../service/AccountService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   ReclaimClearingOperationByPartitionCommand,
   ReclaimClearingOperationByPartitionCommandResponse,
 } from './ReclaimClearingOperationByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(ReclaimClearingOperationByPartitionCommand)
 export class ReclaimClearingOperationByPartitionCommandHandler
@@ -228,8 +228,8 @@ export class ReclaimClearingOperationByPartitionCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
   ) {}
@@ -247,14 +247,14 @@ export class ReclaimClearingOperationByPartitionCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 
     await this.validationService.checkPause(securityId);
 
-    await this.validationService.validateClearingActivated(securityId);
-    await this.validationService.validateKycAddresses(securityId, [targetId]);
+    await this.validationService.checkClearingActivated(securityId);
+    await this.validationService.checkKycAddresses(securityId, [targetId]);
 
     const res = await handler.reclaimClearingOperationByPartition(
       securityEvmAddress,

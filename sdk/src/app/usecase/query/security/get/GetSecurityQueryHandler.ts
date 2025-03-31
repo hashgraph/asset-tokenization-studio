@@ -207,14 +207,13 @@ import { Security } from '../../../../../domain/context/security/Security.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
 import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   GetSecurityQuery,
   GetSecurityQueryResponse,
 } from './GetSecurityQuery.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../service/AccountService';
+import ContractService from '../../../../service/ContractService';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 
 @QueryHandler(GetSecurityQuery)
@@ -222,19 +221,17 @@ export class GetSecurityQueryHandler
   implements IQueryHandler<GetSecurityQuery>
 {
   constructor(
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetSecurityQuery): Promise<GetSecurityQueryResponse> {
     const { securityId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const security: Security =
       await this.queryAdapter.getSecurity(securityEvmAddress);
 

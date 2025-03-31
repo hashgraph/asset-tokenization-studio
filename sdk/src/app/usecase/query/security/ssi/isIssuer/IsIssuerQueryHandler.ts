@@ -210,6 +210,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import SecurityService from '../../../../../service/SecurityService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { IsIssuerQuery, IsIssuerQueryResponse } from './IsIssuerQuery';
+import ContractService from '../../../../../service/ContractService';
 import AccountService from '../../../../../service/AccountService';
 
 @QueryHandler(IsIssuerQuery)
@@ -219,6 +220,8 @@ export class IsIssuerQueryHandler implements IQueryHandler<IsIssuerQuery> {
     public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
   ) {}
@@ -227,7 +230,7 @@ export class IsIssuerQueryHandler implements IQueryHandler<IsIssuerQuery> {
     const { securityId, issuerId } = query;
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const issuerEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(issuerId.toString());
 

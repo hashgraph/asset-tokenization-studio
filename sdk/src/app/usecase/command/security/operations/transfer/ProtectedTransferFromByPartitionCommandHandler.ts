@@ -215,9 +215,8 @@ import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ValidationService from '../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(ProtectedTransferFromByPartitionCommand)
 export class ProtectedTransferFromByPartitionCommandHandler
@@ -230,12 +229,10 @@ export class ProtectedTransferFromByPartitionCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -257,12 +254,14 @@ export class ProtectedTransferFromByPartitionCommandHandler
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const sourceEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(sourceId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
     const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    await this.validationService.checkPause(securityId);
 
     await this.validationService.checkProtectedPartitions(security);
 
@@ -274,9 +273,7 @@ export class ProtectedTransferFromByPartitionCommandHandler
 
     await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.validateKycAddresses(securityId, [
+    await this.validationService.checkKycAddresses(securityId, [
       sourceId,
       targetId,
     ]);

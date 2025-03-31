@@ -386,7 +386,7 @@ import {
 } from './UpdateMaturityDateCommand';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter';
 import { OperationNotAllowed } from '../../security/error/OperationNotAllowed';
-import AccountService from '../../../../service/AccountService';
+import ContractService from '../../../../service/ContractService';
 
 @CommandHandler(UpdateMaturityDateCommand)
 export class UpdateMaturityDateCommandHandler
@@ -397,8 +397,8 @@ export class UpdateMaturityDateCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -408,7 +408,7 @@ export class UpdateMaturityDateCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const bondDetails =
       await this.queryAdapter.getBondDetails(securityEvmAddress);
 

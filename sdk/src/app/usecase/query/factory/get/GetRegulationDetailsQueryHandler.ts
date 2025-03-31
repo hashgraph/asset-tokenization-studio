@@ -207,7 +207,6 @@ import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
 import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   GetRegulationDetailsQuery,
@@ -222,8 +221,6 @@ export class GetRegulationDetailsQueryHandler
   implements IQueryHandler<GetRegulationDetailsQuery>
 {
   constructor(
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)

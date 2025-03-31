@@ -212,8 +212,8 @@ import { ReleaseCommand, ReleaseCommandResponse } from './ReleaseCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(ReleaseCommand)
 export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
@@ -224,10 +224,10 @@ export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(command: ReleaseCommand): Promise<ReleaseCommandResponse> {
@@ -235,7 +235,7 @@ export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const sourceEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(sourceId);
 

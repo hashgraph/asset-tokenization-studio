@@ -212,9 +212,8 @@ import ValidationService from '../../../../../service/ValidationService.js';
 import SecurityService from '../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { UnpauseCommand, UnpauseCommandResponse } from './UnpauseCommand.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { SecurityUnPaused } from '../../error/SecurityUnPaused.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(UnpauseCommand)
 export class UnpauseCommandHandler implements ICommandHandler<UnpauseCommand> {
@@ -225,8 +224,8 @@ export class UnpauseCommandHandler implements ICommandHandler<UnpauseCommand> {
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    private readonly rpcQueryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
   ) {}
@@ -237,16 +236,14 @@ export class UnpauseCommandHandler implements ICommandHandler<UnpauseCommand> {
     const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     await this.validationService.checkRole(
       SecurityRole._PAUSER_ROLE,
       account.id.toString(),
       securityId,
     );
 
-    if (!(await this.rpcQueryAdapter.isPaused(securityEvmAddress))) {
-      throw new SecurityUnPaused();
-    }
+    await this.validationService.checkUnpause(securityId);
 
     const res = await handler.unpause(securityEvmAddress, securityId);
     return Promise.resolve(

@@ -211,7 +211,7 @@ import {
 import { ICommandHandler } from '../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../service/TransactionService';
-import AccountService from '../../../../service/AccountService';
+import ContractService from '../../../../service/ContractService';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
 
 @CommandHandler(UpdateConfigCommand)
@@ -221,8 +221,8 @@ export class UpdateConfigCommandHandler
   constructor(
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -232,7 +232,7 @@ export class UpdateConfigCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
+      await this.contractService.getContractEvmAddress(securityId);
     const res = await handler.updateConfig(
       securityEvmAddress,
       configId,

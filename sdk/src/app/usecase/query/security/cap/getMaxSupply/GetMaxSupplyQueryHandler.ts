@@ -213,9 +213,8 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../../service/SecurityService.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @QueryHandler(GetMaxSupplyQuery)
 export class GetMaxSupplyQueryHandler
@@ -224,21 +223,18 @@ export class GetMaxSupplyQueryHandler
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetMaxSupplyQuery): Promise<GetMaxSupplyQueryResponse> {
     const { securityId } = query;
     const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
 
     const res = await this.queryAdapter.getMaxSupply(securityEvmAddress);
     const amount = BigDecimal.fromStringFixed(

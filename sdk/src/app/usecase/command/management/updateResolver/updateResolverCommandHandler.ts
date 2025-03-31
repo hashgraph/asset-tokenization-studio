@@ -381,12 +381,11 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../service/TransactionService';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
 import {
   UpdateResolverCommand,
   UpdateResolverCommandResponse,
 } from './updateResolverCommand';
-import AccountService from '../../../../service/AccountService';
+import ContractService from '../../../../service/ContractService';
 
 @CommandHandler(UpdateResolverCommand)
 export class UpdateResolverCommandHandler
@@ -397,8 +396,8 @@ export class UpdateResolverCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -408,13 +407,9 @@ export class UpdateResolverCommandHandler
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress =
-      await this.accountService.getContractEvmAddress(securityId);
-    const resolverEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(resolver.toString())
-        ? (await this.mirrorNodeAdapter.getContractInfo(resolver.toString()))
-            .evmAddress
-        : resolver.toString(),
-    );
+      await this.contractService.getContractEvmAddress(securityId);
+    const resolverEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(resolver.toString());
 
     const res = await handler.updateResolver(
       securityEvmAddress,
