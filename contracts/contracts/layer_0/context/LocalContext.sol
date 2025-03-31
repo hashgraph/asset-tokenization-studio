@@ -207,9 +207,18 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {Context} from '@openzeppelin/contracts/utils/Context.sol';
+import {ArrayLib} from '../common/ArrayLib.sol';
 
 abstract contract LocalContext is Context {
     error ExpirationNotReached();
+
+    modifier onlyUniqueActivations(
+        address[] calldata _controlLists,
+        bool[] calldata _actives
+    ) {
+        ArrayLib.checkUniqueValues(_controlLists, _actives);
+        _;
+    }
 
     function _checkExpirationReached(
         uint256 _expirationTimestamp

@@ -206,6 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+
 import {
     ProtectedPartitionsStorageWrapper
 } from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
@@ -239,37 +240,21 @@ abstract contract ExternalControlListManagementStorageWrapper is
         bool[] calldata _actives
     ) internal returns (bool success_) {
         uint256 length = _controlLists.length;
-        unchecked {
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalControlList(_controlLists[index]))
-                        _addExternalControlList(_controlLists[index]);
-                    continue;
+        for (uint256 index; index < length; ) {
+            if (_actives[index]) {
+                if (!_isExternalControlList(_controlLists[index]))
+                    _addExternalControlList(_controlLists[index]);
+                unchecked {
+                    ++index;
                 }
-                if (_isExternalControlList(_controlLists[index]))
-                    _removeExternalControlList(_controlLists[index]);
+                continue;
             }
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalControlList(_controlLists[index]))
-                        revert IExternalControlListManagement
-                            .UpdateExternalControlListsContradiction(
-                                _controlLists,
-                                _actives,
-                                _controlLists[index]
-                            );
-                    continue;
-                }
-                if (_isExternalControlList(_controlLists[index]))
-                    revert IExternalControlListManagement
-                        .UpdateExternalControlListsContradiction(
-                            _controlLists,
-                            _actives,
-                            _controlLists[index]
-                        );
+            if (_isExternalControlList(_controlLists[index]))
+                _removeExternalControlList(_controlLists[index]);
+            unchecked {
+                ++index;
             }
         }
-
         success_ = true;
     }
 

@@ -253,6 +253,7 @@ abstract contract AccessControl is IAccessControl, Common {
         override
         onlyUnpaused
         onlySameRolesAndActivesLength(_roles.length, _actives.length)
+        onlyUniqueRoles(_roles, _actives)
         returns (bool success_)
     {
         success_ = _applyRoles(_roles, _actives, _account);
