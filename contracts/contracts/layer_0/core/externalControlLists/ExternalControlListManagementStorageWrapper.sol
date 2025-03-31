@@ -321,13 +321,14 @@ abstract contract ExternalControlListManagementStorageWrapper is
         ExternalControlListDataStorage
             storage externalControlListStorage = _externalControlListStorage();
         uint256 length = _getExternalControlListsCount();
-        unchecked {
-            for (uint256 index = 0; index < length; ++index) {
-                if (
-                    !IExternalControlList(
-                        externalControlListStorage.controlLists.at(index)
-                    ).isAuthorized(_account)
-                ) return false;
+        for (uint256 index; index < length; ) {
+            if (
+                !IExternalControlList(
+                    externalControlListStorage.controlLists.at(index)
+                ).isAuthorized(_account)
+            ) return false;
+            unchecked {
+                ++index;
             }
         }
         return true;

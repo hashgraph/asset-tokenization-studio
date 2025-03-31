@@ -234,7 +234,7 @@ contract ExternalControlListManagement is
         ExternalControlListDataStorage
             storage externalControlListDataStorage = _externalControlListStorage();
         uint256 length = _controlLists.length;
-        for (uint256 index = 0; index < length; ) {
+        for (uint256 index; index < length; ) {
             _addExternalControlList(_controlLists[index]);
             unchecked {
                 ++index;
