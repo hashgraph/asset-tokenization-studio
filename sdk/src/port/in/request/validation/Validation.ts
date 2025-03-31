@@ -441,7 +441,7 @@ export default class Validation {
     values: string[],
     fieldName: string,
     allowEmpty: boolean = false,
-  ): InvalidValue[] {
+  ): BaseError[] {
     if (values.length === 0) {
       return allowEmpty
         ? []
