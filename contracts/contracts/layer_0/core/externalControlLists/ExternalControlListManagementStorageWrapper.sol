@@ -203,109 +203,146 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
 import {
-    IBusinessLogicResolver,
-    IBusinessLogicResolver__factory,
-    IFactory,
-    IFactory__factory,
-    IStaticFunctionSelectors,
-    ProxyAdmin,
-    ProxyAdmin__factory,
-} from '@typechain'
+    ProtectedPartitionsStorageWrapper
+} from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
+import {LibCommon} from '../../common/LibCommon.sol';
 import {
-    DeployedBusinessLogics,
-    DeployAtsFullInfrastructureCommand,
-    deployAtsFullInfrastructure,
-} from '@scripts'
-import { Network } from '@configuration'
-import { network } from 'hardhat'
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
+import {
+    IExternalControlListManagement
+} from '../../../layer_1/interfaces/externalControlLists/IExternalControlListManagement.sol';
+import {
+    IExternalControlList
+} from '../../../layer_1/interfaces/externalControlLists/IExternalControlList.sol';
 
-export interface Environment {
-    deployedBusinessLogics: DeployedBusinessLogics
-    facetIdsEquities: string[]
-    facetVersionsEquities: number[]
-    facetIdsBonds: string[]
-    facetVersionsBonds: number[]
-    proxyAdmin: ProxyAdmin
-    resolver: IBusinessLogicResolver
-    factory: IFactory
-}
+abstract contract ExternalControlListManagementStorageWrapper is
+    ProtectedPartitionsStorageWrapper
+{
+    using LibCommon for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
-export const environment: Environment = buildEmptyEnvironment()
-let environmentInitialized = false
-
-export async function deployEnvironment({
-    signer,
-    timeTravelEnabled = false,
-}: {
-    signer: SignerWithAddress
-    timeTravelEnabled?: boolean
-}) {
-    if (!environmentInitialized) {
-        const { deployer, factory, businessLogicResolver } =
-            await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
-                    signer: signer,
-                    network: network.name as Network,
-                    useDeployed: false,
-                    timeTravelEnabled: timeTravelEnabled,
-                })
-            )
-
-        environment.proxyAdmin = ProxyAdmin__factory.connect(
-            businessLogicResolver.proxyAdminAddress!,
-            deployer!
-        )
-        environment.resolver = IBusinessLogicResolver__factory.connect(
-            businessLogicResolver.proxyAddress!,
-            deployer!
-        )
-        environment.factory = IFactory__factory.connect(
-            factory.proxyAddress!,
-            deployer!
-        )
-        environmentInitialized = true
+    struct ExternalControlListDataStorage {
+        bool initialized;
+        EnumerableSet.AddressSet controlLists;
     }
-}
 
-function buildEmptyEnvironment(): Environment {
-    return {
-        deployedBusinessLogics: {
-            businessLogicResolver: {} as IStaticFunctionSelectors,
-            factory: {} as IStaticFunctionSelectors,
-            diamondFacet: {} as IStaticFunctionSelectors,
-            accessControl: {} as IStaticFunctionSelectors,
-            controlList: {} as IStaticFunctionSelectors,
-            kyc: {} as IStaticFunctionSelectors,
-            ssiManagement: {} as IStaticFunctionSelectors,
-            corporateActions: {} as IStaticFunctionSelectors,
-            pause: {} as IStaticFunctionSelectors,
-            ERC20: {} as IStaticFunctionSelectors,
-            ERC1644: {} as IStaticFunctionSelectors,
-            eRC1410ScheduledTasks: {} as IStaticFunctionSelectors,
-            ERC1594: {} as IStaticFunctionSelectors,
-            eRC1643: {} as IStaticFunctionSelectors,
-            equityUSA: {} as IStaticFunctionSelectors,
-            bondUSA: {} as IStaticFunctionSelectors,
-            Snapshots: {} as IStaticFunctionSelectors,
-            scheduledSnapshots: {} as IStaticFunctionSelectors,
-            scheduledBalanceAdjustments: {} as IStaticFunctionSelectors,
-            scheduledTasks: {} as IStaticFunctionSelectors,
-            Cap: {} as IStaticFunctionSelectors,
-            Lock: {} as IStaticFunctionSelectors,
-            transferAndLock: {} as IStaticFunctionSelectors,
-            adjustBalances: {} as IStaticFunctionSelectors,
-            protectedPartitions: {} as IStaticFunctionSelectors,
-            Hold: {} as IStaticFunctionSelectors,
-            externalControlListManagement: {} as IStaticFunctionSelectors,
-        },
-        facetIdsEquities: [],
-        facetVersionsEquities: [],
-        facetIdsBonds: [],
-        facetVersionsBonds: [],
-        proxyAdmin: {} as ProxyAdmin,
-        resolver: {} as IBusinessLogicResolver,
-        factory: {} as IFactory,
+    function _updateExternalControlLists(
+        address[] calldata _controlLists,
+        bool[] calldata _actives
+    ) internal returns (bool success_) {
+        uint256 length = _controlLists.length;
+        unchecked {
+            for (uint256 index; index < length; ++index) {
+                if (_actives[index]) {
+                    if (!_isExternalControlList(_controlLists[index]))
+                        _addExternalControlList(_controlLists[index]);
+                    continue;
+                }
+                if (_isExternalControlList(_controlLists[index]))
+                    _removeExternalControlList(_controlLists[index]);
+            }
+            for (uint256 index; index < length; ++index) {
+                if (_actives[index]) {
+                    if (!_isExternalControlList(_controlLists[index]))
+                        revert IExternalControlListManagement
+                            .UpdateExternalControlListsContradiction(
+                                _controlLists,
+                                _actives,
+                                _controlLists[index]
+                            );
+                    continue;
+                }
+                if (_isExternalControlList(_controlLists[index]))
+                    revert IExternalControlListManagement
+                        .UpdateExternalControlListsContradiction(
+                            _controlLists,
+                            _actives,
+                            _controlLists[index]
+                        );
+            }
+        }
+
+        success_ = true;
+    }
+
+    function _addExternalControlList(
+        address _controlList
+    ) internal returns (bool success_) {
+        success_ = _externalControlListStorage().controlLists.add(_controlList);
+    }
+
+    function _removeExternalControlList(
+        address _controlList
+    ) internal returns (bool success_) {
+        success_ = _externalControlListStorage().controlLists.remove(
+            _controlList
+        );
+    }
+
+    function _isExternalControlList(
+        address _controlList
+    ) internal view returns (bool) {
+        return
+            _externalControlListStorage().controlLists.contains(_controlList);
+    }
+
+    function _getExternalControlListsCount()
+        internal
+        view
+        returns (uint256 externalControlListsCount_)
+    {
+        externalControlListsCount_ = _externalControlListStorage()
+            .controlLists
+            .length();
+    }
+
+    function _getExternalControlListsMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory members_) {
+        return
+            _externalControlListStorage().controlLists.getFromSet(
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _isExternallyAuthorized(
+        address _account
+    ) internal view returns (bool) {
+        ExternalControlListDataStorage
+            storage externalControlListStorage = _externalControlListStorage();
+        uint256 length = _getExternalControlListsCount();
+        unchecked {
+            for (uint256 index = 0; index < length; ++index) {
+                if (
+                    !IExternalControlList(
+                        externalControlListStorage.controlLists.at(index)
+                    ).isAuthorized(_account)
+                ) return false;
+            }
+        }
+        return true;
+    }
+
+    function _externalControlListStorage()
+        internal
+        pure
+        virtual
+        returns (ExternalControlListDataStorage storage externalControlList_)
+    {
+        bytes32 position = _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            externalControlList_.slot := position
+        }
     }
 }

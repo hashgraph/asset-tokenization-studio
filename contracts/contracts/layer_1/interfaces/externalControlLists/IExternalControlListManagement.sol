@@ -203,109 +203,68 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import {
-    IBusinessLogicResolver,
-    IBusinessLogicResolver__factory,
-    IFactory,
-    IFactory__factory,
-    IStaticFunctionSelectors,
-    ProxyAdmin,
-    ProxyAdmin__factory,
-} from '@typechain'
-import {
-    DeployedBusinessLogics,
-    DeployAtsFullInfrastructureCommand,
-    deployAtsFullInfrastructure,
-} from '@scripts'
-import { Network } from '@configuration'
-import { network } from 'hardhat'
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
 
-export interface Environment {
-    deployedBusinessLogics: DeployedBusinessLogics
-    facetIdsEquities: string[]
-    facetVersionsEquities: number[]
-    facetIdsBonds: string[]
-    facetVersionsBonds: number[]
-    proxyAdmin: ProxyAdmin
-    resolver: IBusinessLogicResolver
-    factory: IFactory
-}
+interface IExternalControlListManagement {
+    event ExternalControlListsUpdated(
+        address indexed operator,
+        address[] controlLists,
+        bool[] actives
+    );
+    event AddedToExternalControlLists(
+        address indexed operator,
+        address controlList
+    );
+    event RemovedFromExternalControlLists(
+        address indexed operator,
+        address controlList
+    );
 
-export const environment: Environment = buildEmptyEnvironment()
-let environmentInitialized = false
+    error ListedControlList(address controlList);
 
-export async function deployEnvironment({
-    signer,
-    timeTravelEnabled = false,
-}: {
-    signer: SignerWithAddress
-    timeTravelEnabled?: boolean
-}) {
-    if (!environmentInitialized) {
-        const { deployer, factory, businessLogicResolver } =
-            await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
-                    signer: signer,
-                    network: network.name as Network,
-                    useDeployed: false,
-                    timeTravelEnabled: timeTravelEnabled,
-                })
-            )
+    error UnlistedControlList(address controlList);
 
-        environment.proxyAdmin = ProxyAdmin__factory.connect(
-            businessLogicResolver.proxyAdminAddress!,
-            deployer!
-        )
-        environment.resolver = IBusinessLogicResolver__factory.connect(
-            businessLogicResolver.proxyAddress!,
-            deployer!
-        )
-        environment.factory = IFactory__factory.connect(
-            factory.proxyAddress!,
-            deployer!
-        )
-        environmentInitialized = true
-    }
-}
+    error UpdateExternalControlListsContradiction(
+        address[] controlLists,
+        bool[] actives,
+        address controlListContract
+    );
 
-function buildEmptyEnvironment(): Environment {
-    return {
-        deployedBusinessLogics: {
-            businessLogicResolver: {} as IStaticFunctionSelectors,
-            factory: {} as IStaticFunctionSelectors,
-            diamondFacet: {} as IStaticFunctionSelectors,
-            accessControl: {} as IStaticFunctionSelectors,
-            controlList: {} as IStaticFunctionSelectors,
-            kyc: {} as IStaticFunctionSelectors,
-            ssiManagement: {} as IStaticFunctionSelectors,
-            corporateActions: {} as IStaticFunctionSelectors,
-            pause: {} as IStaticFunctionSelectors,
-            ERC20: {} as IStaticFunctionSelectors,
-            ERC1644: {} as IStaticFunctionSelectors,
-            eRC1410ScheduledTasks: {} as IStaticFunctionSelectors,
-            ERC1594: {} as IStaticFunctionSelectors,
-            eRC1643: {} as IStaticFunctionSelectors,
-            equityUSA: {} as IStaticFunctionSelectors,
-            bondUSA: {} as IStaticFunctionSelectors,
-            Snapshots: {} as IStaticFunctionSelectors,
-            scheduledSnapshots: {} as IStaticFunctionSelectors,
-            scheduledBalanceAdjustments: {} as IStaticFunctionSelectors,
-            scheduledTasks: {} as IStaticFunctionSelectors,
-            Cap: {} as IStaticFunctionSelectors,
-            Lock: {} as IStaticFunctionSelectors,
-            transferAndLock: {} as IStaticFunctionSelectors,
-            adjustBalances: {} as IStaticFunctionSelectors,
-            protectedPartitions: {} as IStaticFunctionSelectors,
-            Hold: {} as IStaticFunctionSelectors,
-            externalControlListManagement: {} as IStaticFunctionSelectors,
-        },
-        facetIdsEquities: [],
-        facetVersionsEquities: [],
-        facetIdsBonds: [],
-        facetVersionsBonds: [],
-        proxyAdmin: {} as ProxyAdmin,
-        resolver: {} as IBusinessLogicResolver,
-        factory: {} as IFactory,
-    }
+    error ExternalControlListsNotUpdated(
+        address[] controlLista,
+        bool[] actives
+    );
+
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ExternalControlLists(
+        address[] calldata _controlLists
+    ) external;
+
+    function updateExternalControlLists(
+        address[] calldata _controlLists,
+        bool[] calldata _actives
+    ) external returns (bool success_);
+
+    function addExternalControlList(
+        address _controlList
+    ) external returns (bool success_);
+
+    function removeExternalControlList(
+        address _controlList
+    ) external returns (bool success_);
+
+    function isExternalControlList(
+        address _controlList
+    ) external view returns (bool);
+
+    function getExternalControlListsCount()
+        external
+        view
+        returns (uint256 externalControlListsCount_);
+
+    function getExternalControlListsMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory members_);
 }
