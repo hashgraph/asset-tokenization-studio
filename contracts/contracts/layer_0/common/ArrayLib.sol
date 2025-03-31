@@ -226,8 +226,12 @@ library ArrayLib {
         bool[] memory _bools
     ) internal pure {
         uint256 length = _addresses.length;
+        uint256 innerIndex;
         for (uint256 index; index < length; ) {
-            for (uint256 innerIndex = index + 1; innerIndex < length; ) {
+            unchecked {
+                innerIndex = index + 1;
+            }
+            for (; innerIndex < length; ) {
                 if (
                     _addresses[index] == _addresses[innerIndex] &&
                     _bools[index] != _bools[innerIndex]
@@ -247,8 +251,12 @@ library ArrayLib {
         bool[] memory _bools
     ) internal pure {
         uint256 length = _bytes32s.length;
+        uint256 innerIndex;
         for (uint256 index; index < length; ) {
-            for (uint256 innerIndex = index + 1; innerIndex < length; ) {
+            unchecked {
+                innerIndex = index + 1;
+            }
+            for (; innerIndex < length; ) {
                 if (
                     _bytes32s[index] == _bytes32s[innerIndex] &&
                     _bools[index] != _bools[innerIndex]

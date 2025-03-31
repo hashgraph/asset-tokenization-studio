@@ -217,9 +217,6 @@ import {
     _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {
-    IExternalControlListManagement
-} from '../../../layer_1/interfaces/externalControlLists/IExternalControlListManagement.sol';
-import {
     IExternalControlList
 } from '../../../layer_1/interfaces/externalControlLists/IExternalControlList.sol';
 
