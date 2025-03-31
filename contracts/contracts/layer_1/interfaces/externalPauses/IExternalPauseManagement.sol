@@ -203,19 +203,53 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-library ArrayLib {
-    function getSlotForDynamicArrayItem(
-        uint256 _dynamicArraySlot,
-        uint256 _itemIndex,
-        uint256 _itemsSize
-    ) internal pure returns (uint256) {
-        uint256 dynamicArrayBaseSlot = uint256(
-            keccak256(abi.encode(_dynamicArraySlot))
-        );
+interface IExternalPauseManagement {
+    event ExternalPausesUpdated(
+        address indexed operator,
+        address[] pauses,
+        bool[] actives
+    );
+    event AddedToExternalPauses(address indexed operator, address pause);
+    event RemovedFromExternalPauses(address indexed operator, address pause);
 
-        return dynamicArrayBaseSlot + _itemIndex * _itemsSize;
-    }
+    error ListedPause(address pause);
+
+    error UnlistedPause(address pause);
+
+    error UpdateExternalPausesContradiction(
+        address[] pauses,
+        bool[] actives,
+        address pauseContract
+    );
+
+    error ExternalPausesNotUpdated(address[] pauses, bool[] actives);
+
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ExternalPauses(address[] calldata _pauses) external;
+
+    function updateExternalPauses(
+        address[] calldata _pauses,
+        bool[] calldata _actives
+    ) external returns (bool success_);
+
+    function addExternalPause(address _pause) external returns (bool success_);
+
+    function removeExternalPause(
+        address _pause
+    ) external returns (bool success_);
+
+    function isExternalPause(address _pause) external view returns (bool);
+
+    function getExternalPausesCount()
+        external
+        view
+        returns (uint256 externalPausesCount_);
+
+    function getExternalPausesMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory members_);
 }

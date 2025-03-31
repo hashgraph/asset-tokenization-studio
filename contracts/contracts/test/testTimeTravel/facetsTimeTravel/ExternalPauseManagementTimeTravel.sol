@@ -203,65 +203,27 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-// solhint-disable var-name-mixedcase, no-inline-assembly
-library MappingLib {
-    function getSlotForBytes32MappingKey(
-        mapping(bytes32 => uint256) storage _mapping,
-        bytes32 _key
-    ) internal pure returns (uint256) {
-        uint256 MappingSlot;
+    ExternalPauseManagement
+} from '../../../layer_1/externalPauses/ExternalPauseManagement.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-        assembly {
-            MappingSlot := _mapping.slot
-        }
-
-        return uint256(keccak256(abi.encode(_key, MappingSlot)));
-    }
-
-    function getSlotForAddressMappingKey(
-        mapping(address => uint256) storage _mapping,
-        address _key
-    ) internal pure returns (uint256) {
-        uint256 MappingSlot;
-
-        assembly {
-            MappingSlot := _mapping.slot
-        }
-
-        return uint256(keccak256(abi.encode(_key, MappingSlot)));
-    }
-
-    function getSlotForAddressMappingKey(
-        mapping(address => uint256[]) storage _mapping,
-        address _key
-    ) internal pure returns (uint256) {
-        uint256 MappingSlot;
-
-        assembly {
-            MappingSlot := _mapping.slot
-        }
-
-        return uint256(keccak256(abi.encode(_key, MappingSlot)));
-    }
-
-    function getSlotForAddressMappingKey(
-        mapping(address => ERC1410BasicStorageWrapperRead.Partition[])
-            storage _mapping,
-        address _key
-    ) internal pure returns (uint256) {
-        uint256 MappingSlot;
-
-        assembly {
-            MappingSlot := _mapping.slot
-        }
-
-        return uint256(keccak256(abi.encode(_key, MappingSlot)));
+contract ExternalPauseManagementTimeTravel is
+    ExternalPauseManagement,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }
-// solhint-enable var-name-mixedcase, no-inline-assembly
