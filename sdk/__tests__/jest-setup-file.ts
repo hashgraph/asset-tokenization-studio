@@ -314,6 +314,7 @@ const kycAccountsByStatus = new Map<number, string[]>();
 
 let controlList: string[] = [];
 let issuerList: string[] = [];
+let externalPausesList: string[] = [];
 
 let securityInfo: Security;
 let equityInfo: EquityDetails;
@@ -504,6 +505,7 @@ function createBondMockImplementation(
   _resolver: EvmAddress,
   _configId: string,
   _configVersion: number,
+  _externalPauses?: EvmAddress[],
   _diamondOwnerAccount?: EvmAddress,
 ): Promise<TransactionResponse> {
   securityInfo = _securityInfo;
@@ -530,6 +532,8 @@ function createBondMockImplementation(
   configVersion = _configVersion;
   configId = _configId;
   resolverAddress = _resolver.toString();
+  externalPausesList =
+    _externalPauses?.map((address) => address.toString()) ?? [];
 
   const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
   const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
@@ -1430,6 +1434,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       _resolver: EvmAddress,
       _configId: string,
       _configVersion: number,
+      _externalPauses?: EvmAddress[],
       _diamondOwnerAccount?: EvmAddress,
     ) => {
       securityInfo = _securityInfo;
@@ -1455,6 +1460,8 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       configVersion = _configVersion;
       configId = _configId;
       resolverAddress = _resolver.toString();
+      externalPausesList =
+        _externalPauses?.map((address) => address.toString()) ?? [];
 
       return {
         status: 'success',
@@ -2490,6 +2497,23 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       clearingId: number,
       clearingOperationType: ClearingOperationType,
     ) => processClearingOperation(targetId, clearingId, clearingOperationType),
+  );
+
+  singletonInstance.updateExternalPauses = jest.fn(
+    async (address: EvmAddress, externalPausesAddresses: EvmAddress[]) => {
+      externalPausesAddresses.forEach((externalPauseAddress) => {
+        const account = identifiers(externalPauseAddress.toString())[1];
+
+        if (externalPausesList.findIndex((item) => item == account) == -1) {
+          externalPausesList.push(account);
+        }
+      });
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
   );
 
   return {

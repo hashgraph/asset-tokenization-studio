@@ -229,6 +229,7 @@ import { InvalidBytes3 } from '../../../../domain/context/bond/error/InvalidByte
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../domain/context/shared/HederaId.js';
 import { InvalidBytes } from '../../../../domain/context/shared/error/InvalidBytes.js';
 import { InvalidBase64 } from '../../../../domain/context/shared/error/InvalidBase64.js';
+import { InvalidValue } from '../error/InvalidValue.js';
 
 export default class Validation {
   public static checkPublicKey = () => {
@@ -435,4 +436,34 @@ export default class Validation {
       return err;
     };
   };
+
+  public static checkHederaIdOrEvmAddressArray(
+    vals: string[],
+    fieldName: string,
+    allowEmpty: boolean = false,
+  ): InvalidValue[] {
+    if (vals.length === 0 && allowEmpty) {
+      return [];
+    }
+    if (!allowEmpty && vals.length === 0) {
+      return [new InvalidValue(`The list of ${fieldName} cannot be empty.`)];
+    }
+
+    const errors: InvalidValue[] = [];
+    const seen = new Set<string>();
+
+    vals.forEach((val) => {
+      const validationErrors =
+        Validation.checkHederaIdFormatOrEvmAddress()(val);
+      if (validationErrors.length > 0) {
+        errors.push(...validationErrors);
+      }
+      if (seen.has(val)) {
+        errors.push(new InvalidValue(`${fieldName} ${val} is duplicated.`));
+      }
+      seen.add(val);
+    });
+
+    return errors;
+  }
 }

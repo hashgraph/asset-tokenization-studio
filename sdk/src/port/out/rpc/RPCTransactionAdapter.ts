@@ -325,6 +325,7 @@ import {
   OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+  UPDATE_EXTERNAL_PAUSES_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -361,6 +362,7 @@ import {
   ClearingTransferFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
+  ExternalPauseManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -449,6 +451,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
@@ -494,7 +497,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
-        externalPauses: [],
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -564,6 +568,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
@@ -609,7 +614,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
-        externalPauses: [],
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
       };
 
       const bondDetails: BondDetailsData = {
@@ -2791,6 +2797,30 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         targetId.toString(),
         {
           gasLimit: OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating External Pauses for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalPauseManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateExternalPauses(
+        externalPausesAddresses.map((address) => address.toString()),
+        actives,
+        {
+          gasLimit: UPDATE_EXTERNAL_PAUSES_GAS,
         },
       ),
       this.networkService.environment,

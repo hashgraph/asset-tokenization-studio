@@ -204,185 +204,179 @@
 */
 
 import {
-  CreateBondCommand,
-  CreateBondCommandResponse,
-} from './CreateBondCommand.js';
-import { InvalidRequest } from '../../error/InvalidRequest.js';
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+  CreateEquityRequest,
+  Equity,
+  LoggerTransports,
+  Role,
+  RoleRequest,
+  SDK,
+  UpdateExternalPausesRequest,
+} from '../../../src';
 import {
-  ADDRESS_LENGTH,
-  BYTES_32_LENGTH,
-} from '../../../../../core/Constants.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { Security } from '../../../../../domain/context/security/Security.js';
-import AccountService from '../../../../service/AccountService.js';
-import TransactionService from '../../../../service/TransactionService.js';
-import NetworkService from '../../../../service/NetworkService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId.js';
-import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+  CastRegulationSubType,
+  CastRegulationType,
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType';
+import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';
+import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter';
+import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter';
+import NetworkService from '../../../src/app/service/NetworkService';
+import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter';
+import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel';
+import {
+  CLIENT_ACCOUNT_ECDSA,
+  CLIENT_ACCOUNT_ECDSA_A,
+  FACTORY_ADDRESS,
+  RESOLVER_ADDRESS,
+} from '../../config';
+import Injectable from '../../../src/core/Injectable';
+import Account from '../../../src/domain/context/account/Account';
+import { ethers, Wallet } from 'ethers';
+import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
+import ExternalPausesManagement from '../../../src/port/in/ExternalPausesManagement';
 
-@CommandHandler(CreateBondCommand)
-export class CreateBondCommandHandler
-  implements ICommandHandler<CreateBondCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-  ) {}
+SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
-  async execute(
-    command: CreateBondCommand,
-  ): Promise<CreateBondCommandResponse> {
-    const {
-      security,
-      currency,
-      nominalValue,
-      startingDate,
-      maturityDate,
-      couponFrequency,
-      couponRate,
-      firstCouponDate,
-      factory,
-      resolver,
-      configId,
-      configVersion,
-      diamondOwnerAccount,
-      externalPauses,
-    } = command;
+const decimals = 0;
+const name = 'TEST_SECURITY_TOKEN';
+const symbol = 'TEST';
+const isin = 'ABCDE123456Z';
+const votingRight = true;
+const informationRight = false;
+const liquidationRight = true;
+const subscriptionRight = false;
+const conversionRight = true;
+const redemptionRight = false;
+const putRight = true;
+const dividendRight = 1;
+const currency = '0x345678';
+const numberOfShares = 0;
+const nominalValue = 1000;
+const regulationType = RegulationType.REG_D;
+const regulationSubType = RegulationSubType.B_506;
+const countries = 'AF,HG,BN';
+const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 1;
 
-    if (!factory) {
-      throw new InvalidRequest('Factory not found in request');
-    }
+const mirrorNode: MirrorNode = {
+  name: 'testmirrorNode',
+  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
+};
 
-    if (!resolver) {
-      throw new InvalidRequest('Resolver not found in request');
-    }
+const rpcNode: JsonRpcRelay = {
+  name: 'testrpcNode',
+  baseUrl: 'http://127.0.0.1:7546/api',
+};
 
-    if (!configId) {
-      throw new InvalidRequest('Config Id not found in request');
-    }
+let th: RPCTransactionAdapter;
+let mirrorNodeAdapter: MirrorNodeAdapter;
 
-    if (configVersion === undefined) {
-      throw new InvalidRequest('Config Version not found in request');
-    }
+describe('🧪 External Pauses Management tests', () => {
+  let ns: NetworkService;
+  let rpcQueryAdapter: RPCQueryAdapter;
+  let equity: SecurityViewModel;
 
-    const diamondOwnerAccountEvmAddress: EvmAddress =
-      HEDERA_FORMAT_ID_REGEX.test(diamondOwnerAccount!)
-        ? await this.mirrorNodeAdapter.accountToEvmAddress(diamondOwnerAccount!)
-        : new EvmAddress(diamondOwnerAccount!);
+  const url = 'http://127.0.0.1:7546';
+  const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
-    const factoryEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(factory.toString())
-        ? (await this.mirrorNodeAdapter.getContractInfo(factory.toString()))
-            .evmAddress
-        : factory.toString(),
-    );
+  const wallet = new Wallet(
+    CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+    customHttpProvider,
+  );
 
-    const resolverEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(resolver.toString())
-        ? (await this.mirrorNodeAdapter.getContractInfo(resolver.toString()))
-            .evmAddress
-        : resolver.toString(),
-    );
-
-    let externalPausesEvmAddresses: EvmAddress[] = [];
-    if (externalPauses) {
-      externalPausesEvmAddresses = await Promise.all(
-        externalPauses.map(
-          async (address) =>
-            new EvmAddress(
-              HEDERA_FORMAT_ID_REGEX.test(address)
-                ? (await this.mirrorNodeAdapter.getContractInfo(address))
-                    .evmAddress
-                : address.toString(),
-            ),
-        ),
-      );
-    }
-
-    const handler = this.transactionService.getHandler();
-
-    const bondInfo = new BondDetails(
-      currency,
-      BigDecimal.fromString(nominalValue),
-      parseInt(startingDate),
-      parseInt(maturityDate),
-    );
-
-    const couponInfo = new CouponDetails(
-      parseInt(couponFrequency),
-      BigDecimal.fromString(couponRate),
-      parseInt(firstCouponDate),
-    );
-
-    const res = await handler.createBond(
-      new Security(security),
-      bondInfo,
-      couponInfo,
-      factoryEvmAddress,
-      resolverEvmAddress,
-      configId,
-      configVersion,
-      externalPausesEvmAddresses,
-      diamondOwnerAccountEvmAddress,
-      factory.toString(),
-    );
-
-    if (!res.id) throw new Error('Create Command Handler response id empty');
-
-    let contractAddress: string;
+  beforeAll(async () => {
     try {
-      if (res.response && res.response.bondAddress) {
-        contractAddress = res.response.bondAddress;
-      } else {
-        // * Recover the new contract ID from Event data from the Mirror Node
+      mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
+      mirrorNodeAdapter.set(mirrorNode);
 
-        const results = await this.mirrorNodeAdapter.getContractResults(
-          res.id.toString(),
-          1,
-        );
+      th = Injectable.resolve(RPCTransactionAdapter);
+      ns = Injectable.resolve(NetworkService);
+      rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
 
-        console.log(`Creation event data:${results}`); //! Remove this line
+      rpcQueryAdapter.init();
+      ns.environment = 'testnet';
+      ns.configuration = {
+        factoryAddress: FACTORY_ADDRESS,
+        resolverAddress: RESOLVER_ADDRESS,
+      };
+      ns.mirrorNode = mirrorNode;
+      ns.rpcNode = rpcNode;
 
-        if (!results || results.length !== 1) {
-          throw new Error('Invalid data structure');
-        }
+      await th.init(true);
+      const account = new Account({
+        id: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        evmAddress: CLIENT_ACCOUNT_ECDSA.evmAddress,
+        alias: CLIENT_ACCOUNT_ECDSA.alias,
+        privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
+        publicKey: CLIENT_ACCOUNT_ECDSA.publicKey,
+      });
+      await th.register(account, true);
 
-        const data = results.map((result) =>
-          result.substring(BYTES_32_LENGTH - ADDRESS_LENGTH + 2),
-        );
+      th.signerOrProvider = wallet;
 
-        contractAddress = '0x' + data[0];
-      }
-      const contractId =
-        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
-          contractAddress,
-        );
+      const requestST = new CreateEquityRequest({
+        name,
+        symbol,
+        isin,
+        decimals,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        clearingActive: false,
+        isMultiPartition: false,
+        diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares: numberOfShares.toString(),
+        nominalValue: nominalValue.toString(),
+        regulationType: CastRegulationType.toNumber(regulationType),
+        regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+        isCountryControlListWhiteList: true,
+        countries,
+        info,
+        configId,
+        configVersion,
+        externalPauses: [CLIENT_ACCOUNT_ECDSA.id.toString()],
+      });
 
-      return Promise.resolve(
-        new CreateBondCommandResponse(new ContractId(contractId), res.id!),
-      );
-    } catch (e) {
-      if (res.response == 1)
-        return Promise.resolve(
-          new CreateBondCommandResponse(new ContractId('0.0.0'), res.id!),
-        );
-      else throw e;
+      equity = (await Equity.create(requestST)).security;
+    } catch (error) {
+      console.error('Error in beforeAll setup:', error);
     }
-  }
-}
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._PAUSE_MANAGER_ROLE,
+      }),
+    );
+  }, 900_000);
+
+  it('Update External Pause functionality work successfully', async () => {
+    expect(
+      (
+        await ExternalPausesManagement.updateExternalPauses(
+          new UpdateExternalPausesRequest({
+            securityId: equity.evmDiamondAddress!,
+            externalPausesAddresses: [
+              CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            ],
+            actives: [true],
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+  }, 600_000);
+});

@@ -264,6 +264,7 @@ export class CreateEquityCommandHandler
       dividendRight,
       currency,
       nominalValue,
+      externalPauses,
     } = command;
 
     if (!factory) {
@@ -300,6 +301,22 @@ export class CreateEquityCommandHandler
             .evmAddress
         : resolver.toString(),
     );
+
+    let externalPausesEvmAddresses: EvmAddress[] = [];
+    if (externalPauses) {
+      externalPausesEvmAddresses = await Promise.all(
+        externalPauses.map(
+          async (address) =>
+            new EvmAddress(
+              HEDERA_FORMAT_ID_REGEX.test(address)
+                ? (await this.mirrorNodeAdapter.getContractInfo(address))
+                    .evmAddress
+                : address.toString(),
+            ),
+        ),
+      );
+    }
+
     const handler = this.transactionService.getHandler();
 
     const equityInfo = new EquityDetails(
@@ -322,6 +339,7 @@ export class CreateEquityCommandHandler
       resolverEvmAddress,
       configId,
       configVersion,
+      externalPausesEvmAddresses,
       diamondOwnerAccountEvmAddress,
       factory.toString(),
     );

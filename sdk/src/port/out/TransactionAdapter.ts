@@ -248,6 +248,7 @@ interface ITransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -259,6 +260,7 @@ interface ITransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -805,6 +807,15 @@ interface IClearingAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IExternalPausesAdapter {
+  updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -813,7 +824,8 @@ export default abstract class TransactionAdapter
     IHoldTransactionAdapter,
     ISSIManagementTransactionAdapter,
     IKYCTransactionAdapter,
-    IClearingAdapter
+    IClearingAdapter,
+    IExternalPausesAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -903,6 +915,7 @@ export default abstract class TransactionAdapter
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -916,6 +929,7 @@ export default abstract class TransactionAdapter
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -1536,6 +1550,14 @@ export default abstract class TransactionAdapter
     sourceId: EvmAddress,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
