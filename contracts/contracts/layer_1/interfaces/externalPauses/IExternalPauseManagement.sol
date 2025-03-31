@@ -227,6 +227,7 @@ interface IExternalPauseManagement {
 
     error ExternalPausesNotUpdated(address[] pauses, bool[] actives);
 
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalPauses(address[] calldata _pauses) external;
 
     function updateExternalPauses(

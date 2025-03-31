@@ -221,14 +221,18 @@ contract ExternalPauseManagement is
     IStaticFunctionSelectors,
     Common
 {
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalPauses(
         address[] calldata _pauses
     ) external override onlyUninitialized(_externalPauseStorage().initialized) {
         ExternalPauseDataStorage
             storage externalPauseDataStorage = _externalPauseStorage();
         uint256 length = _pauses.length;
-        for (uint256 index = 0; index < length; ++index) {
+        for (uint256 index = 0; index < length; ) {
             _addExternalPause(_pauses[index]);
+            unchecked {
+                ++index;
+            }
         }
         externalPauseDataStorage.initialized = true;
     }
