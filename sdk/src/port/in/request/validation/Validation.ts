@@ -438,30 +438,27 @@ export default class Validation {
   };
 
   public static checkHederaIdOrEvmAddressArray(
-    vals: string[],
+    values: string[],
     fieldName: string,
     allowEmpty: boolean = false,
   ): InvalidValue[] {
-    if (vals.length === 0 && allowEmpty) {
-      return [];
-    }
-    if (!allowEmpty && vals.length === 0) {
-      return [new InvalidValue(`The list of ${fieldName} cannot be empty.`)];
+    if (values.length === 0) {
+      return allowEmpty
+        ? []
+        : [new InvalidValue(`The list of ${fieldName} cannot be empty`)];
     }
 
     const errors: InvalidValue[] = [];
-    const seen = new Set<string>();
+    const seenValues = new Set<string>();
 
-    vals.forEach((val) => {
-      const validationErrors =
-        Validation.checkHederaIdFormatOrEvmAddress()(val);
-      if (validationErrors.length > 0) {
-        errors.push(...validationErrors);
+    values.forEach((value) => {
+      const formatErrors = Validation.checkHederaIdFormatOrEvmAddress()(value);
+      errors.push(...formatErrors);
+
+      if (seenValues.has(value)) {
+        errors.push(new InvalidValue(`${fieldName} ${value} is duplicated`));
       }
-      if (seen.has(val)) {
-        errors.push(new InvalidValue(`${fieldName} ${val} is duplicated.`));
-      }
-      seen.add(val);
+      seenValues.add(value);
     });
 
     return errors;
