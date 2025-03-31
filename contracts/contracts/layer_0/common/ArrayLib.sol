@@ -221,14 +221,17 @@ library ArrayLib {
         return dynamicArrayBaseSlot + _itemIndex * _itemsSize;
     }
 
-    function checkUniqueValues(address[] memory _addresses,
-        bool[] memory _bools) internal pure {
+    function checkUniqueValues(
+        address[] memory _addresses,
+        bool[] memory _bools
+    ) internal pure {
         uint256 length = _addresses.length;
         for (uint256 index; index < length; ) {
             for (uint256 innerIndex = index + 1; innerIndex < length; ) {
-                if (_addresses[index] == _addresses[innerIndex] &&
-                    _bools[index] != _bools[innerIndex])
-                    revert DuplicatedValuesInArray(index, innerIndex);
+                if (
+                    _addresses[index] == _addresses[innerIndex] &&
+                    _bools[index] != _bools[innerIndex]
+                ) revert DuplicatedValuesInArray(index, innerIndex);
                 unchecked {
                     ++innerIndex;
                 }

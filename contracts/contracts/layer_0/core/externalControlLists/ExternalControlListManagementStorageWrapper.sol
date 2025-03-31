@@ -206,7 +206,6 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-
 import {
     ProtectedPartitionsStorageWrapper
 } from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
