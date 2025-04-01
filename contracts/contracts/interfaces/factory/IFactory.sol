@@ -241,6 +241,7 @@ interface IFactory {
         uint256 maxSupply;
         ERC20.ERC20MetadataInfo erc20MetadataInfo;
         bool clearingActive;
+        address[] externalControlLists;
     }
 
     struct EquityData {

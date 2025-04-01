@@ -494,6 +494,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalControlLists: [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -608,6 +609,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalControlLists: [],
       };
 
       const bondDetails: BondDetailsData = {
