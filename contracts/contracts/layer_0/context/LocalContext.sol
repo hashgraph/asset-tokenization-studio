@@ -212,7 +212,7 @@ import {ArrayLib} from '../common/ArrayLib.sol';
 abstract contract LocalContext is Context {
     error ExpirationNotReached();
 
-    modifier onlyUniqueActivations(
+    modifier onlyConsistentActivations(
         address[] calldata _controlLists,
         bool[] calldata _actives
     ) {

@@ -384,7 +384,7 @@ describe('Access Control Tests', () => {
         )
             .to.be.revertedWithCustomError(
                 accessControlFacet,
-                'DuplicatedValuesInArray'
+                'ContradictoryValuesInArray'
             )
             .withArgs(3, 6)
 
@@ -393,7 +393,7 @@ describe('Access Control Tests', () => {
         )
             .to.be.revertedWithCustomError(
                 accessControlFacet,
-                'DuplicatedValuesInArray'
+                'ContradictoryValuesInArray'
             )
             .withArgs(3, 6)
     })

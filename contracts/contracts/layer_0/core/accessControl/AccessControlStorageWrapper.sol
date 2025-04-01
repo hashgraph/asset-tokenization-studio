@@ -257,7 +257,7 @@ abstract contract AccessControlStorageWrapper is
         _;
     }
 
-    modifier onlyUniqueRoles(
+    modifier onlyConsistentRoles(
         bytes32[] calldata _roles,
         bool[] calldata _actives
     ) {
