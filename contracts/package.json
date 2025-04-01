@@ -41,6 +41,7 @@
     "test:accessControl": "npx hardhat test test/unitTests/layer_1/accessControl/accessControl.test.ts",
     "test:controlList": "npx hardhat test test/unitTests/layer_1/controlList/controlList.test.ts",
     "test:pause": "npx hardhat test test/unitTests/layer_1/pause/pause.test.ts",
+    "test:externalPause": "npx hardhat test test/unitTests/layer_1/externalPauses/externalPause.test.ts",
     "test:corporateActions": "npx hardhat test test/unitTests/layer_1/corporateActions/corporateActions.test.ts",
     "test:erc1643": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC1643/erc1643.test.ts",
     "test:erc1644": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC1644/erc1644.test.ts",
