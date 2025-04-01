@@ -203,25 +203,91 @@
 
 */
 
-import { Command } from '../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
+import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
+import SecurityService from '../../../../../../service/SecurityService.js';
+import {
+  ExecuteHoldByPartitionCommand,
+  ExecuteHoldByPartitionCommandResponse,
+} from './ExecuteHoldByPartitionCommand.js';
+import TransactionService from '../../../../../../service/TransactionService.js';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
+import AccountService from '../../../../../../service/AccountService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
-export class ExecuteHoldByPartitionCommandResponse implements CommandResponse {
+@CommandHandler(ExecuteHoldByPartitionCommand)
+export class ExecuteHoldByPartitionCommandHandler
+  implements ICommandHandler<ExecuteHoldByPartitionCommand>
+{
   constructor(
-    public readonly payload: boolean,
-    public readonly transactionId: string,
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
-}
 
-export class ExecuteHoldByPartitionCommand extends Command<ExecuteHoldByPartitionCommandResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly sourceId: string,
-    public readonly amount: string,
-    public readonly holdId: number,
-    public readonly targetId: string,
-    public readonly partitionId: string,
-  ) {
-    super();
+  async execute(
+    command: ExecuteHoldByPartitionCommand,
+  ): Promise<ExecuteHoldByPartitionCommandResponse> {
+    const { securityId, sourceId, amount, holdId, targetId, partitionId } =
+      command;
+
+    const handler = this.transactionService.getHandler();
+    const security = await this.securityService.get(securityId);
+
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddressOrNull(targetId);
+    const sourceEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(sourceId);
+
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkDecimals(security, amount);
+
+    await this.validationService.checkHoldBalance(
+      securityId,
+      partitionId,
+      sourceId,
+      holdId,
+      amountBd,
+    );
+
+    await this.validationService.checkKycAddresses(securityId, [
+      sourceId,
+      targetId,
+    ]);
+
+    const res = await handler.executeHoldByPartition(
+      securityEvmAddress,
+      sourceEvmAddress,
+      targetEvmAddress,
+      amountBd,
+      partitionId,
+      holdId,
+      securityId,
+    );
+
+    return Promise.resolve(
+      new ExecuteHoldByPartitionCommandResponse(
+        res.error === undefined,
+        res.id!,
+      ),
+    );
   }
 }

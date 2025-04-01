@@ -203,7 +203,49 @@
 
 */
 
-export class DiamondInitialization {
-  public contractAddress: string;
-  public calldataInitialization: string;
+import {
+  GetMaxSupplyByPartitionQuery,
+  GetMaxSupplyByPartitionQueryResponse,
+} from './GetMaxSupplyByPartitionQuery.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../../service/AccountService.js';
+
+@QueryHandler(GetMaxSupplyByPartitionQuery)
+export class GetMaxSupplyByPartitionQueryHandler
+  implements IQueryHandler<GetMaxSupplyByPartitionQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+  ) {}
+
+  async execute(
+    query: GetMaxSupplyByPartitionQuery,
+  ): Promise<GetMaxSupplyByPartitionQueryResponse> {
+    const { securityId, partitionId } = query;
+    const security = await this.securityService.get(securityId);
+
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(securityId);
+
+    const res = await this.queryAdapter.getMaxSupplyByPartition(
+      securityEvmAddress,
+      partitionId,
+    );
+    const amount = BigDecimal.fromStringFixed(
+      res.toString(),
+      security.decimals,
+    );
+    return new GetMaxSupplyByPartitionQueryResponse(amount);
+  }
 }

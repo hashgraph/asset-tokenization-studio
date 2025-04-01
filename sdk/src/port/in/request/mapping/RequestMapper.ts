@@ -217,10 +217,10 @@ import {
   FireblocksConfigRequest,
   HWCRequestSettings,
 } from '../network/ConnectRequest.js';
-import HWCSettings from '../../../../domain/context/walletConnect/HWCSettings';
-import DfnsSettings from '../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
-import FireblocksSettings from '../../../../domain/context/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../../../domain/context/custodialWalletSettings/AWSKMSSettings.js';
+import HWCSettings from '../../../../core/settings/walletConnect/HWCSettings.js';
+import DfnsSettings from '../../../../core/settings/custodialWalletSettings/DfnsSettings.js';
+import FireblocksSettings from '../../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
+import AWSKMSSettings from '../../../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
 
 export default class RequestMapper {
   public static isPublicKey = (val: any): val is RequestPublicKey => {

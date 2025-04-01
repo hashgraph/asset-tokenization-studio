@@ -203,13 +203,44 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
+import {
+  GetMaxSupplyQuery,
+  GetMaxSupplyQueryResponse,
+} from './GetMaxSupplyQuery.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/ContractService.js';
 
-export class UnlistedIssuer extends BaseError {
-  constructor() {
-    super(
-      ErrorCode.UnlistedIssuer,
-      `The issuer is not registered in the system`,
+@QueryHandler(GetMaxSupplyQuery)
+export class GetMaxSupplyQueryHandler
+  implements IQueryHandler<GetMaxSupplyQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+  ) {}
+
+  async execute(query: GetMaxSupplyQuery): Promise<GetMaxSupplyQueryResponse> {
+    const { securityId } = query;
+    const security = await this.securityService.get(securityId);
+
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+
+    const res = await this.queryAdapter.getMaxSupply(securityEvmAddress);
+    const amount = BigDecimal.fromStringFixed(
+      res.toString(),
+      security.decimals,
     );
+    return new GetMaxSupplyQueryResponse(amount);
   }
 }

@@ -259,6 +259,7 @@ import {
   GetClearingRedeemForByPartitionRequest,
   GetClearingCreateHoldForByPartitionRequest,
   GetClearingTransferForByPartitionRequest,
+  SetMaxSupplyRequest,
 } from '../../../src/index.js';
 import TransferRequest from '../../../src/port/in/request/security/operations/transfer/TransferRequest.js';
 import RedeemRequest from '../../../src/port/in/request/security/operations/redeem/RedeemRequest.js';
@@ -524,6 +525,13 @@ describe('🧪 Security tests', () => {
         securityId: equity.evmDiamondAddress!,
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
         vcBase64: await createVcT3(CLIENT_ACCOUNT_ECDSA.evmAddress!.toString()),
+      }),
+    );
+
+    await Security.setMaxSupply(
+      new SetMaxSupplyRequest({
+        securityId: equity.evmDiamondAddress!,
+        maxSupply: '1000000',
       }),
     );
   }, 900_000);
@@ -1575,6 +1583,12 @@ describe('🧪 Security tests', () => {
         ),
       ).toEqual(0);
 
+      await Security.deactivateClearing(
+        new DeactivateClearingRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
+
       await Security.controllerRedeem(
         new ForceRedeemRequest({
           securityId: equity.evmDiamondAddress!,
@@ -1697,6 +1711,12 @@ describe('🧪 Security tests', () => {
           }),
         ),
       ).toEqual(0);
+
+      await Security.deactivateClearing(
+        new DeactivateClearingRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
 
       await Security.controllerRedeem(
         new ForceRedeemRequest({
@@ -1823,6 +1843,12 @@ describe('🧪 Security tests', () => {
         ),
       ).toEqual(0);
 
+      await Security.deactivateClearing(
+        new DeactivateClearingRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
+
       await Security.controllerRedeem(
         new ForceRedeemRequest({
           securityId: equity.evmDiamondAddress!,
@@ -1937,6 +1963,12 @@ describe('🧪 Security tests', () => {
         ),
       ).toEqual(0);
 
+      await Security.deactivateClearing(
+        new DeactivateClearingRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
+
       await Security.controllerRedeem(
         new ForceRedeemRequest({
           securityId: equity.evmDiamondAddress!,
@@ -2041,6 +2073,12 @@ describe('🧪 Security tests', () => {
           }),
         ),
       ).toEqual(0);
+
+      await Security.deactivateClearing(
+        new DeactivateClearingRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
 
       await Security.controllerRedeem(
         new ForceRedeemRequest({
@@ -2157,6 +2195,12 @@ describe('🧪 Security tests', () => {
           }),
         ),
       ).toEqual(0);
+
+      await Security.deactivateClearing(
+        new DeactivateClearingRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
 
       await Security.controllerRedeem(
         new ForceRedeemRequest({
@@ -2287,6 +2331,12 @@ describe('🧪 Security tests', () => {
         }),
       );
 
+      await Security.deactivateClearing(
+        new DeactivateClearingRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
+
       await Security.controllerRedeem(
         new ForceRedeemRequest({
           securityId: equity.evmDiamondAddress!,
@@ -2400,6 +2450,12 @@ describe('🧪 Security tests', () => {
         }),
       );
 
+      await Security.deactivateClearing(
+        new DeactivateClearingRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
+
       await Security.controllerRedeem(
         new ForceRedeemRequest({
           securityId: equity.evmDiamondAddress!,
@@ -2509,6 +2565,12 @@ describe('🧪 Security tests', () => {
 
       await Security.unprotectPartitions(
         new PartitionsProtectedRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
+
+      await Security.deactivateClearing(
+        new DeactivateClearingRequest({
           securityId: equity.evmDiamondAddress!,
         }),
       );

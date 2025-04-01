@@ -203,14 +203,60 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import {
+  CanTransferQuery,
+  CanTransferQueryResponse,
+} from './CanTransferQuery.js';
+import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../service/SecurityService.js';
+import ValidationService from '../../../../service/ValidationService.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../service/AccountService.js';
+import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { EMPTY_BYTES } from '../../../../../core/Constants.js';
+import ContractService from '../../../../service/ContractService.js';
 
-export class PublicKeyNotValid extends BaseError {
-  constructor(val: string, type?: string) {
-    let msg = `Public Key ${val} is not a valid key`;
-    if (type) {
-      msg = `Public Key ${val} of type ${type}, is not a valid key`;
-    }
-    super(ErrorCode.PublicKeyInvalid, msg);
+@QueryHandler(CanTransferQuery)
+export class CanTransferQueryHandler
+  implements IQueryHandler<CanTransferQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+  ) {}
+
+  async execute(query: CanTransferQuery): Promise<CanTransferQueryResponse> {
+    const { securityId, targetId, amount } = query;
+
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
+
+    const security = await this.securityService.get(securityId);
+
+    await this.validationService.checkDecimals(security, amount);
+
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    const [, res] = await this.queryAdapter.canTransfer(
+      securityEvmAddress,
+      targetEvmAddress,
+      amountBd,
+      EMPTY_BYTES,
+    );
+
+    return new CanTransferQueryResponse(res);
   }
 }

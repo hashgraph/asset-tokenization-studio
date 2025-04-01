@@ -203,13 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class AccountNotAssociatedToSecurity extends BaseError {
-  constructor(accountId: string, securityId: string) {
+export class InsufficientAllowance extends BaseError {
+  constructor(fromId: string, spenderId: string) {
     super(
-      ErrorCode.AccountNotAssociatedToSecurity,
-      `Account ${accountId} is not associated to token ${securityId}`,
+      ErrorCode.InsufficientAllowance,
+      `Insufficient allowance from ${fromId} to ${spenderId}`,
     );
   }
 }
