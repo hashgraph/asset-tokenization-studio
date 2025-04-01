@@ -247,13 +247,13 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
           JSON.stringify(transactionResponse),
         ).response.transactionId.toString();
       }
-      console.log('Manage Response AFTER : ' + responseType.toString());
+      LogService.logTrace('Manage Response AFTER : ' + responseType.toString());
 
       return this.createTransactionResponse(transId, responseType, results);
     }
 
     if (responseType === TransactionType.RECORD) {
-      console.log('RECORD');
+      LogService.logTrace('RECORD');
 
       const transactionRecord:
         | TransactionRecord
@@ -287,7 +287,7 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
         ' with decoded result:',
         results,
       );
-      console.log('Manage Response AFTER : ' + responseType.toString());
+      LogService.logTrace('Manage Response AFTER : ' + responseType.toString());
 
       return this.createTransactionResponse(
         transactionId,
@@ -331,14 +331,14 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
     signer: Signer,
     transactionResponse: HTransactionResponse,
   ): Promise<Uint32Array | undefined | Uint8Array> {
-    console.log('getRecordWithSigner');
+    LogService.logInfo('getRecordWithSigner');
 
     // const txId = transactionResponse.transactionId.toString();
     // const query = new TransactionRecordQuery().setTransactionId(txId);
     // const record = await query.executeWithSigner(signer);
 
     const record = await transactionResponse.getRecordWithSigner(signer);
-    console.log('getRecordWithSigner : ' + JSON.stringify(record));
+    LogService.logTrace('getRecordWithSigner : ' + JSON.stringify(record));
 
     if (!record) {
       const transactionError = {

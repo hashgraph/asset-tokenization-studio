@@ -238,6 +238,7 @@ import DfnsSettings from '../../core/settings/custodialWalletSettings/DfnsSettin
 import { FireblocksTransactionAdapter } from '../out/hs/hts/custodial/FireblocksTransactionAdapter.js';
 import FireblocksSettings from '../../core/settings/custodialWalletSettings/FireblocksSettings.js';
 import { AWSKMSTransactionAdapter } from '../out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
+import LogService from '../../app/service/LogService.js';
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -374,7 +375,7 @@ class NetworkInPort implements INetworkInPort {
 
   @LogError
   async connect(req: ConnectRequest): Promise<InitializationData> {
-    console.log('ConnectRequest from network', req);
+    LogService.logInfo('ConnectRequest from network', req);
     handleValidation('ConnectRequest', req);
 
     const account = req.account
@@ -385,12 +386,17 @@ class NetworkInPort implements INetworkInPort {
       ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings)
       : undefined;
     const custodialSettings = this.getCustodialSettings(req);
-    console.log('SetNetworkCommand', req.network, req.mirrorNode, req.rpcNode);
+    LogService.logTrace(
+      'SetNetworkCommand',
+      req.network,
+      req.mirrorNode,
+      req.rpcNode,
+    );
     await this.commandBus.execute(
       new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode),
     );
 
-    console.log(
+    LogService.logTrace(
       'ConnectRequest',
       req.wallet,
       account,
