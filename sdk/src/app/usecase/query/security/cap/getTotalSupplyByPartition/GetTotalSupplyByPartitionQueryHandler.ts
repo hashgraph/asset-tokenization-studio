@@ -203,16 +203,49 @@
 
 */
 
-import { Query } from '../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../core/query/QueryResponse.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import {
+  GetTotalSupplyByPartitionQuery,
+  GetTotalSupplyByPartitionQueryResponse,
+} from './GetTotalSupplyByPartitionQuery.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../../service/AccountService.js';
 
-export class GetMaxSupplyQueryResponse implements QueryResponse {
-  constructor(public readonly payload: BigDecimal) {}
-}
+@QueryHandler(GetTotalSupplyByPartitionQuery)
+export class GetMaxSupplyByPartitionQueryHandler
+  implements IQueryHandler<GetTotalSupplyByPartitionQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+  ) {}
 
-export class GetMaxSupplyQuery extends Query<GetMaxSupplyQueryResponse> {
-  constructor(public readonly securityId: string) {
-    super();
+  async execute(
+    query: GetTotalSupplyByPartitionQuery,
+  ): Promise<GetTotalSupplyByPartitionQueryResponse> {
+    const { securityId, partitionId } = query;
+    const security = await this.securityService.get(securityId);
+
+    const securityEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(securityId);
+
+    const res = await this.queryAdapter.getTotalSupplyByPartition(
+      securityEvmAddress,
+      partitionId,
+    );
+    const amount = BigDecimal.fromStringFixed(
+      res.toString(),
+      security.decimals,
+    );
+    return new GetTotalSupplyByPartitionQueryResponse(amount);
   }
 }

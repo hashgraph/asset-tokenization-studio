@@ -203,49 +203,54 @@
 
 */
 
-import {
-  GetMaxSupplyQuery,
-  GetMaxSupplyQueryResponse,
-} from './GetMaxSupplyQuery.js';
-import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../service/SecurityService.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import BaseError, {
+  ErrorCode,
+} from '../../../../../../core/error/BaseError.js';
+import { AccountNotKycd } from '../AccountNotKycd.js';
+import { ClearingActivated } from '../ClearingActivated.js';
+import { InsufficientAllowance } from '../InsufficientAllowance.js';
+import { InvalidPartition } from '../InvalidPartition.js';
+import { AccountIsNotOperator } from '../AccountIsNotOperator.js';
+import { InsufficientBalance } from '../InsufficientBalance.js';
+import { InvalidFromAccount } from '../InvalidFromAccount.js';
+import { InvalidDestinationAccount } from '../InvalidDestinationAccount.js';
+import { AccountNotInControlList } from '../AccountNotInControlList.js';
+import { SecurityPaused } from '../SecurityPaused.js';
 
-@QueryHandler(GetMaxSupplyQuery)
-export class GetMaxSupplyQueryHandler
-  implements IQueryHandler<GetMaxSupplyQuery>
-{
-  constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-  ) {}
+export class ContractsErrorMapper {
+  static mapError(
+    errorCode: string,
+    sourceId?: string,
+    targetId?: string,
+    operatorId?: string,
+  ): BaseError {
+    const errorMappings: {
+      [key: string]: (
+        sourceId?: string,
+        targetId?: string,
+        operatorId?: string,
+      ) => BaseError;
+    } = {
+      '0x40': () => new SecurityPaused(),
+      '0x41': (_1, _2, operatorId) => new AccountNotInControlList(operatorId!),
+      '0x42': (sourceId, _2, _3) => new AccountNotInControlList(sourceId!),
+      '0x43': (_1, targetId, _3) => new AccountNotInControlList(targetId!),
+      '0x44': () => new InvalidFromAccount(),
+      '0x45': () => new InvalidDestinationAccount(),
+      '0x46': () => new InsufficientBalance(),
+      '0x47': (sourceId, _2, operatorId) =>
+        new AccountIsNotOperator(sourceId!, operatorId!),
+      '0x48': () => new InvalidPartition(),
+      '0x49': (sourceId, _2, operatorId) =>
+        new InsufficientAllowance(sourceId!, operatorId!),
+      '0x50': (sourceId) => new AccountNotKycd(sourceId!),
+      '0x51': (_1, targetId) => new AccountNotKycd(targetId!),
+      '0x52': () => new ClearingActivated(),
+    };
 
-  async execute(query: GetMaxSupplyQuery): Promise<GetMaxSupplyQueryResponse> {
-    const { securityId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
-
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
+    return (
+      errorMappings[errorCode]?.(sourceId, targetId, operatorId) ||
+      new BaseError(ErrorCode.Unexpected, 'An unexpected error occurred.')
     );
-
-    const res = await this.queryAdapter.getMaxSupply(securityEvmAddress);
-    const amount = BigDecimal.fromStringFixed(
-      res.toString(),
-      security.decimals,
-    );
-    return new GetMaxSupplyQueryResponse(amount);
   }
 }

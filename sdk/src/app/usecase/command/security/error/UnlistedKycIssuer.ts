@@ -203,10 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class ContractNotFound extends BaseError {
-  constructor(contractId: string) {
-    super(ErrorCode.ContractNotFound, `Contract ${contractId} not found`);
+export class UnlistedKycIssuer extends BaseError {
+  constructor(issuerId: string) {
+    super(
+      ErrorCode.UnlistedKycIssuer,
+      `The issuer ${issuerId} is not registered in the system`,
+    );
   }
 }

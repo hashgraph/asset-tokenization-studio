@@ -210,20 +210,14 @@ import SecurityService from '../../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../../error/SecurityPaused.js';
 import {
   ClearingCreateHoldFromByPartitionCommand,
   ClearingCreateHoldFromByPartitionCommandResponse,
 } from './ClearingCreateHoldFromByPartitionCommand.js';
-import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
-import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
-import ValidationService from '../../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(ClearingCreateHoldFromByPartitionCommand)
 export class ClearingCreateHoldFromByPartitionCommandHandler
@@ -236,12 +230,12 @@ export class ClearingCreateHoldFromByPartitionCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -258,50 +252,27 @@ export class ClearingCreateHoldFromByPartitionCommandHandler
       holdExpirationDate,
     } = command;
     const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const escrowEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(escrow);
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    await this.validationService.validateClearingActivated(securityId);
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const escrowEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(escrow)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
-      : new EvmAddress(escrow);
-
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
+    const sourceEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(sourceId);
 
     const targetEvmAddress: EvmAddress =
-      targetId === '0.0.0'
-        ? new EvmAddress(EVM_ZERO_ADDRESS)
-        : HEDERA_FORMAT_ID_REGEX.exec(targetId)
-          ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-          : new EvmAddress(targetId);
-
+      await this.accountService.getAccountEvmAddressOrNull(targetId);
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    if (
-      account.evmAddress &&
-      (
-        await this.queryAdapter.balanceOf(securityEvmAddress, sourceEvmAddress)
-      ).lt(amountBd.toBigNumber())
-    ) {
-      throw new InsufficientBalance();
-    }
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkClearingActivated(securityId);
+
+    await this.validationService.checkDecimals(security, amount);
+
+    await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
     const res = await handler.clearingCreateHoldFromByPartition(
       securityEvmAddress,

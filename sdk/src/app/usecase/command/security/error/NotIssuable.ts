@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class AccountNotValid extends BaseError {
-  constructor(cause: string) {
-    super(ErrorCode.InvalidAmount, `Account is not valid: ${cause}`);
+export class NotIssuable extends BaseError {
+  constructor() {
+    super(ErrorCode.NotIssuable, `Security not issuable`);
   }
 }

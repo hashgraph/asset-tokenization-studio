@@ -460,6 +460,7 @@ describe('🧪 Bond test', () => {
       securityId: bond.evmDiamondAddress!.toString(),
       maturityDate: newMaturityDate.toString(),
     });
+
     const res = await Bond.updateMaturityDate(request);
 
     const bondDetails = await Bond.getBondDetails(

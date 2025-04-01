@@ -203,31 +203,24 @@
 
 */
 
-import BigDecimal from '../shared/BigDecimal';
+export class Kyc {
+  validFrom: string;
+  validTo: string;
+  VCid: string;
+  issuer: string;
+  status: number;
 
-export class HoldDetails {
-  expirationTimeStamp: number;
-  amount: BigDecimal;
-  escrowAddress: string;
-  tokenHolderAddress: string;
-  destinationAddress: string;
-  data: string;
-  operatorData: string;
   constructor(
-    executionTimeStamp: number,
-    amount: BigDecimal,
-    escrowAddress: string,
-    tokenHolderAddress: string,
-    destinationAddress: string,
-    data: string,
-    operatorData: string,
+    validFrom: string,
+    validTo: string,
+    VCid: string,
+    issuer: string,
+    status: number,
   ) {
-    this.expirationTimeStamp = executionTimeStamp;
-    this.amount = amount;
-    this.escrowAddress = escrowAddress;
-    this.tokenHolderAddress = tokenHolderAddress;
-    this.destinationAddress = destinationAddress;
-    this.data = data;
-    this.operatorData = operatorData;
+    this.validFrom = validFrom;
+    this.validTo = validTo;
+    this.VCid = VCid;
+    this.issuer = issuer;
+    this.status = status;
   }
 }

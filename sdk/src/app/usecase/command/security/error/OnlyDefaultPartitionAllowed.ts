@@ -203,15 +203,13 @@
 
 */
 
-import { QueryResponse } from '../../../core/query/QueryResponse.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export enum ControlListStatus {
-  'MEMBER' = 'MEMBER',
-  'NOT_MEMBER' = 'NOT_MEMBER',
-}
-
-export interface AccountSecurityRelation extends QueryResponse {
-  balance: string;
-  controlListStatus: ControlListStatus;
-  securityId: string;
+export class OnlyDefaultPartitionAllowed extends BaseError {
+  constructor() {
+    super(
+      ErrorCode.OnlyDefaultPartitionAllowed,
+      `Only default partition allowed in single mode`,
+    );
+  }
 }

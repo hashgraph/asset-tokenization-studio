@@ -210,22 +210,15 @@ import SecurityService from '../../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../../error/SecurityPaused.js';
 import {
   OperatorClearingTransferByPartitionCommand,
   OperatorClearingTransferByPartitionCommandResponse,
 } from './OperatorClearingTransferByPartitionCommand.js';
-import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
-import { SecurityControlListType } from '../../../../../../../domain/context/security/SecurityControlListType.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
-import { AccountInBlackList } from '../../../error/AccountInBlackList.js';
-import { AccountNotInWhiteList } from '../../../error/AccountNotInWhiteList.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(OperatorClearingTransferByPartitionCommand)
 export class OperatorClearingTransferByPartitionCommandHandler
@@ -244,6 +237,8 @@ export class OperatorClearingTransferByPartitionCommandHandler
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -261,95 +256,40 @@ export class OperatorClearingTransferByPartitionCommandHandler
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
+    const sourceEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(sourceId);
 
-    await this.validationService.validateOperator(
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
+
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkOperator(
       securityId,
       partitionId,
       account.id.toString(),
       sourceId,
     );
-    await this.validationService.validateClearingActivated(securityId);
-    await this.validationService.validateKycAddresses(securityId, [
+    await this.validationService.checkClearingActivated(securityId);
+
+    await this.validationService.checkKycAddresses(securityId, [
       sourceId,
       targetId,
     ]);
 
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
+    await this.validationService.checkControlList(
+      securityId,
+      sourceEvmAddress.toString(),
+      targetEvmAddress.toString(),
+    );
 
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
+    await this.validationService.checkDecimals(security, amount);
 
-    const controListType = (await this.queryAdapter.getControlListType(
-      securityEvmAddress,
-    ))
-      ? SecurityControlListType.WHITELIST
-      : SecurityControlListType.BLACKLIST;
-    const controlListCount =
-      await this.queryAdapter.getControlListCount(securityEvmAddress);
-    const controlListMembers = (
-      await this.queryAdapter.getControlListMembers(
-        securityEvmAddress,
-        0,
-        controlListCount,
-      )
-    ).map(function (x) {
-      return x.toUpperCase();
-    });
-
-    if (
-      controListType === SecurityControlListType.BLACKLIST &&
-      controlListMembers.includes(sourceEvmAddress.toString().toUpperCase())
-    ) {
-      throw new AccountInBlackList(sourceEvmAddress.toString());
-    }
-
-    if (
-      controListType === SecurityControlListType.BLACKLIST &&
-      controlListMembers.includes(targetEvmAddress.toString().toUpperCase())
-    ) {
-      throw new AccountInBlackList(targetEvmAddress.toString());
-    }
-
-    if (
-      controListType === SecurityControlListType.WHITELIST &&
-      !controlListMembers.includes(sourceEvmAddress.toString().toUpperCase())
-    ) {
-      throw new AccountNotInWhiteList(sourceEvmAddress.toString());
-    }
-
-    if (
-      controListType === SecurityControlListType.WHITELIST &&
-      !controlListMembers.includes(targetEvmAddress.toString().toUpperCase())
-    ) {
-      throw new AccountNotInWhiteList(targetEvmAddress.toString());
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
-
-    if (
-      account.evmAddress &&
-      (
-        await this.queryAdapter.balanceOf(securityEvmAddress, sourceEvmAddress)
-      ).lt(amountBd.toBigNumber())
-    ) {
-      throw new InsufficientBalance();
-    }
+    await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
     const res = await handler.operatorClearingTransferByPartition(
       securityEvmAddress,

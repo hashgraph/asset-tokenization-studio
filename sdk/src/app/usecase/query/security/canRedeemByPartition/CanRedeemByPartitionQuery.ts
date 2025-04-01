@@ -203,24 +203,20 @@
 
 */
 
-export class KYC {
-  validFrom: string;
-  validTo: string;
-  VCid: string;
-  issuer: string;
-  status: number;
+import { Query } from '../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../core/query/QueryResponse.js';
 
+export class CanRedeemByPartitionQueryResponse implements QueryResponse {
+  constructor(public readonly payload: string) {}
+}
+
+export class CanRedeemByPartitionQuery extends Query<CanRedeemByPartitionQueryResponse> {
   constructor(
-    validFrom: string,
-    validTo: string,
-    VCid: string,
-    issuer: string,
-    status: number,
+    public readonly securityId: string,
+    public readonly sourceId: string,
+    public readonly partitionId: string,
+    public readonly amount: string,
   ) {
-    this.validFrom = validFrom;
-    this.validTo = validTo;
-    this.VCid = VCid;
-    this.issuer = issuer;
-    this.status = status;
+    super();
   }
 }

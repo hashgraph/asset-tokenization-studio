@@ -203,21 +203,63 @@
 
 */
 
-import { Query } from '../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../core/query/QueryResponse.js';
-import { AccountSecurityRelation } from '../../../../../domain/context/account/AccountSecurityRelation.js';
+import {
+  CanTransferByPartitionQuery,
+  CanTransferByPartitionQueryResponse,
+} from './CanTransferByPartitionQuery.js';
+import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../service/SecurityService.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../service/AccountService.js';
+import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { EMPTY_BYTES } from '../../../../../core/Constants.js';
+import ContractService from '../../../../service/ContractService.js';
 
-export class GetAccountSecurityRelationshipQueryResponse
-  implements QueryResponse
+@QueryHandler(CanTransferByPartitionQuery)
+export class CanTransferByPartitionQueryHandler
+  implements IQueryHandler<CanTransferByPartitionQuery>
 {
-  constructor(public readonly payload?: AccountSecurityRelation) {}
-}
-
-export class GetAccountSecurityRelationshipQuery extends Query<GetAccountSecurityRelationshipQueryResponse> {
   constructor(
-    public readonly targetId: string,
-    public readonly securityId: string,
-  ) {
-    super();
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+  ) {}
+
+  async execute(
+    query: CanTransferByPartitionQuery,
+  ): Promise<CanTransferByPartitionQueryResponse> {
+    const { securityId, sourceId, targetId, partitionId, amount } = query;
+
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const sourceEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(sourceId);
+
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
+
+    const security = await this.securityService.get(securityId);
+
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    const [, res] = await this.queryAdapter.canTransferByPartition(
+      securityEvmAddress,
+      sourceEvmAddress,
+      targetEvmAddress,
+      amountBd,
+      partitionId,
+      EMPTY_BYTES,
+      EMPTY_BYTES,
+    );
+
+    return new CanTransferByPartitionQueryResponse(res);
   }
 }

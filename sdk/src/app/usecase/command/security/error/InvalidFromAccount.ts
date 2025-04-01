@@ -203,10 +203,10 @@
 
 */
 
-import { Rbac } from './Rbac';
-import { DiamondInitialization } from './DiamondInitialization';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class DiamondArgs {
-  public rbacs: Rbac[];
-  public initialization: DiamondInitialization;
+export class InvalidFromAccount extends BaseError {
+  constructor() {
+    super(ErrorCode.InvalidFromAccount, `Invalid null from account`);
+  }
 }

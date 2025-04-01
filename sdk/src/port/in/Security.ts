@@ -219,7 +219,7 @@ import { AddToControlListCommand } from '../../app/usecase/command/security/oper
 import { UnpauseCommand } from '../../app/usecase/command/security/operations/unpause/UnpauseCommand.js';
 import { PauseCommand } from '../../app/usecase/command/security/operations/pause/PauseCommand.js';
 import { SetMaxSupplyCommand } from '../../app/usecase/command/security/operations/cap/SetMaxSupplyCommand.js';
-import { GetMaxSupplyQuery } from '../../app/usecase/query/security/cap/GetMaxSupplyQuery.js';
+import { GetMaxSupplyQuery } from '../../app/usecase/query/security/cap/getMaxSupply/GetMaxSupplyQuery.js';
 import { RemoveFromControlListCommand } from '../../app/usecase/command/security/operations/removeFromControlList/RemoveFromControlListCommand.js';
 import GetControlListCountRequest from './request/GetControlListCountRequest.js';
 import GetControlListMembersRequest from './request/GetControlListMembersRequest.js';
@@ -296,7 +296,7 @@ import ReleaseHoldByPartitionRequest from './request/ReleaseHoldByPartitionReque
 import { ReleaseHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommand.js';
 import ReclaimHoldByPartitionRequest from './request/ReclaimHoldByPartitionRequest.js';
 import { ReclaimHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommand.js';
-import { ExecuteHoldByPartitionCommand } from '../../app/usecase/command/security/operations/executeHoldByPartition/ExecuteHoldByPartitionCommand.js';
+import { ExecuteHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommand.js';
 import ExecuteHoldByPartitionRequest from './request/ExecuteHoldByPartitionRequest.js';
 import ActivateClearingRequest from './request/ActivateClearingRequest.js';
 import DeactivateClearingRequest from './request/DeactivateClearingRequest.js';

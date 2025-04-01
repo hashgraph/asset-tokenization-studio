@@ -203,15 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export default class InvalidAutoRenewPeriod extends BaseError {
-  constructor(val: number | string, min: number, max?: number) {
+export class NotAllowedInMultiPartition extends BaseError {
+  constructor() {
     super(
-      ErrorCode.InvalidRange,
-      `Invalid Auto Renew Period ${val}, outside range ${
-        max !== undefined ? `[${min}, ${max}]` : min
-      }`,
+      ErrorCode.NotAllowedInMultiPartition,
+      `Operation not allowed in multi partition mode`,
     );
   }
 }
