@@ -251,6 +251,7 @@ contract ExternalControlListManagement is
         override
         onlyRole(_CONTROL_LIST_MANAGER_ROLE)
         onlyUnpaused
+        onlyConsistentActivations(_controlLists, _actives)
         returns (bool success_)
     {
         success_ = _updateExternalControlLists(_controlLists, _actives);

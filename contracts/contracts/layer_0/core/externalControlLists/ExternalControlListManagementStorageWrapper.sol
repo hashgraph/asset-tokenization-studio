@@ -217,9 +217,6 @@ import {
     _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {
-    IExternalControlListManagement
-} from '../../../layer_1/interfaces/externalControlLists/IExternalControlListManagement.sol';
-import {
     IExternalControlList
 } from '../../../layer_1/interfaces/externalControlLists/IExternalControlList.sol';
 
@@ -239,37 +236,21 @@ abstract contract ExternalControlListManagementStorageWrapper is
         bool[] calldata _actives
     ) internal returns (bool success_) {
         uint256 length = _controlLists.length;
-        unchecked {
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalControlList(_controlLists[index]))
-                        _addExternalControlList(_controlLists[index]);
-                    continue;
+        for (uint256 index; index < length; ) {
+            if (_actives[index]) {
+                if (!_isExternalControlList(_controlLists[index]))
+                    _addExternalControlList(_controlLists[index]);
+                unchecked {
+                    ++index;
                 }
-                if (_isExternalControlList(_controlLists[index]))
-                    _removeExternalControlList(_controlLists[index]);
+                continue;
             }
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalControlList(_controlLists[index]))
-                        revert IExternalControlListManagement
-                            .UpdateExternalControlListsContradiction(
-                                _controlLists,
-                                _actives,
-                                _controlLists[index]
-                            );
-                    continue;
-                }
-                if (_isExternalControlList(_controlLists[index]))
-                    revert IExternalControlListManagement
-                        .UpdateExternalControlListsContradiction(
-                            _controlLists,
-                            _actives,
-                            _controlLists[index]
-                        );
+            if (_isExternalControlList(_controlLists[index]))
+                _removeExternalControlList(_controlLists[index]);
+            unchecked {
+                ++index;
             }
         }
-
         success_ = true;
     }
 
