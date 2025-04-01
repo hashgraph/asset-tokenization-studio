@@ -255,7 +255,7 @@ import { NotAllowedInMultiPartition } from '../usecase/command/security/error/No
 import { OnlyDefaultPartitionAllowed } from '../usecase/command/security/error/OnlyDefaultPartitionAllowed.js';
 import { NotIssuable } from '../usecase/command/security/error/NotIssuable.js';
 import { _PARTITION_ID_1 } from '../../core/Constants.js';
-import { Terminal3VC } from '../../domain/context/kyc/terminal3.js';
+import { Terminal3VC } from '../../domain/context/kyc/Terminal3.js';
 import { SignedCredential } from '@terminal3/vc_core';
 import { InvalidVCHolder } from '../usecase/command/security/error/InvalidVCHolder.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress';

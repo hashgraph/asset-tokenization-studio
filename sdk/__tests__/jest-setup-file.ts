@@ -237,9 +237,8 @@ import {
 import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../src/domain/context/equity/DividendFor';
 import { VotingFor } from '../src/domain/context/equity/VotingFor';
-import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSettings.js';
-import { HoldDetails } from '../src/domain/context/security/HoldDetails.js';
-import { KYC } from '../src/domain/context/kyc/KYC.js';
+import DfnsSettings from '../src/core/settings/custodialWalletSettings/DfnsSettings.js';
+import { Kyc } from '../src/domain/context/kyc/Kyc.js';
 import { KycAccountData } from '../src/domain/context/kyc/KycAccountData.js';
 import {
   ClearingHoldCreation,
@@ -247,6 +246,7 @@ import {
   ClearingRedeem,
   ClearingTransfer,
 } from '../src/domain/context/security/Clearing.js';
+import { HoldDetails } from '../src/domain/context/security/Hold.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -309,7 +309,7 @@ const lastHoldIds = new Map<string, number>();
 const lastClearingIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 const nonces = new Map<string, BigNumber>();
-const kycAccountsData = new Map<string, KYC>();
+const kycAccountsData = new Map<string, Kyc>();
 const kycAccountsByStatus = new Map<number, string[]>();
 
 let controlList: string[] = [];
@@ -2347,7 +2347,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
         kycAccountsByStatus.set(kycStatus, kycAccounts);
         kycAccountsData.set(
           account,
-          new KYC(
+          new Kyc(
             validFrom.toString(),
             validTo.toString(),
             VCId,
