@@ -204,7 +204,7 @@
 */
 
 /* eslint-disable jest/no-mocks-import */
-import { QueryBus } from '../../src/core/query/QueryBus';
+import { QueryBus } from '../../src/core/query/QueryBus.js';
 import {
   ConcreteQuery,
   ConcreteQueryResponse,

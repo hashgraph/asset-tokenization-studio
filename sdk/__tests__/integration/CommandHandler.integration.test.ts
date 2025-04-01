@@ -204,7 +204,7 @@
 */
 
 /* eslint-disable jest/no-mocks-import */
-import { CommandBus } from '../../src/core/command/CommandBus';
+import { CommandBus } from '../../src/core/command/CommandBus.js';
 import {
   ConcreteCommand,
   ConcreteCommandResponse,
