@@ -203,37 +203,69 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Query } from '../../../src/core/query/Query.js';
-import { IQueryHandler } from '../../../src/core/query/QueryHandler.js';
-import { QueryResponse } from '../../../src/core/query/QueryResponse.js';
-import { QueryHandler } from '../../../src/core/decorator/QueryHandlerDecorator.js';
+import { createFixture } from '../config';
+import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
+import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
 
-export class ConcreteQueryResponse implements QueryResponse {
-  constructor(public readonly payload: number) {}
-}
+export const EvmAddressPropsFixture = createFixture<{ value: string }>(
+  (props) => {
+    props.value.faker((faker) =>
+      faker.string.hexadecimal({ length: 40, casing: 'lower' }),
+    );
+  },
+);
 
-export class ConcreteQuery extends Query<ConcreteQueryResponse> {
-  constructor(
-    public readonly itemId: string,
-    public readonly payload: number,
-  ) {
-    super();
-  }
-}
+export const HederaIdPropsFixture = createFixture<{ value: string }>(
+  (props) => {
+    props.value.faker(
+      (faker) => `0.0.${faker.number.int({ min: 100, max: 999 })}`,
+    );
+  },
+);
 
-export class ConcreteQueryRepository {
-  public map = new Map<ConcreteQuery, any>();
-}
+export const HederaIdZeroAddressFixture = createFixture<{ address: string }>(
+  (props) => {
+    props.address.faker(() => '0.0.0');
+  },
+);
 
-@QueryHandler(ConcreteQuery)
-export class ConcreteQueryHandler implements IQueryHandler<ConcreteQuery> {
-  constructor(
-    public readonly repo: ConcreteQueryRepository = new ConcreteQueryRepository(),
-  ) {}
+export const ContractIdPropFixture = createFixture<{ value: string }>(
+  (props) => {
+    props.value.as(() => HederaIdPropsFixture.create().value);
+  },
+);
 
-  execute(query: ConcreteQuery): Promise<ConcreteQueryResponse> {
-    this.repo.map.set(query, 'Hello world');
-    return Promise.resolve(new ConcreteQueryResponse(query.payload));
-  }
-}
+export const TransactionIdFixture = createFixture<{ id: string }>((props) => {
+  props.id.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const CouponIdFixture = createFixture<{ id: string }>((props) => {
+  props.id.faker((faker) => faker.number.hex({ min: 1, max: 1000 }));
+});
+
+export const GetContractInvalidStringFixture = createFixture<{ value: string }>(
+  (props) => {
+    props.value.faker((faker) => faker.string.alpha(5));
+  },
+);
+
+export const PartitionIdFixture = createFixture<{ value: string }>((props) => {
+  props.value.faker(
+    (faker) =>
+      `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 1, max: 9 })}`,
+  );
+});
+
+export const RoleFixture = createFixture<{ value: string }>((props) => {
+  props.value.faker((faker) =>
+    faker.helpers.arrayElement(Object.values(SecurityRole)),
+  );
+});
+
+export const AmountFixture = createFixture<{ value: BigDecimal }>((props) => {
+  props.value.faker((faker) =>
+    BigDecimal.fromString(
+      faker.finance.amount({ min: 1000000, max: 10000000, dec: 0 }),
+    ),
+  );
+});

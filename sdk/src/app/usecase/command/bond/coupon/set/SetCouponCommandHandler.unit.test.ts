@@ -203,18 +203,139 @@
 
 */
 
-import { createFixture } from '../config.js';
-import { Regulation } from '../../../src/domain/context/factory/Regulation.js';
+import {
+  SetCouponCommand,
+  SetCouponCommandResponse,
+} from './SetCouponCommand.js';
+import { SetCouponCommandHandler } from './SetCouponCommandHandler.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { SetCouponCommandFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
+import { createMock } from '@golevelup/ts-jest';
+import TransactionService from '../../../../../service/TransactionService.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import {
+  CouponIdFixture,
+  EvmAddressPropsFixture,
+  GetContractInvalidStringFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 
-export const RegulationFixture = createFixture<Regulation>((props) => {
-  props.type.faker((faker) => faker.lorem.sentence());
-  props.subType.faker((faker) => faker.lorem.sentence());
-  props.dealSize.faker((faker) => faker.lorem.sentence());
-  props.accreditedInvestors.faker((faker) => faker.lorem.sentence());
-  props.maxNonAccreditedInvestors.faker((faker) =>
-    faker.number.int({ min: 0, max: 10 }),
-  );
-  props.manualInvestorVerification.faker((faker) => faker.lorem.sentence());
-  props.internationalInvestors.faker((faker) => faker.lorem.sentence());
-  props.resaleHoldPeriod.faker((faker) => faker.lorem.sentence());
+describe('SetCouponCommandHandler', () => {
+  let handler: SetCouponCommandHandler;
+  let command: SetCouponCommand;
+  const transactionServiceMock = createMock<TransactionService>();
+  const contractServiceMock = createMock<ContractService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const couponId = CouponIdFixture.create().id;
+  const getResultInvalid = GetContractInvalidStringFixture.create().value;
+
+  beforeEach(() => {
+    handler = new SetCouponCommandHandler(
+      transactionServiceMock,
+      mirrorNodeAdapterMock,
+      contractServiceMock,
+    );
+    command = SetCouponCommandFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws error when transaction response id is missing', async () => {
+        setupContractEvmAddressMock();
+        transactionServiceMock
+          .getHandler()
+          .setCoupon.mockResolvedValue({ id: undefined });
+
+        await expect(handler.execute(command)).rejects.toThrow(
+          'Set coupon Command Handler response id empty',
+        );
+      });
+
+      it('throws error when mirror node returns invalid results', async () => {
+        setupContractEvmAddressMock();
+        transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
+          id: transactionId,
+          response: null,
+        });
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
+          getResultInvalid,
+        ]);
+
+        await expect(handler.execute(command)).rejects.toThrow(
+          'Invalid data structure',
+        );
+      });
+    });
+
+    describe('success cases', () => {
+      it('successfully sets coupon with couponID in response', async () => {
+        setupContractEvmAddressMock();
+        setupSuccessfulTransactionMock();
+
+        const result = await handler.execute(command);
+
+        expectSuccessfulResponse(result);
+        expectTransactionServiceCall(command, evmAddress);
+      });
+
+      it('recovers coupon ID from mirror node when not in response', async () => {
+        setupContractEvmAddressMock();
+        transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
+          id: transactionId,
+          response: null,
+        });
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
+          getResultInvalid,
+          couponId,
+        ]);
+
+        const result = await handler.execute(command);
+
+        expectSuccessfulResponse(result);
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
+          transactionId,
+          2,
+        );
+      });
+    });
+  });
+
+  function setupContractEvmAddressMock(): void {
+    contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+  }
+
+  function setupSuccessfulTransactionMock(): void {
+    transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
+      id: transactionId,
+      response: { couponID: couponId },
+    });
+  }
+
+  function expectSuccessfulResponse(result: SetCouponCommandResponse): void {
+    expect(result).toBeInstanceOf(SetCouponCommandResponse);
+    expect(result.payload).toBe(parseInt(couponId, 16));
+    expect(result.transactionId).toBe(transactionId);
+  }
+
+  function expectTransactionServiceCall(
+    command: ReturnType<typeof SetCouponCommandFixture.create>,
+    expectedAddress: { value: string },
+  ): void {
+    expect(transactionServiceMock.getHandler().setCoupon).toHaveBeenCalledWith(
+      expectedAddress,
+      BigDecimal.fromString(command.recordDate),
+      BigDecimal.fromString(command.executionDate),
+      BigDecimal.fromString(command.rate),
+      command.address,
+    );
+  }
 });

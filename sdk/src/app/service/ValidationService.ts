@@ -273,18 +273,18 @@ export default class ValidationService extends Service {
     super();
   }
 
-  async checkIssuer(securityId: string, issuer: string): Promise<boolean> {
+  async checkIssuer(securityId: string, issuer: string): Promise<void> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
       new IsIssuerQuery(securityId, issuer),
     );
     if (!res.payload) throw new UnlistedKycIssuer(issuer);
-    return true;
   }
 
   async checkKycAddresses(
     securityId: string,
     addresses: string[],
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     let res;
     for (const address of addresses) {
@@ -295,10 +295,9 @@ export default class ValidationService extends Service {
         throw new AccountNotKycd(address);
       }
     }
-    return true;
   }
 
-  async checkClearingActivated(securityId: string): Promise<boolean> {
+  async checkClearingActivated(securityId: string): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const result = (
       await this.queryBus.execute(new IsClearingActivatedQuery(securityId))
@@ -307,10 +306,9 @@ export default class ValidationService extends Service {
     if (!result) {
       throw new ClearingDeactivated();
     }
-    return result;
   }
 
-  async checkClearingDeactivated(securityId: string): Promise<boolean> {
+  async checkClearingDeactivated(securityId: string): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const result = (
       await this.queryBus.execute(new IsClearingActivatedQuery(securityId))
@@ -319,7 +317,6 @@ export default class ValidationService extends Service {
     if (result) {
       throw new ClearingActivated();
     }
-    return result;
   }
 
   async checkOperator(
@@ -327,7 +324,7 @@ export default class ValidationService extends Service {
     partitionId: string,
     operatorId: string,
     targetId: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
 
     if (
@@ -347,9 +344,8 @@ export default class ValidationService extends Service {
         )
       ).payload
     ) {
-      return true;
+      return;
     }
-
     throw new AccountIsNotOperator(operatorId, targetId);
   }
 
@@ -357,7 +353,7 @@ export default class ValidationService extends Service {
     role: string,
     accountId: string,
     securityId: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
       new HasRoleQuery(role, accountId, securityId),
@@ -365,41 +361,34 @@ export default class ValidationService extends Service {
     if (!res.payload) {
       throw new NotGrantedRole(role);
     }
-    return res.payload;
   }
 
-  async checkPause(securityId: string): Promise<boolean> {
+  async checkPause(securityId: string): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(new IsPausedQuery(securityId));
     if (res.payload) {
       throw new SecurityPaused();
     }
-    return false;
   }
 
-  async checkUnpause(securityId: string): Promise<boolean> {
+  async checkUnpause(securityId: string): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(new IsPausedQuery(securityId));
     if (!res.payload) {
       throw new SecurityUnPaused();
     }
-    return false;
   }
 
-  async checkProtectedPartitions(security: Security): Promise<boolean> {
-    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+  async checkProtectedPartitions(security: Security): Promise<void> {
     if (!security.arePartitionsProtected) {
       throw new PartitionsUnProtected();
     }
-    return true;
   }
 
-  async checkUnprotectedPartitions(security: Security): Promise<boolean> {
-    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+  async checkUnprotectedPartitions(security: Security): Promise<void> {
     if (security.arePartitionsProtected) {
       throw new PartitionsProtected();
     }
-    return true;
   }
 
   async checkCanTransfer(
@@ -409,7 +398,7 @@ export default class ValidationService extends Service {
     sourceId?: string,
     partitionId?: string,
     operatorId?: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     let res;
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     if (operatorId) {
@@ -436,7 +425,6 @@ export default class ValidationService extends Service {
         operatorId,
       );
     }
-    return true;
   }
 
   async checkCanRedeem(
@@ -445,7 +433,7 @@ export default class ValidationService extends Service {
     amount: string,
     partitionId: string,
     operatorId?: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
       new CanRedeemByPartitionQuery(securityId, sourceId, partitionId, amount),
@@ -459,8 +447,6 @@ export default class ValidationService extends Service {
         operatorId,
       );
     }
-
-    return true;
   }
 
   async checkMaxSupply(
@@ -468,7 +454,7 @@ export default class ValidationService extends Service {
     amount: BigDecimal,
     security: Security,
     partitionId?: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     let res;
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     if (partitionId) {
@@ -498,41 +484,28 @@ export default class ValidationService extends Service {
     ) {
       throw new MaxSupplyReached();
     }
-    return true;
   }
 
-  private isMaxSupplyExceeded(
-    maxSupply: BigNumber,
-    amount: BigNumber,
-    totalSupply: BigNumber,
-  ): boolean {
-    return maxSupply.lt(totalSupply.add(amount));
-  }
-
-  async checkDecimals(security: Security, amount: string): Promise<boolean> {
+  async checkDecimals(security: Security, amount: string): Promise<void> {
     if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
       throw new DecimalsOverRange(security.decimals);
     }
-    return true;
   }
 
   async checkProtectedPartitionRole(
     partitionId: string,
     accountId: string,
     securityId: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     const protectedPartitionRole = getProtectedPartitionRole(partitionId);
-
     await this.checkRole(protectedPartitionRole, accountId, securityId);
-
-    return true;
   }
 
   async checkValidNounce(
     securityId: string,
     targetId: string,
     nounce: number,
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const nextNounce = (
       await this.queryBus.execute(new GetNounceQuery(securityId, targetId))
@@ -541,14 +514,13 @@ export default class ValidationService extends Service {
     if (nounce <= nextNounce) {
       throw new NounceAlreadyUsed(nounce);
     }
-    return true;
   }
 
   async checkAccountInControlList(
     securityId: string,
     targetId: string,
     add: boolean,
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
       new IsInControlListQuery(securityId, targetId),
@@ -559,14 +531,13 @@ export default class ValidationService extends Service {
     if (!add && !res.payload) {
       throw new AccountNotInControlList(targetId.toString());
     }
-    return true;
   }
 
   async checkAccountInIssuersList(
     securityId: string,
     targetId: string,
     add: boolean,
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
       new IsIssuerQuery(securityId, targetId),
@@ -577,7 +548,6 @@ export default class ValidationService extends Service {
     if (!add && !res.payload) {
       throw new UnlistedKycIssuer(targetId.toString());
     }
-    return true;
   }
 
   async checkHoldBalance(
@@ -586,7 +556,7 @@ export default class ValidationService extends Service {
     sourceId: string,
     holdId: number,
     amount: BigDecimal,
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const holdDetails = await this.queryBus.execute(
       new GetHoldForByPartitionQuery(securityId, partitionId, sourceId, holdId),
@@ -594,14 +564,13 @@ export default class ValidationService extends Service {
     if (holdDetails.payload.amount.toBigNumber().lt(amount.toBigNumber())) {
       throw new InsufficientHoldBalance();
     }
-    return true;
   }
 
   async checkBalance(
     securityId: string,
     accountId: string,
     amount: BigDecimal,
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
       new BalanceOfQuery(securityId, accountId),
@@ -609,14 +578,13 @@ export default class ValidationService extends Service {
     if (res.payload.toBigNumber().lt(amount.toBigNumber())) {
       throw new InsufficientBalance();
     }
-    return true;
   }
 
   async checkControlList(
     securityId: string,
     sourceEvmAddress?: string,
     targetEvmAddress?: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const controListType = (
       await this.queryBus.execute(new GetControlListTypeQuery(securityId))
@@ -647,36 +615,12 @@ export default class ValidationService extends Service {
         targetEvmAddress,
       );
     }
-
-    return true;
-  }
-
-  private async checkUserInControlList(
-    controListType: SecurityControlListType,
-    controlListMembers: string[],
-    user: string,
-  ): Promise<boolean> {
-    if (
-      controListType === SecurityControlListType.BLACKLIST &&
-      controlListMembers.includes(user.toString().toUpperCase())
-    ) {
-      throw new AccountInBlackList(user.toString());
-    }
-
-    if (
-      controListType === SecurityControlListType.WHITELIST &&
-      !controlListMembers.includes(user.toString().toUpperCase())
-    ) {
-      throw new AccountNotInWhiteList(user.toString());
-    }
-
-    return false;
   }
 
   async checkMultiPartition(
     security: Security,
     partitionId?: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     if (!partitionId && security.isMultiPartition) {
       throw new NotAllowedInMultiPartition();
     }
@@ -687,14 +631,12 @@ export default class ValidationService extends Service {
     ) {
       throw new OnlyDefaultPartitionAllowed();
     }
-    return true;
   }
 
-  async checkIssuable(security: Security): Promise<boolean> {
+  async checkIssuable(security: Security): Promise<void> {
     if (!security.isIssuable) {
       throw new NotIssuable();
     }
-    return true;
   }
 
   async checkValidVc(
@@ -718,7 +660,8 @@ export default class ValidationService extends Service {
   async checkMaturityDate(
     securityId: string,
     maturityDate: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const bondDetails = (
       await this.queryBus.execute(new GetBondDetailsQuery(securityId))
     ).bond;
@@ -728,6 +671,33 @@ export default class ValidationService extends Service {
         'The maturity date cannot be earlier or equal than the current one',
       );
     }
-    return true;
+  }
+
+  private async checkUserInControlList(
+    controListType: SecurityControlListType,
+    controlListMembers: string[],
+    user: string,
+  ): Promise<void> {
+    if (
+      controListType === SecurityControlListType.BLACKLIST &&
+      controlListMembers.includes(user.toString().toUpperCase())
+    ) {
+      throw new AccountInBlackList(user.toString());
+    }
+
+    if (
+      controListType === SecurityControlListType.WHITELIST &&
+      !controlListMembers.includes(user.toString().toUpperCase())
+    ) {
+      throw new AccountNotInWhiteList(user.toString());
+    }
+  }
+
+  private isMaxSupplyExceeded(
+    maxSupply: BigNumber,
+    amount: BigNumber,
+    totalSupply: BigNumber,
+  ): boolean {
+    return maxSupply.lt(totalSupply.add(amount));
   }
 }

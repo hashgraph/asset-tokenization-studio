@@ -319,7 +319,6 @@ export default class BaseError extends Error {
     this.message = msg;
     this.errorCode = code;
     this.errorCategory = getErrorCategory(code);
-    Object.setPrototypeOf(this, BaseError.prototype);
   }
 
   toString(stack = false): string {

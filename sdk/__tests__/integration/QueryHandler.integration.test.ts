@@ -204,16 +204,16 @@
 */
 
 /* eslint-disable jest/no-mocks-import */
-import { QueryBus } from '../../../src/core/query/QueryBus.js';
+import { QueryBus } from '../../src/core/query/QueryBus';
 import {
   ConcreteQuery,
   ConcreteQueryResponse,
-} from './__mocks__/ConcreteQueryHandler.js';
+} from './__mocks__/ConcreteQueryHandler';
 
 const queryBus = new QueryBus();
 
-describe('🧪 QueryHandler Test', () => {
-  it('Executes a simple query', async () => {
+describe('QueryHandler Test', () => {
+  it('Executes a simple query successfully', async () => {
     const execSpy = jest.spyOn(queryBus, 'execute');
     const query = new ConcreteQuery('1', 4);
     const res = await queryBus.execute(query);

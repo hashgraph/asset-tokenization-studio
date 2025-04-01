@@ -203,149 +203,37 @@
 
 */
 
-import TransactionService from '../../../../service/TransactionService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { createMock } from '@golevelup/ts-jest';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import {
-  BondDetailsFixture,
-  UpdateMaturityDateCommandFixture,
-} from '../../../../../../test/fixtures/bond/BondFixture.js';
-import {
-  EvmAddressFixture,
-  HederaIdFixture,
-  TransactionIdFixture,
-} from '../../../../../../test/fixtures/shared/IdentifierFixture.js';
-import { UpdateMaturityDateCommandHandler } from './UpdateMaturityDateCommandHandler.js';
-import {
-  UpdateMaturityDateCommand,
-  UpdateMaturityDateCommandResponse,
-} from './UpdateMaturityDateCommand.js';
-import { faker } from '@faker-js/faker';
-import { OperationNotAllowed } from '../../security/error/OperationNotAllowed.js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Query } from '../../../src/core/query/Query';
+import { IQueryHandler } from '../../../src/core/query/QueryHandler';
+import { QueryResponse } from '../../../src/core/query/QueryResponse';
+import { QueryHandler } from '../../../src/core/decorator/QueryHandlerDecorator';
 
-describe('UpdateMaturityDateCommandHandler', () => {
-  let handler: UpdateMaturityDateCommandHandler;
-  let command: UpdateMaturityDateCommand;
-  const transactionServiceMock = createMock<TransactionService>();
-  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
-  const rpcQueryAdapterMock = createMock<RPCQueryAdapter>();
+export class ConcreteQueryResponse implements QueryResponse {
+  constructor(public readonly payload: number) {}
+}
 
-  const evmAddress = EvmAddressFixture.create();
-  const transactionId = TransactionIdFixture.create().id;
-  const hederaId = HederaIdFixture.create();
+export class ConcreteQuery extends Query<ConcreteQueryResponse> {
+  constructor(
+    public readonly itemId: string,
+    public readonly payload: number,
+  ) {
+    super();
+  }
+}
 
-  beforeEach(() => {
-    handler = new UpdateMaturityDateCommandHandler(
-      transactionServiceMock,
-      rpcQueryAdapterMock,
-      mirrorNodeAdapterMock,
-    );
-    command = UpdateMaturityDateCommandFixture.create();
-  });
+export class ConcreteQueryRepository {
+  public map = new Map<ConcreteQuery, any>();
+}
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
+@QueryHandler(ConcreteQuery)
+export class ConcreteQueryHandler implements IQueryHandler<ConcreteQuery> {
+  constructor(
+    public readonly repo: ConcreteQueryRepository = new ConcreteQueryRepository(),
+  ) {}
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('should throw OperationNotAllowed if the date is in the past', async () => {
-        mirrorNodeAdapterMock.accountToEvmAddress.mockResolvedValue(evmAddress);
-
-        mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
-          id: hederaId.value,
-          evmAddress: evmAddress.value,
-        });
-
-        rpcQueryAdapterMock.getBondDetails.mockResolvedValue(
-          BondDetailsFixture.create({
-            maturityDate: faker.date
-              .between({
-                from: parseInt(command.maturityDate),
-                to: parseInt(command.maturityDate),
-              })
-              .getTime(),
-          }),
-        );
-
-        await expect(handler.execute(command)).rejects.toThrow(
-          new OperationNotAllowed(
-            'The maturity date cannot be earlier or equal than the current one',
-          ),
-        );
-      });
-    });
-
-    describe('success cases', () => {
-      it('should successfully update maturity date in response', async () => {
-        mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
-          id: hederaId.value,
-          evmAddress: evmAddress.value,
-        });
-
-        rpcQueryAdapterMock.getBondDetails.mockResolvedValue(
-          BondDetailsFixture.create(),
-        );
-
-        transactionServiceMock
-          .getHandler()
-          .updateMaturityDate.mockResolvedValue({
-            id: transactionId,
-          });
-
-        const result = await handler.execute(command);
-
-        expect(result).toBeInstanceOf(UpdateMaturityDateCommandResponse);
-        expect(mirrorNodeAdapterMock.getContractInfo).toHaveBeenCalledTimes(1);
-        expect(rpcQueryAdapterMock.getBondDetails).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().updateMaturityDate,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().updateMaturityDate,
-        ).toHaveBeenCalledWith(
-          evmAddress,
-          parseInt(command.maturityDate),
-          command.securityId,
-        );
-        expect(result.payload).toBe(true);
-        expect(result.transactionId).toBe(transactionId);
-      });
-
-      it('should successfully update maturity date with non-Hedera address format', async () => {
-        command = UpdateMaturityDateCommandFixture.create({
-          securityId: evmAddress.value,
-        });
-
-        rpcQueryAdapterMock.getBondDetails.mockResolvedValue(
-          BondDetailsFixture.create(),
-        );
-
-        transactionServiceMock
-          .getHandler()
-          .updateMaturityDate.mockResolvedValue({
-            id: transactionId,
-          });
-
-        const result = await handler.execute(command);
-
-        expect(result).toBeInstanceOf(UpdateMaturityDateCommandResponse);
-        expect(rpcQueryAdapterMock.getBondDetails).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().updateMaturityDate,
-        ).toHaveBeenCalledTimes(1);
-        expect(mirrorNodeAdapterMock.getContractInfo).not.toHaveBeenCalled();
-        expect(
-          transactionServiceMock.getHandler().updateMaturityDate,
-        ).toHaveBeenCalledWith(
-          evmAddress,
-          parseInt(command.maturityDate),
-          command.securityId,
-        );
-        expect(result.payload).toBe(true);
-        expect(result.transactionId).toBe(transactionId);
-      });
-    });
-  });
-});
+  execute(query: ConcreteQuery): Promise<ConcreteQueryResponse> {
+    this.repo.map.set(query, 'Hello world');
+    return Promise.resolve(new ConcreteQueryResponse(query.payload));
+  }
+}

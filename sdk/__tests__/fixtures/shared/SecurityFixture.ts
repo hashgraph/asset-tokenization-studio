@@ -203,22 +203,71 @@
 
 */
 
-/* eslint-disable jest/no-mocks-import */
-import { QueryBus } from '../../src/core/query/QueryBus.js';
+import { createFixture } from '../config';
+import { SecurityProps } from '../../../src/domain/context/security/Security';
+import { SecurityType } from '../../../src/domain/context/factory/SecurityType';
+import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
 import {
-  ConcreteQuery,
-  ConcreteQueryResponse,
-} from './mocks/ConcreteQueryHandler.js';
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType';
+import { RegulationFixture } from './RegulationFixture';
+import { EvmAddressPropsFixture, HederaIdPropsFixture } from './DataFixture';
+import EvmAddress from '../../../src/domain/context/contract/EvmAddress';
+import { HederaId } from '../../../src/domain/context/shared/HederaId';
 
-const queryBus = new QueryBus();
-
-describe('QueryHandler Test', () => {
-  it('Executes a simple query successfully', async () => {
-    const execSpy = jest.spyOn(queryBus, 'execute');
-    const query = new ConcreteQuery('1', 4);
-    const res = await queryBus.execute(query);
-    expect(res).toBeInstanceOf(ConcreteQueryResponse);
-    expect(res.payload).toBe(query.payload);
-    expect(execSpy).toHaveBeenCalled();
-  });
+export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
+  security.name.faker((faker) => faker.company.name());
+  security.symbol.faker((faker) =>
+    faker.string.alpha({ length: 3, casing: 'upper' }),
+  );
+  security.isin.faker((faker) => `US${faker.string.numeric(9)}`);
+  security.type?.faker((faker) =>
+    faker.helpers.arrayElement(Object.values(SecurityType)),
+  );
+  security.decimals.faker((faker) => faker.number.int({ min: 0, max: 18 }));
+  security.isWhiteList.faker((faker) => faker.datatype.boolean());
+  security.isControllable.faker((faker) => faker.datatype.boolean());
+  security.arePartitionsProtected.faker((faker) => faker.datatype.boolean());
+  security.clearingActive.faker((faker) => faker.datatype.boolean());
+  security.isMultiPartition.faker((faker) => faker.datatype.boolean());
+  security.isIssuable?.faker((faker) => faker.datatype.boolean());
+  security.totalSupply?.faker((faker) =>
+    BigDecimal.fromString(
+      faker.finance.amount({ min: 1000, max: 1000000, dec: 0 }),
+    ),
+  );
+  security.maxSupply?.faker((faker) =>
+    BigDecimal.fromString(
+      faker.finance.amount({ min: 1000000, max: 10000000, dec: 0 }),
+    ),
+  );
+  security.diamondAddress?.as(
+    () => new HederaId(HederaIdPropsFixture.create().value),
+  );
+  security.evmDiamondAddress?.as(
+    () => new EvmAddress(EvmAddressPropsFixture.create().value),
+  );
+  security.paused?.faker((faker) => faker.datatype.boolean());
+  security.regulationType?.faker((faker) =>
+    faker.helpers.arrayElement(Object.values(RegulationType)),
+  );
+  security.regulationsubType?.faker((faker) =>
+    faker.helpers.arrayElement(Object.values(RegulationSubType)),
+  );
+  security.regulation?.fromFixture(RegulationFixture);
+  security.isCountryControlListWhiteList.faker((faker) =>
+    faker.datatype.boolean(),
+  );
+  security.countries?.faker((faker) =>
+    faker.helpers
+      .arrayElements(
+        Array.from({ length: 5 }, () =>
+          faker.location.countryCode({ variant: 'alpha-2' }),
+        ),
+        { min: 1, max: 5 },
+      )
+      .join(','),
+  );
+  security.info?.faker((faker) => faker.lorem.sentence());
 });

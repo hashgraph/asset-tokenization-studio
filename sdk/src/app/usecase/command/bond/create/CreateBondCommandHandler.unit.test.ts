@@ -203,65 +203,214 @@
 
 */
 
-import { createFixture } from '../config.js';
-import { SecurityProps } from '../../../src/domain/context/security/Security.js';
-import { SecurityType } from '../../../src/domain/context/factory/SecurityType.js';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal.js';
+import TransactionService from '../../../../service/TransactionService.js';
+import { CreateBondCommandHandler } from './CreateBondCommandHandler.js';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../service/AccountService.js';
+import { CreateBondCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
+import { InvalidRequest } from '../../error/InvalidRequest.js';
 import {
-  RegulationSubType,
-  RegulationType,
-} from '../../../src/domain/context/factory/RegulationType.js';
-import { RegulationFixture } from './RegulationFixture.js';
-import { EvmAddressFixture, HederaIdFixture } from './IdentifierFixture.js';
+  CreateBondCommand,
+  CreateBondCommandResponse,
+} from './CreateBondCommand.js';
+import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import {
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  HederaIdZeroAddressFixture,
+  TransactionIdFixture,
+} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../service/ContractService.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 
-export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
-  security.name.faker((faker) => faker.company.name());
-  security.symbol.faker((faker) =>
-    faker.string.alpha({ length: 3, casing: 'upper' }),
-  );
-  security.isin.faker((faker) => `US${faker.string.numeric(9)}`);
-  security.type?.faker((faker) =>
-    faker.helpers.arrayElement(Object.values(SecurityType)),
-  );
-  security.decimals.faker((faker) => faker.number.int({ min: 0, max: 18 }));
-  security.isWhiteList.faker((faker) => faker.datatype.boolean());
-  security.isControllable.faker((faker) => faker.datatype.boolean());
-  security.arePartitionsProtected.faker((faker) => faker.datatype.boolean());
-  security.clearingActive.faker((faker) => faker.datatype.boolean());
-  security.isMultiPartition.faker((faker) => faker.datatype.boolean());
-  security.isIssuable?.faker((faker) => faker.datatype.boolean());
-  security.totalSupply?.faker((faker) =>
-    BigDecimal.fromString(
-      faker.finance.amount({ min: 1000, max: 1000000, dec: 0 }),
-    ),
-  );
-  security.maxSupply?.faker((faker) =>
-    BigDecimal.fromString(
-      faker.finance.amount({ min: 1000000, max: 10000000, dec: 0 }),
-    ),
-  );
-  security.diamondAddress?.fromFixture(HederaIdFixture);
-  security.evmDiamondAddress?.fromFixture(EvmAddressFixture);
-  security.paused?.faker((faker) => faker.datatype.boolean());
-  security.regulationType?.faker((faker) =>
-    faker.helpers.arrayElement(Object.values(RegulationType)),
-  );
-  security.regulationsubType?.faker((faker) =>
-    faker.helpers.arrayElement(Object.values(RegulationSubType)),
-  );
-  security.regulation?.fromFixture(RegulationFixture);
-  security.isCountryControlListWhiteList.faker((faker) =>
-    faker.datatype.boolean(),
-  );
-  security.countries?.faker((faker) =>
-    faker.helpers
-      .arrayElements(
-        Array.from({ length: 5 }, () =>
-          faker.location.countryCode({ variant: 'alpha-2' }),
-        ),
-        { min: 1, max: 5 },
-      )
-      .join(','),
-  );
-  security.info?.faker((faker) => faker.lorem.sentence());
+describe('CreateBondCommandHandler', () => {
+  let handler: CreateBondCommandHandler;
+  let command: CreateBondCommand;
+
+  const transactionServiceMock = createMock<TransactionService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const contractResult = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const hederaId = HederaIdPropsFixture.create();
+  const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
+
+  beforeEach(() => {
+    handler = new CreateBondCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      mirrorNodeAdapterMock,
+      contractServiceMock,
+    );
+    command = CreateBondCommandFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('should throw InvalidRequest if factory is not provided', async () => {
+        const commandWithNotFactory = {
+          ...command,
+          factory: undefined,
+        };
+
+        await expect(handler.execute(commandWithNotFactory)).rejects.toThrow(
+          new InvalidRequest('Factory not found in request'),
+        );
+      });
+
+      it('should throw InvalidRequest if resolver is not provided', async () => {
+        const commandWithNotResolver = {
+          ...command,
+          resolver: undefined,
+        };
+
+        await expect(handler.execute(commandWithNotResolver)).rejects.toThrow(
+          new InvalidRequest('Resolver not found in request'),
+        );
+      });
+
+      it('should throw InvalidRequest if configId is not provided', async () => {
+        const commandWithNotConfigId = {
+          ...command,
+          configId: undefined,
+        };
+
+        await expect(handler.execute(commandWithNotConfigId)).rejects.toThrow(
+          new InvalidRequest('Config Id not found in request'),
+        );
+      });
+
+      it('should throw InvalidRequest if configVersion is not provided', async () => {
+        const commandWithNotConfigVersion = {
+          ...command,
+          configVersion: undefined,
+        };
+
+        await expect(
+          handler.execute(commandWithNotConfigVersion),
+        ).rejects.toThrow(
+          new InvalidRequest('Config Version not found in request'),
+        );
+      });
+
+      it('throws error when transaction response id is missing', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        transactionServiceMock
+          .getHandler()
+          .createBond.mockResolvedValue({ id: undefined });
+
+        await expect(handler.execute(command)).rejects.toThrow(
+          'Create Command Handler response id empty',
+        );
+      });
+    });
+
+    describe('success cases', () => {
+      it('should successfully create a bond with bondAddress in response', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        transactionServiceMock.getHandler().createBond.mockResolvedValue({
+          id: transactionId,
+          response: { bondAddress: evmAddress.value },
+        });
+
+        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(
+          transactionId,
+        );
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateBondCommandResponse);
+        expect(result.securityId.value).toBe(transactionId);
+        expect(result.transactionId).toBe(transactionId);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          3,
+        );
+        expect(
+          transactionServiceMock.getHandler().createBond,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mirrorNodeAdapterMock.getHederaIdfromContractAddress,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createBond,
+        ).toHaveBeenCalledWith(
+          command.security,
+          {
+            currency: command.currency,
+            nominalValue: BigDecimal.fromString(command.nominalValue),
+            startingDate: parseInt(command.startingDate),
+            maturityDate: parseInt(command.maturityDate),
+          },
+          {
+            couponFrequency: parseInt(command.couponFrequency),
+            couponRate: BigDecimal.fromString(command.couponRate),
+            firstCouponDate: parseInt(command.firstCouponDate),
+          },
+          evmAddress,
+          evmAddress,
+          command.configId,
+          command.configVersion,
+          evmAddress,
+          command.factory?.toString(),
+        );
+      });
+
+      it('should recover contract ID from mirror node if bondAddress is not in response', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        transactionServiceMock.getHandler().createBond.mockResolvedValue({
+          id: transactionId,
+          response: null,
+        });
+
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
+          contractResult.value,
+        ]);
+
+        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(
+          hederaId.value,
+        );
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateBondCommandResponse);
+        expect(result.securityId.toString()).toBe(hederaId.value);
+        expect(result.transactionId.toString()).toBe(transactionId);
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
+          transactionId,
+          1,
+        );
+      });
+
+      it('should handle error and return fallback response if response code is 1', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
+          id: hederaId.value,
+          evmAddress: evmAddress.value,
+        });
+
+        transactionServiceMock.getHandler().createBond.mockResolvedValue({
+          id: transactionId,
+          response: 1,
+        });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateBondCommandResponse);
+        expect(result.securityId.toString()).toBe(hederaIdZeroAddress);
+        expect(result.transactionId.toString()).toBe(transactionId);
+      });
+    });
+  });
 });

@@ -203,50 +203,22 @@
 
 */
 
-import EvmAddress from '../../../src/domain/context/contract/EvmAddress.js';
-import { createFixture } from '../config.js';
-import ContractId from '../../../src/domain/context/contract/ContractId.js';
-import { HederaId } from '../../../src/domain/context/shared/HederaId.js';
+/* eslint-disable jest/no-mocks-import */
+import { CommandBus } from '../../src/core/command/CommandBus';
+import {
+  ConcreteCommand,
+  ConcreteCommandResponse,
+} from './__mocks__/ConcreteCommandHandler';
 
-export const EvmAddressFixture = createFixture<EvmAddress>((props) => {
-  props.value.faker((faker) =>
-    faker.string.hexadecimal({ length: 40, casing: 'lower' }),
-  );
-});
+const commandBus = new CommandBus();
 
-export const HederaIdFixture = createFixture<HederaId>((props) => {
-  props.value.faker(
-    (faker) => `0.0.${faker.number.int({ min: 100, max: 999 })}`,
-  );
-});
-
-export const HederaIdZeroAddressFixture = createFixture<{ address: string }>(
-  (props) => {
-    props.address.faker(() => '0.0.0');
-  },
-);
-
-export const ContractIdFixture = createFixture<ContractId>((props) => {
-  props.value.as(() => HederaIdFixture.create().value);
-});
-
-export const TransactionIdFixture = createFixture<{ id: string }>((props) => {
-  props.id.as(() => HederaIdFixture.create().value);
-});
-
-export const CouponIdFixture = createFixture<{ id: string }>((props) => {
-  props.id.faker((faker) => faker.number.hex({ min: 1, max: 1000 }));
-});
-
-export const GetContractInvalidStringFixture = createFixture<{ value: string }>(
-  (props) => {
-    props.value.faker((faker) => faker.string.alpha(5));
-  },
-);
-
-export const PartitionIdFixture = createFixture<{ value: string }>((props) => {
-  props.value.faker(
-    (faker) =>
-      `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 1, max: 9 })}`,
-  );
+describe('CommandHandler Test', () => {
+  it('Executes a simple command successfully', async () => {
+    const execSpy = jest.spyOn(commandBus, 'execute');
+    const command = new ConcreteCommand('1', 4);
+    const res = await commandBus.execute(command);
+    expect(res).toBeInstanceOf(ConcreteCommandResponse);
+    expect(res.payload).toBe(command.payload);
+    expect(execSpy).toHaveBeenCalled();
+  });
 });

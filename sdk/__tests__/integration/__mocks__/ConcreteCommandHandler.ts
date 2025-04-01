@@ -203,175 +203,39 @@
 
 */
 
-import ValidationService from './ValidationService';
-import { QueryBus } from '../../core/query/QueryBus';
-import Injectable from '../../core/Injectable';
-import { createMock } from '@golevelup/ts-jest';
-import BaseError from '../../core/error/BaseError';
-import {
-  HederaIdFixture,
-  PartitionIdFixture,
-} from '../../../test/fixtures/shared/IdentifierFixture';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Command } from '../../../src/core/command/Command';
+import { ICommandHandler } from '../../../src/core/command/CommandHandler';
+import { CommandResponse } from '../../../src/core/command/CommandResponse';
+import { CommandHandler } from '../../../src/core/decorator/CommandHandlerDecorator';
 
-describe('ValidationService', () => {
-  let service: ValidationService;
+export class ConcreteCommandResponse implements CommandResponse {
+  constructor(public readonly payload: number) {}
+}
 
-  const queryBusMock = createMock<QueryBus>();
+export class ConcreteCommand extends Command<ConcreteCommandResponse> {
+  constructor(
+    public readonly itemId: string,
+    public readonly payload: number,
+  ) {
+    super();
+  }
+}
 
-  const securityId = HederaIdFixture.create();
-  const issuerId = HederaIdFixture.create();
-  const operatorId = HederaIdFixture.create();
-  const targetId = HederaIdFixture.create();
-  const firstAddress = HederaIdFixture.create();
-  const secondAddress = HederaIdFixture.create();
-  const partitionId = PartitionIdFixture.create();
+export class ConcreteCommandRepository {
+  public map = new Map<ConcreteCommand, any>();
+}
 
-  beforeEach(() => {
-    service = new ValidationService();
-    jest.spyOn(Injectable, 'resolve').mockReturnValue(queryBusMock);
-  });
+@CommandHandler(ConcreteCommand)
+export class ConcreteCommandHandler
+  implements ICommandHandler<ConcreteCommand>
+{
+  constructor(
+    public readonly repo: ConcreteCommandRepository = new ConcreteCommandRepository(),
+  ) {}
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
-  describe('validateIssuer', () => {
-    it('should return true when issuer is valid', async () => {
-      queryBusMock.execute.mockResolvedValue({ payload: true });
-
-      const result = await service.validateIssuer(
-        securityId.value,
-        issuerId.value,
-      );
-
-      expect(result).toBe(true);
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          securityId: securityId.value,
-          issuerId: issuerId.value,
-        }),
-      );
-    });
-
-    it('should throw UnlistedIssuer when issuer is invalid', async () => {
-      queryBusMock.execute.mockResolvedValue({ payload: false });
-      await expect(
-        service.validateIssuer(securityId.value, issuerId.value),
-      ).rejects.toThrow(BaseError);
-    });
-  });
-
-  describe('validateKycAddresses', () => {
-    it('should return true when all addresses are KYCd', async () => {
-      queryBusMock.execute.mockResolvedValue({ payload: 1 });
-
-      const result = await service.validateKycAddresses(securityId.value, [
-        firstAddress.value,
-        secondAddress.value,
-      ]);
-
-      expect(result).toBe(true);
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
-    });
-
-    it('should throw AccountNotKycd when an address is not KYCd', async () => {
-      queryBusMock.execute
-        .mockResolvedValueOnce({ payload: 1 })
-        .mockResolvedValueOnce({ payload: 0 });
-
-      await expect(
-        service.validateKycAddresses(securityId.value, [
-          firstAddress.value,
-          secondAddress.value,
-        ]),
-      ).rejects.toThrow(BaseError);
-    });
-  });
-
-  describe('validateClearingActivated', () => {
-    it('should return true when clearing is activated', async () => {
-      queryBusMock.execute.mockResolvedValue({ payload: true });
-
-      const result = await service.validateClearingActivated(securityId.value);
-
-      expect(result).toBe(true);
-    });
-
-    it('should throw ClearingDeactivated when clearing is not activated', async () => {
-      queryBusMock.execute.mockResolvedValue({ payload: false });
-
-      await expect(
-        service.validateClearingActivated(securityId.value),
-      ).rejects.toThrow(BaseError);
-    });
-  });
-
-  describe('validateClearingDeactivated', () => {
-    it('should return false when clearing is deactivated', async () => {
-      queryBusMock.execute.mockResolvedValue({ payload: false });
-
-      const result = await service.validateClearingDeactivated(
-        securityId.value,
-      );
-
-      expect(result).toBe(false);
-    });
-
-    it('should throw ClearingActivated when clearing is activated', async () => {
-      queryBusMock.execute.mockResolvedValue({ payload: true });
-
-      await expect(
-        service.validateClearingDeactivated(securityId.value),
-      ).rejects.toThrow(BaseError);
-    });
-  });
-
-  describe('validateOperator', () => {
-    it('should return true when operator is valid via IsOperatorQuery', async () => {
-      queryBusMock.execute
-        .mockResolvedValueOnce({ payload: true })
-        .mockResolvedValueOnce({ payload: false });
-
-      const result = await service.validateOperator(
-        securityId.value,
-        partitionId.value,
-        operatorId.value,
-        targetId.value,
-      );
-
-      expect(result).toBe(true);
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-    });
-
-    it('should return true when operator is valid via IsOperatorForPartitionQuery', async () => {
-      queryBusMock.execute
-        .mockResolvedValueOnce({ payload: false })
-        .mockResolvedValueOnce({ payload: true });
-
-      const result = await service.validateOperator(
-        securityId.value,
-        partitionId.value,
-        operatorId.value,
-        targetId.value,
-      );
-
-      expect(result).toBe(true);
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
-    });
-
-    it('should throw AccountIsNotOperator when neither query validates', async () => {
-      queryBusMock.execute
-        .mockResolvedValueOnce({ payload: false })
-        .mockResolvedValueOnce({ payload: false });
-
-      await expect(
-        service.validateOperator(
-          securityId.value,
-          partitionId.value,
-          operatorId.value,
-          targetId.value,
-        ),
-      ).rejects.toThrow(BaseError);
-    });
-  });
-});
+  execute(command: ConcreteCommand): Promise<ConcreteCommandResponse> {
+    this.repo.map.set(command, 'Hello world');
+    return Promise.resolve(new ConcreteCommandResponse(command.payload));
+  }
+}

@@ -203,21 +203,21 @@
 
 */
 
-import { CreateBondCommand } from '../../../src/app/usecase/command/bond/create/CreateBondCommand.js';
-import { SetCouponCommand } from '../../../src/app/usecase/command/bond/coupon/set/SetCouponCommand.js';
-import { createFixture } from '../config.js';
-import ContractId from '../../../src/domain/context/contract/ContractId.js';
+import { CreateBondCommand } from '../../../src/app/usecase/command/bond/create/CreateBondCommand';
+import { SetCouponCommand } from '../../../src/app/usecase/command/bond/coupon/set/SetCouponCommand';
+import { createFixture } from '../config';
+import ContractId from '../../../src/domain/context/contract/ContractId';
 import {
-  ContractIdFixture,
-  HederaIdFixture,
-} from '../shared/IdentifierFixture.js';
-import { SecurityPropsFixture } from '../shared/SecurityFixture.js';
-import { UpdateMaturityDateCommand } from 'app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand.js';
-import { BondDetails } from 'domain/context/bond/BondDetails.js';
+  ContractIdPropFixture,
+  HederaIdPropsFixture,
+} from '../shared/DataFixture';
+import { SecurityPropsFixture } from '../shared/SecurityFixture';
+import { UpdateMaturityDateCommand } from '../../../src/app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import { BondDetails } from '../../../src/domain/context/bond/BondDetails';
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {
-    command.address.as(() => HederaIdFixture.create().value);
+    command.address.as(() => HederaIdPropsFixture.create().value);
     command.recordDate.faker((faker) =>
       faker.date.future().getTime().toString(),
     );
@@ -252,15 +252,15 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
     command.firstCouponDate.faker((faker) =>
       faker.date.soon({ days: 30 }).getTime().toString(),
     );
-    command.factory?.as(() => new ContractId(ContractIdFixture.create().value));
+    command.factory?.as(() => new ContractId(ContractIdPropFixture.create().value));
     command.resolver?.as(
-      () => new ContractId(ContractIdFixture.create().value),
+      () => new ContractId(ContractIdPropFixture.create().value),
     );
-    command.configId?.as(() => HederaIdFixture.create().value);
+    command.configId?.as(() => HederaIdPropsFixture.create().value);
     command.configVersion?.faker((faker) =>
       faker.number.int({ min: 1, max: 5 }),
     );
-    command.diamondOwnerAccount?.as(() => HederaIdFixture.create().value);
+    command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
   },
 );
 
@@ -269,7 +269,7 @@ export const UpdateMaturityDateCommandFixture =
     command.maturityDate.faker((faker) =>
       faker.date.future().getTime().toString(),
     );
-    command.securityId.as(() => HederaIdFixture.create().value);
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
   });
 
 export const BondDetailsFixture = createFixture<BondDetails>((props) => {
