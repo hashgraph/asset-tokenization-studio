@@ -309,7 +309,7 @@ const lastHoldIds = new Map<string, number>();
 const lastClearingIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 const nonces = new Map<string, BigNumber>();
-const kycAccountsData = new Map<string, KYC>();
+const kycAccountsData = new Map<string, Kyc>();
 const kycAccountsByStatus = new Map<number, string[]>();
 
 let controlList: string[] = [];

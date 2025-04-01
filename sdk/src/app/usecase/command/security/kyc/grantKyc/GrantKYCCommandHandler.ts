@@ -213,7 +213,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import { Terminal3VC } from '../../../../../../domain/context/kyc/terminal3';
+import { Terminal3VC } from '../../../../../../domain/context/kyc/Terminal3';
 import { verifyVc } from '@terminal3/verify_vc';
 import { SignedCredential } from '@terminal3/vc_core';
 import { InvalidVC } from '../../error/InvalidVC';
