@@ -252,7 +252,9 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
     command.firstCouponDate.faker((faker) =>
       faker.date.soon({ days: 30 }).getTime().toString(),
     );
-    command.factory?.as(() => new ContractId(ContractIdPropFixture.create().value));
+    command.factory?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
+    );
     command.resolver?.as(
       () => new ContractId(ContractIdPropFixture.create().value),
     );

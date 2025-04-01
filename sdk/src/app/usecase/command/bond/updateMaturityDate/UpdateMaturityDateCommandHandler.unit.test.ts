@@ -245,7 +245,7 @@ describe('UpdateMaturityDateCommandHandler', () => {
   describe('execute', () => {
     it('should successfully update maturity date in response', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-      validationServiceMock.checkMaturityDate.mockResolvedValue(true);
+      validationServiceMock.checkMaturityDate.mockResolvedValue(undefined);
 
       transactionServiceMock.getHandler().updateMaturityDate.mockResolvedValue({
         id: transactionId,
