@@ -233,6 +233,10 @@ export enum ErrorCode {
   ValidationChecks = '10022',
   InvalidClearingOperationType = '10032',
   InvalidClearingOperationTypeNumber = '10033',
+  InvalidVcFormat = '10034',
+  MissingVcData = '10035',
+  InvalidVcDates = '10036',
+  InvalidTimeUnits = '10037',
 
   // Error codes for Logic Errors (Prefix: 2XXXX)
   AccountAlreadyInControlList = '20013',
@@ -276,6 +280,23 @@ export enum ErrorCode {
   ReceiptNotReceived = '30001',
   RuntimeError = '30004',
   Unexpected = '30003',
+  TransactionNotFound = '30007',
+  TransactionResultNotFound = '30008',
+  BalanceNotFound = '30009',
+  ErrorRetrievingEvmAddress = '30010',
+  PublickKeyNotFound = '30011',
+  UnsupportedNetwork = '30012',
+  NotInitialized = '30013',
+  AccountNotSet = '30014',
+  NoSettings = '30015',
+  NoSigners = '30016',
+  AccountNotRetrievedFromSigners = '30017',
+  AccountNotFound = '30018',
+  ConsensusNodesNotSet = '30019',
+  SignatureNotFound = '30020',
+  ErrorDecodingVc = '30021',
+  EmptyResponse = '30022',
+  WalletNotSupported = '30023',
 
   // Error codes for Provider Errors (Prefix: 4XXXX)
   DeploymentError = '40006', // Fixed typo here

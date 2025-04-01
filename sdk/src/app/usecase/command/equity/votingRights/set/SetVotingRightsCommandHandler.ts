@@ -214,6 +214,8 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
 
 @CommandHandler(SetVotingRightsCommand)
 export class SetVotingRightsCommandHandler
@@ -243,8 +245,7 @@ export class SetVotingRightsCommandHandler
       address,
     );
 
-    if (!res.id)
-      throw new Error('Set voting right Command Handler response id empty');
+    if (!res.id) throw new EmptyResponse('Set voting right');
 
     let voteId: string;
 
@@ -260,7 +261,7 @@ export class SetVotingRightsCommandHandler
       );
 
       if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
+        throw new InvalidResponse(results);
       }
 
       voteId = results[1];

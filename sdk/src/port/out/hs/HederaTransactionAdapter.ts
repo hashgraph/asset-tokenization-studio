@@ -363,6 +363,8 @@ import {
   ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
+import { InvalidRegulationSubType } from '../../../domain/context/factory/error/InvalidRegulationSubType.js';
+import { InvalidRegulationType } from '../../../domain/context/factory/error/InvalidRegulationType.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -428,14 +430,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'deployEquity';
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new InvalidRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new InvalidRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -545,14 +543,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'deployBond';
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new InvalidRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new InvalidRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {

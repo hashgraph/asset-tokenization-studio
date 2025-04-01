@@ -203,94 +203,10 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import {
-  SetScheduledBalanceAdjustmentCommand,
-  SetScheduledBalanceAdjustmentCommandResponse,
-} from './SetScheduledBalanceAdjustmentCommand.js';
-import TransactionService from '../../../../../service/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import AccountService from '../../../../../service/AccountService.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import ContractService from '../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
+import BaseError, { ErrorCode } from '../../../core/error/BaseError.js';
 
-@CommandHandler(SetScheduledBalanceAdjustmentCommand)
-export class SetScheduledBalanceAdjustmentCommandHandler
-  implements ICommandHandler<SetScheduledBalanceAdjustmentCommand>
-{
-  constructor(
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
-
-  async execute(
-    command: SetScheduledBalanceAdjustmentCommand,
-  ): Promise<SetScheduledBalanceAdjustmentCommandResponse> {
-    const { securityId, executionDate, factor, decimals } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkRole(
-      SecurityRole._CORPORATEACTIONS_ROLE,
-      account.evmAddress!,
-      securityId,
-    );
-
-    const res = await handler.setScheduledBalanceAdjustment(
-      securityEvmAddress,
-      BigDecimal.fromString(executionDate),
-      BigDecimal.fromString(factor),
-      BigDecimal.fromString(decimals),
-      securityId,
-    );
-
-    if (!res.id) throw new EmptyResponse('Set Scheduler Balance Adjustment');
-
-    let balanceAdjustmentId: string;
-
-    if (res.response && res.response.balanceAdjustmentID) {
-      balanceAdjustmentId = res.response.balanceAdjustmentID;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      balanceAdjustmentId = results[1];
-    }
-
-    return Promise.resolve(
-      new SetScheduledBalanceAdjustmentCommandResponse(
-        parseInt(balanceAdjustmentId, 16),
-        res.id!,
-      ),
-    );
+export class WalletNotSupported extends BaseError {
+  constructor() {
+    super(ErrorCode.WalletNotSupported, `Invalid wallet type`);
   }
 }

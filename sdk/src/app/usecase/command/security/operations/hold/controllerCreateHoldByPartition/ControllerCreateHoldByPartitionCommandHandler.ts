@@ -220,6 +220,8 @@ import {
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../error/EmptyResponse.js';
 
 @CommandHandler(ControllerCreateHoldByPartitionCommand)
 export class ControllerCreateHoldByPartitionCommandHandler
@@ -295,10 +297,7 @@ export class ControllerCreateHoldByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id)
-      throw new Error(
-        'Controller Create Hold By Partition Command Handler response id empty',
-      );
+    if (!res.id) throw new EmptyResponse('Controller Create Hold By Partition');
 
     let holdId: string;
 
@@ -314,7 +313,7 @@ export class ControllerCreateHoldByPartitionCommandHandler
       );
 
       if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
+        throw new InvalidResponse(results);
       }
 
       holdId = results[1];

@@ -218,6 +218,8 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { EmptyResponse } from '../../error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
 
 @CommandHandler(TransferAndLockCommand)
 export class TransferAndLockCommandHandler
@@ -268,8 +270,7 @@ export class TransferAndLockCommandHandler
       securityId,
     );
 
-    if (!res.id)
-      throw new Error('Transfer and Lock Command Handler response id empty');
+    if (!res.id) throw new EmptyResponse('Transfer and Lock');
 
     let lockId: string;
 
@@ -285,7 +286,7 @@ export class TransferAndLockCommandHandler
       );
 
       if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
+        throw new InvalidResponse(results);
       }
 
       lockId = results[1];

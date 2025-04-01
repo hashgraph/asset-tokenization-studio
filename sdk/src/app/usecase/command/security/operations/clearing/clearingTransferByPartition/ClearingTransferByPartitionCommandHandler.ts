@@ -218,6 +218,8 @@ import {
 } from './ClearingTransferByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../error/EmptyResponse.js';
 
 @CommandHandler(ClearingTransferByPartitionCommand)
 export class ClearingTransferByPartitionCommandHandler
@@ -284,10 +286,7 @@ export class ClearingTransferByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id)
-      throw new Error(
-        'Clearing Transfer By Partition Command Handler response id empty',
-      );
+    if (!res.id) throw new EmptyResponse('Clearing Transfer By Partition');
 
     let clearingId: string;
 
@@ -303,7 +302,7 @@ export class ClearingTransferByPartitionCommandHandler
       );
 
       if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
+        throw new InvalidResponse(results);
       }
 
       clearingId = results[1];

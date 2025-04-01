@@ -236,6 +236,8 @@ import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/
 import { HederaId } from '../../../../../domain/context/shared/HederaId.js';
 import FireblocksSettings from '../../../../../domain/context/custodialWalletSettings/FireblocksSettings.js';
 import AWSKMSSettings from '../../../../../domain/context/custodialWalletSettings/AWSKMSSettings.js';
+import { PublickKeyNotFound } from '../../../error/PublickKeyNotFound.js';
+import { UnsupportedNetwork } from '../../../error/UnsupportedNetwork.js';
 
 export abstract class CustodialTransactionAdapter extends HederaTransactionAdapter {
   protected client: Client;
@@ -266,7 +268,7 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
         this.client = Client.forPreviewnet();
         break;
       default:
-        throw new Error('Network not supported');
+        throw new UnsupportedNetwork();
     }
     this.client.setOperatorWith(accountId, publicKey, this.signingService);
   }
@@ -345,7 +347,7 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
       new HederaId(settings.hederaAccountId),
     );
     if (!accountMirror.publicKey) {
-      throw new Error('PublicKey not found in the mirror node');
+      throw new PublickKeyNotFound();
     }
 
     this.account = new Account({

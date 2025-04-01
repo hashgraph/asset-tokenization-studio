@@ -400,6 +400,8 @@ import {
   ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
+import { InvalidRegulationSubType } from '../../../domain/context/factory/error/InvalidRegulationSubType.js';
+import { InvalidRegulationType } from '../../../domain/context/factory/error/InvalidRegulationType.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -453,14 +455,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new InvalidRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new InvalidRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -567,14 +565,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new InvalidRegulationType(securityInfo.regulationType);
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new InvalidRegulationSubType(securityInfo.regulationsubType);
       }
 
       const rbacAdmin: Rbac = {
