@@ -83,8 +83,7 @@
     "uuid": "^9.0.0",
     "winston": "^3.8.2",
     "winston-daily-rotate-file": "^4.7.1",
-    "efate": "1.5.1",
-    "tsarch": "5.4.0"
+    "efate": "1.5.1"
   },
   "overrides": {
     "ws": "7.5.10",
