@@ -218,4 +218,5 @@ export class SecurityData {
   public maxSupply: string;
   public erc20MetadataInfo: ERC20MetadataInfo;
   public clearingActive: boolean;
+  public externalControlLists: string[]; // TODO: review. Just put here for error avoidance
 }
