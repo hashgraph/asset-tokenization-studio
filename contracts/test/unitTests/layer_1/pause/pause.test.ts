@@ -215,15 +215,21 @@ import {
     BusinessLogicResolver,
     AccessControlFacet__factory,
     PauseFacet__factory,
+    MockedExternalPause,
+    MockedExternalPause__factory,
+    ExternalPauseManagement,
+    ExternalPauseManagement__factory,
 } from '@typechain'
 import {
     PAUSER_ROLE,
+    PAUSE_MANAGER_ROLE,
     deployEquityFromFactory,
     RegulationSubType,
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    GAS_LIMIT,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
@@ -239,6 +245,8 @@ describe('Pause Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
+    let externalPauseManagement: ExternalPauseManagement
+    let externalPauseMock: MockedExternalPause
 
     before(async () => {
         // mute | mock console.log
@@ -297,6 +305,24 @@ describe('Pause Tests', () => {
             signer_A
         )
         pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
+        externalPauseManagement = ExternalPauseManagement__factory.connect(
+            diamond.address,
+            signer_A
+        )
+
+        // Deploy mock external pause contract
+        externalPauseMock = await new MockedExternalPause__factory(
+            signer_A
+        ).deploy({ gasLimit: GAS_LIMIT.high })
+        await externalPauseMock.deployed()
+
+        // Add external pause to the token
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_A)
+        await accessControlFacet.grantRole(PAUSE_MANAGER_ROLE, account_A)
+        await externalPauseManagement.addExternalPause(
+            externalPauseMock.address,
+            { gasLimit: GAS_LIMIT.high }
+        )
     })
 
     it('GIVEN an account without pause role WHEN pause THEN transaction fails with AccountHasNoRole', async () => {
@@ -371,5 +397,50 @@ describe('Pause Tests', () => {
         // check is unpaused
         paused = await pauseFacet.isPaused()
         expect(paused).to.be.equal(false)
+    })
+
+    it('GIVEN an external pause WHEN isPaused THEN it reflects the external pause state', async () => {
+        // Initially unpaused
+        let isPaused = await pauseFacet.isPaused()
+        expect(isPaused).to.be.false
+
+        // Set external pause to true
+        await externalPauseMock.setPaused(true, { gasLimit: GAS_LIMIT.default })
+        isPaused = await pauseFacet.isPaused()
+        expect(isPaused).to.be.true
+
+        // Set external pause to false
+        await externalPauseMock.setPaused(false, {
+            gasLimit: GAS_LIMIT.default,
+        })
+        isPaused = await pauseFacet.isPaused()
+        expect(isPaused).to.be.false
+    })
+
+    it('GIVEN an external pause WHEN token is paused THEN isPaused returns true', async () => {
+        // Pause the token
+        await pauseFacet.pause({ gasLimit: GAS_LIMIT.default })
+
+        // Check isPaused
+        const isPaused = await pauseFacet.isPaused()
+        expect(isPaused).to.be.true
+    })
+
+    it('GIVEN an external pause WHEN token is unpaused THEN isPaused reflects external pause state', async () => {
+        // Pause and then unpause the token
+        await pauseFacet.pause({ gasLimit: GAS_LIMIT.default })
+        await pauseFacet.unpause({ gasLimit: GAS_LIMIT.default })
+
+        // Set external pause to true
+        await externalPauseMock.setPaused(true, { gasLimit: GAS_LIMIT.default })
+        let isPaused = await pauseFacet.isPaused()
+        expect(isPaused).to.be.true
+
+        // Set external pause to false
+        await externalPauseMock.setPaused(false, {
+            gasLimit: GAS_LIMIT.default,
+        })
+        isPaused = await pauseFacet.isPaused()
+        expect(isPaused).to.be.false
     })
 })
