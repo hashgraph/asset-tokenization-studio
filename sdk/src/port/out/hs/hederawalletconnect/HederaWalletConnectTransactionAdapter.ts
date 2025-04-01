@@ -248,7 +248,7 @@ import {
   testnet,
 } from '../../../../domain/context/network/Environment';
 import { SupportedWallets } from '../../../../domain/context/network/Wallet';
-import HWCSettings from '../../../../domain/context/walletConnect/HWCSettings';
+import HWCSettings from '../../../../core/settings/walletConnect/HWCSettings';
 import { NotInitialized } from './error/NotInitialized';
 import { AccountNotSet } from './error/AccountNotSet';
 import { NoSettings } from './error/NoSettings';

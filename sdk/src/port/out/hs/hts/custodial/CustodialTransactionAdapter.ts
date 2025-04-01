@@ -232,10 +232,10 @@ import { TransactionType } from '../../../TransactionResponseEnums';
 import Hex from '../../../../../core/Hex.js';
 import { HederaTransactionAdapter } from '../../HederaTransactionAdapter.js';
 import { HTSTransactionResponseAdapter } from '../HTSTransactionResponseAdapter.js';
-import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
+import DfnsSettings from '../../../../../core/settings/custodialWalletSettings/DfnsSettings.js';
 import { HederaId } from '../../../../../domain/context/shared/HederaId.js';
-import FireblocksSettings from '../../../../../domain/context/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../../../../domain/context/custodialWalletSettings/AWSKMSSettings.js';
+import FireblocksSettings from '../../../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
+import AWSKMSSettings from '../../../../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
 import { PublickKeyNotFound } from '../../../error/PublickKeyNotFound.js';
 import { UnsupportedNetwork } from '../../../error/UnsupportedNetwork.js';
 

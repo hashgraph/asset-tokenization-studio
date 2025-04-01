@@ -218,7 +218,7 @@ import {
 } from './ClearingTransferFromByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
-import { InvalidResponse } from 'port/out/mirror/error/InvalidResponse.js';
+import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
 import { EmptyResponse } from '../../../error/EmptyResponse.js';
 
 @CommandHandler(ClearingTransferFromByPartitionCommand)
