@@ -206,10 +206,8 @@
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import SecurityService from '../../../../../service/SecurityService';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
+import ContractService from '../../../../../service/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetAggregatedBalanceAdjustmentFactorQuery,
@@ -221,27 +219,19 @@ export class GetAggregatedBalanceAdjustmentFactorQueryHandler
   implements IQueryHandler<GetAggregatedBalanceAdjustmentFactorQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetAggregatedBalanceAdjustmentFactorQuery,
   ): Promise<GetAggregatedBalanceAdjustmentFactorQueryResponse> {
     const { securityId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
     const res =
       await this.queryAdapter.getAggregatedBalanceAdjustmentFactor(
         securityEvmAddress,

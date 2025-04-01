@@ -203,24 +203,46 @@
 
 */
 
-export class Kyc {
-  validFrom: string;
-  validTo: string;
-  VCid: string;
-  issuer: string;
-  status: number;
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import {
+  GetAccountSecurityRelationshipQuery,
+  GetAccountSecurityRelationshipQueryResponse,
+} from './GetAccountSecurityRelationshipQuery.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../service/ContractService.js';
 
+@QueryHandler(GetAccountSecurityRelationshipQuery)
+export class GetAccountSecurityRelationshipQueryHandler
+  implements IQueryHandler<GetAccountSecurityRelationshipQuery>
+{
+  [x: string]: any;
   constructor(
-    validFrom: string,
-    validTo: string,
-    VCid: string,
-    issuer: string,
-    status: number,
-  ) {
-    this.validFrom = validFrom;
-    this.validTo = validTo;
-    this.VCid = VCid;
-    this.issuer = issuer;
-    this.status = status;
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+  ) {}
+
+  async execute(
+    query: GetAccountSecurityRelationshipQuery,
+  ): Promise<GetAccountSecurityRelationshipQueryResponse> {
+    const { targetId, securityId } = query;
+
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
+
+    const res = await this.queryAdapter.getAccountSecurityRelationship(
+      securityEvmAddress,
+      targetEvmAddress,
+    );
+
+    return Promise.resolve(
+      new GetAccountSecurityRelationshipQueryResponse(res),
+    );
   }
 }

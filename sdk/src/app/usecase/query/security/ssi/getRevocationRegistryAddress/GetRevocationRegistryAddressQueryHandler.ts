@@ -207,46 +207,39 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import SecurityService from '../../../../../service/SecurityService';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
+import AccountService from '../../../../../service/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetRevocationRegistryAddressQuery,
   GetRevocationRegistryAddressQueryResponse,
 } from './GetRevocationRegistryAddressQuery';
+import ContractService from '../../../../../service/ContractService';
 
 @QueryHandler(GetRevocationRegistryAddressQuery)
 export class GetRevocationRegistryAddressQueryHandler
   implements IQueryHandler<GetRevocationRegistryAddressQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetRevocationRegistryAddressQuery,
   ): Promise<GetRevocationRegistryAddressQueryResponse> {
     const { securityId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
     const res =
       await this.queryAdapter.getRevocationRegistryAddress(securityEvmAddress);
 
     const hederaId = (
-      await this.mirrorNodeAdapter.getAccountInfo(res)
+      await this.accountService.getAccountInfo(res)
     ).id.toString();
 
     return new GetRevocationRegistryAddressQueryResponse(hederaId);

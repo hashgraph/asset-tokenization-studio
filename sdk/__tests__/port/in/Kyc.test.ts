@@ -507,7 +507,7 @@ describe('🧪 Kyc tests', () => {
         await SSIManagement.removeIssuer(
           new RemoveIssuerRequest({
             securityId: equity.evmDiamondAddress!,
-            issuerId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT,
           }),
         )
       ).payload,

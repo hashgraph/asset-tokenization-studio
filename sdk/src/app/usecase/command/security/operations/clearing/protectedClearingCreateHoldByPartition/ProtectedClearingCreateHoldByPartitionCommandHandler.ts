@@ -210,28 +210,15 @@ import SecurityService from '../../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../../error/SecurityPaused.js';
 import {
   ProtectedClearingCreateHoldByPartitionCommand,
   ProtectedClearingCreateHoldByPartitionCommandResponse,
 } from './ProtectedClearingCreateHoldByPartitionCommand.js';
-import { PartitionsUnProtected } from '../../../error/PartitionsUnprotected.js';
-import {
-  getProtectedPartitionRole,
-  SecurityRole,
-} from '../../../../../../../domain/context/security/SecurityRole.js';
-import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
-import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
-import { BigNumber } from 'ethers';
-import { NounceAlreadyUsed } from '../../../error/NounceAlreadyUsed.js';
-import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
-import ValidationService from '../../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(ProtectedClearingCreateHoldByPartitionCommand)
 export class ProtectedClearingCreateHoldByPartitionCommandHandler
@@ -250,6 +237,8 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -272,74 +261,35 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const sourceEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(sourceId);
 
-    await this.validationService.validateClearingActivated(securityId);
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (!security.arePartitionsProtected) {
-      throw new PartitionsUnProtected();
-    }
-
-    const protectedPartitionRole = getProtectedPartitionRole(
-      partitionId,
-    ) as SecurityRole;
-
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        protectedPartitionRole,
-      ))
-    ) {
-      throw new NotGrantedRole(protectedPartitionRole);
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
-
-    const escrowEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(escrow)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
-      : new EvmAddress(escrow);
+    const escrowEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(escrow);
 
     const targetEvmAddress: EvmAddress =
-      targetId === '0.0.0'
-        ? new EvmAddress(EVM_ZERO_ADDRESS)
-        : HEDERA_FORMAT_ID_REGEX.exec(targetId)
-          ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-          : new EvmAddress(targetId);
-
+      await this.accountService.getAccountEvmAddressOrNull(targetId);
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    if (
-      account.evmAddress &&
-      (
-        await this.queryAdapter.balanceOf(securityEvmAddress, sourceEvmAddress)
-      ).lt(amountBd.toBigNumber())
-    ) {
-      throw new InsufficientBalance();
-    }
+    await this.validationService.checkPause(securityId);
 
-    const nextNounce = await this.queryAdapter.getNounceFor(
-      securityEvmAddress,
-      sourceEvmAddress,
+    await this.validationService.checkClearingActivated(securityId);
+
+    await this.validationService.checkProtectedPartitions(security);
+
+    await this.validationService.checkProtectedPartitionRole(
+      partitionId,
+      account.id.toString(),
+      securityId,
     );
 
-    if (BigNumber.from(nonce).lte(nextNounce)) {
-      throw new NounceAlreadyUsed(nonce);
-    }
+    await this.validationService.checkDecimals(security, amount);
+
+    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+
+    await this.validationService.checkValidNounce(securityId, sourceId, nonce);
 
     const res = await handler.protectedClearingCreateHoldByPartition(
       securityEvmAddress,
