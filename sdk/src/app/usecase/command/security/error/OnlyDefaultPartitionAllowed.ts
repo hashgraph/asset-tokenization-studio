@@ -203,25 +203,13 @@
 
 */
 
-import { Command } from '../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class ExecuteHoldByPartitionCommandResponse implements CommandResponse {
-  constructor(
-    public readonly payload: boolean,
-    public readonly transactionId: string,
-  ) {}
-}
-
-export class ExecuteHoldByPartitionCommand extends Command<ExecuteHoldByPartitionCommandResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly sourceId: string,
-    public readonly amount: string,
-    public readonly holdId: number,
-    public readonly targetId: string,
-    public readonly partitionId: string,
-  ) {
-    super();
+export class OnlyDefaultPartitionAllowed extends BaseError {
+  constructor() {
+    super(
+      ErrorCode.OnlyDefaultPartitionAllowed,
+      `Only default partition allowed in single mode`,
+    );
   }
 }

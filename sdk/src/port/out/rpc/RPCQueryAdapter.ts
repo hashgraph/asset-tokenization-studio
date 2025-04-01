@@ -899,7 +899,7 @@ export class RPCQueryAdapter {
     data: string,
     operatorData: string,
   ): Promise<[boolean, string, string]> {
-    LogService.logTrace(`Checking can transfer`);
+    LogService.logTrace(`Checking can transfer by partition`);
 
     return await this.connect(
       ERC1410ScheduledTasks__factory,
@@ -911,6 +911,21 @@ export class RPCQueryAdapter {
       amount.toBigNumber(),
       data,
       operatorData,
+    );
+  }
+
+  async canTransfer(
+    address: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    data: string,
+  ): Promise<[boolean, string, string]> {
+    LogService.logTrace(`Checking can transfer`);
+
+    return await this.connect(ERC1594__factory, address.toString()).canTransfer(
+      targetId.toString(),
+      amount.toBigNumber(),
+      data,
     );
   }
 
@@ -1021,6 +1036,34 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(Cap__factory, address.toString()).getMaxSupply();
+  }
+
+  async getMaxSupplyByPartition(
+    address: EvmAddress,
+    partitionId: string,
+  ): Promise<BigNumber> {
+    LogService.logTrace(
+      `Getting max supply by partition for ${address.toString()} security`,
+    );
+
+    return await this.connect(
+      Cap__factory,
+      address.toString(),
+    ).getMaxSupplyByPartition(partitionId);
+  }
+
+  async getTotalSupplyByPartition(
+    address: EvmAddress,
+    partitionId: string,
+  ): Promise<BigNumber> {
+    LogService.logTrace(
+      `Getting max supply by partition for ${address.toString()} security`,
+    );
+
+    return await this.connect(
+      ERC1410ScheduledTasks__factory,
+      address.toString(),
+    ).totalSupplyByPartition(partitionId);
   }
 
   async getRegulationDetails(
