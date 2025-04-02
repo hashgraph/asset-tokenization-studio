@@ -308,7 +308,9 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
     );
 
     if (!res.id)
-      throw new EmptyResponse('Protected Clearing Redeem By Partition');
+      throw new EmptyResponse(
+        ProtectedClearingRedeemByPartitionCommandHandler.name,
+      );
 
     let clearingId: string;
 
