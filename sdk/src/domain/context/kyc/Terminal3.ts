@@ -205,6 +205,10 @@
 
 import { SignedCredential } from '@terminal3/vc_core';
 import BigDecimal from '../shared/BigDecimal.js';
+import { InvalidVcFormat } from './error/InvalidVcFormat.js';
+import { ErrorDecodingVc } from './error/ErrorDecodingVc.js';
+import { MissingVcData } from './error/MissingVcData.js';
+import { InvalidVcDates } from './error/InvalidVcDates.js';
 
 export class Terminal3VC {
   public static vcFromBase64(base64: string): SignedCredential {
@@ -213,26 +217,24 @@ export class Terminal3VC {
       const parsedData = JSON.parse(jsonString);
 
       if (!parsedData || typeof parsedData !== 'object') {
-        throw new Error('Invalid SignedCredential format');
+        throw new InvalidVcFormat();
       }
 
       return parsedData as SignedCredential;
     } catch (error) {
-      throw new Error(
-        `Failed to decode Base64 VC: ${(error as Error).message}`,
-      );
+      throw new ErrorDecodingVc(error);
     }
   }
 
   public static extractHolder(signedCredential: SignedCredential): string {
     const holder = signedCredential.credentialSubject.id.split(':').pop();
-    if (!holder) throw new Error('VC must include a valid holder.');
+    if (!holder) throw new MissingVcData('holder');
     return holder;
   }
 
   public static extractIssuer(signedCredential: SignedCredential): string {
     const issuer = signedCredential.issuer.split(':').pop();
-    if (!issuer) throw new Error('VC must include a valid issuer.');
+    if (!issuer) throw new MissingVcData('issuer');
     return issuer;
   }
 
@@ -257,13 +259,13 @@ export class Terminal3VC {
 
   private static validateDateOrder(signedCredential: SignedCredential): void {
     if (!signedCredential.validFrom || !signedCredential.validUntil)
-      throw new Error(`Invalid validFrom or validUntil.`);
+      throw new InvalidVcDates();
     if (
       BigDecimal.fromString(signedCredential.validFrom).isGreaterThan(
         BigDecimal.fromString(signedCredential.validUntil),
       )
     ) {
-      throw new Error('validUntil must be later than validFrom.');
+      throw new InvalidVcDates();
     }
   }
 }
