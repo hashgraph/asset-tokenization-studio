@@ -326,6 +326,8 @@ import {
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
   UPDATE_EXTERNAL_PAUSES_GAS,
+  ADD_EXTERNAL_PAUSE_GAS,
+  REMOVE_EXTERNAL_PAUSE_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -2823,6 +2825,44 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: UPDATE_EXTERNAL_PAUSES_GAS,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding External Pause for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalPauseManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addExternalPause(externalPauseAddress.toString(), {
+        gasLimit: ADD_EXTERNAL_PAUSE_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing External Pause for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalPauseManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeExternalPause(externalPauseAddress.toString(), {
+        gasLimit: REMOVE_EXTERNAL_PAUSE_GAS,
+      }),
       this.networkService.environment,
     );
   }

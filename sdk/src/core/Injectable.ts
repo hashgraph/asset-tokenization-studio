@@ -360,6 +360,8 @@ import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/
 import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
 import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
 import { UpdateExternalPausesCommandHandler } from '../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommandHandler.js';
+import { AddExternalPauseCommandHandler } from '../app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommandHandler.js';
+import { RemoveExternalPauseCommandHandler } from '../app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommandHandler.js';
 import { GetExternalPausesCountQueryHandler } from '../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQueryHandler.js';
 import { GetExternalPausesMembersQueryHandler } from '../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQueryHandler.js';
 import { IsExternalPauseQueryHandler } from '../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQueryHandler.js';
@@ -642,6 +644,14 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: UpdateExternalPausesCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddExternalPauseCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveExternalPauseCommandHandler,
   },
 ];
 

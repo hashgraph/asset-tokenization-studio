@@ -209,12 +209,16 @@ import { handleValidation } from './Common';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
 import {
+  AddExternalPauseRequest,
+  RemoveExternalPauseRequest,
+  UpdateExternalPausesRequest,
   GetExternalPausesCountRequest,
   GetExternalPausesMembersRequest,
   IsExternalPauseRequest,
-  UpdateExternalPausesRequest,
 } from './request';
 import { UpdateExternalPausesCommand } from '../../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
+import { AddExternalPauseCommand } from '../../app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommand.js';
+import { RemoveExternalPauseCommand } from '../../app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
 import { IsExternalPauseQuery } from '../../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery.js';
 import { GetExternalPausesCountQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery.js';
@@ -223,6 +227,12 @@ import { GetExternalPausesMembersQuery } from '../../app/usecase/query/security/
 interface IExternalPausesInPort {
   updateExternalPauses(
     request: UpdateExternalPausesRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  addExternalPause(
+    request: AddExternalPauseRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeExternalPause(
+    request: RemoveExternalPauseRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   isExternalPause(request: IsExternalPauseRequest): Promise<boolean>;
   getExternalPausesCount(
@@ -252,6 +262,30 @@ class ExternalPausesInPort implements IExternalPausesInPort {
         externalPausesAddresses,
         actives,
       ),
+    );
+  }
+
+  @LogError
+  async addExternalPause(
+    request: AddExternalPauseRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, externalPauseAddress } = request;
+    handleValidation('AddExternalPauseRequest', request);
+
+    return await this.commandBus.execute(
+      new AddExternalPauseCommand(securityId, externalPauseAddress),
+    );
+  }
+
+  @LogError
+  async removeExternalPause(
+    request: RemoveExternalPauseRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, externalPauseAddress } = request;
+    handleValidation('RemoveExternalPauseRequest', request);
+
+    return await this.commandBus.execute(
+      new RemoveExternalPauseCommand(securityId, externalPauseAddress),
     );
   }
 

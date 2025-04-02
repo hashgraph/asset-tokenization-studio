@@ -2542,6 +2542,36 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     },
   );
 
+  singletonInstance.addExternalPause = jest.fn(
+    async (address: EvmAddress, externalPauseAddress: EvmAddress) => {
+      const account = identifiers(externalPauseAddress.toString())[1];
+
+      if (externalPausesList.findIndex((item) => item == account) == -1) {
+        externalPausesList.push(account);
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.removeExternalPause = jest.fn(
+    async (address: EvmAddress, externalPauseAddress: EvmAddress) => {
+      const account = identifiers(externalPauseAddress.toString())[1];
+
+      if (issuerList.findIndex((item) => item == account) !== -1) {
+        issuerList = issuerList.filter((item) => item !== account);
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),
   };

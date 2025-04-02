@@ -307,6 +307,8 @@ import {
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
   UPDATE_EXTERNAL_PAUSES_GAS,
+  REMOVE_EXTERNAL_PAUSE_GAS,
+  ADD_EXTERNAL_PAUSE_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -3096,6 +3098,68 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(UPDATE_EXTERNAL_PAUSES_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'addExternalPause';
+    LogService.logTrace(
+      `Adding External Pause for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalPauseManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalPauseAddress.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(ADD_EXTERNAL_PAUSE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'removeExternalPause';
+    LogService.logTrace(
+      `Removing External Pause for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalPauseManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalPauseAddress.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(REMOVE_EXTERNAL_PAUSE_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
