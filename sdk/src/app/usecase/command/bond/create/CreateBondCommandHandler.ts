@@ -262,6 +262,7 @@ export class CreateBondCommandHandler
       configId,
       configVersion,
       diamondOwnerAccount,
+      externalPauses,
     } = command;
 
     if (!factory) {
@@ -298,6 +299,22 @@ export class CreateBondCommandHandler
             .evmAddress
         : resolver.toString(),
     );
+
+    let externalPausesEvmAddresses: EvmAddress[] = [];
+    if (externalPauses) {
+      externalPausesEvmAddresses = await Promise.all(
+        externalPauses.map(
+          async (address) =>
+            new EvmAddress(
+              HEDERA_FORMAT_ID_REGEX.test(address)
+                ? (await this.mirrorNodeAdapter.getContractInfo(address))
+                    .evmAddress
+                : address.toString(),
+            ),
+        ),
+      );
+    }
+
     const handler = this.transactionService.getHandler();
 
     const bondInfo = new BondDetails(
@@ -321,6 +338,7 @@ export class CreateBondCommandHandler
       resolverEvmAddress,
       configId,
       configVersion,
+      externalPausesEvmAddresses,
       diamondOwnerAccountEvmAddress,
       factory.toString(),
     );

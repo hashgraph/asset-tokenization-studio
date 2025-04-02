@@ -359,6 +359,14 @@ import { OperatorClearingTransferByPartitionCommandHandler } from '../app/usecas
 import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler.js';
 import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
 import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
+import { UpdateExternalPausesCommandHandler } from '../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommandHandler.js';
+import { AddExternalPauseCommandHandler } from '../app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommandHandler.js';
+import { RemoveExternalPauseCommandHandler } from '../app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommandHandler.js';
+import { GetExternalPausesCountQueryHandler } from '../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQueryHandler.js';
+import { GetExternalPausesMembersQueryHandler } from '../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQueryHandler.js';
+import { IsExternalPauseQueryHandler } from '../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQueryHandler.js';
+import { SetPausedMockCommandHandler } from '../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommandHandler.js';
+import { IsPausedMockQueryHandler } from '../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -371,6 +379,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: ConcreteCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetPausedMockCommandHandler,
   },
   // Security Creation
   {
@@ -635,12 +647,28 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: OperatorClearingTransferByPartitionCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UpdateExternalPausesCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddExternalPauseCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveExternalPauseCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: ConcreteQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsPausedMockQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
@@ -902,6 +930,18 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsOperatorQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalPausesCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalPausesMembersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsExternalPauseQueryHandler,
   },
 ];
 
