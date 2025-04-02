@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {LibCommon} from '../layer_0/common/LibCommon.sol';
+import {LibCommon} from '../layer_0/common/libraries/LibCommon.sol';
 import {
     IBusinessLogicResolverWrapper
 } from '../interfaces/resolver/IBusinessLogicResolverWrapper.sol';
