@@ -207,7 +207,7 @@ import { Account, Network } from '../../../src/index.js';
 import { GetAccountInfoRequest } from '../../../src/port/in/request/index.js';
 import ConnectRequest, {
   SupportedWallets,
-} from '../../../src/port/in/request/ConnectRequest.js';
+} from '../../../src/port/in/request/network/ConnectRequest.js';
 
 import { CLIENT_ACCOUNT_ECDSA, CLIENT_PUBLIC_KEY_ECDSA } from '../../config.js';
 import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
