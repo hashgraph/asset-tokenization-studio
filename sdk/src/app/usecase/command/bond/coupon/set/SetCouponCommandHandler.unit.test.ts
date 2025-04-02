@@ -221,6 +221,8 @@ import {
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../../service/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { EmptyResponse } from '../../../../../../app/usecase/command/security/error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
 
 describe('SetCouponCommandHandler', () => {
   let handler: SetCouponCommandHandler;
@@ -255,9 +257,7 @@ describe('SetCouponCommandHandler', () => {
           .getHandler()
           .setCoupon.mockResolvedValue({ id: undefined });
 
-        await expect(handler.execute(command)).rejects.toThrow(
-          'Set coupon Command Handler response id empty',
-        );
+        await expect(handler.execute(command)).rejects.toThrow(EmptyResponse);
       });
 
       it('throws error when mirror node returns invalid results', async () => {
@@ -270,9 +270,7 @@ describe('SetCouponCommandHandler', () => {
           getResultInvalid,
         ]);
 
-        await expect(handler.execute(command)).rejects.toThrow(
-          'Invalid data structure',
-        );
+        await expect(handler.execute(command)).rejects.toThrow(InvalidResponse);
       });
     });
 

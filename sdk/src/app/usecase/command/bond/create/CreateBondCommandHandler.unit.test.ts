@@ -223,6 +223,7 @@ import {
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../service/ContractService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import { EmptyResponse } from '../../security/error/EmptyResponse.js';
 
 describe('CreateBondCommandHandler', () => {
   let handler: CreateBondCommandHandler;
@@ -308,9 +309,7 @@ describe('CreateBondCommandHandler', () => {
           .getHandler()
           .createBond.mockResolvedValue({ id: undefined });
 
-        await expect(handler.execute(command)).rejects.toThrow(
-          'Create Command Handler response id empty',
-        );
+        await expect(handler.execute(command)).rejects.toThrow(EmptyResponse);
       });
     });
 
