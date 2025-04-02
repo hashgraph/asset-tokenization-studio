@@ -211,6 +211,7 @@ import {
   AmountFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
+  NonDefaultPartitionIdFixture,
   PartitionIdFixture,
   RoleFixture,
 } from '../../../__tests__/fixtures/shared/DataFixture';
@@ -286,6 +287,7 @@ describe('ValidationService', () => {
   const firstAddress = HederaIdPropsFixture.create();
   const secondAddress = HederaIdPropsFixture.create();
   const partitionId = PartitionIdFixture.create();
+  const nonDefaultPartitionId = NonDefaultPartitionIdFixture.create();
   const role = RoleFixture.create();
   const amount = AmountFixture.create();
   const sourceId = HederaIdPropsFixture.create();
@@ -1141,7 +1143,10 @@ describe('ValidationService', () => {
 
     it('should throw OnlyDefaultPartitionAllowed when non-default partitionId and single partition', async () => {
       await expect(
-        service.checkMultiPartition(securitySingle, partitionId.value),
+        service.checkMultiPartition(
+          securitySingle,
+          nonDefaultPartitionId.value,
+        ),
       ).rejects.toThrow(OnlyDefaultPartitionAllowed);
     });
   });
