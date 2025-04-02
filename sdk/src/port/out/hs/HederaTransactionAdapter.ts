@@ -430,10 +430,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'deployEquity';
     try {
       if (!securityInfo.regulationType) {
-        throw new MissingRegulationType;
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new MissingRegulationSubType;
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -543,10 +543,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'deployBond';
     try {
       if (!securityInfo.regulationType) {
-        throw new MissingRegulationType;
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new MissingRegulationSubType;
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {

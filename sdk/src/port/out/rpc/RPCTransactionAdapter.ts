@@ -565,10 +565,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new MissingRegulationType;
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new MissingRegulationSubType;
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
