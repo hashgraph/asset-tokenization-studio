@@ -321,6 +321,11 @@ import GetClearingCreateHoldForByPartitionRequest from './GetClearingCreateHoldF
 import GetClearingRedeemForByPartitionRequest from './GetClearingRedeemForByPartitionRequest.js';
 import GetClearingTransferForByPartitionRequest from './GetClearingTransferForByPartitionRequest.js';
 import UpdateExternalPausesRequest from './UpdateExternalPausesRequest.js';
+import AddExternalPauseRequest from './AddExternalPauseRequest.js';
+import RemoveExternalPauseRequest from './RemoveExternalPauseRequest.js';
+import IsExternalPauseRequest from './IsExternalPauseRequest.js';
+import GetExternalPausesCountRequest from './GetExternalPausesCountRequest.js';
+import GetExternalPausesMembersRequest from './GetExternalPausesMembersRequest.js';
 import IsPausedMockRequest from './IsPausedMockRequest.js';
 import SetPausedMockRequest from './SetPausedMockRequest.js';
 
@@ -443,6 +448,11 @@ export {
   OperatorClearingRedeemByPartitionRequest,
   OperatorClearingTransferByPartitionRequest,
   UpdateExternalPausesRequest,
+  AddExternalPauseRequest,
+  RemoveExternalPauseRequest,
+  IsExternalPauseRequest,
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
   IsPausedMockRequest,
   SetPausedMockRequest,
 };

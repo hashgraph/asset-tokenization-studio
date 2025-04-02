@@ -1414,6 +1414,32 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       return accountClearingTransfer[0];
     },
   );
+
+  singletonInstance.isExternalPause = jest.fn(
+    async (address: EvmAddress, externalPauseAddress: EvmAddress) => {
+      const account = identifiers(externalPauseAddress.toString())[1];
+      return externalPausesList.findIndex((item) => item == account) !== -1;
+    },
+  );
+
+  singletonInstance.getExternalPausesCount = jest.fn(
+    async (address: EvmAddress) => {
+      return externalPausesList.length;
+    },
+  );
+
+  singletonInstance.getExternalPausesMembers = jest.fn(
+    async (address: EvmAddress, start: number, end: number) => {
+      const externalPausesListMembers: string[] = [];
+
+      for (let i = start; i < end; i++) {
+        externalPausesListMembers.push(externalPausesList[i]);
+      }
+
+      return externalPausesListMembers;
+    },
+  );
+
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };
@@ -2508,6 +2534,38 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
           externalPausesList.push(account);
         }
       });
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.addExternalPause = jest.fn(
+    async (address: EvmAddress, externalPauseAddress: EvmAddress) => {
+      const account = identifiers(externalPauseAddress.toString())[1];
+
+      if (externalPausesList.findIndex((item) => item == account) == -1) {
+        externalPausesList.push(account);
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.removeExternalPause = jest.fn(
+    async (address: EvmAddress, externalPauseAddress: EvmAddress) => {
+      const account = identifiers(externalPauseAddress.toString())[1];
+
+      if (externalPausesList.findIndex((item) => item == account) !== -1) {
+        externalPausesList = externalPausesList.filter(
+          (item) => item !== account,
+        );
+      }
 
       return {
         status: 'success',

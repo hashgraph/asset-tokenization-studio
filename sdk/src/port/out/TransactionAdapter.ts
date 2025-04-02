@@ -814,6 +814,16 @@ interface IExternalPausesAdapter {
     actives: boolean[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 interface IExternalPausesMockAdapter {
@@ -1567,6 +1577,20 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     externalPausesAddresses: EvmAddress[],
     actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
