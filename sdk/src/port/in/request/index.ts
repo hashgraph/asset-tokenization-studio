@@ -326,6 +326,8 @@ import RemoveExternalPauseRequest from './RemoveExternalPauseRequest.js';
 import IsExternalPauseRequest from './IsExternalPauseRequest.js';
 import GetExternalPausesCountRequest from './GetExternalPausesCountRequest.js';
 import GetExternalPausesMembersRequest from './GetExternalPausesMembersRequest.js';
+import IsPausedMockRequest from './IsPausedMockRequest.js';
+import SetPausedMockRequest from './SetPausedMockRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -451,4 +453,6 @@ export {
   IsExternalPauseRequest,
   GetExternalPausesCountRequest,
   GetExternalPausesMembersRequest,
+  IsPausedMockRequest,
+  SetPausedMockRequest,
 };

@@ -251,6 +251,7 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ExternalPauseManagement__factory,
+  MockedExternalPause__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1623,5 +1624,16 @@ export class RPCQueryAdapter {
       ExternalPauseManagement__factory,
       address.toString(),
     ).getExternalPausesMembers(start, end);
+  }
+
+  async isPausedMock(address: EvmAddress): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the external pause mock contract: ${address.toString()} is paused`,
+    );
+
+    return await this.connect(
+      MockedExternalPause__factory,
+      address.toString(),
+    ).isPaused();
   }
 }

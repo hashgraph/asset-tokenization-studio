@@ -365,6 +365,8 @@ import { RemoveExternalPauseCommandHandler } from '../app/usecase/command/securi
 import { GetExternalPausesCountQueryHandler } from '../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQueryHandler.js';
 import { GetExternalPausesMembersQueryHandler } from '../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQueryHandler.js';
 import { IsExternalPauseQueryHandler } from '../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQueryHandler.js';
+import { SetPausedMockCommandHandler } from '../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommandHandler.js';
+import { IsPausedMockQueryHandler } from '../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -377,6 +379,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: ConcreteCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetPausedMockCommandHandler,
   },
   // Security Creation
   {
@@ -659,6 +665,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: ConcreteQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsPausedMockQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,

@@ -328,6 +328,7 @@ import {
   UPDATE_EXTERNAL_PAUSES_GAS,
   ADD_EXTERNAL_PAUSE_GAS,
   REMOVE_EXTERNAL_PAUSE_GAS,
+  SET_PAUSED_MOCK_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -365,6 +366,7 @@ import {
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
   ExternalPauseManagement__factory,
+  MockedExternalPause__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -2862,6 +2864,25 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).removeExternalPause(externalPauseAddress.toString(), {
         gasLimit: REMOVE_EXTERNAL_PAUSE_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting paused to external pause mock contract ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedExternalPause__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).setPaused(paused, {
+        gasLimit: SET_PAUSED_MOCK_GAS,
       }),
       this.networkService.environment,
     );
