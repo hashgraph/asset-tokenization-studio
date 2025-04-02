@@ -2561,8 +2561,8 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     async (address: EvmAddress, externalPauseAddress: EvmAddress) => {
       const account = identifiers(externalPauseAddress.toString())[1];
 
-      if (issuerList.findIndex((item) => item == account) !== -1) {
-        issuerList = issuerList.filter((item) => item !== account);
+      if (externalPausesList.findIndex((item) => item == account) !== -1) {
+        externalPausesList = externalPausesList.filter((item) => item !== account);
       }
 
       return {

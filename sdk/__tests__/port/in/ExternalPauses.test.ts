@@ -371,6 +371,14 @@ describe('🧪 External Pauses Management tests', () => {
 
   it('External Pause functionality work successfully', async () => {
     expect(
+      await ExternalPausesManagement.getExternalPausesCount(
+        new GetExternalPausesCountRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toEqual(1);
+
+    expect(
       (
         await ExternalPausesManagement.updateExternalPauses(
           new UpdateExternalPausesRequest({
@@ -410,22 +418,7 @@ describe('🧪 External Pauses Management tests', () => {
         }),
       ),
     ).toContain(CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString());
-  }, 600_000);
 
-  it('Add External Pause functionality work successfully', async () => {
-    expect(
-      (
-        await ExternalPausesManagement.addExternalPause(
-          new AddExternalPauseRequest({
-            securityId: equity.evmDiamondAddress!,
-            externalPauseAddress: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-          }),
-        )
-      ).payload,
-    ).toBe(true);
-  }, 600_000);
-
-  it('Remove External Pause functionality work successfully', async () => {
     expect(
       (
         await ExternalPausesManagement.removeExternalPause(
@@ -436,5 +429,32 @@ describe('🧪 External Pauses Management tests', () => {
         )
       ).payload,
     ).toBe(true);
+
+    expect(
+      await ExternalPausesManagement.getExternalPausesCount(
+        new GetExternalPausesCountRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toEqual(1);
+
+    expect(
+      (
+        await ExternalPausesManagement.addExternalPause(
+          new AddExternalPauseRequest({
+            securityId: equity.evmDiamondAddress!,
+            externalPauseAddress: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    expect(
+      await ExternalPausesManagement.getExternalPausesCount(
+        new GetExternalPausesCountRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toEqual(2);
   }, 600_000);
 });
