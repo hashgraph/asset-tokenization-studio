@@ -2562,7 +2562,9 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       const account = identifiers(externalPauseAddress.toString())[1];
 
       if (externalPausesList.findIndex((item) => item == account) !== -1) {
-        externalPausesList = externalPausesList.filter((item) => item !== account);
+        externalPausesList = externalPausesList.filter(
+          (item) => item !== account,
+        );
       }
 
       return {
