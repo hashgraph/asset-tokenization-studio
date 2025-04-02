@@ -203,130 +203,47 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from './Common';
-import Injectable from '../../core/Injectable';
-import { CommandBus } from '../../core/command/CommandBus';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import {
-  AddExternalPauseRequest,
-  RemoveExternalPauseRequest,
-  UpdateExternalPausesRequest,
-  GetExternalPausesCountRequest,
-  GetExternalPausesMembersRequest,
-  IsExternalPauseRequest,
-} from './request';
-import { UpdateExternalPausesCommand } from '../../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
-import { AddExternalPauseCommand } from '../../app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommand.js';
-import { RemoveExternalPauseCommand } from '../../app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import { IsExternalPauseQuery } from '../../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery.js';
-import { GetExternalPausesCountQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery.js';
-import { GetExternalPausesMembersQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery.js';
+  GetExternalPausesCountQuery,
+  GetExternalPausesCountQueryResponse,
+} from './GetExternalPausesCountQuery.js';
 
-interface IExternalPausesInPort {
-  updateExternalPauses(
-    request: UpdateExternalPausesRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  addExternalPause(
-    request: AddExternalPauseRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  removeExternalPause(
-    request: RemoveExternalPauseRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  isExternalPause(request: IsExternalPauseRequest): Promise<boolean>;
-  getExternalPausesCount(
-    request: GetExternalPausesCountRequest,
-  ): Promise<number>;
-  getExternalPausesMembers(
-    request: GetExternalPausesMembersRequest,
-  ): Promise<string[]>;
-}
-
-class ExternalPausesInPort implements IExternalPausesInPort {
+@QueryHandler(GetExternalPausesCountQuery)
+export class GetExternalPausesCountQueryHandler
+  implements IQueryHandler<GetExternalPausesCountQuery>
+{
   constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
   ) {}
 
-  @LogError
-  async updateExternalPauses(
-    request: UpdateExternalPausesRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalPausesAddresses, actives } = request;
-    handleValidation('UpdateExternalPausesRequest', request);
+  async execute(
+    query: GetExternalPausesCountQuery,
+  ): Promise<GetExternalPausesCountQueryResponse> {
+    const { securityId } = query;
+    const security = await this.securityService.get(securityId);
+    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    return await this.commandBus.execute(
-      new UpdateExternalPausesCommand(
-        securityId,
-        externalPausesAddresses,
-        actives,
-      ),
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
     );
-  }
 
-  @LogError
-  async addExternalPause(
-    request: AddExternalPauseRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalPauseAddress } = request;
-    handleValidation('AddExternalPauseRequest', request);
-
-    return await this.commandBus.execute(
-      new AddExternalPauseCommand(securityId, externalPauseAddress),
-    );
-  }
-
-  @LogError
-  async removeExternalPause(
-    request: RemoveExternalPauseRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalPauseAddress } = request;
-    handleValidation('RemoveExternalPauseRequest', request);
-
-    return await this.commandBus.execute(
-      new RemoveExternalPauseCommand(securityId, externalPauseAddress),
-    );
-  }
-
-  @LogError
-  async isExternalPause(request: IsExternalPauseRequest): Promise<boolean> {
-    const { securityId, externalPauseAddress } = request;
-    handleValidation('IsExternalPauseRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new IsExternalPauseQuery(securityId, externalPauseAddress),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getExternalPausesCount(
-    request: GetExternalPausesCountRequest,
-  ): Promise<number> {
-    const { securityId } = request;
-    handleValidation('GetExternalPausesCountRequest', request);
-
-    return (
-      await this.queryBus.execute(new GetExternalPausesCountQuery(securityId))
-    ).payload;
-  }
-
-  @LogError
-  async getExternalPausesMembers(
-    request: GetExternalPausesMembersRequest,
-  ): Promise<string[]> {
-    const { securityId, start, end } = request;
-    handleValidation('GetExternalPausesMembersRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetExternalPausesMembersQuery(securityId, start, end),
-      )
-    ).payload;
+    const res =
+      await this.queryAdapter.getExternalPausesCount(securityEvmAddress);
+    return new GetExternalPausesCountQueryResponse(res);
   }
 }
-
-const ExternalPausesManagement = new ExternalPausesInPort();
-export default ExternalPausesManagement;

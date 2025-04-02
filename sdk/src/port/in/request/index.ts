@@ -323,6 +323,9 @@ import GetClearingTransferForByPartitionRequest from './GetClearingTransferForBy
 import UpdateExternalPausesRequest from './UpdateExternalPausesRequest.js';
 import AddExternalPauseRequest from './AddExternalPauseRequest.js';
 import RemoveExternalPauseRequest from './RemoveExternalPauseRequest.js';
+import IsExternalPauseRequest from './IsExternalPauseRequest.js';
+import GetExternalPausesCountRequest from './GetExternalPausesCountRequest.js';
+import GetExternalPausesMembersRequest from './GetExternalPausesMembersRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -445,4 +448,7 @@ export {
   UpdateExternalPausesRequest,
   AddExternalPauseRequest,
   RemoveExternalPauseRequest,
+  IsExternalPauseRequest,
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
 };

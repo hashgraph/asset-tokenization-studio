@@ -250,6 +250,7 @@ import {
   ClearingHoldCreationFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
+  ExternalPauseManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1580,5 +1581,47 @@ export class RPCQueryAdapter {
       ClearingActionsFacet__factory,
       address.toString(),
     ).isClearingActivated();
+  }
+
+  async isExternalPause(
+    address: EvmAddress,
+    externalPauseAddress: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the address ${externalPauseAddress.toString()} is a external pause for the security: ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ExternalPauseManagement__factory,
+      address.toString(),
+    ).isExternalPause(externalPauseAddress.toString());
+  }
+
+  async getExternalPausesCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(
+      `Getting External Pauses Count for ${address.toString()}`,
+    );
+
+    const getExternalPausesCount = await this.connect(
+      ExternalPauseManagement__factory,
+      address.toString(),
+    ).getExternalPausesCount();
+
+    return getExternalPausesCount.toNumber();
+  }
+
+  async getExternalPausesMembers(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting External Pauses Members For security ${address.toString()} from ${start} to ${end}`,
+    );
+
+    return await this.connect(
+      ExternalPauseManagement__factory,
+      address.toString(),
+    ).getExternalPausesMembers(start, end);
   }
 }

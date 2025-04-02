@@ -207,6 +207,9 @@ import {
   AddExternalPauseRequest,
   CreateEquityRequest,
   Equity,
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
+  IsExternalPauseRequest,
   LoggerTransports,
   RemoveExternalPauseRequest,
   Role,
@@ -366,7 +369,15 @@ describe('🧪 External Pauses Management tests', () => {
     );
   }, 900_000);
 
-  it('Update External Pause functionality work successfully', async () => {
+  it('External Pause functionality work successfully', async () => {
+    expect(
+      await ExternalPausesManagement.getExternalPausesCount(
+        new GetExternalPausesCountRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toEqual(1);
+
     expect(
       (
         await ExternalPausesManagement.updateExternalPauses(
@@ -380,22 +391,34 @@ describe('🧪 External Pauses Management tests', () => {
         )
       ).payload,
     ).toBe(true);
-  }, 600_000);
 
-  it('Add External Pause functionality work successfully', async () => {
     expect(
-      (
-        await ExternalPausesManagement.addExternalPause(
-          new AddExternalPauseRequest({
-            securityId: equity.evmDiamondAddress!,
-            externalPauseAddress: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-          }),
-        )
-      ).payload,
+      await ExternalPausesManagement.isExternalPause(
+        new IsExternalPauseRequest({
+          securityId: equity.evmDiamondAddress!,
+          externalPauseAddress: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        }),
+      ),
     ).toBe(true);
-  }, 600_000);
 
-  it('Remove External Pause functionality work successfully', async () => {
+    expect(
+      await ExternalPausesManagement.getExternalPausesCount(
+        new GetExternalPausesCountRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toEqual(2);
+
+    expect(
+      await ExternalPausesManagement.getExternalPausesMembers(
+        new GetExternalPausesMembersRequest({
+          securityId: equity.evmDiamondAddress!,
+          start: 0,
+          end: 2,
+        }),
+      ),
+    ).toContain(CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString());
+
     expect(
       (
         await ExternalPausesManagement.removeExternalPause(
@@ -406,5 +429,32 @@ describe('🧪 External Pauses Management tests', () => {
         )
       ).payload,
     ).toBe(true);
+
+    expect(
+      await ExternalPausesManagement.getExternalPausesCount(
+        new GetExternalPausesCountRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toEqual(1);
+
+    expect(
+      (
+        await ExternalPausesManagement.addExternalPause(
+          new AddExternalPauseRequest({
+            securityId: equity.evmDiamondAddress!,
+            externalPauseAddress: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    expect(
+      await ExternalPausesManagement.getExternalPausesCount(
+        new GetExternalPausesCountRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toEqual(2);
   }, 600_000);
 });
