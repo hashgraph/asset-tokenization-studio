@@ -816,6 +816,14 @@ interface IExternalPausesAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IExternalPausesMockAdapter {
+  setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -825,7 +833,8 @@ export default abstract class TransactionAdapter
     ISSIManagementTransactionAdapter,
     IKYCTransactionAdapter,
     IClearingAdapter,
-    IExternalPausesAdapter
+    IExternalPausesAdapter,
+    IExternalPausesMockAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1559,6 +1568,13 @@ export default abstract class TransactionAdapter
     externalPausesAddresses: EvmAddress[],
     actives: boolean[],
     securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+    contractId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }

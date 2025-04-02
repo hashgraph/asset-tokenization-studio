@@ -208,8 +208,15 @@ import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { handleValidation } from './Common';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
-import { UpdateExternalPausesRequest } from './request';
+import {
+  IsPausedMockRequest,
+  SetPausedMockRequest,
+  UpdateExternalPausesRequest,
+} from './request';
 import { UpdateExternalPausesCommand } from '../../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
+import { SetPausedMockCommand } from '../../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommand.js';
+import { QueryBus } from '../../core/query/QueryBus.js';
+import { IsPausedMockQuery } from 'app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery.js';
 
 interface IExternalPausesInPort {
   updateExternalPauses(
@@ -217,8 +224,18 @@ interface IExternalPausesInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
-class ExternalPausesInPort implements IExternalPausesInPort {
+interface IExternalPausesMocksInPort {
+  setPausedMock(
+    request: SetPausedMockRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  isPausedMock(request: IsPausedMockRequest): Promise<boolean>;
+}
+
+class ExternalPausesInPort
+  implements IExternalPausesInPort, IExternalPausesMocksInPort
+{
   constructor(
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
     private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
   ) {}
 
@@ -236,6 +253,27 @@ class ExternalPausesInPort implements IExternalPausesInPort {
         actives,
       ),
     );
+  }
+
+  @LogError
+  async setPausedMock(
+    request: SetPausedMockRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { contractId, paused } = request;
+    handleValidation('SetPausedMockRequest', request);
+
+    return await this.commandBus.execute(
+      new SetPausedMockCommand(contractId, paused),
+    );
+  }
+
+  @LogError
+  async isPausedMock(request: IsPausedMockRequest): Promise<boolean> {
+    const { contractId } = request;
+    handleValidation('IsPausedMockRequest', request);
+
+    return (await this.queryBus.execute(new IsPausedMockQuery(contractId)))
+      .payload;
   }
 }
 

@@ -360,6 +360,8 @@ import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/
 import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
 import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
 import { UpdateExternalPausesCommandHandler } from '../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommandHandler.js';
+import { SetPausedMockCommandHandler } from '../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommandHandler.js';
+import { IsPausedMockQueryHandler } from '../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -372,6 +374,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: ConcreteCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetPausedMockCommandHandler,
   },
   // Security Creation
   {
@@ -646,6 +652,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: ConcreteQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsPausedMockQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
