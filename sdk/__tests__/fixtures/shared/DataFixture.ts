@@ -256,6 +256,15 @@ export const PartitionIdFixture = createFixture<{ value: string }>((props) => {
   );
 });
 
+export const NonDefaultPartitionIdFixture = createFixture<{ value: string }>(
+  (props) => {
+    props.value.faker(
+      (faker) =>
+        `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 2, max: 9 })}`,
+    );
+  },
+);
+
 export const RoleFixture = createFixture<{ value: string }>((props) => {
   props.value.faker((faker) =>
     faker.helpers.arrayElement(Object.values(SecurityRole)),

@@ -331,8 +331,6 @@ export class CreateEquityCommandHandler
           1,
         );
 
-        console.log(`Creation event data:${results}`); //! Remove this line
-
         if (!results || results.length !== 1) {
           throw new InvalidResponse(results);
         }
