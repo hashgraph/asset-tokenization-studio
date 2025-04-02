@@ -400,8 +400,8 @@ import {
   ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
-import { InvalidRegulationSubType } from '../../../domain/context/factory/error/InvalidRegulationSubType.js';
-import { InvalidRegulationType } from '../../../domain/context/factory/error/InvalidRegulationType.js';
+import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
+import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -455,10 +455,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new InvalidRegulationType();
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new InvalidRegulationSubType();
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -565,10 +565,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new InvalidRegulationType(securityInfo.regulationType);
+        throw new MissingRegulationType;
       }
       if (!securityInfo.regulationsubType) {
-        throw new InvalidRegulationSubType(securityInfo.regulationsubType);
+        throw new MissingRegulationSubType;
       }
 
       const rbacAdmin: Rbac = {
