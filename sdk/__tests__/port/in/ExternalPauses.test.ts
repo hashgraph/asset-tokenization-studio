@@ -204,9 +204,11 @@
 */
 
 import {
+  AddExternalPauseRequest,
   CreateEquityRequest,
   Equity,
   LoggerTransports,
+  RemoveExternalPauseRequest,
   Role,
   RoleRequest,
   SDK,
@@ -374,6 +376,32 @@ describe('🧪 External Pauses Management tests', () => {
               CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             ],
             actives: [true],
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+  }, 600_000);
+
+  it('Add External Pause functionality work successfully', async () => {
+    expect(
+      (
+        await ExternalPausesManagement.addExternalPause(
+          new AddExternalPauseRequest({
+            securityId: equity.evmDiamondAddress!,
+            externalPauseAddress: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+  }, 600_000);
+
+  it('Remove External Pause functionality work successfully', async () => {
+    expect(
+      (
+        await ExternalPausesManagement.removeExternalPause(
+          new RemoveExternalPauseRequest({
+            securityId: equity.evmDiamondAddress!,
+            externalPauseAddress: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
           }),
         )
       ).payload,
