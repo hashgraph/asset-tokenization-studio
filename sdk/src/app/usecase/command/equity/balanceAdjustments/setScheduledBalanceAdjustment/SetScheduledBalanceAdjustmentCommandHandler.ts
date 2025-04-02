@@ -218,6 +218,8 @@ import AccountService from '../../../../../service/AccountService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
 
 @CommandHandler(SetScheduledBalanceAdjustmentCommand)
 export class SetScheduledBalanceAdjustmentCommandHandler
@@ -263,9 +265,7 @@ export class SetScheduledBalanceAdjustmentCommandHandler
     );
 
     if (!res.id)
-      throw new Error(
-        'Set Scheduler Balance Adjustment Command Handler response id empty',
-      );
+      throw new EmptyResponse(SetScheduledBalanceAdjustmentCommandHandler.name);
 
     let balanceAdjustmentId: string;
 
@@ -281,7 +281,7 @@ export class SetScheduledBalanceAdjustmentCommandHandler
       );
 
       if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
+        throw new InvalidResponse(results);
       }
 
       balanceAdjustmentId = results[1];

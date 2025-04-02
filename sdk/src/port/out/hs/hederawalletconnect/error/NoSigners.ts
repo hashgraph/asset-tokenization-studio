@@ -203,23 +203,10 @@
 
 */
 
-/* eslint-disable jest/no-mocks-import */
-import { CommandBus } from '../../../src/core/command/CommandBus.js';
-import Injectable from '../../../src/core/Injectable.js';
-import {
-  ConcreteCommand,
-  ConcreteCommandResponse,
-} from './__mocks__/ConcreteCommandHandler.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-const commandBus = Injectable.resolve(CommandBus);
-
-describe('🧪 CommandHandler Test', () => {
-  it('Executes a simple command', async () => {
-    const execSpy = jest.spyOn(commandBus, 'execute');
-    const command = new ConcreteCommand('1', 4);
-    const res = await commandBus.execute(command);
-    expect(res).toBeInstanceOf(ConcreteCommandResponse);
-    expect(res.payload).toBe(command.payload);
-    expect(execSpy).toHaveBeenCalled();
-  });
-});
+export class NoSigners extends BaseError {
+  constructor() {
+    super(ErrorCode.NoSigners, `❌ No signers retrieved from wallet connect`);
+  }
+}

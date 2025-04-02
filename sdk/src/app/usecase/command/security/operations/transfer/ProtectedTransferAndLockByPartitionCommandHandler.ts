@@ -218,6 +218,8 @@ import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeA
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { EmptyResponse } from '../../error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
 
 @CommandHandler(ProtectedTransferAndLockByPartitionCommand)
 export class ProtectedTransferAndLockByPartitionCommandHandler
@@ -305,8 +307,8 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
     );
 
     if (!res.id)
-      throw new Error(
-        'Protected Transfer and Lock Command Handler response id empty',
+      throw new EmptyResponse(
+        ProtectedTransferAndLockByPartitionCommandHandler.name,
       );
 
     let lockId: string;
@@ -323,7 +325,7 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
       );
 
       if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
+        throw new InvalidResponse(results);
       }
 
       lockId = results[1];

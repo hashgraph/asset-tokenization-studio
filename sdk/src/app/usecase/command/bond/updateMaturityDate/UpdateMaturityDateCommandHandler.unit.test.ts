@@ -203,39 +203,73 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Command } from '../../../../src/core/command/Command.js';
-import { ICommandHandler } from '../../../../src/core/command/CommandHandler.js';
-import { CommandResponse } from '../../../../src/core/command/CommandResponse.js';
-import { CommandHandler } from '../../../../src/core/decorator/CommandHandlerDecorator.js';
+import TransactionService from '../../../../service/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import { UpdateMaturityDateCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
+import {
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { UpdateMaturityDateCommandHandler } from './UpdateMaturityDateCommandHandler.js';
+import {
+  UpdateMaturityDateCommand,
+  UpdateMaturityDateCommandResponse,
+} from './UpdateMaturityDateCommand.js';
+import ContractService from '../../../../service/ContractService.js';
+import ValidationService from '../../../../service/ValidationService.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 
-export class ConcreteCommandResponse implements CommandResponse {
-  constructor(public readonly payload: number) {}
-}
+describe('UpdateMaturityDateCommandHandler', () => {
+  let handler: UpdateMaturityDateCommandHandler;
+  let command: UpdateMaturityDateCommand;
+  const transactionServiceMock = createMock<TransactionService>();
+  const contractServiceMock = createMock<ContractService>();
+  const validationServiceMock = createMock<ValidationService>();
 
-export class ConcreteCommand extends Command<ConcreteCommandResponse> {
-  constructor(
-    public readonly itemId: string,
-    public readonly payload: number,
-  ) {
-    super();
-  }
-}
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
 
-export class ConcreteCommandRepository {
-  public map = new Map<ConcreteCommand, any>();
-}
+  beforeEach(() => {
+    handler = new UpdateMaturityDateCommandHandler(
+      transactionServiceMock,
+      contractServiceMock,
+      validationServiceMock,
+    );
+    command = UpdateMaturityDateCommandFixture.create();
+  });
 
-@CommandHandler(ConcreteCommand)
-export class ConcreteCommandHandler
-  implements ICommandHandler<ConcreteCommand>
-{
-  constructor(
-    public readonly repo: ConcreteCommandRepository = new ConcreteCommandRepository(),
-  ) {}
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-  execute(command: ConcreteCommand): Promise<ConcreteCommandResponse> {
-    this.repo.map.set(command, 'Hello world');
-    return Promise.resolve(new ConcreteCommandResponse(command.payload));
-  }
-}
+  describe('execute', () => {
+    it('should successfully update maturity date in response', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+      validationServiceMock.checkMaturityDate.mockResolvedValue(undefined);
+
+      transactionServiceMock.getHandler().updateMaturityDate.mockResolvedValue({
+        id: transactionId,
+      });
+
+      const result = await handler.execute(command);
+
+      expect(result).toBeInstanceOf(UpdateMaturityDateCommandResponse);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(validationServiceMock.checkMaturityDate).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().updateMaturityDate,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().updateMaturityDate,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        parseInt(command.maturityDate),
+        command.securityId,
+      );
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
+    });
+  });
+});
