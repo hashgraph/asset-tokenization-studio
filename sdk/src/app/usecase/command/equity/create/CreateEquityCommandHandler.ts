@@ -318,7 +318,7 @@ export class CreateEquityCommandHandler
       factory.toString(),
     );
 
-    if (!res.id) throw new EmptyResponse('Create Command');
+    if (!res.id) throw new EmptyResponse(CreateEquityCommandHandler.name);
 
     let contractAddress: string;
     try {

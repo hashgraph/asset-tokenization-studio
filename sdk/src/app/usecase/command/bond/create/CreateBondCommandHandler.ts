@@ -314,7 +314,7 @@ export class CreateBondCommandHandler
       factory.toString(),
     );
 
-    if (!res.id) throw new EmptyResponse('Create');
+    if (!res.id) throw new EmptyResponse(CreateBondCommandHandler.name);
 
     let contractAddress: string;
     try {

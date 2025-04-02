@@ -207,6 +207,6 @@ import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 export class EmptyResponse extends BaseError {
   constructor(handler: string) {
-    super(ErrorCode.EmptyResponse, `${handler} handler response id empty`);
+    super(ErrorCode.EmptyResponse, `${handler} response id empty`);
   }
 }

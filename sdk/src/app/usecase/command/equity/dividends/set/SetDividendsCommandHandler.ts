@@ -246,7 +246,7 @@ export class SetDividendsCommandHandler
       address,
     );
 
-    if (!res.id) throw new EmptyResponse('Set dividend');
+    if (!res.id) throw new EmptyResponse(SetDividendsCommandHandler.name);
 
     let dividendId: string;
 

@@ -305,7 +305,10 @@ export class ProtectedCreateHoldByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id) throw new EmptyResponse('Protected Create Hold By Partition');
+    if (!res.id)
+      throw new EmptyResponse(
+        ProtectedCreateHoldByPartitionCommandHandler.name,
+      );
 
     let holdId: string;
 

@@ -276,7 +276,8 @@ export class ClearingRedeemByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id) throw new EmptyResponse('Clearing Redeem By Partition');
+    if (!res.id)
+      throw new EmptyResponse(ClearingRedeemByPartitionCommandHandler.name);
 
     let clearingId: string;
 

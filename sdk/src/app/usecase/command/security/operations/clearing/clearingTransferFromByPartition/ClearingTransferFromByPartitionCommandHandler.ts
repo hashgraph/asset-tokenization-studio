@@ -293,7 +293,9 @@ export class ClearingTransferFromByPartitionCommandHandler
     );
 
     if (!res.id)
-      throw new EmptyResponse('Create Clearing Transfer From By Partition');
+      throw new EmptyResponse(
+        ClearingTransferFromByPartitionCommandHandler.name,
+      );
 
     let clearingId: string;
 

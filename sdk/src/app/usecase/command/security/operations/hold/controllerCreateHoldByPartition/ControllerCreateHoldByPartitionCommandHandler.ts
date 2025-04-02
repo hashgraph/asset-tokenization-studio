@@ -297,7 +297,10 @@ export class ControllerCreateHoldByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id) throw new EmptyResponse('Controller Create Hold By Partition');
+    if (!res.id)
+      throw new EmptyResponse(
+        ControllerCreateHoldByPartitionCommandHandler.name,
+      );
 
     let holdId: string;
 

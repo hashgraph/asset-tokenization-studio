@@ -306,7 +306,10 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
       signature,
     );
 
-    if (!res.id) throw new EmptyResponse('Protected Transfer and Lock');
+    if (!res.id)
+      throw new EmptyResponse(
+        ProtectedTransferAndLockByPartitionCommandHandler.name,
+      );
 
     let lockId: string;
 

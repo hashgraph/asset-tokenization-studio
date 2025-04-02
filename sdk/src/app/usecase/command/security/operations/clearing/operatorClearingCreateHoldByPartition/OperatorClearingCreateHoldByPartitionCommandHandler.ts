@@ -299,7 +299,9 @@ export class OperatorClearingCreateHoldByPartitionCommandHandler
     );
 
     if (!res.id)
-      throw new EmptyResponse('Operator Clearing Create Hold By Partition');
+      throw new EmptyResponse(
+        OperatorClearingCreateHoldByPartitionCommandHandler.name,
+      );
 
     let clearingId: string;
 

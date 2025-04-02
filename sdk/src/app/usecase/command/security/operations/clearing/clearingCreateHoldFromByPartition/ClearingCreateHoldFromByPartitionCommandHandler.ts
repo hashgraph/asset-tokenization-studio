@@ -289,7 +289,9 @@ export class ClearingCreateHoldFromByPartitionCommandHandler
     );
 
     if (!res.id)
-      throw new EmptyResponse('Clearing Create Hold From By Partition');
+      throw new EmptyResponse(
+        ClearingCreateHoldFromByPartitionCommandHandler.name,
+      );
 
     let clearingId: string;
 

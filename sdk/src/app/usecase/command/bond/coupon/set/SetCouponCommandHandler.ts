@@ -245,7 +245,7 @@ export class SetCouponCommandHandler
       address,
     );
 
-    if (!res.id) throw new EmptyResponse('Set coupon');
+    if (!res.id) throw new EmptyResponse(SetCouponCommandHandler.name);
     let couponId: string;
 
     if (res.response && res.response.couponID) {

@@ -264,7 +264,8 @@ export class SetScheduledBalanceAdjustmentCommandHandler
       securityId,
     );
 
-    if (!res.id) throw new EmptyResponse('Set Scheduler Balance Adjustment');
+    if (!res.id)
+      throw new EmptyResponse(SetScheduledBalanceAdjustmentCommandHandler.name);
 
     let balanceAdjustmentId: string;
 

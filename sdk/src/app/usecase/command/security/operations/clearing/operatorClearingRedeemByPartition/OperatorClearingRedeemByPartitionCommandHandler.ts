@@ -295,7 +295,9 @@ export class OperatorClearingRedeemByPartitionCommandHandler
     );
 
     if (!res.id)
-      throw new EmptyResponse('Operator Create Clearing Redeem By Partition');
+      throw new EmptyResponse(
+        OperatorClearingRedeemByPartitionCommandHandler.name,
+      );
 
     let clearingId: string;
 

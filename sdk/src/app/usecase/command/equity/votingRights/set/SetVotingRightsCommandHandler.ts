@@ -245,7 +245,7 @@ export class SetVotingRightsCommandHandler
       address,
     );
 
-    if (!res.id) throw new EmptyResponse('Set voting right');
+    if (!res.id) throw new EmptyResponse(SetVotingRightsCommandHandler.name);
 
     let voteId: string;
 

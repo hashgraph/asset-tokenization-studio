@@ -209,7 +209,7 @@ export class InvalidRegulationType extends BaseError {
   constructor(value?: number) {
     super(
       ErrorCode.InvalidRegulationType,
-      `Regulation Type ${value ?? 'undefined'} is not valid`,
+      `Regulation Type ${value} is not valid`,
     );
   }
 }

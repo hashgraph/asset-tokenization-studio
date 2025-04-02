@@ -270,7 +270,7 @@ export class TransferAndLockCommandHandler
       securityId,
     );
 
-    if (!res.id) throw new EmptyResponse('Transfer and Lock');
+    if (!res.id) throw new EmptyResponse(TransferAndLockCommandHandler.name);
 
     let lockId: string;
 

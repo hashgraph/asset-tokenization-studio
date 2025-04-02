@@ -289,7 +289,8 @@ export class CreateHoldFromByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id) throw new EmptyResponse('Create Hold From By Partition');
+    if (!res.id)
+      throw new EmptyResponse(CreateHoldFromByPartitionCommandHandler.name);
 
     let holdId: string;
 
