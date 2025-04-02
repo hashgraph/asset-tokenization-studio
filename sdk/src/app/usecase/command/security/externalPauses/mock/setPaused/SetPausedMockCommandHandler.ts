@@ -205,7 +205,10 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
-import { SetPausedMockCommand, SetPausedMockCommandResponse } from './SetPausedMockCommand';
+import {
+  SetPausedMockCommand,
+  SetPausedMockCommandResponse,
+} from './SetPausedMockCommand';
 import TransactionService from '../../../../../../service/TransactionService';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId';
@@ -226,7 +229,9 @@ export class SetPausedMockCommandHandler
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
   ) {}
 
-  async execute(command: SetPausedMockCommand): Promise<SetPausedMockCommandResponse> {
+  async execute(
+    command: SetPausedMockCommand,
+  ): Promise<SetPausedMockCommandResponse> {
     const { contractId, paused } = command;
     const handler = this.transactionService.getHandler();
 

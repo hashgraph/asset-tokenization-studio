@@ -2833,7 +2833,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     contract: EvmAddress,
     paused: boolean,
   ): Promise<TransactionResponse> {
-    LogService.logTrace(`Setting paused to external pause mock contract ${contract.toString()}`);
+    LogService.logTrace(
+      `Setting paused to external pause mock contract ${contract.toString()}`,
+    );
 
     return RPCTransactionResponseAdapter.manageResponse(
       await MockedExternalPause__factory.connect(
