@@ -216,7 +216,7 @@ import {
 import { UpdateExternalPausesCommand } from '../../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
 import { SetPausedMockCommand } from '../../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommand.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
-import { IsPausedMockQuery } from 'app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery.js';
+import { IsPausedMockQuery } from '../../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery.js';
 
 interface IExternalPausesInPort {
   updateExternalPauses(
