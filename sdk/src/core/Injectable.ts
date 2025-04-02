@@ -360,6 +360,9 @@ import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/
 import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
 import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
 import { UpdateExternalPausesCommandHandler } from '../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommandHandler.js';
+import { GetExternalPausesCountQueryHandler } from '../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQueryHandler.js';
+import { GetExternalPausesMembersQueryHandler } from '../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQueryHandler.js';
+import { IsExternalPauseQueryHandler } from '../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -907,6 +910,18 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsOperatorQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalPausesCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalPausesMembersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsExternalPauseQueryHandler,
   },
 ];
 

@@ -321,6 +321,9 @@ import GetClearingCreateHoldForByPartitionRequest from './GetClearingCreateHoldF
 import GetClearingRedeemForByPartitionRequest from './GetClearingRedeemForByPartitionRequest.js';
 import GetClearingTransferForByPartitionRequest from './GetClearingTransferForByPartitionRequest.js';
 import UpdateExternalPausesRequest from './UpdateExternalPausesRequest.js';
+import IsExternalPauseRequest from './IsExternalPauseRequest.js';
+import GetExternalPausesCountRequest from './GetExternalPausesCountRequest.js';
+import GetExternalPausesMembersRequest from './GetExternalPausesMembersRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -441,4 +444,7 @@ export {
   OperatorClearingRedeemByPartitionRequest,
   OperatorClearingTransferByPartitionRequest,
   UpdateExternalPausesRequest,
+  IsExternalPauseRequest,
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
 };

@@ -208,17 +208,34 @@ import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { handleValidation } from './Common';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
-import { UpdateExternalPausesRequest } from './request';
+import {
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
+  IsExternalPauseRequest,
+  UpdateExternalPausesRequest,
+} from './request';
 import { UpdateExternalPausesCommand } from '../../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
+import { QueryBus } from '../../core/query/QueryBus.js';
+import { IsExternalPauseQuery } from '../../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery.js';
+import { GetExternalPausesCountQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery.js';
+import { GetExternalPausesMembersQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery.js';
 
 interface IExternalPausesInPort {
   updateExternalPauses(
     request: UpdateExternalPausesRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  isExternalPause(request: IsExternalPauseRequest): Promise<boolean>;
+  getExternalPausesCount(
+    request: GetExternalPausesCountRequest,
+  ): Promise<number>;
+  getExternalPausesMembers(
+    request: GetExternalPausesMembersRequest,
+  ): Promise<string[]>;
 }
 
 class ExternalPausesInPort implements IExternalPausesInPort {
   constructor(
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
     private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
   ) {}
 
@@ -236,6 +253,44 @@ class ExternalPausesInPort implements IExternalPausesInPort {
         actives,
       ),
     );
+  }
+
+  @LogError
+  async isExternalPause(request: IsExternalPauseRequest): Promise<boolean> {
+    const { securityId, externalPauseAddress } = request;
+    handleValidation('IsExternalPauseRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new IsExternalPauseQuery(securityId, externalPauseAddress),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getExternalPausesCount(
+    request: GetExternalPausesCountRequest,
+  ): Promise<number> {
+    const { securityId } = request;
+    handleValidation('GetExternalPausesCountRequest', request);
+
+    return (
+      await this.queryBus.execute(new GetExternalPausesCountQuery(securityId))
+    ).payload;
+  }
+
+  @LogError
+  async getExternalPausesMembers(
+    request: GetExternalPausesMembersRequest,
+  ): Promise<string[]> {
+    const { securityId, start, end } = request;
+    handleValidation('GetExternalPausesMembersRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetExternalPausesMembersQuery(securityId, start, end),
+      )
+    ).payload;
   }
 }
 
