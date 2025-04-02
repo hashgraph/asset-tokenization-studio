@@ -203,22 +203,73 @@
 
 */
 
-/* eslint-disable jest/no-mocks-import */
-import { QueryBus } from '../../../src/core/query/QueryBus.js';
+import TransactionService from '../../../../service/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import { UpdateMaturityDateCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
 import {
-  ConcreteQuery,
-  ConcreteQueryResponse,
-} from './__mocks__/ConcreteQueryHandler.js';
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { UpdateMaturityDateCommandHandler } from './UpdateMaturityDateCommandHandler.js';
+import {
+  UpdateMaturityDateCommand,
+  UpdateMaturityDateCommandResponse,
+} from './UpdateMaturityDateCommand.js';
+import ContractService from '../../../../service/ContractService.js';
+import ValidationService from '../../../../service/ValidationService.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 
-const queryBus = new QueryBus();
+describe('UpdateMaturityDateCommandHandler', () => {
+  let handler: UpdateMaturityDateCommandHandler;
+  let command: UpdateMaturityDateCommand;
+  const transactionServiceMock = createMock<TransactionService>();
+  const contractServiceMock = createMock<ContractService>();
+  const validationServiceMock = createMock<ValidationService>();
 
-describe('🧪 QueryHandler Test', () => {
-  it('Executes a simple query', async () => {
-    const execSpy = jest.spyOn(queryBus, 'execute');
-    const query = new ConcreteQuery('1', 4);
-    const res = await queryBus.execute(query);
-    expect(res).toBeInstanceOf(ConcreteQueryResponse);
-    expect(res.payload).toBe(query.payload);
-    expect(execSpy).toHaveBeenCalled();
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+
+  beforeEach(() => {
+    handler = new UpdateMaturityDateCommandHandler(
+      transactionServiceMock,
+      contractServiceMock,
+      validationServiceMock,
+    );
+    command = UpdateMaturityDateCommandFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    it('should successfully update maturity date in response', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+      validationServiceMock.checkMaturityDate.mockResolvedValue(undefined);
+
+      transactionServiceMock.getHandler().updateMaturityDate.mockResolvedValue({
+        id: transactionId,
+      });
+
+      const result = await handler.execute(command);
+
+      expect(result).toBeInstanceOf(UpdateMaturityDateCommandResponse);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(validationServiceMock.checkMaturityDate).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().updateMaturityDate,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().updateMaturityDate,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        parseInt(command.maturityDate),
+        command.securityId,
+      );
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
+    });
   });
 });

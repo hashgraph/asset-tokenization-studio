@@ -203,23 +203,82 @@
 
 */
 
-/* eslint-disable jest/no-mocks-import */
-import { CommandBus } from '../../../src/core/command/CommandBus.js';
-import Injectable from '../../../src/core/Injectable.js';
+import { CreateBondCommand } from '../../../src/app/usecase/command/bond/create/CreateBondCommand';
+import { SetCouponCommand } from '../../../src/app/usecase/command/bond/coupon/set/SetCouponCommand';
+import { createFixture } from '../config';
+import ContractId from '../../../src/domain/context/contract/ContractId';
 import {
-  ConcreteCommand,
-  ConcreteCommandResponse,
-} from './__mocks__/ConcreteCommandHandler.js';
+  ContractIdPropFixture,
+  HederaIdPropsFixture,
+} from '../shared/DataFixture';
+import { SecurityPropsFixture } from '../shared/SecurityFixture';
+import { UpdateMaturityDateCommand } from '../../../src/app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import { BondDetails } from '../../../src/domain/context/bond/BondDetails';
 
-const commandBus = Injectable.resolve(CommandBus);
+export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
+  (command) => {
+    command.address.as(() => HederaIdPropsFixture.create().value);
+    command.recordDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.executionDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.rate.faker((faker) =>
+      faker.number.int({ min: 100, max: 999 }).toString(),
+    );
+  },
+);
 
-describe('🧪 CommandHandler Test', () => {
-  it('Executes a simple command', async () => {
-    const execSpy = jest.spyOn(commandBus, 'execute');
-    const command = new ConcreteCommand('1', 4);
-    const res = await commandBus.execute(command);
-    expect(res).toBeInstanceOf(ConcreteCommandResponse);
-    expect(res.payload).toBe(command.payload);
-    expect(execSpy).toHaveBeenCalled();
+export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
+  (command) => {
+    command.security.fromFixture(SecurityPropsFixture);
+    command.currency.faker((faker) => faker.finance.currencyCode());
+    command.nominalValue.faker((faker) =>
+      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    command.startingDate.faker((faker) =>
+      faker.date.recent().getTime().toString(),
+    );
+    command.maturityDate.faker((faker) =>
+      faker.date.future({ years: 2 }).getTime().toString(),
+    );
+    command.couponFrequency.faker((faker) =>
+      faker.number.int({ min: 1, max: 12 }).toString(),
+    );
+    command.couponRate.faker((faker) =>
+      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    command.firstCouponDate.faker((faker) =>
+      faker.date.soon({ days: 30 }).getTime().toString(),
+    );
+    command.factory?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
+    );
+    command.resolver?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
+    );
+    command.configId?.as(() => HederaIdPropsFixture.create().value);
+    command.configVersion?.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
+    command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const UpdateMaturityDateCommandFixture =
+  createFixture<UpdateMaturityDateCommand>((command) => {
+    command.maturityDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
   });
+
+export const BondDetailsFixture = createFixture<BondDetails>((props) => {
+  props.currency.faker((faker) => faker.finance.currencyCode());
+  props.nominalValue.faker((faker) =>
+    faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+  );
+  props.startingDate.faker((faker) => faker.date.past());
+  props.maturityDate.faker((faker) => faker.date.recent());
 });

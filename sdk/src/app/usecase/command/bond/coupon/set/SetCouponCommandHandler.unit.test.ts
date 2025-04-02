@@ -203,42 +203,137 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+import {
+  SetCouponCommand,
+  SetCouponCommandResponse,
+} from './SetCouponCommand.js';
+import { SetCouponCommandHandler } from './SetCouponCommandHandler.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { SetCouponCommandFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
+import { createMock } from '@golevelup/ts-jest';
+import TransactionService from '../../../../../service/TransactionService.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import {
+  CouponIdFixture,
+  EvmAddressPropsFixture,
+  GetContractInvalidStringFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { EmptyResponse } from '../../../../../../app/usecase/command/security/error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
-  }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
+describe('SetCouponCommandHandler', () => {
+  let handler: SetCouponCommandHandler;
+  let command: SetCouponCommand;
+  const transactionServiceMock = createMock<TransactionService>();
+  const contractServiceMock = createMock<ContractService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
 
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const couponId = CouponIdFixture.create().id;
+  const getResultInvalid = GetContractInvalidStringFixture.create().value;
 
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
+  beforeEach(() => {
+    handler = new SetCouponCommandHandler(
+      transactionServiceMock,
+      mirrorNodeAdapterMock,
+      contractServiceMock,
+    );
+    command = SetCouponCommandFixture.create();
+  });
 
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws error when transaction response id is missing', async () => {
+        setupContractEvmAddressMock();
+        transactionServiceMock
+          .getHandler()
+          .setCoupon.mockResolvedValue({ id: undefined });
+
+        await expect(handler.execute(command)).rejects.toThrow(EmptyResponse);
       });
-    }
+
+      it('throws error when mirror node returns invalid results', async () => {
+        setupContractEvmAddressMock();
+        transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
+          id: transactionId,
+          response: null,
+        });
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
+          getResultInvalid,
+        ]);
+
+        await expect(handler.execute(command)).rejects.toThrow(InvalidResponse);
+      });
+    });
+
+    describe('success cases', () => {
+      it('successfully sets coupon with couponID in response', async () => {
+        setupContractEvmAddressMock();
+        setupSuccessfulTransactionMock();
+
+        const result = await handler.execute(command);
+
+        expectSuccessfulResponse(result);
+        expectTransactionServiceCall(command, evmAddress);
+      });
+
+      it('recovers coupon ID from mirror node when not in response', async () => {
+        setupContractEvmAddressMock();
+        transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
+          id: transactionId,
+          response: null,
+        });
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
+          getResultInvalid,
+          couponId,
+        ]);
+
+        const result = await handler.execute(command);
+
+        expectSuccessfulResponse(result);
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
+          transactionId,
+          2,
+        );
+      });
+    });
+  });
+
+  function setupContractEvmAddressMock(): void {
+    contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
   }
-}
+
+  function setupSuccessfulTransactionMock(): void {
+    transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
+      id: transactionId,
+      response: { couponID: couponId },
+    });
+  }
+
+  function expectSuccessfulResponse(result: SetCouponCommandResponse): void {
+    expect(result).toBeInstanceOf(SetCouponCommandResponse);
+    expect(result.payload).toBe(parseInt(couponId, 16));
+    expect(result.transactionId).toBe(transactionId);
+  }
+
+  function expectTransactionServiceCall(
+    command: ReturnType<typeof SetCouponCommandFixture.create>,
+    expectedAddress: { value: string },
+  ): void {
+    expect(transactionServiceMock.getHandler().setCoupon).toHaveBeenCalledWith(
+      expectedAddress,
+      BigDecimal.fromString(command.recordDate),
+      BigDecimal.fromString(command.executionDate),
+      BigDecimal.fromString(command.rate),
+      command.address,
+    );
+  }
+});

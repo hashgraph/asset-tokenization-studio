@@ -203,42 +203,213 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+import TransactionService from '../../../../service/TransactionService.js';
+import { CreateBondCommandHandler } from './CreateBondCommandHandler.js';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../service/AccountService.js';
+import { CreateBondCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
+import { InvalidRequest } from '../../error/InvalidRequest.js';
+import {
+  CreateBondCommand,
+  CreateBondCommandResponse,
+} from './CreateBondCommand.js';
+import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import {
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  HederaIdZeroAddressFixture,
+  TransactionIdFixture,
+} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../service/ContractService.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import { EmptyResponse } from '../../security/error/EmptyResponse.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
-  }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
+describe('CreateBondCommandHandler', () => {
+  let handler: CreateBondCommandHandler;
+  let command: CreateBondCommand;
 
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
+  const transactionServiceMock = createMock<TransactionService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const contractResult = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const hederaId = HederaIdPropsFixture.create();
+  const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
 
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
+  beforeEach(() => {
+    handler = new CreateBondCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      mirrorNodeAdapterMock,
+      contractServiceMock,
+    );
+    command = CreateBondCommandFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('should throw InvalidRequest if factory is not provided', async () => {
+        const commandWithNotFactory = {
+          ...command,
+          factory: undefined,
+        };
+
+        await expect(handler.execute(commandWithNotFactory)).rejects.toThrow(
+          new InvalidRequest('Factory not found in request'),
+        );
       });
-    }
-  }
-}
+
+      it('should throw InvalidRequest if resolver is not provided', async () => {
+        const commandWithNotResolver = {
+          ...command,
+          resolver: undefined,
+        };
+
+        await expect(handler.execute(commandWithNotResolver)).rejects.toThrow(
+          new InvalidRequest('Resolver not found in request'),
+        );
+      });
+
+      it('should throw InvalidRequest if configId is not provided', async () => {
+        const commandWithNotConfigId = {
+          ...command,
+          configId: undefined,
+        };
+
+        await expect(handler.execute(commandWithNotConfigId)).rejects.toThrow(
+          new InvalidRequest('Config Id not found in request'),
+        );
+      });
+
+      it('should throw InvalidRequest if configVersion is not provided', async () => {
+        const commandWithNotConfigVersion = {
+          ...command,
+          configVersion: undefined,
+        };
+
+        await expect(
+          handler.execute(commandWithNotConfigVersion),
+        ).rejects.toThrow(
+          new InvalidRequest('Config Version not found in request'),
+        );
+      });
+
+      it('throws error when transaction response id is missing', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        transactionServiceMock
+          .getHandler()
+          .createBond.mockResolvedValue({ id: undefined });
+
+        await expect(handler.execute(command)).rejects.toThrow(EmptyResponse);
+      });
+    });
+
+    describe('success cases', () => {
+      it('should successfully create a bond with bondAddress in response', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        transactionServiceMock.getHandler().createBond.mockResolvedValue({
+          id: transactionId,
+          response: { bondAddress: evmAddress.value },
+        });
+
+        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(
+          transactionId,
+        );
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateBondCommandResponse);
+        expect(result.securityId.value).toBe(transactionId);
+        expect(result.transactionId).toBe(transactionId);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          3,
+        );
+        expect(
+          transactionServiceMock.getHandler().createBond,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mirrorNodeAdapterMock.getHederaIdfromContractAddress,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createBond,
+        ).toHaveBeenCalledWith(
+          command.security,
+          {
+            currency: command.currency,
+            nominalValue: BigDecimal.fromString(command.nominalValue),
+            startingDate: parseInt(command.startingDate),
+            maturityDate: parseInt(command.maturityDate),
+          },
+          {
+            couponFrequency: parseInt(command.couponFrequency),
+            couponRate: BigDecimal.fromString(command.couponRate),
+            firstCouponDate: parseInt(command.firstCouponDate),
+          },
+          evmAddress,
+          evmAddress,
+          command.configId,
+          command.configVersion,
+          evmAddress,
+          command.factory?.toString(),
+        );
+      });
+
+      it('should recover contract ID from mirror node if bondAddress is not in response', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        transactionServiceMock.getHandler().createBond.mockResolvedValue({
+          id: transactionId,
+          response: null,
+        });
+
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
+          contractResult.value,
+        ]);
+
+        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(
+          hederaId.value,
+        );
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateBondCommandResponse);
+        expect(result.securityId.toString()).toBe(hederaId.value);
+        expect(result.transactionId.toString()).toBe(transactionId);
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
+          transactionId,
+          1,
+        );
+      });
+
+      it('should handle error and return fallback response if response code is 1', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
+          id: hederaId.value,
+          evmAddress: evmAddress.value,
+        });
+
+        transactionServiceMock.getHandler().createBond.mockResolvedValue({
+          id: transactionId,
+          response: 1,
+        });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateBondCommandResponse);
+        expect(result.securityId.toString()).toBe(hederaIdZeroAddress);
+        expect(result.transactionId.toString()).toBe(transactionId);
+      });
+    });
+  });
+});

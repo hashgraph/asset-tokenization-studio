@@ -203,39 +203,22 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Command } from '../../../../src/core/command/Command.js';
-import { ICommandHandler } from '../../../../src/core/command/CommandHandler.js';
-import { CommandResponse } from '../../../../src/core/command/CommandResponse.js';
-import { CommandHandler } from '../../../../src/core/decorator/CommandHandlerDecorator.js';
+/* eslint-disable jest/no-mocks-import */
+import { CommandBus } from '../../src/core/command/CommandBus.js';
+import {
+  ConcreteCommand,
+  ConcreteCommandResponse,
+} from './__mocks__/ConcreteCommandHandler';
 
-export class ConcreteCommandResponse implements CommandResponse {
-  constructor(public readonly payload: number) {}
-}
+const commandBus = new CommandBus();
 
-export class ConcreteCommand extends Command<ConcreteCommandResponse> {
-  constructor(
-    public readonly itemId: string,
-    public readonly payload: number,
-  ) {
-    super();
-  }
-}
-
-export class ConcreteCommandRepository {
-  public map = new Map<ConcreteCommand, any>();
-}
-
-@CommandHandler(ConcreteCommand)
-export class ConcreteCommandHandler
-  implements ICommandHandler<ConcreteCommand>
-{
-  constructor(
-    public readonly repo: ConcreteCommandRepository = new ConcreteCommandRepository(),
-  ) {}
-
-  execute(command: ConcreteCommand): Promise<ConcreteCommandResponse> {
-    this.repo.map.set(command, 'Hello world');
-    return Promise.resolve(new ConcreteCommandResponse(command.payload));
-  }
-}
+describe('CommandHandler Test', () => {
+  it('Executes a simple command successfully', async () => {
+    const execSpy = jest.spyOn(commandBus, 'execute');
+    const command = new ConcreteCommand('1', 4);
+    const res = await commandBus.execute(command);
+    expect(res).toBeInstanceOf(ConcreteCommandResponse);
+    expect(res.payload).toBe(command.payload);
+    expect(execSpy).toHaveBeenCalled();
+  });
+});

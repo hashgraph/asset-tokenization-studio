@@ -203,42 +203,39 @@
 
 */
 
-import { ethers } from 'ethers';
-import LogService from '../../app/service/LogService.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from './error/TransactionResponseError.js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Command } from '../../../src/core/command/Command.js';
+import { ICommandHandler } from '../../../src/core/command/CommandHandler.js';
+import { CommandResponse } from '../../../src/core/command/CommandResponse.js';
+import { CommandHandler } from '../../../src/core/decorator/CommandHandlerDecorator.js';
 
-export class TransactionResponseAdapter {
-  manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
+export class ConcreteCommandResponse implements CommandResponse {
+  constructor(public readonly payload: number) {}
+}
+
+export class ConcreteCommand extends Command<ConcreteCommandResponse> {
+  constructor(
+    public readonly itemId: string,
+    public readonly payload: number,
+  ) {
+    super();
   }
-  public static decodeFunctionResult(
-    functionName: string,
-    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-    abi: any, // eslint-disable-line
-    network: string,
-  ): Uint8Array {
-    try {
-      const iface = new ethers.utils.Interface(abi);
+}
 
-      if (!iface.functions[functionName]) {
-        throw new TransactionResponseError({
-          message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
-          network: network,
-        });
-      }
+export class ConcreteCommandRepository {
+  public map = new Map<ConcreteCommand, any>();
+}
 
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = iface.decodeFunctionResult(functionName, resultHex);
+@CommandHandler(ConcreteCommand)
+export class ConcreteCommandHandler
+  implements ICommandHandler<ConcreteCommand>
+{
+  constructor(
+    public readonly repo: ConcreteCommandRepository = new ConcreteCommandRepository(),
+  ) {}
 
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
-      return jsonParsedArray;
-    } catch (error) {
-      LogService.logError(error);
-      throw new TransactionResponseError({
-        message: 'Could not decode function result',
-        network: network,
-      });
-    }
+  execute(command: ConcreteCommand): Promise<ConcreteCommandResponse> {
+    this.repo.map.set(command, 'Hello world');
+    return Promise.resolve(new ConcreteCommandResponse(command.payload));
   }
 }
