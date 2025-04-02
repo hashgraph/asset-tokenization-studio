@@ -214,6 +214,8 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
 
 @CommandHandler(SetCouponCommand)
 export class SetCouponCommandHandler
@@ -243,9 +245,7 @@ export class SetCouponCommandHandler
       address,
     );
 
-    if (!res.id)
-      throw new Error('Set coupon Command Handler response id empty');
-
+    if (!res.id) throw new EmptyResponse(SetCouponCommandHandler.name);
     let couponId: string;
 
     if (res.response && res.response.couponID) {
@@ -260,7 +260,7 @@ export class SetCouponCommandHandler
       );
 
       if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
+        throw new InvalidResponse(results);
       }
 
       couponId = results[1];

@@ -203,23 +203,10 @@
 
 */
 
-import { InvalidTimeUnits } from './error/InvalidTimeUnits';
+import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export class Time {
-  public static delay(
-    time: number,
-    unit: 'seconds' | 'milliseconds' | 'sec' | 'ms',
-  ): Promise<boolean> {
-    let delayInMilliseconds: number;
-    if (unit === 'seconds' || unit === 'sec') {
-      delayInMilliseconds = time * 1000;
-    } else if (unit === 'milliseconds' || unit === 'ms') {
-      delayInMilliseconds = time;
-    } else {
-      throw new InvalidTimeUnits();
-    }
-    return new Promise<boolean>((resolve) =>
-      setTimeout(() => resolve(true), delayInMilliseconds),
-    );
+export class MissingVcData extends BaseError {
+  constructor(missingField: string) {
+    super(ErrorCode.MissingVcData, `VC must include a valid ${missingField}`);
   }
 }
