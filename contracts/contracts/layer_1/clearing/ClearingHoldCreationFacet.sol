@@ -217,6 +217,7 @@ import {
 import {
     _CLEARING_HOLDCREATION_RESOLVER_KEY
 } from '../constants/resolverKeys.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingHoldCreationFacet is
@@ -239,15 +240,12 @@ contract ClearingHoldCreationFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
-
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperation,
-            sender,
-            sender,
-            false,
+            _msgSender(),
             _hold,
-            ''
+            '',
+            ThirdPartyType.NULL
         );
     }
 
@@ -266,20 +264,28 @@ contract ClearingHoldCreationFacet is
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         )
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
+        {
+            _checkExpirationTimestamp(_hold.expirationTimestamp);
+            _checkUnProtectedPartitionsOrWildCardRole();
+        }
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
-            sender,
-            true,
             _hold,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.AUTHORIZED
+        );
+
+        _decreaseAllowedBalanceForClearing(
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ClearingOperationType.HoldCreation,
+            _clearingOperationFrom.from,
+            _hold.amount
         );
     }
 
@@ -298,8 +304,6 @@ contract ClearingHoldCreationFacet is
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         )
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -308,16 +312,16 @@ contract ClearingHoldCreationFacet is
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
             );
+            _checkExpirationTimestamp(_hold.expirationTimestamp);
+            _checkUnProtectedPartitionsOrWildCardRole();
         }
-        address sender = _msgSender();
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
-            sender,
-            false,
             _hold,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.OPERATOR
         );
     }
 

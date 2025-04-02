@@ -209,6 +209,7 @@ pragma solidity 0.8.18;
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
 
 interface IHold {
     enum OperationType {
@@ -241,6 +242,7 @@ interface IHold {
         uint256 id;
         Hold hold;
         bytes operatorData;
+        ThirdPartyType thirdPartyType;
     }
 
     struct HoldDataStorage {
@@ -249,9 +251,46 @@ interface IHold {
         mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
         mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
     }
 
     event HeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event HeldFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event OperatorHeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event ControllerHeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event ProtectedHeldByPartition(
         address indexed operator,
         address indexed tokenHolder,
         bytes32 partition,
@@ -370,6 +409,11 @@ interface IHold {
             address escrow_,
             address destination_,
             bytes memory data_,
-            bytes memory operatorData_
+            bytes memory operatorData_,
+            ThirdPartyType thirdPartyType_
         );
+
+    function getHoldThirdParty(
+        HoldIdentifier calldata _holdIdentifier
+    ) external view returns (address thirdParty_);
 }
