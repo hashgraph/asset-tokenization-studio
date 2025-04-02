@@ -224,7 +224,6 @@ import { QueryBus } from '../../core/query/QueryBus.js';
 import { IsPausedMockQuery } from '../../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery.js';
 import { AddExternalPauseCommand } from '../../app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommand.js';
 import { RemoveExternalPauseCommand } from '../../app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
 import { IsExternalPauseQuery } from '../../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery.js';
 import { GetExternalPausesCountQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery.js';
 import { GetExternalPausesMembersQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery.js';
