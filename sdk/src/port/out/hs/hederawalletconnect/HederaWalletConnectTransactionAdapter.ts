@@ -249,6 +249,15 @@ import {
 } from '../../../../domain/context/network/Environment';
 import { SupportedWallets } from '../../../../domain/context/network/Wallet';
 import HWCSettings from '../../../../core/settings/walletConnect/HWCSettings';
+import { NotInitialized } from './error/NotInitialized';
+import { AccountNotSet } from './error/AccountNotSet';
+import { NoSettings } from './error/NoSettings';
+import { UnsupportedNetwork } from '../../error/UnsupportedNetwork';
+import { NoSigners } from './error/NoSigners';
+import { AccountNotRetrievedFromSigners } from './error/AccountNotRetrievedFromSigners';
+import { AccountNotFound } from '../error/AccountNotFound';
+import { ConsensusNodesNotSet } from './error/ConsensusNodesNotSet';
+import { SignatureNotFound } from './error/SignatureNotFound';
 
 @singleton()
 /**
@@ -333,7 +342,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
 
     if (!hwcSettings) {
       LogService.logError('Error: Hedera WalletConnect settings not set');
-      throw new Error('hedera wallet conenct settings not set');
+      throw new NoSettings();
     }
     this.projectId = hwcSettings.projectId ?? '';
     LogService.logTrace('Project ID set to:', this.projectId);
@@ -373,7 +382,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
         return HederaChainId.Mainnet;
       default:
         LogService.logError('Error: Invalid network name:', network);
-        throw new Error(`❌ Invalid network name: ${network}`);
+        throw new UnsupportedNetwork();
     }
   }
 
@@ -425,9 +434,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
 
     if (!walletConnectSigners) {
       LogService.logError('Error: No signers retrieved from WalletConnect.');
-      throw new Error(
-        `❌ No signers retrieved from wallet connect. Signers: ${walletConnectSigners}`,
-      );
+      throw new NoSigners();
     }
 
     const accountId = walletConnectSigners[0].getAccountId().toString();
@@ -435,9 +442,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
 
     if (!accountId) {
       LogService.logError('Error: No account ID retrieved from signers.');
-      throw new Error(
-        `❌ No account ID retrieved from signers. Account ID: ${accountId}`,
-      );
+      throw new AccountNotRetrievedFromSigners();
     }
 
     const accountMirror =
@@ -449,9 +454,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
 
     if (!accountMirror) {
       LogService.logError('Error: No account info retrieved from Mirror Node.');
-      throw new Error(
-        `❌ No account info retrieved from Mirror Node. Account ID: ${accountId}`,
-      );
+      throw new AccountNotFound();
     }
 
     this.signer = this.dAppConnector.getSigner(AccountId.fromString(accountId));
@@ -539,17 +542,17 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
   ): Promise<TransactionResponse> {
     LogService.logInfo(`🔏 Signing and sending transaction from HWC...`);
     if (!this.dAppConnector) {
-      throw new Error('❌ Hedera WalletConnect not initialized');
+      throw new NotInitialized();
     }
     if (!this.account) {
-      throw new Error('❌ Account not set');
+      throw new AccountNotSet();
     }
     if (
       !this.signer ||
       !this.dAppConnector.signers ||
       this.dAppConnector.signers.length === 0
     ) {
-      throw new Error('❌ No signers found');
+      throw new NoSigners();
     }
 
     try {
@@ -595,10 +598,8 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       if (error instanceof Error) {
         LogService.logError(error.stack);
       }
-      throw new Error(
-        `Error signing and sending transaction: ${
-          error instanceof Object ? JSON.stringify(error, null, 2) : error
-        }`,
+      throw new SigningError(
+        error instanceof Object ? JSON.stringify(error, null, 2) : error,
       );
     }
   }
@@ -618,17 +619,17 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
   async sign(message: string | Transaction): Promise<string> {
     LogService.logInfo('🔏 Signing transaction from HWC...');
     if (!this.dAppConnector) {
-      throw new Error('❌ Hedera WalletConnect not initialized');
+      throw new NotInitialized();
     }
     if (!this.account) {
-      throw new Error('❌ Account not set');
+      throw new AccountNotSet();
     }
     if (
       !this.signer ||
       !this.dAppConnector.signers ||
       this.dAppConnector.signers.length === 0
     ) {
-      throw new Error('❌ No signers found');
+      throw new NoSigners();
     }
     if (!(message instanceof Transaction))
       throw new SigningError(
@@ -638,9 +639,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       !this.networkService.consensusNodes ||
       this.networkService.consensusNodes.length == 0
     ) {
-      throw new Error(
-        '❌ In order to create sign multisignature transactions you must set consensus nodes for the environment',
-      );
+      throw new ConsensusNodesNotSet();
     }
 
     try {
@@ -683,20 +682,14 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
 
       const signaturesLength = decodedSignatureMap.sigPair.length;
       if (signaturesLength === 0) {
-        throw new Error(`❌ No signatures found in response`);
+        throw new SignatureNotFound();
       }
       const firstSignature =
         decodedSignatureMap.sigPair[0].ed25519 ||
         decodedSignatureMap.sigPair[0].ECDSASecp256k1 ||
         decodedSignatureMap.sigPair[0].ECDSA_384;
       if (!firstSignature) {
-        throw new Error(
-          `❌ No signatures found in response: ${JSON.stringify(
-            firstSignature,
-            null,
-            2,
-          )}`,
-        );
+        throw new SignatureNotFound(JSON.stringify(firstSignature, null, 2));
       }
 
       const hexSignature = Hex.fromUint8Array(firstSignature);

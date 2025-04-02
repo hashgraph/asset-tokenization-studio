@@ -219,12 +219,12 @@ import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
 import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter.js';
 import { handleValidation } from './Common.js';
-import GetRoleCountForRequest from './request/GetRoleCountForRequest.js';
-import GetRoleMemberCountRequest from './request/GetRoleMemberCountRequest.js';
-import GetRoleMembersRequest from './request/GetRoleMembersRequest.js';
-import GetRolesForRequest from './request/GetRolesForRequest.js';
-import RoleRequest from './request/RoleRequest.js';
-import ApplyRolesRequest from './request/ApplyRolesRequest.js';
+import GetRoleCountForRequest from './request/security/roles/GetRoleCountForRequest.js';
+import GetRoleMemberCountRequest from './request/security/roles/GetRoleMemberCountRequest.js';
+import GetRoleMembersRequest from './request/security/roles/GetRoleMembersRequest.js';
+import GetRolesForRequest from './request/security/roles/GetRolesForRequest.js';
+import RoleRequest from './request/security/roles/RoleRequest.js';
+import ApplyRolesRequest from './request/security/roles/ApplyRolesRequest.js';
 import { ApplyRolesCommand } from '../../app/usecase/command/security/roles/applyRoles/ApplyRolesCommand.js';
 
 interface IRole {

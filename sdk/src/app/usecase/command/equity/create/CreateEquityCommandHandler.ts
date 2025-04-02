@@ -225,6 +225,8 @@ import { EquityDetails } from '../../../../../domain/context/equity/EquityDetail
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../service/ContractService.js';
 import AccountService from '../../../../service/AccountService.js';
+import { InvalidResponse } from '../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../security/error/EmptyResponse.js';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler
@@ -316,7 +318,7 @@ export class CreateEquityCommandHandler
       factory.toString(),
     );
 
-    if (!res.id) throw new Error('Create Command Handler response id empty');
+    if (!res.id) throw new EmptyResponse(CreateEquityCommandHandler.name);
 
     let contractAddress: string;
     try {
@@ -330,7 +332,7 @@ export class CreateEquityCommandHandler
         );
 
         if (!results || results.length !== 1) {
-          throw new Error('Invalid data structure');
+          throw new InvalidResponse(results);
         }
 
         const data = results.map((result) =>
