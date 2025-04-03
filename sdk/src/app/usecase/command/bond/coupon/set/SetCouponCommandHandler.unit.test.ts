@@ -283,6 +283,9 @@ describe('SetCouponCommandHandler', () => {
 
         expectSuccessfulResponse(result);
         expectTransactionServiceCall(command, evmAddress);
+        expect(
+          transactionServiceMock.getHandler().setCoupon,
+        ).toHaveBeenCalledTimes(1);
       });
 
       it('recovers coupon ID from mirror node when not in response', async () => {
