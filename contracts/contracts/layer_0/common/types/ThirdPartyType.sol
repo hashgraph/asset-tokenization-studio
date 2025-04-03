@@ -203,41 +203,18 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-interface IAssociationStorageWrapper {
-    /**
-     * @dev Emitted when the an account is associated to the token
-     *
-     * @param operator The caller of the function that emitted the event
-     * @param account The associated account
-     */
-    event AccountAssociated(address indexed operator, address indexed account);
+/**
+ * @notice Auxiliary enum used to keep track of the party initating a hold or clearing
+ * @dev Its primary intended use is to know whether the allowance should be returned or not
+ */
 
-    /**
-     * @dev Emitted when the an account is dissociated from the token
-     *
-     * @param operator The caller of the function that emitted the event
-     * @param account The dissociated account
-     */
-    event AccountDissociated(address indexed operator, address indexed account);
-
-    /**
-     * @dev Emitted when the an account is not associated to an account and trying to dissociate it
-     *
-     */
-    error AccountIsNotAssociated(address account);
-
-    /**
-     * @dev Emitted when the account is already associated and we are trying to associate it again
-     *
-     */
-    error AccountAlreadyAssociated(address account);
-
-    /**
-     * @dev Emitted when the account cannot be dissociated because its balance is not 0
-     *
-     */
-    error CannotDissociate(address account);
+enum ThirdPartyType {
+    NULL,
+    AUTHORIZED,
+    OPERATOR,
+    PROTECTED,
+    CONTROLLER
 }

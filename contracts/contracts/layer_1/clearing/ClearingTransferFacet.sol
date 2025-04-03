@@ -212,6 +212,7 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_TRANSFER_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingTransferFacet is
@@ -234,16 +235,13 @@ contract ClearingTransferFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
-
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperation,
             _amount,
             _to,
-            sender,
-            sender,
-            false,
-            ''
+            _msgSender(),
+            '',
+            ThirdPartyType.NULL
         );
     }
 
@@ -269,16 +267,20 @@ contract ClearingTransferFacet is
             _checkValidAddress(_clearingOperationFrom.from);
             _checkValidAddress(_to);
         }
-        address sender = _msgSender();
-
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
             _clearingOperationFrom.from,
-            sender,
-            true,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.AUTHORIZED
+        );
+        _decreaseAllowedBalanceForClearing(
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ClearingOperationType.Transfer,
+            _clearingOperationFrom.from,
+            _amount
         );
     }
 
@@ -308,16 +310,14 @@ contract ClearingTransferFacet is
                 _clearingOperationFrom.from
             );
         }
-        address sender = _msgSender();
 
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
             _clearingOperationFrom.from,
-            sender,
-            false,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.OPERATOR
         );
     }
 
