@@ -379,13 +379,12 @@ import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDeco
 import { ICommandHandler } from '../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../service/TransactionService';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
 import {
   UpdateResolverCommand,
   UpdateResolverCommandResponse,
 } from './updateResolverCommand';
+import ContractService from '../../../../service/ContractService';
 
 @CommandHandler(UpdateResolverCommand)
 export class UpdateResolverCommandHandler
@@ -394,8 +393,8 @@ export class UpdateResolverCommandHandler
   constructor(
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -404,18 +403,10 @@ export class UpdateResolverCommandHandler
     const { configVersion, securityId, resolver, configId } = command;
     const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    const resolverEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(resolver.toString())
-        ? (await this.mirrorNodeAdapter.getContractInfo(resolver.toString()))
-            .evmAddress
-        : resolver.toString(),
-    );
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const resolverEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(resolver.toString());
 
     const res = await handler.updateResolver(
       securityEvmAddress,

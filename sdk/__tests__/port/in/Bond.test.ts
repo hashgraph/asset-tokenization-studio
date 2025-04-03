@@ -225,7 +225,7 @@ import {
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
 } from '../../config.js';
-import ConnectRequest from '../../../src/port/in/request/ConnectRequest.js';
+import ConnectRequest from '../../../src/port/in/request/network/ConnectRequest.js';
 import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
 import NetworkService from '../../../src/app/service/NetworkService.js';
@@ -460,6 +460,7 @@ describe('🧪 Bond test', () => {
       securityId: bond.evmDiamondAddress!.toString(),
       maturityDate: newMaturityDate.toString(),
     });
+
     const res = await Bond.updateMaturityDate(request);
 
     const bondDetails = await Bond.getBondDetails(

@@ -204,6 +204,7 @@
 */
 
 import { BigNumber } from 'ethers';
+import BigDecimal from '../shared/BigDecimal';
 
 export class Hold {
   public amount: BigNumber;
@@ -223,4 +224,31 @@ export class HoldIdentifier {
   public partition: string;
   public tokenHolder: string;
   public holdId: number;
+}
+
+export class HoldDetails {
+  expirationTimeStamp: number;
+  amount: BigDecimal;
+  escrowAddress: string;
+  tokenHolderAddress: string;
+  destinationAddress: string;
+  data: string;
+  operatorData: string;
+  constructor(
+    executionTimeStamp: number,
+    amount: BigDecimal,
+    escrowAddress: string,
+    tokenHolderAddress: string,
+    destinationAddress: string,
+    data: string,
+    operatorData: string,
+  ) {
+    this.expirationTimeStamp = executionTimeStamp;
+    this.amount = amount;
+    this.escrowAddress = escrowAddress;
+    this.tokenHolderAddress = tokenHolderAddress;
+    this.destinationAddress = destinationAddress;
+    this.data = data;
+    this.operatorData = operatorData;
+  }
 }

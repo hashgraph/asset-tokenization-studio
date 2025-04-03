@@ -213,7 +213,7 @@ export class GetAccountInfoQueryResponse implements QueryResponse {
 }
 
 export class GetAccountInfoQuery extends Query<GetAccountInfoQueryResponse> {
-  constructor(public readonly id: HederaId) {
+  constructor(public readonly id: HederaId | string) {
     super();
   }
 }

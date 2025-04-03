@@ -214,7 +214,7 @@ export class TransactionResponseAdapter {
   }
   public static decodeFunctionResult(
     functionName: string,
-    resultAsBytes: ArrayBuffer,
+    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
     abi: any, // eslint-disable-line
     network: string,
   ): Uint8Array {

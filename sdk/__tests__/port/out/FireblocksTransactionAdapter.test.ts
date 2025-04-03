@@ -217,7 +217,7 @@ import {
   FIREBLOCKS_SETTINGS,
   RESOLVER_ADDRESS,
 } from '../../config.js';
-import ConnectRequest from '../../../src/port/in/request/ConnectRequest.js';
+import ConnectRequest from '../../../src/port/in/request/network/ConnectRequest.js';
 import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
 import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';

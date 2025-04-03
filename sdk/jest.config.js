@@ -9,8 +9,9 @@ module.exports = {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.(m)?js$': '$1',
   },
-  testMatch: ['**/__tests__/**/*.(test|spec).[jt]s?(x)'],
+  testMatch: ['**/(__tests__|src)/**/*.(test|spec).[jt]s?(x)'],
   testPathIgnorePatterns: ['/build/', '/src_old/'],
+  modulePathIgnorePatterns: ['/build/'],
   collectCoverage: true,
   coverageDirectory: '../coverage/sdk',
   collectCoverageFrom: [

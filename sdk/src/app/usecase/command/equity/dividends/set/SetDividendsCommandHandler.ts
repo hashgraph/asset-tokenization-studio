@@ -211,10 +211,11 @@ import {
 } from './SetDividendsCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import ContractService from '../../../../../service/ContractService.js';
+import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
 
 @CommandHandler(SetDividendsCommand)
 export class SetDividendsCommandHandler
@@ -225,6 +226,8 @@ export class SetDividendsCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -233,12 +236,8 @@ export class SetDividendsCommandHandler
     const { address, recordDate, executionDate, amount } = command;
     const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(address)
-        ? (await this.mirrorNodeAdapter.getContractInfo(address)).evmAddress
-        : address,
-    );
-
+    const securityEvmAddress =
+      await this.contractService.getContractEvmAddress(address);
     const res = await handler.setDividends(
       securityEvmAddress,
       BigDecimal.fromString(recordDate),
@@ -247,8 +246,7 @@ export class SetDividendsCommandHandler
       address,
     );
 
-    if (!res.id)
-      throw new Error('Set dividend Command Handler response id empty');
+    if (!res.id) throw new EmptyResponse(SetDividendsCommandHandler.name);
 
     let dividendId: string;
 
@@ -264,7 +262,7 @@ export class SetDividendsCommandHandler
       );
 
       if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
+        throw new InvalidResponse(results);
       }
 
       dividendId = results[1];
