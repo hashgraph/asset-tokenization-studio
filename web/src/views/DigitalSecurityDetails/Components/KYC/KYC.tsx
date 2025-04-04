@@ -29,19 +29,16 @@ const STATUS = {
 };
 
 const getStatus = ({ kyc }: { kyc: KycAccountDataViewModelResponse }) => {
-  const validToDate = formatDate(Number(kyc.validTo) * 1000, DATE_TIME_FORMAT);
-  const validFromDate = formatDate(
-    Number(kyc.validFrom) * 1000,
-    DATE_TIME_FORMAT,
-  );
-  const currentDate = new Date().toLocaleString();
+  const validToTimestamp = Number(kyc.validTo) * 1000;
+  const validFromTimestamp = Number(kyc.validFrom) * 1000;
+  const currentTimestamp = Date.now();
 
   if (!kyc.isIssuer) return STATUS.UNTRUSTED;
-  if (currentDate < validFromDate) return STATUS.PENDING;
-  if (currentDate >= validToDate) return STATUS.EXPIRED;
+  if (currentTimestamp < validFromTimestamp) return STATUS.PENDING;
+  if (currentTimestamp >= validToTimestamp) return STATUS.EXPIRED;
   if (
     Number(kyc.validTo) > 1e13 ||
-    (currentDate >= validFromDate && currentDate < validToDate)
+    (currentTimestamp >= validFromTimestamp && currentTimestamp < validToTimestamp)
   )
     return STATUS.VALID;
 
