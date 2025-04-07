@@ -340,7 +340,7 @@ export const SearchByRole = () => {
                       );
                     })
                     .map((role) => ({
-                      value: role.label,
+                      value: role.value,
                       label: tRoles(role.label),
                     }))}
                   size="sm"
