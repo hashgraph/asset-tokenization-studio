@@ -206,45 +206,37 @@
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import SecurityService from '../../../../../service/SecurityService';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
+import AccountService from '../../../../../service/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetLastAggregatedBalanceAdjustmentFactorForQuery,
   GetLastAggregatedBalanceAdjustmentFactorForQueryResponse,
 } from './GetLastAggregatedBalanceAdjustmentFactorForQuery';
+import ContractService from '../../../../../service/ContractService';
 
 @QueryHandler(GetLastAggregatedBalanceAdjustmentFactorForQuery)
 export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler
   implements IQueryHandler<GetLastAggregatedBalanceAdjustmentFactorForQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetLastAggregatedBalanceAdjustmentFactorForQuery,
   ): Promise<GetLastAggregatedBalanceAdjustmentFactorForQueryResponse> {
     const { securityId, targetId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
 
     const res =
       await this.queryAdapter.getLastAggregatedBalanceAdjustmentFactorFor(

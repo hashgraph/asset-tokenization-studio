@@ -204,7 +204,7 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import UpdateConfigVersionRequest from './request/UpdateConfigVersionRequest';
+import UpdateConfigVersionRequest from './request/management/UpdateConfigVersionRequest';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { handleValidation } from './Common';
 import { UpdateConfigVersionCommand } from '../../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
@@ -212,7 +212,7 @@ import { QueryBus } from '../../core/query/QueryBus';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
 import { GetConfigInfoRequest } from './request';
-import UpdateResolverRequest from './request/UpdateResolverRequest';
+import UpdateResolverRequest from './request/management/UpdateResolverRequest';
 import { UpdateResolverCommand } from '../../app/usecase/command/management/updateResolver/updateResolverCommand';
 import ContractId from '../../domain/context/contract/ContractId.js';
 import { GetConfigInfoQuery } from '../../app/usecase/query/management/GetConfigInfoQuery';

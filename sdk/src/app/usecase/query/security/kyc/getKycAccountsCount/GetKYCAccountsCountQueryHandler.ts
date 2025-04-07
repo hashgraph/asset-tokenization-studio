@@ -205,11 +205,9 @@
 
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import ContractService from '../../../../../service/ContractService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   GetKYCAccountsCountQuery,
@@ -221,12 +219,10 @@ export class GetKYCAccountsCountQueryHandler
   implements IQueryHandler<GetKYCAccountsCountQuery>
 {
   constructor(
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -234,12 +230,8 @@ export class GetKYCAccountsCountQueryHandler
   ): Promise<GetKYCAccountsCountQueryResponse> {
     const { securityId, kycStatus } = query;
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getKYCAccountsCount(
       securityEvmAddress,
       kycStatus,
