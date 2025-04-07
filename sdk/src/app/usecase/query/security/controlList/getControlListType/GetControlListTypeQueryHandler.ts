@@ -206,15 +206,13 @@
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import {
   GetControlListTypeQuery,
   GetControlListTypeQueryResponse,
 } from './GetControlListTypeQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import ContractService from '../../../../../service/ContractService';
 import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
 
 @QueryHandler(GetControlListTypeQuery)
@@ -222,27 +220,19 @@ export class GetControlListTypeQueryHandler
   implements IQueryHandler<GetControlListTypeQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetControlListTypeQuery,
   ): Promise<GetControlListTypeQueryResponse> {
     const { securityId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
     const res = await this.queryAdapter.getControlListType(securityEvmAddress);
 
     return new GetControlListTypeQueryResponse(
