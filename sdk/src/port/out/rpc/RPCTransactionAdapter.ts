@@ -400,6 +400,8 @@ import {
   ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
+import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
+import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -453,14 +455,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -567,14 +565,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -822,7 +816,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             factoryId = result.factory.toString();
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Factories could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -837,7 +831,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             resolverId = result.resolver.toString();
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Resolvers could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -852,7 +846,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             mirrorNode = result.mirrorNode;
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Mirror Nodes could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -867,14 +861,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             rpcNode = result.jsonRpcRelay;
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `RPC Nodes could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
       }
       LogService.logTrace('Metamask Network:', chainId);
     } else {
-      console.error(chainId + ' not an hedera network');
+      LogService.logError(chainId + ' not an hedera network');
     }
 
     await this.commandBus.execute(

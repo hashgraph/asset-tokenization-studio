@@ -213,7 +213,6 @@ import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDeco
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
-import AccountService from '../../../../service/AccountService.js';
 import TransactionService from '../../../../service/TransactionService.js';
 import NetworkService from '../../../../service/NetworkService.js';
 import {
@@ -221,27 +220,29 @@ import {
   BYTES_32_LENGTH,
 } from '../../../../../core/Constants.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId.js';
 import { EquityDetails } from '../../../../../domain/context/equity/EquityDetails.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import ContractService from '../../../../service/ContractService.js';
+import AccountService from '../../../../service/AccountService.js';
+import { InvalidResponse } from '../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../security/error/EmptyResponse.js';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler
   implements ICommandHandler<CreateEquityCommand>
 {
   constructor(
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
     @lazyInject(NetworkService)
     public readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -283,23 +284,14 @@ export class CreateEquityCommandHandler
     }
 
     const diamondOwnerAccountEvmAddress: EvmAddress =
-      HEDERA_FORMAT_ID_REGEX.test(diamondOwnerAccount!)
-        ? await this.mirrorNodeAdapter.accountToEvmAddress(diamondOwnerAccount!)
-        : new EvmAddress(diamondOwnerAccount!);
+      await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
 
-    const factoryEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(factory.toString())
-        ? (await this.mirrorNodeAdapter.getContractInfo(factory.toString()))
-            .evmAddress
-        : factory.toString(),
-    );
+    const factoryEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(factory.toString());
 
-    const resolverEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(resolver.toString())
-        ? (await this.mirrorNodeAdapter.getContractInfo(resolver.toString()))
-            .evmAddress
-        : resolver.toString(),
-    );
+    const resolverEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(resolver.toString());
+
     const handler = this.transactionService.getHandler();
 
     const equityInfo = new EquityDetails(
@@ -326,7 +318,7 @@ export class CreateEquityCommandHandler
       factory.toString(),
     );
 
-    if (!res.id) throw new Error('Create Command Handler response id empty');
+    if (!res.id) throw new EmptyResponse(CreateEquityCommandHandler.name);
 
     let contractAddress: string;
     try {
@@ -339,10 +331,8 @@ export class CreateEquityCommandHandler
           1,
         );
 
-        console.log(`Creation event data:${results}`); //! Remove this line
-
         if (!results || results.length !== 1) {
-          throw new Error('Invalid data structure');
+          throw new InvalidResponse(results);
         }
 
         const data = results.map((result) =>
