@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-sdk",
-  "version": "1.12.1",
+  "version": "1.12.2",
   "description": "Testing to MASTER",
   "main": "./build/cjs/src/index.js",
   "module": "./build/esm/src/index.js",

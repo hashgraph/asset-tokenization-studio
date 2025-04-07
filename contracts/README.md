@@ -8,10 +8,10 @@
 
 ### Table of Contents
 
--   **[Description](#description)**<br>
--   **[Installation](#installation)**<br>
--   **[Build](#build)**<br>
--   **[Test](#test)**<br>
+- **[Description](#description)**<br>
+- **[Installation](#installation)**<br>
+- **[Build](#build)**<br>
+- **[Test](#test)**<br>
 
 # Description
 
@@ -47,29 +47,37 @@ npm run test
 
 | **Contract**                        | **Address**                                | **ID**      |
 | ----------------------------------- | ------------------------------------------ | ----------- |
-| Business Logic Resolver Proxy       | 0x2E56929B865023a8F6a35051Df4bF3C01B2507Ae | 0.0.5423638 |
-| Business Logic Resolver Proxy Admin | 0x4dDeda80360d81Fdf7365F7586b6a03f534131Ec | 0.0.5423637 |
-| Business Logic Resolver             | 0xbd72C1955b9dC0111E62f79bCF79A0B9743ABa3b | 0.0.5423636 |
-| Factory Proxy                       | 0x018D668b1ef8622e045cdEF6DF03f1C25357B70D | 0.0.5423681 |
-| Factory Proxy Admin                 | 0x560173B61b5778f08EC0ee09070d17A60EDa373b | 0.0.5423680 |
-| Factory                             | 0x6388410CD306d54E306AE3DdE9fA3f733E7dAB3d | 0.0.5423679 |
-| Access Control                      | 0xD6e817512EF60dAebC9e1ef79A2A6402ec11e565 | 0.0.5423640 |
-| Cap                                 | 0x5C01D6632Db13Dd1bA798002fcE44E333133bb22 | 0.0.5423641 |
-| Control List                        | 0x132CD0E27FAE70B4286be94d43a878864Def1fed | 0.0.5423642 |
-| Pause                               | 0x3deAa220892A1F9aEB15bBc6a6f8A2d18DAd85f4 | 0.0.5423643 |
-| ERC20                               | 0xA78Cd6D92deC37aC8D03A30b9898cF15A2554124 | 0.0.5423647 |
-| ERC1410                             | 0xBE61FfDE13A2d5b14306143Eb6F5F1415e8EC63d | 0.0.5423649 |
-| ERC1594                             | 0x5287F3f14fDb3d516Cc209F5e86A0256876539B0 | 0.0.5423651 |
-| ERC1643                             | 0x08C50Eb19Bbe03990d825df6b3D83a1e75b3aE3f | 0.0.5423652 |
-| ERC1644                             | 0xB2b9B455e7eD22c0211936aedc7FE6d7a60064F5 | 0.0.5423654 |
-| Snapshots                           | 0xa2dbce229b5Bd1aDB88046CE98759cC5a3cd7B33 | 0.0.5423656 |
-| Diamond Facet                       | 0x3F4e702cE97ff0a12A671574dd933B87D70a79Af | 0.0.5423658 |
-| Equity                              | 0x52EE324AE8ef6393be4dfe1c1e6ddB97Fee906E8 | 0.0.5423662 |
-| Bond                                | 0x77905De457d2eb91eEC94c2Eb8dA7C50f895B907 | 0.0.5423664 |
-| Scheduled Snapshots                 | 0x23e4846D8CdC4c25f1b15D4C3b2e3Dd56e992F4F | 0.0.5423665 |
-| Scheduled Balance Adjustments       | 0x9d5ac398fC85b5e423e16452184C087C20C2dA2f | 0.0.5423666 |
-| Scheduled Tasks                     | 0x0546f49dAa1184937aaeAf065007251D94CF5CEa | 0.0.5423667 |
-| Corporate Actions                   | 0xFd51ed7aC409FA1be94C9736d266722e1c487B66 | 0.0.5423669 |
-| Lock                                | 0x3B8aA6a81D27E4448CfD6a8cC09F01f2436b5DfD | 0.0.5423645 |
-| Transfer and Lock                   | 0x12Ffcf34B599127Bc40704b1Fa0e197ED4246e0d | 0.0.5423672 |
-| Adjust Balances                     | 0x3F36fB6FC9849209De79d43fEB364f085Ee9927d | 0.0.5423674 |
+| Business Logic Resolver Proxy       | 0x20a5E266A8b83b248ae3b3516954c400fa7b1281 | 0.0.5827968 |
+| Business Logic Resolver Proxy Admin | 0xcC9CdfC299A1b4cfaBF5C3d82522feF9ef5bb65D | 0.0.5827967 |
+| Business Logic Resolver             | 0x62b81bA32bd526F0c6C14DDfa178491629DB2A36 | 0.0.5827966 |
+| Factory Proxy                       | 0xEA5bF55277777d952deF8D92275f8f82C4d870dF | 0.0.5828112 |
+| Factory Proxy Admin                 | 0x22DDA6B4dDb330DB0fC767D53FFec310Cd2a1C38 | 0.0.5828111 |
+| Factory                             | 0xb603b85A9Ce5F82288274a069e601967D7EaB9AE | 0.0.5828110 |
+| Access Control                      | 0xF715053FEC7e0ebd7C1E195Ea96eACD2f405a40a | 0.0.5827969 |
+| Cap                                 | 0x9dF275691dFA0838aa23d0d0Bf1076c30b7DF419 | 0.0.5827970 |
+| Control List                        | 0x1066157C65b46DbfA3Ca970b0B9dE6d4e7E2bbd9 | 0.0.5827971 |
+| Kyc                                 | 0xb5fb3fD2169289d01b1d31794433E53d324718FE | 0.0.5827973 |
+| SsiManagement                       | 0x987ab6a0857D3F14057a04B0aaCFeaB9F56c14D0 | 0.0.5827974 |
+| Pause                               | 0xba6CBc7F865C0cb62796E5f498667adF3A9Cc51e | 0.0.5827976 |
+| ERC20                               | 0xBbdeffc43B0a11f32c127F188BB029c4b65d6300 | 0.0.5827993 |
+| ERC1410                             | 0x8FB10aAB6bd8669eD9745E13F6c850E274e7CdBE | 0.0.5828006 |
+| ERC1594                             | 0xC1D3FeF914A746fD5f2252Ae3e3c77cd8e9AdCF0 | 0.0.5828021 |
+| ERC1643                             | 0x4F827424315518a3C34a68a098D46B4117964775 | 0.0.5828023 |
+| ERC1644                             | 0x9b4F4b6c163546031dae04edB927CE0a8b36eeCC | 0.0.5828034 |
+| Snapshots                           | 0x837080e979340eD259FEB04E6DB7Ac8C398F31B1 | 0.0.5828039 |
+| Diamond Facet                       | 0x8EC656B12B451a8DAF8d7EA9A23578Eb2316bb2B | 0.0.5828046 |
+| Equity                              | 0x26Fe83E5205d06F89391C633C279d26E91104280 | 0.0.5828055 |
+| Bond                                | 0x0a075A67Ba2158F626febc0cf41E69b85814D86c | 0.0.5828064 |
+| Scheduled Snapshots                 | 0xcd7626C8Cc238fc1c7664aa9233DD48243ea54eB | 0.0.5828067 |
+| Scheduled Balance Adjustments       | 0x7bDf559585178Be833C92fFb9C6915481F073489 | 0.0.5828069 |
+| Scheduled Tasks                     | 0x385299c36b4A7f57B1fEAba0936DBb2EDa3c3d29 | 0.0.5828072 |
+| Corporate Actions                   | 0x05f1241e60ec3B098cCF801a9583801ca3174644 | 0.0.5828078 |
+| Lock                                | 0xF3240333A1b944fbd205854229BA3825C3AbD163 | 0.0.5827978 |
+| Hold                                | 0xa1f0DCBa93ce06a530Cb1a9cd4f6319d4123f7b5 | 0.0.5827985 |
+| Transfer and Lock                   | 0x9322c4EF212810e82Dc64905c83Bb4E700204E4a | 0.0.5828089 |
+| Adjust Balances                     | 0xC62479a45CaC582684676277de7c1aE890333c3E | 0.0.5828090 |
+| Clearing Action Facet               | 0xCE5257A6E5821Ee0e5e1392Eb3F433D954CDCAd4 | 0.0.5828105 |
+| Clearing Transfer Facet             | 0xfB1396E83Fd8e0D62326Af767A463e8c35F2fFB9 | 0.0.5828093 |
+| Clearing Redeem Facet               | 0x7B01Dc54924E5EF850a97aBc62afea18D8285A80 | 0.0.5828097 |
+| Clearing Hold Creation Facet        | 0x15D17ac9755f1ADa737C0075cF39eD383B3393B2 | 0.0.5828101 |
+| Clearing Read Facet                 | 0x8A9a9999E1131B357a46892B0c7a720923e3f73B | 0.0.5828102 |

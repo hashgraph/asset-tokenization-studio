@@ -279,7 +279,7 @@ export class CreateBondCommandHandler
     }
 
     const diamondOwnerAccountEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(diamondOwnerAccount!);
+      await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
 
     const factoryEvmAddress: EvmAddress =
       await this.contractService.getContractEvmAddress(factory.toString());

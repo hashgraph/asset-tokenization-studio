@@ -316,6 +316,7 @@ describe('CreateBondCommandHandler', () => {
     describe('success cases', () => {
       it('should successfully create a bond with bondAddress in response', async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
 
         transactionServiceMock.getHandler().createBond.mockResolvedValue({
           id: transactionId,
@@ -332,7 +333,10 @@ describe('CreateBondCommandHandler', () => {
         expect(result.securityId.value).toBe(transactionId);
         expect(result.transactionId).toBe(transactionId);
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          3,
+          2,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          1,
         );
         expect(
           transactionServiceMock.getHandler().createBond,
