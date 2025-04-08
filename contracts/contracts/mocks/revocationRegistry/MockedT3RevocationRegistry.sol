@@ -206,10 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-contract T3RevocationRegistry {
+contract MockedT3RevocationRegistry {
     mapping(address => mapping(string => bool)) public revoked;
-
-    constructor() {}
 
     function revoke(string memory vcId) public {
         revoked[msg.sender][vcId] = true;
