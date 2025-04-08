@@ -206,31 +206,25 @@
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
-import SecurityService from '../../../../../service/SecurityService.js';
 import { PauseCommand, PauseCommandResponse } from './PauseCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { NotGrantedRole } from '../../error/NotGrantedRole.js';
-import { SecurityPaused } from '../../error/SecurityPaused.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(PauseCommand)
 export class PauseCommandHandler implements ICommandHandler<PauseCommand> {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(RPCQueryAdapter)
-    private readonly rpcQueryAdapter: RPCQueryAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(command: PauseCommand): Promise<PauseCommandResponse> {
@@ -238,26 +232,15 @@ export class PauseCommandHandler implements ICommandHandler<PauseCommand> {
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    await this.validationService.checkRole(
+      SecurityRole._PAUSER_ROLE,
+      account.id.toString(),
+      securityId,
     );
 
-    if (
-      account.evmAddress &&
-      !(await this.rpcQueryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._PAUSER_ROLE,
-      ))
-    ) {
-      throw new NotGrantedRole(SecurityRole._PAUSER_ROLE);
-    }
-
-    if (await this.rpcQueryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
+    await this.validationService.checkPause(securityId);
 
     const res = await handler.pause(securityEvmAddress, securityId);
     return Promise.resolve(

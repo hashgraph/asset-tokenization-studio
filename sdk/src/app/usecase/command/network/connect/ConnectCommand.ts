@@ -209,10 +209,10 @@ import Account from '../../../../../domain/context/account/Account.js';
 import { Environment } from '../../../../../domain/context/network/Environment.js';
 import { SupportedWallets } from '../../../../../domain/context/network/Wallet.js';
 import { InitializationData } from '../../../../../port/out/TransactionAdapter.js';
-import HWCSettings from '../../../../../domain/context/walletConnect/HWCSettings';
-import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
-import FireblocksSettings from '../../../../../domain/context/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../../../../domain/context/custodialWalletSettings/AWSKMSSettings.js';
+import HWCSettings from '../../../../../core/settings/walletConnect/HWCSettings.js';
+import DfnsSettings from '../../../../../core/settings/custodialWalletSettings/DfnsSettings.js';
+import FireblocksSettings from '../../../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
+import AWSKMSSettings from '../../../../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
 
 export class ConnectCommandResponse implements CommandResponse {
   constructor(
