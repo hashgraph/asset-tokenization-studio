@@ -203,203 +203,78 @@
 
 */
 
-import i18n from "i18next";
-import { MainLayout } from "../layouts/MainLayout";
-import { GenericRoute } from "./components/GenericRoute";
-import { PrivateRoute } from "./components/PrivateRoute";
-import { RouteName } from "./RouteName";
-import { RoutePath } from "./RoutePath";
-import { Landing } from "../views/Landing/Landing";
-import { AddSecurity } from "../views/AddSecurity/AddSecurity";
-import { CreateSecurity } from "../views/Dashboard/Components/CreateSecurity";
-import { CreateEquity } from "../views/CreateEquity/CreateEquity";
-import { CreateBond } from "../views/CreateBond/CreateBond";
-import { Dashboard } from "../views/Dashboard/Dashboard";
-import { DigitalSecuritiesList } from "../views/DigitalSecuritiesList/DigitalSecuritiesList";
-import { DigitalSecurityDetails } from "../views/DigitalSecurityDetails/DigitalSecurityDetails";
-import { DigitalSecurityMint } from "../views/DigitalSecurityMint/DigitalSecurityMint";
-import { DigitalSecurityTransfer } from "../views/DigitalSecurityTransfer/DigitalSecurityTransfer";
-import { DigitalSecurityRedeem } from "../views/DigitalSecurityRedeem/DigitalSecurityRedeem";
-import { DigitalSecurityForceTransfer } from "../views/DigitalSecurityForceTransfer/DigitalSecurityForceTransfer";
-import { DigitalSecurityForceRedeem } from "../views/DigitalSecurityForceRedeem/DigitalSecurityForceRedeem";
-import { DigitalSecurityLocker } from "../views/DigitalSecurityLocker/DigitalSecurityLocker";
-import { ExternalControlList } from "../views/ExternalControlList/ExternalControlList";
-import { ExternalPauseList } from "../views/ExternalPauseList/ExternalPauseList";
-import { CreateExternalPause } from "../views/CreateExternalPause/CreateExternalPause";
-import { AddExternalPause } from "../views/AddExternalPause/AddExternalPause";
-
-const t = (key: RouteName) => i18n.t(`routes:${key}`);
-
-export const routes = [
-  {
-    element: <MainLayout />,
-    children: [
-      {
-        path: RoutePath.LANDING,
-        breadcrumb: t(RouteName.Landing),
-        element: <Landing />,
+export default {
+  list: {
+    header: {
+      createNewExternalPause: "Create new external pause",
+      title: "External Pause list",
+    },
+    table: {
+      address: "Address",
+      state: "State",
+      actions: "Actions",
+      activated: "Activated",
+      deactivated: "Deactivated",
+      empty: "No results found",
+    },
+    modal: {
+      removeExternalPausePopUp: {
+        title: "Remove External Pause",
+        description:
+          "Are you sure you want to remove this external pause? This action cannot be undone.",
+        confirmText: "Yes, remove it",
+        cancelText: "Cancel",
       },
-      {
-        path: RoutePath.DASHBOARD,
-        breadcrumb: t(RouteName.Dashboard),
-        element: (
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        ),
+    },
+    messages: {
+      removeExternalPause: {
+        success: "Success: ",
+        descriptionSuccess: "The external pause has been removed",
+        error: "Deletion failed: ",
+        descriptionFailed:
+          "There was an error deleting the external pause. Please try again",
       },
-      {
-        path: RoutePath.EXTERNAL_CONTROL_LIST,
-        breadcrumb: t(RouteName.ExternalControlList),
-        element: (
-          <PrivateRoute>
-            <ExternalControlList />
-          </PrivateRoute>
-        ),
+      changeState: {
+        success: "Success: ",
+        descriptionSuccess: "The external pause state has been changed",
+        error: "State change failed: ",
+        descriptionFailed:
+          "There was an error updating the external pause state. Please try again",
       },
-      {
-        path: RoutePath.EXTERNAL_PAUSE_LIST,
-        breadcrumb: t(RouteName.ExternalPauseList),
-        element: (
-          <PrivateRoute>
-            <ExternalPauseList />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.CREATE_EXTERNAL_PAUSE,
-        breadcrumb: t(RouteName.CreateExternalPause),
-        element: (
-          <PrivateRoute>
-            <CreateExternalPause />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.ADD_EXTERNAL_PAUSE,
-        breadcrumb: t(RouteName.AddExternalPause),
-        element: (
-          <PrivateRoute>
-            <AddExternalPause />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.DIGITAL_SECURITIES_LIST,
-        breadcrumb: t(RouteName.DigitalSecuritiesList),
-        element: (
-          <PrivateRoute>
-            <DigitalSecuritiesList />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.ADD_SECURITY,
-        breadcrumb: t(RouteName.AddSecurity),
-        element: (
-          <PrivateRoute>
-            <AddSecurity />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.CREATE_SECURITY,
-        breadcrumb: t(RouteName.CreateSecurity),
-        element: (
-          <PrivateRoute>
-            <CreateSecurity />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.CREATE_EQUITY,
-        breadcrumb: t(RouteName.CreateEquity),
-        element: (
-          <PrivateRoute>
-            <CreateEquity />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.CREATE_BOND,
-        breadcrumb: t(RouteName.CreateBond),
-        element: (
-          <PrivateRoute>
-            <CreateBond />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.DIGITAL_SECURITY_DETAILS,
-        breadcrumb: t(RouteName.DigitalSecurityDetails),
-        element: (
-          <PrivateRoute>
-            <DigitalSecurityDetails />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.DIGITAL_SECURITY_MINT,
-        breadcrumb: t(RouteName.DigitalSecurityMint),
-        element: (
-          <PrivateRoute>
-            <DigitalSecurityMint />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.DIGITAL_SECURITY_TRANSFER,
-        breadcrumb: t(RouteName.DigitalSecurityTransfer),
-        element: (
-          <PrivateRoute>
-            <DigitalSecurityTransfer />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.DIGITAL_SECURITY_FORCE_TRANSFER,
-        breadcrumb: t(RouteName.DigitalSecurityForceTransfer),
-        element: (
-          <PrivateRoute>
-            <DigitalSecurityForceTransfer />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.DIGITAL_SECURITY_REDEEM,
-        breadcrumb: t(RouteName.DigitalSecurityRedeem),
-        element: (
-          <PrivateRoute>
-            <DigitalSecurityRedeem />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.DIGITAL_SECURITY_FORCE_REDEEM,
-        breadcrumb: t(RouteName.DigitalSecurityForceRedeem),
-        element: (
-          <PrivateRoute>
-            <DigitalSecurityForceRedeem />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: RoutePath.DIGITAL_SECURITY_LOCK,
-        breadcrumb: t(RouteName.DigitalSecurityLock),
-        element: (
-          <PrivateRoute>
-            <DigitalSecurityLocker />
-          </PrivateRoute>
-        ),
-      },
-    ],
+    },
   },
-  {
-    path: "*",
-    element: (
-      <PrivateRoute>
-        <GenericRoute />
-      </PrivateRoute>
-    ),
+  add: {
+    title: "Add External Pause",
+    subtitle: "Add an existing external pause with its ID",
+    mandatoryFields: "*Mandatory fields",
+    input: {
+      id: {
+        label: "External Pause ID*",
+        placeholder: "0.0.12345",
+      },
+    },
+    create: "Add external pause",
+    cancel: "Cancel",
   },
-];
+  create: {
+    title: "External Pause creation",
+    subtitle: "Create a new external pause to be used for securities",
+    mandatoryFields: "*Mandatory fields",
+    input: {
+      isActivated: {
+        label: "Activated*",
+      },
+    },
+    create: "Create external pause",
+    cancel: "Cancel",
+  },
+  messages: {
+    addExternalPause: {
+      success: "Success: ",
+      descriptionSuccess: "The external pause has been added",
+      error: "Failed: ",
+      descriptionFailed:
+        "There was an error adding the external pause. Please try again",
+    },
+  },
+};

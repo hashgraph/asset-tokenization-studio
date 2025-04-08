@@ -325,6 +325,14 @@ import {
   GetClearingCreateHoldForByPartitionRequest,
   ClearingCreateHoldViewModel,
   GetClearedAmountForRequest,
+  ExternalPausesManagement,
+  AddExternalPauseRequest,
+  UpdateExternalPausesRequest,
+  IsExternalPauseRequest,
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
+  IsPausedMockRequest,
+  SetPausedMockRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -1010,6 +1018,55 @@ export class SDKService {
   ): Promise<number> {
     const response = await Security.getClearedAmountFor(req);
     return response;
+  }
+
+  // EXTERNAL PAUSES //////////////////////////////////////
+  public static async addExternalPause(
+    req: AddExternalPauseRequest,
+  ): Promise<boolean> {
+    const response = await ExternalPausesManagement.addExternalPause(req);
+    return response.payload;
+  }
+
+  public static async updateExternalPauses(
+    req: UpdateExternalPausesRequest,
+  ): Promise<boolean> {
+    const response = await ExternalPausesManagement.updateExternalPauses(req);
+    return response.payload;
+  }
+
+  public static async isExternalPause(
+    req: IsExternalPauseRequest,
+  ): Promise<boolean> {
+    const response = await ExternalPausesManagement.isExternalPause(req);
+    return response;
+  }
+
+  public static async getExternalPausesCount(
+    req: GetExternalPausesCountRequest,
+  ): Promise<number> {
+    const response = await ExternalPausesManagement.getExternalPausesCount(req);
+    return response;
+  }
+
+  public static async getExternalPausesMembers(
+    req: GetExternalPausesMembersRequest,
+  ): Promise<string[]> {
+    const response =
+      await ExternalPausesManagement.getExternalPausesMembers(req);
+    return response;
+  }
+
+  public static async isPauseMock(req: IsPausedMockRequest): Promise<boolean> {
+    const response = await ExternalPausesManagement.isPausedMock(req);
+    return response;
+  }
+
+  public static async setPausedMock(
+    req: SetPausedMockRequest,
+  ): Promise<boolean> {
+    const response = await ExternalPausesManagement.setPausedMock(req);
+    return response.payload;
   }
 }
 
