@@ -217,7 +217,6 @@ import {
   IsExternalPauseRequest,
   IsPausedMockRequest,
   SetPausedMockRequest,
-  CreateExternalPauseMockRequest,
 } from './request';
 import { UpdateExternalPausesCommand } from '../../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
 import { SetPausedMockCommand } from '../../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommand.js';
@@ -254,7 +253,7 @@ interface IExternalPausesMocksInPort {
     request: SetPausedMockRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   isPausedMock(request: IsPausedMockRequest): Promise<boolean>;
-  createMock(request: CreateExternalPauseMockRequest): Promise<string>;
+  createMock(): Promise<string>;
 }
 
 class ExternalPausesInPort
@@ -365,14 +364,9 @@ class ExternalPausesInPort
   }
 
   @LogError
-  async createMock(request: CreateExternalPauseMockRequest): Promise<string> {
-    const { privateKey, providerJsonUrl } = request;
-    handleValidation('CreateExternalPauseMockRequest', request);
-    return (
-      await this.commandBus.execute(
-        new CreateExternalPauseMockCommand(privateKey, providerJsonUrl),
-      )
-    ).payload;
+  async createMock(): Promise<string> {
+    return (await this.commandBus.execute(new CreateExternalPauseMockCommand()))
+      .payload;
   }
 }
 

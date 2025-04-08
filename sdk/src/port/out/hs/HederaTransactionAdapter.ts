@@ -208,6 +208,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-case-declarations */
 import {
+  ContractCreateTransaction,
   ContractExecuteTransaction,
   ContractFunctionParameters,
   ContractId,
@@ -237,6 +238,7 @@ import {
   ClearingHoldCreationFacet__factory,
   ClearingActionsFacet__factory,
   ExternalPauseManagement__factory,
+  MockedExternalPause__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -309,6 +311,7 @@ import {
   UPDATE_EXTERNAL_PAUSES_GAS,
   REMOVE_EXTERNAL_PAUSE_GAS,
   ADD_EXTERNAL_PAUSE_GAS,
+  CREATE_EXTERNAL_PAUSE_MOCK_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -3163,6 +3166,21 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
+  }
+
+  async createExternalPauseMock(): Promise<TransactionResponse> {
+    LogService.logTrace(`Deploying External Pause Mock contract`);
+
+    const bytecodeHex = MockedExternalPause__factory.bytecode.startsWith('0x')
+      ? MockedExternalPause__factory.bytecode.slice(2)
+      : MockedExternalPause__factory.bytecode;
+    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, 'hex'));
+
+    const contractCreate = new ContractCreateTransaction()
+      .setBytecode(bytecode)
+      .setGas(CREATE_EXTERNAL_PAUSE_MOCK_GAS);
+
+    return this.signAndSendTransaction(contractCreate);
   }
 
   // * Definition of the abstract methods

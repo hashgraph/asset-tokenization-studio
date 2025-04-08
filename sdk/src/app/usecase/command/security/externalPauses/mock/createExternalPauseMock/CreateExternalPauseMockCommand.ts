@@ -211,10 +211,7 @@ export class CreateExternalPauseMockCommandResponse implements CommandResponse {
 }
 
 export class CreateExternalPauseMockCommand extends Command<CreateExternalPauseMockCommandResponse> {
-  constructor(
-    public readonly privateKey: string,
-    public readonly providerJsonUrl: string,
-  ) {
+  constructor() {
     super();
   }
 }

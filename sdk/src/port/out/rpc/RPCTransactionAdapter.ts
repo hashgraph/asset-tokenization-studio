@@ -2887,4 +2887,17 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       this.networkService.environment,
     );
   }
+
+  async createExternalPauseMock(): Promise<string> {
+    LogService.logTrace(`Deploying External Pause Mock contract`);
+
+    const factory = new MockedExternalPause__factory(
+      this.signerOrProvider as Signer,
+    );
+
+    const contract = await factory.deploy();
+    await contract.deployed();
+
+    return contract.address;
+  }
 }

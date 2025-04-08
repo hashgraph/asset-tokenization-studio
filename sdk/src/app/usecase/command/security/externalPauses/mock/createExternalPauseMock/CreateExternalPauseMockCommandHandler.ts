@@ -211,9 +211,7 @@ import {
 } from './CreateExternalPauseMockCommand';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import { MockedExternalPause__factory } from '@hashgraph/asset-tokenization-contracts';
-import { ethers } from 'ethers';
-import { InvalidRequest } from '../../../../error/InvalidRequest';
+import TransactionService from '../../../../../../../app/service/TransactionService';
 
 @CommandHandler(CreateExternalPauseMockCommand)
 export class CreateExternalPauseMockCommandHandler
@@ -222,29 +220,37 @@ export class CreateExternalPauseMockCommandHandler
   constructor(
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
   ) {}
 
-  async execute(
-    command: CreateExternalPauseMockCommand,
-  ): Promise<CreateExternalPauseMockCommandResponse> {
-    const { privateKey, providerJsonUrl } = command;
+  async execute(): Promise<CreateExternalPauseMockCommandResponse> {
+    const handler = this.transactionService.getHandler();
 
-    if (!privateKey || !providerJsonUrl) {
-      throw new InvalidRequest(
-        'Missing privateKey or providerJsonUrl in request',
+    const res = await handler.createExternalPauseMock();
+
+    let contractAddress: string;
+
+    if (typeof res === 'string') {
+      contractAddress = res;
+    } else {
+      if (!res.id)
+        throw new Error('Create External Pause Mock Handler response id empty');
+
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        1,
+        true,
       );
+
+      if (!results || results.length !== 1) {
+        throw new Error('Invalid data structure');
+      }
+      contractAddress = results[0];
     }
 
-    const provider = new ethers.providers.JsonRpcProvider(providerJsonUrl);
-    const wallet = new ethers.Wallet(privateKey, provider);
-
-    const factory = new MockedExternalPause__factory(wallet);
-
-    const contract = await factory.deploy();
-    await contract.deployed();
-
     const address = (
-      await this.mirrorNodeAdapter.getAccountInfo(contract.address)
+      await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
     ).id.toString();
 
     return Promise.resolve(new CreateExternalPauseMockCommandResponse(address));

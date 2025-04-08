@@ -288,6 +288,7 @@ task(
             clearingRedeemFacet,
             clearingHoldCreationFacet,
             clearingReadFacet,
+            externalPauseManagement,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -335,6 +336,7 @@ task(
             'Clearing Redeem Facet': clearingRedeemFacet.address,
             'Clearing Hold Creation Facet': clearingHoldCreationFacet.address,
             'Clearing Read Facet': clearingReadFacet.address,
+            'External Pause Management': externalPauseManagement.address,
         }
 
         console.log('\n 🟢 Deployed ATS Contract List:')

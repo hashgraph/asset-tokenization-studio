@@ -832,6 +832,7 @@ interface IExternalPausesMockAdapter {
     paused: boolean,
     contractId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  createExternalPauseMock(): Promise<string | TransactionResponse>;
 }
 
 export default abstract class TransactionAdapter
@@ -1600,6 +1601,9 @@ export default abstract class TransactionAdapter
     paused: boolean,
     contractId?: ContractId | string,
   ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createExternalPauseMock(): Promise<string | TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }
