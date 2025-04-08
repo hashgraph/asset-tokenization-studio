@@ -289,6 +289,42 @@ import {
   UPDATE_CONFIG_VERSION_GAS,
   UPDATE_RESOLVER_GAS,
   UPDATE_MATURITY_DATE_GAS,
+  SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+  SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
+  PROTECT_PARTITION_GAS,
+  PROTECTED_TRANSFER_GAS,
+  PROTECTED_REDEEM_GAS,
+  UNPROTECT_PARTITION_GAS,
+  PROTECTED_TRANSFER_AND_LOCK_GAS,
+  CREATE_HOLD_GAS,
+  CREATE_HOLD_FROM_GAS,
+  CONTROLLER_CREATE_HOLD_GAS,
+  PROTECTED_CREATE_HOLD_GAS,
+  RELEASE_HOLD_GAS,
+  RECLAIM_HOLD_GAS,
+  EXECUTE_HOLD_BY_PARTITION_GAS,
+  ADD_ISSUER_GAS,
+  SET_REVOCATION_REGISTRY_GAS,
+  REMOVE_ISSUER_GAS,
+  GRANT_KYC_GAS,
+  REVOKE_KYC_GAS,
+  ACTIVATE_CLEARING_GAS,
+  DEACTIVATE_CLEARING_GAS,
+  CLEARING_TRANSFER_BY_PARTITION,
+  CLEARING_TRANSFER_FROM_BY_PARTITION,
+  PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
+  APPROVE_CLEARING_TRANSFER_BY_PARTITION,
+  CANCEL_CLEARING_TRANSFER_BY_PARTITION,
+  RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
+  CLEARING_REDEEM_BY_PARTITION,
+  CLEARING_REDEEM_FROM_BY_PARTITION,
+  PROTECTED_CLEARING_REDEEM_BY_PARTITION,
+  CLEARING_CREATE_HOLD_BY_PARTITION,
+  CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
+  PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
+  OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
+  OPERATOR_CLEARING_REDEEM_BY_PARTITION,
+  OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -307,16 +343,24 @@ import {
   ControlList__factory,
   DiamondFacet__factory,
   Equity__factory,
-  ERC1410ScheduledSnapshot__factory,
+  ERC1410ScheduledTasks__factory,
   ERC1643__factory,
   Factory__factory,
   IBond,
   IEquity,
   Lock__factory,
   Pause__factory,
-  ScheduledSnapshots__factory,
+  ProtectedPartitions__factory,
+  ScheduledTasks__factory,
   Snapshots__factory,
   TransferAndLock__factory,
+  Hold__factory,
+  SsiManagement__factory,
+  Kyc__factory,
+  ClearingActionsFacet__factory,
+  ClearingTransferFacet__factory,
+  ClearingRedeemFacet__factory,
+  ClearingHoldCreationFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -337,6 +381,27 @@ import {
   CastRegulationType,
 } from '../../../domain/context/factory/RegulationType.js';
 import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
+import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
+import {
+  Hold,
+  HoldIdentifier,
+  ProtectedHold,
+} from '../../../domain/context/security/Hold.js';
+import {
+  BasicTransferInfo,
+  IssueData,
+  OperatorTransferData,
+} from '../../../domain/context/factory/ERC1410Metadata.js';
+import {
+  CastClearingOperationType,
+  ClearingOperation,
+  ClearingOperationFrom,
+  ClearingOperationIdentifier,
+  ClearingOperationType,
+  ProtectedClearingOperation,
+} from '../../../domain/context/security/Clearing.js';
+import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
+import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -390,14 +455,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -419,6 +480,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       };
 
       const security: SecurityData = {
+        arePartitionsProtected: securityInfo.arePartitionsProtected,
         isMultiPartition: securityInfo.isMultiPartition,
         resolver: resolver.toString(),
         resolverProxyConfiguration: resolverProxyConfiguration,
@@ -429,6 +491,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           ? securityInfo.maxSupply.toString()
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: securityInfo.clearingActive,
       };
 
       const equityDetails: EquityDetailsData = {
@@ -502,14 +565,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -531,6 +590,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       };
 
       const security: SecurityData = {
+        arePartitionsProtected: securityInfo.arePartitionsProtected,
         isMultiPartition: securityInfo.isMultiPartition,
         resolver: resolver.toString(),
         resolverProxyConfiguration: resolverProxyConfiguration,
@@ -541,6 +601,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           ? securityInfo.maxSupply.toString()
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: securityInfo.clearingActive,
       };
 
       const bondDetails: BondDetailsData = {
@@ -755,7 +816,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             factoryId = result.factory.toString();
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Factories could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -770,7 +831,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             resolverId = result.resolver.toString();
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Resolvers could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -785,7 +846,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             mirrorNode = result.mirrorNode;
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Mirror Nodes could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -800,14 +861,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             rpcNode = result.jsonRpcRelay;
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `RPC Nodes could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
       }
       LogService.logTrace('Metamask Network:', chainId);
     } else {
-      console.error(chainId + ' not an hedera network');
+      LogService.logError(chainId + ' not an hedera network');
     }
 
     await this.commandBus.execute(
@@ -934,19 +995,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()}`,
     );
 
+    const basicTransferInfo: BasicTransferInfo = {
+      to: targetId.toString(),
+      value: amount.toHexString(),
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledSnapshot__factory.connect(
+      await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).transferByPartition(
-        _PARTITION_ID_1,
-        targetId.toString(),
-        amount.toBigNumber(),
-        '0x',
-        {
-          gasLimit: TRANSFER_GAS,
-        },
-      ),
+      ).transferByPartition(_PARTITION_ID_1, basicTransferInfo, '0x', {
+        gasLimit: TRANSFER_GAS,
+      }),
       this.networkService.environment,
     );
   }
@@ -986,7 +1046,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Redeeming ${amount} securities`);
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledSnapshot__factory.connect(
+      await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).redeemByPartition(_PARTITION_ID_1, amount.toBigNumber(), '0x', {
@@ -1100,17 +1160,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Issue ${amount} ${security} to account: ${targetId.toString()}`,
     );
 
+    const issueData: IssueData = {
+      partition: _PARTITION_ID_1,
+      tokenHolder: targetId.toString(),
+      value: amount.toHexString(),
+      data: '0x',
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledSnapshot__factory.connect(
+      await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).issueByPartition(
-        _PARTITION_ID_1,
-        targetId.toString(),
-        amount.toBigNumber(),
-        '0x',
-        { gasLimit: ISSUE_GAS },
-      ),
+      ).issueByPartition(issueData, { gasLimit: ISSUE_GAS }),
       this.networkService.environment,
     );
   }
@@ -1164,7 +1225,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledSnapshot__factory.connect(
+      await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).controllerTransferByPartition(
@@ -1192,7 +1253,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledSnapshot__factory.connect(
+      await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).controllerRedeemByPartition(
@@ -1345,7 +1406,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledSnapshot__factory.connect(
+      await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).authorizeOperator(targetId.toString(), {
@@ -1363,7 +1424,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledSnapshot__factory.connect(
+      await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).revokeOperator(targetId.toString(), { gasLimit: REVOKE_OPERATOR_GAS }),
@@ -1380,7 +1441,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledSnapshot__factory.connect(
+      await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).authorizeOperatorByPartition(partitionId, targetId.toString(), {
@@ -1399,7 +1460,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledSnapshot__factory.connect(
+      await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).revokeOperatorByPartition(partitionId, targetId.toString(), {
@@ -1419,19 +1480,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()} for partition ${partitionId}`,
     );
 
+    const operatorTransferData: OperatorTransferData = {
+      partition: partitionId,
+      from: sourceId.toString(),
+      to: targetId.toString(),
+      value: amount.toHexString(),
+      data: '0x',
+      operatorData: '0x',
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledSnapshot__factory.connect(
+      await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).operatorTransferByPartition(
-        partitionId,
-        sourceId.toString(),
-        targetId.toString(),
-        amount.toBigNumber(),
-        '0x',
-        '0x',
-        { gasLimit: TRANSFER_OPERATOR_GAS },
-      ),
+      ).operatorTransferByPartition(operatorTransferData, {
+        gasLimit: TRANSFER_OPERATOR_GAS,
+      }),
       this.networkService.environment,
     );
   }
@@ -1461,10 +1525,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ScheduledSnapshots__factory.connect(
+      await ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).triggerPendingScheduledSnapshots({
+      ).triggerPendingScheduledTasks({
         gasLimit: TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
       }),
       this.networkService.environment,
@@ -1479,10 +1543,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ScheduledSnapshots__factory.connect(
+      await ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).triggerScheduledSnapshots(max.toBigNumber(), {
+      ).triggerScheduledTasks(max.toBigNumber(), {
         gasLimit: TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
       }),
       this.networkService.environment,
@@ -1616,6 +1680,1111 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       ).updateMaturityDate(maturityDate, {
         gasLimit: UPDATE_MATURITY_DATE_GAS,
       }),
+      this.networkService.environment,
+    );
+  }
+
+  async setScheduledBalanceAdjustment(
+    security: EvmAddress,
+    executionDate: BigDecimal,
+    factor: BigDecimal,
+    decimals: BigDecimal,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `equity: ${security} ,
+      executionDate :${executionDate} , 
+      factor: ${factor},
+      decimals : ${decimals}  `,
+    );
+    const scheduledBalanceAdjustmentStruct: IEquity.ScheduledBalanceAdjustmentStruct =
+      {
+        executionDate: executionDate.toBigNumber(),
+        factor: factor.toBigNumber(),
+        decimals: decimals.toBigNumber(),
+      };
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Equity__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setScheduledBalanceAdjustment(scheduledBalanceAdjustmentStruct, {
+        gasLimit: SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
+      }),
+      this.networkService.environment,
+      SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+    );
+  }
+
+  async protectPartitions(
+    address: EvmAddress,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Protecting Partitions for security: ${address.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ProtectedPartitions__factory.connect(
+        address.toString(),
+        this.signerOrProvider,
+      ).protectPartitions({ gasLimit: PROTECT_PARTITION_GAS }),
+      this.networkService.environment,
+    );
+  }
+
+  async protectedRedeemFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC1410ScheduledTasks__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).protectedRedeemFromByPartition(
+        partitionId,
+        sourceId.toString(),
+        amount.toBigNumber(),
+        deadline.toBigNumber(),
+        nounce.toBigNumber(),
+        signature,
+        {
+          gasLimit: PROTECTED_REDEEM_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async unprotectPartitions(
+    address: EvmAddress,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Unprotecting Partitions for security: ${address.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ProtectedPartitions__factory.connect(
+        address.toString(),
+        this.signerOrProvider,
+      ).unprotectPartitions({ gasLimit: UNPROTECT_PARTITION_GAS }),
+      this.networkService.environment,
+    );
+  }
+
+  async protectedTransferAndLockByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
+    );
+
+    const transferAndLockData: TransferAndLock = {
+      from: sourceId.toString(),
+      to: targetId.toString(),
+      amount: amount.toBigNumber(),
+      data: '0x',
+      expirationTimestamp: expirationDate.toBigNumber(),
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await TransferAndLock__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).protectedTransferAndLockByPartition(
+        partitionId,
+        transferAndLockData,
+        deadline.toBigNumber(),
+        nounce.toBigNumber(),
+        signature,
+        {
+          gasLimit: PROTECTED_TRANSFER_AND_LOCK_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async protectedTransferFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC1410ScheduledTasks__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).protectedTransferFromByPartition(
+        partitionId,
+        sourceId.toString(),
+        targetId.toString(),
+        amount.toBigNumber(),
+        deadline.toBigNumber(),
+        nounce.toBigNumber(),
+        signature,
+        {
+          gasLimit: PROTECTED_TRANSFER_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async createHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrow}`,
+    );
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).createHoldByPartition(partitionId, hold, {
+        gasLimit: CREATE_HOLD_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async createHoldFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+    );
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).createHoldFromByPartition(
+        partitionId,
+        sourceId.toString(),
+        hold,
+        '0x',
+        {
+          gasLimit: CREATE_HOLD_FROM_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async controllerCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Controller Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+    );
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).controllerCreateHoldByPartition(
+        partitionId,
+        sourceId.toString(),
+        hold,
+        '0x',
+        {
+          gasLimit: CONTROLLER_CREATE_HOLD_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async protectedCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    escrow: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Protected Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+    );
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    const protectedHold: ProtectedHold = {
+      hold,
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).protectedCreateHoldByPartition(
+        partitionId,
+        sourceId.toString(),
+        protectedHold,
+        signature,
+        {
+          gasLimit: PROTECTED_CREATE_HOLD_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async releaseHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    holdId: number,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Releasing hold amount ${amount} from account ${targetId.toString()}}`,
+    );
+
+    const holdIdentifier: HoldIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      holdId,
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).releaseHoldByPartition(holdIdentifier, amount.toBigNumber(), {
+        gasLimit: RELEASE_HOLD_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async reclaimHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    holdId: number,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Reclaiming hold amount from account ${targetId.toString()}}`,
+    );
+
+    const holdIdentifier: HoldIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      holdId,
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).reclaimHoldByPartition(holdIdentifier, {
+        gasLimit: RECLAIM_HOLD_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async executeHoldByPartition(
+    security: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    partitionId: string,
+    holdId: number,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
+    );
+
+    const holdIdentifier: HoldIdentifier = {
+      partition: partitionId,
+      tokenHolder: sourceId.toString(),
+      holdId,
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).executeHoldByPartition(
+        holdIdentifier,
+        targetId.toString(),
+        amount.toBigNumber(),
+        {
+          gasLimit: EXECUTE_HOLD_BY_PARTITION_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async setRevocationRegistryAddress(
+    security: EvmAddress,
+    revocationRegistry: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting revocation registry address ${revocationRegistry}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await SsiManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setRevocationRegistryAddress(revocationRegistry.toString(), {
+        gasLimit: SET_REVOCATION_REGISTRY_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async addIssuer(
+    security: EvmAddress,
+    issuer: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Adding issuer ${issuer}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await SsiManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addIssuer(issuer.toString(), {
+        gasLimit: ADD_ISSUER_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeIssuer(
+    security: EvmAddress,
+    issuer: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Removing issuer ${issuer}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await SsiManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeIssuer(issuer.toString(), {
+        gasLimit: REMOVE_ISSUER_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async grantKYC(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    VCId: string,
+    validFrom: BigDecimal,
+    validTo: BigDecimal,
+    issuer: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC id ${VCId}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Kyc__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).grantKyc(
+        targetId.toString(),
+        VCId,
+        validFrom.toBigNumber(),
+        validTo.toBigNumber(),
+        issuer.toString(),
+        {
+          gasLimit: GRANT_KYC_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async revokeKYC(
+    security: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Kyc__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).revokeKyc(targetId.toString(), {
+        gasLimit: REVOKE_KYC_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async activateClearing(security: EvmAddress): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Activating Clearing to address ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingActionsFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).activateClearing({
+        gasLimit: ACTIVATE_CLEARING_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async deactivateClearing(security: EvmAddress): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Deactivate Clearing to address ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingActionsFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).deactivateClearing({
+        gasLimit: DEACTIVATE_CLEARING_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async clearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Clearing Transfer By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: expirationDate.toBigNumber(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingTransferFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingTransferByPartition(
+        clearingOperation,
+        amount.toBigNumber(),
+        targetId.toString(),
+        {
+          gasLimit: CLEARING_TRANSFER_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async clearingTransferFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Clearing Transfer From By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingTransferFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingTransferFromByPartition(
+        clearingOperationFrom,
+        amount.toBigNumber(),
+        targetId.toString(),
+        {
+          gasLimit: CLEARING_TRANSFER_FROM_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async protectedClearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Protected Clearing Transfer By Partition to address ${security.toString()}`,
+    );
+
+    const protectedClearingOperation: ProtectedClearingOperation = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingTransferFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).protectedClearingTransferByPartition(
+        protectedClearingOperation,
+        amount.toBigNumber(),
+        targetId.toString(),
+        signature,
+        {
+          gasLimit: PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async approveClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Approve Clearing Operation By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
+      clearingId: clearingId,
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingActionsFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).approveClearingOperationByPartition(clearingOperationIdentifier, {
+        gasLimit: APPROVE_CLEARING_TRANSFER_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async cancelClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Cancel Clearing Operation By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
+      clearingId: clearingId,
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingActionsFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).cancelClearingOperationByPartition(clearingOperationIdentifier, {
+        gasLimit: CANCEL_CLEARING_TRANSFER_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async reclaimClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Reclaim Clearing Operation By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
+      clearingId: clearingId,
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingActionsFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).reclaimClearingOperationByPartition(clearingOperationIdentifier, {
+        gasLimit: RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async clearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Clearing Redeem By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: expirationDate.toBigNumber(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingRedeemFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingRedeemByPartition(clearingOperation, amount.toBigNumber(), {
+        gasLimit: CLEARING_REDEEM_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async clearingRedeemFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Clearing Redeem From By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingRedeemFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingRedeemFromByPartition(
+        clearingOperationFrom,
+        amount.toBigNumber(),
+        {
+          gasLimit: CLEARING_REDEEM_FROM_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async protectedClearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Protected Clearing Redeem By Partition to address ${security.toString()}`,
+    );
+
+    const protectedClearingOperation: ProtectedClearingOperation = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingRedeemFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).protectedClearingRedeemByPartition(
+        protectedClearingOperation,
+        amount.toBigNumber(),
+        signature,
+        {
+          gasLimit: PROTECTED_CLEARING_REDEEM_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async clearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Clearing Create Hold By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: clearingExpirationDate.toBigNumber(),
+      data: '0x',
+    };
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingHoldCreationFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingCreateHoldByPartition(clearingOperation, hold, {
+        gasLimit: CLEARING_CREATE_HOLD_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async clearingCreateHoldFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Clearing Create Hold From By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingHoldCreationFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingCreateHoldFromByPartition(clearingOperationFrom, hold, {
+        gasLimit: CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async protectedClearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    escrow: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Protected Clearing Create Hold By Partition to address ${security.toString()}`,
+    );
+
+    const protectedClearingOperation: ProtectedClearingOperation = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingHoldCreationFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).protectedClearingCreateHoldByPartition(
+        protectedClearingOperation,
+        hold,
+        signature,
+        {
+          gasLimit: PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async operatorClearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Operator Clearing Create Hold By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingHoldCreationFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold, {
+        gasLimit: OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async operatorClearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Operator Clearing Redeem By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingRedeemFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).operatorClearingRedeemByPartition(
+        clearingOperationFrom,
+        amount.toBigNumber(),
+        {
+          gasLimit: OPERATOR_CLEARING_REDEEM_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async operatorClearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Operator Clearing Transfer By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingTransferFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingTransferFromByPartition(
+        clearingOperationFrom,
+        amount.toBigNumber(),
+        targetId.toString(),
+        {
+          gasLimit: OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+        },
+      ),
       this.networkService.environment,
     );
   }

@@ -244,11 +244,14 @@ export const toDate = (date: string | Date = new Date()) =>
   date instanceof Date ? date : new Date(date);
 
 export const formatDate = (
-  date?: string | Date,
+  date?: string | Date | number,
   format = "dd/MM/yyyy",
   defaultValue = "",
 ) => {
   if (!date) return defaultValue;
+
+  if (typeof date === "number") return _formatDate(date, format);
+
   return _formatDate(toDate(date), format);
 };
 
@@ -350,4 +353,17 @@ export const dateToUnixTimestamp = (date: string) => {
 
 export const calculateCouponFrequency = (couponFrequency: string) => {
   return (parseInt(couponFrequency) * (30 * 24 * 60 * 60)).toString();
+};
+
+export const calculateFactorDecimals = (number: number, separator?: string) => {
+  const [integerPart, decimalPart] = number.toString().split(separator ?? ".");
+
+  const factorNumber = Number(
+    decimalPart ? integerPart + decimalPart : integerPart,
+  );
+
+  return {
+    factor: factorNumber,
+    decimals: decimalPart ? decimalPart.length : 0,
+  };
 };

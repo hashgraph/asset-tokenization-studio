@@ -237,6 +237,7 @@ export default {
     title: "Search by role",
     subtitle: "Pick a role to see its linked accounts",
     role: "{{ role }} in current accounts",
+    noRoles: "No accounts founded",
     inputs: {
       select: {
         label: "Select a role to show",

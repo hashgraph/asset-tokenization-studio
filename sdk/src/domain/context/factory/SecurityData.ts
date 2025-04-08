@@ -208,6 +208,7 @@ import { Rbac } from './Rbac.js';
 import { ResolverProxyConfiguration } from './ResolverProxyConfiguration.js';
 
 export class SecurityData {
+  public arePartitionsProtected: boolean;
   public isMultiPartition: boolean;
   public resolver: string;
   public resolverProxyConfiguration: ResolverProxyConfiguration;
@@ -216,4 +217,5 @@ export class SecurityData {
   public isWhiteList: boolean;
   public maxSupply: string;
   public erc20MetadataInfo: ERC20MetadataInfo;
+  public clearingActive: boolean;
 }

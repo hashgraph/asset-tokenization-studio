@@ -211,8 +211,16 @@ import Account from '../../../../domain/context/account/Account.js';
 import PublicKey from '../../../../domain/context/account/PublicKey.js';
 import { RequestAccount, RequestPublicKey } from '../BaseRequest.js';
 import ValidatedRequest from '../validation/ValidatedRequest.js';
-import { HWCRequestSettings } from '../ConnectRequest';
-import HWCSettings from '../../../../domain/context/walletConnect/HWCSettings';
+import {
+  AWSKMSConfigRequest,
+  DFNSConfigRequest,
+  FireblocksConfigRequest,
+  HWCRequestSettings,
+} from '../network/ConnectRequest.js';
+import HWCSettings from '../../../../core/settings/walletConnect/HWCSettings.js';
+import DfnsSettings from '../../../../core/settings/custodialWalletSettings/DfnsSettings.js';
+import FireblocksSettings from '../../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
+import AWSKMSSettings from '../../../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
 
 export default class RequestMapper {
   public static isPublicKey = (val: any): val is RequestPublicKey => {
@@ -343,6 +351,47 @@ export default class RequestMapper {
       req.dappDescription,
       req.dappURL,
       req.dappIcons,
+    );
+  }
+
+  public static dfnsRequestToDfnsSettings(
+    req: DFNSConfigRequest,
+  ): DfnsSettings {
+    return new DfnsSettings(
+      req.serviceAccountPrivateKey,
+      req.credentialId,
+      req.authorizationToken,
+      req.urlApplicationOrigin,
+      req.applicationId,
+      req.baseUrl,
+      req.walletId,
+      req.hederaAccountId,
+      req.publicKey,
+    );
+  }
+
+  public static fireblocksRequestToFireblocksSettings(
+    req: FireblocksConfigRequest,
+  ): FireblocksSettings {
+    return new FireblocksSettings(
+      req.apiKey,
+      req.apiSecretKey,
+      req.baseUrl,
+      req.assetId,
+      req.vaultAccountId,
+      req.hederaAccountId,
+    );
+  }
+
+  public static awsKmsRequestToAwsKmsSettings(
+    req: AWSKMSConfigRequest,
+  ): AWSKMSSettings {
+    return new AWSKMSSettings(
+      req.awsAccessKeyId,
+      req.awsSecretAccessKey,
+      req.awsRegion,
+      req.awsKmsKeyId,
+      req.hederaAccountId,
     );
   }
 }

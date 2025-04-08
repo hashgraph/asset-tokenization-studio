@@ -248,19 +248,19 @@ import { ReleaseCommandHandler } from '../app/usecase/command/security/operation
 import { LockCountQueryHandler } from '../app/usecase/query/security/lockCount/LockCountQueryHandler.js';
 import { GetLockQueryHandler } from '../app/usecase/query/security/getLock/GetLockQueryHandler.js';
 import { LocksIdQueryHandler } from '../app/usecase/query/security/locksId/LocksIdQueryHandler.js';
+import { ExecuteHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommandHandler.js';
 
 import { WalletEvents } from '../app/service/event/WalletEvent.js';
 import { CommandHandlerType } from './command/CommandBus.js';
 import { QueryHandlerType } from './query/QueryBus.js';
 import { NetworkProps } from '../app/service/NetworkService.js';
 // eslint-disable-next-line jest/no-mocks-import
-import { ConcreteQueryHandler } from '../../__tests__/core/command/__mocks__/ConcreteQueryHandler.js';
+import { ConcreteQueryHandler } from '../../__tests__/integration/__mocks__/ConcreteQueryHandler.js';
 // eslint-disable-next-line jest/no-mocks-import
-import { ConcreteCommandHandler } from '../../__tests__/core/command/__mocks__/ConcreteCommandHandler.js';
+import { ConcreteCommandHandler } from '../../__tests__/integration/__mocks__/ConcreteCommandHandler.js';
 import TransactionAdapter from '../port/out/TransactionAdapter.js';
 import { RuntimeError } from './error/RuntimeError.js';
 import { BalanceOfQueryHandler } from '../app/usecase/query/security/balanceof/BalanceOfQueryHandler.js';
-import { GetAccountSecurityRelationshipQueryHandler } from '../app/usecase/query/account/securityRelationship/GetAccountSecurityRelationshipQueryHandler.js';
 import { IsPausedQueryHandler } from '../app/usecase/query/security/isPaused/IsPausedQueryHandler';
 import { GetDividendsQueryHandler } from '../app/usecase/query/equity/dividends/getDividends/GetDividendsQueryHandler.js';
 import { GetDividendsCountQueryHandler } from '../app/usecase/query/equity/dividends/getDividendsCount/GetDividendsCountQueryHandler.js';
@@ -282,7 +282,11 @@ import { GetCouponDetailsQueryHandler } from '../app/usecase/query/bond/get/getC
 import { GetCouponQueryHandler } from '../app/usecase/query/bond/coupons/getCoupon/GetCouponQueryHandler.js';
 import { GetCouponCountQueryHandler } from '../app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQueryHandler.js';
 import { GetCouponForQueryHandler } from '../app/usecase/query/bond/coupons/getCouponFor/GetCouponForQueryHandler.js';
-import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/GetMaxSupplyQueryHandler.js';
+import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/getMaxSupply/GetMaxSupplyQueryHandler.js';
+import { GetMaxSupplyByPartitionQueryHandler } from '../app/usecase/query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQueryHandler.js';
+import { CanTransferByPartitionQueryHandler } from '../app/usecase/query/security/canTransferByPartition/CanTransferByPartitionQueryHandler.js';
+import { CanTransferQueryHandler } from '../app/usecase/query/security/canTransfer/CanTransferQueryHandler.js';
+import { CanRedeemByPartitionQueryHandler } from '../app/usecase/query/security/canRedeemByPartition/CanRedeemByPartitionQueryHandler.js';
 
 import { SDK } from '../port/in/Common.js';
 import { HederaWalletConnectTransactionAdapter } from '../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
@@ -291,6 +295,73 @@ import { UpdateConfigVersionCommandHandler } from '../app/usecase/command/manage
 import { UpdateResolverCommandHandler } from '../app/usecase/command/management/updateResolver/updateResolverCommandHandler.js';
 import { GetConfigInfoQueryHandler } from '../app/usecase/query/management/GetConfigInfoQueryHandler';
 import { UpdateMaturityDateCommandHandler } from '../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommandHandler.js';
+import { SetScheduledBalanceAdjustmentCommandHandler } from '../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommandHandler.js';
+import { GetScheduledBalanceAdjustmentQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQueryHandler.js';
+import { GetScheduledBalanceAdjustmentCountQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQueryHandler';
+import { GetLastAggregatedBalanceAdjustmentFactorForQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQueryHandler.js';
+import { GetAggregatedBalanceAdjustmentFactorQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQueryHandler';
+import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler.js';
+import { DFNSTransactionAdapter } from '../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
+import { FireblocksTransactionAdapter } from '../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
+import { AWSKMSTransactionAdapter } from '../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
+import { ProtectPartitionsCommandHandler } from '../app/usecase/command/security/operations/protectPartitions/ProtectPartitionsCommandHandler.js';
+import { UnprotectPartitionsCommandHandler } from '../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommandHandler.js';
+import { ProtectedRedeemFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/redeem/ProtectedRedeemFromByPartitionCommandHandler.js';
+import { ProtectedTransferFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferFromByPartitionCommandHandler.js';
+import { ProtectedTransferAndLockByPartitionCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommandHandler.js';
+import { PartitionsProtectedQueryHandler } from '../app/usecase/query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQueryHandler';
+import { GetNounceQueryHandler } from '../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQueryHandler';
+import { CreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/createHoldByPartition/CreateHoldByPartitionCommandHandler.js';
+import { CreateHoldFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommandHandler.js';
+import { ControllerCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/controllerCreateHoldByPartition/ControllerCreateHoldByPartitionCommandHandler.js';
+import { ProtectedCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommandHandler.js';
+import { GetHeldAmountForQueryHandler } from '../app/usecase/query/security/hold/getHeldAmountFor/GetHeldAmountForQueryHandler.js';
+import { GetHeldAmountForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQueryHandler.js';
+import { GetHoldCountForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQueryHandler.js';
+import { GetHoldsIdForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQueryHandler.js';
+import { GetHoldForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQueryHandler.js';
+import { ReleaseHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommandHandler.js';
+import { ReclaimHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommandHandler.js';
+import { GetIssuerListCountQueryHandler } from '../app/usecase/query/security/ssi/getIssuerListCount/GetIssuerListCountQueryHandler.js';
+import { GetIssuerListMembersQueryHandler } from '../app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQueryHandler.js';
+import { GetRevocationRegistryAddressQueryHandler } from '../app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQueryHandler.js';
+import { IsIssuerQueryHandler } from '../app/usecase/query/security/ssi/isIssuer/IsIssuerQueryHandler.js';
+import { GetKYCForQueryHandler } from '../app/usecase/query/security/kyc/getKycFor/GetKYCForQueryHandler.js';
+import { GetKYCAccountsCountQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsCount/GetKYCAccountsCountQueryHandler.js';
+import { GrantKYCCommandHandler } from '../app/usecase/command/security/kyc/grantKyc/GrantKYCCommandHandler.js';
+import { RevokeKYCCommandHandler } from '../app/usecase/command/security/kyc/revokeKyc/RevokeKYCCommandHandler.js';
+import { AddIssuerCommandHandler } from '../app/usecase/command/security/ssi/addIssuer/AddIssuerCommandHandler.js';
+import { RemoveIssuerCommandHandler } from '../app/usecase/command/security/ssi/removeIssuer/RemoveIssuerCommandHandler.js';
+import { SetRevocationRegistryAddressCommandHandler } from '../app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommandHandler.js';
+import { GetKYCStatusForQueryHandler } from '../app/usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQueryHandler.js';
+import { GetKYCAccountsDataQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsData/GetKYCAccountsDataQueryHandler.js';
+import { ActivateClearingCommandHandler } from '../app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommandHandler.js';
+import { DeactivateClearingCommandHandler } from '../app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommandHandler.js';
+import { ClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommandHandler.js';
+import { ClearingTransferFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommandHandler.js';
+import { ProtectedClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommandHandler.js';
+import { ApproveClearingOperationByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommandHandler.js';
+import { CancelClearingOperationByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommandHandler.js';
+import { ReclaimClearingOperationByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommandHandler.js';
+import { ClearingRedeemByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommandHandler.js';
+import { ClearingRedeemFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommandHandler.js';
+import { ProtectedClearingRedeemByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommandHandler.js';
+import { ClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommandHandler.js';
+import { ClearingCreateHoldFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommandHandler.js';
+import { ProtectedClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommandHandler.js';
+import { IsClearingActivatedQueryHandler } from '../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQueryHandler.js';
+import { GetClearingsIdForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQueryHandler.js';
+import { GetClearingCountForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQueryHandler.js';
+import { GetClearedAmountForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQueryHandler.js';
+import { GetClearedAmountForQueryHandler } from '../app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQueryHandler.js';
+import { IsOperatorForPartitionQueryHandler } from '../app/usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQueryHandler.js';
+import { IsOperatorQueryHandler } from '../app/usecase/query/security/operator/isOperator/IsOperatorQueryHandler.js';
+import { OperatorClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommandHandler.js';
+import { OperatorClearingRedeemByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommandHandler.js';
+import { OperatorClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommandHandler.js';
+import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler.js';
+import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
+import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -374,6 +445,51 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: RemoveFromControlListCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectPartitionsCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UnprotectPartitionsCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedRedeemFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedTransferFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedTransferAndLockByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateHoldFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ControllerCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: GrantKYCCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RevokeKYCCommandHandler,
+  },
+
   // Bond Operations
   {
     token: TOKENS.COMMAND_HANDLER,
@@ -426,6 +542,102 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: UpdateResolverCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetScheduledBalanceAdjustmentCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ReleaseHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ReclaimHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ExecuteHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddIssuerCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveIssuerCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetRevocationRegistryAddressCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ActivateClearingCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: DeactivateClearingCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ClearingTransferByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ClearingTransferFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedClearingTransferByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ApproveClearingOperationByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CancelClearingOperationByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ReclaimClearingOperationByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ClearingRedeemByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ClearingRedeemFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedClearingRedeemByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ClearingCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ClearingCreateHoldFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedClearingCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingRedeemByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingTransferByPartitionCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [
@@ -436,6 +648,14 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetAccountInfoQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: PartitionsProtectedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetNounceQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
@@ -523,10 +743,6 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetAccountSecurityRelationshipQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
     useClass: IsPausedQueryHandler,
   },
   {
@@ -567,7 +783,140 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
+    useClass: GetMaxSupplyByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
     useClass: GetConfigInfoQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetScheduledBalanceAdjustmentQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetScheduledBalanceAdjustmentQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetScheduledBalanceAdjustmentCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetLastAggregatedBalanceAdjustmentFactorForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetAggregatedBalanceAdjustmentFactorQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass:
+      GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetHeldAmountForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetHeldAmountForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetHoldCountForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetHoldsIdForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetHoldForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetIssuerListCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetIssuerListMembersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetRevocationRegistryAddressQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsIssuerQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCAccountsCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCAccountsDataQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCStatusForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearedAmountForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearedAmountForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingCountForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingCreateHoldForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingTransferForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingRedeemForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingsIdForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsClearingActivatedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsOperatorForPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsOperatorQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: CanTransferByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: CanTransferQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: CanRedeemByPartitionQueryHandler,
   },
 ];
 
@@ -579,6 +928,18 @@ const TRANSACTION_HANDLER = [
   {
     token: TOKENS.TRANSACTION_HANDLER,
     useClass: HederaWalletConnectTransactionAdapter,
+  },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: DFNSTransactionAdapter,
+  },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: FireblocksTransactionAdapter,
+  },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: AWSKMSTransactionAdapter,
   },
 ];
 
@@ -665,6 +1026,9 @@ export default class Injectable {
     adapters.push(
       Injectable.resolve(RPCTransactionAdapter),
       Injectable.resolve(HederaWalletConnectTransactionAdapter),
+      Injectable.resolve(DFNSTransactionAdapter),
+      Injectable.resolve(FireblocksTransactionAdapter),
+      Injectable.resolve(AWSKMSTransactionAdapter),
     );
     return adapters;
   }

@@ -209,9 +209,10 @@ import {
     BusinessLogicResolver__factory,
     IStaticFunctionSelectors__factory,
     DiamondCutManager__factory,
-} from '../typechain-types'
+} from '@typechain'
 import { contractCall } from './contractsLifeCycle/utils'
 import { FacetConfiguration } from './resolverDiamondCut'
+import { GAS_LIMIT } from './constants'
 
 export async function getProxyImplementation(
     proxyAdminAddress: ContractId,
@@ -287,7 +288,7 @@ export async function createConfiguration(
         'createConfiguration',
         params,
         client,
-        10000000,
+        GAS_LIMIT.businessLogicResolver.createConfiguration,
         DiamondCutManager__factory.abi
     )
 }

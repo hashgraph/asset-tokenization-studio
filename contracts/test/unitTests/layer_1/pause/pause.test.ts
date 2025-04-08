@@ -205,20 +205,27 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Pause,
     AccessControl,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
-import { _PAUSER_ROLE } from '../../../../scripts/constants'
+    IFactory,
+    BusinessLogicResolver,
+    AccessControlFacet__factory,
+    PauseFacet__factory,
+} from '@typechain'
 import {
+    PAUSER_ROLE,
     deployEquityFromFactory,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    MAX_UINT256,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 describe('Pause Tests', () => {
     let diamond: ResolverProxy
@@ -228,56 +235,73 @@ describe('Pause Tests', () => {
     let account_A: string
     let account_B: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
-    beforeEach(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
 
-        await deployEnvironment()
-
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            'TEST_AccessControl',
-            'TAC',
-            6,
-            'ABCDEF123456',
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            0,
-            100,
-            RegulationType.REG_S,
-            RegulationSubType.NONE,
-            true,
-            'ES,FR,CH',
-            'nothing'
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: false,
+                timeTravelEnabled: true,
+            })
         )
 
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
-        )
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+    beforeEach(async () => {
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_S,
+            regulationSubType: RegulationSubType.NONE,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            factory: factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        accessControlFacet = AccessControlFacet__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
     })
 
     it('GIVEN an account without pause role WHEN pause THEN transaction fails with AccountHasNoRole', async () => {
         // Using account B (non role)
         pauseFacet = pauseFacet.connect(signer_B)
-
         // pause fails
         await expect(pauseFacet.pause()).to.be.rejectedWith('AccountHasNoRole')
     })
@@ -297,7 +321,7 @@ describe('Pause Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _PAUSER_ROLE,
+            PAUSER_ROLE,
             signer_A,
             signer_B,
             account_B
@@ -305,24 +329,30 @@ describe('Pause Tests', () => {
 
         // pause fails
         pauseFacet = pauseFacet.connect(signer_B)
-        await expect(pauseFacet.pause()).to.eventually.be.rejectedWith(Error)
+        await expect(pauseFacet.pause()).to.be.revertedWithCustomError(
+            pauseFacet,
+            'TokenIsPaused'
+        )
     })
 
     it('GIVEN an unpause Token WHEN unpause THEN transaction fails with TokenIsUnpaused', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_B)
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_B)
         pauseFacet = pauseFacet.connect(signer_B)
 
         // unpause fails
-        await expect(pauseFacet.unpause()).to.eventually.be.rejectedWith(Error)
+        await expect(pauseFacet.unpause()).to.be.revertedWithCustomError(
+            pauseFacet,
+            'TokenIsUnpaused'
+        )
     })
 
     it('GIVEN an account with pause role WHEN pause and unpause THEN transaction succeeds', async () => {
         // PAUSE ------------------------------------------------------------------
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_B)
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_B)
         // Pausing the token
         pauseFacet = pauseFacet.connect(signer_B)
 

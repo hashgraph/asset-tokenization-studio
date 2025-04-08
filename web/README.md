@@ -25,15 +25,15 @@ This Dapp interacts directly with the Hedera Testnet through the SDK.
 
 # Yarn Version Compatibility
 
-This project is compatible with Yarn version 1.22.19. Please ensure you have this version installed before running any yarn commands. If you need to install this version, you can run:
+This project is compatible with Yarn version 1.22.22. Please ensure you have this version installed before running any yarn commands. If you need to install this version, you can run:
 
 ```
-npm install -g yarn@1.22.19
+npm install -g yarn@1.22.22
 ```
 
 # Installation
 
-First, verify that you have the correct version of Yarn installed by running `yarn --version`. You should see `1.22.19` as the output.
+First, verify that you have the correct version of Yarn installed by running `yarn --version`. You should see `1.22.22` as the output.
 
 Then, install the project dependencies with:
 
@@ -50,9 +50,6 @@ Below is a description of which each variable represents.
 
 ## General
 
-- **REACT_APP_BUSINESS_LOGIC_KEYS_COMMON :** These keys serve to link deployed assets (diamond smart contracts) with the implementation smart contracts to which they delegate incoming calls. These keys should remain immutable. When a new implementation smart contract is deployed, its address will change, but the resolver must be updated to ensure the corresponding key points to the new contract address. This makes the upgrade process entirely seamless and transparent to the deployed assets. These keys represent the shared business logic common to all assets (e.g., equities, bonds, etc.).
-- **REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY :** These keys are similar to the "REACT_APP_BUSINESS_LOGIC_KEYS_COMMON" keys, but they specifically point to the implementation smart contracts that contain logic unique to Equities.
-- **REACT_APP_BUSINESS_LOGIC_KEYS_BOND :** These keys are similar to the "REACT_APP_BUSINESS_LOGIC_KEYS_COMMON" keys, but they specifically point to the implementation smart contracts that contain logic unique to Bonds.
 - **REACT_APP_SHOW_DISCLAIMER :** shows (true) or hides (false) the cookie disclaimer pop up message when running the web.
 
 ## Network

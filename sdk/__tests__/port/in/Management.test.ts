@@ -325,6 +325,8 @@ describe('🧪 Management tests', () => {
         decimals,
         isWhiteList: false,
         isControllable: true,
+        arePartitionsProtected: false,
+        clearingActive: false,
         isMultiPartition: false,
         diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
         votingRight,
@@ -358,10 +360,11 @@ describe('🧪 Management tests', () => {
     configId: string,
     configVersion: number,
     configInfo: ConfigInfoViewModel,
-  ) {
+  ): boolean {
     expect(configInfo.resolverAddress).toEqual(resolver);
     expect(configInfo.configId).toEqual(configId);
     expect(configInfo.configVersion).toEqual(configVersion);
+    return true;
   }
 
   it('Fetches configInfo successfully', async () => {
@@ -370,7 +373,9 @@ describe('🧪 Management tests', () => {
         securityId: equity.evmDiamondAddress!.toString(),
       }),
     );
-    checkConfig(RESOLVER_ADDRESS, configId, configVersion, res);
+    expect(checkConfig(RESOLVER_ADDRESS, configId, configVersion, res)).toBe(
+      true,
+    );
   }, 600_000);
 
   it('Updates configVersion correctly', async () => {

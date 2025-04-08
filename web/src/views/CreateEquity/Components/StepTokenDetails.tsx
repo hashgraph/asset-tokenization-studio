@@ -342,7 +342,7 @@ export const StepTokenDetails = () => {
           size="md"
           rules={{
             required,
-            validate: isISINValid(12),
+            validate: isISINValid,
           }}
         />
       </Stack>
@@ -385,6 +385,24 @@ export const StepTokenDetails = () => {
             />
             <Tooltip
               label={t("stepTokenDetails.permissionApprovalListTooltip")}
+              placement="right"
+            >
+              <PhosphorIcon as={Info} />
+            </Tooltip>
+          </HStack>
+        </FormControl>
+      </VStack>
+      <InfoDivider title={t("stepTokenDetails.configuration")} type="main" />
+      <VStack w="full">
+        <FormControl gap="15px" as={SimpleGrid} columns={{ base: 3, lg: 1 }}>
+          <HStack justifySelf="flex-start">
+            <ToggleController
+              control={control}
+              id="isClearing"
+              label={t("stepTokenDetails.isClearing")}
+            />
+            <Tooltip
+              label={t("stepTokenDetails.isClearingTooltip")}
               placement="right"
             >
               <PhosphorIcon as={Info} />

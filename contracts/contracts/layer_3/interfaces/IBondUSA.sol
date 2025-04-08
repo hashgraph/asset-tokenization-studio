@@ -221,5 +221,5 @@ interface IBondUSA is IBond, ISecurity {
         CouponDetailsData calldata _couponDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) external returns (bool);
+    ) external;
 }

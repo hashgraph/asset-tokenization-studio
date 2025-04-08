@@ -207,18 +207,26 @@ import { Box, Center, Flex, HStack, VStack } from "@chakra-ui/react";
 import { Text, DefinitionList, Spinner } from "io-bricks-ui";
 import { Panel } from "../../../components/Panel";
 import { useTranslation } from "react-i18next";
-import { ActionsButtons } from "./ActionsButtons";
 import {
   BondDetailsViewModel,
   EquityDetailsViewModel,
   GetAccountBalanceRequest,
   GetAllCouponsRequest,
   GetAllDividendsRequest,
+  GetAllScheduledBalanceAdjustmentsRequest,
   SecurityViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
-import { formatNumberLocale, toNumber } from "../../../utils/format";
+import {
+  formatDate,
+  formatNumberLocale,
+  toNumber,
+} from "../../../utils/format";
 import { useUserStore } from "../../../store/userStore";
-import { COUPONS_FACTOR, User } from "../../../utils/constants";
+import {
+  COUPONS_FACTOR,
+  DATE_TIME_FORMAT,
+  User,
+} from "../../../utils/constants";
 import { useSecurityStore } from "../../../store/securityStore";
 import { SkeletonText } from "@chakra-ui/react";
 import {
@@ -230,6 +238,8 @@ import { SecurityDetailsExtended } from "./SecurityDetailsExtended";
 import { useGetAllCoupons } from "../../../hooks/queries/useCoupons";
 import { CountriesList } from "../../CreateSecurityCommons/CountriesList";
 import _capitalize from "lodash/capitalize";
+import { useGetAllBalanceAdjustments } from "../../../hooks/queries/useBalanceAdjustment";
+import { HolderActionsButtons } from "./HolderActionsButtons";
 
 interface DetailsProps {
   id?: string;
@@ -265,25 +275,40 @@ export const Details = ({
   const { details = {} } = useSecurityStore();
   const { address: walletAddress } = useWalletStore();
 
-  // DIVIDENDS
-  const dividendsRequest = new GetAllDividendsRequest({
-    securityId: id,
-  });
   const {
     data: dividends,
     isLoading: isLoadingDividends,
     isFetching: isFetchingDividends,
-  } = useGetAllDividends(dividendsRequest);
+  } = useGetAllDividends(
+    new GetAllDividendsRequest({
+      securityId: id,
+    }),
+    {
+      enabled: details?.type === "EQUITY",
+    },
+  );
 
-  // COUPONS
-  const couponsRequest = new GetAllCouponsRequest({
-    securityId: id,
-  });
+  const { data: balanceAdjustments } = useGetAllBalanceAdjustments(
+    new GetAllScheduledBalanceAdjustmentsRequest({
+      securityId: id,
+    }),
+    {
+      enabled: details?.type === "EQUITY",
+    },
+  );
+
   const {
     data: coupons,
     isLoading: isLoadingCoupons,
     isFetching: isFetchingCoupons,
-  } = useGetAllCoupons(couponsRequest);
+  } = useGetAllCoupons(
+    new GetAllCouponsRequest({
+      securityId: id,
+    }),
+    {
+      enabled: details?.type === "BOND",
+    },
+  );
 
   const rightsAndPrivileges = {
     votingRights: equityDetailsResponse.votingRight,
@@ -415,7 +440,7 @@ export const Details = ({
 
   return (
     <VStack gap={6} pt={2} pb={8} w="full">
-      <ActionsButtons />
+      {type === User.holder && <HolderActionsButtons />}
       <HStack w="full" gap={8} alignItems="flex-start">
         <VStack w="full" gap={8}>
           <SecurityDetailsExtended
@@ -442,16 +467,12 @@ export const Details = ({
                 {
                   title: tBenefits("recordDate"),
                   description:
-                    new Date(
-                      dividend.recordDate.getTime(),
-                    ).toLocaleDateString() ?? "",
+                    formatDate(dividend.recordDate, DATE_TIME_FORMAT) ?? "",
                 },
                 {
                   title: tBenefits("executionDate"),
                   description:
-                    new Date(
-                      dividend.executionDate.getTime(),
-                    ).toLocaleDateString() ?? "",
+                    formatDate(dividend.executionDate, DATE_TIME_FORMAT) ?? "",
                 },
                 {
                   title: tBenefits("dividendAmount"),
@@ -489,21 +510,16 @@ export const Details = ({
                 {
                   title: tBenefits("recordDate"),
                   description:
-                    new Date(
-                      coupon.recordDate.getTime(),
-                    ).toLocaleDateString() ?? "",
+                    formatDate(coupon.recordDate, DATE_TIME_FORMAT) ?? "",
                 },
                 {
                   title: tBenefits("executionDate"),
                   description:
-                    new Date(
-                      coupon.executionDate.getTime(),
-                    ).toLocaleDateString() ?? "",
+                    formatDate(coupon.executionDate, DATE_TIME_FORMAT) ?? "",
                 },
                 {
                   title: tBenefits("couponRate"),
-                  description:
-                    `${parseInt(coupon.rate) / COUPONS_FACTOR}%` ?? "",
+                  description: `${parseInt(coupon.rate) / COUPONS_FACTOR}%`,
                 },
                 ...(coupon.snapshotId
                   ? [
@@ -575,6 +591,32 @@ export const Details = ({
             title={tRegulations("label")}
             layerStyle="container"
           />
+
+          {balanceAdjustments?.map((balanceAdjustment) => (
+            <DefinitionList
+              key={balanceAdjustment.id}
+              items={[
+                {
+                  title: tBenefits("executionDate"),
+                  description:
+                    formatDate(
+                      balanceAdjustment.executionDate,
+                      DATE_TIME_FORMAT,
+                    ) ?? "",
+                },
+                {
+                  title: tBenefits("factor"),
+                  description:
+                    (
+                      Number(balanceAdjustment.factor) /
+                      Math.pow(10, Number(balanceAdjustment.decimals))
+                    ).toString() ?? "",
+                },
+              ]}
+              title={tBenefits("balanceAdjustments")}
+              layerStyle="container"
+            />
+          ))}
         </VStack>
       </HStack>
     </VStack>

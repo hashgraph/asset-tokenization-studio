@@ -211,24 +211,24 @@ import { QueryBus } from '../../core/query/QueryBus.js';
 import { CommandBus } from '../../core/command/CommandBus.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { GetSecurityQuery } from '../../app/usecase/query/security/get/GetSecurityQuery.js';
-import PauseRequest from './request/PauseRequest.js';
-import ControlListRequest from './request/ControlListRequest.js';
-import RedeemRequest from './request/RedeemRequest.js';
-import IssueRequest from './request/IssueRequest.js';
+import PauseRequest from './request/security/operations/pause/PauseRequest.js';
+import ControlListRequest from './request/security/operations/controlList/ControlListRequest.js';
+import RedeemRequest from './request/security/operations/redeem/RedeemRequest.js';
+import IssueRequest from './request/security/operations/issue/IssueRequest.js';
 import { AddToControlListCommand } from '../../app/usecase/command/security/operations/AddToControlList/AddToControlListCommand.js';
 import { UnpauseCommand } from '../../app/usecase/command/security/operations/unpause/UnpauseCommand.js';
 import { PauseCommand } from '../../app/usecase/command/security/operations/pause/PauseCommand.js';
 import { SetMaxSupplyCommand } from '../../app/usecase/command/security/operations/cap/SetMaxSupplyCommand.js';
-import { GetMaxSupplyQuery } from '../../app/usecase/query/security/cap/GetMaxSupplyQuery.js';
+import { GetMaxSupplyQuery } from '../../app/usecase/query/security/cap/getMaxSupply/GetMaxSupplyQuery.js';
 import { RemoveFromControlListCommand } from '../../app/usecase/command/security/operations/removeFromControlList/RemoveFromControlListCommand.js';
-import GetControlListCountRequest from './request/GetControlListCountRequest.js';
-import GetControlListMembersRequest from './request/GetControlListMembersRequest.js';
-import GetAccountBalanceRequest from './request/GetAccountBalanceRequest.js';
+import GetControlListCountRequest from './request/security/operations/controlList/GetControlListCountRequest.js';
+import GetControlListMembersRequest from './request/security/operations/controlList/GetControlListMembersRequest.js';
+import GetAccountBalanceRequest from './request/account/GetAccountBalanceRequest.js';
 import BalanceViewModel from './response/BalanceViewModel.js';
-import TransferRequest from './request/TransferRequest.js';
-import TransferAndLockRequest from './request/TransferAndLockRequest.js';
-import ForceTransferRequest from './request/ForceTransferRequest.js';
-import ForceRedeemRequest from './request/ForceRedeemRequest.js';
+import TransferRequest from './request/security/operations/transfer/TransferRequest.js';
+import TransferAndLockRequest from './request/security/operations/transfer/TransferAndLockRequest.js';
+import ForceTransferRequest from './request/security/operations/transfer/ForceTransferRequest.js';
+import ForceRedeemRequest from './request/security/operations/redeem/ForceRedeemRequest.js';
 import { IssueCommand } from '../../app/usecase/command/security/operations/issue/IssueCommand.js';
 import { RedeemCommand } from '../../app/usecase/command/security/operations/redeem/RedeemCommand.js';
 import { ControllerRedeemCommand } from '../../app/usecase/command/security/operations/redeem/ControllerRedeemCommand.js';
@@ -241,18 +241,18 @@ import { BalanceOfQuery } from '../../app/usecase/query/security/balanceof/Balan
 import { IsPausedQuery } from '../../app/usecase/query/security/isPaused/IsPausedQuery.js';
 import { IsInControlListQuery } from '../../app/usecase/query/account/controlList/IsInControlListQuery.js';
 import { SecurityControlListType } from '../../domain/context/security/SecurityControlListType.js';
-import GetControlListTypeRequest from './request/GetControlListTypeRequest.js';
+import GetControlListTypeRequest from './request/security/operations/controlList/GetControlListTypeRequest.js';
 import { GetControlListTypeQuery } from '../../app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery.js';
-import GetMaxSupplyRequest from './request/GetMaxSupplyRequest.js';
-import SetMaxSupplyRequest from './request/SetMaxSupplyRequest.js';
+import GetMaxSupplyRequest from './request/security/operations/cap/GetMaxSupplyRequest.js';
+import SetMaxSupplyRequest from './request/security/operations/cap/SetMaxSupplyRequest.js';
 import MaxSupplyViewModel from './response/MaxSupplyViewModel.js';
-import LockRequest from './request/LockRequest.js';
-import ReleaseRequest from './request/ReleaseRequest.js';
-import GetLockCountRequest from './request/GetLockCountRequest.js';
-import GetLockRequest from './request/GetLockRequest.js';
-import GetLockedBalanceRequest from './request/GetLockedBalanceRequest.js';
-import GetLocksIdRequest from './request/GetLocksIdRequest.js';
-import GetSecurityDetailsRequest from './request/GetSecurityDetailsRequest.js';
+import LockRequest from './request/security/operations/lock/LockRequest.js';
+import ReleaseRequest from './request/security/operations/release/ReleaseRequest.js';
+import GetLockCountRequest from './request/security/operations/lock/GetLockCountRequest.js';
+import GetLockRequest from './request/security/operations/lock/GetLockRequest.js';
+import GetLockedBalanceRequest from './request/security/operations/lock/GetLockedBalanceRequest.js';
+import GetLocksIdRequest from './request/security/operations/lock/GetLocksIdRequest.js';
+import GetSecurityDetailsRequest from './request/security/GetSecurityDetailsRequest.js';
 import { LockCommand } from '../../app/usecase/command/security/operations/lock/LockCommand.js';
 import { ReleaseCommand } from '../../app/usecase/command/security/operations/release/ReleaseCommand.js';
 import { LockedBalanceOfQuery } from '../../app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery.js';
@@ -260,6 +260,97 @@ import { LockCountQuery } from '../../app/usecase/query/security/lockCount/LockC
 import { LocksIdQuery } from '../../app/usecase/query/security/locksId/LocksIdQuery.js';
 import { GetLockQuery } from '../../app/usecase/query/security/getLock/GetLockQuery.js';
 import LockViewModel from './response/LockViewModel.js';
+import ProtectedTransferFromByPartitionRequest from './request/security/operations/transfer/ProtectedTransferFromByPartitionRequest.js';
+import ProtectedRedeemFromByPartitionRequest from './request/security/operations/redeem/ProtectedRedeemFromByPartitionRequest.js';
+import { ProtectedTransferFromByPartitionCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferFromByPartitionCommand.js';
+import { ProtectedRedeemFromByPartitionCommand } from '../../app/usecase/command/security/operations/redeem/ProtectedRedeemFromByPartitionCommand.js';
+import PartitionsProtectedRequest from './request/security/operations/protectedPartitions/PartitionsProtectedRequest.js';
+import GetNounceRequest from './request/security/operations/protectedPartitions/GetNounceRequest.js';
+import { PartitionsProtectedQuery } from '../../app/usecase/query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQuery.js';
+import { GetNounceQuery } from '../../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQuery.js';
+import { ProtectPartitionsCommand } from '../../app/usecase/command/security/operations/protectPartitions/ProtectPartitionsCommand.js';
+import { UnprotectPartitionsCommand } from '../../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommand.js';
+import { ProtectedTransferAndLockByPartitionCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand.js';
+import ProtectedTransferAndLockByPartitionRequest from './request/security/operations/transfer/ProtectedTransferAndLockByPartitionRequest.js';
+import CreateHoldByPartitionRequest from './request/security/operations/hold/CreateHoldByPartition.js';
+import { CreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/createHoldByPartition/CreateHoldByPartitionCommand.js';
+import CreateHoldFromByPartitionRequest from './request/security/operations/hold/CreateHoldFromByPartition.js';
+import ControllerCreateHoldByPartitionRequest from './request/security/operations/hold/ControllerCreateHoldFromByPartition.js';
+import ProtectedCreateHoldByPartitionRequest from './request/security/operations/hold/ProtectedCreateHoldFromByPartition.js';
+import { CreateHoldFromByPartitionCommand } from '../../app/usecase/command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommand.js';
+import { ControllerCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/controllerCreateHoldByPartition/ControllerCreateHoldByPartitionCommand.js';
+import { ProtectedCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommand.js';
+import HoldViewModel from './response/HoldViewModel.js';
+import { GetHoldForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery.js';
+import { ONE_THOUSAND } from '../../domain/context/shared/SecurityDate.js';
+import { GetHeldAmountForByPartitionQuery } from '../../app/usecase/query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQuery.js';
+import { GetHeldAmountForQuery } from '../../app/usecase/query/security/hold/getHeldAmountFor/GetHeldAmountForQuery.js';
+import { GetHoldCountForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQuery.js';
+import { GetHoldsIdForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery.js';
+import GetHeldAmountForRequest from './request/security/operations/hold/GetHeldAmountForRequest.js';
+import GetHeldAmountForByPartitionRequest from './request/security/operations/hold/GetHeldAmountForByPartitionRequest.js';
+import GetHoldCountForByPartitionRequest from './request/security/operations/hold/GetHoldCountForByPartitionRequest.js';
+import GetHoldsIdForByPartitionRequest from './request/security/operations/hold/GetHoldsIdForByPartitionRequest.js';
+import GetHoldForByPartitionRequest from './request/security/operations/hold/GetHoldForByPartitionRequest.js';
+import ReleaseHoldByPartitionRequest from './request/security/operations/release/ReleaseHoldByPartitionRequest.js';
+import { ReleaseHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommand.js';
+import ReclaimHoldByPartitionRequest from './request/security/operations/hold/ReclaimHoldByPartitionRequest.js';
+import { ReclaimHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommand.js';
+import ExecuteHoldByPartitionRequest from './request/security/operations/hold/ExecuteHoldByPartitionRequest.js';
+import ActivateClearingRequest from './request/security/operations/clearing/ActivateClearingRequest.js';
+import DeactivateClearingRequest from './request/security/operations/clearing/DeactivateClearingRequest.js';
+import { ExecuteHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommand.js';
+import { ActivateClearingCommand } from '../../app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommand.js';
+import { DeactivateClearingCommand } from '../../app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand.js';
+import ClearingTransferByPartitionRequest from './request/security/operations/clearing/ClearingTransferByPartitionRequest.js';
+import ClearingTransferFromByPartitionRequest from './request/security/operations/clearing/ClearingTransferFromByPartitionRequest.js';
+import ProtectedClearingTransferByPartitionRequest from './request/security/operations/clearing/ProtectedClearingTransferByPartitionRequest.js';
+import { ClearingTransferByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommand.js';
+import { ClearingTransferFromByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommand.js';
+import { ProtectedClearingTransferByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand.js';
+import ApproveClearingOperationByPartitionRequest from './request/security/operations/clearing/ApproveClearingOperationByPartitionRequest.js';
+import CancelClearingOperationByPartitionRequest from './request/security/operations/clearing/CancelClearingOperationByPartitionRequest.js';
+import ReclaimClearingOperationByPartitionRequest from './request/security/operations/clearing/ReclaimClearingOperationByPartitionRequest.js';
+import { ApproveClearingOperationByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand.js';
+import { CancelClearingOperationByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommand.js';
+import { ReclaimClearingOperationByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommand.js';
+import ClearingRedeemByPartitionRequest from './request/security/operations/clearing/ClearingRedeemByPartitionRequest.js';
+import ClearingRedeemFromByPartitionRequest from './request/security/operations/clearing/ClearingRedeemFromByPartitionRequest.js';
+import ProtectedClearingRedeemByPartitionRequest from './request/security/operations/clearing/ProtectedClearingRedeemByPartitionRequest.js';
+import { ClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand.js';
+import { ClearingRedeemFromByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand.js';
+import { ProtectedClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand.js';
+import ClearingCreateHoldByPartitionRequest from './request/security/operations/clearing/ClearingCreateHoldByPartitionRequest.js';
+import ProtectedClearingCreateHoldByPartitionRequest from './request/security/operations/clearing/ProtectedClearingCreateHoldByPartitionRequest.js';
+import ClearingCreateHoldFromByPartitionRequest from './request/security/operations/clearing/ClearingCreateHoldFromByPartitionRequest.js';
+import { ClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommand.js';
+import { ClearingCreateHoldFromByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand.js';
+import { ProtectedClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand.js';
+import GetClearedAmountForByPartitionRequest from './request/security/operations/clearing/GetClearedAmountForByPartitionRequest.js';
+import GetClearingCountForByPartitionRequest from './request/security/operations/clearing/GetClearingCountForByPartitionRequest.js';
+import GetClearingsIdForByPartitionRequest from './request/security/operations/clearing/GetClearingsIdForByPartitionRequest.js';
+import IsClearingActivatedRequest from './request/security/operations/clearing/IsClearingActivatedRequest.js';
+import GetClearedAmountForRequest from './request/security/operations/clearing/GetClearedAmountForRequest.js';
+import { GetClearedAmountForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery.js';
+import { GetClearedAmountForQuery } from '../../app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery.js';
+import { GetClearingCountForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery.js';
+import { GetClearingsIdForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery.js';
+import { IsClearingActivatedQuery } from '../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
+import OperatorClearingCreateHoldByPartitionRequest from './request/security/operations/clearing/OperatorClearingCreateHoldByPartitionRequest.js';
+import { OperatorClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand.js';
+import OperatorClearingRedeemByPartitionRequest from './request/security/operations/clearing/OperatorClearingRedeemByPartitionRequest.js';
+import { OperatorClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand.js';
+import OperatorClearingTransferByPartitionRequest from './request/security/operations/clearing/OperatorClearingTransferByPartitionRequest.js';
+import { OperatorClearingTransferByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommand.js';
+import GetClearingCreateHoldForByPartitionRequest from './request/security/operations/clearing/GetClearingCreateHoldForByPartitionRequest.js';
+import GetClearingTransferForByPartitionRequest from './request/security/operations/clearing/GetClearingTransferForByPartitionRequest.js';
+import GetClearingRedeemForByPartitionRequest from './request/security/operations/clearing/GetClearingRedeemForByPartitionRequest.js';
+import ClearingCreateHoldViewModel from './response/ClearingCreateHoldViewModel.js';
+import ClearingRedeemViewModel from './response/ClearingRedeemViewModel.js';
+import ClearingTransferViewModel from './response/ClearingTransferViewModel.js';
+import { GetClearingCreateHoldForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery.js';
+import { GetClearingRedeemForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery.js';
+import { GetClearingTransferForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -318,6 +409,111 @@ interface ISecurityInPort {
   getLockedBalanceOf(
     request: GetLockedBalanceRequest,
   ): Promise<BalanceViewModel>;
+  createHoldByPartition(
+    request: CreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  createHoldFromByPartition(
+    request: CreateHoldFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  controllerCreateHoldByPartition(
+    request: ControllerCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  protectedCreateHoldByPartition(
+    request: ProtectedCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  getHeldAmountFor(request: GetHeldAmountForRequest): Promise<number>;
+  getHeldAmountForByPartition(
+    request: GetHeldAmountForByPartitionRequest,
+  ): Promise<number>;
+  getHoldCountForByPartition(
+    request: GetHoldCountForByPartitionRequest,
+  ): Promise<number>;
+  getHoldsIdForByPartition(
+    request: GetHoldsIdForByPartitionRequest,
+  ): Promise<number[]>;
+  getHoldForByPartition(
+    request: GetHoldForByPartitionRequest,
+  ): Promise<HoldViewModel>;
+  releaseHoldByPartition(
+    request: ReleaseHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  reclaimHoldByPartition(
+    request: ReclaimHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  executeHoldByPartition(
+    request: ExecuteHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  activateClearing(
+    request: ActivateClearingRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  deactivateClearing(
+    request: DeactivateClearingRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  clearingTransferByPartition(
+    request: ClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  clearingTransferFromByPartition(
+    request: ClearingTransferFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  protectedClearingTransferByPartition(
+    request: ProtectedClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  approveClearingOperationByPartition(
+    request: ApproveClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  cancelClearingOperationByPartition(
+    request: CancelClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  reclaimClearingOperationByPartition(
+    request: ReclaimClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  clearingRedeemByPartition(
+    request: ClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  clearingRedeemFromByPartition(
+    request: ClearingRedeemFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  protectedClearingRedeemByPartition(
+    request: ProtectedClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  clearingCreateHoldByPartition(
+    request: ClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  clearingCreateHoldFromByPartition(
+    request: ClearingCreateHoldFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  protectedClearingCreateHoldByPartition(
+    request: ProtectedClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  getClearedAmountFor(request: GetClearedAmountForRequest): Promise<number>;
+  getClearedAmountForByPartition(
+    request: GetClearedAmountForByPartitionRequest,
+  ): Promise<number>;
+  getClearingCountForByPartition(
+    request: GetClearingCountForByPartitionRequest,
+  ): Promise<number>;
+  getClearingCreateHoldForByPartition(
+    request: GetClearingCreateHoldForByPartitionRequest,
+  ): Promise<ClearingCreateHoldViewModel>;
+  getClearingRedeemForByPartition(
+    request: GetClearingRedeemForByPartitionRequest,
+  ): Promise<ClearingRedeemViewModel>;
+  getClearingTransferForByPartition(
+    request: GetClearingTransferForByPartitionRequest,
+  ): Promise<ClearingTransferViewModel>;
+  getClearingsIdForByPartition(
+    request: GetClearingsIdForByPartitionRequest,
+  ): Promise<number[]>;
+  isClearingActivated(request: IsClearingActivatedRequest): Promise<boolean>;
+  operatorClearingCreateHoldByPartition(
+    request: OperatorClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  operatorClearingRedeemByPartition(
+    request: OperatorClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  operatorClearingTransferByPartition(
+    request: OperatorClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -383,8 +579,6 @@ class SecurityInPort implements ISecurityInPort {
   async getLocksId(request: GetLocksIdRequest): Promise<string[]> {
     handleValidation('GetLocksIdRequest', request);
 
-    const lockIds: string[] = [];
-
     const res = (
       await this.queryBus.execute(
         new LocksIdQuery(
@@ -396,9 +590,7 @@ class SecurityInPort implements ISecurityInPort {
       )
     ).payload;
 
-    for (let i = 0; i < res.length; i++) {
-      lockIds.push(res.toString());
-    }
+    const lockIds: string[] = res.map((id) => id.toString());
 
     return lockIds;
   }
@@ -682,6 +874,855 @@ class SecurityInPort implements ISecurityInPort {
     const maxSupply: MaxSupplyViewModel = { value: res.payload.toString() };
 
     return maxSupply;
+  }
+
+  @LogError
+  async protectedTransferFromByPartition(
+    request: ProtectedTransferFromByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      sourceId,
+      targetId,
+      amount,
+      deadline,
+      nounce,
+      signature,
+    } = request;
+    handleValidation('ProtectedTransferFromByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectedTransferFromByPartitionCommand(
+        securityId,
+        partitionId,
+        sourceId,
+        targetId,
+        amount,
+        deadline,
+        nounce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedRedeemFromByPartition(
+    request: ProtectedRedeemFromByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const {
+      securityId,
+      amount,
+      sourceId,
+      partitionId,
+      deadline,
+      nounce,
+      signature,
+    } = request;
+    handleValidation('ProtectedRedeemFromByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectedRedeemFromByPartitionCommand(
+        securityId,
+        partitionId,
+        sourceId,
+        amount,
+        deadline,
+        nounce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async arePartitionsProtected(
+    request: PartitionsProtectedRequest,
+  ): Promise<boolean> {
+    handleValidation('PartitionsProtectedRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new PartitionsProtectedQuery(request.securityId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getNounce(request: GetNounceRequest): Promise<number> {
+    handleValidation('GetNounceRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetNounceQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async protectPartitions(
+    request: PartitionsProtectedRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId } = request;
+    handleValidation('PartitionsProtectedRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectPartitionsCommand(securityId),
+    );
+  }
+
+  @LogError
+  async unprotectPartitions(
+    request: PartitionsProtectedRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId } = request;
+    handleValidation('PartitionsProtectedRequest', request);
+
+    return await this.commandBus.execute(
+      new UnprotectPartitionsCommand(securityId),
+    );
+  }
+
+  @LogError
+  async protectedTransferAndLockByPartition(
+    request: ProtectedTransferAndLockByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      targetId,
+      sourceId,
+      expirationDate,
+      deadline,
+      nounce,
+      signature,
+    } = request;
+    handleValidation('ProtectedTransferAndLockByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectedTransferAndLockByPartitionCommand(
+        securityId,
+        partitionId,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+        deadline,
+        nounce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async createHoldByPartition(
+    request: CreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      targetId,
+      expirationDate,
+    } = request;
+    handleValidation('CreateHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new CreateHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        targetId,
+        expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async createHoldFromByPartition(
+    request: CreateHoldFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      sourceId,
+      targetId,
+      expirationDate,
+    } = request;
+    handleValidation('CreateHoldFromByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new CreateHoldFromByPartitionCommand(
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async controllerCreateHoldByPartition(
+    request: ControllerCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      sourceId,
+      targetId,
+      expirationDate,
+    } = request;
+    handleValidation('ControllerCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ControllerCreateHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedCreateHoldByPartition(
+    request: ProtectedCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      sourceId,
+      targetId,
+      expirationDate,
+      deadline,
+      nonce,
+      signature,
+    } = request;
+    handleValidation('ProtectedCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ProtectedCreateHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+        deadline,
+        nonce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async getHeldAmountFor(request: GetHeldAmountForRequest): Promise<number> {
+    handleValidation('GetHeldAmountForRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHeldAmountForQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHeldAmountForByPartition(
+    request: GetHeldAmountForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetHeldAmountForByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHeldAmountForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldCountForByPartition(
+    request: GetHoldCountForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetHoldCountForByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHoldCountForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldsIdForByPartition(
+    request: GetHoldsIdForByPartitionRequest,
+  ): Promise<number[]> {
+    handleValidation('GetHoldsIdForByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHoldsIdForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldForByPartition(
+    request: GetHoldForByPartitionRequest,
+  ): Promise<HoldViewModel> {
+    handleValidation('GetHoldForByPartitionRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetHoldForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.holdId,
+        ),
+      )
+    ).payload;
+
+    const hold: HoldViewModel = {
+      id: request.holdId,
+      amount: res.amount.toString(),
+      expirationDate: new Date(res.expirationTimeStamp * ONE_THOUSAND),
+      tokenHolderAddress: res.tokenHolderAddress,
+      escrowAddress: res.escrowAddress,
+      destinationAddress: res.destinationAddress,
+      data: res.data,
+      operatorData: res.operatorData,
+    };
+
+    return hold;
+  }
+
+  @LogError
+  async releaseHoldByPartition(
+    request: ReleaseHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, partitionId, amount, targetId, holdId } = request;
+    handleValidation('ReleaseHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ReleaseHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        amount,
+        holdId,
+        targetId,
+      ),
+    );
+  }
+
+  @LogError
+  async reclaimHoldByPartition(
+    request: ReclaimHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, partitionId, targetId, holdId } = request;
+    handleValidation('ReclaimHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ReclaimHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        holdId,
+        targetId,
+      ),
+    );
+  }
+
+  @LogError
+  async executeHoldByPartition(
+    request: ExecuteHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, sourceId, amount, holdId, targetId, partitionId } =
+      request;
+    handleValidation('ExecuteHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ExecuteHoldByPartitionCommand(
+        securityId,
+        sourceId,
+        amount,
+        holdId,
+        targetId,
+        partitionId,
+      ),
+    );
+  }
+
+  @LogError
+  async activateClearing(
+    request: ActivateClearingRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('ActivateClearingRequest', request);
+
+    return await this.commandBus.execute(
+      new ActivateClearingCommand(request.securityId),
+    );
+  }
+
+  @LogError
+  async deactivateClearing(
+    request: DeactivateClearingRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('DeactivateClearingRequest', request);
+
+    return await this.commandBus.execute(
+      new DeactivateClearingCommand(request.securityId),
+    );
+  }
+
+  @LogError
+  async clearingTransferByPartition(
+    request: ClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingTransferByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingTransferByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.targetId,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async clearingTransferFromByPartition(
+    request: ClearingTransferFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingTransferFromByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingTransferFromByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedClearingTransferByPartition(
+    request: ProtectedClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ProtectedClearingTransferByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ProtectedClearingTransferByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.expirationDate,
+        request.deadline,
+        request.nonce,
+        request.signature,
+      ),
+    );
+  }
+
+  @LogError
+  async approveClearingOperationByPartition(
+    request: ApproveClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('ApproveClearingOperationByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ApproveClearingOperationByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.targetId,
+        request.clearingId,
+        request.clearingOperationType,
+      ),
+    );
+  }
+
+  @LogError
+  async cancelClearingOperationByPartition(
+    request: CancelClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('CancelClearingOperationByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new CancelClearingOperationByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.targetId,
+        request.clearingId,
+        request.clearingOperationType,
+      ),
+    );
+  }
+
+  @LogError
+  async reclaimClearingOperationByPartition(
+    request: ReclaimClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('ReclaimClearingOperationByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ReclaimClearingOperationByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.targetId,
+        request.clearingId,
+        request.clearingOperationType,
+      ),
+    );
+  }
+
+  @LogError
+  async clearingRedeemByPartition(
+    request: ClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingRedeemByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingRedeemByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async clearingRedeemFromByPartition(
+    request: ClearingRedeemFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingRedeemFromByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingRedeemFromByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedClearingRedeemByPartition(
+    request: ProtectedClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ProtectedClearingRedeemByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ProtectedClearingRedeemByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.expirationDate,
+        request.deadline,
+        request.nonce,
+        request.signature,
+      ),
+    );
+  }
+
+  @LogError
+  async clearingCreateHoldByPartition(
+    request: ClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingCreateHoldByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.escrow,
+        request.amount,
+        request.targetId,
+        request.clearingExpirationDate,
+        request.holdExpirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async clearingCreateHoldFromByPartition(
+    request: ClearingCreateHoldFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingCreateHoldFromByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingCreateHoldFromByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.escrow,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.clearingExpirationDate,
+        request.holdExpirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedClearingCreateHoldByPartition(
+    request: ProtectedClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ProtectedClearingCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ProtectedClearingCreateHoldByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.escrow,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.clearingExpirationDate,
+        request.holdExpirationDate,
+        request.deadline,
+        request.nonce,
+        request.signature,
+      ),
+    );
+  }
+
+  @LogError
+  async getClearedAmountFor(
+    request: GetClearedAmountForRequest,
+  ): Promise<number> {
+    handleValidation('GetClearedAmountForByPartitionRequest', request);
+    return (
+      await this.queryBus.execute(
+        new GetClearedAmountForQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getClearedAmountForByPartition(
+    request: GetClearedAmountForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetClearedAmountForByPartitionRequest', request);
+    return (
+      await this.queryBus.execute(
+        new GetClearedAmountForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getClearingCountForByPartition(
+    request: GetClearingCountForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetClearingCountForByPartitionRequest', request);
+    return (
+      await this.queryBus.execute(
+        new GetClearingCountForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.clearingOperationType,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getClearingCreateHoldForByPartition(
+    request: GetClearingCreateHoldForByPartitionRequest,
+  ): Promise<ClearingCreateHoldViewModel> {
+    handleValidation('GetClearingCreateHoldForByPartitionRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetClearingCreateHoldForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.clearingId,
+        ),
+      )
+    ).payload;
+
+    const clearing: ClearingCreateHoldViewModel = {
+      id: request.clearingId,
+      amount: res.amount.toString(),
+      expirationDate: new Date(res.expirationTimestamp * ONE_THOUSAND),
+      data: res.data,
+      operatorData: res.operatorData,
+      holdEscrow: res.holdEscrow,
+      holdExpirationDate: new Date(res.holdExpirationTimestamp * ONE_THOUSAND),
+      holdTo: res.holdTo,
+      holdData: res.holdData,
+    };
+
+    return clearing;
+  }
+
+  @LogError
+  async getClearingRedeemForByPartition(
+    request: GetClearingRedeemForByPartitionRequest,
+  ): Promise<ClearingRedeemViewModel> {
+    handleValidation('GetClearingRedeemForByPartitionRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetClearingRedeemForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.clearingId,
+        ),
+      )
+    ).payload;
+
+    const clearing: ClearingRedeemViewModel = {
+      id: request.clearingId,
+      amount: res.amount.toString(),
+      expirationDate: new Date(res.expirationTimestamp * ONE_THOUSAND),
+      data: res.data,
+      operatorData: res.operatorData,
+    };
+
+    return clearing;
+  }
+
+  @LogError
+  async getClearingTransferForByPartition(
+    request: GetClearingTransferForByPartitionRequest,
+  ): Promise<ClearingTransferViewModel> {
+    handleValidation('GetClearingTransferForByPartitionRequest', request);
+    const res = (
+      await this.queryBus.execute(
+        new GetClearingTransferForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.clearingId,
+        ),
+      )
+    ).payload;
+
+    const clearing: ClearingTransferViewModel = {
+      id: request.clearingId,
+      amount: res.amount.toString(),
+      expirationDate: new Date(res.expirationTimestamp * ONE_THOUSAND),
+      destination: res.destination,
+      data: res.data,
+      operatorData: res.operatorData,
+    };
+
+    return clearing;
+  }
+
+  @LogError
+  async getClearingsIdForByPartition(
+    request: GetClearingsIdForByPartitionRequest,
+  ): Promise<number[]> {
+    handleValidation('GetClearingsIdForByPartitionRequest', request);
+    return (
+      await this.queryBus.execute(
+        new GetClearingsIdForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.clearingOperationType,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async isClearingActivated(
+    request: IsClearingActivatedRequest,
+  ): Promise<boolean> {
+    handleValidation('IsClearingActivatedRequest', request);
+    return (
+      await this.queryBus.execute(
+        new IsClearingActivatedQuery(request.securityId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async operatorClearingCreateHoldByPartition(
+    request: OperatorClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('OperatorClearingCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new OperatorClearingCreateHoldByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.escrow,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.clearingExpirationDate,
+        request.holdExpirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async operatorClearingRedeemByPartition(
+    request: OperatorClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('OperatorClearingRedeemByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new OperatorClearingRedeemByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async operatorClearingTransferByPartition(
+    request: OperatorClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('OperatorClearingTransferByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new OperatorClearingTransferByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.expirationDate,
+      ),
+    );
   }
 }
 

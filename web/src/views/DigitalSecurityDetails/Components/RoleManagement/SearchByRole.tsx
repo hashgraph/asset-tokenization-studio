@@ -218,9 +218,10 @@ import {
   GetRoleMembersRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
-import { rolesList } from "./rolesList";
+import { rolesList, TSecurityType } from "./rolesList";
 import { useEffect, useState } from "react";
 import { SecurityRole } from "../../../../utils/SecurityRole";
+import { useSecurityStore } from "../../../../store/securityStore";
 
 interface SearchByRoleFieldValue {
   role: { label: string; value: SecurityRole };
@@ -241,7 +242,9 @@ export const SearchByRole = () => {
     keyPrefix: "details.roleManagement.search",
   });
   const { id = "" } = useParams();
-  const [roleToSearch, setRoleToSearch] = useState<SecurityRole>();
+  const { details: securityDetails } = useSecurityStore();
+
+  const [roleToSearch, setRoleToSearch] = useState<string>();
   const [isRoleMemberCountLoading, setIsRoleMemberCountLoading] =
     useState<boolean>(false);
   const [isRoleMembersLoading, setIsRoleMembersLoading] =
@@ -259,7 +262,7 @@ export const SearchByRole = () => {
 
   const roleMemberCountRequest = new GetRoleMemberCountRequest({
     securityId: id,
-    role: roleToSearch,
+    role: roleToSearch ?? "",
   });
 
   const { data: roleMemberCount, refetch: refetchRoleMemberCount } =
@@ -272,7 +275,7 @@ export const SearchByRole = () => {
 
   const roleMembersRequest = new GetRoleMembersRequest({
     securityId: id,
-    role: roleToSearch,
+    role: roleToSearch ?? "",
     start: 0,
     end: roleMemberCount ?? 0,
   });
@@ -328,10 +331,18 @@ export const SearchByRole = () => {
                 <SelectController
                   id="role"
                   control={control}
-                  options={rolesList.map((role) => ({
-                    label: tRoles(role.label),
-                    value: role.value,
-                  }))}
+                  options={rolesList
+                    .filter((role) => {
+                      if (!securityDetails) return role;
+
+                      return role.allowedSecurities.includes(
+                        securityDetails.type as TSecurityType,
+                      );
+                    })
+                    .map((role) => ({
+                      value: role.value,
+                      label: tRoles(role.label),
+                    }))}
                   size="sm"
                   setsFullOption
                   rules={{ required }}

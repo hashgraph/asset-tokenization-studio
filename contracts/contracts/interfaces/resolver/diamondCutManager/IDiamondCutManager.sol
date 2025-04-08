@@ -229,6 +229,24 @@ interface IDiamondCutManager {
         uint256 version;
     }
 
+    /// @notice emited when createConfiguration is executed
+    event DiamondConfigurationCreated(
+        bytes32 configurationId,
+        FacetConfiguration[] facetConfigurations,
+        uint256 version
+    );
+
+    /// @notice emited when createBatchConfiguration is executed
+    event DiamondBatchConfigurationCreated(
+        bytes32 configurationId,
+        FacetConfiguration[] facetConfigurations,
+        bool _isLastBatch,
+        uint256 version
+    );
+
+    /// @notice emited when cancelBatchConfiguration is executed
+    event DiamondBatchConfigurationCanceled(bytes32 configurationId);
+
     // @notice Not able to use bytes32(0) with configurationId
     error DefaultValueForConfigurationIdNotPermitted();
 
@@ -244,13 +262,6 @@ interface IDiamondCutManager {
         uint256 version
     );
 
-    /// @notice emited when createConfiguration is executed
-    event DiamondConfigurationCreated(
-        bytes32 configurationId,
-        FacetConfiguration[] facetConfigurations,
-        uint256 version
-    );
-
     /// @notice Create a new configuration to the latest version of all facets.
     /// @param _configurationId unused identifier to the configuration.
     /// @param _facetConfigurations.id list of business logics to be registered.
@@ -258,6 +269,29 @@ interface IDiamondCutManager {
     function createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
+    ) external;
+
+    /// @notice Create a new batch configuration to the latest version of all facets.
+    /// @param _configurationId unused identifier to the configuration.
+    /// @param _facetConfigurations.id list of business logics to be registered.
+    /// @param _facetConfigurations.version list of versions of each _facetIds.
+    /// @param _isLastBatch boolean to indicate if is the last batch iteration.
+    function createBatchConfiguration(
+        bytes32 _configurationId,
+        FacetConfiguration[] calldata _facetConfigurations,
+        bool _isLastBatch
+    ) external;
+
+    /// @notice Cancel a current batch configuration.
+    /// @param _configurationId unused identifier to the configuration.
+    function cancelBatchConfiguration(bytes32 _configurationId) external;
+
+    /// @notice check if a resolverProxy is registered. If not revert.
+    /// @param _configurationId the configuration key to be checked.
+    /// @param _version configured version in the resolverProxy.
+    function checkResolverProxyConfigurationRegistered(
+        bytes32 _configurationId,
+        uint256 _version
     ) external;
 
     /// @notice Resolve the facet address knowing configuration, version and selector.
@@ -290,14 +324,6 @@ interface IDiamondCutManager {
         bytes32 _configurationId,
         uint256 _version
     ) external view returns (bool);
-
-    /// @notice check if a resolverProxy is registered. If not revert.
-    /// @param _configurationId the configuration key to be checked.
-    /// @param _version configured version in the resolverProxy.
-    function checkResolverProxyConfigurationRegistered(
-        bytes32 _configurationId,
-        uint256 _version
-    ) external;
 
     /// @notice Returns the length of configuration keys
     /// @return configurationsLength_

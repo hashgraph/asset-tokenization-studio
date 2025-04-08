@@ -205,6 +205,8 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ERC20,
@@ -212,23 +214,32 @@ import {
     type Pause,
     type ControlList,
     type ERC1594,
-} from '../../../../../typechain-types'
-import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
+    BusinessLogicResolver,
+    IFactory,
+    Kyc,
+    SsiManagement,
+    ClearingActionsFacet,
+} from '@typechain'
 import {
-    _CONTROL_LIST_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _DEFAULT_PARTITION,
-} from '../../../../../scripts/constants'
-import {
+    CONTROL_LIST_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    DEFAULT_PARTITION,
+    MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
     SecurityType,
-} from '../../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { assertObject } from '../../../../assert'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
+    ZERO,
+    EMPTY_STRING,
+    CLEARING_ROLE,
+} from '@scripts'
+import { assertObject } from '../../../../common'
 
 const amount = 1000
 
@@ -244,20 +255,27 @@ describe('ERC20 Tests', () => {
     let account_C: string
     let account_E: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc20Facet: ERC20
     let erc20FacetBlackList: ERC20
     let pauseFacet: Pause
     let controlListFacet: ControlList
     let erc1594Facet: ERC1594
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
+    let clearingActionsFacet: ClearingActionsFacet
 
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
     const decimals = 6
-    const isin = 'ABCDEF123456'
+    const isin = isinGenerator()
+    const EMPTY_VC_ID = EMPTY_STRING
 
     describe('Multi partition', () => {
-        beforeEach(async () => {
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             ;[signer_A, signer_B, signer_C, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -265,45 +283,70 @@ describe('ERC20 Tests', () => {
             account_C = signer_C.address
             account_E = signer_E.address
 
-            await deployEnvironment()
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
 
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
+        })
+
+        beforeEach(async () => {
             const rbacPause: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_B],
             }
             const rbacControlList: Rbac = {
-                role: _CONTROL_LIST_ROLE,
+                role: CONTROL_LIST_ROLE,
                 members: [account_A],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacControlList]
+            const rbacClearing: Rbac = {
+                role: CLEARING_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [
+                rbacPause,
+                rbacControlList,
+                rbacClearing,
+            ]
 
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                true,
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                clearingActive: false,
+                isMultiPartition: true,
                 name,
                 symbol,
                 decimals,
                 isin,
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                0,
-                100,
-                RegulationType.REG_S,
-                RegulationSubType.NONE,
-                true,
-                'ES,FR,CH',
-                'nothing',
-                init_rbacs
-            )
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_S,
+                regulationSubType: RegulationSubType.NONE,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
             erc20FacetBlackList = await ethers.getContractAt(
@@ -318,6 +361,11 @@ describe('ERC20 Tests', () => {
             )
             controlListFacet = await ethers.getContractAt(
                 'ControlList',
+                diamond.address,
+                signer_A
+            )
+            clearingActionsFacet = await ethers.getContractAt(
+                'ClearingActionsFacet',
                 diamond.address,
                 signer_A
             )
@@ -385,6 +433,17 @@ describe('ERC20 Tests', () => {
             await expect(
                 erc20Facet.decreaseAllowance(account_C, amount)
             ).to.be.rejectedWith('TokenIsPaused')
+        })
+
+        it('GIVEN an ERC20 with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
+            await clearingActionsFacet.activateClearing()
+            await expect(
+                erc20Facet.transfer(account_E, amount)
+            ).to.be.rejectedWith('ClearingIsActivated')
+
+            await expect(
+                erc20Facet.transferFrom(account_C, account_E, amount)
+            ).to.be.rejectedWith('ClearingIsActivated')
         })
 
         it('GIVEN a initializer ERC20 WHEN try to use a non authorized account THEN transaction fails with AccountIsBlocked', async () => {
@@ -459,8 +518,9 @@ describe('ERC20 Tests', () => {
         let erc20SignerE: ERC20
         let erc1410Facet: ERC1410Snapshot
 
-        beforeEach(async () => {
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             ;[signer_A, signer_B, signer_C, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -468,41 +528,65 @@ describe('ERC20 Tests', () => {
             account_C = signer_C.address
             account_E = signer_E.address
 
-            await deployEnvironment()
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
+        })
+
+        beforeEach(async () => {
             const rbacIssuer: Rbac = {
-                role: _ISSUER_ROLE,
+                role: ISSUER_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacIssuer]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [rbacIssuer, rbacKYC, rbacSSI]
 
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                false,
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                clearingActive: false,
+                isMultiPartition: false,
                 name,
                 symbol,
                 decimals,
                 isin,
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                0,
-                100,
-                RegulationType.REG_S,
-                RegulationSubType.NONE,
-                true,
-                'ES,FR,CH',
-                'nothing',
-                init_rbacs
-            )
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_S,
+                regulationSubType: RegulationSubType.NONE,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
             erc20SignerC = await ethers.getContractAt(
@@ -523,6 +607,31 @@ describe('ERC20 Tests', () => {
                 'ERC1594',
                 diamond.address,
                 signer_B
+            )
+            kycFacet = await ethers.getContractAt(
+                'Kyc',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SsiManagement',
+                diamond.address,
+                signer_A
+            )
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.grantKyc(
+                account_E,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
             )
             await erc1594Facet.issue(account_C, amount, '0x')
         })
@@ -650,6 +759,25 @@ describe('ERC20 Tests', () => {
         })
 
         describe('transfer', () => {
+            it('GIVEN a non kyc account THEN transfer fails with InvalidKycStatus', async () => {
+                await kycFacet.revokeKyc(account_E)
+                await expect(
+                    erc20SignerC.transfer(account_E, amount / 2)
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
+
+                await kycFacet.grantKyc(
+                    account_E,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_E
+                )
+
+                await kycFacet.revokeKyc(account_C)
+                await expect(
+                    erc20SignerC.transfer(account_E, amount / 2)
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
+            })
             it(
                 'GIVEN an account with balance ' +
                     'WHEN transfer to another whitelisted account ' +
@@ -667,19 +795,19 @@ describe('ERC20 Tests', () => {
                     expect(await erc1410Facet.totalSupply()).to.be.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_C
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_E
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
-                            _DEFAULT_PARTITION
+                            DEFAULT_PARTITION
                         )
                     ).to.be.equal(amount)
                 }
@@ -689,6 +817,23 @@ describe('ERC20 Tests', () => {
         describe('transferFrom', () => {
             beforeEach(async () => {
                 await erc20SignerC.approve(account_E, amount)
+            })
+
+            it('GIVEN a non kyc account THEN transferFrom fails with InvalidKycStatus', async () => {
+                await kycFacet.revokeKyc(account_C)
+                // non kyc'd sender
+                await expect(
+                    erc20Facet
+                        .connect(signer_A)
+                        .transferFrom(account_E, account_C, amount / 2)
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
+
+                // non kyc'd receiver
+                await expect(
+                    erc20Facet
+                        .connect(signer_A)
+                        .transferFrom(account_C, account_E, amount / 2)
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
             })
 
             it(
@@ -714,19 +859,19 @@ describe('ERC20 Tests', () => {
                     expect(await erc1410Facet.totalSupply()).to.be.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_C
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_E
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
-                            _DEFAULT_PARTITION
+                            DEFAULT_PARTITION
                         )
                     ).to.be.equal(amount)
                 }

@@ -217,4 +217,5 @@ export enum RouteName {
   DigitalSecurityForceTransfer = "DIGITAL_SECURITY_FORCE_TRANSFER",
   DigitalSecurityRedeem = "DIGITAL_SECURITY_REDEEM",
   DigitalSecurityForceRedeem = "DIGITAL_SECURITY_FORCE_REDEEM",
+  DigitalSecurityLock = "DIGITAL_SECURITY_LOCK",
 }

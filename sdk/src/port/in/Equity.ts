@@ -211,25 +211,26 @@ import { SetVotingRightsCommand } from '../../app/usecase/command/equity/votingR
 import { GetVotingQuery } from '../../app/usecase/query/equity/votingRights/getVoting/GetVotingQuery.js';
 import { GetVotingCountQuery } from '../../app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery.js';
 import { GetVotingForQuery } from '../../app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery.js';
+import { SetScheduledBalanceAdjustmentCommand } from '../../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand.js';
 import Injectable from '../../core/Injectable.js';
 import { CommandBus } from '../../core/command/CommandBus.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
 import { ONE_THOUSAND } from '../../domain/context/shared/SecurityDate.js';
 import { handleValidation } from './Common.js';
-import GetDividendsForRequest from './request/GetDividendsForRequest.js';
-import GetDividendsRequest from './request/GetDividendsRequest.js';
-import GetAllDividendsRequest from './request/GetAllDividendsRequest.js';
-import SetDividendsRequest from './request/SetDividendsRequest.js';
+import GetDividendsForRequest from './request/equity/GetDividendsForRequest.js';
+import GetDividendsRequest from './request/equity/GetDividendsRequest.js';
+import GetAllDividendsRequest from './request/equity/GetAllDividendsRequest.js';
+import SetDividendsRequest from './request/equity/SetDividendsRequest.js';
 import DividendsForViewModel from './response/DividendsForViewModel.js';
 import DividendsViewModel from './response/DividendsViewModel.js';
-import SetVotingRightsRequest from './request/SetVotingRightsRequest.js';
-import GetVotingRightsForRequest from './request/GetVotingRightsForRequest.js';
-import GetVotingRightsRequest from './request/GetVotingRightsRequest.js';
-import GetAllVotingRightsRequest from './request/GetAllVotingRightsRequest.js';
+import SetVotingRightsRequest from './request/equity/SetVotingRightsRequest.js';
+import GetVotingRightsForRequest from './request/equity/GetVotingRightsForRequest.js';
+import GetVotingRightsRequest from './request/equity/GetVotingRightsRequest.js';
+import GetAllVotingRightsRequest from './request/equity/GetAllVotingRightsRequest.js';
 import VotingRightsForViewModel from './response/VotingRightsForViewModel.js';
 import VotingRightsViewModel from './response/VotingRightsViewModel.js';
-import CreateEquityRequest from './request/CreateEquityRequest.js';
+import CreateEquityRequest from './request/equity/CreateEquityRequest.js';
 import { SecurityViewModel } from './Security.js';
 import NetworkService from '../../app/service/NetworkService.js';
 import { SecurityProps } from '../../domain/context/security/Security.js';
@@ -238,13 +239,28 @@ import ContractId from '../../domain/context/contract/ContractId.js';
 import { GetSecurityQuery } from '../../app/usecase/query/security/get/GetSecurityQuery.js';
 import { CastDividendType } from '../../domain/context/equity/DividendType.js';
 import BigDecimal from '../../domain/context/shared/BigDecimal.js';
-import GetEquityDetailsRequest from './request/GetEquityDetailsRequest.js';
+import GetEquityDetailsRequest from './request/equity/GetEquityDetailsRequest.js';
 import EquityDetailsViewModel from './response/EquityDetailsViewModel.js';
 import { GetEquityDetailsQuery } from '../../app/usecase/query/equity/get/getEquityDetails/GetEquityDetailsQuery.js';
 import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../domain/context/factory/RegulationType.js';
+import SetScheduledBalanceAdjustmentRequest from './request/equity/SetScheduledBalanceAdjustmentRequest.js';
+import GetScheduledBalanceAdjustmentRequest from './request/equity/GetScheduledBalanceAdjustmentRequest.js';
+import ScheduledBalanceAdjustmentViewModel from './response/ScheduledBalanceAdjustmentViewModel.js';
+import { GetScheduledBalanceAdjustmentQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
+import GetScheduledBalanceAdjustmentCountRequest from './request/equity/GetScheduledBalanceAdjustmentsCountRequest.js';
+import { GetScheduledBalanceAdjustmentCountQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
+import {
+  GetAggregatedBalanceAdjustmentFactorRequest,
+  GetAllScheduledBalanceAdjustmentsRequest,
+} from './request';
+import GetLastAggregatedBalanceAdjustmentFactorForRequest from './request/equity/GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
+import { GetLastAggregatedBalanceAdjustmentFactorForQuery } from '../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQuery.js';
+import { GetAggregatedBalanceAdjustmentFactorQuery } from '../../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQuery';
+import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from './request/equity/GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
+import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery } from '../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery.js';
 
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
@@ -276,6 +292,27 @@ interface IEquityInPort {
   getAllVotingRights(
     request: GetAllVotingRightsRequest,
   ): Promise<VotingRightsViewModel[]>;
+  setScheduledBalanceAdjustment(
+    request: SetScheduledBalanceAdjustmentRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  getScheduledBalanceAdjustmentsCount(
+    request: GetScheduledBalanceAdjustmentCountRequest,
+  ): Promise<number>;
+  getScheduledBalanceAdjustment(
+    request: GetScheduledBalanceAdjustmentRequest,
+  ): Promise<ScheduledBalanceAdjustmentViewModel>;
+  getAllScheduledBalanceAdjustments(
+    request: GetAllScheduledBalanceAdjustmentsRequest,
+  ): Promise<ScheduledBalanceAdjustmentViewModel[]>;
+  getLastAggregatedBalanceAdjustmentFactorFor(
+    request: GetLastAggregatedBalanceAdjustmentFactorForRequest,
+  ): Promise<number>;
+  getAggregatedBalanceAdjustmentFactor(
+    request: GetAggregatedBalanceAdjustmentFactorRequest,
+  ): Promise<number>;
+  getLastAggregatedBalanceAdjustmentFactorForByPartition(
+    request: GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
+  ): Promise<number>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -304,6 +341,8 @@ class EquityInPort implements IEquityInPort {
       decimals: req.decimals,
       isWhiteList: req.isWhiteList,
       isControllable: req.isControllable,
+      arePartitionsProtected: req.arePartitionsProtected,
+      clearingActive: req.clearingActive,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfShares),
       regulationType: CastRegulationType.fromNumber(req.regulationType),
@@ -410,7 +449,8 @@ class EquityInPort implements IEquityInPort {
     );
 
     const votingFor: VotingRightsForViewModel = {
-      value: res.payload.toString(),
+      tokenBalance: res.tokenBalance.toString(),
+      decimals: res.decimals.toString(),
     };
 
     return votingFor;
@@ -503,7 +543,8 @@ class EquityInPort implements IEquityInPort {
     );
 
     const dividendsFor: DividendsForViewModel = {
-      value: res.payload.toString(),
+      tokenBalance: res.tokenBalance.toString(),
+      decimals: res.decimals.toString(),
     };
 
     return dividendsFor;
@@ -560,6 +601,153 @@ class EquityInPort implements IEquityInPort {
     }
 
     return dividends;
+  }
+
+  @LogError
+  async setScheduledBalanceAdjustment(
+    request: SetScheduledBalanceAdjustmentRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const { executionDate, factor, decimals, securityId } = request;
+    handleValidation('SetScheduledBalanceAdjustmentRequest', request);
+
+    return await this.commandBus.execute(
+      new SetScheduledBalanceAdjustmentCommand(
+        securityId,
+        executionDate,
+        factor,
+        decimals,
+      ),
+    );
+  }
+
+  @LogError
+  async getScheduledBalanceAdjustment(
+    request: GetScheduledBalanceAdjustmentRequest,
+  ): Promise<ScheduledBalanceAdjustmentViewModel> {
+    handleValidation('GetScheduledBalanceAdjustmentRequest', request);
+
+    const res = await this.queryBus.execute(
+      new GetScheduledBalanceAdjustmentQuery(
+        request.securityId,
+        request.balanceAdjustmentId,
+      ),
+    );
+
+    const scheduledBalanceAdjustment: ScheduledBalanceAdjustmentViewModel = {
+      id: request.balanceAdjustmentId,
+      executionDate: new Date(
+        res.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND,
+      ),
+      factor: res.scheduleBalanceAdjustment.factor.toString(),
+      decimals: res.scheduleBalanceAdjustment.decimals.toString(),
+    };
+
+    return scheduledBalanceAdjustment;
+  }
+
+  @LogError
+  async getScheduledBalanceAdjustmentsCount(
+    request: GetScheduledBalanceAdjustmentCountRequest,
+  ): Promise<number> {
+    const { securityId } = request;
+    handleValidation('GetScheduledBalanceAdjustmentCountRequest', request);
+
+    const getScheduledBalanceAdjustmentCountQueryResponse =
+      await this.queryBus.execute(
+        new GetScheduledBalanceAdjustmentCountQuery(securityId),
+      );
+
+    return getScheduledBalanceAdjustmentCountQueryResponse.payload;
+  }
+
+  @LogError
+  async getAllScheduledBalanceAdjustments(
+    request: GetAllScheduledBalanceAdjustmentsRequest,
+  ): Promise<ScheduledBalanceAdjustmentViewModel[]> {
+    handleValidation('GetAllScheduledBalanceAdjustmentsRequest', request);
+
+    const count = await this.queryBus.execute(
+      new GetScheduledBalanceAdjustmentCountQuery(request.securityId),
+    );
+
+    if (count.payload == 0) return [];
+
+    const scheduledBalanceAdjustments: ScheduledBalanceAdjustmentViewModel[] =
+      [];
+
+    for (let i = 1; i <= count.payload; i++) {
+      const res = await this.queryBus.execute(
+        new GetScheduledBalanceAdjustmentQuery(request.securityId, i),
+      );
+
+      const scheduledBalanceAdjustment: ScheduledBalanceAdjustmentViewModel = {
+        id: i,
+        executionDate: new Date(
+          res.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND,
+        ),
+        factor: res.scheduleBalanceAdjustment.factor.toString(),
+        decimals: res.scheduleBalanceAdjustment.decimals.toString(),
+      };
+
+      scheduledBalanceAdjustments.push(scheduledBalanceAdjustment);
+    }
+
+    return scheduledBalanceAdjustments;
+  }
+
+  @LogError
+  async getLastAggregatedBalanceAdjustmentFactorFor(
+    request: GetLastAggregatedBalanceAdjustmentFactorForRequest,
+  ): Promise<number> {
+    handleValidation(
+      'GetLastAggregatedBalanceAdjustmentFactorForRequest',
+      request,
+    );
+
+    const getLastAggregatedBalanceAdjustmentFactorForQueryResponse =
+      await this.queryBus.execute(
+        new GetLastAggregatedBalanceAdjustmentFactorForQuery(
+          request.securityId,
+          request.targetId,
+        ),
+      );
+
+    return getLastAggregatedBalanceAdjustmentFactorForQueryResponse.payload;
+  }
+
+  @LogError
+  async getAggregatedBalanceAdjustmentFactor(
+    request: GetAggregatedBalanceAdjustmentFactorRequest,
+  ): Promise<number> {
+    handleValidation('GetAggregatedBalanceAdjustmentFactorRequest', request);
+
+    const getAggregatedBalanceAdjustmentFactorQueryResponse =
+      await this.queryBus.execute(
+        new GetAggregatedBalanceAdjustmentFactorQuery(request.securityId),
+      );
+
+    return getAggregatedBalanceAdjustmentFactorQueryResponse.payload;
+  }
+
+  @LogError
+  async getLastAggregatedBalanceAdjustmentFactorForByPartition(
+    request: GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation(
+      'GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest',
+      request,
+    );
+
+    const getLastAggregatedBalanceAdjustmentFactorForByPartitionQueryResponse =
+      await this.queryBus.execute(
+        new GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery(
+          request.securityId,
+          request.targetId,
+          request.partitionId,
+        ),
+      );
+
+    return getLastAggregatedBalanceAdjustmentFactorForByPartitionQueryResponse.payload;
   }
 }
 

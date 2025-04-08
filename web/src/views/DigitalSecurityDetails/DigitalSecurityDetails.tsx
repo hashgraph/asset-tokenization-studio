@@ -208,10 +208,7 @@ import { Tag, Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { History } from "../../components/History";
 import { Details } from "./Components/Details";
-import { Dividends } from "./Components/Dividends/Dividends";
 import { Balance } from "./Components/Balance";
-import { RoleManagement } from "./Components/RoleManagement/RoleManagement";
-import { ControlList } from "./Components/ControlList";
 import {
   GetSecurityDetailsRequest,
   GetRoleCountForRequest,
@@ -239,31 +236,33 @@ import { useUserStore } from "../../store/userStore";
 import { SecurityRole } from "../../utils/SecurityRole";
 import { useRolesStore } from "../../store/rolesStore";
 import { useSecurityStore } from "../../store/securityStore";
-import { VotingRights } from "./Components/VotingRights/VotingRights";
-import { Coupons } from "./Components/Coupons/Coupons";
-import { Management } from "./Components/Management/Management";
+import { ManagementTab } from "./Components/Tabs/Management";
+import { OperationsTab } from "./Components/Tabs/Operations";
+import { ControlTab } from "./Components/Tabs/Control";
+import { CorporateActionsTab } from "./Components/Tabs/CorporateActions";
+import { hasRole } from "../../utils/helpers";
 
 export const DigitalSecurityDetails = () => {
   const { t: tHeader } = useTranslation("security", {
     keyPrefix: "details.header",
   });
+
   const { t: tTabs } = useTranslation("security", {
     keyPrefix: "details.tabs",
   });
-  const { id = "" } = useParams();
-  const { address: walletAddress } = useWalletStore();
-  const detailsRequest = new GetSecurityDetailsRequest({
-    securityId: id,
-  });
-  useGetSecurityDetails(detailsRequest);
-  const { type: userType } = useUserStore();
-  const { setRoles, roles: accountRoles } = useRolesStore();
-  const { details, setDetails } = useSecurityStore();
 
-  useEffect(() => {
-    setDetails(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { id = "" } = useParams();
+
+  const { address: walletAddress } = useWalletStore();
+  const { type: userType } = useUserStore();
+  const { roles: accountRoles, setRoles } = useRolesStore();
+  const { setDetails } = useSecurityStore();
+
+  const { data: securityDetails } = useGetSecurityDetails(
+    new GetSecurityDetailsRequest({
+      securityId: id,
+    }),
+  );
 
   // GET EQUITY DETAILS
   const { data: equityDetails } = useGetEquityDetails(
@@ -272,6 +271,7 @@ export const DigitalSecurityDetails = () => {
     }),
     {
       retry: false,
+      enabled: securityDetails?.type === "EQUITY",
     },
   );
 
@@ -282,33 +282,40 @@ export const DigitalSecurityDetails = () => {
     }),
     {
       retry: false,
+      enabled: securityDetails?.type === "BOND",
     },
   );
 
-  // ROLE COUNT FOR
-  const roleCountForRequest = new GetRoleCountForRequest({
-    securityId: id,
-    targetId: walletAddress,
-  });
+  useEffect(() => {
+    setDetails(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const { data: roleCountFor } =
-    useGetSecurityRoleCountFor(roleCountForRequest);
+  // ROLE COUNT FOR
+  const { data: roleCountFor } = useGetSecurityRoleCountFor(
+    new GetRoleCountForRequest({
+      securityId: id,
+      targetId: walletAddress,
+    }),
+  );
 
   // ROLES FOR
-  const rolesForRequest = new GetRolesForRequest({
-    securityId: id,
-    targetId: walletAddress,
-    start: 0,
-    end: roleCountFor ?? 0,
-  });
-
-  const { data: roles = [] } = useGetSecurityRolesFor(rolesForRequest, {
-    enabled: !!roleCountFor,
-    onSuccess: (roles) => setRoles(roles as SecurityRole[]),
-  });
+  const { data: roles = [], isLoading: isLoadingRoles } =
+    useGetSecurityRolesFor(
+      new GetRolesForRequest({
+        securityId: id,
+        targetId: walletAddress,
+        start: 0,
+        end: roleCountFor ?? 0,
+      }),
+      {
+        enabled: !!roleCountFor,
+        onSuccess: (roles) => setRoles(roles as SecurityRole[]),
+      },
+    );
 
   // IS PAUSED
-  const { data: isPaused } = useGetIsPaused(
+  const { data: isPaused, isLoading: isLoadingIsPaused } = useGetIsPaused(
     new PauseRequest({ securityId: id }),
   );
 
@@ -318,7 +325,7 @@ export const DigitalSecurityDetails = () => {
         content: (
           <Details
             id={id}
-            detailsResponse={details ?? ({} as SecurityViewModel)}
+            detailsResponse={securityDetails ?? ({} as SecurityViewModel)}
             equityDetailsResponse={
               equityDetails ?? ({} as EquityDetailsViewModel)
             }
@@ -328,7 +335,7 @@ export const DigitalSecurityDetails = () => {
         header: tTabs("details"),
       },
       {
-        content: <Balance id={id} detailsResponse={details ?? {}} />,
+        content: <Balance id={id} detailsResponse={securityDetails ?? {}} />,
         header: tTabs("balance"),
       },
     ];
@@ -340,7 +347,7 @@ export const DigitalSecurityDetails = () => {
         content: (
           <Details
             id={id}
-            detailsResponse={details ?? ({} as SecurityViewModel)}
+            detailsResponse={securityDetails ?? ({} as SecurityViewModel)}
             equityDetailsResponse={
               equityDetails ?? ({} as EquityDetailsViewModel)
             }
@@ -349,61 +356,117 @@ export const DigitalSecurityDetails = () => {
         ),
         header: tTabs("details"),
       },
+      {
+        content: <Balance id={id} detailsResponse={securityDetails ?? {}} />,
+        header: tTabs("balance"),
+      },
     ];
 
-    const hasCorporateActionsRole = roles.find(
-      (role) => role === SecurityRole._CORPORATEACTIONS_ROLE,
-    );
+    const isSecurityPaused = !isLoadingIsPaused && isPaused;
 
-    if (equityDetails?.dividendRight && hasCorporateActionsRole && !isPaused) {
-      adminTabs.push({ content: <Dividends />, header: tTabs("dividends") });
-    }
+    const operationsConfig = {
+      showLocker:
+        !isSecurityPaused && hasRole(roles, SecurityRole._LOCKER_ROLE),
+      showHold: !isSecurityPaused,
+      showCap: !isSecurityPaused && hasRole(roles, SecurityRole._CAP_ROLE),
+      showClearingOperations:
+        !isSecurityPaused &&
+        hasRole(roles, SecurityRole._CLEARING_VALIDATOR_ROLE),
+    };
 
-    adminTabs.push({
-      content: <Balance id={id} detailsResponse={details ?? {}} />,
-      header: tTabs("balance"),
-    });
+    const corporateActionsConfig = {
+      showBalanceAdjustment:
+        !isSecurityPaused &&
+        Boolean(equityDetails) &&
+        hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
+      showDividends:
+        !isSecurityPaused &&
+        Boolean(equityDetails?.dividendRight) &&
+        hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
+      showVotingRights:
+        !isSecurityPaused &&
+        Boolean(equityDetails?.votingRight) &&
+        hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
+      showCoupons:
+        !isSecurityPaused &&
+        Boolean(bondDetails) &&
+        hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
+    };
 
-    const hasControllerListRole = roles.find(
-      (role) => role === SecurityRole._CONTROLLIST_ROLE,
-    );
+    const controlConfig = {
+      showControlList:
+        !isSecurityPaused && hasRole(roles, SecurityRole._CONTROLLIST_ROLE),
+      showKYC: !isSecurityPaused && hasRole(roles, SecurityRole._KYC_ROLE),
+      showSSIManager:
+        !isSecurityPaused && hasRole(roles, SecurityRole._SSI_MANAGER_ROLE),
+    };
 
-    if (hasControllerListRole && !isPaused) {
+    const managementConfig = {
+      showRoleManagement: !isSecurityPaused,
+      showDangerZone:
+        hasRole(roles, SecurityRole._CLEARING_ROLE) ||
+        hasRole(roles, SecurityRole._PAUSER_ROLE),
+      showConfiguration: true,
+    };
+
+    const showOperationTab =
+      !isLoadingRoles &&
+      Object.values(operationsConfig).some((isVisible) => isVisible);
+
+    const showCorporateActionsTab =
+      !isLoadingRoles &&
+      Object.values(corporateActionsConfig).some((isVisible) => isVisible);
+
+    const showControlTab =
+      !isLoadingRoles &&
+      Object.values(controlConfig).some((isVisible) => isVisible);
+
+    const showManagementTab =
+      !isLoadingRoles &&
+      Object.values(managementConfig).some((isVisible) => isVisible);
+
+    const showLoadingTab = isLoadingRoles;
+
+    if (showManagementTab) {
       adminTabs.push({
-        content: <ControlList />,
-        header: details?.isWhiteList
-          ? tTabs("allowedList")
-          : tTabs("blockedList"),
+        content: <ManagementTab config={managementConfig} />,
+        header: tTabs("management"),
       });
     }
 
-    if (equityDetails?.votingRight && hasCorporateActionsRole && !isPaused) {
+    if (showOperationTab) {
       adminTabs.push({
-        content: <VotingRights />,
-        header: tTabs("votingRights"),
+        content: <OperationsTab config={operationsConfig} />,
+        header: tTabs("operations"),
       });
     }
 
-    if (!isPaused) {
+    if (showCorporateActionsTab) {
       adminTabs.push({
-        content: <RoleManagement />,
-        header: tTabs("roleManagement"),
+        content: <CorporateActionsTab config={corporateActionsConfig} />,
+        header: tTabs("corporateActions"),
       });
     }
 
-    if (bondDetails && hasCorporateActionsRole && !isPaused) {
-      adminTabs.push({ content: <Coupons />, header: tTabs("coupons") });
+    if (showControlTab) {
+      adminTabs.push({
+        content: (
+          <ControlTab details={securityDetails ?? {}} config={controlConfig} />
+        ),
+        header: tTabs("control"),
+      });
     }
 
-    // TODO: check if there are some permissions to display it
-    adminTabs.push({
-      content: <Management id={id} />,
-      header: tTabs("management"),
-    });
+    if (showLoadingTab) {
+      adminTabs.push({
+        content: <></>,
+        header: "Loading...",
+      });
+    }
 
     return adminTabs;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [details, id, roles, isPaused, accountRoles]);
+  }, [securityDetails, id, roles, isPaused, accountRoles]);
 
   return (
     <>
@@ -414,7 +477,7 @@ export const DigitalSecurityDetails = () => {
         )}
       </HStack>
       <Stack w="full" h="full" borderRadius={1} pt={6} gap={4}>
-        <Tabs tabs={tabs} />
+        <Tabs tabs={tabs} variant="primary" />
       </Stack>
     </>
   );

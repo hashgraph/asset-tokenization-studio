@@ -220,13 +220,20 @@ import {
   GetAllVotingRightsRequest,
   GetDividendsForRequest,
   GetVotingRightsForRequest,
+  SetScheduledBalanceAdjustmentRequest,
+  PauseRequest,
+  Security,
+  GetScheduledBalanceAdjustmentRequest,
+  GetScheduledBalanceAdjustmentCountRequest,
+  GetLastAggregatedBalanceAdjustmentFactorForRequest,
+  GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
 } from '../../../src/index.js';
 import {
   CLIENT_ACCOUNT_ECDSA,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
 } from '../../config.js';
-import ConnectRequest from '../../../src/port/in/request/ConnectRequest.js';
+import ConnectRequest from '../../../src/port/in/request/network/ConnectRequest.js';
 import { Wallet, ethers } from 'ethers';
 import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
@@ -243,10 +250,14 @@ import {
   RegulationSubType,
   RegulationType,
 } from '../../../src/domain/context/factory/RegulationType.js';
+import { GetAllScheduledBalanceAdjustmentsRequest } from '../../../src';
+import GetAggregatedBalanceAdjustmentFactorRequest from '../../../src/port/in/request/account/GetAggregatedBalanceAdjustmentFactorRequest.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
 const decimals = 0;
+const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
+const factor = '1';
 const name = 'TEST_SECURITY_TOKEN';
 const symbol = 'TEST';
 const isin = 'ABCDE123456Z';
@@ -319,6 +330,7 @@ describe('🧪 Equity test', () => {
         account: {
           accountId: CLIENT_ACCOUNT_ECDSA.id.toString(),
           privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
+          evmAddress: CLIENT_ACCOUNT_ECDSA.evmAddress?.toString(),
         },
         network: 'testnet',
         wallet: SupportedWallets.METAMASK,
@@ -335,6 +347,8 @@ describe('🧪 Equity test', () => {
       decimals: decimals,
       isWhiteList: false,
       isControllable: true,
+      arePartitionsProtected: false,
+      clearingActive: false,
       isMultiPartition: false,
       diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
       votingRight: votingRight,
@@ -409,7 +423,8 @@ describe('🧪 Equity test', () => {
     expect(dividend.dividendId).toEqual(1);
     expect(dividend.executionDate.getTime() / 1000).toEqual(executionTimestamp);
     expect(dividend.recordDate.getTime() / 1000).toEqual(recordTimestamp);
-    expect(dividendFor.value).toEqual('0');
+    expect(dividendFor.tokenBalance).toEqual('0');
+    expect(dividendFor.decimals).toEqual('0');
     expect(allDividends.length).toEqual(1);
 
     await Role.revokeRole(
@@ -465,7 +480,8 @@ describe('🧪 Equity test', () => {
     expect(voting.votingId).toEqual(1);
     expect(voting.recordDate.getTime() / 1000).toEqual(recordTimestamp);
     expect(voting.data.toUpperCase()).toEqual(data.toUpperCase());
-    expect(votingFor.value).toEqual('0');
+    expect(votingFor.tokenBalance).toEqual('0');
+    expect(votingFor.decimals).toEqual('0');
     expect(allVotings.length).toEqual(1);
 
     await Role.revokeRole(
@@ -475,5 +491,210 @@ describe('🧪 Equity test', () => {
         role: SecurityRole._CORPORATEACTIONS_ROLE,
       }),
     );
+  }, 60_000);
+
+  it('Should set and get scheduled balance adjustment correctly', async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    await Equity.setScheduledBalanceAdjustment(
+      new SetScheduledBalanceAdjustmentRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        executionDate: recordTimestamp.toString(),
+        factor,
+        decimals: decimals.toString(),
+      }),
+    );
+
+    const scheduledBalanceAdjustment =
+      await Equity.getScheduledBalanceAdjustment(
+        new GetScheduledBalanceAdjustmentRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+          balanceAdjustmentId: 1,
+        }),
+      );
+
+    expect(scheduledBalanceAdjustment.id).toEqual(1);
+    expect(scheduledBalanceAdjustment.executionDate.getTime() / 1000).toEqual(
+      recordTimestamp,
+    );
+    expect(scheduledBalanceAdjustment.factor).toEqual(factor);
+    expect(scheduledBalanceAdjustment.decimals).toEqual(decimals.toString());
+
+    await Role.revokeRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+  }, 60_000);
+
+  it('Should return error if try to set a scheduled balance adjust and do not have the role', async () => {
+    let thrownError;
+    try {
+      await Equity.setScheduledBalanceAdjustment(
+        new SetScheduledBalanceAdjustmentRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+          executionDate: recordTimestamp.toString(),
+          factor,
+          decimals: decimals.toString(),
+        }),
+      );
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).toBeInstanceOf(Error);
+  }, 600_000);
+
+  it('Should return error if try to set a scheduled balance adjust and the token is paused', async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._PAUSER_ROLE,
+      }),
+    );
+
+    await Security.pause(
+      new PauseRequest({
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
+
+    let thrownError;
+    try {
+      await Equity.setScheduledBalanceAdjustment(
+        new SetScheduledBalanceAdjustmentRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+          executionDate: recordTimestamp.toString(),
+          factor,
+          decimals: decimals.toString(),
+        }),
+      );
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).toBeInstanceOf(Error);
+
+    await Security.unpause(
+      new PauseRequest({
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
+  }, 600_000);
+
+  it('Should return scheduled balance adjustments count correctly', async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    const count = await Equity.getScheduledBalanceAdjustmentsCount(
+      new GetScheduledBalanceAdjustmentCountRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+      }),
+    );
+
+    expect(count).toBeDefined();
+    expect(typeof count).toBe('number');
+
+    await Role.revokeRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+  }, 60_000);
+
+  it('Get All Scheduled Balance Adjustments', async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    const decimals = '2';
+    const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
+    const executionTimestamp = recordTimestamp + 1000;
+
+    await Equity.setScheduledBalanceAdjustment(
+      new SetScheduledBalanceAdjustmentRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        executionDate: executionTimestamp.toString(),
+        factor,
+        decimals,
+      }),
+    );
+
+    const allScheduledAdjustments =
+      await Equity.getAllScheduledBalanceAdjustments(
+        new GetAllScheduledBalanceAdjustmentsRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+        }),
+      );
+
+    expect(allScheduledAdjustments.length).toEqual(1);
+    expect(allScheduledAdjustments[0].factor).toEqual(factor);
+    expect(allScheduledAdjustments[0].decimals).toEqual(decimals);
+    expect(allScheduledAdjustments[0].executionDate.getTime() / 1000).toEqual(
+      executionTimestamp,
+    );
+
+    await Role.revokeRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+  }, 60_000);
+
+  it('Should return last aggregated balance adjustment factor for correctly', async () => {
+    const count = await Equity.getLastAggregatedBalanceAdjustmentFactorFor(
+      new GetLastAggregatedBalanceAdjustmentFactorForRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+      }),
+    );
+
+    expect(count).toBeDefined();
+    expect(typeof count).toBe('number');
+  }, 60_000);
+
+  it('Should return aggregated balance adjustment factor correctly', async () => {
+    const count = await Equity.getAggregatedBalanceAdjustmentFactor(
+      new GetAggregatedBalanceAdjustmentFactorRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+      }),
+    );
+
+    expect(count).toBeDefined();
+    expect(typeof count).toBe('number');
+  }, 60_000);
+
+  it('Should return last aggregated balance adjustment factor for by partition correctly', async () => {
+    const labaf =
+      await Equity.getLastAggregatedBalanceAdjustmentFactorForByPartition(
+        new GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          partitionId: configId,
+        }),
+      );
+
+    expect(labaf).toBeDefined();
+    expect(typeof labaf).toBe('number');
   }, 60_000);
 });

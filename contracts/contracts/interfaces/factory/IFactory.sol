@@ -231,6 +231,7 @@ interface IFactory {
 
     // TODO: Separete common data in new struct
     struct SecurityData {
+        bool arePartitionsProtected;
         bool isMultiPartition;
         IBusinessLogicResolver resolver;
         ResolverProxyConfiguration resolverProxyConfiguration;
@@ -239,6 +240,7 @@ interface IFactory {
         bool isWhiteList;
         uint256 maxSupply;
         ERC20.ERC20MetadataInfo erc20MetadataInfo;
+        bool clearingActive;
     }
 
     struct EquityData {
@@ -267,7 +269,6 @@ interface IFactory {
     );
 
     error EmptyResolver(IBusinessLogicResolver resolver);
-    error WrongISIN(string isin);
     error NoInitialAdmins();
 
     function deployEquity(

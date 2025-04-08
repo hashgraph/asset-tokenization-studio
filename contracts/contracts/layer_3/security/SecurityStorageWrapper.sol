@@ -235,7 +235,7 @@ contract SecurityStorageWrapper {
 
     function _securityStorage()
         internal
-        view
+        pure
         returns (ISecurity.SecurityRegulationData storage securityStorage_)
     {
         bytes32 position = _SECURITY_STORAGE_POSITION;

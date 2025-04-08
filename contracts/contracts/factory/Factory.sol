@@ -219,10 +219,12 @@ import {IERC1410Basic} from '../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 import {ICap} from '../layer_1/interfaces/cap/ICap.sol';
 import {IERC1594} from '../layer_1/interfaces/ERC1400/IERC1594.sol';
 import {
+    IClearingActions
+} from '../layer_1/interfaces/clearing/IClearingActions.sol';
+import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {LocalContext} from '../layer_1/context/LocalContext.sol';
-import {_ISIN_LENGTH} from '../layer_1/constants/values.sol';
+import {LocalContext} from '../layer_0/context/LocalContext.sol';
 import {
     FactoryRegulationData,
     buildRegulationData,
@@ -233,6 +235,10 @@ import {
 } from '../layer_3/constants/regulation.sol';
 import {IEquityUSA} from '../layer_3/interfaces/IEquityUSA.sol';
 import {IBondUSA} from '../layer_3/interfaces/IBondUSA.sol';
+import {
+    IProtectedPartitions
+} from '../layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol';
+import {validateISIN} from './isinValidator.sol';
 
 contract Factory is IFactory, LocalContext {
     modifier checkResolver(IBusinessLogicResolver resolver) {
@@ -243,9 +249,7 @@ contract Factory is IFactory, LocalContext {
     }
 
     modifier checkISIN(string calldata isin) {
-        if (bytes(isin).length != _ISIN_LENGTH) {
-            revert WrongISIN(isin);
-        }
+        validateISIN(isin);
         _;
     }
 
@@ -362,6 +366,16 @@ contract Factory is IFactory, LocalContext {
         );
     }
 
+    function getAppliedRegulationData(
+        RegulationType _regulationType,
+        RegulationSubType _regulationSubType
+    ) external pure override returns (RegulationData memory regulationData_) {
+        regulationData_ = buildRegulationData(
+            _regulationType,
+            _regulationSubType
+        );
+    }
+
     function _deploySecurity(
         SecurityData calldata _securityData,
         SecurityType _securityType
@@ -406,15 +420,13 @@ contract Factory is IFactory, LocalContext {
             _securityData.maxSupply,
             new ICap.PartitionCap[](0)
         );
-    }
 
-    function getAppliedRegulationData(
-        RegulationType _regulationType,
-        RegulationSubType _regulationSubType
-    ) external pure override returns (RegulationData memory regulationData_) {
-        regulationData_ = buildRegulationData(
-            _regulationType,
-            _regulationSubType
+        IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(
+            _securityData.arePartitionsProtected
+        );
+
+        IClearingActions(securityAddress_).initializeClearing(
+            _securityData.clearingActive
         );
     }
 }

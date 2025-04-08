@@ -206,19 +206,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {IEquity} from '../interfaces/equity/IEquity.sol';
-import {
-    DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE
-} from '../constants/values.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
-import {EquityStorageWrapper} from './EquityStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
+import {
+    DIVIDEND_CORPORATE_ACTION_TYPE,
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+} from '../constants/values.sol';
+import {IEquity} from '../interfaces/equity/IEquity.sol';
+import {EquityStorageWrapper} from './EquityStorageWrapper.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 abstract contract Equity is
     IEquity,
@@ -229,33 +230,16 @@ abstract contract Equity is
 
     // solhint-disable func-name-mixedcase
     // solhint-disable-next-line private-vars-leading-underscore
-    function _initializeEquity(
-        EquityDetailsData calldata _equityDetailsData
-    ) internal returns (bool success_) {
-        EquityDataStorage storage equityStorage = _equityStorage();
-        equityStorage.initialized = true;
-        success_ = _storeEquityDetails(_equityDetailsData);
-    }
-
-    function getEquityDetails()
-        external
-        view
-        override
-        returns (EquityDetailsData memory equityDetailsData_)
-    {
-        return _getEquityDetails();
-    }
 
     function setDividends(
         Dividend calldata _newDividend
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        checkDates(_newDividend.recordDate, _newDividend.executionDate)
-        checkTimestamp(_newDividend.recordDate)
+        validateDates(_newDividend.recordDate, _newDividend.executionDate)
+        onlyValidTimestamp(_newDividend.recordDate)
         returns (bool success_, uint256 dividendID_)
     {
         bytes32 corporateActionID;
@@ -272,6 +256,63 @@ abstract contract Equity is
         );
     }
 
+    function setVoting(
+        Voting calldata _newVoting
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyValidTimestamp(_newVoting.recordDate)
+        returns (bool success_, uint256 voteID_)
+    {
+        bytes32 corporateActionID;
+        (success_, corporateActionID, voteID_) = _setVoting(_newVoting);
+        emit VotingSet(
+            corporateActionID,
+            voteID_,
+            _msgSender(),
+            _newVoting.recordDate,
+            _newVoting.data
+        );
+    }
+
+    function setScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyValidTimestamp(_newBalanceAdjustment.executionDate)
+        validateFactor(_newBalanceAdjustment.factor)
+        returns (bool success_, uint256 balanceAdjustmentID_)
+    {
+        bytes32 corporateActionID;
+        (
+            success_,
+            corporateActionID,
+            balanceAdjustmentID_
+        ) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
+        emit ScheduledBalanceAdjustmentSet(
+            corporateActionID,
+            balanceAdjustmentID_,
+            _msgSender(),
+            _newBalanceAdjustment.executionDate,
+            _newBalanceAdjustment.factor,
+            _newBalanceAdjustment.decimals
+        );
+    }
+
+    function getEquityDetails()
+        external
+        view
+        override
+        returns (EquityDetailsData memory equityDetailsData_)
+    {
+        return _getEquityDetails();
+    }
+
     /**
      * @dev returns the properties and related snapshots (if any) of a dividend.
      *
@@ -282,12 +323,8 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            _dividendID - 1
-        )
+        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
         returns (RegisteredDividend memory registeredDividend_)
     {
         return _getDividends(_dividendID);
@@ -305,12 +342,8 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            _dividendID - 1
-        )
+        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
         returns (DividendFor memory dividendFor_)
     {
         return _getDividendsFor(_dividendID, _account);
@@ -323,33 +356,10 @@ abstract contract Equity is
     function getDividendsCount()
         external
         view
-        virtual
         override
         returns (uint256 dividendCount_)
     {
         return _getDividendsCount();
-    }
-
-    function setVoting(
-        Voting calldata _newVoting
-    )
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        checkTimestamp(_newVoting.recordDate)
-        returns (bool success_, uint256 voteID_)
-    {
-        bytes32 corporateActionID;
-        (success_, corporateActionID, voteID_) = _setVoting(_newVoting);
-        emit VotingSet(
-            corporateActionID,
-            voteID_,
-            _msgSender(),
-            _newVoting.recordDate,
-            _newVoting.data
-        );
     }
 
     function getVoting(
@@ -357,12 +367,8 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            _voteID - 1
-        )
+        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
         returns (RegisteredVoting memory registeredVoting_)
     {
         return _getVoting(_voteID);
@@ -374,12 +380,8 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            _voteID - 1
-        )
+        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
         returns (VotingFor memory votingFor_)
     {
         return _getVotingFor(_voteID, _account);
@@ -388,10 +390,41 @@ abstract contract Equity is
     function getVotingCount()
         external
         view
-        virtual
         override
         returns (uint256 votingCount_)
     {
         return _getVotingCount();
+    }
+
+    function getScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentID
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            _balanceAdjustmentID - 1
+        )
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
+    {
+        return _getScheduledBalanceAdjusment(_balanceAdjustmentID);
+    }
+
+    function getScheduledBalanceAdjustmentCount()
+        external
+        view
+        override
+        returns (uint256 balanceAdjustmentCount_)
+    {
+        return _getScheduledBalanceAdjustmentsCount();
+    }
+
+    function _initializeEquity(
+        EquityDetailsData calldata _equityDetailsData
+    ) internal {
+        EquityDataStorage storage equityStorage = _equityStorage();
+        equityStorage.initialized = true;
+        _storeEquityDetails(_equityDetailsData);
     }
 }

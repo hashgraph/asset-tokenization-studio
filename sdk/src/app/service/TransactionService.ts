@@ -212,6 +212,10 @@ import { SupportedWallets } from '../../domain/context/network/Wallet';
 import { InvalidWalletTypeError } from '../../domain/context/network/error/InvalidWalletAccountTypeError';
 import LogService from './LogService.js';
 import { HederaWalletConnectTransactionAdapter } from '../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
+import { DFNSTransactionAdapter } from '../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
+import { FireblocksTransactionAdapter } from '../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
+import { AWSKMSTransactionAdapter } from '../../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
+import { WalletNotSupported } from './error/WalletNotSupported.js';
 
 @singleton()
 export default class TransactionService extends Service {
@@ -242,8 +246,26 @@ export default class TransactionService extends Service {
         }
         LogService.logTrace('HWALLETCONNECT TransactionAdapter');
         return Injectable.resolve(HederaWalletConnectTransactionAdapter);
+      case SupportedWallets.DFNS:
+        if (!Injectable.isWeb()) {
+          throw new InvalidWalletTypeError();
+        }
+        LogService.logTrace('DFNS TransactionAdapter');
+        return Injectable.resolve(DFNSTransactionAdapter);
+      case SupportedWallets.FIREBLOCKS:
+        if (!Injectable.isWeb()) {
+          throw new InvalidWalletTypeError();
+        }
+        LogService.logTrace('FIREBLOCKS TransactionAdapter');
+        return Injectable.resolve(FireblocksTransactionAdapter);
+      case SupportedWallets.AWSKMS:
+        if (!Injectable.isWeb()) {
+          throw new InvalidWalletTypeError();
+        }
+        LogService.logTrace('AWSKMS TransactionAdapter');
+        return Injectable.resolve(AWSKMSTransactionAdapter);
       default:
-        throw new Error('Invalid wallet type');
+        throw new WalletNotSupported();
     }
   }
 }

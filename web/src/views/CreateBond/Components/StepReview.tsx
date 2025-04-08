@@ -282,6 +282,7 @@ export const StepReview = () => {
   const totalCoupons = getValues("totalCoupons");
   const isBlocklist = getValues("isBlocklist");
   const isControllable = getValues("isControllable");
+  const isClearing = getValues("isClearing");
   const regulationType = getValues("regulationType");
   const regulationSubType = getValues("regulationSubType");
   const countriesListType = getValues("countriesListType");
@@ -305,6 +306,8 @@ export const StepReview = () => {
       decimals,
       isWhiteList: !isBlocklist,
       isControllable,
+      clearingActive: isClearing,
+      arePartitionsProtected: false,
       isMultiPartition: false,
       diamondOwnerAccount: address,
       numberOfUnits: numberToExponential(numberOfUnits, decimals),

@@ -8,20 +8,19 @@
 
 ### Table of Contents
 
-- **[Development manifesto](#development-manifesto)**<br>
-- **[Prerequisites](#prerequisites)**<br>
-- **[Installation](#installation)**<br>
-- **[Build](#build)**<br>
-- **[Setting Up the Environment](#setting-up-the-environment)**<br>
-  - **[Required Environment Variables](#required-environment-variables)**<br>
-  - **[Optional Environment Variables (Hedera Wallet Connect)](#optional-environment-variables-hedera-wallet-connect)**<br>
-  - **[Steps to set up the `.env` file](#steps-to-set-up-the-env-file)**<br>
-- **[Run](#run)**<br>
-- **[Support](#support)**<br>
-- **[Contributing](#contributing)**<br>
-- **[Code of conduct](#code-of-conduct)**<br>
-- **[License](#license)**<br>
-
+-   **[Development manifesto](#development-manifesto)**<br>
+-   **[Prerequisites](#prerequisites)**<br>
+-   **[Installation](#installation)**<br>
+-   **[Build](#build)**<br>
+-   **[Setting Up the Environment](#setting-up-the-environment)**<br>
+    -   **[Required Environment Variables](#required-environment-variables)**<br>
+    -   **[Optional Environment Variables (Hedera Wallet Connect)](#optional-environment-variables-hedera-wallet-connect)**<br>
+    -   **[Steps to set up the `.env` file](#steps-to-set-up-the-env-file)**<br>
+-   **[Run](#run)**<br>
+-   **[Support](#support)**<br>
+-   **[Contributing](#contributing)**<br>
+-   **[Code of conduct](#code-of-conduct)**<br>
+-   **[License](#license)**<br>
 
 # Development manifesto
 
@@ -32,11 +31,12 @@ The development of the project follows enterprise-grade practices for software d
 By using DDD (Domain-Driven Design), we aim to create a shared language among all members of the project team, which allows us to focus our development efforts on thoroughly understanding the processes and rules of the domain. This helps to bring benefits such as increased efficiency and improved communication.
 
 # Prerequisites
+
 Ensure the following tools are installed with these versions:
 
-- **Node:**`v20.17.0`
-- **NPM:** `v10.8.3`
-- **Yarn:** `v1.22.19`
+-   **Node:**`v20.17.0`
+-   **NPM:** `v10.8.3`
+-   **Yarn:** `v1.22.22`
 
 # Installation
 
@@ -49,7 +49,6 @@ npm run install:all
 This will install the dependencies in all projects and sets up the links between them.
 
 You can now start developing in any of the modules.
-
 
 # Build
 
@@ -70,29 +69,30 @@ To run the project, you'll need to configure environment variables in the `.env`
 
 ## Required Environment Variables
 
-### *General Settings*
+### _General Settings_
 
-- **`REACT_APP_BUSINESS_LOGIC_KEYS_COMMON`**: This is a list of common business logic keys required for the functioning of the application. Each key represents a smart contract or similar on-chain entity.
-- **`REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY`**: Business logic key specifically for handling equity-related operations.
-- **`REACT_APP_BUSINESS_LOGIC_KEYS_BOND`**: Business logic key specifically for handling bond-related operations.
-- **`REACT_APP_SHOW_DISCLAIMER`**: Set this value to `"true"` to show a disclaimer in the application.
+-   **`REACT_APP_EQUITY_CONFIG_ID`**: Configuration Id for Equities.
+-   **`REACT_APP_EQUITY_CONFIG_VERSION`**: Equity Version.
+-   **`REACT_APP_BOND_CONFIG_ID`**: configuration Id for Bonds.
+-   **`REACT_APP_BOND_CONFIG_VERSION`**: Bond Version.
+-   **`REACT_APP_SHOW_DISCLAIMER`**: Set this value to `"true"` to show a disclaimer in the application.
 
-### *Network Configuration*
+### _Network Configuration_
 
-- **`REACT_APP_MIRROR_NODE`**: The URL of the Hedera Mirror Node API used to query historical data from the Hedera testnet. Example: `https://testnet.mirrornode.hedera.com/api/v1/`
-- **`REACT_APP_RPC_NODE`**: The RPC node URL used to communicate with the Hedera testnet. Example: `https://testnet.hashio.io/api`
-- **`REACT_APP_RPC_RESOLVER`**: The Hedera testnet account ID for the resolver. Example: `0.0.3532144`
-- **`REACT_APP_RPC_FACTORY`**: The Hedera testnet account ID for the factory. Example: `0.0.3532205`
+-   **`REACT_APP_MIRROR_NODE`**: The URL of the Hedera Mirror Node API used to query historical data from the Hedera testnet. Example: `https://testnet.mirrornode.hedera.com/api/v1/`
+-   **`REACT_APP_RPC_NODE`**: The RPC node URL used to communicate with the Hedera testnet. Example: `https://testnet.hashio.io/api`
+-   **`REACT_APP_RPC_RESOLVER`**: The Hedera testnet account ID for the resolver. Example: `0.0.5479997`
+-   **`REACT_APP_RPC_FACTORY`**: The Hedera testnet account ID for the factory. Example: `0.0.5480051`
 
 ## Optional Environment Variables (Hedera Wallet Connect)
 
 These variables are only required if you are integrating Hedera Wallet Connect for decentralized application (dApp) interactions. If not needed, they can be omitted.
 
-- **`REACT_APP_PROJECT_ID`**: Project ID for Wallet Connect integration. You can obtain it from the [WalletConnect website](https://walletconnect.com/).
-- **`REACT_APP_DAPP_NAME`**: The name of your dApp as displayed in Wallet Connect.
-- **`REACT_APP_DAPP_DESCRIPTION`**: A description of your dApp, typically displayed in Wallet Connect.
-- **`REACT_APP_DAPP_URL`**: The URL of your dApp that will be referenced in Wallet Connect.
-- **`REACT_APP_DAPP_ICONS`**: An array of URLs pointing to icons for the dApp, typically used in Wallet Connect interfaces. Example: `['https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg']`
+-   **`REACT_APP_PROJECT_ID`**: Project ID for Wallet Connect integration. You can obtain it from the [WalletConnect website](https://walletconnect.com/).
+-   **`REACT_APP_DAPP_NAME`**: The name of your dApp as displayed in Wallet Connect.
+-   **`REACT_APP_DAPP_DESCRIPTION`**: A description of your dApp, typically displayed in Wallet Connect.
+-   **`REACT_APP_DAPP_URL`**: The URL of your dApp that will be referenced in Wallet Connect.
+-   **`REACT_APP_DAPP_ICONS`**: An array of URLs pointing to icons for the dApp, typically used in Wallet Connect interfaces. Example: `['https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg']`
 
 ## Steps to set up the `.env` file:
 
@@ -107,15 +107,16 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 4. Replace the placeholder values with your actual environment settings. For example:
 
     ```bash
-    REACT_APP_BUSINESS_LOGIC_KEYS_COMMON="0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6"
-    REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY="0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810"
-    REACT_APP_BUSINESS_LOGIC_KEYS_BOND="0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef"
+    REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
+    REACT_APP_EQUITY_CONFIG_VERSION="0"
+    REACT_APP_BOND_CONFIG_ID="0x0000000000000000000000000000000000000000000000000000000000000002"
+    REACT_APP_BOND_CONFIG_VERSION="0"
     REACT_APP_SHOW_DISCLAIMER="true"
 
     REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
     REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
-    REACT_APP_RPC_RESOLVER="0.0.5038989"
-    REACT_APP_RPC_FACTORY="0.0.5039041"
+    REACT_APP_RPC_RESOLVER='0.0.5827968'
+    REACT_APP_RPC_FACTORY='0.0.5828112'
 
     REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
     REACT_APP_DAPP_NAME="Asset Tokenization Studio"
@@ -130,13 +131,12 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 
 In order to run the application locally:
 
-- Clone the repository
-- Install the application as described in the *Installation* section
-- Create a ".env" file in the *web* module (using the ".env.sample" file as a template)
-- Open a terminal and go to the *web* folder
-- Run the command : __yarn dev__
-- Open a browser and type in the URL displayed in the terminal (by default it will be : *http://localhost:5173*)
-
+-   Clone the repository
+-   Install the application as described in the _Installation_ section
+-   Create a ".env" file in the _web_ module (using the ".env.sample" file as a template)
+-   Open a terminal and go to the _web_ folder
+-   Run the command : **yarn dev**
+-   Open a browser and type in the URL displayed in the terminal (by default it will be : _http://localhost:5173_)
 
 # Support
 

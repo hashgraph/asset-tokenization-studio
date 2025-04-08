@@ -207,16 +207,21 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
     type BusinessLogicResolver,
-    type AccessControl,
-    type Pause,
+    type AccessControlFacet,
+    type PauseFacet,
     DiamondFacet,
     DiamondLoupeFacet,
-} from '../../../typechain-types'
+    DiamondFacet__factory,
+    AccessControlFacet__factory,
+    PauseFacet__factory,
+} from '@typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { assertObject } from '../../assert'
-import { _DEFAULT_ADMIN_ROLE } from '../../../scripts/constants'
-import { FacetConfiguration } from '../../../scripts/resolverDiamondCut.js'
-import { BusinessLogicRegistryData } from '../../../scripts/businessLogicResolverLogic.js'
+import {
+    DEFAULT_ADMIN_ROLE,
+    BusinessLogicRegistryData,
+    FacetConfiguration,
+} from '@scripts'
+import { assertObject } from '../../common'
 
 describe('ResolverProxy Tests', () => {
     const CONFIG_ID =
@@ -227,8 +232,8 @@ describe('ResolverProxy Tests', () => {
     let resolver: BusinessLogicResolver
     let resolver_2: BusinessLogicResolver
     let diamondFacet: DiamondFacet
-    let accessControlImpl: AccessControl
-    let pauseImpl: Pause
+    let accessControlImpl: AccessControlFacet
+    let pauseImpl: PauseFacet
     let signer_A: SignerWithAddress
 
     let account_A: string
@@ -236,15 +241,11 @@ describe('ResolverProxy Tests', () => {
     async function deployContracts() {
         resolver = await deployResolver()
 
-        diamondFacet = await (
-            await ethers.getContractFactory('DiamondFacet')
+        diamondFacet = await new DiamondFacet__factory(signer_A).deploy()
+        accessControlImpl = await new AccessControlFacet__factory(
+            signer_A
         ).deploy()
-
-        accessControlImpl = await (
-            await ethers.getContractFactory('AccessControl')
-        ).deploy()
-
-        pauseImpl = await (await ethers.getContractFactory('Pause')).deploy()
+        pauseImpl = await new PauseFacet__factory(signer_A).deploy()
     }
 
     async function setUpResolver(
@@ -334,7 +335,6 @@ describe('ResolverProxy Tests', () => {
     }
 
     beforeEach(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A] = await ethers.getSigners()
         account_A = signer_A.address
 
@@ -404,11 +404,11 @@ describe('ResolverProxy Tests', () => {
         )
 
         const GRANT_ROLE_SIGNATURE = '0x2f2ff15d'
-        await expect(accessControl.grantRole(_DEFAULT_ADMIN_ROLE, account_A))
+        await expect(accessControl.grantRole(DEFAULT_ADMIN_ROLE, account_A))
             .to.be.revertedWithCustomError(resolverProxy, 'FunctionNotFound')
             .withArgs(GRANT_ROLE_SIGNATURE)
-        expect(await diamondLoupe.supportsInterface(GRANT_ROLE_SIGNATURE)).to.be
-            .false
+        await expect(await diamondLoupe.supportsInterface(GRANT_ROLE_SIGNATURE))
+            .to.be.false
     })
 
     it('GIVEN deployed facets WHEN deploy a diamond to latestVersion and one to a specific version THEN only the latest version one will get updated', async () => {
@@ -515,7 +515,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -553,7 +553,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -634,7 +634,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -673,7 +673,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -758,7 +758,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -803,7 +803,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]

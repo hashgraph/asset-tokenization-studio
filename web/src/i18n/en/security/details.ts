@@ -209,6 +209,13 @@ import roleManagement from "./roleManagement";
 import management from "./management";
 import allowedList from "./allowedList";
 import votingRights from "./votingRight";
+import balanceAdjustment from "./balanceAdjustment";
+import locker from "./locker";
+import cap from "./cap";
+import hold from "./hold";
+import kyc from "./kyc";
+import ssiManager from "./ssiManager";
+import clearingOperations from "./clearingOperations";
 
 export default {
   header: {
@@ -220,10 +227,21 @@ export default {
     blockedList: "Blocked list",
     details: "Details",
     dividends: "Dividends",
+    balanceAdjustment: "Balance Adjustment",
     coupons: "Coupons",
     votingRights: "Voting rights",
     roleManagement: "Role management",
     management: "Management",
+    locker: "Locker",
+    cap: "Cap",
+    hold: "Hold",
+    kyc: "KYC",
+    ssiManager: "SSI Manager",
+    clearingOperations: "Clearing Operations",
+    configuration: "Configuration",
+    operations: "Operations",
+    control: "Control",
+    corporateActions: "Corporate Actions",
   },
   actions: {
     redeem: "Redeem",
@@ -233,12 +251,20 @@ export default {
     forceRedeem: "Force redeem",
     dangerZone: {
       title: "Danger zone",
-      subtitle: "Pause security token",
+      pauseSecurityTokenTitle: "Pause Security Token",
+      pauseSecurityTokenDescription:
+        "Pause all activity related to the security token as a protective measure. While paused, transfers and interactions will be restricted",
       buttonActive: "Active",
       buttonInactive: "Inactive",
+      clearingModeTitle: "Clearing mode",
+      clearingModeDescription:
+        "Restrict token interactions to clearing operations only. While enabled, other types of transactions will be blocked",
+      activate: "Activate",
+      deactivate: "Deactivate",
     },
   },
   dividends,
+  balanceAdjustment,
   coupons,
   balance: {
     search: {
@@ -249,6 +275,10 @@ export default {
     },
     details: {
       title: "Details",
+      availableBalance: "Available balance",
+      lockBalance: "Lock balance",
+      heldBalance: "Held balance",
+      clearedBalance: "Cleared balance",
     },
     error: {
       targetId: "Sorry, there was an error. Probably wrong address",
@@ -258,8 +288,15 @@ export default {
   management,
   allowedList,
   votingRights,
+  locker,
+  cap,
+  hold,
+  kyc,
+  ssiManager,
+  clearingOperations,
   benefits: {
     dividends: "Dividends",
+    balanceAdjustments: "Balance Adjustments",
     coupons: "Coupons",
     id: "Id",
     recordDate: "Record date",
@@ -267,6 +304,8 @@ export default {
     dividendAmount: "Dividend amount",
     couponRate: "Rate",
     snapshot: "Snapshot Id",
+    factor: "Factor",
+    decimals: "Decimals",
   },
   bond: {
     updateMaturityDate: {

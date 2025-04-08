@@ -206,22 +206,22 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import {Common} from '../../layer_1/common/Common.sol';
 import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {IEquity} from '../interfaces/equity/IEquity.sol';
-import {
-    CorporateActionsStorageWrapperSecurity
-} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from '../constants/values.sol';
+import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    IEquityStorageWrapper
+} from '../interfaces/equity/IEquityStorageWrapper.sol';
 
-abstract contract EquityStorageWrapper is
-    CorporateActionsStorageWrapperSecurity
-{
+abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     struct EquityDataStorage {
@@ -231,9 +231,52 @@ abstract contract EquityStorageWrapper is
 
     function _storeEquityDetails(
         IEquity.EquityDetailsData memory _equityDetailsData
-    ) internal returns (bool) {
+    ) internal {
         _equityStorage().equityDetailsData = _equityDetailsData;
-        return true;
+    }
+
+    function _setDividends(
+        IEquity.Dividend calldata _newDividend
+    )
+        internal
+        returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_)
+    {
+        (success_, corporateActionId_, dividendId_) = _addCorporateAction(
+            DIVIDEND_CORPORATE_ACTION_TYPE,
+            abi.encode(_newDividend)
+        );
+    }
+
+    function _setVoting(
+        IEquity.Voting calldata _newVoting
+    )
+        internal
+        returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
+    {
+        (success_, corporateActionId_, voteID_) = _addCorporateAction(
+            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+            abi.encode(_newVoting)
+        );
+    }
+
+    function _setScheduledBalanceAdjustment(
+        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    )
+        internal
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 balanceAdjustmentID_
+        )
+    {
+        (
+            success_,
+            corporateActionId_,
+            balanceAdjustmentID_
+        ) = _addCorporateAction(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            abi.encode(_newBalanceAdjustment)
+        );
     }
 
     function _getEquityDetails()
@@ -242,19 +285,6 @@ abstract contract EquityStorageWrapper is
         returns (IEquity.EquityDetailsData memory equityDetails_)
     {
         equityDetails_ = _equityStorage().equityDetailsData;
-    }
-
-    function _setDividends(
-        IEquity.Dividend calldata _newDividend
-    )
-        internal
-        virtual
-        returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_)
-    {
-        (success_, corporateActionId_, dividendId_) = _addCorporateAction(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            abi.encode(_newDividend)
-        );
     }
 
     /**
@@ -268,7 +298,6 @@ abstract contract EquityStorageWrapper is
     )
         internal
         view
-        virtual
         returns (IEquity.RegisteredDividend memory registeredDividend_)
     {
         bytes32 actionId = _corporateActionsStorage()
@@ -297,7 +326,7 @@ abstract contract EquityStorageWrapper is
     function _getDividendsFor(
         uint256 _dividendID,
         address _account
-    ) internal view virtual returns (IEquity.DividendFor memory dividendFor_) {
+    ) internal view returns (IEquity.DividendFor memory dividendFor_) {
         IEquity.RegisteredDividend memory registeredDividend = _getDividends(
             _dividendID
         );
@@ -306,35 +335,23 @@ abstract contract EquityStorageWrapper is
         dividendFor_.recordDate = registeredDividend.dividend.recordDate;
         dividendFor_.executionDate = registeredDividend.dividend.executionDate;
 
-        if (registeredDividend.dividend.recordDate < _blockTimestamp()) {
-            dividendFor_.recordDateReached = true;
-
-            dividendFor_.tokenBalance = (registeredDividend.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredDividend.snapshotId, _account)
-                : _balanceOf(_account);
-        }
+        (
+            dividendFor_.tokenBalance,
+            dividendFor_.decimals,
+            dividendFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredDividend.dividend.recordDate,
+            registeredDividend.snapshotId,
+            _account
+        );
     }
 
     function _getDividendsCount()
         internal
         view
-        virtual
         returns (uint256 dividendCount_)
     {
         return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
-    }
-
-    function _setVoting(
-        IEquity.Voting calldata _newVoting
-    )
-        internal
-        virtual
-        returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
-    {
-        (success_, corporateActionId_, voteID_) = _addCorporateAction(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            abi.encode(_newVoting)
-        );
     }
 
     function _getVoting(
@@ -342,7 +359,6 @@ abstract contract EquityStorageWrapper is
     )
         internal
         view
-        virtual
         returns (IEquity.RegisteredVoting memory registeredVoting_)
     {
         bytes32 actionId = _corporateActionsStorage()
@@ -368,35 +384,91 @@ abstract contract EquityStorageWrapper is
     function _getVotingFor(
         uint256 _voteID,
         address _account
-    ) internal view virtual returns (IEquity.VotingFor memory votingFor_) {
+    ) internal view returns (IEquity.VotingFor memory votingFor_) {
         IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
 
         votingFor_.recordDate = registeredVoting.voting.recordDate;
         votingFor_.data = registeredVoting.voting.data;
 
-        if (registeredVoting.voting.recordDate < _blockTimestamp()) {
-            votingFor_.recordDateReached = true;
+        (
+            votingFor_.tokenBalance,
+            votingFor_.decimals,
+            votingFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredVoting.voting.recordDate,
+            registeredVoting.snapshotId,
+            _account
+        );
+    }
 
-            votingFor_.tokenBalance = (registeredVoting.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredVoting.snapshotId, _account)
-                : _balanceOf(_account);
+    function _getVotingCount() internal view returns (uint256 votingCount_) {
+        return
+            _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+    }
+
+    function _getScheduledBalanceAdjusment(
+        uint256 _balanceAdjustmentID
+    )
+        internal
+        view
+        returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
+            .at(_balanceAdjustmentID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (balanceAdjustment_) = abi.decode(
+                data,
+                (IEquity.ScheduledBalanceAdjustment)
+            );
         }
     }
 
-    function _getVotingCount()
+    function _getScheduledBalanceAdjustmentsCount()
         internal
         view
-        virtual
-        returns (uint256 votingCount_)
+        returns (uint256 balanceAdjustmentCount_)
     {
         return
-            _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+            _getCorporateActionCountByType(
+                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+            );
+    }
+
+    function _getSnapshotBalanceForIfDateReached(
+        uint256 _date,
+        uint256 _snapshotId,
+        address _account
+    )
+        internal
+        view
+        returns (uint256 balance_, uint8 decimals_, bool dateReached_)
+    {
+        if (_date < _blockTimestamp()) {
+            dateReached_ = true;
+
+            balance_ = (_snapshotId != 0)
+                ? (_balanceOfAtSnapshot(_snapshotId, _account) +
+                    _lockedBalanceOfAtSnapshot(_snapshotId, _account) +
+                    _heldBalanceOfAtSnapshot(_snapshotId, _account) +
+                    _clearedBalanceOfAtSnapshot(_snapshotId, _account))
+                : (_balanceOfAdjustedAt(_account, _date) +
+                    _getLockedAmountForAdjustedAt(_account, _blockTimestamp()) +
+                    _getHeldAmountForAdjusted(_account) +
+                    _getClearedAmountForAdjusted(_account));
+
+            decimals_ = (_snapshotId != 0)
+                ? _decimalsAtSnapshot(_snapshotId)
+                : _decimalsAdjustedAt(_date);
+        }
     }
 
     function _equityStorage()
         internal
         pure
-        virtual
         returns (EquityDataStorage storage equityData_)
     {
         bytes32 position = _EQUITY_STORAGE_POSITION;

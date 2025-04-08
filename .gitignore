@@ -85,7 +85,6 @@ web_modules/
 
 # Next.js build output
 .next
-out
 
 # Nuxt.js build / generate output
 .nuxt
@@ -106,9 +105,6 @@ dist
 
 # Docusaurus cache and generated files
 .docusaurus
-
-# Serverless directories
-.serverless/
 
 # FuseBox cache
 .fusebox/
@@ -131,8 +127,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-
-package-lock.json
 
 asset-tokenization-studio.iml
 

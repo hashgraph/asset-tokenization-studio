@@ -203,54 +203,65 @@
 
 */
 
-import { Client } from '@hashgraph/sdk'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
-export interface GetClientResult {
-    client: Client
-    account: string
+export interface GetSignerResult {
+    signer: SignerWithAddress
+    address: string
     privateKey: string
 }
 
-interface BasicArgs {
-    account?: string
+interface WithSigner {
     privateKey?: string
-    isEd25519: boolean
+    signerAddress?: string
+    signerPosition?: number
 }
 
-export type GetClientArgs = BasicArgs
+export type GetSignerArgs = WithSigner
 
 // * Utils
-export interface GetProxyAdminConfigArgs extends BasicArgs {
-    proxyAdmin: string
-    proxy: string
+
+export interface Keccak256Args {
+    input: string
 }
 
-export interface GetConfigurationInfoArgs extends BasicArgs {
-    resolver: string
-    configId: string
-}
-
-export interface GetResolverBusinessLogicsArgs extends BasicArgs {
-    resolver: string
+export interface CreateVcArgs {
+    holder: string
+    privatekey: string
 }
 
 // * Deploy
-export interface DeployArgs extends BasicArgs {
+export interface DeployArgs extends WithSigner {
     contractName: string
 }
 
-export interface DeployAllArgs extends BasicArgs {
+export interface DeployAllArgs extends WithSigner {
     useDeployed: boolean
 }
 
-// * Update
-export interface UpdateFactoryVersionArgs extends BasicArgs {
+// * Transparent Upgradeable Proxy
+export interface GetProxyAdminConfigArgs {
     proxyAdmin: string
     proxy: string
-    newImplementation: string
 }
 
-export interface UpdateBusinessLogicKeysArgs extends BasicArgs {
+export interface UpdateFactoryVersionArgs extends WithSigner {
+    proxyAdminAddress: string
+    transparentProxyAddress: string
+    newImplementationAddress: string
+}
+
+// * Business Logic Resolver
+export interface GetConfigurationInfoArgs {
     resolver: string
-    implementations: string // * Comma separated list
+    configurationId: string
+}
+
+export interface GetResolverBusinessLogicsArgs {
+    resolver: string
+}
+
+export interface UpdateBusinessLogicKeysArgs extends WithSigner {
+    resolverAddress: string
+    implementationAddressList: string // * Comma separated list
 }

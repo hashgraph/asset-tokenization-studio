@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useUpdateBondMaturityDate } from "../../../hooks/mutations/useUpdateBonMaturityDate";
-import { dateToUnixTimestamp } from "../../../utils/format";
+import { dateToUnixTimestamp, formatDate } from "../../../utils/format";
 import { Flex } from "@chakra-ui/react";
 import {
   CalendarInputController,
@@ -20,6 +20,7 @@ import { useRolesStore } from "../../../store/rolesStore";
 import { SecurityRole } from "../../../utils/SecurityRole";
 import { useGetBondDetails } from "../../../hooks/queries/useGetSecurityDetails";
 import { useParams } from "react-router-dom";
+import { DATE_TIME_FORMAT } from "../../../utils/constants";
 
 export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
   const { id = "" } = useParams();
@@ -93,6 +94,8 @@ export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
               size="sm"
               defaultValue={new Date(maturityDate)}
               fromDate={new Date(maturityDate)}
+              withTimeInput
+              format={DATE_TIME_FORMAT}
             />
             <Flex alignItems={"center"} gap={2}>
               <IconButton
@@ -115,7 +118,7 @@ export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
         {!isEditMode && (
           <>
             <Text>
-              {new Date(bondDetailsResponse.maturityDate).toLocaleDateString()}
+              {formatDate(bondDetailsResponse.maturityDate, DATE_TIME_FORMAT)}
             </Text>
             {accountRoles.includes(SecurityRole._BOND_MANAGER_ROLE) && (
               <IconButton

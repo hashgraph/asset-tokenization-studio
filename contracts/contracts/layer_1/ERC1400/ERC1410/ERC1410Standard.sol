@@ -207,40 +207,27 @@
 pragma solidity 0.8.18;
 
 import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
-import {
-    ERC1410StandardStorageWrapper
-} from './ERC1410StandardStorageWrapper.sol';
-import {_ISSUER_ROLE} from '../../constants/roles.sol';
-import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
 
-abstract contract ERC1410Standard is
-    IERC1410Standard,
-    ERC1410StandardStorageWrapper,
-    CapStorageWrapper
-{
-    /// @notice Increases totalSupply and the corresponding amount of the specified owners partition
-    /// @param _partition The partition to allocate the increase in balance
-    /// @param _tokenHolder The token holder whose balance should be increased
-    /// @param _value The amount by which to increase the balance
-    /// @param _data Additional data attached to the minting of tokens
+import {_ISSUER_ROLE} from '../../constants/roles.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+
+abstract contract ERC1410Standard is IERC1410Standard, Common {
     function issueByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
+        IERC1410Standard.IssueData calldata _issueData
     )
         external
-        virtual
         override
-        checkMaxSupply(_value)
-        checkMaxSupplyForPartition(_partition, _value)
-        onlyValidAddress(_tokenHolder)
-        checkControlList(_tokenHolder)
+        onlyWithinMaxSupply(_issueData.value)
+        onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
+        validateAddress(_issueData.tokenHolder)
+        onlyListedAllowed(_issueData.tokenHolder)
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyRole(_ISSUER_ROLE)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _issueData.tokenHolder)
     {
-        _issueByPartition(_partition, _tokenHolder, _value, _data);
+        _issueByPartition(_issueData);
     }
 
     /// @notice Decreases totalSupply and the corresponding amount of the specified partition of _msgSender()
@@ -253,11 +240,13 @@ abstract contract ERC1410Standard is
         bytes calldata _data
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        checkControlList(_msgSender())
+        onlyListedAllowed(_msgSender())
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
     {
         // Add the function to validate the `_data` parameter
         _redeemByPartition(
@@ -285,13 +274,15 @@ abstract contract ERC1410Standard is
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyDefaultPartitionWithSinglePartition(_partition)
-        checkControlList(_tokenHolder)
-        checkControlList(_msgSender())
+        onlyListedAllowed(_tokenHolder)
+        onlyListedAllowed(_msgSender())
         onlyOperator(_partition, _tokenHolder)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
         _redeemByPartition(
             _partition,
@@ -309,7 +300,7 @@ abstract contract ERC1410Standard is
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external view virtual override returns (bool, bytes1, bytes32) {
+    ) external view override returns (bool, bytes1, bytes32) {
         return
             _canRedeemByPartition(
                 _from,

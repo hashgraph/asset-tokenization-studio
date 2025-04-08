@@ -203,7 +203,7 @@
 
 */
 
-import Web3 from 'web3';
+import { ethers } from 'ethers';
 import LogService from '../../app/service/LogService.js';
 import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
 import { TransactionResponseError } from './error/TransactionResponseError.js';
@@ -214,35 +214,22 @@ export class TransactionResponseAdapter {
   }
   public static decodeFunctionResult(
     functionName: string,
-    resultAsBytes: ArrayBuffer,
+    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
     abi: any, // eslint-disable-line
     network: string,
   ): Uint8Array {
     try {
-      const web3 = new Web3();
+      const iface = new ethers.utils.Interface(abi);
 
-      let functionAbi;
-      if (abi) {
-        functionAbi = abi.find(
-          (func: { name: string }) => func.name === functionName,
-        );
-      } else {
-        throw new TransactionResponseError({
-          message: `ABI is undefined, so it could not be possible to find contract function`,
-          network: network,
-        });
-      }
-      if (!functionAbi?.outputs)
+      if (!iface.functions[functionName]) {
         throw new TransactionResponseError({
           message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
           network: network,
         });
-      const functionParameters = functionAbi?.outputs;
+      }
+
       const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
-      const result = web3.eth.abi.decodeParameters(
-        functionParameters || [],
-        resultHex,
-      );
+      const result = iface.decodeFunctionResult(functionName, resultHex);
 
       const jsonParsedArray = JSON.parse(JSON.stringify(result));
       return jsonParsedArray;

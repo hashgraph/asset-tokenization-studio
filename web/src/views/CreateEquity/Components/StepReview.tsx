@@ -267,6 +267,7 @@ export const StepReview = () => {
   const decimals = getValues("decimals");
   const isControllable = getValues("isControllable");
   const isBlocklist = getValues("isBlocklist");
+  const isClearing = getValues("isClearing");
   const nominalValue = getValues("nominalValue");
   const currency = getValues("currency");
   const numberOfShares = getValues("numberOfShares");
@@ -298,6 +299,8 @@ export const StepReview = () => {
       decimals: decimals,
       isWhiteList: !isBlocklist,
       isControllable: isControllable,
+      clearingActive: isClearing,
+      arePartitionsProtected: false,
       isMultiPartition: false,
       diamondOwnerAccount: address,
       votingRight: rights.votingRights,

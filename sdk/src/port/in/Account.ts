@@ -204,8 +204,8 @@
 */
 
 import AccountViewModel from './response/AccountViewModel.js';
-import GetAccountInfoRequest from './request/GetAccountInfoRequest.js';
-import GetAccountBalanceRequest from './request/GetAccountBalanceRequest.js';
+import GetAccountInfoRequest from './request/account/GetAccountInfoRequest.js';
+import GetAccountBalanceRequest from './request/account/GetAccountBalanceRequest.js';
 import { handleValidation } from './Common.js';
 import { GetAccountInfoQuery } from '../../app/usecase/query/account/info/GetAccountInfoQuery.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
