@@ -216,8 +216,8 @@ import {
     IFactory,
     BusinessLogicResolver,
     SsiManagement,
-    T3RevocationRegistry,
-    T3RevocationRegistry__factory,
+    MockedT3RevocationRegistry,
+    MockedT3RevocationRegistry__factory,
     TimeTravel,
 } from '@typechain'
 import {
@@ -257,7 +257,7 @@ describe('Kyc Tests', () => {
     let kycFacet: Kyc
     let pauseFacet: Pause
     let ssiManagementFacet: SsiManagement
-    let revocationList: T3RevocationRegistry
+    let revocationList: MockedT3RevocationRegistry
     let timeTravelFacet: TimeTravel
 
     let currentTimestamp = 0
@@ -288,13 +288,13 @@ describe('Kyc Tests', () => {
 
         const reovationListDeployed = await deployContractWithFactory(
             new DeployContractWithFactoryCommand({
-                factory: new T3RevocationRegistry__factory(),
+                factory: new MockedT3RevocationRegistry__factory(),
                 signer: signer_A,
             })
         )
 
         revocationList = await ethers.getContractAt(
-            'T3RevocationRegistry',
+            'MockedT3RevocationRegistry',
             reovationListDeployed.address,
             signer_C
         )
