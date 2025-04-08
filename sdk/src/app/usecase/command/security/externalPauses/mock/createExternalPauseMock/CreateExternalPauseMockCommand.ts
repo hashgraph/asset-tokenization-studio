@@ -206,11 +206,11 @@
 import { Command } from '../../../../../../../core/command/Command';
 import { CommandResponse } from '../../../../../../../core/command/CommandResponse';
 
-export class CreateMockCommandResponse implements CommandResponse {
+export class CreateExternalPauseMockCommandResponse implements CommandResponse {
   constructor(public readonly payload: string) {}
 }
 
-export class CreateMockCommand extends Command<CreateMockCommandResponse> {
+export class CreateExternalPauseMockCommand extends Command<CreateExternalPauseMockCommandResponse> {
   constructor(
     public readonly privateKey: string,
     public readonly providerJsonUrl: string,

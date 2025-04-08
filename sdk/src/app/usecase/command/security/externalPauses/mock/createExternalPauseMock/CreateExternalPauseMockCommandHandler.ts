@@ -206,18 +206,18 @@
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
 import {
-  CreateMockCommand,
-  CreateMockCommandResponse,
-} from './CreateMockCommand';
+  CreateExternalPauseMockCommand,
+  CreateExternalPauseMockCommandResponse,
+} from './CreateExternalPauseMockCommand';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
 import { MockedExternalPause__factory } from '@hashgraph/asset-tokenization-contracts';
 import { ethers } from 'ethers';
-import { InvalidRequest } from '../../../../../../../app/usecase/command/error/InvalidRequest';
+import { InvalidRequest } from '../../../../error/InvalidRequest';
 
-@CommandHandler(CreateMockCommand)
-export class CreateMockCommandHandler
-  implements ICommandHandler<CreateMockCommand>
+@CommandHandler(CreateExternalPauseMockCommand)
+export class CreateExternalPauseMockCommandHandler
+  implements ICommandHandler<CreateExternalPauseMockCommand>
 {
   constructor(
     @lazyInject(MirrorNodeAdapter)
@@ -225,8 +225,8 @@ export class CreateMockCommandHandler
   ) {}
 
   async execute(
-    command: CreateMockCommand,
-  ): Promise<CreateMockCommandResponse> {
+    command: CreateExternalPauseMockCommand,
+  ): Promise<CreateExternalPauseMockCommandResponse> {
     const { privateKey, providerJsonUrl } = command;
 
     if (!privateKey || !providerJsonUrl) {
@@ -247,6 +247,6 @@ export class CreateMockCommandHandler
       await this.mirrorNodeAdapter.getAccountInfo(contract.address)
     ).id.toString();
 
-    return Promise.resolve(new CreateMockCommandResponse(address));
+    return Promise.resolve(new CreateExternalPauseMockCommandResponse(address));
   }
 }

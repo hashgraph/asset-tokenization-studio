@@ -228,7 +228,7 @@ import { RemoveExternalPauseCommand } from '../../app/usecase/command/security/e
 import { IsExternalPauseQuery } from '../../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery.js';
 import { GetExternalPausesCountQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery.js';
 import { GetExternalPausesMembersQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery.js';
-import { CreateMockCommand } from '../../app/usecase/command/security/externalPauses/mock/createMock/CreateMockCommand.js';
+import { CreateExternalPauseMockCommand } from '../../app/usecase/command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommand.js';
 
 interface IExternalPausesInPort {
   updateExternalPauses(
@@ -370,7 +370,7 @@ class ExternalPausesInPort
     handleValidation('CreateExternalPauseMockRequest', request);
     return (
       await this.commandBus.execute(
-        new CreateMockCommand(privateKey, providerJsonUrl),
+        new CreateExternalPauseMockCommand(privateKey, providerJsonUrl),
       )
     ).payload;
   }
