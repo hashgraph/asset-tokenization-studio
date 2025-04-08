@@ -231,8 +231,6 @@ export class IsPausedMockQueryHandler
 
   async execute(query: IsPausedMockQuery): Promise<IsPausedMockQueryResponse> {
     const { contractId } = query;
-    const contract = await this.securityService.get(contractId);
-    if (!contract.evmDiamondAddress) throw new Error('Invalid security id');
 
     const contractEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.test(contractId)
