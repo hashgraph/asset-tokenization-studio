@@ -214,6 +214,7 @@ import Factory from './Factory.js';
 import Management from './Management.js';
 import SSIManagement from './SSIManagement.js';
 import Kyc from './Kyc.js';
+import ExternalPausesManagement from './ExternalPausesManagement.js';
 
 export {
   Security,
@@ -227,6 +228,7 @@ export {
   Management,
   SSIManagement,
   Kyc,
+  ExternalPausesManagement,
 };
 
 export * from './request';
@@ -244,3 +246,4 @@ export * from './Factory.js';
 export * from './Management.js';
 export * from './Kyc.js';
 export * from './SSIManagement.js';
+export * from './ExternalPausesManagement.js';

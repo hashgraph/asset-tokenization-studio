@@ -367,6 +367,7 @@ import { GetExternalPausesMembersQueryHandler } from '../app/usecase/query/secur
 import { IsExternalPauseQueryHandler } from '../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQueryHandler.js';
 import { SetPausedMockCommandHandler } from '../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommandHandler.js';
 import { IsPausedMockQueryHandler } from '../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQueryHandler.js';
+import { CreateMockCommandHandler } from '../app/usecase/command/security/externalPauses/mock/createMock/CreateMockCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -383,6 +384,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetPausedMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateMockCommandHandler,
   },
   // Security Creation
   {
