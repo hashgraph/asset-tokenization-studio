@@ -206,7 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LibCommon} from '../../common/LibCommon.sol';
+import {LibCommon} from '../../common/libraries/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -282,11 +282,6 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
         return _ssiManagementStorage().issuerList.contains(_issuer);
     }
 
-    function _checkIssuer(address _issuer) private view {
-        if (!_isIssuer(_issuer))
-            revert ISsiManagement.AccountIsNotIssuer(_issuer);
-    }
-
     function _ssiManagementStorage()
         internal
         pure
@@ -297,5 +292,10 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
         assembly {
             ssiManagement_.slot := position
         }
+    }
+
+    function _checkIssuer(address _issuer) private view {
+        if (!_isIssuer(_issuer))
+            revert ISsiManagement.AccountIsNotIssuer(_issuer);
     }
 }

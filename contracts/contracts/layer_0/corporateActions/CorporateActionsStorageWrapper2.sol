@@ -206,7 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -275,6 +275,48 @@ abstract contract CorporateActionsStorageWrapper2 is
             _actionType
         );
         _initByActionType(_actionType, success_, corporateActionId_, _data);
+    }
+
+    function _onScheduledTaskTriggered(bytes memory _data) internal {
+        if (_data.length == 0) return;
+        if (abi.decode(_data, (bytes32)) == SNAPSHOT_TASK_TYPE) {
+            _triggerScheduledSnapshots(1);
+            return;
+        }
+        _triggerScheduledBalanceAdjustments(1);
+    }
+
+    function _onScheduledBalanceAdjustmentTriggered(
+        bytes memory _data
+    ) internal {
+        if (_data.length == 0) return;
+        (, bytes memory balanceAdjustmentData) = _getCorporateAction(
+            abi.decode(_data, (bytes32))
+        );
+        if (balanceAdjustmentData.length == 0) return;
+        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi
+            .decode(
+                balanceAdjustmentData,
+                (IEquity.ScheduledBalanceAdjustment)
+            );
+        _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
+    }
+
+    function _getSnapshotID(bytes32 _actionId) internal view returns (uint256) {
+        bytes memory data = _getResult(_actionId, SNAPSHOT_RESULT_ID);
+
+        uint256 bytesLength = data.length;
+
+        if (bytesLength < 32) return 0;
+
+        uint256 snapshotId;
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            snapshotId := mload(add(data, 0x20))
+        }
+
+        return snapshotId;
     }
 
     function _initByActionType(
@@ -368,48 +410,6 @@ abstract contract CorporateActionsStorageWrapper2 is
             newBalanceAdjustment.executionDate,
             abi.encode(_actionId)
         );
-    }
-
-    function _onScheduledTaskTriggered(bytes memory _data) internal {
-        if (_data.length == 0) return;
-        if (abi.decode(_data, (bytes32)) == SNAPSHOT_TASK_TYPE) {
-            _triggerScheduledSnapshots(1);
-            return;
-        }
-        _triggerScheduledBalanceAdjustments(1);
-    }
-
-    function _onScheduledBalanceAdjustmentTriggered(
-        bytes memory _data
-    ) internal {
-        if (_data.length == 0) return;
-        (, bytes memory balanceAdjustmentData) = _getCorporateAction(
-            abi.decode(_data, (bytes32))
-        );
-        if (balanceAdjustmentData.length == 0) return;
-        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi
-            .decode(
-                balanceAdjustmentData,
-                (IEquity.ScheduledBalanceAdjustment)
-            );
-        _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
-    }
-
-    function _getSnapshotID(bytes32 _actionId) internal view returns (uint256) {
-        bytes memory data = _getResult(_actionId, SNAPSHOT_RESULT_ID);
-
-        uint256 bytesLength = data.length;
-
-        if (bytesLength < 32) return 0;
-
-        uint256 snapshotId;
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            snapshotId := mload(add(data, 0x20))
-        }
-
-        return snapshotId;
     }
 
     function _checkMatchingActionType(

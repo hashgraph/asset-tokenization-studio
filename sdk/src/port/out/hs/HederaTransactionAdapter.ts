@@ -232,7 +232,9 @@ import {
   TransferAndLock__factory,
   SsiManagement__factory,
   Kyc__factory,
-  ClearingFacet__factory,
+  ClearingTransferFacet__factory,
+  ClearingRedeemFacet__factory,
+  ClearingHoldCreationFacet__factory,
   ClearingActionsFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
@@ -300,6 +302,9 @@ import {
   CLEARING_CREATE_HOLD_BY_PARTITION,
   CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
   PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
+  OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
+  OPERATOR_CLEARING_REDEEM_BY_PARTITION,
+  OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -358,6 +363,8 @@ import {
   ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
+import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
+import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -423,14 +430,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'deployEquity';
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -540,14 +543,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'deployBond';
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -2368,7 +2367,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingTransferFacet__factory().attach(
       security.toString(),
     );
 
@@ -2413,7 +2412,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingTransferFacet__factory().attach(
       security.toString(),
     );
 
@@ -2462,7 +2461,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       nonce: nonce.toBigNumber(),
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingTransferFacet__factory().attach(
       security.toString(),
     );
 
@@ -2635,7 +2634,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingRedeemFacet__factory().attach(
       security.toString(),
     );
 
@@ -2679,7 +2678,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingRedeemFacet__factory().attach(
       security.toString(),
     );
 
@@ -2727,7 +2726,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       nonce: nonce.toBigNumber(),
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingRedeemFacet__factory().attach(
       security.toString(),
     );
 
@@ -2777,7 +2776,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
     );
 
@@ -2832,7 +2831,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
     );
 
@@ -2891,7 +2890,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingFacet__factory().attach(
+    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
     );
 
@@ -2907,6 +2906,150 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async operatorClearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'operatorClearingCreateHoldByPartition';
+    LogService.logTrace(
+      `Operator Clearing Create Hold By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperationFrom, hold],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async operatorClearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'operatorClearingRedeemByPartition';
+    LogService.logTrace(
+      `Operator Clearing Redeem By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    const factoryInstance = new ClearingRedeemFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperationFrom, amount.toBigNumber()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(OPERATOR_CLEARING_REDEEM_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async operatorClearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'operatorClearingTransferByPartition';
+    LogService.logTrace(
+      `Operator Clearing Transfer By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    const factoryInstance = new ClearingTransferFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperationFrom, amount.toBigNumber(), targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(OPERATOR_CLEARING_TRANSFER_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

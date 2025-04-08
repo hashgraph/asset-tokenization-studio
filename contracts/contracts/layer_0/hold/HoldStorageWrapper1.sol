@@ -205,13 +205,14 @@
 
 pragma solidity 0.8.18;
 
-import {LibCommon} from '../common/LibCommon.sol';
+import {LibCommon} from '../common/libraries/LibCommon.sol';
 import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -281,7 +282,8 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
             address escrow_,
             address destination_,
             bytes memory data_,
-            bytes memory operatorData_
+            bytes memory operatorData_,
+            ThirdPartyType thirdPartType_
         )
     {
         IHold.HoldData memory holdData = _getHold(_holdIdentifier);
@@ -291,7 +293,8 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
             holdData.hold.escrow,
             holdData.hold.to,
             holdData.hold.data,
-            holdData.operatorData
+            holdData.operatorData,
+            holdData.thirdPartyType
         );
     }
 
@@ -325,12 +328,6 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
             revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
     }
 
-    function _checkHoldId(
-        IHold.HoldIdentifier calldata _holdIdentifier
-    ) private view {
-        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
-    }
-
     function _holdStorage()
         internal
         pure
@@ -341,5 +338,11 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
         assembly {
             hold_.slot := position
         }
+    }
+
+    function _checkHoldId(
+        IHold.HoldIdentifier calldata _holdIdentifier
+    ) private view {
+        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
     }
 }

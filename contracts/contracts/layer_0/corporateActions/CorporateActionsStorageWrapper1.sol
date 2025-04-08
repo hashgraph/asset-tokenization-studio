@@ -214,7 +214,7 @@ import {
     ICorporateActionsStorageWrapper,
     CorporateActionDataStorage
 } from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -358,15 +358,6 @@ abstract contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
         return _corporateActionsStorage().actionsData[actionId].data;
     }
 
-    function _checkDates(uint256 _firstDate, uint256 _secondDate) private pure {
-        if (_secondDate < _firstDate) {
-            revert ICorporateActionsStorageWrapper.WrongDates(
-                _firstDate,
-                _secondDate
-            );
-        }
-    }
-
     function _corporateActionsStorage()
         internal
         pure
@@ -376,6 +367,15 @@ abstract contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             corporateActions_.slot := position
+        }
+    }
+
+    function _checkDates(uint256 _firstDate, uint256 _secondDate) private pure {
+        if (_secondDate < _firstDate) {
+            revert ICorporateActionsStorageWrapper.WrongDates(
+                _firstDate,
+                _secondDate
+            );
         }
     }
 }

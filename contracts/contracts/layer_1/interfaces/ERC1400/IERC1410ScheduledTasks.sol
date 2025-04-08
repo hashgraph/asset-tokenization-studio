@@ -215,23 +215,8 @@ interface IERC1410ScheduledTasks {
         address _to
     ) external;
 
-    function totalSupplyAdjusted() external view returns (uint256);
-
-    function totalSupplyByPartitionAdjusted(
-        bytes32 _partition
-    ) external view returns (uint256);
-
-    function balanceOfAdjusted(
-        address _tokenHolder
-    ) external view returns (uint256);
-
-    function balanceOfAdjustedAt(
+    function balanceOfAt(
         address _tokenHolder,
         uint256 _timestamp
-    ) external view returns (uint256);
-
-    function balanceOfByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
     ) external view returns (uint256);
 }

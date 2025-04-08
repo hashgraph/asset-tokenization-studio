@@ -220,7 +220,6 @@ import { Security } from '../../../domain/context/security/Security.js';
 import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
 import { Dividend } from '../../../domain/context/equity/Dividend.js';
-import { AccountSecurityRelation } from '../../../domain/context/account/AccountSecurityRelation.js';
 import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
 import { HederaId } from '../../../domain/context/shared/HederaId.js';
 import {
@@ -245,7 +244,11 @@ import {
   Hold__factory,
   SsiManagement__factory,
   Kyc__factory,
-  ClearingFacet__factory,
+  ClearingReadFacet__factory,
+  ClearingActionsFacet__factory,
+  ClearingHoldCreationFacet__factory,
+  ClearingRedeemFacet__factory,
+  ClearingTransferFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -266,15 +269,16 @@ import {
 import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
 import { VotingFor } from '../../../domain/context/equity/VotingFor';
-import { HoldDetails } from '../../../domain/context/security/HoldDetails.js';
-import { KYC } from '../../../domain/context/kyc/KYC.js';
+import { Kyc } from '../../../domain/context/kyc/Kyc.js';
 import { KycAccountData } from '../../../domain/context/kyc/KycAccountData.js';
 import {
   CastClearingOperationType,
-  Clearing,
-  ClearingOperationIdentifier,
+  ClearingHoldCreation,
   ClearingOperationType,
+  ClearingRedeem,
+  ClearingTransfer,
 } from '../../../domain/context/security/Clearing.js';
+import { HoldDetails } from '../../../domain/context/security/Hold.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -544,6 +548,10 @@ export class RPCQueryAdapter {
       ProtectedPartitions__factory,
       address.toString(),
     ).arePartitionsProtected();
+    const clearingActive = await this.connect(
+      ClearingActionsFacet__factory,
+      address.toString(),
+    ).isClearingActivated();
     const isMultiPartition = await this.connect(
       ERC1410ScheduledTasks__factory,
       address.toString(),
@@ -596,6 +604,7 @@ export class RPCQueryAdapter {
       isWhiteList: isWhiteList,
       isControllable: isControllable,
       arePartitionsProtected: arePartitionsProtected,
+      clearingActive: clearingActive,
       isMultiPartition: isMultiPartition,
       isIssuable: isIssuable,
       totalSupply: new BigDecimal(totalSupply.toString()),
@@ -854,13 +863,6 @@ export class RPCQueryAdapter {
     return couponCount.toNumber();
   }
 
-  async getAccountSecurityRelationship(
-    address: EvmAddress,
-    target: EvmAddress,
-  ): Promise<AccountSecurityRelation> {
-    throw new Error('Method not implemented.');
-  }
-
   async isPaused(address: EvmAddress): Promise<boolean> {
     LogService.logTrace(
       `Checking if the security: ${address.toString()} is paused`,
@@ -889,7 +891,7 @@ export class RPCQueryAdapter {
     data: string,
     operatorData: string,
   ): Promise<[boolean, string, string]> {
-    LogService.logTrace(`Checking can transfer`);
+    LogService.logTrace(`Checking can transfer by partition`);
 
     return await this.connect(
       ERC1410ScheduledTasks__factory,
@@ -901,6 +903,21 @@ export class RPCQueryAdapter {
       amount.toBigNumber(),
       data,
       operatorData,
+    );
+  }
+
+  async canTransfer(
+    address: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    data: string,
+  ): Promise<[boolean, string, string]> {
+    LogService.logTrace(`Checking can transfer`);
+
+    return await this.connect(ERC1594__factory, address.toString()).canTransfer(
+      targetId.toString(),
+      amount.toBigNumber(),
+      data,
     );
   }
 
@@ -1011,6 +1028,34 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(Cap__factory, address.toString()).getMaxSupply();
+  }
+
+  async getMaxSupplyByPartition(
+    address: EvmAddress,
+    partitionId: string,
+  ): Promise<BigNumber> {
+    LogService.logTrace(
+      `Getting max supply by partition for ${address.toString()} security`,
+    );
+
+    return await this.connect(
+      Cap__factory,
+      address.toString(),
+    ).getMaxSupplyByPartition(partitionId);
+  }
+
+  async getTotalSupplyByPartition(
+    address: EvmAddress,
+    partitionId: string,
+  ): Promise<BigNumber> {
+    LogService.logTrace(
+      `Getting max supply by partition for ${address.toString()} security`,
+    );
+
+    return await this.connect(
+      ERC1410ScheduledTasks__factory,
+      address.toString(),
+    ).totalSupplyByPartition(partitionId);
   }
 
   async getRegulationDetails(
@@ -1324,7 +1369,7 @@ export class RPCQueryAdapter {
     ).isIssuer(issuer.toString());
   }
 
-  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<KYC> {
+  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<Kyc> {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
     const kycData = await this.connect(
@@ -1332,7 +1377,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getKycFor(targetId.toString());
 
-    return new KYC(
+    return new Kyc(
       kycData.validFrom.toString(),
       kycData.validTo.toString(),
       kycData.vcId,
@@ -1403,7 +1448,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Cleared Amount For ${targetId}`);
 
     const clearedAmountFor = await this.connect(
-      ClearingFacet__factory,
+      ClearingReadFacet__factory,
       address.toString(),
     ).getClearedAmountFor(targetId.toString());
 
@@ -1420,7 +1465,7 @@ export class RPCQueryAdapter {
     );
 
     const clearedAmountForByPartition = await this.connect(
-      ClearingFacet__factory,
+      ClearingReadFacet__factory,
       address.toString(),
     ).getClearedAmountForByPartition(partitionId, targetId.toString());
 
@@ -1438,7 +1483,7 @@ export class RPCQueryAdapter {
     );
 
     const clearingCountForByPartition = await this.connect(
-      ClearingFacet__factory,
+      ClearingReadFacet__factory,
       address.toString(),
     ).getClearingCountForByPartition(
       partitionId,
@@ -1462,7 +1507,7 @@ export class RPCQueryAdapter {
     );
 
     const clearingsIdForByPartition = await this.connect(
-      ClearingFacet__factory,
+      ClearingReadFacet__factory,
       address.toString(),
     ).getClearingsIdForByPartition(
       partitionId,
@@ -1475,47 +1520,89 @@ export class RPCQueryAdapter {
     return clearingsIdForByPartition.map((id) => id.toNumber());
   }
 
-  async getClearingForByPartition(
+  async getClearingCreateHoldForByPartition(
     address: EvmAddress,
     partitionId: string,
     targetId: EvmAddress,
-    clearingOperationType: ClearingOperationType,
     clearingId: number,
-  ): Promise<Clearing> {
+  ): Promise<ClearingHoldCreation> {
     LogService.logTrace(
-      `Getting Clearing details for ${targetId} id ${clearingId} by partition ${partitionId}`,
+      `Getting Clearing Create Hold details for ${targetId} id ${clearingId} by partition ${partitionId}`,
     );
 
-    const clearingOperationIdentifier: ClearingOperationIdentifier = {
-      partition: partitionId,
-      tokenHolder: targetId.toString(),
-      clearingOperationType: CastClearingOperationType.toNumber(
-        clearingOperationType,
-      ),
-      clearingId: clearingId,
-    };
+    const clearing = await this.connect(
+      ClearingHoldCreationFacet__factory,
+      address.toString(),
+    ).getClearingCreateHoldForByPartition(
+      partitionId,
+      targetId.toString(),
+      clearingId,
+    );
+
+    return new ClearingHoldCreation(
+      new BigDecimal(clearing.amount.toString()),
+      clearing.expirationTimestamp.toNumber(),
+      clearing.data,
+      clearing.operatorData,
+      clearing.holdEscrow,
+      clearing.holdExpirationTimestamp.toNumber(),
+      clearing.holdTo,
+      clearing.holdData,
+    );
+  }
+
+  async getClearingRedeemForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+  ): Promise<ClearingRedeem> {
+    LogService.logTrace(
+      `Getting Clearing Redeem details for ${targetId} id ${clearingId} by partition ${partitionId}`,
+    );
 
     const clearing = await this.connect(
-      ClearingFacet__factory,
+      ClearingRedeemFacet__factory,
       address.toString(),
-    ).getClearingForByPartition(clearingOperationIdentifier);
+    ).getClearingRedeemForByPartition(
+      partitionId,
+      targetId.toString(),
+      clearingId,
+    );
 
-    return new Clearing(
-      clearing.expirationTimestamp_.toNumber(),
-      new BigDecimal(clearing.amount_.toString()),
-      clearing.destination_,
-      CastClearingOperationType.fromNumber(clearing.clearingOperationType_),
-      clearing.data_,
-      clearing.operatorData_,
-      {
-        amount: new BigDecimal(clearing.hold_.amount.toString()),
-        expirationTimestamp: new BigDecimal(
-          clearing.hold_.expirationTimestamp.toString(),
-        ),
-        escrow: clearing.hold_.escrow,
-        to: clearing.hold_.to,
-        data: clearing.hold_.data,
-      },
+    return new ClearingRedeem(
+      new BigDecimal(clearing.amount.toString()),
+      clearing.expirationTimestamp.toNumber(),
+      clearing.data,
+      clearing.operatorData,
+    );
+  }
+
+  async getClearingTransferForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+  ): Promise<ClearingTransfer> {
+    LogService.logTrace(
+      `Getting Clearing Transfer details for ${targetId} id ${clearingId} by partition ${partitionId}`,
+    );
+
+    const clearing = await this.connect(
+      ClearingTransferFacet__factory,
+      address.toString(),
+    ).getClearingTransferForByPartition(
+      partitionId,
+      targetId.toString(),
+      clearingId,
+    );
+
+    return new ClearingTransfer(
+      new BigDecimal(clearing.amount.toString()),
+      clearing.expirationTimestamp.toNumber(),
+      clearing.destination,
+      clearing.data,
+      clearing.operatorData,
     );
   }
 
@@ -1525,7 +1612,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ClearingFacet__factory,
+      ClearingActionsFacet__factory,
       address.toString(),
     ).isClearingActivated();
   }

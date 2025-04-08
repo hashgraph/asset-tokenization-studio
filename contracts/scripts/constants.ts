@@ -210,6 +210,7 @@ export const ZERO = Zero
 export const HASH_ZERO = HashZero
 export const ADDRESS_ZERO = AddressZero
 export const EMPTY_STRING = ''
+export const EMPTY_HEX_BYTES = '0x'
 export const MAX_UINT256 = BigInt(
     '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 )
@@ -278,6 +279,7 @@ export const WRONG_PARTITION_ERROR_ID = '0x48'
 export const ALLOWANCE_REACHED_ERROR_ID = '0x49'
 export const FROM_ACCOUNT_KYC_ERROR_ID = '0x50'
 export const TO_ACCOUNT_KYC_ERROR_ID = '0x51'
+export const CLEARING_ACTIVE_ERROR_ID = '0x52'
 
 export const SUCCESS = '0x00'
 

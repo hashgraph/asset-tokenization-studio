@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DangerZone Admin has pauser role should render correctly: pauserRole 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1d625dw"
+  >
+    <div
+      class="chakra-stack css-198f9j2"
+    >
+      <div
+        class="chakra-stack css-xerlbm"
+      >
+        <p
+          class="css-oal6jm"
+        >
+          Pause Security Token
+        </p>
+        <p
+          class="css-w4vgn5"
+        >
+          Pause all activity related to the security token as a protective measure. While paused, transfers and interactions will be restricted
+        </p>
+      </div>
+      <div
+        class="css-70qvj9"
+      >
+        <label
+          class="chakra-switch css-1azg3ty"
+          data-testid="pauser-button"
+        >
+          <input
+            aria-disabled="false"
+            class="chakra-switch__input"
+            style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+            type="checkbox"
+            value=""
+          />
+          <span
+            aria-hidden="true"
+            class="chakra-switch__track css-x0quta"
+          >
+            <span
+              class="chakra-switch__thumb css-1vh5y2u"
+            />
+          </span>
+        </label>
+        <label
+          class="chakra-form__label css-1ii0m7i"
+        />
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`DangerZone should render correctly: defaultAdminRole 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1d625dw"
+  />
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

@@ -203,6 +203,8 @@
 
 */
 
+import { InvalidTimeUnits } from './error/InvalidTimeUnits';
+
 export class Time {
   public static delay(
     time: number,
@@ -214,9 +216,7 @@ export class Time {
     } else if (unit === 'milliseconds' || unit === 'ms') {
       delayInMilliseconds = time;
     } else {
-      throw new Error(
-        'Invalid time unit. Please use "seconds", "milliseconds", "sec", or "ms".',
-      );
+      throw new InvalidTimeUnits();
     }
     return new Promise<boolean>((resolve) =>
       setTimeout(() => resolve(true), delayInMilliseconds),

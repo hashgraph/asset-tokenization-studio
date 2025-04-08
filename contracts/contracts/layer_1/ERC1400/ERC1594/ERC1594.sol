@@ -245,11 +245,11 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
     {
@@ -279,12 +279,12 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
         onlyListedAllowed(_from)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
     {
@@ -333,10 +333,10 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
     {
         _redeem(_value, _data);
@@ -359,11 +359,11 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
         _redeemFrom(_tokenHolder, _value, _data);

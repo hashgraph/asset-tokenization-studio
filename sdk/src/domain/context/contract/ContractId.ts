@@ -214,6 +214,7 @@ import BaseError from '../../../core/error/BaseError.js';
 import CheckStrings from '../../../core/checks/strings/CheckStrings.js';
 import { InvalidContractId } from './error/InvalidContractId.js';
 import { HederaId } from '../shared/HederaId.js';
+import LogService from '../../../app/service/LogService.js';
 
 export default class ContractId extends HederaId {
   public readonly value: string;
@@ -262,7 +263,7 @@ export default class ContractId extends HederaId {
         if (!(id.length == 42 && id.startsWith('0x')))
           HContractId.fromString(id);
       } catch (error) {
-        console.error(error);
+        LogService.logError(error);
         err.push(new InvalidContractId(id));
       }
     }

@@ -237,14 +237,16 @@ import {
 import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../src/domain/context/equity/DividendFor';
 import { VotingFor } from '../src/domain/context/equity/VotingFor';
-import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSettings.js';
-import { HoldDetails } from '../src/domain/context/security/HoldDetails.js';
-import { KYC } from '../src/domain/context/kyc/KYC.js';
+import DfnsSettings from '../src/core/settings/custodialWalletSettings/DfnsSettings.js';
+import { Kyc } from '../src/domain/context/kyc/Kyc.js';
 import { KycAccountData } from '../src/domain/context/kyc/KycAccountData.js';
 import {
-  Clearing,
+  ClearingHoldCreation,
   ClearingOperationType,
+  ClearingRedeem,
+  ClearingTransfer,
 } from '../src/domain/context/security/Clearing.js';
+import { HoldDetails } from '../src/domain/context/security/Hold.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -276,7 +278,10 @@ function identifiers(accountId: HederaId | string): string[] {
 type balance = Map<string, string>;
 type lock = Map<number, string[]>;
 type hold = Map<number, HoldDetails[]>;
-type clearing = Map<number, Clearing[]>;
+type clearing = Map<
+  number,
+  ClearingHoldCreation[] | ClearingRedeem[] | ClearingTransfer[]
+>;
 const securityEvmAddress = '0x0000000000000000000000000000000000000001';
 const transactionId =
   '0x0102030405060708010203040506070801020304050607080x0102030405060708';
@@ -303,8 +308,8 @@ const lastLockIds = new Map<string, number>();
 const lastHoldIds = new Map<string, number>();
 const lastClearingIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
-const nonces = new Map<string, number>();
-const kycAccountsData = new Map<string, KYC>();
+const nonces = new Map<string, BigNumber>();
+const kycAccountsData = new Map<string, Kyc>();
 const kycAccountsByStatus = new Map<number, string[]>();
 
 let controlList: string[] = [];
@@ -324,7 +329,6 @@ let configVersion: number;
 let configId: string;
 let resolverAddress: string;
 let revocationRegistryAddress: string;
-let isClearingActivated: boolean = false;
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -396,7 +400,11 @@ function decreaseClearedBalance(
   }
 }
 
-function processClearingOperation(targetId: EvmAddress, clearingId: number) {
+function processClearingOperation(
+  targetId: EvmAddress,
+  clearingId: number,
+  clearingOperationType: ClearingOperationType,
+): TransactionResponse {
   const accountClearings = clearings.get(
     '0x' + targetId.toString().toUpperCase().substring(2),
   );
@@ -411,6 +419,16 @@ function processClearingOperation(targetId: EvmAddress, clearingId: number) {
   const currentAccount = new EvmAddress(identifiers(user_account.id)[1]);
   increaseBalance(currentAccount, clearedAmount);
 
+  const operationMap = clearingsIds.get(currentAccount.toString());
+  if (operationMap) {
+    const idList = operationMap.get(clearingOperationType);
+    if (idList) {
+      operationMap.set(
+        clearingOperationType,
+        idList.filter((id) => id !== clearingId),
+      );
+    }
+  }
   return {
     status: 'success',
     id: transactionId,
@@ -590,35 +608,40 @@ const createClearing = async (
   clearingIds.push(newLastClearingId);
   clearingsIds.set(account, new Map([[clearingOperationType, clearingIds]]));
 
-  let hold = {
-    amount: new BigDecimal('0'),
-    expirationTimestamp: new BigDecimal('0'),
-    escrow: '0',
-    to: '0',
-    data: '0x',
-  };
-
-  if (clearingOperationType == ClearingOperationType.HoldCreation) {
-    hold = {
-      amount: amount,
-      expirationTimestamp: holdExpirationDate!,
-      escrow: escrow!.toString(),
-      to: target.toString(),
-      data: '0x',
-    };
+  let clearing;
+  switch (clearingOperationType) {
+    case ClearingOperationType.HoldCreation:
+      clearing = new ClearingHoldCreation(
+        amount,
+        clearingExpirationDate.toBigNumber().toNumber(),
+        '0x',
+        '0x',
+        escrow!.toString(),
+        holdExpirationDate!.toBigNumber().toNumber(),
+        target.toString(),
+        '0x',
+      );
+      break;
+    case ClearingOperationType.Redeem:
+      clearing = new ClearingRedeem(
+        amount,
+        clearingExpirationDate.toBigNumber().toNumber(),
+        '0x',
+        '0x',
+      );
+      break;
+    default:
+      clearing = new ClearingTransfer(
+        amount,
+        clearingExpirationDate.toBigNumber().toNumber(),
+        targetId!.toString(),
+        '0x',
+        '0x',
+      );
+      break;
   }
 
-  accountClearings.set(newLastClearingId, [
-    new Clearing(
-      clearingExpirationDate.toBigNumber().toNumber(),
-      amount,
-      target.toString(),
-      clearingOperationType,
-      '0x',
-      '0x',
-      hold,
-    ),
-  ]);
+  accountClearings.set(newLastClearingId, [clearing]);
   clearings.set(target.toString(), accountClearings);
 
   increaseClearedBalance(target, amount);
@@ -960,7 +983,131 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       data: string,
       operatorData: string,
     ) => {
-      return [false, '', ''];
+      const operator = user_account.evmAddress;
+
+      if (securityInfo.paused) return [false, '0x40', ''];
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, operator))
+        )
+          return [false, '0x41', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, operator))
+          return [false, '0x41', ''];
+      }
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, sourceId))
+        )
+          return [false, '0x42', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, sourceId))
+          return [false, '0x42', ''];
+      }
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, targetId))
+        )
+          return [false, '0x43', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, targetId))
+          return [false, '0x43', ''];
+      }
+
+      if (!sourceId) return [false, '0x44', ''];
+      if (!targetId) return [false, '0x45', ''];
+
+      const balance = await singletonInstance.balanceOfByPartition(
+        address,
+        sourceId,
+        partitionId,
+      );
+
+      if (amount.isLowerThan(balance)) return [false, '0x46', ''];
+
+      if (
+        sourceId.toString().toUpperCase != operator!.toString().toUpperCase &&
+        !singletonInstance.hasRole(SecurityRole._CONTROLLIST_ROLE)
+      ) {
+        if (
+          !(
+            singletonInstance.isOperatorForPartition(
+              address,
+              partitionId,
+              operator,
+              sourceId,
+            ) || singletonInstance.isOperator(address, operator, sourceId)
+          )
+        )
+          return [false, '0x47', ''];
+      }
+
+      if (!balance) return [false, '0x48', ''];
+
+      if (!singletonInstance.getKYCStatusFor(address, sourceId))
+        return [false, '0x50', ''];
+
+      if (!singletonInstance.getKYCStatusFor(address, targetId))
+        return [false, '0x51', ''];
+
+      if (securityInfo.clearingActive) return [false, '0x52', ''];
+
+      return [true, '0x00', ''];
+    },
+  );
+
+  singletonInstance.canTransfer = jest.fn(
+    async (
+      address: EvmAddress,
+      targetId: EvmAddress,
+      amount: BigDecimal,
+      data: string,
+    ) => {
+      const operator = user_account.evmAddress;
+
+      if (securityInfo.paused) return [false, '0x40', ''];
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, operator))
+        )
+          return [false, '0x42', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, operator))
+          return [false, '0x42', ''];
+      }
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, targetId))
+        )
+          return [false, '0x43', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, targetId))
+          return [false, '0x43', ''];
+      }
+
+      if (!targetId) return [false, '0x45', ''];
+
+      const balance = await singletonInstance.balanceOfByPartition(
+        address,
+        operator,
+      );
+
+      if (amount.isLowerThan(balance)) return [false, '0x46', ''];
+
+      if (!singletonInstance.getKYCStatusFor(address, operator))
+        return [false, '0x50', ''];
+
+      if (!singletonInstance.getKYCStatusFor(address, targetId))
+        return [false, '0x51', ''];
+
+      if (securityInfo.clearingActive) return [false, '0x52', ''];
+
+      return [true, '0x00', ''];
     },
   );
 
@@ -973,7 +1120,65 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       data: string,
       operatorData: string,
     ) => {
-      return [false, '', ''];
+      const operator = user_account.evmAddress;
+
+      if (securityInfo.paused) return [false, '0x40', ''];
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, operator))
+        )
+          return [false, '0x41', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, operator))
+          return [false, '0x41', ''];
+      }
+
+      if (securityInfo.isWhiteList) {
+        if (
+          !(await singletonInstance.isAccountInControlList(address, sourceId))
+        )
+          return [false, '0x42', ''];
+      } else {
+        if (await singletonInstance.isAccountInControlList(address, sourceId))
+          return [false, '0x42', ''];
+      }
+
+      if (!sourceId) return [false, '0x44', ''];
+
+      const balance = await singletonInstance.balanceOfByPartition(
+        address,
+        sourceId,
+        partitionId,
+      );
+
+      if (amount.isLowerThan(balance)) return [false, '0x46', ''];
+
+      if (
+        sourceId.toString().toUpperCase != operator!.toString().toUpperCase &&
+        !singletonInstance.hasRole(SecurityRole._CONTROLLIST_ROLE)
+      ) {
+        if (
+          !(
+            singletonInstance.isOperatorForPartition(
+              address,
+              partitionId,
+              operator,
+              sourceId,
+            ) || singletonInstance.isOperator(address, operator, sourceId)
+          )
+        )
+          return [false, '0x47', ''];
+      }
+
+      if (!balance) return [false, '0x48', ''];
+
+      if (!singletonInstance.getKYCStatusFor(address, sourceId))
+        return [false, '0x50', ''];
+
+      if (securityInfo.clearingActive) return [false, '0x52', ''];
+
+      return [true, '0x00', ''];
     },
   );
 
@@ -994,13 +1199,13 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       operator: EvmAddress,
       target: EvmAddress,
     ) => {
-      return false;
+      return true;
     },
   );
 
   singletonInstance.isOperator = jest.fn(
     async (address: EvmAddress, operator: EvmAddress, target: EvmAddress) => {
-      return false;
+      return true;
     },
   );
 
@@ -1017,7 +1222,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   );
 
   singletonInstance.getMaxSupply = jest.fn(async (address: EvmAddress) => {
-    return BigNumber.from(0);
+    return securityInfo.maxSupply;
   });
 
   singletonInstance.getRegulationDetails = jest.fn(
@@ -1138,7 +1343,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   singletonInstance.getNounceFor = jest.fn(
     async (address: EvmAddress, target: EvmAddress) => {
       const account = '0x' + target.toString().toUpperCase().substring(2);
-      return nonces.get(account) ?? 0;
+      return nonces.get(account) ?? new BigDecimal('0').toBigNumber();
     },
   );
 
@@ -1309,7 +1514,81 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
 
   singletonInstance.isClearingActivated = jest.fn(
     async (address: EvmAddress) => {
-      return isClearingActivated;
+      return securityInfo.clearingActive;
+    },
+  );
+
+  singletonInstance.getClearingRedeemForByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      targetId: EvmAddress,
+      clearingId: number,
+    ) => {
+      const accountClearings = clearings.get(
+        '0x' + targetId.toString().toUpperCase().substring(2),
+      );
+      const emptyClearingRedeem = new ClearingRedeem(
+        new BigDecimal(BigNumber.from(0)),
+        0,
+        '',
+        '',
+      );
+      if (!accountClearings) return emptyClearingRedeem;
+      const accountClearingRedeem = accountClearings.get(clearingId);
+      if (!accountClearingRedeem) return emptyClearingRedeem;
+      return accountClearingRedeem[0];
+    },
+  );
+
+  singletonInstance.getClearingCreateHoldForByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      targetId: EvmAddress,
+      clearingId: number,
+    ) => {
+      const accountClearings = clearings.get(
+        '0x' + targetId.toString().toUpperCase().substring(2),
+      );
+      const emptyClearingCreateHold = new ClearingHoldCreation(
+        new BigDecimal(BigNumber.from(0)),
+        0,
+        '',
+        '',
+        '',
+        0,
+        '',
+        '',
+      );
+      if (!accountClearings) return emptyClearingCreateHold;
+      const accountClearingCreateHold = accountClearings.get(clearingId);
+      if (!accountClearingCreateHold) return emptyClearingCreateHold;
+      return accountClearingCreateHold[0];
+    },
+  );
+
+  singletonInstance.getClearingTransferForByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      targetId: EvmAddress,
+      clearingId: number,
+    ) => {
+      const accountClearings = clearings.get(
+        '0x' + targetId.toString().toUpperCase().substring(2),
+      );
+      const emptyClearingTransfer = new ClearingTransfer(
+        new BigDecimal(BigNumber.from(0)),
+        0,
+        '',
+        '',
+        '',
+      );
+      if (!accountClearings) return emptyClearingTransfer;
+      const accountClearingTransfer = accountClearings.get(clearingId);
+      if (!accountClearingTransfer) return emptyClearingTransfer;
+      return accountClearingTransfer[0];
     },
   );
   return {
@@ -1720,12 +1999,15 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     } as TransactionResponse;
   });
 
-  singletonInstance.setMaxSupply = jest.fn(async () => {
-    return {
-      status: 'success',
-      id: transactionId,
-    } as TransactionResponse;
-  });
+  singletonInstance.setMaxSupply = jest.fn(
+    async (address: EvmAddress, amount: BigDecimal) => {
+      securityInfo.maxSupply = amount;
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
 
   singletonInstance.lock = jest.fn(async () => {
     return {
@@ -2065,7 +2347,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
         kycAccountsByStatus.set(kycStatus, kycAccounts);
         kycAccountsData.set(
           account,
-          new KYC(
+          new Kyc(
             validFrom.toString(),
             validTo.toString(),
             VCId,
@@ -2211,6 +2493,27 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       ),
   );
 
+  singletonInstance.operatorClearingCreateHoldByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      escrow: EvmAddress,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      clearingExpirationDate: BigDecimal,
+      holdExpirationDate: BigDecimal,
+    ) =>
+      createClearing(
+        clearingExpirationDate,
+        amount,
+        ClearingOperationType.HoldCreation,
+        targetId,
+        escrow,
+        holdExpirationDate,
+      ),
+  );
+
   singletonInstance.protectedClearingCreateHoldByPartition = jest.fn(
     async (
       address: EvmAddress,
@@ -2239,6 +2542,16 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       address: EvmAddress,
       partitionId: string,
       amount: BigDecimal,
+      expirationDate: BigDecimal,
+    ) => createClearing(expirationDate, amount, ClearingOperationType.Redeem),
+  );
+
+  singletonInstance.operatorClearingRedeemByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
       expirationDate: BigDecimal,
     ) => createClearing(expirationDate, amount, ClearingOperationType.Redeem),
   );
@@ -2278,6 +2591,23 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       ),
   );
 
+  singletonInstance.operatorClearingTransferByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      expirationDate: BigDecimal,
+    ) =>
+      createClearing(
+        expirationDate,
+        amount,
+        ClearingOperationType.Transfer,
+        targetId,
+      ),
+  );
+
   singletonInstance.protectedClearingTransferByPartition = jest.fn(
     async (
       address: EvmAddress,
@@ -2299,7 +2629,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
   );
 
   singletonInstance.activateClearing = jest.fn(async (address: EvmAddress) => {
-    isClearingActivated = true;
+    securityInfo.clearingActive = true;
     return {
       status: 'success',
       id: transactionId,
@@ -2308,7 +2638,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
   singletonInstance.deactivateClearing = jest.fn(
     async (address: EvmAddress) => {
-      isClearingActivated = false;
+      securityInfo.clearingActive = false;
       return {
         status: 'success',
         id: transactionId,
@@ -2323,7 +2653,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       targetId: EvmAddress,
       clearingId: number,
       clearingOperationType: ClearingOperationType,
-    ) => processClearingOperation(targetId, clearingId),
+    ) => processClearingOperation(targetId, clearingId, clearingOperationType),
   );
 
   singletonInstance.reclaimClearingOperationByPartition = jest.fn(
@@ -2333,7 +2663,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       targetId: EvmAddress,
       clearingId: number,
       clearingOperationType: ClearingOperationType,
-    ) => processClearingOperation(targetId, clearingId),
+    ) => processClearingOperation(targetId, clearingId, clearingOperationType),
   );
 
   singletonInstance.approveClearingOperationByPartition = jest.fn(
@@ -2343,7 +2673,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       targetId: EvmAddress,
       clearingId: number,
       clearingOperationType: ClearingOperationType,
-    ) => processClearingOperation(targetId, clearingId),
+    ) => processClearingOperation(targetId, clearingId, clearingOperationType),
   );
 
   return {

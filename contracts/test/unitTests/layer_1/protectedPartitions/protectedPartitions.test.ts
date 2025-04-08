@@ -222,7 +222,6 @@ import {
     Kyc,
     SsiManagement,
     Hold,
-    ClearingFacet,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -248,6 +247,8 @@ import {
     EMPTY_STRING,
     ADDRESS_ZERO,
 } from '@scripts'
+import { Contract } from 'ethers'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const amount = 1
 
@@ -381,13 +382,55 @@ const clearingRedeemType = {
     ],
 }
 
-let basicTransferInfo: any
-let operatorTransferData: any
-enum ClearingOperationType {
-    Transfer,
-    Redeem,
-    HoldCreation,
+interface BasicTransferInfo {
+    to: string
+    value: number
 }
+
+interface OperatorTransferData {
+    partition: string
+    from: string
+    to: string
+    value: number
+    data: string
+    operatorData: string
+}
+
+interface HoldData {
+    amount: number
+    expirationTimestamp: bigint
+    escrow: string
+    to: string
+    data: string
+}
+
+interface ProtectedHoldData {
+    hold: HoldData
+    deadline: bigint
+    nonce: number
+}
+
+interface ClearingOperationData {
+    partition: string
+    expirationTimestamp: bigint
+    data: string
+}
+
+interface ClearingOperationFromData {
+    clearingOperation: ClearingOperationData
+    from: string
+    operatorData: string
+}
+
+interface ProtectedClearingOperationData {
+    clearingOperation: ClearingOperationData
+    from: string
+    deadline: bigint
+    nonce: number
+}
+
+let basicTransferInfo: BasicTransferInfo
+let operatorTransferData: OperatorTransferData
 
 describe('ProtectedPartitions Tests', () => {
     let diamond_UnprotectedPartitions: ResolverProxy
@@ -413,14 +456,12 @@ describe('ProtectedPartitions Tests', () => {
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let holdFacet: Hold
-    let clearingFacet: ClearingFacet
-
-    let protectedHold: any
-    let hold: any
-    let clearingOperation: any
-    let clearingOperationFrom: any
-    let clearingIdentifier: any
-    let protectedClearingOperation: any
+    let clearingFacet: Contract
+    let protectedHold: ProtectedHoldData
+    let hold: HoldData
+    let clearingOperation: ClearingOperationData
+    let clearingOperationFrom: ClearingOperationFromData
+    let protectedClearingOperation: ProtectedClearingOperationData
 
     async function grant_WILD_CARD_ROLE_and_issue_tokens(
         wildCard_Account: string,
@@ -468,7 +509,44 @@ describe('ProtectedPartitions Tests', () => {
             'SsiManagement',
             address
         )
-        clearingFacet = await ethers.getContractAt('ClearingFacet', address)
+        const clearingTransferFacet = await ethers.getContractAt(
+            'ClearingTransferFacet',
+            address,
+            signer_A
+        )
+
+        const clearingRedeemFacet = await ethers.getContractAt(
+            'ClearingRedeemFacet',
+            address,
+            signer_A
+        )
+        const clearingHoldCreationFacet = await ethers.getContractAt(
+            'ClearingHoldCreationFacet',
+            address,
+            signer_A
+        )
+        const clearingReadFacet = await ethers.getContractAt(
+            'ClearingReadFacet',
+            address,
+            signer_A
+        )
+        const clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
+            address,
+            signer_A
+        )
+
+        clearingFacet = new Contract(
+            address,
+            [
+                ...clearingTransferFacet.interface.fragments,
+                ...clearingRedeemFacet.interface.fragments,
+                ...clearingHoldCreationFacet.interface.fragments,
+                ...clearingReadFacet.interface.fragments,
+                ...clearingActionsFacet.interface.fragments,
+            ],
+            signer_A
+        )
     }
 
     async function grantKyc() {
@@ -496,30 +574,7 @@ describe('ProtectedPartitions Tests', () => {
         await grantKyc()
     }
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: false,
-                    timeTravelEnabled: true,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
+    function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
@@ -560,7 +615,8 @@ describe('ProtectedPartitions Tests', () => {
             role: CLEARING_VALIDATOR_ROLE,
             members: [account_A],
         }
-        const init_rbacs: Rbac[] = [
+
+        return [
             rbacPause,
             rbacControlList,
             rbacIssuer,
@@ -572,12 +628,17 @@ describe('ProtectedPartitions Tests', () => {
             rbacClearing,
             rbacClearingValidator,
         ]
+    }
+
+    async function deploySecurityFixtureUnprotectedPartitions() {
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond_UnprotectedPartitions = await deployEquityFromFactory({
             adminAccount: account_A,
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             isMultiPartition: false,
             name: 'TEST_ProtectedPartitions',
             symbol: 'TPP',
@@ -603,12 +664,19 @@ describe('ProtectedPartitions Tests', () => {
             factory,
             businessLogicResolver: businessLogicResolver.address,
         })
+
+        await setFacets(diamond_UnprotectedPartitions.address)
+    }
+
+    async function deploySecurityFixtureProtectedPartitions() {
+        const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond_ProtectedPartitions = await deployEquityFromFactory({
             adminAccount: account_A,
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: true,
+            clearingActive: false,
             isMultiPartition: false,
             name: 'TEST_ProtectedPartitions',
             symbol: 'TPP',
@@ -635,7 +703,35 @@ describe('ProtectedPartitions Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        let expirationTimestamp = MAX_UINT256
+        await setFacets(diamond_ProtectedPartitions.address)
+    }
+
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: false,
+                timeTravelEnabled: true,
+            })
+        )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
+        await loadFixture(deploySecurityFixtureProtectedPartitions)
+        await loadFixture(deploySecurityFixtureUnprotectedPartitions)
+
+        const expirationTimestamp = MAX_UINT256
 
         hold = {
             amount: 1,
@@ -677,13 +773,6 @@ describe('ProtectedPartitions Tests', () => {
             operatorData: '0x1234',
         }
 
-        clearingIdentifier = {
-            partition: DEFAULT_PARTITION,
-            tokenHolder: account_A,
-            clearingId: 1,
-            clearingOperationType: ClearingOperationType.Transfer,
-        }
-
         protectedClearingOperation = {
             clearingOperation: clearingOperation,
             from: account_A,
@@ -717,6 +806,24 @@ describe('ProtectedPartitions Tests', () => {
                     '0x1234'
                 )
             ).to.be.rejectedWith('TokenIsPaused')
+        })
+
+        it('GIVEN a security with clearing active WHEN performing a protected transfer THEN transaction fails with ClearingIsActivated', async () => {
+            await setProtected()
+
+            await clearingFacet.activateClearing()
+
+            await expect(
+                erc1410Facet.protectedTransferFromByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    account_B,
+                    amount,
+                    MAX_UINT256,
+                    1,
+                    '0x1234'
+                )
+            ).to.be.rejectedWith('ClearingIsActivated')
         })
 
         it('GIVEN a account without the participant role WHEN performing a protected transfer THEN transaction fails with AccountHasNoRole', async () => {
@@ -836,6 +943,23 @@ describe('ProtectedPartitions Tests', () => {
             ).to.be.rejectedWith('TokenIsPaused')
         })
 
+        it('GIVEN a security with clearing active WHEN performing a protected redeem THEN transaction fails with ClearingIsActivated', async () => {
+            await setProtected()
+
+            await clearingFacet.activateClearing()
+
+            await expect(
+                erc1410Facet.protectedRedeemFromByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    amount,
+                    MAX_UINT256,
+                    1,
+                    '0x1234'
+                )
+            ).to.be.rejectedWith('ClearingIsActivated')
+        })
+
         it('GIVEN a account without the participant role WHEN performing a protected redeem THEN transaction fails with AccountHasNoRole', async () => {
             await setProtected()
 
@@ -907,6 +1031,21 @@ describe('ProtectedPartitions Tests', () => {
             ).to.be.revertedWithCustomError(holdFacet, 'TokenIsPaused')
         })
 
+        it('GIVEN a security with clearing active WHEN performing a protected hold THEN transaction fails with ClearingIsActivated', async () => {
+            await setProtected()
+
+            await clearingFacet.activateClearing()
+
+            await expect(
+                holdFacet.protectedCreateHoldByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    protectedHold,
+                    '0x1234'
+                )
+            ).to.be.revertedWithCustomError(holdFacet, 'ClearingIsActivated')
+        })
+
         it('GIVEN a account without the participant role WHEN performing a protected hold THEN transaction fails with AccountHasNoRole', async () => {
             await setProtected()
 
@@ -951,7 +1090,7 @@ describe('ProtectedPartitions Tests', () => {
         it('GIVEN a wrong expiration date WHEN performing a protected hold from it THEN transaction fails with WrongExpirationTimestamp', async () => {
             await setProtected()
 
-            protectedHold.hold.expirationTimestamp = 1
+            protectedHold.hold.expirationTimestamp = 1n
 
             await expect(
                 holdFacet
@@ -1615,7 +1754,7 @@ describe('ProtectedPartitions Tests', () => {
             })
 
             it('GIVEN a wrong deadline WHEN performing a protected hold THEN transaction fails with ExpiredDeadline', async () => {
-                protectedHold.deadline = 1
+                protectedHold.deadline = 1n
 
                 await expect(
                     holdFacet
@@ -1790,7 +1929,7 @@ describe('ProtectedPartitions Tests', () => {
             })
 
             it('GIVEN a wrong deadline WHEN performing a protected clearing THEN transaction fails with ExpiredDeadline', async () => {
-                protectedClearingOperation.deadline = 1
+                protectedClearingOperation.deadline = 1n
                 //TRANSFER
                 await expect(
                     clearingFacet

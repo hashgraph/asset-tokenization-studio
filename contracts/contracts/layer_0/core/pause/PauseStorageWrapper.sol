@@ -247,12 +247,6 @@ abstract contract PauseStorageWrapper is
         return _pauseStorage().paused;
     }
 
-    function _checkPaused() private view {
-        if (!_isPaused()) {
-            revert TokenIsUnpaused();
-        }
-    }
-
     function _checkUnpaused() internal view {
         if (_isPaused()) {
             revert TokenIsPaused();
@@ -269,6 +263,12 @@ abstract contract PauseStorageWrapper is
         // solhint-disable-next-line no-inline-assembly
         assembly {
             pause_.slot := position
+        }
+    }
+
+    function _checkPaused() private view {
+        if (!_isPaused()) {
+            revert TokenIsUnpaused();
         }
     }
 }

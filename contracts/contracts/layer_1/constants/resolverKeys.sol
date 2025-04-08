@@ -268,8 +268,17 @@ bytes32 constant _SSI_MANAGEMENT_RESOLVER_KEY = 0x46df6aaf3742e0cbad136a74fb679b
 // keccak256("security.token.standard.kyc.resolverKey")
 bytes32 constant _KYC_RESOLVER_KEY = 0xf516a0f6b4726244ae916c590cd26c2b593d7d448e46e43714fb9f9435c46e32;
 
-// keccak256("security.token.standard.clearing.resolverKey")
-bytes32 constant _CLEARING_RESOLVER_KEY = 0x43432f8c1c15888e9f2825356efbd94b604920165ac59da52595f66b1adbbc9f;
+// keccak256("security.token.standard.clearing.transfer.resolverKey")
+bytes32 constant _CLEARING_TRANSFER_RESOLVER_KEY = 0x7399d03db62430bec60ca2c3eacf98b1b7e2253f17593ef7a226d759442e0928;
+
+// keccak256("security.token.standard.clearing.redeem.resolverKey")
+bytes32 constant _CLEARING_REDEEM_RESOLVER_KEY = 0xb341e7aa749da43976c189209de51ccdf838af9f964cd27340b914d5b2aeba97;
+
+// keccak256("security.token.standard.clearing.holdCreation.resolverKey")
+bytes32 constant _CLEARING_HOLDCREATION_RESOLVER_KEY = 0x44f99a141c434fac20d69e7511932ee344d5b37b61851976c83a5df4ca468152;
+
+// keccak256("security.token.standard.clearing.read.resolverKey")
+bytes32 constant _CLEARING_READ_RESOLVER_KEY = 0xebb2e29bdf4edaf4ca66a3f9b7735087f9d0474d56d856e53c94ef00596c0b1e;
 
 // keccak256("security.token.standard.clearing.actions.resolverKey")
 bytes32 constant _CLEARING_ACTIONS_RESOLVER_KEY = 0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74;

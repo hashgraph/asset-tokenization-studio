@@ -248,20 +248,19 @@ import { ReleaseCommandHandler } from '../app/usecase/command/security/operation
 import { LockCountQueryHandler } from '../app/usecase/query/security/lockCount/LockCountQueryHandler.js';
 import { GetLockQueryHandler } from '../app/usecase/query/security/getLock/GetLockQueryHandler.js';
 import { LocksIdQueryHandler } from '../app/usecase/query/security/locksId/LocksIdQueryHandler.js';
-import { ExecuteHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/executeHoldByPartition/ExecuteHoldByPartitionCommandHandler.js';
+import { ExecuteHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommandHandler.js';
 
 import { WalletEvents } from '../app/service/event/WalletEvent.js';
 import { CommandHandlerType } from './command/CommandBus.js';
 import { QueryHandlerType } from './query/QueryBus.js';
 import { NetworkProps } from '../app/service/NetworkService.js';
 // eslint-disable-next-line jest/no-mocks-import
-import { ConcreteQueryHandler } from '../../__tests__/core/command/__mocks__/ConcreteQueryHandler.js';
+import { ConcreteQueryHandler } from '../../__tests__/integration/__mocks__/ConcreteQueryHandler.js';
 // eslint-disable-next-line jest/no-mocks-import
-import { ConcreteCommandHandler } from '../../__tests__/core/command/__mocks__/ConcreteCommandHandler.js';
+import { ConcreteCommandHandler } from '../../__tests__/integration/__mocks__/ConcreteCommandHandler.js';
 import TransactionAdapter from '../port/out/TransactionAdapter.js';
 import { RuntimeError } from './error/RuntimeError.js';
 import { BalanceOfQueryHandler } from '../app/usecase/query/security/balanceof/BalanceOfQueryHandler.js';
-import { GetAccountSecurityRelationshipQueryHandler } from '../app/usecase/query/account/securityRelationship/GetAccountSecurityRelationshipQueryHandler.js';
 import { IsPausedQueryHandler } from '../app/usecase/query/security/isPaused/IsPausedQueryHandler';
 import { GetDividendsQueryHandler } from '../app/usecase/query/equity/dividends/getDividends/GetDividendsQueryHandler.js';
 import { GetDividendsCountQueryHandler } from '../app/usecase/query/equity/dividends/getDividendsCount/GetDividendsCountQueryHandler.js';
@@ -283,7 +282,11 @@ import { GetCouponDetailsQueryHandler } from '../app/usecase/query/bond/get/getC
 import { GetCouponQueryHandler } from '../app/usecase/query/bond/coupons/getCoupon/GetCouponQueryHandler.js';
 import { GetCouponCountQueryHandler } from '../app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQueryHandler.js';
 import { GetCouponForQueryHandler } from '../app/usecase/query/bond/coupons/getCouponFor/GetCouponForQueryHandler.js';
-import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/GetMaxSupplyQueryHandler.js';
+import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/getMaxSupply/GetMaxSupplyQueryHandler.js';
+import { GetMaxSupplyByPartitionQueryHandler } from '../app/usecase/query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQueryHandler.js';
+import { CanTransferByPartitionQueryHandler } from '../app/usecase/query/security/canTransferByPartition/CanTransferByPartitionQueryHandler.js';
+import { CanTransferQueryHandler } from '../app/usecase/query/security/canTransfer/CanTransferQueryHandler.js';
+import { CanRedeemByPartitionQueryHandler } from '../app/usecase/query/security/canRedeemByPartition/CanRedeemByPartitionQueryHandler.js';
 
 import { SDK } from '../port/in/Common.js';
 import { HederaWalletConnectTransactionAdapter } from '../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
@@ -348,10 +351,17 @@ import { ClearingCreateHoldFromByPartitionCommandHandler } from '../app/usecase/
 import { ProtectedClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommandHandler.js';
 import { IsClearingActivatedQueryHandler } from '../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQueryHandler.js';
 import { GetClearingsIdForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQueryHandler.js';
-import { GetClearingForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingForByPartition/GetClearingForByPartitionQueryHandler.js';
 import { GetClearingCountForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQueryHandler.js';
 import { GetClearedAmountForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQueryHandler.js';
 import { GetClearedAmountForQueryHandler } from '../app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQueryHandler.js';
+import { IsOperatorForPartitionQueryHandler } from '../app/usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQueryHandler.js';
+import { IsOperatorQueryHandler } from '../app/usecase/query/security/operator/isOperator/IsOperatorQueryHandler.js';
+import { OperatorClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommandHandler.js';
+import { OperatorClearingRedeemByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommandHandler.js';
+import { OperatorClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommandHandler.js';
+import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler.js';
+import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
+import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -616,6 +626,18 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: ProtectedClearingCreateHoldByPartitionCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingRedeemByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingTransferByPartitionCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [
@@ -721,10 +743,6 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetAccountSecurityRelationshipQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
     useClass: IsPausedQueryHandler,
   },
   {
@@ -762,6 +780,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetMaxSupplyQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetMaxSupplyByPartitionQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
@@ -858,7 +880,15 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetClearingForByPartitionQueryHandler,
+    useClass: GetClearingCreateHoldForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingTransferForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingRedeemForByPartitionQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
@@ -867,6 +897,26 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsClearingActivatedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsOperatorForPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsOperatorQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: CanTransferByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: CanTransferQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: CanRedeemByPartitionQueryHandler,
   },
 ];
 

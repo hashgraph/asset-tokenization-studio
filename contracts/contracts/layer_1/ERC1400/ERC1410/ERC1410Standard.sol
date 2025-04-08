@@ -276,12 +276,12 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyListedAllowed(_tokenHolder)
         onlyListedAllowed(_msgSender())
         onlyOperator(_partition, _tokenHolder)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
         _redeemByPartition(

@@ -208,7 +208,7 @@ import { Contract, Overrides } from 'ethers'
 export default class CallContractCommand {
     public readonly contract: Contract
     public readonly method: string
-    public readonly args: Array<any>
+    public readonly args: Array<unknown>
     public readonly overrides?: Overrides
 
     constructor({
@@ -219,7 +219,7 @@ export default class CallContractCommand {
     }: {
         contract: Contract
         method: string
-        args: Array<any>
+        args: Array<unknown>
         overrides?: Overrides
     }) {
         this.contract = contract

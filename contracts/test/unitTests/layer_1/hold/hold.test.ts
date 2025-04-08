@@ -206,7 +206,11 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
+import {
+    takeSnapshot,
+    loadFixture,
+    time,
+} from '@nomicfoundation/hardhat-network-helpers'
 import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
@@ -221,6 +225,11 @@ import {
     TimeTravel,
     Kyc,
     SsiManagement,
+    ClearingActionsFacet,
+    Equity,
+    AdjustBalances,
+    Cap,
+    AccessControl,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -229,6 +238,9 @@ import {
     CONTROL_LIST_ROLE,
     KYC_ROLE,
     SSI_MANAGER_ROLE,
+    CORPORATE_ACTION_ROLE,
+    ADJUSTMENT_BALANCE_ROLE,
+    CAP_ROLE,
     MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
@@ -239,17 +251,41 @@ import {
     ADDRESS_ZERO,
     ZERO,
     EMPTY_STRING,
+    CLEARING_ROLE,
+    dateToUnixTimestamp,
+    EMPTY_HEX_BYTES,
 } from '@scripts'
-import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 const _WRONG_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000321'
+const _PARTITION_ID_1 =
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
+const _PARTITION_ID_2 =
+    '0x0000000000000000000000000000000000000000000000000000000000000002'
 const _AMOUNT = 1000
 const _DATA = '0x1234'
+const maxSupply_Original = 1000000 * _AMOUNT
+const maxSupply_Partition_1_Original = 50000 * _AMOUNT
+const maxSupply_Partition_2_Original = 0
+const ONE_SECOND = 1
 const EMPTY_VC_ID = EMPTY_STRING
+const balanceOf_A_Original = [10 * _AMOUNT, 100 * _AMOUNT]
+const balanceOf_B_Original = [20 * _AMOUNT, 200 * _AMOUNT]
+const adjustFactor = 253
+const adjustDecimals = 2
+const decimals_Original = 6
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let holdIdentifier: any
+enum ThirdPartyType {
+    NULL,
+    AUTHORIZED,
+    OPERATOR,
+    PROTECTED,
+    CONTROLLER,
+    CLEARING,
+}
 
 describe('Hold Tests', () => {
     let diamond: ResolverProxy
@@ -275,6 +311,11 @@ describe('Hold Tests', () => {
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
+    let clearingActionsFacet: ClearingActionsFacet
+    let equityFacet: Equity
+    let accessControlFacet: AccessControl
+    let capFacet: Cap
+    let adjustBalancesFacet: AdjustBalances
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -282,58 +323,17 @@ describe('Hold Tests', () => {
 
     let snapshot: SnapshotRestorer
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let hold: any
 
-    before(async () => {
-        snapshot = await takeSnapshot()
-        // mute | mock console.log
-        console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
-            await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-        account_D = signer_D.address
-        account_E = signer_E.address
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    timeTravelEnabled: true,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    after(async () => {
-        await snapshot.restore()
-    })
-
-    afterEach(async () => {
-        await timeTravelFacet.resetSystemTimestamp()
-    })
-
-    async function deployAll(isMultiPartition: boolean) {
+    function set_initRbacs(): Rbac[] {
         const rbacIssuer: Rbac = {
             role: ISSUER_ROLE,
             members: [account_B],
         }
-        const rbacController: Rbac = {
-            role: CONTROLLER_ROLE,
-            members: [account_C],
-        }
         const rbacPausable: Rbac = {
             role: PAUSER_ROLE,
             members: [account_D],
-        }
-        const rbacControlList: Rbac = {
-            role: CONTROL_LIST_ROLE,
-            members: [account_E],
         }
         const rbacKYC: Rbac = {
             role: KYC_ROLE,
@@ -343,46 +343,35 @@ describe('Hold Tests', () => {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
         }
-        const init_rbacs: Rbac[] = [
+        const rbacClearing: Rbac = {
+            role: CLEARING_ROLE,
+            members: [account_A],
+        }
+        const rbacCorporateAction: Rbac = {
+            role: CORPORATE_ACTION_ROLE,
+            members: [account_B],
+        }
+        const rbacControlList: Rbac = {
+            role: CONTROL_LIST_ROLE,
+            members: [account_E],
+        }
+        const rbacController: Rbac = {
+            role: CONTROLLER_ROLE,
+            members: [account_C],
+        }
+        return [
             rbacIssuer,
-            rbacController,
             rbacPausable,
-            rbacControlList,
             rbacKYC,
             rbacSSI,
+            rbacClearing,
+            rbacCorporateAction,
+            rbacControlList,
+            rbacController,
         ]
+    }
 
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            isMultiPartition: isMultiPartition,
-            name: 'TEST_Hold',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_B,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
-
+    async function setFacets({ diamond }: { diamond: ResolverProxy }) {
         holdFacet = await ethers.getContractAt(
             'Hold',
             diamond.address,
@@ -398,13 +387,14 @@ describe('Hold Tests', () => {
             diamond.address,
             signer_B
         )
-        controlListFacet = await ethers.getContractAt(
-            'ControlList',
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
             diamond.address,
-            signer_E
+            signer_A
         )
-        erc20Facet = await ethers.getContractAt(
-            'ERC20',
+        equityFacet = await ethers.getContractAt(
+            'Equity',
             diamond.address,
             signer_A
         )
@@ -413,11 +403,32 @@ describe('Hold Tests', () => {
             diamond.address,
             signer_A
         )
-        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
-        ssiManagementFacet = await ethers.getContractAt(
-            'SsiManagement',
+        adjustBalancesFacet = await ethers.getContractAt(
+            'AdjustBalances',
             diamond.address,
             signer_A
+        )
+        clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
+            diamond.address,
+            signer_A
+        )
+        capFacet = await ethers.getContractAt('Cap', diamond.address, signer_A)
+
+        accessControlFacet = await ethers.getContractAt(
+            'AccessControl',
+            diamond.address,
+            signer_A
+        )
+        erc20Facet = await ethers.getContractAt(
+            'ERC20',
+            diamond.address,
+            signer_A
+        )
+        controlListFacet = await ethers.getContractAt(
+            'ControlList',
+            diamond.address,
+            signer_E
         )
 
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
@@ -447,9 +458,117 @@ describe('Hold Tests', () => {
             partition: _DEFAULT_PARTITION,
             tokenHolder: account_A,
             value: _AMOUNT,
-            data: '0x',
+            data: EMPTY_HEX_BYTES,
         })
     }
+
+    async function deploySecurityFixtureMultiPartition() {
+        const init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: true,
+            clearingActive: false,
+            name: 'TEST_Lock',
+            symbol: 'TAC',
+            decimals: decimals_Original,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        await setFacets({ diamond })
+    }
+
+    async function deploySecurityFixtureSinglePartition() {
+        const init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: false,
+            clearingActive: false,
+            name: 'TEST_Lock',
+            symbol: 'TAC',
+            decimals: decimals_Original,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        await setFacets({ diamond })
+    }
+
+    before(async () => {
+        snapshot = await takeSnapshot()
+        // mute | mock console.log
+        console.log = () => {}
+        ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
+            await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+        account_D = signer_D.address
+        account_E = signer_E.address
+
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                timeTravelEnabled: true,
+            })
+        )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    after(async () => {
+        await snapshot.restore()
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
+    })
 
     describe('Multi-partition disabled', () => {
         async function checkCreatedHold_expected(
@@ -463,18 +582,20 @@ describe('Hold Tests', () => {
             holdDestination_expected: string,
             holdExpirationTimestamp_expected: string,
             holdsLength_expected: number,
-            holdId_expected: number
+            holdId_expected: number,
+            holdThirdPartyType_expected: ThirdPartyType,
+            holdThirdPartyAddress_expected: string
         ) {
-            let balance = await erc1410Facet.balanceOf(account_A)
-            let heldAmount = await holdFacet.getHeldAmountForByPartition(
+            const balance = await erc1410Facet.balanceOf(account_A)
+            const heldAmount = await holdFacet.getHeldAmountForByPartition(
                 _DEFAULT_PARTITION,
                 account_A
             )
-            let holdCount = await holdFacet.getHoldCountForByPartition(
+            const holdCount = await holdFacet.getHoldCountForByPartition(
                 _DEFAULT_PARTITION,
                 account_A
             )
-            let holdIds = await holdFacet.getHoldsIdForByPartition(
+            const holdIds = await holdFacet.getHoldsIdForByPartition(
                 _DEFAULT_PARTITION,
                 account_A,
                 0,
@@ -487,9 +608,10 @@ describe('Hold Tests', () => {
             expect(holdIds.length).to.equal(holdsLength_expected)
 
             if (holdCount_expected > 0) {
-                let retrieved_hold = await holdFacet.getHoldForByPartition(
-                    holdIdentifier
-                )
+                const retrieved_hold =
+                    await holdFacet.getHoldForByPartition(holdIdentifier)
+                const holdThirdParty =
+                    await holdFacet.getHoldThirdParty(holdIdentifier)
 
                 expect(retrieved_hold.amount_).to.equal(holdAmount_expected)
                 expect(retrieved_hold.escrow_).to.equal(holdEscrow_expected)
@@ -504,6 +626,10 @@ describe('Hold Tests', () => {
                     holdExpirationTimestamp_expected
                 )
                 expect(holdIds[0]).to.equal(holdId_expected)
+                expect(retrieved_hold.thirdPartyType_).to.equal(
+                    holdThirdPartyType_expected
+                )
+                expect(holdThirdParty).to.equal(holdThirdPartyAddress_expected)
             }
         }
 
@@ -525,7 +651,7 @@ describe('Hold Tests', () => {
                 holdId: 1,
             }
 
-            await deployAll(false)
+            await loadFixture(deploySecurityFixtureSinglePartition)
         })
 
         describe('Paused', () => {
@@ -547,7 +673,7 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
@@ -558,7 +684,7 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
@@ -569,7 +695,7 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
@@ -600,6 +726,40 @@ describe('Hold Tests', () => {
             })
         })
 
+        describe('Clearing active', () => {
+            it('GIVEN a token in clearing mode THEN hold creation fails with ClearingIsActivated', async () => {
+                await clearingActionsFacet.activateClearing()
+                await expect(
+                    holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'ClearingIsActivated'
+                )
+                await expect(
+                    holdFacet.createHoldFromByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        EMPTY_HEX_BYTES
+                    )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'ClearingIsActivated'
+                )
+                await expect(
+                    holdFacet.operatorCreateHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        EMPTY_HEX_BYTES
+                    )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'ClearingIsActivated'
+                )
+            })
+        })
+
         describe('AccessControl', () => {
             // Create
             it('GIVEN an account without authorization WHEN createHoldFromByPartition THEN transaction fails with InsufficientAllowance', async () => {
@@ -610,7 +770,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc20Facet,
@@ -626,7 +786,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(holdFacet, 'Unauthorized')
             })
@@ -639,7 +799,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(holdFacet, 'AccountHasNoRole')
             })
@@ -697,9 +857,9 @@ describe('Hold Tests', () => {
 
         describe('Create with wrong input arguments', () => {
             it('GIVEN a Token WHEN creating hold with amount bigger than balance THEN transaction fails with InsufficientBalance', async () => {
-                let AmountLargerThanBalance = 1000 * _AMOUNT
+                const AmountLargerThanBalance = 1000 * _AMOUNT
 
-                let hold_wrong = {
+                const hold_wrong = {
                     amount: AmountLargerThanBalance,
                     expirationTimestamp: expirationTimestamp,
                     escrow: account_B,
@@ -732,7 +892,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc20Facet,
@@ -756,7 +916,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc20Facet,
@@ -774,7 +934,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc20Facet,
@@ -782,61 +942,8 @@ describe('Hold Tests', () => {
                 )
             })
 
-            it('GIVEN a Token WHEN createHoldByPartition for wrong partition THEN transaction fails with InvalidPartition', async () => {
-                await deployAll(true)
-
-                console.log('createHoldByPartition')
-
-                await expect(
-                    holdFacet.createHoldByPartition(_WRONG_PARTITION, hold)
-                ).to.be.revertedWithCustomError(
-                    erc1410Facet,
-                    'InvalidPartition'
-                )
-
-                console.log('createHoldFromByPartition')
-
-                console.log('operatorCreateHoldByPartition')
-
-                await erc1410Facet
-                    .connect(signer_A)
-                    .authorizeOperator(account_B)
-
-                await expect(
-                    holdFacet
-                        .connect(signer_B)
-                        .operatorCreateHoldByPartition(
-                            _WRONG_PARTITION,
-                            account_A,
-                            hold,
-                            '0x'
-                        )
-                ).to.be.revertedWithCustomError(
-                    erc1410Facet,
-                    'InvalidPartition'
-                )
-
-                await erc1410Facet.connect(signer_A).revokeOperator(account_B)
-
-                console.log('controllerCreateHoldByPartition')
-
-                await expect(
-                    holdFacet
-                        .connect(signer_C)
-                        .controllerCreateHoldByPartition(
-                            _WRONG_PARTITION,
-                            account_A,
-                            hold,
-                            '0x'
-                        )
-                ).to.be.revertedWithCustomError(
-                    erc1410Facet,
-                    'InvalidPartition'
-                )
-            })
-
             it('GIVEN a Token WHEN createHoldByPartition passing empty escrow THEN transaction fails with ZeroAddressNotAllowed', async () => {
-                let hold_wrong = {
+                const hold_wrong = {
                     amount: _AMOUNT,
                     expirationTimestamp: expirationTimestamp,
                     escrow: ADDRESS_ZERO,
@@ -867,7 +974,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -891,7 +998,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -909,7 +1016,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -918,17 +1025,16 @@ describe('Hold Tests', () => {
             })
 
             it('GIVEN a Token WHEN createHoldByPartition passing wrong expirationTimestamp THEN transaction fails with WrongExpirationTimestamp', async () => {
-                let wrongExpirationTimestamp = currentTimestamp - 1
+                await timeTravelFacet.changeSystemTimestamp(currentTimestamp)
+                const wrongExpirationTimestamp = currentTimestamp - 1
 
-                let hold_wrong = {
+                const hold_wrong = {
                     amount: _AMOUNT,
                     expirationTimestamp: wrongExpirationTimestamp,
                     escrow: account_B,
                     to: ADDRESS_ZERO,
                     data: _DATA,
                 }
-
-                console.log('createHoldByPartition')
 
                 await expect(
                     holdFacet.createHoldByPartition(
@@ -951,7 +1057,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -975,7 +1081,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -993,7 +1099,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold_wrong,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -1022,7 +1128,7 @@ describe('Hold Tests', () => {
                             _WRONG_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc1410Facet,
@@ -1046,7 +1152,7 @@ describe('Hold Tests', () => {
                             _WRONG_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc1410Facet,
@@ -1064,7 +1170,7 @@ describe('Hold Tests', () => {
                             _WRONG_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
                     erc1410Facet,
@@ -1075,7 +1181,11 @@ describe('Hold Tests', () => {
 
         describe('Create Holds OK', () => {
             // Create
-            async function checkCreatedHold(operatorData?: string) {
+            async function checkCreatedHold(
+                thirdPartyType: ThirdPartyType,
+                thirdPartyAddress?: string,
+                operatorData?: string
+            ) {
                 await checkCreatedHold_expected(
                     0,
                     _AMOUNT,
@@ -1083,11 +1193,13 @@ describe('Hold Tests', () => {
                     hold.amount,
                     hold.escrow,
                     hold.data,
-                    operatorData ?? '0x',
+                    operatorData ?? EMPTY_HEX_BYTES,
                     hold.to,
                     hold.expirationTimestamp,
                     1,
-                    1
+                    1,
+                    thirdPartyType,
+                    thirdPartyAddress ?? ADDRESS_ZERO
                 )
             }
 
@@ -1102,16 +1214,16 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         1,
                         Object.values(hold),
-                        '0x'
+                        EMPTY_HEX_BYTES
                     )
 
-                await checkCreatedHold()
+                await checkCreatedHold(ThirdPartyType.NULL)
             })
 
             it('GIVEN a Token WHEN createHoldFromByPartition hold THEN transaction succeeds', async () => {
                 await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
 
-                let operatorData = '0x'
+                const operatorData = EMPTY_HEX_BYTES
 
                 await expect(
                     holdFacet
@@ -1123,7 +1235,7 @@ describe('Hold Tests', () => {
                             operatorData
                         )
                 )
-                    .to.emit(holdFacet, 'HeldByPartition')
+                    .to.emit(holdFacet, 'HeldFromByPartition')
                     .withArgs(
                         account_B,
                         account_A,
@@ -1133,11 +1245,15 @@ describe('Hold Tests', () => {
                         operatorData
                     )
 
-                await checkCreatedHold(operatorData)
+                await checkCreatedHold(
+                    ThirdPartyType.AUTHORIZED,
+                    account_B,
+                    operatorData
+                )
             })
 
             it('GIVEN a Token WHEN operatorCreateHoldByPartition hold THEN transaction succeeds', async () => {
-                let operatorData = '0xab56'
+                const operatorData = '0xab56'
 
                 await erc1410Facet
                     .connect(signer_A)
@@ -1153,7 +1269,7 @@ describe('Hold Tests', () => {
                             operatorData
                         )
                 )
-                    .to.emit(holdFacet, 'HeldByPartition')
+                    .to.emit(holdFacet, 'OperatorHeldByPartition')
                     .withArgs(
                         account_B,
                         account_A,
@@ -1165,11 +1281,15 @@ describe('Hold Tests', () => {
 
                 await erc1410Facet.connect(signer_A).revokeOperator(account_B)
 
-                await checkCreatedHold(operatorData)
+                await checkCreatedHold(
+                    ThirdPartyType.OPERATOR,
+                    ADDRESS_ZERO,
+                    operatorData
+                )
             })
 
             it('GIVEN a Token WHEN controllerCreateHoldByPartition hold THEN transaction succeeds', async () => {
-                let operatorData = '0xab56222233'
+                const operatorData = '0xab56222233'
 
                 await expect(
                     holdFacet
@@ -1181,7 +1301,7 @@ describe('Hold Tests', () => {
                             operatorData
                         )
                 )
-                    .to.emit(holdFacet, 'HeldByPartition')
+                    .to.emit(holdFacet, 'ControllerHeldByPartition')
                     .withArgs(
                         account_C,
                         account_A,
@@ -1191,7 +1311,11 @@ describe('Hold Tests', () => {
                         operatorData
                     )
 
-                await checkCreatedHold(operatorData)
+                await checkCreatedHold(
+                    ThirdPartyType.CONTROLLER,
+                    ADDRESS_ZERO,
+                    operatorData
+                )
             })
         })
 
@@ -1236,8 +1360,8 @@ describe('Hold Tests', () => {
             })
 
             it('GIVEN a hold WHEN executeHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached', async () => {
-                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
-                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+                const initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                const finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
 
                 hold.expirationTimestamp = finalDate - 1
 
@@ -1314,8 +1438,8 @@ describe('Hold Tests', () => {
             })
 
             it('GIVEN hold WHEN releaseHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached', async () => {
-                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
-                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+                const initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                const finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
 
                 hold.expirationTimestamp = finalDate - 1
 
@@ -1374,7 +1498,7 @@ describe('Hold Tests', () => {
 
         describe('Execute OK', () => {
             it('GIVEN hold with no destination WHEN executeHoldByPartition THEN transaction succeeds', async () => {
-                let balance_before = await erc1410Facet.balanceOf(account_C)
+                const balance_before = await erc1410Facet.balanceOf(account_C)
 
                 await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
 
@@ -1401,16 +1525,18 @@ describe('Hold Tests', () => {
                     0,
                     0,
                     0,
-                    '-',
-                    '0x',
-                    '0x',
-                    '-',
-                    '-',
+                    EMPTY_STRING,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_STRING,
+                    EMPTY_STRING,
                     0,
-                    0
+                    0,
+                    ThirdPartyType.NULL,
+                    ADDRESS_ZERO
                 )
 
-                let balance_after = await erc1410Facet.balanceOf(account_C)
+                const balance_after = await erc1410Facet.balanceOf(account_C)
 
                 expect(balance_after.toNumber()).to.equal(
                     balance_before.add(_AMOUNT).toNumber()
@@ -1435,21 +1561,51 @@ describe('Hold Tests', () => {
                     0,
                     0,
                     0,
-                    '-',
-                    '0x',
-                    '0x',
-                    '-',
-                    '-',
+                    EMPTY_STRING,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_STRING,
+                    EMPTY_STRING,
                     0,
-                    0
+                    0,
+                    ThirdPartyType.NULL,
+                    ADDRESS_ZERO
                 )
+            })
+
+            it('GIVEN a hold created by an approved user WHEN releaseHoldByPartition THEN allowance is restored', async () => {
+                await erc20Facet.increaseAllowance(account_B, _AMOUNT)
+                await holdFacet
+                    .connect(signer_B)
+                    .createHoldFromByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        EMPTY_HEX_BYTES
+                    )
+
+                expect(
+                    await erc20Facet.allowance(account_A, account_B)
+                ).to.be.equal(ZERO)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .releaseHoldByPartition(holdIdentifier, _AMOUNT)
+                )
+                    .to.emit(holdFacet, 'Approval')
+                    .withArgs(account_A, account_B, _AMOUNT)
+
+                expect(
+                    await erc20Facet.allowance(account_A, account_B)
+                ).to.be.equal(_AMOUNT)
             })
         })
 
         describe('Reclaim OK', () => {
             it('GIVEN hold with no destination WHEN reclaimHoldByPartition THEN transaction succeeds', async () => {
-                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
-                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+                const initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                const finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
 
                 hold.expirationTimestamp = finalDate - 1
 
@@ -1478,14 +1634,630 @@ describe('Hold Tests', () => {
                     0,
                     0,
                     0,
-                    '-',
-                    '0x',
-                    '0x',
-                    '-',
-                    '-',
+                    EMPTY_STRING,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_STRING,
+                    EMPTY_STRING,
                     0,
-                    0
+                    0,
+                    ThirdPartyType.NULL,
+                    ADDRESS_ZERO
                 )
+            })
+        })
+
+        it('GIVEN a hold created by an approved user WHEN reclaimHoldByPartition THEN allowance is restored', async () => {
+            await erc20Facet.increaseAllowance(account_B, _AMOUNT)
+            await holdFacet
+                .connect(signer_B)
+                .createHoldFromByPartition(
+                    _DEFAULT_PARTITION,
+                    account_A,
+                    hold,
+                    EMPTY_HEX_BYTES
+                )
+
+            expect(
+                await erc20Facet.allowance(account_A, account_B)
+            ).to.be.equal(ZERO)
+
+            await timeTravelFacet.changeSystemTimestamp(
+                hold.expirationTimestamp + 1
+            )
+
+            await expect(holdFacet.reclaimHoldByPartition(holdIdentifier))
+                .to.emit(holdFacet, 'Approval')
+                .withArgs(account_A, account_B, _AMOUNT)
+
+            expect(
+                await erc20Facet.allowance(account_A, account_B)
+            ).to.be.equal(_AMOUNT)
+        })
+    })
+
+    describe('Multi-partition enabled', () => {
+        beforeEach(async () => {
+            await loadFixture(deploySecurityFixtureMultiPartition)
+        })
+
+        it('GIVEN a Token WHEN createHoldByPartition for wrong partition THEN transaction fails with InvalidPartition', async () => {
+            console.log('createHoldByPartition')
+
+            await expect(
+                holdFacet.createHoldByPartition(_WRONG_PARTITION, hold)
+            ).to.be.revertedWithCustomError(erc1410Facet, 'InvalidPartition')
+
+            console.log('createHoldFromByPartition')
+
+            console.log('operatorCreateHoldByPartition')
+
+            await erc1410Facet.connect(signer_A).authorizeOperator(account_B)
+
+            await expect(
+                holdFacet
+                    .connect(signer_B)
+                    .operatorCreateHoldByPartition(
+                        _WRONG_PARTITION,
+                        account_A,
+                        hold,
+                        EMPTY_HEX_BYTES
+                    )
+            ).to.be.revertedWithCustomError(erc1410Facet, 'InvalidPartition')
+
+            await erc1410Facet.connect(signer_A).revokeOperator(account_B)
+
+            console.log('controllerCreateHoldByPartition')
+
+            await expect(
+                holdFacet
+                    .connect(signer_C)
+                    .controllerCreateHoldByPartition(
+                        _WRONG_PARTITION,
+                        account_A,
+                        hold,
+                        EMPTY_HEX_BYTES
+                    )
+            ).to.be.revertedWithCustomError(erc1410Facet, 'InvalidPartition')
+        })
+
+        describe('Adjust balances', () => {
+            async function setPreBalanceAdjustment() {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    ADJUSTMENT_BALANCE_ROLE,
+                    account_C
+                )
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+                await accessControlFacet.grantRole(CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+
+                // Using account C (with role)
+                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+                erc1410Facet = erc1410Facet.connect(signer_A)
+                capFacet = capFacet.connect(signer_A)
+
+                await capFacet.setMaxSupply(maxSupply_Original)
+                await capFacet.setMaxSupplyByPartition(
+                    _PARTITION_ID_1,
+                    maxSupply_Partition_1_Original
+                )
+                await capFacet.setMaxSupplyByPartition(
+                    _PARTITION_ID_2,
+                    maxSupply_Partition_2_Original
+                )
+
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_A,
+                    value: balanceOf_A_Original[0],
+                    data: EMPTY_HEX_BYTES,
+                })
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_2,
+                    tokenHolder: account_A,
+                    value: balanceOf_A_Original[1],
+                    data: EMPTY_HEX_BYTES,
+                })
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_B,
+                    value: balanceOf_B_Original[0],
+                    data: EMPTY_HEX_BYTES,
+                })
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_2,
+                    tokenHolder: account_B,
+                    value: balanceOf_B_Original[1],
+                    data: EMPTY_HEX_BYTES,
+                })
+            }
+
+            it('GIVEN a hold WHEN adjustBalances THEN hold amount gets updated succeeds', async () => {
+                await setPreBalanceAdjustment()
+
+                const balance_Before = await erc1410Facet.balanceOf(account_A)
+                const balance_Before_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // HOLD
+                holdFacet = holdFacet.connect(signer_A)
+                const hold = {
+                    amount: _AMOUNT,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:01Z'
+                    ),
+                    escrow: account_B,
+                    to: ADDRESS_ZERO,
+                    data: EMPTY_HEX_BYTES,
+                }
+
+                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+
+                const hold_TotalAmount_Before =
+                    await holdFacet.getHeldAmountFor(account_A)
+                const hold_TotalAmount_Before_Partition_1 =
+                    await holdFacet.getHeldAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const hold_Before =
+                    await holdFacet.getHoldForByPartition(holdIdentifier)
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // scheduled two balance updates
+                equityFacet = equityFacet.connect(signer_B)
+
+                const balanceAdjustmentData = {
+                    executionDate: dateToUnixTimestamp(
+                        '2030-01-01T00:00:02Z'
+                    ).toString(),
+                    factor: adjustFactor,
+                    decimals: adjustDecimals,
+                }
+
+                const balanceAdjustmentData_2 = {
+                    executionDate: dateToUnixTimestamp(
+                        '2030-01-01T00:16:40Z'
+                    ).toString(),
+                    factor: adjustFactor,
+                    decimals: adjustDecimals,
+                }
+                await equityFacet.setScheduledBalanceAdjustment(
+                    balanceAdjustmentData
+                )
+                await equityFacet.setScheduledBalanceAdjustment(
+                    balanceAdjustmentData_2
+                )
+
+                // wait for first scheduled balance adjustment only
+                await timeTravelFacet.changeSystemTimestamp(
+                    dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                )
+
+                const hold_TotalAmount_After =
+                    await holdFacet.getHeldAmountFor(account_A)
+                const hold_TotalAmount_After_Partition_1 =
+                    await holdFacet.getHeldAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const hold_After =
+                    await holdFacet.getHoldForByPartition(holdIdentifier)
+                const balance_After = await erc1410Facet.balanceOf(account_A)
+                const balance_After_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                expect(hold_TotalAmount_After).to.be.equal(
+                    hold_TotalAmount_Before.mul(adjustFactor * adjustFactor)
+                )
+                expect(hold_TotalAmount_After_Partition_1).to.be.equal(
+                    hold_TotalAmount_Before_Partition_1.mul(
+                        adjustFactor * adjustFactor
+                    )
+                )
+                expect(balance_After).to.be.equal(
+                    balance_Before.sub(_AMOUNT).mul(adjustFactor * adjustFactor)
+                )
+                expect(hold_TotalAmount_After).to.be.equal(
+                    hold_TotalAmount_Before.mul(adjustFactor * adjustFactor)
+                )
+                expect(balance_After_Partition_1).to.be.equal(
+                    balance_Before_Partition_1
+                        .sub(_AMOUNT)
+                        .mul(adjustFactor * adjustFactor)
+                )
+                expect(hold_After.amount_).to.be.equal(
+                    hold_Before.amount_.mul(adjustFactor * adjustFactor)
+                )
+            })
+
+            it('GIVEN a hold WHEN adjustBalances THEN execute succeed', async () => {
+                await setPreBalanceAdjustment()
+                const balance_Before_A = await erc1410Facet.balanceOf(account_A)
+                const balance_Before_Partition_1_A =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const balance_Before_C = await erc1410Facet.balanceOf(account_C)
+                const balance_Before_Partition_1_C =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_C
+                    )
+
+                // HOLD TWICE
+                const currentTimestamp = (
+                    await ethers.provider.getBlock('latest')
+                ).timestamp
+
+                holdFacet = holdFacet.connect(signer_A)
+                const hold = {
+                    amount: _AMOUNT,
+                    expirationTimestamp: currentTimestamp + 10 * ONE_SECOND,
+                    escrow: account_B,
+                    to: ADDRESS_ZERO,
+                    data: EMPTY_HEX_BYTES,
+                }
+
+                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+
+                hold.expirationTimestamp = currentTimestamp + 100 * ONE_SECOND
+                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+
+                const held_Amount_Before =
+                    await holdFacet.getHeldAmountFor(account_A)
+                const held_Amount_Before_Partition_1 =
+                    await holdFacet.getHeldAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // EXECUTE HOLD
+                await holdFacet
+                    .connect(signer_B)
+                    .executeHoldByPartition(
+                        holdIdentifier,
+                        account_C,
+                        hold.amount * adjustFactor
+                    )
+
+                const balance_After_Execute_A =
+                    await erc1410Facet.balanceOf(account_A)
+                const balance_After_Execute_Partition_1_A =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const balance_After_Execute_C =
+                    await erc1410Facet.balanceOf(account_C)
+                const balance_After_Execute_Partition_1_C =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_C
+                    )
+                const held_Amount_After =
+                    await holdFacet.getHeldAmountFor(account_A)
+                const held_Amount_After_Partition_1 =
+                    await holdFacet.getHeldAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                expect(balance_After_Execute_A).to.be.equal(
+                    balance_Before_A.sub(_AMOUNT).sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(balance_After_Execute_C).to.be.equal(
+                    balance_Before_C.add(_AMOUNT).mul(adjustFactor)
+                )
+                expect(balance_After_Execute_Partition_1_A).to.be.equal(
+                    balance_Before_Partition_1_A
+                        .sub(_AMOUNT)
+                        .sub(_AMOUNT)
+                        .mul(adjustFactor)
+                )
+                expect(balance_After_Execute_Partition_1_C).to.be.equal(
+                    balance_Before_Partition_1_C.add(_AMOUNT).mul(adjustFactor)
+                )
+                expect(held_Amount_After).to.be.equal(
+                    held_Amount_Before.sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(held_Amount_After_Partition_1).to.be.equal(
+                    held_Amount_Before_Partition_1
+                        .sub(_AMOUNT)
+                        .mul(adjustFactor)
+                )
+                expect(
+                    balance_After_Execute_A.add(held_Amount_After)
+                ).to.be.equal(balance_Before_A.sub(_AMOUNT).mul(adjustFactor))
+                expect(
+                    balance_After_Execute_Partition_1_A.add(
+                        held_Amount_After_Partition_1
+                    )
+                ).to.be.equal(
+                    balance_Before_Partition_1_A.sub(_AMOUNT).mul(adjustFactor)
+                )
+            })
+
+            it('GIVEN a hold WHEN adjustBalances THEN release succeed', async () => {
+                await setPreBalanceAdjustment()
+                const balance_Before = await erc1410Facet.balanceOf(account_A)
+                const balance_Before_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // HOLD TWICE
+                const currentTimestamp = (
+                    await ethers.provider.getBlock('latest')
+                ).timestamp
+
+                holdFacet = holdFacet.connect(signer_A)
+                const hold = {
+                    amount: _AMOUNT,
+                    expirationTimestamp: currentTimestamp + 10 * ONE_SECOND,
+                    escrow: account_B,
+                    to: ADDRESS_ZERO,
+                    data: EMPTY_HEX_BYTES,
+                }
+
+                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+
+                hold.expirationTimestamp = currentTimestamp + 100 * ONE_SECOND
+                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+
+                const held_Amount_Before =
+                    await holdFacet.getHeldAmountFor(account_A)
+                const held_Amount_Before_Partition_1 =
+                    await holdFacet.getHeldAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // RELEASE HOLD
+                await holdFacet
+                    .connect(signer_B)
+                    .releaseHoldByPartition(
+                        holdIdentifier,
+                        hold.amount * adjustFactor
+                    )
+
+                const balance_After_Release =
+                    await erc1410Facet.balanceOf(account_A)
+                const balance_After_Release_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const held_Amount_After =
+                    await holdFacet.getHeldAmountFor(account_A)
+                const held_Amount_After_Partition_1 =
+                    await holdFacet.getHeldAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                expect(balance_After_Release).to.be.equal(
+                    balance_Before.sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(balance_After_Release_Partition_1).to.be.equal(
+                    balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(held_Amount_After).to.be.equal(
+                    held_Amount_Before.sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(held_Amount_After_Partition_1).to.be.equal(
+                    held_Amount_Before_Partition_1
+                        .sub(_AMOUNT)
+                        .mul(adjustFactor)
+                )
+                expect(
+                    balance_After_Release.add(held_Amount_After)
+                ).to.be.equal(balance_Before.mul(adjustFactor))
+                expect(
+                    balance_After_Release_Partition_1.add(
+                        held_Amount_After_Partition_1
+                    )
+                ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
+            })
+
+            it('GIVEN a hold WHEN adjustBalances THEN reclaim succeed', async () => {
+                await setPreBalanceAdjustment()
+                const balance_Before = await erc1410Facet.balanceOf(account_A)
+                const balance_Before_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // HOLD TWICE
+                const currentTimestamp = (
+                    await ethers.provider.getBlock('latest')
+                ).timestamp
+
+                holdFacet = holdFacet.connect(signer_A)
+                const hold = {
+                    amount: _AMOUNT,
+                    expirationTimestamp: currentTimestamp + ONE_SECOND,
+                    escrow: account_B,
+                    to: ADDRESS_ZERO,
+                    data: EMPTY_HEX_BYTES,
+                }
+
+                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+
+                hold.expirationTimestamp = currentTimestamp + 100 * ONE_SECOND
+                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+
+                const held_Amount_Before =
+                    await holdFacet.getHeldAmountFor(account_A)
+                const held_Amount_Before_Partition_1 =
+                    await holdFacet.getHeldAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // RECLAIM HOLD
+                await time.setNextBlockTimestamp(
+                    (await ethers.provider.getBlock('latest')).timestamp +
+                        2 * ONE_SECOND
+                )
+                await holdFacet.reclaimHoldByPartition(holdIdentifier)
+
+                const balance_After_Release =
+                    await erc1410Facet.balanceOf(account_A)
+                const balance_After_Release_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const held_Amount_After =
+                    await holdFacet.getHeldAmountFor(account_A)
+                const held_Amount_After_Partition_1 =
+                    await holdFacet.getHeldAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                expect(balance_After_Release).to.be.equal(
+                    balance_Before.sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(balance_After_Release_Partition_1).to.be.equal(
+                    balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(held_Amount_After).to.be.equal(
+                    held_Amount_Before.sub(_AMOUNT).mul(adjustFactor)
+                )
+                expect(held_Amount_After_Partition_1).to.be.equal(
+                    held_Amount_Before_Partition_1
+                        .sub(_AMOUNT)
+                        .mul(adjustFactor)
+                )
+                expect(
+                    balance_After_Release.add(held_Amount_After)
+                ).to.be.equal(balance_Before.mul(adjustFactor))
+                expect(
+                    balance_After_Release_Partition_1.add(
+                        held_Amount_After_Partition_1
+                    )
+                ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
+            })
+
+            it('GIVEN a hold WHEN adjustBalances THEN hold succeeds', async () => {
+                await setPreBalanceAdjustment()
+                const balance_Before = await erc1410Facet.balanceOf(account_A)
+                const balance_Before_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // HOLD BEFORE BALANCE ADJUSTMENT
+                const currentTimestamp = (
+                    await ethers.provider.getBlock('latest')
+                ).timestamp
+
+                holdFacet = holdFacet.connect(signer_A)
+                const hold = {
+                    amount: _AMOUNT,
+                    expirationTimestamp: currentTimestamp + 100 * ONE_SECOND,
+                    escrow: account_B,
+                    to: ADDRESS_ZERO,
+                    data: EMPTY_HEX_BYTES,
+                }
+
+                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+
+                const held_Amount_Before =
+                    await holdFacet.getHeldAmountFor(account_A)
+                const held_Amount_Before_Partition_1 =
+                    await holdFacet.getHeldAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // HOLD AFTER BALANCE ADJUSTMENT
+                holdFacet = holdFacet.connect(signer_A)
+                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+
+                const balance_After_Hold =
+                    await erc1410Facet.balanceOf(account_A)
+                const balance_After_Hold_Partition_1 =
+                    await erc1410Facet.balanceOfByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+                const held_Amount_After =
+                    await holdFacet.getHeldAmountFor(account_A)
+                const held_Amount_After_Partition_1 =
+                    await holdFacet.getHeldAmountForByPartition(
+                        _PARTITION_ID_1,
+                        account_A
+                    )
+
+                expect(balance_After_Hold).to.be.equal(
+                    balance_Before.sub(_AMOUNT).mul(adjustFactor).sub(_AMOUNT)
+                )
+                expect(balance_After_Hold_Partition_1).to.be.equal(
+                    balance_Before_Partition_1
+                        .sub(_AMOUNT)
+                        .mul(adjustFactor)
+                        .sub(_AMOUNT)
+                )
+                expect(held_Amount_After).to.be.equal(
+                    held_Amount_Before.mul(adjustFactor).add(_AMOUNT)
+                )
+                expect(held_Amount_After_Partition_1).to.be.equal(
+                    held_Amount_Before_Partition_1
+                        .mul(adjustFactor)
+                        .add(_AMOUNT)
+                )
+                expect(balance_After_Hold.add(held_Amount_After)).to.be.equal(
+                    balance_Before.mul(adjustFactor)
+                )
+                expect(
+                    balance_After_Hold_Partition_1.add(
+                        held_Amount_After_Partition_1
+                    )
+                ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
             })
         })
     })

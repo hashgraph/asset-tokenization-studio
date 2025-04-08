@@ -224,7 +224,7 @@ import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapte
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
 import ConnectRequest, {
   SupportedWallets,
-} from '../../../src/port/in/request/ConnectRequest.js';
+} from '../../../src/port/in/request/network/ConnectRequest.js';
 import { Wallet, ethers } from 'ethers';
 import {
   CLIENT_ACCOUNT_ECDSA,
@@ -340,6 +340,7 @@ describe('🧪 Role test', () => {
       isWhiteList: false,
       isControllable: true,
       arePartitionsProtected: false,
+      clearingActive: false,
       isMultiPartition: false,
       diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
       votingRight: votingRight,

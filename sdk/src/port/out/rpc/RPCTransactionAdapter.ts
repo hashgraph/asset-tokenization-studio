@@ -322,6 +322,9 @@ import {
   CLEARING_CREATE_HOLD_BY_PARTITION,
   CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
   PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
+  OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
+  OPERATOR_CLEARING_REDEEM_BY_PARTITION,
+  OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -354,8 +357,10 @@ import {
   Hold__factory,
   SsiManagement__factory,
   Kyc__factory,
-  ClearingFacet__factory,
   ClearingActionsFacet__factory,
+  ClearingTransferFacet__factory,
+  ClearingRedeemFacet__factory,
+  ClearingHoldCreationFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -395,6 +400,8 @@ import {
   ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
+import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
+import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -448,14 +455,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -562,14 +565,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -817,7 +816,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             factoryId = result.factory.toString();
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Factories could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -832,7 +831,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             resolverId = result.resolver.toString();
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Resolvers could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -847,7 +846,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             mirrorNode = result.mirrorNode;
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Mirror Nodes could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -862,14 +861,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             rpcNode = result.jsonRpcRelay;
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `RPC Nodes could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
       }
       LogService.logTrace('Metamask Network:', chainId);
     } else {
-      console.error(chainId + ' not an hedera network');
+      LogService.logError(chainId + ' not an hedera network');
     }
 
     await this.commandBus.execute(
@@ -2203,7 +2202,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingActionsFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).activateClearing({
@@ -2219,7 +2218,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingActionsFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).deactivateClearing({
@@ -2247,7 +2246,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingTransferFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingTransferByPartition(
@@ -2285,7 +2284,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingTransferFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingTransferFromByPartition(
@@ -2327,7 +2326,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingTransferFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedClearingTransferByPartition(
@@ -2453,7 +2452,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingRedeemFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingRedeemByPartition(clearingOperation, amount.toBigNumber(), {
@@ -2485,7 +2484,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingRedeemFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingRedeemFromByPartition(
@@ -2525,7 +2524,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingRedeemFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedClearingRedeemByPartition(
@@ -2568,7 +2567,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingHoldCreationFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingCreateHoldByPartition(clearingOperation, hold, {
@@ -2611,7 +2610,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingHoldCreationFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).clearingCreateHoldFromByPartition(clearingOperationFrom, hold, {
@@ -2658,7 +2657,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
+      await ClearingHoldCreationFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedClearingCreateHoldByPartition(
@@ -2667,6 +2666,123 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         signature,
         {
           gasLimit: PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async operatorClearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Operator Clearing Create Hold By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingHoldCreationFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold, {
+        gasLimit: OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async operatorClearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Operator Clearing Redeem By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingRedeemFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).operatorClearingRedeemByPartition(
+        clearingOperationFrom,
+        amount.toBigNumber(),
+        {
+          gasLimit: OPERATOR_CLEARING_REDEEM_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async operatorClearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Operator Clearing Transfer By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingTransferFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingTransferFromByPartition(
+        clearingOperationFrom,
+        amount.toBigNumber(),
+        targetId.toString(),
+        {
+          gasLimit: OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
         },
       ),
       this.networkService.environment,

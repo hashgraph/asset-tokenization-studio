@@ -211,10 +211,11 @@ import {
 } from './SetCouponCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import ContractService from '../../../../../service/ContractService.js';
+import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
 
 @CommandHandler(SetCouponCommand)
 export class SetCouponCommandHandler
@@ -225,17 +226,16 @@ export class SetCouponCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(command: SetCouponCommand): Promise<SetCouponCommandResponse> {
     const { address, recordDate, executionDate, rate } = command;
     const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(address)
-        ? (await this.mirrorNodeAdapter.getContractInfo(address)).evmAddress
-        : address,
-    );
+    const securityEvmAddress =
+      await this.contractService.getContractEvmAddress(address);
 
     const res = await handler.setCoupon(
       securityEvmAddress,
@@ -245,9 +245,7 @@ export class SetCouponCommandHandler
       address,
     );
 
-    if (!res.id)
-      throw new Error('Set coupon Command Handler response id empty');
-
+    if (!res.id) throw new EmptyResponse(SetCouponCommandHandler.name);
     let couponId: string;
 
     if (res.response && res.response.couponID) {
@@ -262,7 +260,7 @@ export class SetCouponCommandHandler
       );
 
       if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
+        throw new InvalidResponse(results);
       }
 
       couponId = results[1];

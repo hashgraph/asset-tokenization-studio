@@ -235,8 +235,16 @@ abstract contract Common is CapStorageWrapper2 {
         _;
     }
 
-    function _checkUninitialized(bool _initialized) private pure {
-        if (_initialized) revert AlreadyInitialized();
+    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
+        if (
+            _arePartitionsProtected() &&
+            !_hasRole(_WILD_CARD_ROLE, _msgSender())
+        ) {
+            revert PartitionsAreProtectedAndNoRole(
+                _msgSender(),
+                _WILD_CARD_ROLE
+            );
+        }
     }
 
     function _checkDelegate() private view {
@@ -249,15 +257,7 @@ abstract contract Common is CapStorageWrapper2 {
         }
     }
 
-    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
-        }
+    function _checkUninitialized(bool _initialized) private pure {
+        if (_initialized) revert AlreadyInitialized();
     }
 }

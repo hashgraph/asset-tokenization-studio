@@ -284,7 +284,10 @@ task(
             transferAndLock,
             adjustBalances,
             clearingActionsFacet,
-            clearingFacet,
+            clearingTransferFacet,
+            clearingRedeemFacet,
+            clearingHoldCreationFacet,
+            clearingReadFacet,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -328,7 +331,10 @@ task(
             'Transfer and Lock': transferAndLock.address,
             'Adjust Balances': adjustBalances.address,
             'Clearing Action Facet': clearingActionsFacet.address,
-            'Clearing Facet': clearingFacet.address,
+            'Clearing Transfer Facet': clearingTransferFacet.address,
+            'Clearing Redeem Facet': clearingRedeemFacet.address,
+            'Clearing Hold Creation Facet': clearingHoldCreationFacet.address,
+            'Clearing Read Facet': clearingReadFacet.address,
         }
 
         console.log('\n 🟢 Deployed ATS Contract List:')

@@ -207,37 +207,29 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import SecurityService from '../../../../../service/SecurityService';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { IsIssuerQuery, IsIssuerQueryResponse } from './IsIssuerQuery';
+import ContractService from '../../../../../service/ContractService';
+import AccountService from '../../../../../service/AccountService';
 
 @QueryHandler(IsIssuerQuery)
 export class IsIssuerQueryHandler implements IQueryHandler<IsIssuerQuery> {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(query: IsIssuerQuery): Promise<IsIssuerQueryResponse> {
     const { securityId, issuerId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    const issuerEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.test(issuerId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(issuerId)
-      : new EvmAddress(issuerId);
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const issuerEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(issuerId.toString());
 
     const res = await this.queryAdapter.isIssuer(
       securityEvmAddress,
