@@ -248,6 +248,13 @@ export default {
         descriptionFailed:
           "There was an error updating the external pause state. Please try again",
       },
+      createMock: {
+        success: "Success: ",
+        descriptionSuccess: "The external pause has been created",
+        error: "State change failed: ",
+        descriptionFailed:
+          "There was an error creating the external pause. Please try again",
+      },
     },
   },
   add: {

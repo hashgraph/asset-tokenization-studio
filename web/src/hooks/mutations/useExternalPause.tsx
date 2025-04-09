@@ -171,12 +171,48 @@ export const useSetPausedMock = () => {
 
         toast.show({
           duration: 3000,
-          title: t("changeState.success"),
-          description: t("changeState.descriptionSuccess"),
+          title: t("changeState.error"),
+          description: t("changeState.descriptionFailed"),
           variant: "subtle",
           status: "error",
         });
       },
     },
   );
+};
+
+export const useCreatePauseMock = () => {
+  const toast = useToast();
+  const { t } = useTranslation("externalPause", {
+    keyPrefix: "list.messages",
+  });
+
+  return useMutation(() => SDKService.createMock(), {
+    onSuccess(data) {
+      console.log("SDK message --> Pause mock created success: ", data);
+
+      if (!data) {
+        return;
+      }
+
+      toast.show({
+        duration: 3000,
+        title: t("createMock.success"),
+        description: t("createMock.descriptionSuccess"),
+        variant: "subtle",
+        status: "success",
+      });
+    },
+    onError: (error) => {
+      console.log("SDK message --> Pause mock created error: ", error);
+
+      toast.show({
+        duration: 3000,
+        title: t("createMock.error"),
+        description: t("createMock.descriptionFailed"),
+        variant: "subtle",
+        status: "error",
+      });
+    },
+  });
 };

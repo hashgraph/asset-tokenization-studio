@@ -7,13 +7,14 @@ import { Button, Text, ToggleController } from "io-bricks-ui";
 import { RouterManager } from "../../router/RouterManager";
 import { useForm } from "react-hook-form";
 import { useExternalPauseStore } from "../../store/externalPauseStore";
+import { useCreatePauseMock } from "../../hooks/mutations/useExternalPause";
 
 export interface FormValues {
   isActivated: boolean;
 }
 
 export const CreateExternalPause = () => {
-  const { externalPauses, addExternalPause } = useExternalPauseStore();
+  const { addExternalPause } = useExternalPauseStore();
   const { t: tRoutes } = useTranslation("routes");
   const { t: tCreate } = useTranslation("externalPause", {
     keyPrefix: "create",
@@ -27,15 +28,19 @@ export const CreateExternalPause = () => {
     mode: "onChange",
   });
 
-  const onSubmit = (values: FormValues) => {
-    const newAddress = externalPauses.length + 1;
+  const { mutateAsync, isLoading } = useCreatePauseMock();
 
-    addExternalPause({
-      address: newAddress.toString(),
-      isPaused: values.isActivated,
+  const onSubmit = () => {
+    mutateAsync().then((response) => {
+      if (response) {
+        addExternalPause({
+          address: response,
+          isPaused: false,
+        });
+
+        RouterManager.goBack();
+      }
     });
-
-    RouterManager.goBack();
   };
 
   return (
@@ -82,7 +87,8 @@ export const CreateExternalPause = () => {
             </Button>
             <Button
               size={"md"}
-              isDisabled={!isValid}
+              isDisabled={!isValid || isLoading}
+              isLoading={isLoading}
               onClick={handleSubmit(onSubmit)}
             >
               {tCreate("create")}

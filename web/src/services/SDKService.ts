@@ -1076,6 +1076,11 @@ export class SDKService {
     const response = await ExternalPausesManagement.setPausedMock(req);
     return response.payload;
   }
+
+  public static async createMock(): Promise<string> {
+    const response = await ExternalPausesManagement.createMock();
+    return response;
+  }
 }
 
 export default SDKService;
