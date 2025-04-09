@@ -41,7 +41,10 @@ export const useAddExternalPause = () => {
         });
       },
       onError: (error) => {
-        console.log("SDK message --> KYC operation error: ", error);
+        console.log(
+          "SDK message --> Add external pause operation error: ",
+          error,
+        );
 
         toast.show({
           duration: 3000,
