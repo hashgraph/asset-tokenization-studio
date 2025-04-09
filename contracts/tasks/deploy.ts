@@ -336,7 +336,7 @@ task(
             'Clearing Redeem Facet': clearingRedeemFacet.address,
             'Clearing Hold Creation Facet': clearingHoldCreationFacet.address,
             'Clearing Read Facet': clearingReadFacet.address,
-            'External Pause Management': externalPauseManagement.address,
+            'External Pause Management Facet': externalPauseManagement.address,
         }
 
         console.log('\n 🟢 Deployed ATS Contract List:')
