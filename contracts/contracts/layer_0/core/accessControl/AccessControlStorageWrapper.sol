@@ -206,6 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {LibCommon} from '../../common/libraries/LibCommon.sol';
 import {ArrayLib} from '../../common/ArrayLib.sol';
 import {LibCommon} from '../../common/LibCommon.sol';
 import {

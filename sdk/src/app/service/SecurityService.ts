@@ -228,8 +228,14 @@ export default class SecurityService extends Service {
     const viewModel = (
       await this.queryBus.execute(new GetSecurityQuery(securityId))
     ).security;
-    const { name, decimals, symbol, isin } = viewModel;
-    if (!name || decimals === undefined || !symbol || !isin)
+    const { name, decimals, symbol, evmDiamondAddress, isin } = viewModel;
+    if (
+      !name ||
+      decimals === undefined ||
+      !symbol ||
+      !isin ||
+      !evmDiamondAddress
+    )
       throw new SecurityNotFound(securityId);
 
     return new Security({
