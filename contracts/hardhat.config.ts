@@ -224,6 +224,12 @@ const config: HardhatUserConfig = {
             evmVersion: 'london',
         },
     },
+    paths: {
+        sources: './contracts',
+        tests: './test/unitTests',
+        cache: './cache',
+        artifacts: './artifacts',
+    },
     defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
@@ -255,8 +261,14 @@ const config: HardhatUserConfig = {
     contractSizer: {
         alphaSort: true,
         disambiguatePaths: false,
-        runOnCompile: true,
+        runOnCompile: Configuration.contractSizerRunOnCompile,
         strict: true,
+    },
+    gasReporter: {
+        enabled: true,
+        showTimeSpent: true,
+        outputFile: 'gas-report.txt', // Force output to a file
+        noColors: true, // Recommended for file output
     },
     typechain: {
         outDir: './typechain-types',
