@@ -329,6 +329,7 @@ import {
   ADD_EXTERNAL_PAUSE_GAS,
   REMOVE_EXTERNAL_PAUSE_GAS,
   SET_PAUSED_MOCK_GAS,
+  CREATE_EXTERNAL_PAUSE_MOCK_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -2886,5 +2887,20 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       }),
       this.networkService.environment,
     );
+  }
+
+  async createExternalPauseMock(): Promise<string> {
+    LogService.logTrace(`Deploying External Pause Mock contract`);
+
+    const factory = new MockedExternalPause__factory(
+      this.signerOrProvider as Signer,
+    );
+
+    const contract = await factory.deploy({
+      gasLimit: CREATE_EXTERNAL_PAUSE_MOCK_GAS,
+    });
+    await contract.deployed();
+
+    return contract.address;
   }
 }
