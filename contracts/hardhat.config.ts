@@ -265,7 +265,7 @@ const config: HardhatUserConfig = {
         strict: true,
     },
     gasReporter: {
-        enabled: true,
+        enabled: Configuration.reportGas,
         showTimeSpent: true,
         outputFile: 'gas-report.txt', // Force output to a file
         noColors: true, // Recommended for file output
