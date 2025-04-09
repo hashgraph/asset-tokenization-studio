@@ -207,7 +207,8 @@ import { OptionalField } from '../../../../core/decorator/OptionalDecorator.js';
 import { Equity } from '../../../../domain/context/equity/Equity.js';
 import { Security } from '../../../../domain/context/security/Security.js';
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../../../core/validation/FormatValidation.js';
+import FormatValidation from '..//FormatValidation.js';
+
 import { Factory } from '../../../../domain/context/factory/Factories.js';
 
 export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRequest> {

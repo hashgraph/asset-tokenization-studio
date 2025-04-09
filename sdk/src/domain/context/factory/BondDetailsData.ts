@@ -203,10 +203,10 @@
 
 */
 
-import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
-import ValidatedArgs from '../../../core/validation/ValidatedArgs';
+import ValidatedDomain from '../../../core/validation/ValidatedArgs';
+import { SecurityDate } from '../shared/SecurityDate';
 
-export class BondDetailsData extends ValidatedArgs<BondDetailsData> {
+export class BondDetailsData extends ValidatedDomain<BondDetailsData> {
   public currency: string;
   public nominalValue: string;
   public startingDate: string;
@@ -219,10 +219,12 @@ export class BondDetailsData extends ValidatedArgs<BondDetailsData> {
     maturityDate: string,
   ) {
     super({
-      startingDate: CommonBusinessLogicValidation.checkDates(
-        true,
-        maturityDate,
-      ),
+      maturityDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          parseInt(this.startingDate),
+        );
+      },
     });
 
     this.currency = currency;
@@ -230,6 +232,6 @@ export class BondDetailsData extends ValidatedArgs<BondDetailsData> {
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
 
-    ValidatedArgs.handleValidation('BondDetailsData', this);
+    ValidatedDomain.handleValidation('BondDetailsData', this);
   }
 }

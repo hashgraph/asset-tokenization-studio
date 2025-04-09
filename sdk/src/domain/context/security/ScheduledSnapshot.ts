@@ -204,21 +204,10 @@
 */
 
 import { BigNumber } from 'ethers';
-import ValidatedArgs from '../../../core/validation/ValidatedArgs';
-import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
 
-export class ScheduledSnapshot extends ValidatedArgs<ScheduledSnapshot> {
-  public readonly scheduledTimestamp: BigNumber;
-  public readonly data: string;
-
-  constructor(scheduledTimestamp: BigNumber, data: string) {
-    super({
-      scheduledTimestamp: CommonBusinessLogicValidation.checkDates(true),
-    });
-
-    this.scheduledTimestamp = scheduledTimestamp;
-    this.data = data;
-
-    ValidatedArgs.handleValidation('ScheduledSnapshot', this);
-  }
+export class ScheduledSnapshot {
+  constructor(
+    public readonly scheduledTimestamp: BigNumber,
+    public readonly data: string,
+  ) {}
 }

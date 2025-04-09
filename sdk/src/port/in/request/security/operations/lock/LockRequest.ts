@@ -204,7 +204,7 @@
 */
 
 import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
+import FormatValidation from '../../../FormatValidation.js';
 
 export default class LockRequest extends ValidatedRequest<LockRequest> {
   securityId: string;

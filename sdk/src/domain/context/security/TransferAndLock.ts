@@ -204,33 +204,11 @@
 */
 
 import { BigNumber } from 'ethers';
-import ValidatedArgs from '../../../core/validation/ValidatedArgs';
-import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
 
-export class TransferAndLock extends ValidatedArgs<TransferAndLock> {
+export class TransferAndLock {
   public from: string;
   public to: string;
   public amount: BigNumber;
   public data: string;
   public expirationTimestamp: BigNumber;
-
-  constructor(
-    from: string,
-    to: string,
-    amount: BigNumber,
-    data: string,
-    expirationTimestamp: BigNumber,
-  ) {
-    super({
-      expirationTimestamp: CommonBusinessLogicValidation.checkDates(true),
-    });
-
-    this.from = from;
-    this.to = to;
-    this.amount = amount;
-    this.data = data;
-    this.expirationTimestamp = expirationTimestamp;
-
-    ValidatedArgs.handleValidation('TransferAndLock', this);
-  }
 }

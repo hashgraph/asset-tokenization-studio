@@ -205,59 +205,19 @@
 
 import { BigNumber } from 'ethers';
 import BigDecimal from '../shared/BigDecimal';
-import ValidatedArgs from '../../../core/validation/ValidatedArgs';
-import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
 
-export class Hold extends ValidatedArgs<Hold> {
+export class Hold {
   public amount: BigNumber;
   public expirationTimestamp: BigNumber;
   public escrow: string;
   public to: string;
   public data: string;
-
-  constructor(
-    amount: BigNumber,
-    expirationTimestamp: BigNumber,
-    escrow: string,
-    to: string,
-    data: string,
-  ) {
-    super({
-      expirationTimestamp: CommonBusinessLogicValidation.checkDates(true),
-    });
-
-    this.amount = amount;
-    this.expirationTimestamp = expirationTimestamp;
-    this.escrow = escrow;
-    this.to = to;
-    this.data = data;
-
-    ValidatedArgs.handleValidation('Hold', this);
-  }
 }
 
-export class ProtectedHold extends ValidatedArgs<ProtectedHold> {
+export class ProtectedHold {
   public hold: Hold;
   public deadline: BigNumber;
   public nonce: BigNumber;
-
-  constructor(hold: Hold, deadline: BigNumber, nonce: BigNumber) {
-    super({
-      deadline: CommonBusinessLogicValidation.checkDates(true),
-    });
-
-    this.hold = new Hold(
-      hold.amount,
-      hold.expirationTimestamp,
-      hold.escrow,
-      hold.to,
-      hold.data,
-    );
-    this.deadline = deadline;
-    this.nonce = nonce;
-
-    ValidatedArgs.handleValidation('ProtectedHold', this);
-  }
 }
 
 export class HoldIdentifier {
@@ -266,17 +226,16 @@ export class HoldIdentifier {
   public holdId: number;
 }
 
-export class HoldDetails extends ValidatedArgs<HoldDetails> {
-  public expirationTimeStamp: number;
-  public amount: BigDecimal;
-  public escrowAddress: string;
-  public tokenHolderAddress: string;
-  public destinationAddress: string;
-  public data: string;
-  public operatorData: string;
-
+export class HoldDetails {
+  expirationTimeStamp: number;
+  amount: BigDecimal;
+  escrowAddress: string;
+  tokenHolderAddress: string;
+  destinationAddress: string;
+  data: string;
+  operatorData: string;
   constructor(
-    expirationTimeStamp: number,
+    executionTimeStamp: number,
     amount: BigDecimal,
     escrowAddress: string,
     tokenHolderAddress: string,
@@ -284,18 +243,12 @@ export class HoldDetails extends ValidatedArgs<HoldDetails> {
     data: string,
     operatorData: string,
   ) {
-    super({
-      expirationTimeStamp: CommonBusinessLogicValidation.checkDates(true),
-    });
-
-    this.expirationTimeStamp = expirationTimeStamp;
+    this.expirationTimeStamp = executionTimeStamp;
     this.amount = amount;
     this.escrowAddress = escrowAddress;
     this.tokenHolderAddress = tokenHolderAddress;
     this.destinationAddress = destinationAddress;
     this.data = data;
     this.operatorData = operatorData;
-
-    ValidatedArgs.handleValidation('HoldDetails', this);
   }
 }

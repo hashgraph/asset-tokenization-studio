@@ -203,13 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export class MaturityDateCannotBeLessThanStartDate extends BaseError {
-  constructor() {
+export default class InvalidSupply extends BaseError {
+  constructor(totalSupply: string, maxSupply: string) {
     super(
-      ErrorCode.MaturityDateCannotBeLessThanStartDate,
-      `Maturity date cannot be less than start date`,
+      ErrorCode.InvalidSupply,
+      `Total supply ${totalSupply} exceeds max supply ${maxSupply}`,
     );
   }
 }

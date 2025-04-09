@@ -203,12 +203,12 @@
 
 */
 
-import ValidatedArgs from '../../../core/validation/ValidatedArgs.js';
+import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
 import BigDecimal from '../shared/BigDecimal.js';
 import { OptionalField } from '../../../core/decorator/OptionalDecorator.js';
-import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation.js';
+import { SecurityDate } from '../shared/SecurityDate.js';
 
-export class Dividend extends ValidatedArgs<Dividend> {
+export class Dividend extends ValidatedDomain<Dividend> {
   amountPerUnitOfSecurity: BigDecimal;
   recordTimeStamp: number;
   executionTimeStamp: number;
@@ -223,10 +223,9 @@ export class Dividend extends ValidatedArgs<Dividend> {
     snapshotId?: number,
   ) {
     super({
-      recordTimeStamp: CommonBusinessLogicValidation.checkDates(
-        true,
-        executionTimeStamp,
-      ),
+      executionTimeStamp: (val) => {
+        return SecurityDate.checkDateTimestamp(val, this.recordTimeStamp);
+      },
     });
 
     this.amountPerUnitOfSecurity = amountPerUnitOfSecurity;
@@ -234,6 +233,6 @@ export class Dividend extends ValidatedArgs<Dividend> {
     this.executionTimeStamp = executionTimeStamp;
     this.snapshotId = snapshotId ? snapshotId : undefined;
 
-    ValidatedArgs.handleValidation('Dividend', this);
+    ValidatedDomain.handleValidation('Dividend', this);
   }
 }

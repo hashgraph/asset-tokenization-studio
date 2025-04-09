@@ -611,11 +611,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         bondInfo.maturityDate.toString(),
       );
 
-      const couponDetails: CouponDetailsData = new CouponDetailsData(
-        couponInfo.couponFrequency.toString(),
-        couponInfo.couponRate.toString(),
-        couponInfo.firstCouponDate.toString(),
-      );
+      const couponDetails: CouponDetailsData = {
+        couponFrequency: couponInfo.couponFrequency.toString(),
+        couponRate: couponInfo.couponRate.toString(),
+        firstCouponDate: couponInfo.firstCouponDate.toString(),
+      };
 
       const securityTokenToCreate = new FactoryBondToken(
         security,
@@ -1793,13 +1793,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
     );
 
-    const transferAndLockData: TransferAndLock = new TransferAndLock(
-      sourceId.toString(),
-      targetId.toString(),
-      amount.toBigNumber(),
-      '0x',
-      expirationDate.toBigNumber(),
-    );
+    const transferAndLockData: TransferAndLock = {
+      from: sourceId.toString(),
+      to: targetId.toString(),
+      amount: amount.toBigNumber(),
+      data: '0x',
+      expirationTimestamp: expirationDate.toBigNumber(),
+    };
 
     return RPCTransactionResponseAdapter.manageResponse(
       await TransferAndLock__factory.connect(
@@ -1865,14 +1865,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      expirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
-
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold__factory.connect(
         security.toString(),
@@ -1897,14 +1896,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      expirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
-
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold__factory.connect(
         security.toString(),
@@ -1935,14 +1933,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Controller Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      expirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
-
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold__factory.connect(
         security.toString(),
@@ -1976,19 +1973,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Protected Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      expirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
-
-    const protectedHold: ProtectedHold = new ProtectedHold(
-      hold,
-      deadline.toBigNumber(),
-      nonce.toBigNumber(),
-    );
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+    const protectedHold: ProtectedHold = {
+      hold: hold,
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
 
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold__factory.connect(
@@ -2239,11 +2235,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Clearing Transfer By Partition to address ${security.toString()}`,
     );
 
-    const clearingOperation: ClearingOperation = new ClearingOperation(
-      partitionId,
-      expirationDate.toBigNumber(),
-      '0x',
-    );
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: expirationDate.toBigNumber(),
+      data: '0x',
+    };
 
     return RPCTransactionResponseAdapter.manageResponse(
       await ClearingTransferFacet__factory.connect(
@@ -2274,11 +2270,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };
@@ -2315,11 +2311,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const protectedClearingOperation: ProtectedClearingOperation = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
@@ -2445,11 +2441,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Clearing Redeem By Partition to address ${security.toString()}`,
     );
 
-    const clearingOperation: ClearingOperation = new ClearingOperation(
-      partitionId,
-      expirationDate.toBigNumber(),
-      '0x',
-    );
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: expirationDate.toBigNumber(),
+      data: '0x',
+    };
 
     return RPCTransactionResponseAdapter.manageResponse(
       await ClearingRedeemFacet__factory.connect(
@@ -2474,11 +2470,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };
@@ -2513,11 +2509,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const protectedClearingOperation: ProtectedClearingOperation = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
@@ -2552,19 +2548,19 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Clearing Create Hold By Partition to address ${security.toString()}`,
     );
 
-    const clearingOperation: ClearingOperation = new ClearingOperation(
-      partitionId,
-      clearingExpirationDate.toBigNumber(),
-      '0x',
-    );
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: clearingExpirationDate.toBigNumber(),
+      data: '0x',
+    };
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      holdExpirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
 
     return RPCTransactionResponseAdapter.manageResponse(
       await ClearingHoldCreationFacet__factory.connect(
@@ -2592,22 +2588,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        clearingExpirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      holdExpirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
 
     return RPCTransactionResponseAdapter.manageResponse(
       await ClearingHoldCreationFacet__factory.connect(
@@ -2638,23 +2634,23 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const protectedClearingOperation: ProtectedClearingOperation = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        clearingExpirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
     };
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      holdExpirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
 
     return RPCTransactionResponseAdapter.manageResponse(
       await ClearingHoldCreationFacet__factory.connect(
@@ -2687,22 +2683,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        clearingExpirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      holdExpirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
 
     return RPCTransactionResponseAdapter.manageResponse(
       await ClearingHoldCreationFacet__factory.connect(
@@ -2727,11 +2723,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };
@@ -2764,11 +2760,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };

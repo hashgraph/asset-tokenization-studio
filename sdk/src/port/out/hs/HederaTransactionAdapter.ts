@@ -589,11 +589,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         bondInfo.maturityDate.toString(),
       );
 
-      const couponDetails: CouponDetailsData = new CouponDetailsData(
-        couponInfo.couponFrequency.toString(),
-        couponInfo.couponRate.toString(),
-        couponInfo.firstCouponDate.toString(),
-      );
+      const couponDetails: CouponDetailsData = {
+        couponFrequency: couponInfo.couponFrequency.toString(),
+        couponRate: couponInfo.couponRate.toString(),
+        firstCouponDate: couponInfo.firstCouponDate.toString(),
+      };
 
       const securityTokenToCreate = new FactoryBondToken(
         security,
@@ -1841,13 +1841,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       security.toString(),
     );
 
-    const transferAndLockData: TransferAndLock = new TransferAndLock(
-      sourceId.toString(),
-      targetId.toString(),
-      amount.toBigNumber(),
-      '0x',
-      expirationDate.toBigNumber(),
-    );
+    const transferAndLockData: TransferAndLock = {
+      from: sourceId.toString(),
+      to: targetId.toString(),
+      amount: amount.toBigNumber(),
+      data: '0x',
+      expirationTimestamp: expirationDate.toBigNumber(),
+    };
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -1887,14 +1887,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const factoryInstance = new Hold__factory().attach(security.toString());
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      expirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
-
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
       [partitionId, hold],
@@ -1929,14 +1928,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const factoryInstance = new Hold__factory().attach(security.toString());
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      expirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
-
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
       [partitionId, sourceId.toString(), hold, '0x'],
@@ -1971,14 +1969,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const factoryInstance = new Hold__factory().attach(security.toString());
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      expirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
-
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
       [partitionId, sourceId.toString(), hold, '0x'],
@@ -2016,19 +2013,18 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const factoryInstance = new Hold__factory().attach(security.toString());
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      expirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
-
-    const protectedHold: ProtectedHold = new ProtectedHold(
-      hold,
-      deadline.toBigNumber(),
-      nonce.toBigNumber(),
-    );
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+    const protectedHold: ProtectedHold = {
+      hold: hold,
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -2361,11 +2357,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Clearing Transfer By Partition to address ${security.toString()}`,
     );
 
-    const clearingOperation: ClearingOperation = new ClearingOperation(
-      partitionId,
-      expirationDate.toBigNumber(),
-      '0x',
-    );
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: expirationDate.toBigNumber(),
+      data: '0x',
+    };
 
     const factoryInstance = new ClearingTransferFacet__factory().attach(
       security.toString(),
@@ -2403,11 +2399,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };
@@ -2451,11 +2447,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const protectedClearingOperation: ProtectedClearingOperation = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
@@ -2628,11 +2624,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Clearing Redeem By Partition to address ${security.toString()}`,
     );
 
-    const clearingOperation: ClearingOperation = new ClearingOperation(
-      partitionId,
-      expirationDate.toBigNumber(),
-      '0x',
-    );
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: expirationDate.toBigNumber(),
+      data: '0x',
+    };
 
     const factoryInstance = new ClearingRedeemFacet__factory().attach(
       security.toString(),
@@ -2669,11 +2665,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };
@@ -2716,11 +2712,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const protectedClearingOperation: ProtectedClearingOperation = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
@@ -2762,19 +2758,19 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Clearing Create Hold By Partition to address ${security.toString()}`,
     );
 
-    const clearingOperation: ClearingOperation = new ClearingOperation(
-      partitionId,
-      clearingExpirationDate.toBigNumber(),
-      '0x',
-    );
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: clearingExpirationDate.toBigNumber(),
+      data: '0x',
+    };
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      holdExpirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
 
     const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
@@ -2814,22 +2810,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        clearingExpirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      holdExpirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
 
     const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
@@ -2872,23 +2868,23 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const protectedClearingOperation: ProtectedClearingOperation = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        clearingExpirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
     };
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      holdExpirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
 
     const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
@@ -2928,22 +2924,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        clearingExpirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };
 
-    const hold: Hold = new Hold(
-      amount.toBigNumber(),
-      holdExpirationDate.toBigNumber(),
-      escrow.toString(),
-      targetId.toString(),
-      '0x',
-    );
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
 
     const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
       security.toString(),
@@ -2980,11 +2976,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };
@@ -3025,11 +3021,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: new ClearingOperation(
-        partitionId,
-        expirationDate.toBigNumber(),
-        '0x',
-      ),
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
       from: sourceId.toString(),
       operatorData: '0x',
     };

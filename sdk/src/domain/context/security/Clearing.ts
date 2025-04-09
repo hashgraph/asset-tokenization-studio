@@ -209,23 +209,11 @@ import {
   InvalidClearingOperationType,
   InvalidClearingOperationTypeNumber,
 } from './error/InvalidClearingOperationType';
-import ValidatedArgs from '../../../core/validation/ValidatedArgs';
-import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
 
-export class ClearingOperation extends ValidatedArgs<ClearingOperation> {
-  public partition: string;
-  public expirationTimestamp: BigNumber;
-  public data: string;
-
-  constructor(partition: string, expirationTimestamp: BigNumber, data: string) {
-    super({
-      expirationTimestamp: CommonBusinessLogicValidation.checkDates(true),
-    });
-
-    this.partition = partition;
-    this.expirationTimestamp = expirationTimestamp;
-    this.data = data;
-  }
+export class ClearingOperation {
+  partition: string;
+  expirationTimestamp: BigNumber;
+  data: string;
 }
 
 export class ClearingOperationFrom {

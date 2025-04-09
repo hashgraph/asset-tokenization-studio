@@ -275,8 +275,7 @@ export enum ErrorCode {
   NotAllowedInMultiPartition = '20033',
   OnlyDefaultPartitionAllowed = '20034',
   NotIssuable = '20035',
-  MaturityDateCannotBeLessThanStartDate = '20036',
-  StartDateCannotBeLessThanCurrentDate = '20037',
+  InvalidSupply = '20036',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',

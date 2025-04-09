@@ -203,10 +203,12 @@
 
 */
 
+import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
 import BigDecimal from '../shared/BigDecimal.js';
 import { DividendType } from './DividendType.js';
+import { Equity } from './Equity.js';
 
-export class EquityDetails {
+export class EquityDetails extends ValidatedDomain<EquityDetails> {
   votingRight: boolean;
   informationRight: boolean;
   liquidationRight: boolean;
@@ -230,6 +232,11 @@ export class EquityDetails {
     currency: string,
     nominalValue: BigDecimal,
   ) {
+    super({
+      dividendRight: (val) => {
+        return Equity.checkDividend(val);
+      },
+    });
     this.votingRight = votingRight;
     this.informationRight = informationRight;
     this.liquidationRight = liquidationRight;

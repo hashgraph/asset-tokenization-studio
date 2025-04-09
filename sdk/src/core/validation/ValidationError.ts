@@ -210,7 +210,7 @@ export class ValidationError extends BaseError {
   constructor(name: string, validations: ValidationResponse[]) {
     super(
       ErrorCode.ValidationChecks,
-      `Format validation for class ${name} was not successful: ${validations.toString()}`,
+      `Validation for class ${name} was not successful: ${validations.toString()}`,
     );
   }
 }

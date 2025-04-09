@@ -203,10 +203,10 @@
 
 */
 
-import ValidatedArgs from '../../../core/validation/ValidatedArgs';
-import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
+import ValidatedDomain from '../../../core/validation/ValidatedArgs';
+import { SecurityDate } from '../shared/SecurityDate';
 
-export class KycAccountData extends ValidatedArgs<KycAccountData> {
+export class KycAccountData extends ValidatedDomain<KycAccountData> {
   public account: string;
   public validFrom: string;
   public validTo: string;
@@ -223,7 +223,12 @@ export class KycAccountData extends ValidatedArgs<KycAccountData> {
     status: number,
   ) {
     super({
-      validFrom: CommonBusinessLogicValidation.checkDates(false, validTo),
+      validTo: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          parseInt(this.validFrom),
+        );
+      },
     });
 
     this.account = account;
@@ -233,6 +238,6 @@ export class KycAccountData extends ValidatedArgs<KycAccountData> {
     this.issuer = issuer;
     this.status = status;
 
-    ValidatedArgs.handleValidation('KycAccountData', this);
+    ValidatedDomain.handleValidation('KycAccountData', this);
   }
 }

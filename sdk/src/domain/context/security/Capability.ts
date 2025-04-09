@@ -204,7 +204,7 @@
 */
 
 import BaseError from '../../../core/error/BaseError';
-import ValidatedArgs from '../../../core/validation/ValidatedArgs';
+import ValidatedDomain from '../../../core/validation/ValidatedArgs';
 import InvalidOperation from './error/InvalidOperation';
 
 export enum Operation {
@@ -236,7 +236,7 @@ export class CastOperation {
   }
 }
 
-export class Capability extends ValidatedArgs<Capability> {
+export class Capability extends ValidatedDomain<Capability> {
   public readonly operation: Operation;
 
   constructor(operation: Operation) {
@@ -247,7 +247,7 @@ export class Capability extends ValidatedArgs<Capability> {
     });
 
     this.operation = operation;
-    ValidatedArgs.handleValidation('Capability', this);
+    ValidatedDomain.handleValidation('Capability', this);
   }
 
   public static checkOperation(value: number | Operation): BaseError[] {

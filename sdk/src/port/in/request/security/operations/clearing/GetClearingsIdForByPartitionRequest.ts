@@ -206,7 +206,7 @@
 import { ClearingOperationType } from '../../../../../../domain/context/security/Clearing.js';
 import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
 
-import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
+import FormatValidation from '../../../FormatValidation.js';
 
 export default class GetClearingsIdForByPartitionRequest extends ValidatedRequest<GetClearingsIdForByPartitionRequest> {
   securityId: string;

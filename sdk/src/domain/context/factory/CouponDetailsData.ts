@@ -203,27 +203,8 @@
 
 */
 
-import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
-import ValidatedArgs from '../../../core/validation/ValidatedArgs';
-
-export class CouponDetailsData extends ValidatedArgs<CouponDetailsData> {
+export class CouponDetailsData {
   public couponFrequency: string;
   public couponRate: string;
   public firstCouponDate: string;
-
-  constructor(
-    couponFrequency: string,
-    couponRate: string,
-    firstCouponDate: string,
-  ) {
-    super({
-      firstCouponDate: CommonBusinessLogicValidation.checkDates(true),
-    });
-
-    this.couponFrequency = couponFrequency;
-    this.couponRate = couponRate;
-    this.firstCouponDate = firstCouponDate;
-
-    ValidatedArgs.handleValidation('CouponDetailsData', this);
-  }
 }

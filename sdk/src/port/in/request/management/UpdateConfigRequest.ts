@@ -204,7 +204,7 @@
 */
 
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs';
-import FormatValidation from '../../../../core/validation/FormatValidation';
+import FormatValidation from '../FormatValidation';
 
 export default class UpdateConfigRequest extends ValidatedRequest<UpdateConfigRequest> {
   configId: string;

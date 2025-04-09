@@ -203,22 +203,14 @@
 
 */
 
-import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
-import ValidatedArgs from '../../../core/validation/ValidatedArgs';
-
-export class VotingRights extends ValidatedArgs<VotingRights> {
+export class VotingRights {
   recordTimeStamp: number;
   data: string;
   snapshotId?: number;
 
   constructor(recordTimeStamp: number, data: string, snapshotId?: number) {
-    super({
-      recordTimeStamp: CommonBusinessLogicValidation.checkDates(true),
-    });
     this.recordTimeStamp = recordTimeStamp;
     this.data = data;
     this.snapshotId = snapshotId ? snapshotId : undefined;
-
-    ValidatedArgs.handleValidation('VotingRights', this);
   }
 }

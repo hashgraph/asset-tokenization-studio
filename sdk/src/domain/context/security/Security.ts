@@ -219,9 +219,15 @@ import InvalidAmount from './error/InvalidAmount.js';
 import { SecurityType } from '../factory/SecurityType.js';
 import { Regulation } from '../factory/Regulation.js';
 import {
+  CastRegulationSubType,
+  CastRegulationType,
   RegulationSubType,
   RegulationType,
 } from '../factory/RegulationType.js';
+import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
+import { Factory } from '../factory/Factories.js';
+import { OptionalField } from '../../../core/decorator/OptionalDecorator.js';
+import InvalidSupply from './error/InvalidSupply.js';
 
 const TWELVE = 12;
 const TEN = 10;
@@ -254,7 +260,10 @@ export interface SecurityProps {
   info?: string;
 }
 
-export class Security implements SecurityProps {
+export class Security
+  extends ValidatedDomain<Security>
+  implements SecurityProps
+{
   name: string;
   symbol: string;
   isin: string;
@@ -266,12 +275,16 @@ export class Security implements SecurityProps {
   arePartitionsProtected: boolean;
   clearingActive: boolean;
   isIssuable?: boolean;
+  @OptionalField()
   totalSupply?: BigDecimal;
+  @OptionalField()
   maxSupply?: BigDecimal;
   diamondAddress?: HederaId;
   evmDiamondAddress?: EvmAddress;
   paused?: boolean;
+  @OptionalField()
   regulationType?: RegulationType;
+  @OptionalField()
   regulationsubType?: RegulationSubType;
   regulation?: Regulation;
   isCountryControlListWhiteList: boolean;
@@ -279,6 +292,20 @@ export class Security implements SecurityProps {
   info?: string;
 
   constructor(params: SecurityProps) {
+    super({
+      regulationType: (val) => {
+        return Factory.checkRegulationType(CastRegulationType.toNumber(val!));
+      },
+      regulationsubType: (val) => {
+        return Factory.checkRegulationSubType(
+          CastRegulationSubType.toNumber(val!),
+          CastRegulationType.toNumber(this.regulationType!),
+        );
+      },
+      totalSupply: (val) => {
+        return Security.checkSupply(val!, this.maxSupply!);
+      },
+    });
     const {
       name,
       symbol,
@@ -400,5 +427,18 @@ export class Security implements SecurityProps {
     const val = amount.toString().split('.');
     const decimals = val.length > 1 ? val[1]?.length : 0;
     return decimals <= this.decimals;
+  }
+
+  public static checkSupply(
+    totalSupply: BigDecimal,
+    maxSupply: BigDecimal,
+  ): BaseError[] {
+    const errorList: BaseError[] = [];
+    if (totalSupply.isGreaterThan(maxSupply)) {
+      errorList.push(
+        new InvalidSupply(totalSupply.toString(), maxSupply.toString()),
+      );
+    }
+    return errorList;
   }
 }

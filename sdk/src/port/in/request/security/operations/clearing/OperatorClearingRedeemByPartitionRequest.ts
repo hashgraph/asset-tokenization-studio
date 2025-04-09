@@ -206,7 +206,7 @@
 import { SecurityDate } from '../../../../../../domain/context/shared/SecurityDate.js';
 import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
 
-import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
+import FormatValidation from '../../../FormatValidation.js';
 
 export default class OperatorClearingRedeemByPartitionRequest extends ValidatedRequest<OperatorClearingRedeemByPartitionRequest> {
   securityId: string;

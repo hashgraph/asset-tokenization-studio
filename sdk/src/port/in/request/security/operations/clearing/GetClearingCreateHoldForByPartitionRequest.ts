@@ -205,7 +205,7 @@
 
 import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
 
-import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
+import FormatValidation from '../../../FormatValidation.js';
 
 export default class GetClearingCreateHoldForByPartitionRequest extends ValidatedRequest<GetClearingCreateHoldForByPartitionRequest> {
   securityId: string;

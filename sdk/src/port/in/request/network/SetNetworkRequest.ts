@@ -207,7 +207,7 @@ import { Environment } from '../../../../domain/context/network/Environment.js';
 import { MirrorNode } from '../../../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../../../domain/context/network/JsonRpcRelay.js';
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../../../core/validation/FormatValidation.js';
+import FormatValidation from '..//FormatValidation.js';
 
 export interface SetNetworkRequestProps {
   environment: Environment;

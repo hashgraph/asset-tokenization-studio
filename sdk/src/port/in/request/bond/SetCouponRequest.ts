@@ -204,7 +204,8 @@
 */
 
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../../../core/validation/FormatValidation.js';
+import FormatValidation from '..//FormatValidation.js';
+
 import { SecurityDate } from '../../../../domain/context/shared/SecurityDate.js';
 
 export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest> {
