@@ -29,6 +29,7 @@ export const CreateExternalPause = () => {
 
   const onSubmit = (values: FormValues) => {
     const newAddress = externalPauses.length + 1;
+
     addExternalPause({
       address: newAddress.toString(),
       isPaused: values.isActivated,

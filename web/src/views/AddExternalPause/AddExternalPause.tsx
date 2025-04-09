@@ -80,6 +80,7 @@ export const AddExternalPause = () => {
       });
     } finally {
       setIsSubmitting(false);
+      RouterManager.to(RouteName.ExternalPauseList);
     }
   };
 

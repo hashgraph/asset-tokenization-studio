@@ -7,22 +7,16 @@ import { Trash } from "@phosphor-icons/react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetExternalPauses } from "../../../../hooks/queries/useExternalPause";
+import { useRemoveExternalPause } from "../../../../hooks/mutations/useExternalPause";
+import { RemoveExternalPauseRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useRolesStore } from "../../../../store/rolesStore";
+import { hasRole } from "../../../../utils/helpers";
+import { SecurityRole } from "../../../../utils/SecurityRole";
 
 type ExternalPause = {
   id: string;
-  state: "activated" | "deactivated";
+  isPaused: boolean;
 };
-
-const EXTERNAL_PAUSES_MOCK: ExternalPause[] = [
-  {
-    id: "1234",
-    state: "activated",
-  },
-  {
-    id: "1235",
-    state: "deactivated",
-  },
-];
 
 export const ExternalPause = () => {
   const { id: securityId = "" } = useParams();
@@ -37,6 +31,15 @@ export const ExternalPause = () => {
     onClose: onCloseRemoveModal,
     onOpen: onOpenRemoveModal,
   } = useDisclosure();
+  const {
+    isOpen: isOpenRemoveMultipleModal,
+    onClose: onCloseRemoveMultipleModal,
+    onOpen: onOpenRemoveMultipleModal,
+  } = useDisclosure();
+
+  const { roles } = useRolesStore();
+
+  const hasPauseManagerRole = hasRole(roles, SecurityRole._PAUSE_MANAGER_ROLE);
 
   const { t: tList } = useTranslation("security", {
     keyPrefix: "details.externalPause.list",
@@ -50,8 +53,10 @@ export const ExternalPause = () => {
 
   const [externalPauseToRemove, setExternalPauseToRemove] =
     useState<string>("");
-  const [isRemoving, setIsRemoving] = useState(false);
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
+
+  const { data: externalPauses, isLoading } = useGetExternalPauses(securityId);
+  const { mutateAsync, isLoading: isLoadingRemove } = useRemoveExternalPause();
 
   const handleCheckboxChange = (id: string) => {
     setSelectedRows((prev) => ({
@@ -62,7 +67,7 @@ export const ExternalPause = () => {
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
-    const newSelectedRows = EXTERNAL_PAUSES_MOCK.reduce(
+    const newSelectedRows = externalPauses.reduce(
       (acc, item) => ({ ...acc, [item.id]: isChecked }),
       {},
     );
@@ -72,40 +77,60 @@ export const ExternalPause = () => {
   const columnsHelper = createColumnHelper<ExternalPause>();
 
   const columns = [
-    columnsHelper.display({
-      id: "selection",
-      header: () => {
-        const totalRows = EXTERNAL_PAUSES_MOCK.length;
-        const selectedCount =
-          Object.values(selectedRows).filter(Boolean).length;
+    ...(hasPauseManagerRole
+      ? [
+          columnsHelper.display({
+            id: "selection",
+            header: () => {
+              const totalRows = externalPauses.length;
+              const selectedCount =
+                Object.values(selectedRows).filter(Boolean).length;
 
-        return (
-          <Checkbox
-            isChecked={selectedCount === totalRows && totalRows > 0}
-            isIndeterminate={selectedCount > 0 && selectedCount < totalRows}
-            onChange={handleSelectAll}
-          />
-        );
-      },
-      enableSorting: false,
-      size: 5,
-      cell(props) {
-        const {
-          row: {
-            original: { id },
-          },
-        } = props;
-        return (
-          <Checkbox
-            isChecked={!!selectedRows[id]}
-            onChange={() => handleCheckboxChange(id)}
-          />
-        );
-      },
-    }),
+              return (
+                <Checkbox
+                  isChecked={selectedCount === totalRows && totalRows > 0}
+                  isIndeterminate={
+                    selectedCount > 0 && selectedCount < totalRows
+                  }
+                  onChange={handleSelectAll}
+                />
+              );
+            },
+            enableSorting: false,
+            size: 5,
+            cell(props) {
+              const {
+                row: {
+                  original: { id },
+                },
+              } = props;
+              return (
+                <Checkbox
+                  isChecked={!!selectedRows[id]}
+                  onChange={() => handleCheckboxChange(id)}
+                />
+              );
+            },
+          }),
+        ]
+      : []),
     columnsHelper.accessor("id", {
       header: tTable("fields.id"),
       enableSorting: false,
+    }),
+    columnsHelper.accessor("isPaused", {
+      header: tTable("fields.state"),
+      enableSorting: false,
+      cell({ getValue }) {
+        const isPaused = getValue();
+        return (
+          <Text>
+            {isPaused
+              ? tTable("fields.activated")
+              : tTable("fields.deactivated")}
+          </Text>
+        );
+      },
     }),
     columnsHelper.display({
       id: "remove",
@@ -118,6 +143,8 @@ export const ExternalPause = () => {
             original: { id },
           },
         } = props;
+
+        if (!hasPauseManagerRole) return;
 
         return (
           <Button
@@ -139,6 +166,35 @@ export const ExternalPause = () => {
   const disabledRemoveItems =
     Object.values(selectedRows).filter(Boolean).length <= 0;
 
+  const handleMultipleRemove = () => {
+    const pausedToDelete = Object.entries(selectedRows)
+      .filter(([_, value]) => value)
+      .map(([key]) => key);
+
+    if (pausedToDelete.length > 0) {
+      pausedToDelete.map((row) => {
+        mutateAsync(
+          new RemoveExternalPauseRequest({
+            securityId,
+            externalPauseAddress: row,
+          }),
+        );
+      });
+    }
+  };
+
+  const handleRemove = () => {
+    mutateAsync(
+      new RemoveExternalPauseRequest({
+        securityId,
+        externalPauseAddress: externalPauseToRemove,
+      }),
+    ).finally(() => {
+      setExternalPauseToRemove("");
+      onCloseRemoveModal();
+    });
+  };
+
   return (
     <>
       <Stack
@@ -154,32 +210,36 @@ export const ExternalPause = () => {
           <Text textStyle="ElementsSemiboldLG" color="neutral.light">
             {tList("title")}
           </Text>
-          <HStack>
-            <Button
-              onClick={() => {
-                onOpenRemoveModal();
-              }}
-              size="sm"
-              variant={"secondary"}
-              isDisabled={disabledRemoveItems}
-            >
-              {tList("removeItemsSelected")}
-            </Button>
-            <Button
-              onClick={() => {
-                onOpenAddModal();
-              }}
-              size="sm"
-            >
-              {tList("add")}
-            </Button>
-          </HStack>
+          {hasPauseManagerRole && (
+            <HStack>
+              <Button
+                onClick={() => {
+                  onOpenRemoveMultipleModal();
+                }}
+                size="sm"
+                variant={"secondary"}
+                isDisabled={disabledRemoveItems}
+              >
+                {tList("removeItemsSelected")}
+              </Button>
+              <Button
+                onClick={() => {
+                  onOpenAddModal();
+                }}
+                size="sm"
+              >
+                {tList("add")}
+              </Button>
+            </HStack>
+          )}
         </HStack>
+
         <Table
           name="external-pause-list"
           columns={columns}
-          data={EXTERNAL_PAUSES_MOCK ?? []}
-          isLoading={false}
+          data={externalPauses ?? []}
+          isLoading={isLoading}
+          emptyComponent={<Text>{tTable("empty")}</Text>}
         />
       </Stack>
       <AddExternalPauseModal
@@ -189,18 +249,41 @@ export const ExternalPause = () => {
       <PopUp
         id="removeExternalPause"
         isOpen={isOpenRemoveModal}
-        onClose={onCloseRemoveModal}
+        onClose={() => {
+          setExternalPauseToRemove("");
+          onCloseRemoveModal();
+        }}
         icon={<PhosphorIcon as={Trash} size="md" />}
         title={tRemove("title")}
         description={tRemove("description")}
         confirmText={tRemove("confirmText")}
         onConfirm={() => {
-          setExternalPauseToRemove("");
+          handleRemove();
         }}
-        onCancel={onCloseRemoveModal}
+        onCancel={() => {
+          setExternalPauseToRemove("");
+          onCloseRemoveModal();
+        }}
         cancelText={tRemove("cancelText")}
         confirmButtonProps={{
-          isLoading: isRemoving,
+          isLoading: isLoadingRemove,
+        }}
+      />
+      <PopUp
+        id="removeExternalMultiplePause"
+        isOpen={isOpenRemoveMultipleModal}
+        onClose={onCloseRemoveMultipleModal}
+        icon={<PhosphorIcon as={Trash} size="md" />}
+        title={tRemove("title.multiple")}
+        description={tRemove("description")}
+        confirmText={tRemove("confirmText")}
+        onConfirm={() => {
+          handleMultipleRemove();
+        }}
+        onCancel={onCloseRemoveMultipleModal}
+        cancelText={tRemove("cancelText")}
+        confirmButtonProps={{
+          isLoading: isLoadingRemove,
         }}
       />
     </>

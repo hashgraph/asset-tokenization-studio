@@ -14,7 +14,6 @@ import {
   Button,
   PhosphorIcon,
   SelectController,
-  SelectOption,
   Tag,
   Text,
 } from "io-bricks-ui";
@@ -24,6 +23,13 @@ import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { useExternalPauseStore } from "../../../../store/externalPauseStore";
 import { X } from "@phosphor-icons/react";
+import { useAddExternalPause } from "../../../../hooks/mutations/useExternalPause";
+import { AddExternalPauseRequest } from "@hashgraph/asset-tokenization-sdk";
+
+type SelectOption = {
+  value: string;
+  label: string;
+};
 
 interface FormValues {
   accountId: string;
@@ -36,8 +42,7 @@ export const AddExternalPauseModal = ({
   isOpen,
   onClose,
 }: AddExternalPauseModalProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedPauses, setSelectedPauses] = useState<string[]>([]);
+  const [selectedPauses, setSelectedPauses] = useState<SelectOption[]>([]);
 
   const { id: securityId = "" } = useParams();
 
@@ -47,7 +52,8 @@ export const AddExternalPauseModal = ({
 
   const { externalPauses } = useExternalPauseStore();
 
-  // TODO: add filter
+  const { mutateAsync, isLoading } = useAddExternalPause();
+
   const options = externalPauses.map((external) => ({
     label: external.address,
     value: external.address,
@@ -58,31 +64,42 @@ export const AddExternalPauseModal = ({
   });
 
   const onSubmit = (_values: FormValues) => {
-    // mutate(request, {
-    //   onSettled() {
-    //     setIsLoading(false);
-    //   },
-    //   onSuccess() {
-    //     onClose();
-    //   },
-    // });
+    selectedPauses.forEach((pause) => {
+      mutateAsync(
+        new AddExternalPauseRequest({
+          securityId,
+          externalPauseAddress: pause.value,
+        }),
+      ).finally(() => {
+        onClose();
+      });
+    });
   };
 
   const isDisable = selectedPauses.length === 0;
 
-  const handleSelectChange = (selectedOptions: SelectOption) => {
-    console.log("selectedOptions", selectedOptions);
+  const handleSelectChange = (selectedOption: SelectOption) => {
+    setSelectedPauses((prevSelectedOptions) => {
+      if (
+        !prevSelectedOptions.some(
+          (option) => option.value === selectedOption.value,
+        )
+      ) {
+        return [...prevSelectedOptions, selectedOption];
+      }
 
-    setSelectedPauses((prevSelectedAddresses) => [
-      ...new Set([...prevSelectedAddresses, ...selectedOptions.value]),
-    ]);
+      return prevSelectedOptions;
+    });
   };
 
-  const handleTagRemove = (addressToRemove: string) => {
+  const handleTagRemove = (addressToRemove: SelectOption) => {
     setSelectedPauses((prevSelectedAddresses) =>
-      prevSelectedAddresses.filter((address) => address !== addressToRemove),
+      prevSelectedAddresses.filter(
+        (address) => address.value !== addressToRemove.value,
+      ),
     );
   };
+
   return (
     <Modal
       isCentered
@@ -120,8 +137,8 @@ export const AddExternalPauseModal = ({
                 {selectedPauses.map((item) => {
                   return (
                     <Tag
-                      key={item}
-                      label={item}
+                      key={item.value}
+                      label={item.label}
                       size="sm"
                       rightIcon={<PhosphorIcon as={X} />}
                       onClick={() => handleTagRemove(item)}

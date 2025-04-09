@@ -333,6 +333,7 @@ import {
   GetExternalPausesMembersRequest,
   IsPausedMockRequest,
   SetPausedMockRequest,
+  RemoveExternalPauseRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -1025,6 +1026,13 @@ export class SDKService {
     req: AddExternalPauseRequest,
   ): Promise<boolean> {
     const response = await ExternalPausesManagement.addExternalPause(req);
+    return response.payload;
+  }
+
+  public static async removeExternalPause(
+    req: RemoveExternalPauseRequest,
+  ): Promise<boolean> {
+    const response = await ExternalPausesManagement.removeExternalPause(req);
     return response.payload;
   }
 

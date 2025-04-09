@@ -212,9 +212,13 @@ export default {
   table: {
     fields: {
       id: "ID",
+      state: "State",
+      activated: "Activated",
+      deactivated: "Deactivated",
       actions: "Actions",
       revoke: "Remove",
     },
+    empty: "No results found",
   },
   create: {
     title: "Add External Pauses",

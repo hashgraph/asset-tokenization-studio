@@ -13,6 +13,7 @@ import {
   DropdownItem,
   PhosphorIcon,
   PopUp,
+  Spinner,
   Table,
   Text,
   useToast,
@@ -25,6 +26,8 @@ import { useExternalPauseStore } from "../../store/externalPauseStore";
 import { useUserStore } from "../../store/userStore";
 import { useRolesStore } from "../../store/rolesStore";
 import { User } from "../../utils/constants";
+import { useSetPausedMock } from "../../hooks/mutations/useExternalPause";
+import { SetPausedMockRequest } from "@hashgraph/asset-tokenization-sdk";
 
 type ExternalPause = {
   address: string;
@@ -44,6 +47,7 @@ export const ExternalPauseList = () => {
     keyPrefix: "list.messages",
   });
 
+  const [loadingRow, setLoadingRow] = useState<string | null>(null);
   const [externalPauseSelected, setExternalPauseSelected] = useState<
     string | undefined
   >(undefined);
@@ -52,6 +56,8 @@ export const ExternalPauseList = () => {
     useExternalPauseStore();
   const { setType } = useUserStore();
   const { setRoles } = useRolesStore();
+
+  const { mutateAsync, isLoading } = useSetPausedMock();
 
   useEffect(() => {
     setRoles([]);
@@ -93,7 +99,11 @@ export const ExternalPauseList = () => {
           <HStack>
             <Menu>
               <MenuButton as={Button} size="xs" variant={"outline"}>
-                <PhosphorIcon as={DotsThreeVertical} />
+                {isLoading && loadingRow === address ? (
+                  <Spinner color="secondary.500" />
+                ) : (
+                  <PhosphorIcon as={DotsThreeVertical} />
+                )}
               </MenuButton>
               <Dropdown w="180px">
                 <DropdownItem
@@ -120,20 +130,20 @@ export const ExternalPauseList = () => {
     }),
   ];
 
-  const handleState = (id: string, isPaused: boolean) => {
+  const handleState = async (id: string, isPaused: boolean) => {
+    setLoadingRow(id);
+
     try {
+      await mutateAsync(
+        new SetPausedMockRequest({
+          contractId: id,
+          paused: isPaused,
+        }),
+      );
+
       toggleExternalPause(id, isPaused);
-      toast.show({
-        status: "success",
-        title: tMessages("changeState.success"),
-        description: tMessages("changeState.descriptionSuccess"),
-      });
-    } catch (error) {
-      toast.show({
-        status: "error",
-        title: tMessages("changeState.error"),
-        description: tMessages("changeState.descriptionFailed"),
-      });
+    } finally {
+      setLoadingRow(null);
     }
   };
 

@@ -221,6 +221,9 @@ export const GET_CONTROL_LIST_MEMBERS = (
   end: number,
 ) => `GET_EXTERNAL_PAUSES_MEMBERS_${securityId}_${start}_${end}`;
 
+export const GET_EXTERNAL_PAUSE = (securityId: string) =>
+  `GET_EXTERNAL_PAUSE_${securityId}`;
+
 export const GET_IS_EXTERNAL_PAUSE = (securityId: string) =>
   `GET_IS_EXTERNAL_PAUSE_${securityId}`;
 
@@ -249,17 +252,6 @@ export const useGetExternalPausesMembers = <TError, TData = string[]>(
   );
 };
 
-export const useIsExternalPause = <TError, TData = string[]>(
-  request: IsExternalPauseRequest,
-  options?: UseQueryOptions<boolean, TError, TData, [string]>,
-) => {
-  return useQuery(
-    [GET_IS_EXTERNAL_PAUSE(request.securityId)],
-    () => SDKService.isExternalPause(request),
-    options,
-  );
-};
-
 export const useGetExternalPauses = (securityId: string, start: number = 0) => {
   const countQuery = useGetExternalPausesCount(
     new GetExternalPausesCountRequest({ securityId }),
@@ -279,12 +271,11 @@ export const useGetExternalPauses = (securityId: string, start: number = 0) => {
 
   const pauseStatusQueries = useQueries({
     queries: (membersQuery.data ?? []).map((memberId) => ({
-      queryKey: [GET_IS_EXTERNAL_PAUSE(securityId)],
+      queryKey: [GET_IS_EXTERNAL_PAUSE(memberId)],
       queryFn: () =>
-        SDKService.isExternalPause(
-          new IsExternalPauseRequest({
-            securityId,
-            externalPauseAddress: memberId,
+        SDKService.isPauseMock(
+          new IsPausedMockRequest({
+            contractId: memberId,
           }),
         ),
       enabled: !!membersQuery.data,
@@ -307,6 +298,17 @@ export const useGetExternalPauses = (securityId: string, start: number = 0) => {
     isError,
     data,
   };
+};
+
+export const useIsExternalPause = <TError, TData = string[]>(
+  request: IsExternalPauseRequest,
+  options?: UseQueryOptions<boolean, TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_IS_EXTERNAL_PAUSE(request.securityId)],
+    () => SDKService.isExternalPause(request),
+    options,
+  );
 };
 
 export const useIsPauseMock = <TError, TData = boolean>(
