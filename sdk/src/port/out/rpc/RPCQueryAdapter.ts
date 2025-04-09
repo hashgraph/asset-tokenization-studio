@@ -220,7 +220,6 @@ import { Security } from '../../../domain/context/security/Security.js';
 import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
 import { Dividend } from '../../../domain/context/equity/Dividend.js';
-import { AccountSecurityRelation } from '../../../domain/context/account/AccountSecurityRelation.js';
 import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
 import { HederaId } from '../../../domain/context/shared/HederaId.js';
 import {
@@ -272,8 +271,7 @@ import {
 import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
 import { VotingFor } from '../../../domain/context/equity/VotingFor';
-import { HoldDetails } from '../../../domain/context/security/HoldDetails.js';
-import { KYC } from '../../../domain/context/kyc/KYC.js';
+import { Kyc } from '../../../domain/context/kyc/Kyc.js';
 import { KycAccountData } from '../../../domain/context/kyc/KycAccountData.js';
 import {
   CastClearingOperationType,
@@ -282,6 +280,7 @@ import {
   ClearingRedeem,
   ClearingTransfer,
 } from '../../../domain/context/security/Clearing.js';
+import { HoldDetails } from '../../../domain/context/security/Hold.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -866,13 +865,6 @@ export class RPCQueryAdapter {
     return couponCount.toNumber();
   }
 
-  async getAccountSecurityRelationship(
-    address: EvmAddress,
-    target: EvmAddress,
-  ): Promise<AccountSecurityRelation> {
-    throw new Error('Method not implemented.');
-  }
-
   async isPaused(address: EvmAddress): Promise<boolean> {
     LogService.logTrace(
       `Checking if the security: ${address.toString()} is paused`,
@@ -901,7 +893,7 @@ export class RPCQueryAdapter {
     data: string,
     operatorData: string,
   ): Promise<[boolean, string, string]> {
-    LogService.logTrace(`Checking can transfer`);
+    LogService.logTrace(`Checking can transfer by partition`);
 
     return await this.connect(
       ERC1410ScheduledTasks__factory,
@@ -913,6 +905,21 @@ export class RPCQueryAdapter {
       amount.toBigNumber(),
       data,
       operatorData,
+    );
+  }
+
+  async canTransfer(
+    address: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    data: string,
+  ): Promise<[boolean, string, string]> {
+    LogService.logTrace(`Checking can transfer`);
+
+    return await this.connect(ERC1594__factory, address.toString()).canTransfer(
+      targetId.toString(),
+      amount.toBigNumber(),
+      data,
     );
   }
 
@@ -1023,6 +1030,34 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(Cap__factory, address.toString()).getMaxSupply();
+  }
+
+  async getMaxSupplyByPartition(
+    address: EvmAddress,
+    partitionId: string,
+  ): Promise<BigNumber> {
+    LogService.logTrace(
+      `Getting max supply by partition for ${address.toString()} security`,
+    );
+
+    return await this.connect(
+      Cap__factory,
+      address.toString(),
+    ).getMaxSupplyByPartition(partitionId);
+  }
+
+  async getTotalSupplyByPartition(
+    address: EvmAddress,
+    partitionId: string,
+  ): Promise<BigNumber> {
+    LogService.logTrace(
+      `Getting max supply by partition for ${address.toString()} security`,
+    );
+
+    return await this.connect(
+      ERC1410ScheduledTasks__factory,
+      address.toString(),
+    ).totalSupplyByPartition(partitionId);
   }
 
   async getRegulationDetails(
@@ -1336,7 +1371,7 @@ export class RPCQueryAdapter {
     ).isIssuer(issuer.toString());
   }
 
-  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<KYC> {
+  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<Kyc> {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
     const kycData = await this.connect(
@@ -1344,7 +1379,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getKycFor(targetId.toString());
 
-    return new KYC(
+    return new Kyc(
       kycData.validFrom.toString(),
       kycData.validTo.toString(),
       kycData.vcId,

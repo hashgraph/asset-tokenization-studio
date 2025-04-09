@@ -221,6 +221,10 @@ import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
 import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
 import Account from '../../../domain/context/account/Account.js';
 import { Time } from '../../../core/Time.js';
+import { TransactionNotFound } from '../error/TransactionNotFound.js';
+import { TransactionResultNotFound } from '../error/TransactionResultNotFound.js';
+import { BalanceNotFound } from '../error/BalanceNotFound.js';
+import { ErrorRetrievingEvmAddress } from '../error/ErrorRetrievingEvmAddress.js';
 
 @singleton()
 export class MirrorNodeAdapter {
@@ -412,8 +416,7 @@ export class MirrorNodeAdapter {
         this.mirrorNodeConfig.baseUrl + 'contracts/results/' + transactionId;
       LogService.logTrace(url);
       const res = await this.instance.get<ITransactionResult>(url);
-      if (!res.data.call_result)
-        throw new Error('Response does not contain a transaction result');
+      if (!res.data.call_result) throw new TransactionResultNotFound();
 
       const result: TransactionResultViewModel = {
         result: res.data.call_result.toString(),
@@ -450,7 +453,7 @@ export class MirrorNodeAdapter {
           res.data.transactions[res.data.transactions.length - 1];
         LogService.logError(JSON.stringify(lastChildTransaction));
       } else {
-        throw new Error('Response does not contain any transaction');
+        throw new TransactionNotFound();
       }
 
       const result: TransactionResultViewModel = {
@@ -481,12 +484,7 @@ export class MirrorNodeAdapter {
         return Promise.reject<EvmAddress>('');
       }
     } catch (e) {
-      throw new Error(
-        'EVM address could not be retrieved for ' +
-          accountId.toString() +
-          ' error : ' +
-          e,
-      );
+      throw new ErrorRetrievingEvmAddress(accountId, e);
     }
   }
 
@@ -517,8 +515,7 @@ export class MirrorNodeAdapter {
       }balances?account.id=${accountId.toString()}`;
       LogService.logTrace(url);
       const res = await this.instance.get<IBalances>(url);
-      if (!res.data.balances)
-        throw new Error('Response does not contain a balances result');
+      if (!res.data.balances) throw new BalanceNotFound();
 
       return BigDecimal.fromString(
         res.data.balances[res.data.balances.length - 1].balance.toString(),
