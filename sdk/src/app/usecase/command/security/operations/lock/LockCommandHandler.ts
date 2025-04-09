@@ -211,15 +211,10 @@ import { LockCommand, LockCommandResponse } from './LockCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../error/SecurityPaused.js';
-import { NotGrantedRole } from '../../error/NotGrantedRole.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/ContractService.js';
 
 @CommandHandler(LockCommand)
 export class LockCommandHandler implements ICommandHandler<LockCommand> {
@@ -230,10 +225,10 @@ export class LockCommandHandler implements ICommandHandler<LockCommand> {
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(command: LockCommand): Promise<LockCommandResponse> {
@@ -242,34 +237,20 @@ export class LockCommandHandler implements ICommandHandler<LockCommand> {
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const sourceEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(sourceId);
+
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkRole(
+      SecurityRole._LOCKER_ROLE,
+      account.id.toString(),
+      securityId,
     );
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._LOCKER_ROLE,
-      ))
-    ) {
-      throw new NotGrantedRole(SecurityRole._LOCKER_ROLE);
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
+    await this.validationService.checkDecimals(security, amount);
 
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
