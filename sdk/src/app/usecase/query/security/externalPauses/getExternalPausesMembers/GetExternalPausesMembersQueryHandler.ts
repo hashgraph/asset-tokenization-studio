@@ -247,6 +247,13 @@ export class GetExternalPausesMembersQueryHandler
       start,
       end,
     );
-    return new GetExternalPausesMembersQueryResponse(res);
+
+    const updatedRes = await Promise.all(
+      res.map(async (address) =>
+        (await this.mirrorNodeAdapter.getAccountInfo(address)).id.toString(),
+      ),
+    );
+
+    return new GetExternalPausesMembersQueryResponse(updatedRes);
   }
 }
