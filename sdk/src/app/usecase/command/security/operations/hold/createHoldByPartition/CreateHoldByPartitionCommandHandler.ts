@@ -210,20 +210,17 @@ import SecurityService from '../../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../../error/SecurityPaused.js';
 import {
   CreateHoldByPartitionCommand,
   CreateHoldByPartitionCommandResponse,
 } from './CreateHoldByPartitionCommand.js';
-import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
-import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
-import ValidationService from '../../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
+import ContractService from '../../../../../../service/ContractService.js';
+import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../error/EmptyResponse.js';
 
 @CommandHandler(CreateHoldByPartitionCommand)
 export class CreateHoldByPartitionCommandHandler
@@ -234,6 +231,8 @@ export class CreateHoldByPartitionCommandHandler
     public readonly securityService: SecurityService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
@@ -259,46 +258,26 @@ export class CreateHoldByPartitionCommandHandler
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
-    await this.validationService.validateClearingDeactivated(securityId);
+    await this.validationService.checkClearingDeactivated(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const escrowEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(escrow)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
-      : new EvmAddress(escrow);
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const escrowEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(escrow);
 
     const targetEvmAddress: EvmAddress =
-      targetId === '0.0.0'
-        ? new EvmAddress(EVM_ZERO_ADDRESS)
-        : HEDERA_FORMAT_ID_REGEX.exec(targetId)
-          ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-          : new EvmAddress(targetId);
-
+      await this.accountService.getAccountEvmAddressOrNull(targetId);
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    if (
-      account.evmAddress &&
-      (
-        await this.queryAdapter.balanceOf(
-          securityEvmAddress,
-          new EvmAddress(account.evmAddress),
-        )
-      ).lt(amountBd.toBigNumber())
-    ) {
-      throw new InsufficientBalance();
-    }
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkDecimals(security, amount);
+
+    await this.validationService.checkBalance(
+      securityId,
+      account.id.toString(),
+      amountBd,
+    );
 
     const res = await handler.createHoldByPartition(
       securityEvmAddress,
@@ -311,9 +290,7 @@ export class CreateHoldByPartitionCommandHandler
     );
 
     if (!res.id)
-      throw new Error(
-        'Create Hold By Partition Command Handler response id empty',
-      );
+      throw new EmptyResponse(CreateHoldByPartitionCommandHandler.name);
 
     let holdId: string;
 
@@ -329,7 +306,7 @@ export class CreateHoldByPartitionCommandHandler
       );
 
       if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
+        throw new InvalidResponse(results);
       }
 
       holdId = results[1];
