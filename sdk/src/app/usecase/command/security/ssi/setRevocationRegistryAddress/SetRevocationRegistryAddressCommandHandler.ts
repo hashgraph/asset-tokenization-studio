@@ -211,14 +211,11 @@ import {
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../../service/TransactionService';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { SecurityPaused } from '../../../security/error/SecurityPaused';
 import AccountService from '../../../../../service/AccountService';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import { NotGrantedRole } from '../../error/NotGrantedRole';
+import ValidationService from '../../../../../service/ValidationService';
+import ContractService from '../../../../../service/ContractService';
 
 @CommandHandler(SetRevocationRegistryAddressCommand)
 export class SetRevocationRegistryAddressCommandHandler
@@ -229,10 +226,10 @@ export class SetRevocationRegistryAddressCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -242,31 +239,18 @@ export class SetRevocationRegistryAddressCommandHandler
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkRole(
+      SecurityRole._SSI_MANAGER_ROLE,
+      account.id.toString(),
+      securityId,
     );
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._SSI_MANAGER_ROLE,
-      ))
-    ) {
-      throw new NotGrantedRole(SecurityRole._SSI_MANAGER_ROLE);
-    }
-
     const revocationRegistryEvmAddress: EvmAddress =
-      HEDERA_FORMAT_ID_REGEX.test(revocationRegistryId)
-        ? await this.mirrorNodeAdapter.accountToEvmAddress(revocationRegistryId)
-        : new EvmAddress(revocationRegistryId);
+      await this.accountService.getAccountEvmAddress(revocationRegistryId);
 
     const res = await handler.setRevocationRegistryAddress(
       securityEvmAddress,

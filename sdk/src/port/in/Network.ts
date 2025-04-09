@@ -213,31 +213,32 @@ import ConnectRequest, {
   DFNSConfigRequest,
   FireblocksConfigRequest,
   SupportedWallets,
-} from './request/ConnectRequest.js';
+} from './request/network/ConnectRequest.js';
 import RequestMapper from './request/mapping/RequestMapper.js';
 import TransactionService from '../../app/service/TransactionService.js';
 import NetworkService from '../../app/service/NetworkService.js';
-import SetNetworkRequest from './request/SetNetworkRequest.js';
+import SetNetworkRequest from './request/network/SetNetworkRequest.js';
 import { SetNetworkCommand } from '../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
 import { SetConfigurationCommand } from '../../app/usecase/command/network/setConfiguration/SetConfigurationCommand.js';
 import {
   Environment,
   unrecognized,
 } from '../../domain/context/network/Environment.js';
-import InitializationRequest from './request/InitializationRequest.js';
+import InitializationRequest from './request/network/InitializationRequest.js';
 import Event from './Event.js';
 import { RPCTransactionAdapter } from '../out/rpc/RPCTransactionAdapter.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import SetConfigurationRequest from './request/SetConfigurationRequest.js';
+import SetConfigurationRequest from './request/management/SetConfigurationRequest.js';
 import { handleValidation } from './Common.js';
 import { MirrorNode } from '../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
 import { HederaWalletConnectTransactionAdapter } from '../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
 import { DFNSTransactionAdapter } from '../out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import DfnsSettings from '../../domain/context/custodialWalletSettings/DfnsSettings.js';
+import DfnsSettings from '../../core/settings/custodialWalletSettings/DfnsSettings.js';
 import { FireblocksTransactionAdapter } from '../out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import FireblocksSettings from '../../domain/context/custodialWalletSettings/FireblocksSettings.js';
+import FireblocksSettings from '../../core/settings/custodialWalletSettings/FireblocksSettings.js';
 import { AWSKMSTransactionAdapter } from '../out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
+import LogService from '../../app/service/LogService.js';
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -374,7 +375,7 @@ class NetworkInPort implements INetworkInPort {
 
   @LogError
   async connect(req: ConnectRequest): Promise<InitializationData> {
-    console.log('ConnectRequest from network', req);
+    LogService.logInfo('ConnectRequest from network', req);
     handleValidation('ConnectRequest', req);
 
     const account = req.account
@@ -385,12 +386,17 @@ class NetworkInPort implements INetworkInPort {
       ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings)
       : undefined;
     const custodialSettings = this.getCustodialSettings(req);
-    console.log('SetNetworkCommand', req.network, req.mirrorNode, req.rpcNode);
+    LogService.logTrace(
+      'SetNetworkCommand',
+      req.network,
+      req.mirrorNode,
+      req.rpcNode,
+    );
     await this.commandBus.execute(
       new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode),
     );
 
-    console.log(
+    LogService.logTrace(
       'ConnectRequest',
       req.wallet,
       account,

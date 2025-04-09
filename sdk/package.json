@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-sdk",
-  "version": "1.12.0",
+  "version": "1.12.2",
   "description": "Testing to MASTER",
   "main": "./build/cjs/src/index.js",
   "module": "./build/esm/src/index.js",
@@ -44,6 +44,8 @@
     "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.4",
+    "@faker-js/faker": "^9.6.0",
+    "@golevelup/ts-jest": "^0.6.2",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-jest": "^27.2.3",
@@ -80,7 +82,8 @@
     "tsyringe": "^4.8.0",
     "uuid": "^9.0.0",
     "winston": "^3.8.2",
-    "winston-daily-rotate-file": "^4.7.1"
+    "winston-daily-rotate-file": "^4.7.1",
+    "efate": "1.5.1"
   },
   "overrides": {
     "ws": "7.5.10",

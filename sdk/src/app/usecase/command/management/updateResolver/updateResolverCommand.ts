@@ -375,7 +375,7 @@
    limitations under the License.
 */
 
-import ContractId from 'domain/context/contract/ContractId';
+import ContractId from '../../../../../domain/context/contract/ContractId';
 import { Command } from '../../../../../core/command/Command';
 import { CommandResponse } from '../../../../../core/command/CommandResponse';
 

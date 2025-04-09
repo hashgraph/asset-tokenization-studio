@@ -209,10 +209,10 @@ import { handleValidation } from './Common';
 import { QueryBus } from '../../core/query/QueryBus';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
-import GrantKYCRequest from './request/GrantKYCRequest.js';
-import RevokeKYCRequest from './request/RevokeKYCRequest.js';
-import GetKYCAccountsCountRequest from './request/GetKYCAccountsCountRequest.js';
-import GetKYCForRequest from './request/GetKYCForRequest.js';
+import GrantKYCRequest from './request/security/kyc/GrantKYCRequest.js';
+import RevokeKYCRequest from './request/security/kyc/RevokeKYCRequest.js';
+import GetKYCAccountsCountRequest from './request/security/kyc/GetKYCAccountsCountRequest.js';
+import GetKYCForRequest from './request/security/kyc/GetKYCForRequest.js';
 import { GrantKYCCommand } from '../../app/usecase/command/security/kyc/grantKyc/GrantKYCCommand.js';
 import { RevokeKYCCommand } from '../../app/usecase/command/security/kyc/revokeKyc/RevokeKYCCommand.js';
 import { GetKYCForQuery } from '../../app/usecase/query/security/kyc/getKycFor/GetKYCForQuery.js';
@@ -220,8 +220,8 @@ import { GetKYCAccountsCountQuery } from '../../app/usecase/query/security/kyc/g
 import { GetKYCAccountsDataQuery } from '../../app/usecase/query/security/kyc/getKycAccountsData/GetKYCAccountsDataQuery.js';
 import KYCViewModel from './response/KYCViewModel.js';
 import KycAccountDataViewModel from './response/KycAccountDataViewModel.js';
-import GetKYCAccountsDataRequest from './request/GetKYCAccountsDataRequest.js';
-import GetKYCStatusForRequest from './request/GetKYCStatusForRequest.js';
+import GetKYCAccountsDataRequest from './request/security/kyc/GetKYCAccountsDataRequest.js';
+import GetKYCStatusForRequest from './request/security/kyc/GetKYCStatusForRequest.js';
 import { GetKYCStatusForQuery } from '../../app/usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQuery.js';
 
 interface IKycInPort {

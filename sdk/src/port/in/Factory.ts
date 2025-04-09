@@ -205,7 +205,7 @@
 
 import { QueryBus } from '../../core/query/QueryBus.js';
 import Injectable from '../../core/Injectable.js';
-import GetRegulationDetailsRequest from './request/GetRegulationDetailsRequest.js';
+import GetRegulationDetailsRequest from './request/factory/GetRegulationDetailsRequest.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import RegulationViewModel from './response/RegulationViewModel.js';
 import { handleValidation } from './Common.js';
