@@ -16,6 +16,7 @@ import {
   SelectController,
   Tag,
   Text,
+  useToast,
 } from "io-bricks-ui";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -23,8 +24,8 @@ import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { useExternalPauseStore } from "../../../../store/externalPauseStore";
 import { X } from "@phosphor-icons/react";
-import { useAddExternalPause } from "../../../../hooks/mutations/useExternalPause";
-import { AddExternalPauseRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useUpdateExternalPauses } from "../../../../hooks/mutations/useExternalPause";
+import { UpdateExternalPausesRequest } from "@hashgraph/asset-tokenization-sdk";
 
 type SelectOption = {
   value: string;
@@ -42,6 +43,8 @@ export const AddExternalPauseModal = ({
   isOpen,
   onClose,
 }: AddExternalPauseModalProps) => {
+  const toast = useToast();
+
   const [selectedPauses, setSelectedPauses] = useState<SelectOption[]>([]);
 
   const { id: securityId = "" } = useParams();
@@ -49,10 +52,16 @@ export const AddExternalPauseModal = ({
   const { t: tCreate } = useTranslation("security", {
     keyPrefix: "details.externalPause.create",
   });
+  const { t: tMessage } = useTranslation("externalPause", {
+    keyPrefix: "messages",
+  });
 
   const { externalPauses } = useExternalPauseStore();
 
-  const { mutateAsync, isLoading } = useAddExternalPause();
+  const {
+    mutateAsync: updateExternalPauses,
+    isLoading: isLoadingUpdateExternalPauses,
+  } = useUpdateExternalPauses();
 
   const options = externalPauses.map((external) => ({
     label: external.address,
@@ -64,14 +73,20 @@ export const AddExternalPauseModal = ({
   });
 
   const onSubmit = (_values: FormValues) => {
-    selectedPauses.forEach((pause) => {
-      mutateAsync(
-        new AddExternalPauseRequest({
-          securityId,
-          externalPauseAddress: pause.value,
-        }),
-      ).finally(() => {
-        onClose();
+    updateExternalPauses(
+      new UpdateExternalPausesRequest({
+        securityId,
+        externalPausesAddresses: selectedPauses.map((option) => option.value),
+        actives: selectedPauses.map(() => true),
+      }),
+    ).finally(() => {
+      onClose();
+      toast.show({
+        duration: 3000,
+        title: tMessage("addExternalPause.success"),
+        description: tMessage("addExternalPause.descriptionSuccess"),
+        variant: "subtle",
+        status: "success",
       });
     });
   };
@@ -152,7 +167,7 @@ export const AddExternalPauseModal = ({
         <ModalFooter>
           <Button
             isDisabled={isDisable}
-            isLoading={isLoading}
+            isLoading={isLoadingUpdateExternalPauses}
             type="submit"
             onClick={handleSubmit(onSubmit)}
           >

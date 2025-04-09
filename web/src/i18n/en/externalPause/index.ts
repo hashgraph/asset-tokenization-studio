@@ -227,6 +227,13 @@ export default {
       },
     },
     messages: {
+      addExternalPause: {
+        success: "Success: ",
+        descriptionSuccess: "The external pause has been added",
+        error: "Failed: ",
+        descriptionFailed:
+          "There was an error adding the external pause. Please try again",
+      },
       removeExternalPause: {
         success: "Success: ",
         descriptionSuccess: "The external pause has been removed",

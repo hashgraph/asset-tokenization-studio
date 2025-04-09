@@ -1,14 +1,27 @@
 import { Checkbox, HStack, Stack, useDisclosure } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/table-core";
-import { Button, PhosphorIcon, PopUp, Table, Text } from "io-bricks-ui";
+import {
+  Button,
+  PhosphorIcon,
+  PopUp,
+  Table,
+  Text,
+  useToast,
+} from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { AddExternalPauseModal } from "./AddExternalPauseModal";
 import { Trash } from "@phosphor-icons/react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetExternalPauses } from "../../../../hooks/queries/useExternalPause";
-import { useRemoveExternalPause } from "../../../../hooks/mutations/useExternalPause";
-import { RemoveExternalPauseRequest } from "@hashgraph/asset-tokenization-sdk";
+import {
+  useRemoveExternalPause,
+  useUpdateExternalPauses,
+} from "../../../../hooks/mutations/useExternalPause";
+import {
+  RemoveExternalPauseRequest,
+  UpdateExternalPausesRequest,
+} from "@hashgraph/asset-tokenization-sdk";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { hasRole } from "../../../../utils/helpers";
 import { SecurityRole } from "../../../../utils/SecurityRole";
@@ -19,6 +32,7 @@ type ExternalPause = {
 };
 
 export const ExternalPause = () => {
+  const toast = useToast();
   const { id: securityId = "" } = useParams();
 
   const {
@@ -50,6 +64,9 @@ export const ExternalPause = () => {
   const { t: tRemove } = useTranslation("security", {
     keyPrefix: "details.externalPause.remove",
   });
+  const { t: tMessage } = useTranslation("externalPause", {
+    keyPrefix: "list.messages",
+  });
 
   const [externalPauseToRemove, setExternalPauseToRemove] =
     useState<string>("");
@@ -57,6 +74,10 @@ export const ExternalPause = () => {
 
   const { data: externalPauses, isLoading } = useGetExternalPauses(securityId);
   const { mutateAsync, isLoading: isLoadingRemove } = useRemoveExternalPause();
+  const {
+    mutateAsync: updateExternalPauses,
+    isLoading: isLoadingUpdateExternalPauses,
+  } = useUpdateExternalPauses();
 
   const handleCheckboxChange = (id: string) => {
     setSelectedRows((prev) => ({
@@ -172,13 +193,21 @@ export const ExternalPause = () => {
       .map(([key]) => key);
 
     if (pausedToDelete.length > 0) {
-      pausedToDelete.map((row) => {
-        mutateAsync(
-          new RemoveExternalPauseRequest({
-            securityId,
-            externalPauseAddress: row,
-          }),
-        );
+      updateExternalPauses(
+        new UpdateExternalPausesRequest({
+          securityId,
+          externalPausesAddresses: pausedToDelete,
+          actives: pausedToDelete.map(() => false),
+        }),
+      ).finally(() => {
+        onCloseRemoveMultipleModal();
+        toast.show({
+          duration: 3000,
+          title: tMessage("removeExternalPause.success"),
+          description: tMessage("removeExternalPause.descriptionSuccess"),
+          variant: "subtle",
+          status: "success",
+        });
       });
     }
   };
@@ -274,7 +303,7 @@ export const ExternalPause = () => {
         isOpen={isOpenRemoveMultipleModal}
         onClose={onCloseRemoveMultipleModal}
         icon={<PhosphorIcon as={Trash} size="md" />}
-        title={tRemove("title.multiple")}
+        title={tRemove("title")}
         description={tRemove("description")}
         confirmText={tRemove("confirmText")}
         onConfirm={() => {
@@ -283,7 +312,7 @@ export const ExternalPause = () => {
         onCancel={onCloseRemoveMultipleModal}
         cancelText={tRemove("cancelText")}
         confirmButtonProps={{
-          isLoading: isLoadingRemove,
+          isLoading: isLoadingUpdateExternalPauses,
         }}
       />
     </>

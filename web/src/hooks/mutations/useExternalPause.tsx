@@ -5,8 +5,35 @@ import SDKService from "../../services/SDKService";
 import {
   AddExternalPauseRequest,
   SetPausedMockRequest,
+  UpdateExternalPausesRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { GET_EXTERNAL_PAUSES_COUNT } from "../queries/useExternalPause";
+
+export const useUpdateExternalPauses = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (req: UpdateExternalPausesRequest) => SDKService.updateExternalPauses(req),
+    {
+      onSuccess(data, variables) {
+        queryClient.invalidateQueries({
+          queryKey: [GET_EXTERNAL_PAUSES_COUNT(variables.securityId)],
+        });
+
+        console.log(
+          "SDK message --> Update external pause operation success: ",
+          data,
+        );
+      },
+      onError: (error) => {
+        console.log(
+          "SDK message --> Update external pause operation error: ",
+          error,
+        );
+      },
+    },
+  );
+};
 
 export const useAddExternalPause = () => {
   const queryClient = useQueryClient();
