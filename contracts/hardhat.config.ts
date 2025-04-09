@@ -206,9 +206,10 @@
 import { HardhatUserConfig } from 'hardhat/config'
 import 'tsconfig-paths/register'
 import '@nomicfoundation/hardhat-toolbox'
+import '@nomicfoundation/hardhat-chai-matchers'
+import '@typechain/hardhat'
 import 'hardhat-contract-sizer'
-import 'solidity-coverage'
-import '@hashgraph/sdk'
+import 'hardhat-gas-reporter'
 import Configuration from '@configuration'
 import '@tasks'
 
