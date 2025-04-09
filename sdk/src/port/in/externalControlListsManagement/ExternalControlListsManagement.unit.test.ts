@@ -214,7 +214,7 @@ import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/Data
 import LogService from '../../../app/service/LogService';
 import { ValidationError } from '../request/error/ValidationError';
 
-describe('ExternalControlListsInPort', () => {
+describe('ExternalControlListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let updateExternalControlListsRequest: UpdateExternalControlListsRequest;
   let handleValidationSpy: jest.SpyInstance;
