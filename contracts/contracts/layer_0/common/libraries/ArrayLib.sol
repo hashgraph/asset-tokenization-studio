@@ -206,44 +206,68 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Context} from '@openzeppelin/contracts/utils/Context.sol';
-import {ArrayLib} from '../common/libraries/ArrayLib.sol';
+library ArrayLib {
+    error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
 
-abstract contract LocalContext is Context {
-    error ExpirationNotReached();
+    function getSlotForDynamicArrayItem(
+        uint256 _dynamicArraySlot,
+        uint256 _itemIndex,
+        uint256 _itemsSize
+    ) internal pure returns (uint256) {
+        uint256 dynamicArrayBaseSlot = uint256(
+            keccak256(abi.encode(_dynamicArraySlot))
+        );
 
-    modifier onlyConsistentActivations(
-        address[] calldata _controlLists,
-        bool[] calldata _actives
-    ) {
-        ArrayLib.checkUniqueValues(_controlLists, _actives);
-        _;
+        return dynamicArrayBaseSlot + _itemIndex * _itemsSize;
     }
 
-    function _checkExpirationReached(
-        uint256 _expirationTimestamp
-    ) internal view {
-        if (!_isExpired(_expirationTimestamp)) {
-            revert ExpirationNotReached();
+    function checkUniqueValues(
+        address[] memory _addresses,
+        bool[] memory _bools
+    ) internal pure {
+        uint256 length = _addresses.length;
+        uint256 innerIndex;
+        for (uint256 index; index < length; ) {
+            unchecked {
+                innerIndex = index + 1;
+            }
+            for (; innerIndex < length; ) {
+                if (
+                    _addresses[index] == _addresses[innerIndex] &&
+                    _bools[index] != _bools[innerIndex]
+                ) revert ContradictoryValuesInArray(index, innerIndex);
+                unchecked {
+                    ++innerIndex;
+                }
+            }
+            unchecked {
+                ++index;
+            }
         }
     }
 
-    function _isExpired(
-        uint256 _expirationTimestamp
-    ) internal view returns (bool) {
-        return _blockTimestamp() > _expirationTimestamp;
-    }
-
-    function _blockChainid() internal view returns (uint256 chainid_) {
-        chainid_ = block.chainid;
-    }
-
-    function _blockTimestamp()
-        internal
-        view
-        virtual
-        returns (uint256 blockTimestamp_)
-    {
-        blockTimestamp_ = block.timestamp;
+    function checkUniqueValues(
+        bytes32[] memory _bytes32s,
+        bool[] memory _bools
+    ) internal pure {
+        uint256 length = _bytes32s.length;
+        uint256 innerIndex;
+        for (uint256 index; index < length; ) {
+            unchecked {
+                innerIndex = index + 1;
+            }
+            for (; innerIndex < length; ) {
+                if (
+                    _bytes32s[index] == _bytes32s[innerIndex] &&
+                    _bools[index] != _bools[innerIndex]
+                ) revert ContradictoryValuesInArray(index, innerIndex);
+                unchecked {
+                    ++innerIndex;
+                }
+            }
+            unchecked {
+                ++index;
+            }
+        }
     }
 }
