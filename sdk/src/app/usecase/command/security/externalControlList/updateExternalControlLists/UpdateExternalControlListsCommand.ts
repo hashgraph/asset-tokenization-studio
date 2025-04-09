@@ -203,37 +203,23 @@
 
 */
 
-import { Command } from '../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { SecurityProps } from '../../../../../domain/context/security/Security.js';
+import { Command } from '../../../../../../core/command/Command';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse';
 
-export class CreateBondCommandResponse implements CommandResponse {
-  public readonly securityId: ContractId;
-  public readonly transactionId: string;
-
-  constructor(securityId: ContractId, transactionId: string) {
-    this.securityId = securityId;
-    this.transactionId = transactionId;
-  }
+export class UpdateExternalControlListsCommandResponse
+  implements CommandResponse
+{
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
 }
 
-export class CreateBondCommand extends Command<CreateBondCommandResponse> {
+export class UpdateExternalControlListsCommand extends Command<UpdateExternalControlListsCommandResponse> {
   constructor(
-    public readonly security: SecurityProps,
-    public readonly currency: string,
-    public readonly nominalValue: string,
-    public readonly startingDate: string,
-    public readonly maturityDate: string,
-    public readonly couponFrequency: string,
-    public readonly couponRate: string,
-    public readonly firstCouponDate: string,
-    public readonly factory?: ContractId,
-    public readonly resolver?: ContractId,
-    public readonly configId?: string,
-    public readonly configVersion?: number,
-    public readonly diamondOwnerAccount?: string,
-    public readonly externalControlLists?: string[],
+    public readonly securityId: string,
+    public readonly externalControlListsAddresses: string[],
+    public readonly actives: boolean[],
   ) {
     super();
   }

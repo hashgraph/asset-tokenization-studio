@@ -203,38 +203,41 @@
 
 */
 
-import { Command } from '../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { SecurityProps } from '../../../../../domain/context/security/Security.js';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+import { handleValidation } from '../Common';
+import Injectable from '../../../core/Injectable';
+import { CommandBus } from '../../../core/command/CommandBus';
+import { UpdateExternalControlListsRequest } from '../request/index.js';
+import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand.js';
 
-export class CreateBondCommandResponse implements CommandResponse {
-  public readonly securityId: ContractId;
-  public readonly transactionId: string;
-
-  constructor(securityId: ContractId, transactionId: string) {
-    this.securityId = securityId;
-    this.transactionId = transactionId;
-  }
+interface IExternalControlListsInPort {
+  updateExternalControlListsPauses(
+    request: UpdateExternalControlListsRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
-export class CreateBondCommand extends Command<CreateBondCommandResponse> {
+class ExternalControlListsInPort implements IExternalControlListsInPort {
   constructor(
-    public readonly security: SecurityProps,
-    public readonly currency: string,
-    public readonly nominalValue: string,
-    public readonly startingDate: string,
-    public readonly maturityDate: string,
-    public readonly couponFrequency: string,
-    public readonly couponRate: string,
-    public readonly firstCouponDate: string,
-    public readonly factory?: ContractId,
-    public readonly resolver?: ContractId,
-    public readonly configId?: string,
-    public readonly configVersion?: number,
-    public readonly diamondOwnerAccount?: string,
-    public readonly externalControlLists?: string[],
-  ) {
-    super();
+    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+  ) {}
+
+  @LogError
+  async updateExternalControlListsPauses(
+    request: UpdateExternalControlListsRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, externalControlListsAddresses, actives } = request;
+    handleValidation('UpdateExternalControlListsRequest', request);
+
+    return await this.commandBus.execute(
+      new UpdateExternalControlListsCommand(
+        securityId,
+        externalControlListsAddresses,
+        actives,
+      ),
+    );
   }
 }
+
+const ExternalControlListsManagement = new ExternalControlListsInPort();
+export default ExternalControlListsManagement;

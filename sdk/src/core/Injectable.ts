@@ -362,6 +362,7 @@ import { OperatorClearingTransferByPartitionCommandHandler } from '../app/usecas
 import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler.js';
 import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
 import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
+import { UpdateExternalControlListsCommandHandler } from '../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -637,6 +638,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: OperatorClearingTransferByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UpdateExternalControlListsCommandHandler,
   },
 ];
 

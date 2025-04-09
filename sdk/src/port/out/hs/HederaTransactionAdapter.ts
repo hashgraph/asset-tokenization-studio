@@ -236,6 +236,7 @@ import {
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
   ClearingActionsFacet__factory,
+  ExternalControlListManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -305,6 +306,7 @@ import {
   OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+  UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -424,6 +426,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -467,7 +470,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
-        externalControlLists: [],
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -538,6 +542,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -581,7 +586,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
-        externalControlLists: [],
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
       const bondDetails: BondDetailsData = {
@@ -3052,6 +3058,41 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(OPERATOR_CLEARING_TRANSFER_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async updateExternalControlLists(
+    security: EvmAddress,
+    externalControlListsAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateExternalControlLists';
+    LogService.logTrace(
+      `Updating External Control Lists for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalControlListManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        externalControlListsAddresses.map((address) => address.toString()),
+        actives,
+      ],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_EXTERNAL_CONTROL_LISTS_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

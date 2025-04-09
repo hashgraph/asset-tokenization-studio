@@ -203,38 +203,139 @@
 
 */
 
-import { Command } from '../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { SecurityProps } from '../../../../../domain/context/security/Security.js';
+import { createMock } from '@golevelup/ts-jest';
+import ExternalControlListsManagement from './ExternalControlListsManagement';
+import { CommandBus } from '../../../core/command/CommandBus';
+import { UpdateExternalControlListsRequest } from '../request';
+import * as Common from '../Common';
+import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
+import { UpdateExternalControlListsRequestFixture } from '../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture';
+import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
+import LogService from '../../../app/service/LogService';
+import { ValidationError } from '../request/error/ValidationError';
 
-export class CreateBondCommandResponse implements CommandResponse {
-  public readonly securityId: ContractId;
-  public readonly transactionId: string;
+describe('ExternalControlListsManagement', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let updateExternalControlListsRequest: UpdateExternalControlListsRequest;
+  let handleValidationSpy: jest.SpyInstance;
 
-  constructor(securityId: ContractId, transactionId: string) {
-    this.securityId = securityId;
-    this.transactionId = transactionId;
-  }
-}
+  const transactionId = TransactionIdFixture.create().id;
 
-export class CreateBondCommand extends Command<CreateBondCommandResponse> {
-  constructor(
-    public readonly security: SecurityProps,
-    public readonly currency: string,
-    public readonly nominalValue: string,
-    public readonly startingDate: string,
-    public readonly maturityDate: string,
-    public readonly couponFrequency: string,
-    public readonly couponRate: string,
-    public readonly firstCouponDate: string,
-    public readonly factory?: ContractId,
-    public readonly resolver?: ContractId,
-    public readonly configId?: string,
-    public readonly configVersion?: number,
-    public readonly diamondOwnerAccount?: string,
-    public readonly externalControlLists?: string[],
-  ) {
-    super();
-  }
-}
+  const expectedResponse = {
+    payload: true,
+    transactionId: transactionId,
+  };
+
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    handleValidationSpy = jest.spyOn(Common, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (ExternalControlListsManagement as any).commandBus = commandBusMock;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('updateExternalControlListsPauses', () => {
+    updateExternalControlListsRequest = new UpdateExternalControlListsRequest(
+      UpdateExternalControlListsRequestFixture.create(),
+    );
+    it('should update external control lists successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result =
+        await ExternalControlListsManagement.updateExternalControlListsPauses(
+          updateExternalControlListsRequest,
+        );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'UpdateExternalControlListsRequest',
+        updateExternalControlListsRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UpdateExternalControlListsCommand(
+          updateExternalControlListsRequest.securityId,
+          updateExternalControlListsRequest.externalControlListsAddresses,
+          updateExternalControlListsRequest.actives,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalControlListsManagement.updateExternalControlListsPauses(
+          updateExternalControlListsRequest,
+        ),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'UpdateExternalControlListsRequest',
+        updateExternalControlListsRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UpdateExternalControlListsCommand(
+          updateExternalControlListsRequest.securityId,
+          updateExternalControlListsRequest.externalControlListsAddresses,
+          updateExternalControlListsRequest.actives,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      updateExternalControlListsRequest = new UpdateExternalControlListsRequest(
+        {
+          ...UpdateExternalControlListsRequestFixture.create({
+            securityId: 'invalid',
+          }),
+        },
+      );
+
+      await expect(
+        ExternalControlListsManagement.updateExternalControlListsPauses(
+          updateExternalControlListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalControlListsAddresses array is invalid', async () => {
+      updateExternalControlListsRequest = new UpdateExternalControlListsRequest(
+        {
+          ...UpdateExternalControlListsRequestFixture.create({
+            externalControlListsAddresses: ['invalid'],
+          }),
+        },
+      );
+
+      await expect(
+        ExternalControlListsManagement.updateExternalControlListsPauses(
+          updateExternalControlListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalControlListsAddresses and active array are different', async () => {
+      updateExternalControlListsRequest = new UpdateExternalControlListsRequest(
+        {
+          ...UpdateExternalControlListsRequestFixture.create({
+            actives: [true, false],
+          }),
+        },
+      );
+
+      await expect(
+        ExternalControlListsManagement.updateExternalControlListsPauses(
+          updateExternalControlListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+});

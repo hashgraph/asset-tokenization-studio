@@ -228,6 +228,9 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   clearingActive: boolean;
 
   @OptionalField()
+  externalControlLists?: string[];
+
+  @OptionalField()
   diamondOwnerAccount?: string;
 
   currency: string;
@@ -256,6 +259,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     arePartitionsProtected,
     isMultiPartition,
     clearingActive,
+    externalControlLists,
     diamondOwnerAccount,
     currency,
     numberOfUnits,
@@ -282,6 +286,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     arePartitionsProtected: boolean;
     isMultiPartition: boolean;
     clearingActive: boolean;
+    externalControlLists?: string[];
     diamondOwnerAccount?: string;
     currency: string;
     numberOfUnits: string;
@@ -348,6 +353,13 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
       configId: Validation.checkBytes32Format(),
+      externalControlLists: (val) => {
+        return Validation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalControlLists',
+          true,
+        );
+      },
     });
     this.name = name;
     this.symbol = symbol;
@@ -360,6 +372,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.isMultiPartition = isMultiPartition;
     this.clearingActive = clearingActive;
     this.diamondOwnerAccount = diamondOwnerAccount;
+    this.externalControlLists = externalControlLists;
     this.currency = currency;
     this.numberOfUnits = numberOfUnits;
     this.nominalValue = nominalValue;

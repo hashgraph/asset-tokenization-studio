@@ -203,38 +203,72 @@
 
 */
 
-import { Command } from '../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { SecurityProps } from '../../../../../domain/context/security/Security.js';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
+import AccountService from '../../../../../service/AccountService';
+import ValidationService from '../../../../../service/ValidationService';
+import {
+  UpdateExternalControlListsCommand,
+  UpdateExternalControlListsCommandResponse,
+} from './UpdateExternalControlListsCommand';
+import TransactionService from '../../../../../service/TransactionService';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
+import ContractService from '../../../../../service/ContractService';
 
-export class CreateBondCommandResponse implements CommandResponse {
-  public readonly securityId: ContractId;
-  public readonly transactionId: string;
-
-  constructor(securityId: ContractId, transactionId: string) {
-    this.securityId = securityId;
-    this.transactionId = transactionId;
-  }
-}
-
-export class CreateBondCommand extends Command<CreateBondCommandResponse> {
+@CommandHandler(UpdateExternalControlListsCommand)
+export class UpdateExternalControlListsCommandHandler
+  implements ICommandHandler<UpdateExternalControlListsCommand>
+{
   constructor(
-    public readonly security: SecurityProps,
-    public readonly currency: string,
-    public readonly nominalValue: string,
-    public readonly startingDate: string,
-    public readonly maturityDate: string,
-    public readonly couponFrequency: string,
-    public readonly couponRate: string,
-    public readonly firstCouponDate: string,
-    public readonly factory?: ContractId,
-    public readonly resolver?: ContractId,
-    public readonly configId?: string,
-    public readonly configVersion?: number,
-    public readonly diamondOwnerAccount?: string,
-    public readonly externalControlLists?: string[],
-  ) {
-    super();
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
+  ) {}
+
+  async execute(
+    command: UpdateExternalControlListsCommand,
+  ): Promise<UpdateExternalControlListsCommandResponse> {
+    const { securityId, externalControlListsAddresses, actives } = command;
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
+
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkRole(
+      SecurityRole._CONTROL_LIST_MANAGER_ROLE,
+      account.id.toString(),
+      securityId,
+    );
+
+    const externalControlListsEvmAddresses = await Promise.all(
+      externalControlListsAddresses.map(
+        async (address) =>
+          await this.contractService.getContractEvmAddress(address),
+      ),
+    );
+
+    const res = await handler.updateExternalControlLists(
+      securityEvmAddress,
+      externalControlListsEvmAddresses,
+      actives,
+      securityId,
+    );
+
+    return Promise.resolve(
+      new UpdateExternalControlListsCommandResponse(
+        res.error === undefined,
+        res.id!,
+      ),
+    );
   }
 }
