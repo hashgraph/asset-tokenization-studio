@@ -265,6 +265,7 @@ export class CreateEquityCommandHandler
       dividendRight,
       currency,
       nominalValue,
+      externalControlLists,
     } = command;
 
     if (!factory) {
@@ -292,6 +293,18 @@ export class CreateEquityCommandHandler
     const resolverEvmAddress: EvmAddress =
       await this.contractService.getContractEvmAddress(resolver.toString());
 
+    let externalControlListsEvmAddresses: EvmAddress[] = [];
+    if (externalControlLists) {
+      externalControlListsEvmAddresses = await Promise.all(
+        externalControlLists.map(
+          async (address) =>
+            await this.contractService.getContractEvmAddress(
+              address.toString(),
+            ),
+        ),
+      );
+    }
+
     const handler = this.transactionService.getHandler();
 
     const equityInfo = new EquityDetails(
@@ -314,6 +327,7 @@ export class CreateEquityCommandHandler
       resolverEvmAddress,
       configId,
       configVersion,
+      externalControlListsEvmAddresses,
       diamondOwnerAccountEvmAddress,
       factory.toString(),
     );

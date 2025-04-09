@@ -273,7 +273,7 @@ class BondInPort implements IBondInPort {
     req: CreateBondRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }> {
     handleValidation('CreateBondRequest', req);
-    const { diamondOwnerAccount } = req;
+    const { diamondOwnerAccount, externalControlLists } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
     const resolver = this.networkService.configuration.resolverAddress;
@@ -313,6 +313,7 @@ class BondInPort implements IBondInPort {
         req.configId,
         req.configVersion,
         diamondOwnerAccount,
+        externalControlLists,
       ),
     );
 

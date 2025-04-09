@@ -203,38 +203,25 @@
 
 */
 
-import { Command } from '../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { SecurityProps } from '../../../../../domain/context/security/Security.js';
+import UpdateExternalControlListsRequest from '../../../src/port/in/request/security/externalControlLists/UpdateExternalControlListsRequest';
+import { createFixture } from '../config';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { UpdateExternalControlListsCommand } from '../../../src/app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
 
-export class CreateBondCommandResponse implements CommandResponse {
-  public readonly securityId: ContractId;
-  public readonly transactionId: string;
+export const UpdateExternalControlListsCommandFixture =
+  createFixture<UpdateExternalControlListsCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.externalControlListsAddresses.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    command.actives.faker((faker) => [faker.datatype.boolean()]);
+  });
 
-  constructor(securityId: ContractId, transactionId: string) {
-    this.securityId = securityId;
-    this.transactionId = transactionId;
-  }
-}
-
-export class CreateBondCommand extends Command<CreateBondCommandResponse> {
-  constructor(
-    public readonly security: SecurityProps,
-    public readonly currency: string,
-    public readonly nominalValue: string,
-    public readonly startingDate: string,
-    public readonly maturityDate: string,
-    public readonly couponFrequency: string,
-    public readonly couponRate: string,
-    public readonly firstCouponDate: string,
-    public readonly factory?: ContractId,
-    public readonly resolver?: ContractId,
-    public readonly configId?: string,
-    public readonly configVersion?: number,
-    public readonly diamondOwnerAccount?: string,
-    public readonly externalControlLists?: string[],
-  ) {
-    super();
-  }
-}
+export const UpdateExternalControlListsRequestFixture =
+  createFixture<UpdateExternalControlListsRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.externalControlListsAddresses.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    request.actives.faker((faker) => [faker.datatype.boolean()]);
+  });

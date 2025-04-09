@@ -203,38 +203,112 @@
 
 */
 
-import { Command } from '../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { SecurityProps } from '../../../../../domain/context/security/Security.js';
+import TransactionService from '../../../../../service/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/AccountService.js';
+import {
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { UpdateExternalControlListsCommandHandler } from './UpdateExternalControlListsCommandHandler.js';
+import {
+  UpdateExternalControlListsCommand,
+  UpdateExternalControlListsCommandResponse,
+} from './UpdateExternalControlListsCommand.js';
+import ValidationService from '../../../../../../app/service/ValidationService.js';
+import { UpdateExternalControlListsCommandFixture } from '../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 
-export class CreateBondCommandResponse implements CommandResponse {
-  public readonly securityId: ContractId;
-  public readonly transactionId: string;
+describe('UpdateExternalControlListCommandHandler', () => {
+  let handler: UpdateExternalControlListsCommandHandler;
+  let command: UpdateExternalControlListsCommand;
 
-  constructor(securityId: ContractId, transactionId: string) {
-    this.securityId = securityId;
-    this.transactionId = transactionId;
-  }
-}
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-export class CreateBondCommand extends Command<CreateBondCommandResponse> {
-  constructor(
-    public readonly security: SecurityProps,
-    public readonly currency: string,
-    public readonly nominalValue: string,
-    public readonly startingDate: string,
-    public readonly maturityDate: string,
-    public readonly couponFrequency: string,
-    public readonly couponRate: string,
-    public readonly firstCouponDate: string,
-    public readonly factory?: ContractId,
-    public readonly resolver?: ContractId,
-    public readonly configId?: string,
-    public readonly configVersion?: number,
-    public readonly diamondOwnerAccount?: string,
-    public readonly externalControlLists?: string[],
-  ) {
-    super();
-  }
-}
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const transactionId = TransactionIdFixture.create().id;
+
+  beforeEach(() => {
+    handler = new UpdateExternalControlListsCommandHandler(
+      accountServiceMock,
+      contractServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+    );
+    command = UpdateExternalControlListsCommandFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    it('should successfully update external control lists', async () => {
+      contractServiceMock.getContractEvmAddress
+        .mockResolvedValueOnce(evmAddress)
+        .mockResolvedValueOnce(externalEvmAddress);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+      validationServiceMock.checkPause.mockResolvedValue(undefined);
+      validationServiceMock.checkRole.mockResolvedValue(undefined);
+      transactionServiceMock
+        .getHandler()
+        .updateExternalControlLists.mockResolvedValue({
+          id: transactionId,
+        });
+
+      const result = await handler.execute(command);
+
+      expect(result).toBeInstanceOf(UpdateExternalControlListsCommandResponse);
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        2,
+      );
+      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().updateExternalControlLists,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+        SecurityRole._CONTROL_LIST_MANAGER_ROLE,
+        account.id.toString(),
+        command.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        1,
+        command.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        2,
+        command.externalControlListsAddresses[0],
+      );
+
+      expect(
+        transactionServiceMock.getHandler().updateExternalControlLists,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        [externalEvmAddress],
+        command.actives,
+        command.securityId,
+      );
+    });
+  });
+});
