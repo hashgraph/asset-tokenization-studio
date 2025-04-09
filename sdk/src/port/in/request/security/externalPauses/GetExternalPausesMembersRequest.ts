@@ -203,26 +203,30 @@
 
 */
 
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
+import ValidatedRequest from '../../validation/ValidatedRequest.js';
+import Validation from '../../validation/Validation.js';
 
-export default class RemoveExternalPauseRequest extends ValidatedRequest<RemoveExternalPauseRequest> {
+export default class GetExternalPausesMembersRequest extends ValidatedRequest<GetExternalPausesMembersRequest> {
   securityId: string;
-  externalPauseAddress: string;
+  start: number;
+  end: number;
 
   constructor({
     securityId,
-    externalPauseAddress,
+    start,
+    end,
   }: {
     securityId: string;
-    externalPauseAddress: string;
+    start: number;
+    end: number;
   }) {
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      externalPauseAddress: Validation.checkHederaIdFormatOrEvmAddress(),
+      start: Validation.checkNumber({ min: 0 }),
+      end: Validation.checkNumber({ min: 0 }),
     });
-
     this.securityId = securityId;
-    this.externalPauseAddress = externalPauseAddress;
+    this.start = start;
+    this.end = end;
   }
 }

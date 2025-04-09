@@ -204,7 +204,8 @@
 */
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
 /**
  * @notice Auxiliary enum used to keep track of the party initating a hold or clearing
  * @dev Its primary intended use is to know whether the allowance should be returned or not

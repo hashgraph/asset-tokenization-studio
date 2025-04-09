@@ -203,25 +203,19 @@
 
 */
 
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import ValidatedRequest from '../../../validation/ValidatedRequest.js';
+import Validation from '../../../validation/Validation.js';
 
-export default class IsExternalPauseRequest extends ValidatedRequest<IsExternalPauseRequest> {
-  securityId: string;
-  externalPauseAddress: string;
+export default class SetPausedMockRequest extends ValidatedRequest<SetPausedMockRequest> {
+  contractId: string;
+  paused: boolean;
 
-  constructor({
-    securityId,
-    externalPauseAddress,
-  }: {
-    securityId: string;
-    externalPauseAddress: string;
-  }) {
+  constructor({ contractId, paused }: { contractId: string; paused: boolean }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      externalPauseAddress: Validation.checkHederaIdFormatOrEvmAddress(),
+      contractId: Validation.checkHederaIdFormatOrEvmAddress(),
     });
-    this.securityId = securityId;
-    this.externalPauseAddress = externalPauseAddress;
+    this.contractId = contractId;
+    this.paused = paused;
   }
 }

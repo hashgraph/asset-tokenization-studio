@@ -320,14 +320,14 @@ import OperatorClearingTransferByPartitionRequest from './security/operations/cl
 import GetClearingCreateHoldForByPartitionRequest from './security/operations/clearing/GetClearingCreateHoldForByPartitionRequest.js';
 import GetClearingRedeemForByPartitionRequest from './security/operations/clearing/GetClearingRedeemForByPartitionRequest.js';
 import GetClearingTransferForByPartitionRequest from './security/operations/clearing/GetClearingTransferForByPartitionRequest.js';
-import UpdateExternalPausesRequest from './UpdateExternalPausesRequest.js';
-import AddExternalPauseRequest from './AddExternalPauseRequest.js';
-import RemoveExternalPauseRequest from './RemoveExternalPauseRequest.js';
-import IsExternalPauseRequest from './IsExternalPauseRequest.js';
-import GetExternalPausesCountRequest from './GetExternalPausesCountRequest.js';
-import GetExternalPausesMembersRequest from './GetExternalPausesMembersRequest.js';
-import IsPausedMockRequest from './IsPausedMockRequest.js';
-import SetPausedMockRequest from './SetPausedMockRequest.js';
+import UpdateExternalPausesRequest from './security/externalPauses/UpdateExternalPausesRequest.js';
+import AddExternalPauseRequest from './security/externalPauses/AddExternalPauseRequest.js';
+import RemoveExternalPauseRequest from './security/externalPauses/RemoveExternalPauseRequest.js';
+import IsExternalPauseRequest from './security/externalPauses/IsExternalPauseRequest.js';
+import GetExternalPausesCountRequest from './security/externalPauses/GetExternalPausesCountRequest.js';
+import GetExternalPausesMembersRequest from './security/externalPauses/GetExternalPausesMembersRequest.js';
+import IsPausedMockRequest from './security/externalPauses/mock/IsPausedMockRequest.js';
+import SetPausedMockRequest from './security/externalPauses/mock/SetPausedMockRequest.js';
 
 export * from './BaseRequest.js';
 export {

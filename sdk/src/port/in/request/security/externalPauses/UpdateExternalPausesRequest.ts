@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
-import { InvalidValue } from './error/InvalidValue.js';
+import ValidatedRequest from '../../validation/ValidatedRequest.js';
+import Validation from '../../validation/Validation.js';
+import { InvalidValue } from '../../error/InvalidValue.js';
 
 export default class UpdateExternalPausesRequest extends ValidatedRequest<UpdateExternalPausesRequest> {
   securityId: string;

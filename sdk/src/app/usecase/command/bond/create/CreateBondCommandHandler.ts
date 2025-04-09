@@ -293,11 +293,8 @@ export class CreateBondCommandHandler
       externalPausesEvmAddresses = await Promise.all(
         externalPauses.map(
           async (address) =>
-            new EvmAddress(
-              HEDERA_FORMAT_ID_REGEX.test(address)
-                ? (await this.mirrorNodeAdapter.getContractInfo(address))
-                    .evmAddress
-                : address.toString(),
+            await this.contractService.getContractEvmAddress(
+              address.toString(),
             ),
         ),
       );

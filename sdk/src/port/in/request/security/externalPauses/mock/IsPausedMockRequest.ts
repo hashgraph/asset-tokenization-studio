@@ -204,8 +204,8 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
+import ValidatedRequest from '../../../validation/ValidatedRequest.js';
+import Validation from '../../../validation/Validation.js';
 
 export default class IsPausedMockRequest extends ValidatedRequest<IsPausedMockRequest> {
   contractId: string;
