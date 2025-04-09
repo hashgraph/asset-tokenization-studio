@@ -223,7 +223,7 @@ export class KycAccountData extends ValidatedArgs<KycAccountData> {
     status: number,
   ) {
     super({
-      validFrom: CommonBusinessLogicValidation.checkDates(validTo),
+      validFrom: CommonBusinessLogicValidation.checkDates(false, validTo),
     });
 
     this.account = account;

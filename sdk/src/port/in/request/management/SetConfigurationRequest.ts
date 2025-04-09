@@ -204,7 +204,7 @@
 */
 
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import { Configuration } from '../../../../domain/context/network/Configuration.js';
+import Configuration from '../../../../domain/context/network/Configuration.js';
 
 export default class SetConfigurationRequest extends ValidatedRequest<SetConfigurationRequest> {
   factoryAddress: string;

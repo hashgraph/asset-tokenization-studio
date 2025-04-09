@@ -219,7 +219,10 @@ export class BondDetailsData extends ValidatedArgs<BondDetailsData> {
     maturityDate: string,
   ) {
     super({
-      startingDate: CommonBusinessLogicValidation.checkDates(maturityDate),
+      startingDate: CommonBusinessLogicValidation.checkDates(
+        true,
+        maturityDate,
+      ),
     });
 
     this.currency = currency;

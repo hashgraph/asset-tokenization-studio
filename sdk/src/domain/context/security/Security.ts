@@ -203,7 +203,6 @@
 
 */
 
-import BaseEntity from '../BaseEntity.js';
 import BaseError from '../../../core/error/BaseError.js';
 import CheckNums from '../../../core/checks/numbers/CheckNums.js';
 import CheckStrings from '../../../core/checks/strings/CheckStrings.js';
@@ -255,7 +254,7 @@ export interface SecurityProps {
   info?: string;
 }
 
-export class Security extends BaseEntity implements SecurityProps {
+export class Security implements SecurityProps {
   name: string;
   symbol: string;
   isin: string;
@@ -304,7 +303,6 @@ export class Security extends BaseEntity implements SecurityProps {
       countries,
       info,
     } = params;
-    super();
     this.name = name;
     this.symbol = symbol;
     this.isin = isin;

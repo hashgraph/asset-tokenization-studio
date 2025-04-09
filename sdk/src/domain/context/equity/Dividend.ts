@@ -223,8 +223,10 @@ export class Dividend extends ValidatedArgs<Dividend> {
     snapshotId?: number,
   ) {
     super({
-      recordTimeStamp:
-        CommonBusinessLogicValidation.checkDates(executionTimeStamp),
+      recordTimeStamp: CommonBusinessLogicValidation.checkDates(
+        true,
+        executionTimeStamp,
+      ),
     });
 
     this.amountPerUnitOfSecurity = amountPerUnitOfSecurity;

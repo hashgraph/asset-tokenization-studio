@@ -221,7 +221,7 @@ export class Kyc extends ValidatedArgs<Kyc> {
     status: number,
   ) {
     super({
-      validFrom: CommonBusinessLogicValidation.checkDates(validTo),
+      validFrom: CommonBusinessLogicValidation.checkDates(false, validTo),
     });
 
     this.validFrom = validFrom;

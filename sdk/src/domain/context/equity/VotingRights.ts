@@ -213,7 +213,7 @@ export class VotingRights extends ValidatedArgs<VotingRights> {
 
   constructor(recordTimeStamp: number, data: string, snapshotId?: number) {
     super({
-      recordTimeStamp: CommonBusinessLogicValidation.checkDates(),
+      recordTimeStamp: CommonBusinessLogicValidation.checkDates(true),
     });
     this.recordTimeStamp = recordTimeStamp;
     this.data = data;

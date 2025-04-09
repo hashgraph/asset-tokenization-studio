@@ -222,6 +222,7 @@ export class CorporateAction extends ValidatedArgs<CorporateAction> {
   ) {
     super({
       recordDateTimestamp: CommonBusinessLogicValidation.checkDates(
+        true,
         executionDateTimestamp,
       ),
     });

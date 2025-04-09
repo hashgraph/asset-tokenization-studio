@@ -217,7 +217,7 @@ export class CouponDetailsData extends ValidatedArgs<CouponDetailsData> {
     firstCouponDate: string,
   ) {
     super({
-      firstCouponDate: CommonBusinessLogicValidation.checkDates(),
+      firstCouponDate: CommonBusinessLogicValidation.checkDates(true),
     });
 
     this.couponFrequency = couponFrequency;

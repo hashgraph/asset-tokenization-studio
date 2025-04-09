@@ -210,8 +210,9 @@ import { MaturityDateCannotBeLessThanStartDate } from './error/MaturityDateCanno
 import { StartDateCannotBeLessThanCurrentDate } from './error/StartDateCannotBeLessThanCurrentDate.js';
 
 export default class CommonBusinessLogicValidation {
-  public static checkDates = (val2?: any) => {
+  public static checkDates = (checkStartDate: boolean, val2?: any) => {
     return (val1: any): BaseError[] => {
+      const margin = 1000 * 30;
       const err: BaseError[] = [];
       if (typeof val1 === 'string') {
         val1 = Number(val1);
@@ -225,8 +226,11 @@ export default class CommonBusinessLogicValidation {
           err.push(new MaturityDateCannotBeLessThanStartDate());
         }
         if (
+          checkStartDate &&
           val1.isLowerThan(
-            BigDecimal.fromString(Math.floor(Date.now() / 1000).toString()),
+            BigDecimal.fromString(
+              Math.floor(Date.now() / 1000 - margin).toString(),
+            ),
           )
         ) {
           err.push(new StartDateCannotBeLessThanCurrentDate());
@@ -235,7 +239,10 @@ export default class CommonBusinessLogicValidation {
         if (val2 && val1 > val2) {
           err.push(new MaturityDateCannotBeLessThanStartDate());
         }
-        if ((val1 as number) < Math.floor(Date.now() / 1000)) {
+        if (
+          checkStartDate &&
+          (val1 as number) < Math.floor(Date.now() / 1000)
+        ) {
           err.push(new StartDateCannotBeLessThanCurrentDate());
         }
       }

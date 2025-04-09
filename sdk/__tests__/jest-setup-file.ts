@@ -1490,7 +1490,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
         '0x' + targetId.toString().toUpperCase().substring(2),
       );
       const emptyHold = new HoldDetails(
-        0,
+        Math.floor(Date.now() / 1000),
         new BigDecimal(BigNumber.from(0)),
         '',
         '',

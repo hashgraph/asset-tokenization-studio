@@ -223,7 +223,7 @@ export class Hold extends ValidatedArgs<Hold> {
     data: string,
   ) {
     super({
-      expirationTimestamp: CommonBusinessLogicValidation.checkDates(),
+      expirationTimestamp: CommonBusinessLogicValidation.checkDates(true),
     });
 
     this.amount = amount;
@@ -243,7 +243,7 @@ export class ProtectedHold extends ValidatedArgs<ProtectedHold> {
 
   constructor(hold: Hold, deadline: BigNumber, nonce: BigNumber) {
     super({
-      deadline: CommonBusinessLogicValidation.checkDates(),
+      deadline: CommonBusinessLogicValidation.checkDates(true),
     });
 
     this.hold = new Hold(
@@ -285,7 +285,7 @@ export class HoldDetails extends ValidatedArgs<HoldDetails> {
     operatorData: string,
   ) {
     super({
-      expirationTimeStamp: CommonBusinessLogicValidation.checkDates(),
+      expirationTimeStamp: CommonBusinessLogicValidation.checkDates(true),
     });
 
     this.expirationTimeStamp = expirationTimeStamp;

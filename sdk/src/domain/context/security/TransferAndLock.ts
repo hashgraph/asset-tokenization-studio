@@ -222,7 +222,7 @@ export class TransferAndLock extends ValidatedArgs<TransferAndLock> {
     expirationTimestamp: BigNumber,
   ) {
     super({
-      expirationTimestamp: CommonBusinessLogicValidation.checkDates(),
+      expirationTimestamp: CommonBusinessLogicValidation.checkDates(true),
     });
 
     this.from = from;

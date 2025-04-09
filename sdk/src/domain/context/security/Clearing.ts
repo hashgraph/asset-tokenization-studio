@@ -219,7 +219,7 @@ export class ClearingOperation extends ValidatedArgs<ClearingOperation> {
 
   constructor(partition: string, expirationTimestamp: BigNumber, data: string) {
     super({
-      expirationTimestamp: CommonBusinessLogicValidation.checkDates(),
+      expirationTimestamp: CommonBusinessLogicValidation.checkDates(true),
     });
 
     this.partition = partition;

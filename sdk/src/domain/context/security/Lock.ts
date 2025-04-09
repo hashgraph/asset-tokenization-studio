@@ -215,7 +215,7 @@ export class Lock extends ValidatedArgs<Lock> {
 
   constructor(id: number, amount: BigDecimal, expiredTimestamp: BigNumber) {
     super({
-      expiredTimestamp: CommonBusinessLogicValidation.checkDates(),
+      expiredTimestamp: CommonBusinessLogicValidation.checkDates(true),
     });
 
     this.id = id;

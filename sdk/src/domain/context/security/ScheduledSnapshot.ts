@@ -213,7 +213,7 @@ export class ScheduledSnapshot extends ValidatedArgs<ScheduledSnapshot> {
 
   constructor(scheduledTimestamp: BigNumber, data: string) {
     super({
-      scheduledTimestamp: CommonBusinessLogicValidation.checkDates(),
+      scheduledTimestamp: CommonBusinessLogicValidation.checkDates(true),
     });
 
     this.scheduledTimestamp = scheduledTimestamp;

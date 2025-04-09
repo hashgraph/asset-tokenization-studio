@@ -221,8 +221,10 @@ export class Coupon extends ValidatedArgs<Coupon> {
     snapshotId?: number,
   ) {
     super({
-      recordTimeStamp:
-        CommonBusinessLogicValidation.checkDates(executionTimeStamp),
+      recordTimeStamp: CommonBusinessLogicValidation.checkDates(
+        true,
+        executionTimeStamp,
+      ),
     });
 
     this.recordTimeStamp = recordTimeStamp;

@@ -212,7 +212,7 @@ export class ScheduledBalanceAdjustment extends ValidatedArgs<ScheduledBalanceAd
   decimals: number;
   constructor(executionTimeStamp: number, factor: number, decimals: number) {
     super({
-      executionTimeStamp: CommonBusinessLogicValidation.checkDates(),
+      executionTimeStamp: CommonBusinessLogicValidation.checkDates(true),
     });
     this.executionTimeStamp = executionTimeStamp;
     this.factor = factor;
