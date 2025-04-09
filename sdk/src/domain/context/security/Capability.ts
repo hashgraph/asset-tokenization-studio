@@ -203,6 +203,10 @@
 
 */
 
+import BaseError from '../../../core/error/BaseError';
+import ValidatedArgs from '../../../core/validation/ValidatedArgs';
+import InvalidOperation from './error/InvalidOperation';
+
 export enum Operation {
   ISSUE = 'Issue',
   CONTROLLER = 'Controller',
@@ -212,6 +216,51 @@ export enum Operation {
   ROLE_ADMIN_MANAGEMENT = 'Admin_Role',
 }
 
-export class Capability {
-  constructor(public readonly operation: Operation) {}
+export class CastOperation {
+  static fromNumber(id: number): Operation {
+    if (id == 0) return Operation.ISSUE;
+    if (id == 1) return Operation.CONTROLLER;
+    if (id == 2) return Operation.PAUSE;
+    if (id == 3) return Operation.CONTROLLIST;
+    if (id == 4) return Operation.CORPORATEACTIONS;
+    return Operation.ROLE_ADMIN_MANAGEMENT;
+  }
+
+  static toNumber(value: Operation): number {
+    if (value == Operation.ISSUE) return 0;
+    if (value == Operation.CONTROLLER) return 1;
+    if (value == Operation.PAUSE) return 2;
+    if (value == Operation.CONTROLLIST) return 3;
+    if (value == Operation.CORPORATEACTIONS) return 4;
+    return 5;
+  }
+}
+
+export class Capability extends ValidatedArgs<Capability> {
+  public readonly operation: Operation;
+
+  constructor(operation: Operation) {
+    super({
+      operation: (val) => {
+        return Capability.checkOperation(val);
+      },
+    });
+
+    this.operation = operation;
+    ValidatedArgs.handleValidation('Capability', this);
+  }
+
+  public static checkOperation(value: number | Operation): BaseError[] {
+    const errorList: BaseError[] = [];
+
+    const length = Object.keys(Operation).length;
+
+    if (typeof value !== 'number') {
+      value = CastOperation.toNumber(value);
+    }
+
+    if (value >= length) errorList.push(new InvalidOperation(value));
+
+    return errorList;
+  }
 }

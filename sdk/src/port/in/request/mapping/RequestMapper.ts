@@ -210,7 +210,7 @@ import { Constructible, MapFunction } from '../../../../core/Type.js';
 import Account from '../../../../domain/context/account/Account.js';
 import PublicKey from '../../../../domain/context/account/PublicKey.js';
 import { RequestAccount, RequestPublicKey } from '../BaseRequest.js';
-import ValidatedRequest from '../validation/ValidatedRequest.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
 import {
   AWSKMSConfigRequest,
   DFNSConfigRequest,
@@ -261,8 +261,8 @@ export default class RequestMapper {
 
   /**
    *
-   * @param req ValidatedRequest<T> --> The request to map from
-   * @param extra { [key in keyof ValidatedRequest<T>]: any } --> Extra parameter type mappings
+   * @param req ValidatedArgs<T> --> The request to map from
+   * @param extra { [key in keyof ValidatedArgs<T>]: any } --> Extra parameter type mappings
    * @example
    * @returns The constructed mapped request
    */

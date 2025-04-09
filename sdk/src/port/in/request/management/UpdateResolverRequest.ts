@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../core/validation/FormatValidation.js';
 
 export default class UpdateResolverRequest extends ValidatedRequest<UpdateResolverRequest> {
   securityId: string;
@@ -224,10 +224,10 @@ export default class UpdateResolverRequest extends ValidatedRequest<UpdateResolv
     resolver: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      configVersion: Validation.checkNumber(),
-      configId: Validation.checkBytes32Format(),
-      resolver: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      configVersion: FormatValidation.checkNumber(),
+      configId: FormatValidation.checkBytes32Format(),
+      resolver: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
 
     this.configVersion = configVersion;

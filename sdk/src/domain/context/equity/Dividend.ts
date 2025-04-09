@@ -203,12 +203,17 @@
 
 */
 
+import ValidatedArgs from '../../../core/validation/ValidatedArgs.js';
 import BigDecimal from '../shared/BigDecimal.js';
+import { OptionalField } from '../../../core/decorator/OptionalDecorator.js';
+import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation.js';
 
-export class Dividend {
+export class Dividend extends ValidatedArgs<Dividend> {
   amountPerUnitOfSecurity: BigDecimal;
   recordTimeStamp: number;
   executionTimeStamp: number;
+
+  @OptionalField()
   snapshotId?: number;
 
   constructor(
@@ -217,9 +222,16 @@ export class Dividend {
     executionTimeStamp: number,
     snapshotId?: number,
   ) {
+    super({
+      recordTimeStamp:
+        CommonBusinessLogicValidation.checkDates(executionTimeStamp),
+    });
+
     this.amountPerUnitOfSecurity = amountPerUnitOfSecurity;
     this.recordTimeStamp = recordTimeStamp;
     this.executionTimeStamp = executionTimeStamp;
     this.snapshotId = snapshotId ? snapshotId : undefined;
+
+    ValidatedArgs.handleValidation('Dividend', this);
   }
 }

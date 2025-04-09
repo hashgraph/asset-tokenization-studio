@@ -203,12 +203,15 @@
 
 */
 
+import ValidatedArgs from '../../../core/validation/ValidatedArgs.js';
 import BigDecimal from '../shared/BigDecimal.js';
+import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation.js';
 
-export class Coupon {
+export class Coupon extends ValidatedArgs<Coupon> {
   recordTimeStamp: number;
   executionTimeStamp: number;
   rate: BigDecimal;
+
   snapshotId?: number;
 
   constructor(
@@ -217,9 +220,16 @@ export class Coupon {
     rate: BigDecimal,
     snapshotId?: number,
   ) {
+    super({
+      recordTimeStamp:
+        CommonBusinessLogicValidation.checkDates(executionTimeStamp),
+    });
+
     this.recordTimeStamp = recordTimeStamp;
     this.executionTimeStamp = executionTimeStamp;
     this.rate = rate;
     this.snapshotId = snapshotId ? snapshotId : undefined;
+
+    ValidatedArgs.handleValidation('Coupon', this);
   }
 }

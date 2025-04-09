@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../../core/validation/FormatValidation.js';
 
 export default class GetKYCAccountsDataRequest extends ValidatedRequest<GetKYCAccountsDataRequest> {
   securityId: string;
@@ -224,10 +224,10 @@ export default class GetKYCAccountsDataRequest extends ValidatedRequest<GetKYCAc
     end: number;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      kycStatus: Validation.checkNumber({ min: 0 }),
-      start: Validation.checkNumber({ min: 0 }),
-      end: Validation.checkNumber({ min: 0 }),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      kycStatus: FormatValidation.checkNumber({ min: 0 }),
+      start: FormatValidation.checkNumber({ min: 0 }),
+      end: FormatValidation.checkNumber({ min: 0 }),
     });
 
     this.securityId = securityId;

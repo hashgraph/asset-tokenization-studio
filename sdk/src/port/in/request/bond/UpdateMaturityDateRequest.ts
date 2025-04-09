@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../core/validation/FormatValidation.js';
 import { SecurityDate } from '../../../../domain/context/shared/SecurityDate.js';
 
 export default class UpdateMaturityDateRequest extends ValidatedRequest<UpdateMaturityDateRequest> {
@@ -219,7 +219,7 @@ export default class UpdateMaturityDateRequest extends ValidatedRequest<UpdateMa
     maturityDate: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       maturityDate: (val) => {
         return SecurityDate.checkDateTimestamp(parseInt(val));
       },

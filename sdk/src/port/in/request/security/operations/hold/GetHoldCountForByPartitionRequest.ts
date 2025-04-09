@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
 
 export default class GetHoldCountForByPartitionRequest extends ValidatedRequest<GetHoldCountForByPartitionRequest> {
   securityId: string;
@@ -221,9 +221,9 @@ export default class GetHoldCountForByPartitionRequest extends ValidatedRequest<
     partitionId: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: FormatValidation.checkBytes32Format(),
     });
 
     this.securityId = securityId;

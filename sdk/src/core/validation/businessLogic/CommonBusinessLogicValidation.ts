@@ -203,14 +203,44 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
-import ValidationResponse from '../validation/ValidationResponse.js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
+import BaseError from '../../error/BaseError.js';
+import { MaturityDateCannotBeLessThanStartDate } from './error/MaturityDateCannotBeLessThanStartDate.js';
+import { StartDateCannotBeLessThanCurrentDate } from './error/StartDateCannotBeLessThanCurrentDate.js';
 
-export class ValidationError extends BaseError {
-  constructor(name: string, validations: ValidationResponse[]) {
-    super(
-      ErrorCode.ValidationChecks,
-      `Validation for request ${name} was not successful: ${validations.toString()}`,
-    );
-  }
+export default class CommonBusinessLogicValidation {
+  public static checkDates = (val2?: any) => {
+    return (val1: any): BaseError[] => {
+      const err: BaseError[] = [];
+      if (typeof val1 === 'string') {
+        val1 = Number(val1);
+      }
+      if (typeof val2 === 'string') {
+        val2 = Number(val2);
+      }
+
+      if (val1 instanceof BigDecimal && (val2 instanceof BigDecimal || !val2)) {
+        if (val2 && val1.isGreaterThan(val2 as BigDecimal)) {
+          err.push(new MaturityDateCannotBeLessThanStartDate());
+        }
+        if (
+          val1.isLowerThan(
+            BigDecimal.fromString(Math.floor(Date.now() / 1000).toString()),
+          )
+        ) {
+          err.push(new StartDateCannotBeLessThanCurrentDate());
+        }
+      } else {
+        if (val2 && val1 > val2) {
+          err.push(new MaturityDateCannotBeLessThanStartDate());
+        }
+        if ((val1 as number) < Math.floor(Date.now() / 1000)) {
+          err.push(new StartDateCannotBeLessThanCurrentDate());
+        }
+      }
+
+      return err;
+    };
+  };
 }

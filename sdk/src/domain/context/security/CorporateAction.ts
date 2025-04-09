@@ -203,13 +203,16 @@
 
 */
 
+import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
+import ValidatedArgs from '../../../core/validation/ValidatedArgs';
+
 export const MIN_ID = 1;
 
-export class CorporateAction {
-  id: string;
-  actionType: string;
-  recordDateTimestamp: number;
-  executionDateTimestamp: number;
+export class CorporateAction extends ValidatedArgs<CorporateAction> {
+  public id: string;
+  public actionType: string;
+  public recordDateTimestamp: number;
+  public executionDateTimestamp: number;
 
   constructor(
     id: string,
@@ -217,9 +220,17 @@ export class CorporateAction {
     recordDateTimestamp: number,
     executionDateTimestamp: number,
   ) {
+    super({
+      recordDateTimestamp: CommonBusinessLogicValidation.checkDates(
+        executionDateTimestamp,
+      ),
+    });
+
     this.id = id;
     this.actionType = actionType;
     this.recordDateTimestamp = recordDateTimestamp;
     this.executionDateTimestamp = executionDateTimestamp;
+
+    ValidatedArgs.handleValidation('CorporateAction', this);
   }
 }

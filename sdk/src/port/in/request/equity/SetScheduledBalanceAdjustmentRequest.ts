@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../core/validation/FormatValidation.js';
 import { SecurityDate } from '../../../../domain/context/shared/SecurityDate.js';
 
 export default class SetScheduledBalanceAdjustmentRequest extends ValidatedRequest<SetScheduledBalanceAdjustmentRequest> {
@@ -225,15 +225,15 @@ export default class SetScheduledBalanceAdjustmentRequest extends ValidatedReque
     decimals: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       executionDate: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),
           Math.ceil(new Date().getTime() / 1000),
         );
       },
-      factor: Validation.checkAmount(),
-      decimals: Validation.checkAmount(true),
+      factor: FormatValidation.checkAmount(),
+      decimals: FormatValidation.checkAmount(true),
     });
 
     this.securityId = securityId;

@@ -205,11 +205,23 @@
 
 import { BigNumber } from 'ethers';
 import BigDecimal from '../shared/BigDecimal.js';
+import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation.js';
+import ValidatedArgs from '../../../core/validation/ValidatedArgs.js';
 
-export class Lock {
-  constructor(
-    public readonly id: number,
-    public readonly amount: BigDecimal,
-    public readonly expiredTimestamp: BigNumber,
-  ) {}
+export class Lock extends ValidatedArgs<Lock> {
+  public readonly id: number;
+  public readonly amount: BigDecimal;
+  public readonly expiredTimestamp: BigNumber;
+
+  constructor(id: number, amount: BigDecimal, expiredTimestamp: BigNumber) {
+    super({
+      expiredTimestamp: CommonBusinessLogicValidation.checkDates(),
+    });
+
+    this.id = id;
+    this.amount = amount;
+    this.expiredTimestamp = expiredTimestamp;
+
+    ValidatedArgs.handleValidation('Lock', this);
+  }
 }

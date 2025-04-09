@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../validation/ValidatedRequest';
-import Validation from '../validation/Validation';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs';
+import FormatValidation from '../../../../core/validation/FormatValidation';
 
 export default class UpdateConfigRequest extends ValidatedRequest<UpdateConfigRequest> {
   configId: string;
@@ -221,9 +221,9 @@ export default class UpdateConfigRequest extends ValidatedRequest<UpdateConfigRe
     securityId: string;
   }) {
     super({
-      configId: Validation.checkBytes32Format(),
-      configVersion: Validation.checkNumber(),
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      configId: FormatValidation.checkBytes32Format(),
+      configVersion: FormatValidation.checkNumber(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
 
     this.configId = configId;

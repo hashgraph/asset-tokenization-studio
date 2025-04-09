@@ -170,8 +170,8 @@
    limitations under the License.
 */
 
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
 
 export default class ReclaimHoldByPartitionRequest extends ValidatedRequest<ReclaimHoldByPartitionRequest> {
   securityId: string;
@@ -191,10 +191,10 @@ export default class ReclaimHoldByPartitionRequest extends ValidatedRequest<Recl
     securityId: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
-      holdId: Validation.checkNumber({ min: 0 }),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: FormatValidation.checkBytes32Format(),
+      holdId: FormatValidation.checkNumber({ min: 0 }),
     });
 
     this.securityId = securityId;

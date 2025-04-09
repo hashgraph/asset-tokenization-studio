@@ -203,9 +203,11 @@
 
 */
 
+import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation.js';
+import ValidatedArgs from '../../../core/validation/ValidatedArgs.js';
 import BigDecimal from '../shared/BigDecimal.js';
 
-export class BondDetails {
+export class BondDetails extends ValidatedArgs<BondDetails> {
   currency: string;
   nominalValue: BigDecimal;
   startingDate: number;
@@ -217,9 +219,15 @@ export class BondDetails {
     startingDate: number,
     maturityDate: number,
   ) {
+    super({
+      startingDate: CommonBusinessLogicValidation.checkDates(maturityDate),
+    });
+
     this.currency = currency;
     this.nominalValue = nominalValue;
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
+
+    ValidatedArgs.handleValidation('BondDetails', this);
   }
 }

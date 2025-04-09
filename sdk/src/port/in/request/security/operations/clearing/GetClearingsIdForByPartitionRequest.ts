@@ -204,8 +204,9 @@
 */
 
 import { ClearingOperationType } from '../../../../../../domain/context/security/Clearing.js';
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+
+import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
 
 export default class GetClearingsIdForByPartitionRequest extends ValidatedRequest<GetClearingsIdForByPartitionRequest> {
   securityId: string;
@@ -231,11 +232,11 @@ export default class GetClearingsIdForByPartitionRequest extends ValidatedReques
     end: number;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
-      start: Validation.checkNumber({ min: 0 }),
-      end: Validation.checkNumber({ min: 0 }),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: FormatValidation.checkBytes32Format(),
+      start: FormatValidation.checkNumber({ min: 0 }),
+      end: FormatValidation.checkNumber({ min: 0 }),
     });
 
     this.securityId = securityId;

@@ -204,8 +204,8 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../../core/validation/FormatValidation.js';
 
 export default class RoleRequest extends ValidatedRequest<RoleRequest> {
   securityId: string;
@@ -222,9 +222,9 @@ export default class RoleRequest extends ValidatedRequest<RoleRequest> {
     role: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      role: Validation.checkBytes32Format(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      role: FormatValidation.checkBytes32Format(),
     });
     this.securityId = securityId;
     this.targetId = targetId;

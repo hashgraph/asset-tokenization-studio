@@ -1005,10 +1005,15 @@ export class RPCQueryAdapter {
   ): Promise<ScheduledSnapshot[]> {
     LogService.logTrace(`Getting scheduled snapshots from ${start} to ${end}`);
 
-    return await this.connect(
+    const snapshots = await this.connect(
       ScheduledSnapshots__factory,
       address.toString(),
     ).getScheduledSnapshots(start, end);
+
+    return snapshots.map(
+      (s: { scheduledTimestamp: BigNumber; data: string }) =>
+        new ScheduledSnapshot(s.scheduledTimestamp, s.data),
+    );
   }
 
   async scheduledSnapshotCount(address: EvmAddress): Promise<number> {

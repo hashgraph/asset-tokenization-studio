@@ -203,8 +203,9 @@
 
 */
 
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+
+import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
 
 export default class GetClearingRedeemForByPartitionRequest extends ValidatedRequest<GetClearingRedeemForByPartitionRequest> {
   securityId: string;
@@ -224,9 +225,9 @@ export default class GetClearingRedeemForByPartitionRequest extends ValidatedReq
     clearingId: number;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: FormatValidation.checkBytes32Format(),
     });
 
     this.securityId = securityId;

@@ -204,8 +204,8 @@
 */
 
 import { MIN_ID } from '../../../../domain/context/security/CorporateAction.js';
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../core/validation/FormatValidation.js';
 
 export default class GetDividendsRequest extends ValidatedRequest<GetDividendsRequest> {
   securityId: string;
@@ -219,8 +219,8 @@ export default class GetDividendsRequest extends ValidatedRequest<GetDividendsRe
     dividendId: number;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      dividendId: Validation.checkNumber({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      dividendId: FormatValidation.checkNumber({
         max: undefined,
         min: MIN_ID,
       }),

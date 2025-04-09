@@ -203,15 +203,15 @@
 
 */
 
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../core/validation/FormatValidation.js';
 
 export default class GetBondDetailsRequest extends ValidatedRequest<GetBondDetailsRequest> {
   bondId: string;
 
   constructor({ bondId }: { bondId: string }) {
     super({
-      bondId: Validation.checkHederaIdFormatOrEvmAddress(),
+      bondId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
 
     this.bondId = bondId;

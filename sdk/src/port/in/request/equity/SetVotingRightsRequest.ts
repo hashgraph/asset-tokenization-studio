@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../core/validation/FormatValidation.js';
 import { SecurityDate } from '../../../../domain/context/shared/SecurityDate.js';
 
 export default class SetVotingRightsRequest extends ValidatedRequest<SetVotingRightsRequest> {
@@ -229,8 +229,8 @@ export default class SetVotingRightsRequest extends ValidatedRequest<SetVotingRi
           undefined,
         );
       },
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      data: Validation.checkBytesFormat(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      data: FormatValidation.checkBytesFormat(),
     });
 
     this.securityId = securityId;

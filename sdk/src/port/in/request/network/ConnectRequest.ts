@@ -209,8 +209,8 @@ import { MirrorNode } from '../../../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../../../domain/context/network/JsonRpcRelay.js';
 import { SupportedWallets } from '../../../../domain/context/network/Wallet.js';
 import { BaseRequest, RequestAccount } from '../BaseRequest.js';
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../core/validation/FormatValidation.js';
 
 export { SupportedWallets };
 
@@ -290,8 +290,8 @@ export default class ConnectRequest
     custodialWalletSettings?: CustodialSettings;
   }) {
     super({
-      account: Validation.checkAccount(),
-      wallet: Validation.checkString({ emptyCheck: true }),
+      account: FormatValidation.checkAccount(),
+      wallet: FormatValidation.checkString({ emptyCheck: true }),
     });
     this.account = account;
     this.network = network;

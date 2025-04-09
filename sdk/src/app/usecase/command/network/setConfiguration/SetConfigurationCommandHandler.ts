@@ -203,6 +203,7 @@
 
 */
 
+import { Configuration } from '../../../../../domain/context/network/Configuration.js';
 import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
@@ -227,10 +228,10 @@ export class SetConfigurationCommandHandler
   async execute(
     command: SetConfigurationCommand,
   ): Promise<SetConfigurationCommandResponse> {
-    this.networkService.configuration = {
-      factoryAddress: command.factoryAddress,
-      resolverAddress: command.resolverAddress,
-    };
+    this.networkService.configuration = new Configuration(
+      command.factoryAddress,
+      command.resolverAddress,
+    );
     return Promise.resolve(
       new SetConfigurationCommandResponse(
         this.networkService.configuration.factoryAddress,

@@ -204,8 +204,8 @@
 */
 
 import { MIN_ID } from '../../../../domain/context/security/CorporateAction.js';
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../core/validation/FormatValidation.js';
 
 export default class GetCouponRequest extends ValidatedRequest<GetCouponRequest> {
   securityId: string;
@@ -219,8 +219,8 @@ export default class GetCouponRequest extends ValidatedRequest<GetCouponRequest>
     couponId: number;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      couponId: Validation.checkNumber({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      couponId: FormatValidation.checkNumber({
         max: undefined,
         min: MIN_ID,
       }),

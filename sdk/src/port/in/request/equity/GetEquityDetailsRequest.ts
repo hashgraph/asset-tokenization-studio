@@ -203,15 +203,15 @@
 
 */
 
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../core/validation/FormatValidation.js';
 
 export default class GetEquityDetailsRequest extends ValidatedRequest<GetEquityDetailsRequest> {
   equityId: string;
 
   constructor({ equityId }: { equityId: string }) {
     super({
-      equityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      equityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
 
     this.equityId = equityId;

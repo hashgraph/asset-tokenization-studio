@@ -205,8 +205,8 @@
 
 import { OptionalField } from '../../../../core/decorator/OptionalDecorator.js';
 import { Security } from '../../../../domain/context/security/Security.js';
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../core/validation/FormatValidation.js';
 import { SecurityDate } from '../../../../domain/context/shared/SecurityDate.js';
 import { Factory } from '../../../../domain/context/factory/Factories.js';
 
@@ -312,10 +312,11 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
       decimals: (val) => {
         return Security.checkInteger(val);
       },
-      diamondOwnerAccount: Validation.checkHederaIdFormatOrEvmAddress(false),
-      currency: Validation.checkBytes3Format(),
-      numberOfUnits: Validation.checkNumber(),
-      nominalValue: Validation.checkNumber(),
+      diamondOwnerAccount:
+        FormatValidation.checkHederaIdFormatOrEvmAddress(false),
+      currency: FormatValidation.checkBytes3Format(),
+      numberOfUnits: FormatValidation.checkNumber(),
+      nominalValue: FormatValidation.checkNumber(),
       startingDate: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),
@@ -330,8 +331,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
           undefined,
         );
       },
-      couponFrequency: Validation.checkNumber(),
-      couponRate: Validation.checkNumber(),
+      couponFrequency: FormatValidation.checkNumber(),
+      couponRate: FormatValidation.checkNumber(),
       firstCouponDate: (val) => {
         if (parseInt(val) != 0) {
           return SecurityDate.checkDateTimestamp(
@@ -347,7 +348,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
       regulationSubType: (val) => {
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
-      configId: Validation.checkBytes32Format(),
+      configId: FormatValidation.checkBytes32Format(),
     });
     this.name = name;
     this.symbol = symbol;

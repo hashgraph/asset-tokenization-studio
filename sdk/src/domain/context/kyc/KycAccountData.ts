@@ -203,13 +203,16 @@
 
 */
 
-export class KycAccountData {
-  account: string;
-  validFrom: string;
-  validTo: string;
-  VCid: string;
-  issuer: string;
-  status: number;
+import ValidatedArgs from '../../../core/validation/ValidatedArgs';
+import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
+
+export class KycAccountData extends ValidatedArgs<KycAccountData> {
+  public account: string;
+  public validFrom: string;
+  public validTo: string;
+  public VCid: string;
+  public issuer: string;
+  public status: number;
 
   constructor(
     account: string,
@@ -219,11 +222,17 @@ export class KycAccountData {
     issuer: string,
     status: number,
   ) {
+    super({
+      validFrom: CommonBusinessLogicValidation.checkDates(validTo),
+    });
+
     this.account = account;
     this.validFrom = validFrom;
     this.validTo = validTo;
     this.VCid = VCid;
     this.issuer = issuer;
     this.status = status;
+
+    ValidatedArgs.handleValidation('KycAccountData', this);
   }
 }

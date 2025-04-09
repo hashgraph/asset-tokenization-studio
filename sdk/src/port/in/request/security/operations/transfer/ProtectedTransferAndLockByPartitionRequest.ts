@@ -204,8 +204,8 @@
 */
 
 import { SecurityDate } from '../../../../../../domain/context/shared/SecurityDate.js';
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
 
 export default class ProtectedTransferAndLockByPartitionRequest extends ValidatedRequest<ProtectedTransferAndLockByPartitionRequest> {
   securityId: string;
@@ -240,11 +240,11 @@ export default class ProtectedTransferAndLockByPartitionRequest extends Validate
     signature: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
-      amount: Validation.checkAmount(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: FormatValidation.checkBytes32Format(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      sourceId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      amount: FormatValidation.checkAmount(),
       deadline: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),

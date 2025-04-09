@@ -362,6 +362,8 @@ import { OperatorClearingTransferByPartitionCommandHandler } from '../app/usecas
 import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler.js';
 import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
 import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
+import { MirrorNode } from '../domain/context/network/MirrorNode.js';
+import { JsonRpcRelay } from '../domain/context/network/JsonRpcRelay.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -945,14 +947,11 @@ const TRANSACTION_HANDLER = [
 
 const defaultNetworkProps: NetworkProps = {
   environment: 'testnet',
-  mirrorNode: {
-    name: 'default',
-    baseUrl: 'https://testnet.mirrornode.hedera.com',
-  },
-  rpcNode: {
-    name: 'default',
-    baseUrl: 'https://testnet.hashio.io/api',
-  },
+  mirrorNode: new MirrorNode(
+    'default',
+    'https://testnet.mirrornode.hedera.com',
+  ),
+  rpcNode: new JsonRpcRelay('default', 'https://testnet.hashio.io/api'),
 };
 
 // Network default props

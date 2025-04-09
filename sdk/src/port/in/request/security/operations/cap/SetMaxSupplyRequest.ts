@@ -203,8 +203,9 @@
 
 */
 
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+
+import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
 
 export default class SetMaxSupplyRequest extends ValidatedRequest<SetMaxSupplyRequest> {
   securityId: string;
@@ -218,8 +219,8 @@ export default class SetMaxSupplyRequest extends ValidatedRequest<SetMaxSupplyRe
     maxSupply: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      maxSupply: Validation.checkAmount(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      maxSupply: FormatValidation.checkAmount(),
     });
 
     this.securityId = securityId;

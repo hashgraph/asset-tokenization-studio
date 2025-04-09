@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
 
 export default class RedeemRequest extends ValidatedRequest<RedeemRequest> {
   securityId: string;
@@ -212,8 +212,8 @@ export default class RedeemRequest extends ValidatedRequest<RedeemRequest> {
 
   constructor({ amount, securityId }: { amount: string; securityId: string }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      amount: Validation.checkAmount(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      amount: FormatValidation.checkAmount(),
     });
 
     this.securityId = securityId;

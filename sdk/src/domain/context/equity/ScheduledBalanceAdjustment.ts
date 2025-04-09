@@ -203,13 +203,21 @@
 
 */
 
-export class ScheduledBalanceAdjustment {
+import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
+import ValidatedArgs from '../../../core/validation/ValidatedArgs';
+
+export class ScheduledBalanceAdjustment extends ValidatedArgs<ScheduledBalanceAdjustment> {
   executionTimeStamp: number;
   factor: number;
   decimals: number;
   constructor(executionTimeStamp: number, factor: number, decimals: number) {
+    super({
+      executionTimeStamp: CommonBusinessLogicValidation.checkDates(),
+    });
     this.executionTimeStamp = executionTimeStamp;
     this.factor = factor;
     this.decimals = decimals;
+
+    ValidatedArgs.handleValidation('ScheduledBalanceAdjustment', this);
   }
 }

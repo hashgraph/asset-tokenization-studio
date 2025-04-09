@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../../core/validation/FormatValidation.js';
 
 export default class GetKYCStatusForRequest extends ValidatedRequest<GetKYCStatusForRequest> {
   securityId: string;
@@ -218,8 +218,8 @@ export default class GetKYCStatusForRequest extends ValidatedRequest<GetKYCStatu
     targetId: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
 
     this.securityId = securityId;

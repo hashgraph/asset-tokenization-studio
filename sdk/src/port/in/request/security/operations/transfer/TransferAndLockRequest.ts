@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../../../core/validation/FormatValidation.js';
 
 export default class TransferAndLockRequest extends ValidatedRequest<TransferAndLockRequest> {
   securityId: string;
@@ -224,9 +224,9 @@ export default class TransferAndLockRequest extends ValidatedRequest<TransferAnd
     expirationDate: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      amount: Validation.checkAmount(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      amount: FormatValidation.checkAmount(),
     });
 
     this.securityId = securityId;

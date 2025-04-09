@@ -203,9 +203,30 @@
 
 */
 
-export class BondDetailsData {
+import CommonBusinessLogicValidation from '../../../core/validation/businessLogic/CommonBusinessLogicValidation';
+import ValidatedArgs from '../../../core/validation/ValidatedArgs';
+
+export class BondDetailsData extends ValidatedArgs<BondDetailsData> {
   public currency: string;
   public nominalValue: string;
   public startingDate: string;
   public maturityDate: string;
+
+  constructor(
+    currency: string,
+    nominalValue: string,
+    startingDate: string,
+    maturityDate: string,
+  ) {
+    super({
+      startingDate: CommonBusinessLogicValidation.checkDates(maturityDate),
+    });
+
+    this.currency = currency;
+    this.nominalValue = nominalValue;
+    this.startingDate = startingDate;
+    this.maturityDate = maturityDate;
+
+    ValidatedArgs.handleValidation('BondDetailsData', this);
+  }
 }

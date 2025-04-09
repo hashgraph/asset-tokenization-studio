@@ -205,7 +205,8 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from './Common';
+import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+
 import { QueryBus } from '../../core/query/QueryBus';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
@@ -249,7 +250,7 @@ class KycInPort implements IKycInPort {
   async grantKYC(
     request: GrantKYCRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    handleValidation('GrantKYCRequest', request);
+    ValidatedRequest.handleValidation('GrantKYCRequest', request);
 
     return await this.commandBus.execute(
       new GrantKYCCommand(
@@ -264,7 +265,7 @@ class KycInPort implements IKycInPort {
   async revokeKYC(
     request: RevokeKYCRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    handleValidation('RevokeKYCRequest', request);
+    ValidatedRequest.handleValidation('RevokeKYCRequest', request);
 
     return await this.commandBus.execute(
       new RevokeKYCCommand(request.securityId, request.targetId),
@@ -273,7 +274,7 @@ class KycInPort implements IKycInPort {
 
   @LogError
   async getKYCFor(request: GetKYCForRequest): Promise<KYCViewModel> {
-    handleValidation('GetKYCForRequest', request);
+    ValidatedRequest.handleValidation('GetKYCForRequest', request);
 
     const res = (
       await this.queryBus.execute(
@@ -296,7 +297,7 @@ class KycInPort implements IKycInPort {
   async getKYCAccountsCount(
     request: GetKYCAccountsCountRequest,
   ): Promise<number> {
-    handleValidation('GetKYCAccountsCountRequest', request);
+    ValidatedRequest.handleValidation('GetKYCAccountsCountRequest', request);
 
     const res = (
       await this.queryBus.execute(
@@ -311,7 +312,7 @@ class KycInPort implements IKycInPort {
   async getKYCAccountsData(
     request: GetKYCAccountsDataRequest,
   ): Promise<KycAccountDataViewModel[]> {
-    handleValidation('GetKYCAccountsData', request);
+    ValidatedRequest.handleValidation('GetKYCAccountsData', request);
 
     const res = (
       await this.queryBus.execute(
@@ -338,7 +339,7 @@ class KycInPort implements IKycInPort {
 
   @LogError
   async getKYCStatusFor(request: GetKYCStatusForRequest): Promise<number> {
-    handleValidation('GetKYCStatusForRequest', request);
+    ValidatedRequest.handleValidation('GetKYCStatusForRequest', request);
 
     const res = (
       await this.queryBus.execute(

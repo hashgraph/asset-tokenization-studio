@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../../../core/validation/FormatValidation.js';
 
 export default class GrantKYCRequest extends ValidatedRequest<GrantKYCRequest> {
   securityId: string;
@@ -221,9 +221,9 @@ export default class GrantKYCRequest extends ValidatedRequest<GrantKYCRequest> {
     vcBase64: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      vcBase64: Validation.checkBase64Format(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      vcBase64: FormatValidation.checkBase64Format(),
     });
 
     this.securityId = securityId;
