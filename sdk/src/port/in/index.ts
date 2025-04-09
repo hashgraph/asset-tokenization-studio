@@ -215,7 +215,6 @@ import Management from './Management.js';
 import SSIManagement from './SSIManagement.js';
 import ExternalPausesManagement from './ExternalPausesManagement.js';
 import Kyc from './Kyc.js';
-import ExternalPausesManagement from './ExternalPausesManagement.js';
 
 export {
   Security,
