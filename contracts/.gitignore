@@ -27,8 +27,7 @@ node_modules
 .env
 coverage
 coverage.json
-typechain
-typechain-types
+gas-report.txt
 
 #Hardhat files
 cache
@@ -37,6 +36,8 @@ artifacts
 ./docs/*
 ./cache/*
 ./typechain-types/*
+typechain
+typechain-types
 
 #Slither
 Slither/*
