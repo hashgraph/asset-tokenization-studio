@@ -255,7 +255,7 @@ export const EditRole = () => {
       securityId: id,
       targetId: addressToSearch ?? "",
       start: 0,
-      end: 10,
+      end: 1000,
     }),
     {
       enabled: false,
