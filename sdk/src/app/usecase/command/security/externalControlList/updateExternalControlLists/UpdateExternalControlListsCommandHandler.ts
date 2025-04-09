@@ -250,7 +250,7 @@ export class UpdateExternalControlListsCommandHandler
       securityId,
     );
 
-    const externalControlListsEvmAddresses: EvmAddress[] = await Promise.all(
+    const externalControlListsEvmAddresses = await Promise.all(
       externalControlListsAddresses.map(
         async (address) =>
           await this.contractService.getContractEvmAddress(address),
