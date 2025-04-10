@@ -231,6 +231,6 @@ export class Coupon extends ValidatedDomain<Coupon> {
     this.rate = rate;
     this.snapshotId = snapshotId ? snapshotId : undefined;
 
-    ValidatedDomain.handleValidation('Coupon', this);
+    ValidatedDomain.handleValidation(Coupon.name, this);
   }
 }

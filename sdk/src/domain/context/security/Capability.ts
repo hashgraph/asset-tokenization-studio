@@ -247,7 +247,7 @@ export class Capability extends ValidatedDomain<Capability> {
     });
 
     this.operation = operation;
-    ValidatedDomain.handleValidation('Capability', this);
+    ValidatedDomain.handleValidation(Capability.name, this);
   }
 
   public static checkOperation(value: number | Operation): BaseError[] {

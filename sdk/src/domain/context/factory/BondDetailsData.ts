@@ -232,6 +232,6 @@ export class BondDetailsData extends ValidatedDomain<BondDetailsData> {
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
 
-    ValidatedDomain.handleValidation('BondDetailsData', this);
+    ValidatedDomain.handleValidation(BondDetailsData.name, this);
   }
 }

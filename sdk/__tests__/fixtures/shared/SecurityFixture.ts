@@ -249,12 +249,13 @@ export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
     () => new EvmAddress(EvmAddressPropsFixture.create().value),
   );
   security.paused?.faker((faker) => faker.datatype.boolean());
-  security.regulationType?.faker((faker) =>
-    faker.helpers.arrayElement(Object.values(RegulationType)),
+  // TODO: find a way to generate subtype based on type
+  security.regulationType?.faker(() =>
+  {return RegulationType.REG_S}
   );
-  security.regulationsubType?.faker((faker) =>
-    faker.helpers.arrayElement(Object.values(RegulationSubType)),
-  );
+  security.regulationsubType?.faker(() => {
+    {return RegulationSubType.NONE}
+  });  
   security.regulation?.fromFixture(RegulationFixture);
   security.isCountryControlListWhiteList.faker((faker) =>
     faker.datatype.boolean(),

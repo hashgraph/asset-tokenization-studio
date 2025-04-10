@@ -205,15 +205,12 @@
 
 import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
 import BigDecimal from '../shared/BigDecimal.js';
-import { OptionalField } from '../../../core/decorator/OptionalDecorator.js';
 import { SecurityDate } from '../shared/SecurityDate.js';
 
 export class Dividend extends ValidatedDomain<Dividend> {
   amountPerUnitOfSecurity: BigDecimal;
   recordTimeStamp: number;
   executionTimeStamp: number;
-
-  @OptionalField()
   snapshotId?: number;
 
   constructor(
@@ -233,6 +230,6 @@ export class Dividend extends ValidatedDomain<Dividend> {
     this.executionTimeStamp = executionTimeStamp;
     this.snapshotId = snapshotId ? snapshotId : undefined;
 
-    ValidatedDomain.handleValidation('Dividend', this);
+    ValidatedDomain.handleValidation(Dividend.name, this);
   }
 }

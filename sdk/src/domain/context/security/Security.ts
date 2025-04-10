@@ -352,6 +352,8 @@ export class Security
     this.isCountryControlListWhiteList = isCountryControlListWhiteList;
     this.countries = countries;
     this.info = info;
+
+    ValidatedDomain.handleValidation(Security.name, this);
   }
 
   public static checkName(value: string): BaseError[] {

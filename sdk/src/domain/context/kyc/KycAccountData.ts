@@ -238,6 +238,6 @@ export class KycAccountData extends ValidatedDomain<KycAccountData> {
     this.issuer = issuer;
     this.status = status;
 
-    ValidatedDomain.handleValidation('KycAccountData', this);
+    ValidatedDomain.handleValidation(KycAccountData.name, this);
   }
 }

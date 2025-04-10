@@ -235,6 +235,6 @@ export class Kyc extends ValidatedDomain<Kyc> {
     this.issuer = issuer;
     this.status = status;
 
-    ValidatedDomain.handleValidation('Kyc', this);
+    ValidatedDomain.handleValidation(Kyc.name, this);
   }
 }

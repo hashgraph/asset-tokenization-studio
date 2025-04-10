@@ -229,20 +229,12 @@ import { InvalidBytes3 } from '../../../domain/context/shared/error/InvalidBytes
 import { HEDERA_FORMAT_ID_REGEX } from '../../../domain/context/shared/HederaId.js';
 import { InvalidBytes } from '../../../domain/context/shared/error/InvalidBytes.js';
 import { InvalidBase64 } from '../../../domain/context/shared/error/InvalidBase64.js';
-import PrivateKey from '../../../domain/context/account/PrivateKey.js';
 
 export default class FormatValidation {
   public static checkPublicKey = () => {
     return (val: any): BaseError[] => {
       const key = val as RequestPublicKey;
       return PublicKey.validate(key);
-    };
-  };
-
-  public static checkPrivateKey = () => {
-    return (val: any): BaseError[] => {
-      const key = val as RequestPublicKey;
-      return PrivateKey.validate(key);
     };
   };
 
@@ -440,16 +432,6 @@ export default class FormatValidation {
       const err: BaseError[] = [];
       if (!base64RegEx.exec(val)) {
         err.push(new InvalidBase64(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkBoolean = () => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      if (typeof val !== 'boolean') {
-        err.push(new InvalidType(val));
       }
       return err;
     };

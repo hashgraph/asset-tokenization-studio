@@ -247,5 +247,7 @@ export class EquityDetails extends ValidatedDomain<EquityDetails> {
     this.dividendRight = dividendRight;
     this.currency = currency;
     this.nominalValue = nominalValue;
+
+    ValidatedDomain.handleValidation(EquityDetails.name, this);
   }
 }

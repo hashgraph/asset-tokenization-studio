@@ -231,6 +231,6 @@ export class CorporateAction extends ValidatedDomain<CorporateAction> {
     this.recordDateTimestamp = recordDateTimestamp;
     this.executionDateTimestamp = executionDateTimestamp;
 
-    ValidatedDomain.handleValidation('CorporateAction', this);
+    ValidatedDomain.handleValidation(CorporateAction.name, this);
   }
 }
