@@ -814,6 +814,16 @@ interface IExternalControlListsAdapter {
     actives: boolean[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  addExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 export default abstract class TransactionAdapter
@@ -1558,6 +1568,20 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     externalControlListsAddresses: EvmAddress[],
     actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

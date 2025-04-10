@@ -203,61 +203,68 @@
 
 */
 
-import UpdateExternalControlListsRequest from '../../../src/port/in/request/security/externalControlLists/UpdateExternalControlListsRequest';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { UpdateExternalControlListsCommand } from '../../../src/app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
-import { AddExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlList/addExternalControlList/AddExternalControlListCommand';
-import { RemoveExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlList/removeExternalControlList/RemoveExternalControlListCommand';
-import AddExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/AddExternalControlListRequest';
-import RemoveExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/RemoveExternalControlListRequest';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
+import AccountService from '../../../../../service/AccountService';
+import {
+  RemoveExternalControlListCommand,
+  RemoveExternalControlListCommandResponse,
+} from './RemoveExternalControlListCommand';
+import TransactionService from '../../../../../service/TransactionService';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
+import ContractService from '../../../../../service/ContractService';
+import ValidationService from '../../../../../service/ValidationService';
 
-export const UpdateExternalControlListsCommandFixture =
-  createFixture<UpdateExternalControlListsCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    command.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
+@CommandHandler(RemoveExternalControlListCommand)
+export class RemoveExternalControlListCommandHandler
+  implements ICommandHandler<RemoveExternalControlListCommand>
+{
+  constructor(
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
+  ) {}
 
-export const AddExternalControlListCommandFixture =
-  createFixture<AddExternalControlListCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
+  async execute(
+    command: RemoveExternalControlListCommand,
+  ): Promise<RemoveExternalControlListCommandResponse> {
+    const { securityId, externalControlListAddress } = command;
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
+
+    const securityEvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkRole(
+      SecurityRole._CONTROL_LIST_MANAGER_ROLE,
+      account.id.toString(),
+      securityId,
     );
-  });
 
-export const RemoveExternalControlListCommandFixture =
-  createFixture<RemoveExternalControlListCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
+    const externalControlListEvmAddresses =
+      await this.contractService.getContractEvmAddress(
+        externalControlListAddress,
+      );
+
+    const res = await handler.removeExternalControlList(
+      securityEvmAddress,
+      externalControlListEvmAddresses,
+      securityId,
     );
-  });
 
-export const UpdateExternalControlListsRequestFixture =
-  createFixture<UpdateExternalControlListsRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    request.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
-
-export const AddExternalControlListsRequestFixture =
-  createFixture<AddExternalControlListRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
+    return Promise.resolve(
+      new RemoveExternalControlListCommandResponse(
+        res.error === undefined,
+        res.id!,
+      ),
     );
-  });
-
-export const RemoveExternalControlListsRequestFixture =
-  createFixture<RemoveExternalControlListRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
-    );
-  });
+  }
+}

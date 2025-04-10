@@ -321,6 +321,8 @@ import GetClearingCreateHoldForByPartitionRequest from './security/operations/cl
 import GetClearingRedeemForByPartitionRequest from './security/operations/clearing/GetClearingRedeemForByPartitionRequest.js';
 import GetClearingTransferForByPartitionRequest from './security/operations/clearing/GetClearingTransferForByPartitionRequest.js';
 import UpdateExternalControlListsRequest from './security/externalControlLists/UpdateExternalControlListsRequest.js';
+import AddExternalControlListRequest from './security/externalControlLists/AddExternalControlListRequest.js';
+import RemoveExternalControlListRequest from './security/externalControlLists/RemoveExternalControlListRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -441,4 +443,6 @@ export {
   OperatorClearingRedeemByPartitionRequest,
   OperatorClearingTransferByPartitionRequest,
   UpdateExternalControlListsRequest,
+  AddExternalControlListRequest,
+  RemoveExternalControlListRequest,
 };
