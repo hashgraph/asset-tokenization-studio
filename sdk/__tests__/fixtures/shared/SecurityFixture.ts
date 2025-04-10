@@ -251,7 +251,9 @@ export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
   );
   security.paused?.faker((faker) => faker.datatype.boolean());
   const regulationType = faker.helpers.arrayElement(
-    Object.values(RegulationType),
+    Object.values(RegulationType).filter(
+      (type) => type !== RegulationType.NONE,
+    ),
   );
   security.regulationType?.as(() => regulationType);
   security.regulationsubType?.faker((faker) =>
