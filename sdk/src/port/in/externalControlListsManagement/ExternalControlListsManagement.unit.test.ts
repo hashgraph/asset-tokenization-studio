@@ -212,7 +212,7 @@ import {
   UpdateExternalControlListsRequest,
 } from '../request';
 import * as Common from '../Common';
-import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
+import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
 import {
   AddExternalControlListsRequestFixture,
   RemoveExternalControlListsRequestFixture,
@@ -221,8 +221,8 @@ import {
 import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
 import LogService from '../../../app/service/LogService';
 import { ValidationError } from '../request/error/ValidationError';
-import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlList/addExternalControlList/AddExternalControlListCommand';
-import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlList/removeExternalControlList/RemoveExternalControlListCommand';
+import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
+import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
 
 describe('ExternalControlListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;

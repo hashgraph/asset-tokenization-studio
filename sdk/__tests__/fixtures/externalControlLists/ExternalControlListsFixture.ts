@@ -206,9 +206,9 @@
 import UpdateExternalControlListsRequest from '../../../src/port/in/request/security/externalControlLists/UpdateExternalControlListsRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { UpdateExternalControlListsCommand } from '../../../src/app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
-import { AddExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlList/addExternalControlList/AddExternalControlListCommand';
-import { RemoveExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlList/removeExternalControlList/RemoveExternalControlListCommand';
+import { UpdateExternalControlListsCommand } from '../../../src/app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
+import { AddExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
+import { RemoveExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
 import AddExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/AddExternalControlListRequest';
 import RemoveExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/RemoveExternalControlListRequest';
 

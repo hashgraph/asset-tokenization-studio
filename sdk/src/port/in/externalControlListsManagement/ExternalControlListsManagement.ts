@@ -213,9 +213,9 @@ import {
   RemoveExternalControlListRequest,
   UpdateExternalControlListsRequest,
 } from '../request/index.js';
-import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand.js';
-import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlList/addExternalControlList/AddExternalControlListCommand.js';
-import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlList/removeExternalControlList/RemoveExternalControlListCommand.js';
+import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand.js';
+import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand.js';
+import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand.js';
 
 interface IExternalControlListsInPort {
   updateExternalControlListsPauses(

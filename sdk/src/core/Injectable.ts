@@ -362,9 +362,9 @@ import { OperatorClearingTransferByPartitionCommandHandler } from '../app/usecas
 import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler.js';
 import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
 import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
-import { UpdateExternalControlListsCommandHandler } from '../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommandHandler.js';
-import { AddExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlList/addExternalControlList/AddExternalControlListCommandHandler.js';
-import { RemoveExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlList/removeExternalControlList/RemoveExternalControlListCommandHandler.js';
+import { UpdateExternalControlListsCommandHandler } from '../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommandHandler.js';
+import { AddExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommandHandler.js';
+import { RemoveExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
