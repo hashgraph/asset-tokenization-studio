@@ -326,6 +326,8 @@ import {
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
   UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
+  ADD_EXTERNAL_CONTROL_LIST_GAS,
+  REMOVE_EXTERNAL_CONTROL_LIST_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -2817,6 +2819,44 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async addExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding External Control List for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalControlListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addExternalControlList(externalControlListAddress.toString(), {
+        gasLimit: ADD_EXTERNAL_CONTROL_LIST_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing External Control List for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalControlListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeExternalControlList(externalControlListAddress.toString(), {
+        gasLimit: REMOVE_EXTERNAL_CONTROL_LIST_GAS,
+      }),
       this.networkService.environment,
     );
   }

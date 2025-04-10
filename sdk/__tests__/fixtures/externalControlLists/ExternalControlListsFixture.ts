@@ -206,7 +206,11 @@
 import UpdateExternalControlListsRequest from '../../../src/port/in/request/security/externalControlLists/UpdateExternalControlListsRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { UpdateExternalControlListsCommand } from '../../../src/app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
+import { UpdateExternalControlListsCommand } from '../../../src/app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
+import { AddExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
+import { RemoveExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
+import AddExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/AddExternalControlListRequest';
+import RemoveExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/RemoveExternalControlListRequest';
 
 export const UpdateExternalControlListsCommandFixture =
   createFixture<UpdateExternalControlListsCommand>((command) => {
@@ -217,6 +221,22 @@ export const UpdateExternalControlListsCommandFixture =
     command.actives.faker((faker) => [faker.datatype.boolean()]);
   });
 
+export const AddExternalControlListCommandFixture =
+  createFixture<AddExternalControlListCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.externalControlListAddress.as(
+      () => HederaIdPropsFixture.create().value,
+    );
+  });
+
+export const RemoveExternalControlListCommandFixture =
+  createFixture<RemoveExternalControlListCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.externalControlListAddress.as(
+      () => HederaIdPropsFixture.create().value,
+    );
+  });
+
 export const UpdateExternalControlListsRequestFixture =
   createFixture<UpdateExternalControlListsRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -224,4 +244,20 @@ export const UpdateExternalControlListsRequestFixture =
       HederaIdPropsFixture.create().value,
     ]);
     request.actives.faker((faker) => [faker.datatype.boolean()]);
+  });
+
+export const AddExternalControlListsRequestFixture =
+  createFixture<AddExternalControlListRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.externalControlListAddress.as(
+      () => HederaIdPropsFixture.create().value,
+    );
+  });
+
+export const RemoveExternalControlListsRequestFixture =
+  createFixture<RemoveExternalControlListRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.externalControlListAddress.as(
+      () => HederaIdPropsFixture.create().value,
+    );
   });

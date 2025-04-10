@@ -362,7 +362,9 @@ import { OperatorClearingTransferByPartitionCommandHandler } from '../app/usecas
 import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler.js';
 import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
 import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
-import { UpdateExternalControlListsCommandHandler } from '../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommandHandler.js';
+import { UpdateExternalControlListsCommandHandler } from '../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommandHandler.js';
+import { AddExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommandHandler.js';
+import { RemoveExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -642,6 +644,14 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: UpdateExternalControlListsCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddExternalControlListCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveExternalControlListCommandHandler,
   },
 ];
 
