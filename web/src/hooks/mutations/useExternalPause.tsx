@@ -136,7 +136,6 @@ export const useRemoveExternalPause = () => {
 };
 
 export const useSetPausedMock = () => {
-  // const queryClient = useQueryClient();
   const toast = useToast();
   const { t } = useTranslation("externalPause", {
     keyPrefix: "list.messages",
