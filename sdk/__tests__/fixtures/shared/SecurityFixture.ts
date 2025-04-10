@@ -250,12 +250,14 @@ export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
   );
   security.paused?.faker((faker) => faker.datatype.boolean());
   // TODO: find a way to generate subtype based on type
-  security.regulationType?.faker(() =>
-  {return RegulationType.REG_S}
-  );
+  security.regulationType?.faker(() => {
+    return RegulationType.REG_S;
+  });
   security.regulationsubType?.faker(() => {
-    {return RegulationSubType.NONE}
-  });  
+    {
+      return RegulationSubType.NONE;
+    }
+  });
   security.regulation?.fromFixture(RegulationFixture);
   security.isCountryControlListWhiteList.faker((faker) =>
     faker.datatype.boolean(),
