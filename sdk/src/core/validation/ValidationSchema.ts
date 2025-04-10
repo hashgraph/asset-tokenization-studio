@@ -203,10 +203,10 @@
 
 */
 
-import BaseError from '../../../../core/error/BaseError.js';
-import { BaseRequest } from '../BaseRequest.js';
+import BaseError from '../error/BaseError.js';
+import { BaseArgs } from './BaseArgs.js';
 
-export type ValidatedRequestKey<T extends BaseRequest> = keyof Omit<
+export type ValidatedArgsKey<T extends BaseArgs> = keyof Omit<
   T,
   'validations' | 'validate'
 >;
@@ -214,6 +214,6 @@ export type ValidatedRequestKey<T extends BaseRequest> = keyof Omit<
 export type ValidationFn<K> = (val: K) => BaseError[] | void;
 export type PropType<TObj, TProp extends keyof TObj> = TObj[TProp];
 
-export type ValidationSchema<T extends BaseRequest> = Partial<{
-  [K in ValidatedRequestKey<T>]: ValidationFn<PropType<T, K>>;
+export type ValidationSchema<T extends BaseArgs> = Partial<{
+  [K in ValidatedArgsKey<T>]: ValidationFn<PropType<T, K>>;
 }>;

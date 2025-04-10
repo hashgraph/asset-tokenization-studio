@@ -203,12 +203,13 @@
 
 */
 
-export default class BaseEntity {
-  public toPrimitive(): object {
-    let res = {};
-    Object.entries(this).map(([key, value]) => {
-      res = { ...res, [key]: value };
-    });
-    return res;
+import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+
+export default class InvalidSupply extends BaseError {
+  constructor(totalSupply: string, maxSupply: string) {
+    super(
+      ErrorCode.InvalidSupply,
+      `Total supply ${totalSupply} exceeds max supply ${maxSupply}`,
+    );
   }
 }

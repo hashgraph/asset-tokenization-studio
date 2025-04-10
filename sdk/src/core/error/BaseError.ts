@@ -239,6 +239,7 @@ export enum ErrorCode {
   InvalidTimeUnits = '10037',
   MissingRegulationSubType = '10038',
   MissingRegulationType = '10039',
+  InvalidOperation = '10040',
 
   // Error codes for Logic Errors (Prefix: 2XXXX)
   AccountAlreadyInControlList = '20013',
@@ -274,6 +275,7 @@ export enum ErrorCode {
   NotAllowedInMultiPartition = '20033',
   OnlyDefaultPartitionAllowed = '20034',
   NotIssuable = '20035',
+  InvalidSupply = '20036',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',

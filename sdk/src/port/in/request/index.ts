@@ -210,7 +210,7 @@ import CreateEquityRequest from './equity/CreateEquityRequest.js';
 import CreateBondRequest from './bond/CreateBondRequest.js';
 import RoleRequest from './security/roles/RoleRequest.js';
 import ApplyRolesRequest from './security/roles/ApplyRolesRequest.js';
-import ValidationResponse from './validation/ValidationResponse.js';
+import ValidationResponse from '../../../core/validation/ValidationResponse.js';
 import TransferRequest from './security/operations/transfer/TransferRequest.js';
 import TransferAndLockRequest from './security/operations/transfer/TransferAndLockRequest.js';
 import ForceTransferRequest from './security/operations/transfer/ForceTransferRequest.js';
@@ -321,7 +321,6 @@ import GetClearingCreateHoldForByPartitionRequest from './security/operations/cl
 import GetClearingRedeemForByPartitionRequest from './security/operations/clearing/GetClearingRedeemForByPartitionRequest.js';
 import GetClearingTransferForByPartitionRequest from './security/operations/clearing/GetClearingTransferForByPartitionRequest.js';
 
-export * from './BaseRequest.js';
 export {
   CreateEquityRequest,
   CreateBondRequest,

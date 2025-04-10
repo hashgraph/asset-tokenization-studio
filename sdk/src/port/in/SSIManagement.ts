@@ -205,7 +205,7 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from './Common';
+import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
 import { QueryBus } from '../../core/query/QueryBus';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
@@ -253,7 +253,7 @@ class SSIManagementInPort implements ISSIManagementInPort {
     request: AddIssuerRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, issuerId } = request;
-    handleValidation('AddIssuerRequest', request);
+    ValidatedRequest.handleValidation('AddIssuerRequest', request);
 
     return await this.commandBus.execute(
       new AddIssuerCommand(securityId, issuerId),
@@ -265,7 +265,10 @@ class SSIManagementInPort implements ISSIManagementInPort {
     request: SetRevocationRegistryAddressRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, revocationRegistryId } = request;
-    handleValidation('SetRevocationRegistryAddressRequest', request);
+    ValidatedRequest.handleValidation(
+      'SetRevocationRegistryAddressRequest',
+      request,
+    );
 
     return await this.commandBus.execute(
       new SetRevocationRegistryAddressCommand(securityId, revocationRegistryId),
@@ -277,7 +280,7 @@ class SSIManagementInPort implements ISSIManagementInPort {
     request: RemoveIssuerRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, issuerId } = request;
-    handleValidation('RemoveIssuerRequest', request);
+    ValidatedRequest.handleValidation('RemoveIssuerRequest', request);
 
     return await this.commandBus.execute(
       new RemoveIssuerCommand(securityId, issuerId),
@@ -289,7 +292,10 @@ class SSIManagementInPort implements ISSIManagementInPort {
     request: GetRevocationRegistryAddressRequest,
   ): Promise<string> {
     const { securityId } = request;
-    handleValidation('GetRevocationRegistryAddressRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetRevocationRegistryAddressRequest',
+      request,
+    );
 
     return (
       await this.queryBus.execute(
@@ -303,7 +309,7 @@ class SSIManagementInPort implements ISSIManagementInPort {
     request: GetIssuerListCountRequest,
   ): Promise<number> {
     const { securityId } = request;
-    handleValidation('GetIssuerListCountRequest', request);
+    ValidatedRequest.handleValidation('GetIssuerListCountRequest', request);
 
     return (
       await this.queryBus.execute(new GetIssuerListCountQuery(securityId))
@@ -315,7 +321,7 @@ class SSIManagementInPort implements ISSIManagementInPort {
     request: GetIssuerListMembersRequest,
   ): Promise<string[]> {
     const { securityId, start, end } = request;
-    handleValidation('GetIssuerListMembersRequest', request);
+    ValidatedRequest.handleValidation('GetIssuerListMembersRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -327,7 +333,7 @@ class SSIManagementInPort implements ISSIManagementInPort {
   @LogError
   async isIssuer(request: IsIssuerRequest): Promise<boolean> {
     const { securityId, issuerId } = request;
-    handleValidation('IsIssuerRequest', request);
+    ValidatedRequest.handleValidation('IsIssuerRequest', request);
 
     return (
       await this.queryBus.execute(new IsIssuerQuery(securityId, issuerId))

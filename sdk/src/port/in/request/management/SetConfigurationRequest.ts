@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
 import Configuration from '../../../../domain/context/network/Configuration.js';
+import FormatValidation from '../FormatValidation.js';
 
 export default class SetConfigurationRequest extends ValidatedRequest<SetConfigurationRequest> {
   factoryAddress: string;
@@ -213,8 +213,8 @@ export default class SetConfigurationRequest extends ValidatedRequest<SetConfigu
 
   constructor(props: Configuration) {
     super({
-      factoryAddress: Validation.checkContractId(),
-      resolverAddress: Validation.checkContractId(),
+      factoryAddress: FormatValidation.checkContractId(),
+      resolverAddress: FormatValidation.checkContractId(),
     });
     this.factoryAddress = props.factoryAddress;
     this.resolverAddress = props.resolverAddress;

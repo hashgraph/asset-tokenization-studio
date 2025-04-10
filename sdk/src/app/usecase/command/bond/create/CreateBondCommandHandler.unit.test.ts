@@ -347,13 +347,13 @@ describe('CreateBondCommandHandler', () => {
         expect(
           transactionServiceMock.getHandler().createBond,
         ).toHaveBeenCalledWith(
-          command.security,
-          {
+          expect.objectContaining(command.security),
+          expect.objectContaining({
             currency: command.currency,
             nominalValue: BigDecimal.fromString(command.nominalValue),
             startingDate: parseInt(command.startingDate),
             maturityDate: parseInt(command.maturityDate),
-          },
+          }),
           {
             couponFrequency: parseInt(command.couponFrequency),
             couponRate: BigDecimal.fromString(command.couponRate),

@@ -204,8 +204,9 @@
 */
 
 import { SecurityDate } from '../../../../../../domain/context/shared/SecurityDate.js';
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+
+import FormatValidation from '../../../FormatValidation.js';
 
 export default class ClearingRedeemByPartitionRequest extends ValidatedRequest<ClearingRedeemByPartitionRequest> {
   securityId: string;
@@ -225,9 +226,9 @@ export default class ClearingRedeemByPartitionRequest extends ValidatedRequest<C
     expirationDate: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
-      amount: Validation.checkAmount(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: FormatValidation.checkBytes32Format(),
+      amount: FormatValidation.checkAmount(),
       expirationDate: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),
