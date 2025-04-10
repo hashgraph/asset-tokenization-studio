@@ -209,11 +209,16 @@ import { handleValidation } from '../Common';
 import Injectable from '../../../core/Injectable';
 import { CommandBus } from '../../../core/command/CommandBus';
 import {
-  GetExternalControlListsCountRequest,
-  GetExternalControlListsMembersRequest,
-  IsExternalControlListRequest,
+  AddExternalControlListRequest,
+  RemoveExternalControlListRequest,
   UpdateExternalControlListsRequest,
+    GetExternalControlListsCountRequest,
+    GetExternalControlListsMembersRequest,
+    IsExternalControlListRequest,
 } from '../request/index.js';
+import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand.js';
+import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand.js';
+import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand.js';
 import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand.js';
 import { QueryBus } from '../../../core/query/QueryBus.js';
 import { IsExternalControlListQuery } from '../../../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery.js';
@@ -223,6 +228,12 @@ import { GetExternalControlListsMembersQuery } from '../../../app/usecase/query/
 interface IExternalControlListsInPort {
   updateExternalControlListsPauses(
     request: UpdateExternalControlListsRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  addExternalControlList(
+    request: AddExternalControlListRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeExternalControlList(
+    request: RemoveExternalControlListRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   isExternalControlList(
     request: IsExternalControlListRequest,
@@ -253,6 +264,33 @@ class ExternalControlListsInPort implements IExternalControlListsInPort {
         securityId,
         externalControlListsAddresses,
         actives,
+      ),
+    );
+  }
+
+  @LogError
+  async addExternalControlList(
+    request: AddExternalControlListRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, externalControlListAddress } = request;
+    handleValidation('AddExternalControlListRequest', request);
+
+    return await this.commandBus.execute(
+      new AddExternalControlListCommand(securityId, externalControlListAddress),
+    );
+  }
+
+  @LogError
+  async removeExternalControlList(
+    request: RemoveExternalControlListRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, externalControlListAddress } = request;
+    handleValidation('RemoveExternalControlListRequest', request);
+
+    return await this.commandBus.execute(
+      new RemoveExternalControlListCommand(
+        securityId,
+        externalControlListAddress,
       ),
     );
   }

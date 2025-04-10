@@ -203,107 +203,23 @@
 
 */
 
-import UpdateExternalControlListsRequest from '../../../src/port/in/request/security/externalControlLists/UpdateExternalControlListsRequest';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { UpdateExternalControlListsCommand } from '../../../src/app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
-import { AddExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
-import { RemoveExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
-import AddExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/AddExternalControlListRequest';
-import RemoveExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/RemoveExternalControlListRequest';
-import { GetExternalControlListsCountQuery } from '../../../src/app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery';
-import { GetExternalControlListsMembersQuery } from '../../../src/app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery';
-import { IsExternalControlListQuery } from '../../../src/app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery';
-import IsExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/IsExternalControlListRequest';
-import GetExternalControlListsMembersRequest from '../../../src/port/in/request/security/externalControlLists/GetExternalControlListsMembersRequest';
-import GetExternalControlListsCountRequest from '../../../src/port/in/request/security/externalControlLists/GetExternalControlListsCountRequest';
+import { Command } from '../../../../../../core/command/Command';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse';
 
-export const UpdateExternalControlListsCommandFixture =
-  createFixture<UpdateExternalControlListsCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    command.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
+export class RemoveExternalControlListCommandResponse
+  implements CommandResponse
+{
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
+}
 
-export const AddExternalControlListCommandFixture =
-  createFixture<AddExternalControlListCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
-    );
-  });
-
-export const RemoveExternalControlListCommandFixture =
-  createFixture<RemoveExternalControlListCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
-    );
-  });
-
-export const UpdateExternalControlListsRequestFixture =
-  createFixture<UpdateExternalControlListsRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    request.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
-
-export const GetExternalControlListsCountQueryFixture =
-  createFixture<GetExternalControlListsCountQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const GetExternalControlListsMembersQueryFixture =
-  createFixture<GetExternalControlListsMembersQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    query.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
-
-export const IsExternalControlListQueryFixture =
-  createFixture<IsExternalControlListQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
-    );
-  });
-
-export const IsExternalControlListRequestFixture =
-  createFixture<IsExternalControlListRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
-    );
-  });
-
-export const GetExternalControlListsMembersRequestFixture =
-  createFixture<GetExternalControlListsMembersRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    request.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
-
-export const GetExternalControlListsCountRequestFixture =
-  createFixture<GetExternalControlListsCountRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const AddExternalControlListsRequestFixture =
-  createFixture<AddExternalControlListRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
-    );
-  });
-
-export const RemoveExternalControlListsRequestFixture =
-  createFixture<RemoveExternalControlListRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
-    );
-  });
+export class RemoveExternalControlListCommand extends Command<RemoveExternalControlListCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly externalControlListAddress: string,
+  ) {
+    super();
+  }
+}

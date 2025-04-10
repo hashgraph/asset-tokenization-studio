@@ -207,25 +207,33 @@ import { createMock } from '@golevelup/ts-jest';
 import ExternalControlListsManagement from './ExternalControlListsManagement';
 import { CommandBus } from '../../../core/command/CommandBus';
 import {
-  GetExternalControlListsCountRequest,
-  GetExternalControlListsMembersRequest,
-  IsExternalControlListRequest,
+  AddExternalControlListRequest,
+  RemoveExternalControlListRequest,
   UpdateExternalControlListsRequest,
+    GetExternalControlListsCountRequest,
+    GetExternalControlListsMembersRequest,
+    IsExternalControlListRequest,
 } from '../request';
 import * as Common from '../Common';
-import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
+import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
 import {
-  GetExternalControlListsCountRequestFixture,
-  GetExternalControlListsMembersRequestFixture,
-  IsExternalControlListRequestFixture,
+  AddExternalControlListsRequestFixture,
+  RemoveExternalControlListsRequestFixture,
   UpdateExternalControlListsRequestFixture,
+    GetExternalControlListsCountRequestFixture,
+    GetExternalControlListsMembersRequestFixture,
+    IsExternalControlListRequestFixture,
 } from '../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture';
+import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
+import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '../../../../__tests__/fixtures/shared/DataFixture';
 import LogService from '../../../app/service/LogService';
 import { ValidationError } from '../request/error/ValidationError';
+import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
+import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
 import { QueryBus } from '../../../core/query/QueryBus';
 import { IsExternalControlListQuery } from '../../../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery';
 import { GetExternalControlListsCountQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery';
@@ -235,6 +243,8 @@ describe('ExternalControlListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
   let updateExternalControlListsRequest: UpdateExternalControlListsRequest;
+  let addExternalControlListsRequest: AddExternalControlListRequest;
+  let removeExternalControlListsRequest: RemoveExternalControlListRequest;
   let isExternalControlListRequest: IsExternalControlListRequest;
   let getExternalControlListsCountRequest: GetExternalControlListsCountRequest;
   let getExternalControlListsMembersRequest: GetExternalControlListsMembersRequest;
@@ -357,6 +367,163 @@ describe('ExternalControlListsManagement', () => {
       await expect(
         ExternalControlListsManagement.updateExternalControlListsPauses(
           updateExternalControlListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('addExternalControlList', () => {
+    addExternalControlListsRequest = new AddExternalControlListRequest(
+      AddExternalControlListsRequestFixture.create(),
+    );
+    it('should add external control list successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result =
+        await ExternalControlListsManagement.addExternalControlList(
+          addExternalControlListsRequest,
+        );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'AddExternalControlListRequest',
+        addExternalControlListsRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new AddExternalControlListCommand(
+          addExternalControlListsRequest.securityId,
+          addExternalControlListsRequest.externalControlListAddress,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalControlListsManagement.addExternalControlList(
+          addExternalControlListsRequest,
+        ),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'AddExternalControlListRequest',
+        addExternalControlListsRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new AddExternalControlListCommand(
+          addExternalControlListsRequest.securityId,
+          addExternalControlListsRequest.externalControlListAddress,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      addExternalControlListsRequest = new AddExternalControlListRequest({
+        ...AddExternalControlListsRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalControlListsManagement.addExternalControlList(
+          addExternalControlListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalControlListAddress is invalid', async () => {
+      addExternalControlListsRequest = new AddExternalControlListRequest({
+        ...AddExternalControlListsRequestFixture.create({
+          externalControlListAddress: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalControlListsManagement.addExternalControlList(
+          addExternalControlListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+  describe('removeExternalControlList', () => {
+    removeExternalControlListsRequest = new RemoveExternalControlListRequest(
+      RemoveExternalControlListsRequestFixture.create(),
+    );
+    it('should remove external control list successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result =
+        await ExternalControlListsManagement.removeExternalControlList(
+          removeExternalControlListsRequest,
+        );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RemoveExternalControlListRequest',
+        removeExternalControlListsRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RemoveExternalControlListCommand(
+          removeExternalControlListsRequest.securityId,
+          removeExternalControlListsRequest.externalControlListAddress,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalControlListsManagement.removeExternalControlList(
+          removeExternalControlListsRequest,
+        ),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RemoveExternalControlListRequest',
+        removeExternalControlListsRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RemoveExternalControlListCommand(
+          removeExternalControlListsRequest.securityId,
+          removeExternalControlListsRequest.externalControlListAddress,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      removeExternalControlListsRequest = new RemoveExternalControlListRequest({
+        ...RemoveExternalControlListsRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalControlListsManagement.removeExternalControlList(
+          addExternalControlListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalControlListAddress is invalid', async () => {
+      removeExternalControlListsRequest = new RemoveExternalControlListRequest({
+        ...RemoveExternalControlListsRequestFixture.create({
+          externalControlListAddress: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalControlListsManagement.removeExternalControlList(
+          addExternalControlListsRequest,
         ),
       ).rejects.toThrow(ValidationError);
     });
