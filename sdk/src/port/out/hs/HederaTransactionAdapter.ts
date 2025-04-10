@@ -582,7 +582,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         clearingActive: securityInfo.clearingActive,
       };
 
-      const bondDetails: BondDetailsData = new BondDetailsData(
+      const bondDetails = new BondDetailsData(
         bondInfo.currency,
         bondInfo.nominalValue.toString(),
         bondInfo.startingDate.toString(),

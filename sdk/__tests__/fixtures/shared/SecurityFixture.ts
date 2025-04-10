@@ -215,6 +215,7 @@ import { RegulationFixture } from './RegulationFixture';
 import { EvmAddressPropsFixture, HederaIdPropsFixture } from './DataFixture';
 import EvmAddress from '../../../src/domain/context/contract/EvmAddress';
 import { HederaId } from '../../../src/domain/context/shared/HederaId';
+import { faker } from '@faker-js/faker';
 
 export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
   security.name.faker((faker) => faker.company.name());
@@ -249,15 +250,19 @@ export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
     () => new EvmAddress(EvmAddressPropsFixture.create().value),
   );
   security.paused?.faker((faker) => faker.datatype.boolean());
-  // TODO: find a way to generate subtype based on type
-  security.regulationType?.faker(() => {
-    return RegulationType.REG_S;
-  });
-  security.regulationsubType?.faker(() => {
-    {
-      return RegulationSubType.NONE;
-    }
-  });
+  const regulationType = faker.helpers.arrayElement(
+    Object.values(RegulationType),
+  );
+  security.regulationType?.as(() => regulationType);
+  security.regulationsubType?.faker((faker) =>
+    regulationType === RegulationType.REG_S
+      ? RegulationSubType.NONE
+      : faker.helpers.arrayElement(
+          Object.values(RegulationSubType).filter(
+            (subType) => subType !== RegulationSubType.NONE,
+          ),
+        ),
+  );
   security.regulation?.fromFixture(RegulationFixture);
   security.isCountryControlListWhiteList.faker((faker) =>
     faker.datatype.boolean(),
