@@ -263,6 +263,9 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
       faker.number.int({ min: 1, max: 5 }),
     );
     command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
+    command.externalControlLists?.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
   },
 );
 

@@ -237,6 +237,7 @@ export class CreateEquityCommand extends Command<CreateEquityCommandResponse> {
     public readonly configId?: string,
     public readonly configVersion?: number,
     public readonly diamondOwnerAccount?: string,
+    public readonly externalControlLists?: string[],
   ) {
     super();
   }

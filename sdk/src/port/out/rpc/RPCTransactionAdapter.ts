@@ -325,6 +325,9 @@ import {
   OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+  UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
+  ADD_EXTERNAL_CONTROL_LIST_GAS,
+  REMOVE_EXTERNAL_CONTROL_LIST_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -361,6 +364,7 @@ import {
   ClearingTransferFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
+  ExternalControlListManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -451,6 +455,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
@@ -492,6 +497,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -561,6 +568,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
@@ -602,6 +610,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
       const bondDetails: BondDetailsData = {
@@ -2785,6 +2795,68 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async updateExternalControlLists(
+    security: EvmAddress,
+    externalControlListsAddresses: EvmAddress[],
+    actives: boolean[],
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating External Control Lists for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalControlListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateExternalControlLists(
+        externalControlListsAddresses.map((address) => address.toString()),
+        actives,
+        {
+          gasLimit: UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async addExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding External Control List for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalControlListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addExternalControlList(externalControlListAddress.toString(), {
+        gasLimit: ADD_EXTERNAL_CONTROL_LIST_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing External Control List for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalControlListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeExternalControlList(externalControlListAddress.toString(), {
+        gasLimit: REMOVE_EXTERNAL_CONTROL_LIST_GAS,
+      }),
       this.networkService.environment,
     );
   }

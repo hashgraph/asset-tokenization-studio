@@ -249,6 +249,7 @@ import {
   ClearingHoldCreationFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
+  ExternalControlListManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1615,5 +1616,47 @@ export class RPCQueryAdapter {
       ClearingActionsFacet__factory,
       address.toString(),
     ).isClearingActivated();
+  }
+
+  async isExternalControlList(
+    address: EvmAddress,
+    externalControlListAddress: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the address ${externalControlListAddress.toString()} is a external control list for the security: ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ExternalControlListManagement__factory,
+      address.toString(),
+    ).isExternalControlList(externalControlListAddress.toString());
+  }
+
+  async getExternalControlListsCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(
+      `Getting External Control Lists Count for ${address.toString()}`,
+    );
+
+    const getExternalPausesCount = await this.connect(
+      ExternalControlListManagement__factory,
+      address.toString(),
+    ).getExternalControlListsCount();
+
+    return getExternalPausesCount.toNumber();
+  }
+
+  async getExternalControlListsMembers(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting External Control Lists Members For security ${address.toString()} from ${start} to ${end}`,
+    );
+
+    return await this.connect(
+      ExternalControlListManagement__factory,
+      address.toString(),
+    ).getExternalControlListsMembers(start, end);
   }
 }
