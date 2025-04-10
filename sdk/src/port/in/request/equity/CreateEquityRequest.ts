@@ -228,6 +228,9 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   clearingActive: boolean;
 
   @OptionalField()
+  externalPauses?: string[];
+
+  @OptionalField()
   diamondOwnerAccount?: string;
 
   votingRight: boolean;
@@ -259,6 +262,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     arePartitionsProtected,
     isMultiPartition,
     clearingActive,
+    externalPauses,
     diamondOwnerAccount,
     votingRight,
     informationRight,
@@ -288,6 +292,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     arePartitionsProtected: boolean;
     clearingActive: boolean;
     isMultiPartition: boolean;
+    externalPauses?: string[];
     diamondOwnerAccount?: string;
     votingRight: boolean;
     informationRight: boolean;
@@ -335,6 +340,13 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
       configId: Validation.checkBytes32Format(),
+      externalPauses: (val) => {
+        return Validation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalPauses',
+          true,
+        );
+      },
     });
     this.name = name;
     this.symbol = symbol;
@@ -346,6 +358,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
     this.clearingActive = clearingActive;
+    this.externalPauses = externalPauses;
     this.diamondOwnerAccount = diamondOwnerAccount;
     this.votingRight = votingRight;
     this.informationRight = informationRight;

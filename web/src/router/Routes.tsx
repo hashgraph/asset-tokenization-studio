@@ -223,6 +223,9 @@ import { DigitalSecurityRedeem } from "../views/DigitalSecurityRedeem/DigitalSec
 import { DigitalSecurityForceTransfer } from "../views/DigitalSecurityForceTransfer/DigitalSecurityForceTransfer";
 import { DigitalSecurityForceRedeem } from "../views/DigitalSecurityForceRedeem/DigitalSecurityForceRedeem";
 import { DigitalSecurityLocker } from "../views/DigitalSecurityLocker/DigitalSecurityLocker";
+import { ExternalPauseList } from "../views/ExternalPauseList/ExternalPauseList";
+import { CreateExternalPause } from "../views/CreateExternalPause/CreateExternalPause";
+import { AddExternalPause } from "../views/AddExternalPause/AddExternalPause";
 
 const t = (key: RouteName) => i18n.t(`routes:${key}`);
 
@@ -241,6 +244,33 @@ export const routes = [
         element: (
           <PrivateRoute>
             <Dashboard />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: RoutePath.EXTERNAL_PAUSE_LIST,
+        breadcrumb: t(RouteName.ExternalPauseList),
+        element: (
+          <PrivateRoute>
+            <ExternalPauseList />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: RoutePath.CREATE_EXTERNAL_PAUSE,
+        breadcrumb: t(RouteName.CreateExternalPause),
+        element: (
+          <PrivateRoute>
+            <CreateExternalPause />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: RoutePath.ADD_EXTERNAL_PAUSE,
+        breadcrumb: t(RouteName.AddExternalPause),
+        element: (
+          <PrivateRoute>
+            <AddExternalPause />
           </PrivateRoute>
         ),
       },

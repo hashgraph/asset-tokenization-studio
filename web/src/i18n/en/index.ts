@@ -209,6 +209,8 @@ import dashboard from "./dashboard";
 import rules from "./rules";
 import security from "./security";
 import initialization from "./initialization";
+import externalControlList from "./externalControlList";
+import externalPause from "./externalPause";
 
 export default {
   globals: {
@@ -314,10 +316,13 @@ export default {
     ssiManager: "SSI Manager role",
     clearing: "Clearing role",
     clearingValidator: "Clearing Validator role",
+    pauseManager: "Pause Manager role",
   },
   landing,
   routes,
   dashboard,
+  externalControlList,
+  externalPause,
   rules,
   security,
   initialization,

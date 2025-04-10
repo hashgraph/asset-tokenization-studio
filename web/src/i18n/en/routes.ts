@@ -208,6 +208,10 @@ import { RouteName } from "../../router/RouteName";
 export default {
   configuration: "Configuration",
   [RouteName.Dashboard]: "Dashboard",
+  [RouteName.ExternalControlList]: "Control List",
+  [RouteName.ExternalPauseList]: "External Pause",
+  [RouteName.CreateExternalPause]: "External Pause creation",
+  [RouteName.AddExternalPause]: "Import a external pause",
   [RouteName.AddSecurity]: "Import a digital security token",
   [RouteName.CreateSecurity]: "Create a digital security",
   [RouteName.CreateEquity]: "Equity creation",

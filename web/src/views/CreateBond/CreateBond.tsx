@@ -218,6 +218,7 @@ import { StepConfiguration } from "./Components/StepConfiguration";
 import { StepReview } from "./Components/StepReview";
 import { StepCoupon } from "./Components/StepCoupon";
 import { StepRegulation } from "../CreateSecurityCommons/StepRegulation";
+import { StepExternalManagement } from "../CreateSecurityCommons/StepExternalManagement";
 
 export const CreateBond = () => {
   const { t } = useTranslation("security", { keyPrefix: "createBond" });
@@ -236,6 +237,7 @@ export const CreateBond = () => {
       regulationSubType: 0,
       countriesListType: 1,
       countriesList: [] as string[],
+      externalPausesList: [],
     },
   });
 
@@ -251,6 +253,10 @@ export const CreateBond = () => {
     {
       title: t("header.coupon"),
       content: <StepCoupon />,
+    },
+    {
+      title: t("stepExternalManagement.title"),
+      content: <StepExternalManagement />,
     },
     {
       title: t("header.regulation"),

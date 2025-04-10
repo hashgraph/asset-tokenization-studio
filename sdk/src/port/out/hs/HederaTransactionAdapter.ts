@@ -208,6 +208,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-case-declarations */
 import {
+  ContractCreateTransaction,
   ContractExecuteTransaction,
   ContractFunctionParameters,
   ContractId,
@@ -236,6 +237,8 @@ import {
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
   ClearingActionsFacet__factory,
+  ExternalPauseManagement__factory,
+  MockedExternalPause__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -305,6 +308,10 @@ import {
   OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+  UPDATE_EXTERNAL_PAUSES_GAS,
+  REMOVE_EXTERNAL_PAUSE_GAS,
+  ADD_EXTERNAL_PAUSE_GAS,
+  CREATE_EXTERNAL_PAUSE_MOCK_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -424,6 +431,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -467,6 +475,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -537,6 +547,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -580,6 +591,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
       };
 
       const bondDetails: BondDetailsData = {
@@ -3053,6 +3066,115 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
+  }
+
+  async updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateExternalPauses';
+    LogService.logTrace(
+      `Updating External Pauses for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalPauseManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalPausesAddresses.map((address) => address.toString()), actives],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_EXTERNAL_PAUSES_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'addExternalPause';
+    LogService.logTrace(
+      `Adding External Pause for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalPauseManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalPauseAddress.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(ADD_EXTERNAL_PAUSE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'removeExternalPause';
+    LogService.logTrace(
+      `Removing External Pause for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalPauseManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalPauseAddress.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(REMOVE_EXTERNAL_PAUSE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async createExternalPauseMock(): Promise<TransactionResponse> {
+    LogService.logTrace(`Deploying External Pause Mock contract`);
+
+    const bytecodeHex = MockedExternalPause__factory.bytecode.startsWith('0x')
+      ? MockedExternalPause__factory.bytecode.slice(2)
+      : MockedExternalPause__factory.bytecode;
+    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, 'hex'));
+
+    const contractCreate = new ContractCreateTransaction()
+      .setBytecode(bytecode)
+      .setGas(CREATE_EXTERNAL_PAUSE_MOCK_GAS);
+
+    return this.signAndSendTransaction(contractCreate);
   }
 
   // * Definition of the abstract methods

@@ -206,6 +206,10 @@
 export enum RouteName {
   Landing = "LANDING",
   Dashboard = "DASHBOARD",
+  ExternalControlList = "EXTERNAL_CONTROL_LIST",
+  ExternalPauseList = "EXTERNAL_PAUSE_LIST",
+  CreateExternalPause = "CREATE_EXTERNAL_PAUSE",
+  AddExternalPause = "ADD_EXTERNAL_PAUSE",
   AddSecurity = "ADD_SECURITY",
   CreateSecurity = "CREATE_SECURITY",
   CreateEquity = "CREATE_EQUITY",

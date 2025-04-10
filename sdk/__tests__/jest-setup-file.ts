@@ -314,6 +314,7 @@ const kycAccountsByStatus = new Map<number, string[]>();
 
 let controlList: string[] = [];
 let issuerList: string[] = [];
+let externalPausesList: string[] = [];
 
 let securityInfo: Security;
 let equityInfo: EquityDetails;
@@ -503,6 +504,7 @@ function createBondMockImplementation(
   _resolver: EvmAddress,
   _configId: string,
   _configVersion: number,
+  _externalPauses?: EvmAddress[],
   _diamondOwnerAccount?: EvmAddress,
 ): Promise<TransactionResponse> {
   securityInfo = _securityInfo;
@@ -529,6 +531,8 @@ function createBondMockImplementation(
   configVersion = _configVersion;
   configId = _configId;
   resolverAddress = _resolver.toString();
+  externalPausesList =
+    _externalPauses?.map((address) => address.toString()) ?? [];
 
   const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
   const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
@@ -1591,6 +1595,32 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       return accountClearingTransfer[0];
     },
   );
+
+  singletonInstance.isExternalPause = jest.fn(
+    async (address: EvmAddress, externalPauseAddress: EvmAddress) => {
+      const account = identifiers(externalPauseAddress.toString())[1];
+      return externalPausesList.findIndex((item) => item == account) !== -1;
+    },
+  );
+
+  singletonInstance.getExternalPausesCount = jest.fn(
+    async (address: EvmAddress) => {
+      return externalPausesList.length;
+    },
+  );
+
+  singletonInstance.getExternalPausesMembers = jest.fn(
+    async (address: EvmAddress, start: number, end: number) => {
+      const externalPausesListMembers: string[] = [];
+
+      for (let i = start; i < end; i++) {
+        externalPausesListMembers.push(externalPausesList[i]);
+      }
+
+      return externalPausesListMembers;
+    },
+  );
+
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };
@@ -1611,6 +1641,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       _resolver: EvmAddress,
       _configId: string,
       _configVersion: number,
+      _externalPauses?: EvmAddress[],
       _diamondOwnerAccount?: EvmAddress,
     ) => {
       securityInfo = _securityInfo;
@@ -1636,6 +1667,8 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       configVersion = _configVersion;
       configId = _configId;
       resolverAddress = _resolver.toString();
+      externalPausesList =
+        _externalPauses?.map((address) => address.toString()) ?? [];
 
       return {
         status: 'success',
@@ -2674,6 +2707,55 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       clearingId: number,
       clearingOperationType: ClearingOperationType,
     ) => processClearingOperation(targetId, clearingId, clearingOperationType),
+  );
+
+  singletonInstance.updateExternalPauses = jest.fn(
+    async (address: EvmAddress, externalPausesAddresses: EvmAddress[]) => {
+      externalPausesAddresses.forEach((externalPauseAddress) => {
+        const account = identifiers(externalPauseAddress.toString())[1];
+
+        if (externalPausesList.findIndex((item) => item == account) == -1) {
+          externalPausesList.push(account);
+        }
+      });
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.addExternalPause = jest.fn(
+    async (address: EvmAddress, externalPauseAddress: EvmAddress) => {
+      const account = identifiers(externalPauseAddress.toString())[1];
+
+      if (externalPausesList.findIndex((item) => item == account) == -1) {
+        externalPausesList.push(account);
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.removeExternalPause = jest.fn(
+    async (address: EvmAddress, externalPauseAddress: EvmAddress) => {
+      const account = identifiers(externalPauseAddress.toString())[1];
+
+      if (externalPausesList.findIndex((item) => item == account) !== -1) {
+        externalPausesList = externalPausesList.filter(
+          (item) => item !== account,
+        );
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
   );
 
   return {

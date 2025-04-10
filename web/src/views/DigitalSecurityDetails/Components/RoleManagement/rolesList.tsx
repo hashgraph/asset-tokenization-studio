@@ -294,4 +294,9 @@ export const rolesList: TRole[] = [
     value: SecurityRole._CLEARING_VALIDATOR_ROLE,
     allowedSecurities: ["BOND", "EQUITY"],
   },
+  {
+    label: "pauseManager",
+    value: SecurityRole._PAUSE_MANAGER_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
+  },
 ];

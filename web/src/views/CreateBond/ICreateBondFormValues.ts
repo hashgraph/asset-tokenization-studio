@@ -228,4 +228,5 @@ export interface ICreateBondFormValues {
   regulationSubType: number;
   countriesListType: number;
   countriesList: string[];
+  externalPausesList?: string[];
 }
