@@ -21,10 +21,6 @@ contract MockedWhitelist is IExternalControlList {
         emit RemovedFromWhitelist(account);
     }
 
-    function isWhitelisted(address account) external view returns (bool) {
-        return _whitelist[account];
-    }
-
     function isAuthorized(address account) external view returns (bool) {
         return _whitelist[account];
     }

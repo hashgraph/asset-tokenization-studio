@@ -21,10 +21,6 @@ contract MockedBlacklist is IExternalControlList {
         emit RemovedFromBlacklist(account);
     }
 
-    function isBlacklisted(address account) external view returns (bool) {
-        return _blacklist[account];
-    }
-
     function isAuthorized(address account) external view returns (bool) {
         return !_blacklist[account];
     }
