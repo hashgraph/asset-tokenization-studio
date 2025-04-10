@@ -271,14 +271,9 @@ abstract contract ERC20StorageWrapper2 is
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
-        _beforeAllowanceUpdate(_msgSender(), spender);
 
-        _erc20Storage().allowed[_msgSender()][spender] += addedValue;
-        emit Approval(
-            _msgSender(),
-            spender,
-            _erc20Storage().allowed[_msgSender()][spender]
-        );
+        _increaseAllowedBalance(_msgSender(), spender, addedValue);
+
         return true;
     }
 
@@ -372,6 +367,20 @@ abstract contract ERC20StorageWrapper2 is
         }
 
         erc20Storage.allowed[from][spender] -= value;
+    }
+
+    function _increaseAllowedBalance(
+        address from,
+        address spender,
+        uint256 value
+    ) internal {
+        _beforeAllowanceUpdate(from, spender);
+
+        ERC20Storage storage erc20Storage = _erc20Storage();
+
+        erc20Storage.allowed[from][spender] += value;
+
+        emit Approval(from, spender, _erc20Storage().allowed[from][spender]);
     }
 
     function _emitTransferEvent(

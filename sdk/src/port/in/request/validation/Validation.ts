@@ -225,10 +225,11 @@ import { EVM_ZERO_ADDRESS } from '../../../../core/Constants.js';
 import { InvalidEvmAddress } from '../../../../domain/context/contract/error/InvalidEvmAddress.js';
 import { InvalidFormatHederaIdOrEvmAddress } from '../error/InvalidFormatHederaIdOrEvmAddress.js';
 import { InvalidBytes32 } from '../../../../domain/context/security/error/InvalidBytes32.js';
-import { InvalidBytes3 } from '../../../../domain/context/bond/error/InvalidBytes3.js';
+import { InvalidBytes3 } from '../../../../domain/context/shared/error/InvalidBytes3.js';
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../domain/context/shared/HederaId.js';
 import { InvalidBytes } from '../../../../domain/context/shared/error/InvalidBytes.js';
 import { InvalidBase64 } from '../../../../domain/context/shared/error/InvalidBase64.js';
+import { InvalidValue } from '../error/InvalidValue.js';
 
 export default class Validation {
   public static checkPublicKey = () => {
@@ -435,4 +436,31 @@ export default class Validation {
       return err;
     };
   };
+
+  public static checkHederaIdOrEvmAddressArray(
+    values: string[],
+    fieldName: string,
+    allowEmpty: boolean = false,
+  ): BaseError[] {
+    if (values.length === 0) {
+      return allowEmpty
+        ? []
+        : [new InvalidValue(`The list of ${fieldName} cannot be empty`)];
+    }
+
+    const errors: InvalidValue[] = [];
+    const seenValues = new Set<string>();
+
+    values.forEach((value) => {
+      const formatErrors = Validation.checkHederaIdFormatOrEvmAddress()(value);
+      errors.push(...formatErrors);
+
+      if (seenValues.has(value)) {
+        errors.push(new InvalidValue(`${fieldName} ${value} is duplicated`));
+      }
+      seenValues.add(value);
+    });
+
+    return errors;
+  }
 }

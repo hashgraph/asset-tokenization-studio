@@ -206,8 +206,8 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {ArrayLib} from '../../common/ArrayLib.sol';
-import {LibCommon} from '../../common/LibCommon.sol';
+import {LibCommon} from '../../common/libraries/LibCommon.sol';
+import {ArrayLib} from '../../common/libraries/ArrayLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';

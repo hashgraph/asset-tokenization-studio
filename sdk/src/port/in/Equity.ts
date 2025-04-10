@@ -218,19 +218,19 @@ import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
 import { ONE_THOUSAND } from '../../domain/context/shared/SecurityDate.js';
 import { handleValidation } from './Common.js';
-import GetDividendsForRequest from './request/GetDividendsForRequest.js';
-import GetDividendsRequest from './request/GetDividendsRequest.js';
-import GetAllDividendsRequest from './request/GetAllDividendsRequest.js';
-import SetDividendsRequest from './request/SetDividendsRequest.js';
+import GetDividendsForRequest from './request/equity/GetDividendsForRequest.js';
+import GetDividendsRequest from './request/equity/GetDividendsRequest.js';
+import GetAllDividendsRequest from './request/equity/GetAllDividendsRequest.js';
+import SetDividendsRequest from './request/equity/SetDividendsRequest.js';
 import DividendsForViewModel from './response/DividendsForViewModel.js';
 import DividendsViewModel from './response/DividendsViewModel.js';
-import SetVotingRightsRequest from './request/SetVotingRightsRequest.js';
-import GetVotingRightsForRequest from './request/GetVotingRightsForRequest.js';
-import GetVotingRightsRequest from './request/GetVotingRightsRequest.js';
-import GetAllVotingRightsRequest from './request/GetAllVotingRightsRequest.js';
+import SetVotingRightsRequest from './request/equity/SetVotingRightsRequest.js';
+import GetVotingRightsForRequest from './request/equity/GetVotingRightsForRequest.js';
+import GetVotingRightsRequest from './request/equity/GetVotingRightsRequest.js';
+import GetAllVotingRightsRequest from './request/equity/GetAllVotingRightsRequest.js';
 import VotingRightsForViewModel from './response/VotingRightsForViewModel.js';
 import VotingRightsViewModel from './response/VotingRightsViewModel.js';
-import CreateEquityRequest from './request/CreateEquityRequest.js';
+import CreateEquityRequest from './request/equity/CreateEquityRequest.js';
 import { SecurityViewModel } from './Security.js';
 import NetworkService from '../../app/service/NetworkService.js';
 import { SecurityProps } from '../../domain/context/security/Security.js';
@@ -239,27 +239,27 @@ import ContractId from '../../domain/context/contract/ContractId.js';
 import { GetSecurityQuery } from '../../app/usecase/query/security/get/GetSecurityQuery.js';
 import { CastDividendType } from '../../domain/context/equity/DividendType.js';
 import BigDecimal from '../../domain/context/shared/BigDecimal.js';
-import GetEquityDetailsRequest from './request/GetEquityDetailsRequest.js';
+import GetEquityDetailsRequest from './request/equity/GetEquityDetailsRequest.js';
 import EquityDetailsViewModel from './response/EquityDetailsViewModel.js';
 import { GetEquityDetailsQuery } from '../../app/usecase/query/equity/get/getEquityDetails/GetEquityDetailsQuery.js';
 import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../domain/context/factory/RegulationType.js';
-import SetScheduledBalanceAdjustmentRequest from './request/SetScheduledBalanceAdjustmentRequest.js';
-import GetScheduledBalanceAdjustmentRequest from './request/GetScheduledBalanceAdjustmentRequest.js';
+import SetScheduledBalanceAdjustmentRequest from './request/equity/SetScheduledBalanceAdjustmentRequest.js';
+import GetScheduledBalanceAdjustmentRequest from './request/equity/GetScheduledBalanceAdjustmentRequest.js';
 import ScheduledBalanceAdjustmentViewModel from './response/ScheduledBalanceAdjustmentViewModel.js';
 import { GetScheduledBalanceAdjustmentQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
-import GetScheduledBalanceAdjustmentCountRequest from './request/GetScheduledBalanceAdjustmentsCountRequest';
+import GetScheduledBalanceAdjustmentCountRequest from './request/equity/GetScheduledBalanceAdjustmentsCountRequest.js';
 import { GetScheduledBalanceAdjustmentCountQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
 import {
   GetAggregatedBalanceAdjustmentFactorRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
 } from './request';
-import GetLastAggregatedBalanceAdjustmentFactorForRequest from './request/GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
+import GetLastAggregatedBalanceAdjustmentFactorForRequest from './request/equity/GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
 import { GetLastAggregatedBalanceAdjustmentFactorForQuery } from '../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQuery.js';
 import { GetAggregatedBalanceAdjustmentFactorQuery } from '../../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQuery';
-import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from './request/GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
+import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from './request/equity/GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
 import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery } from '../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery.js';
 
 interface IEquityInPort {
@@ -329,7 +329,7 @@ class EquityInPort implements IEquityInPort {
     req: CreateEquityRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }> {
     handleValidation('CreateEquityRequest', req);
-    const { diamondOwnerAccount } = req;
+    const { diamondOwnerAccount, externalControlLists } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
     const resolver = this.networkService.configuration.resolverAddress;
@@ -372,6 +372,7 @@ class EquityInPort implements IEquityInPort {
         req.configId,
         req.configVersion,
         diamondOwnerAccount,
+        externalControlLists,
       ),
     );
 

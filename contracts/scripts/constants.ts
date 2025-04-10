@@ -210,6 +210,7 @@ export const ZERO = Zero
 export const HASH_ZERO = HashZero
 export const ADDRESS_ZERO = AddressZero
 export const EMPTY_STRING = ''
+export const EMPTY_HEX_BYTES = '0x'
 export const MAX_UINT256 = BigInt(
     '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 )

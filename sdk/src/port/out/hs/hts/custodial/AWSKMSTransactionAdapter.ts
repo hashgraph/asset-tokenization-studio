@@ -212,7 +212,7 @@ import LogService from '../../../../../app/service/LogService';
 import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
 import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
 import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
-import AWSKMSSettings from '../../../../../domain/context/custodialWalletSettings/AWSKMSSettings';
+import AWSKMSSettings from '../../../../../core/settings/custodialWalletSettings/AWSKMSSettings';
 
 @singleton()
 export class AWSKMSTransactionAdapter extends CustodialTransactionAdapter {

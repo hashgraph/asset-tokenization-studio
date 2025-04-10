@@ -212,6 +212,7 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_REDEEM_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingRedeemFacet is
@@ -232,15 +233,12 @@ contract ClearingRedeemFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
-
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperation,
             _amount,
-            sender,
-            sender,
-            false,
-            ''
+            _msgSender(),
+            '',
+            ThirdPartyType.NULL
         );
     }
 
@@ -262,15 +260,19 @@ contract ClearingRedeemFacet is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        address sender = _msgSender();
-
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
-            sender,
-            true,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.AUTHORIZED
+        );
+        _decreaseAllowedBalanceForClearing(
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ClearingOperationType.Redeem,
+            _clearingOperationFrom.from,
+            _amount
         );
     }
 
@@ -298,15 +300,13 @@ contract ClearingRedeemFacet is
                 _clearingOperationFrom.from
             );
         }
-        address sender = _msgSender();
 
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
-            sender,
-            false,
-            _clearingOperationFrom.operatorData
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.OPERATOR
         );
     }
 

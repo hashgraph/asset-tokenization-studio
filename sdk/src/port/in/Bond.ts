@@ -209,20 +209,20 @@ import Injectable from '../../core/Injectable.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
 import { handleValidation } from './Common.js';
-import GetBondDetailsRequest from './request/GetBondDetailsRequest.js';
-import GetCouponDetailsRequest from './request/GetCouponDetailsRequest.js';
+import GetBondDetailsRequest from './request/bond/GetBondDetailsRequest.js';
+import GetCouponDetailsRequest from './request/bond/GetCouponDetailsRequest.js';
 import BondDetailsViewModel from './response/BondDetailsViewModel.js';
 import CouponDetailsViewModel from './response/CouponDetailsViewModel.js';
 import CouponViewModel from './response/CouponViewModel.js';
 import CouponForViewModel from './response/CouponForViewModel.js';
-import GetAllCouponsRequest from './request/GetAllCouponsRequest.js';
-import GetCouponForRequest from './request/GetCouponForRequest.js';
-import GetCouponRequest from './request/GetCouponRequest.js';
+import GetAllCouponsRequest from './request/bond/GetAllCouponsRequest.js';
+import GetCouponForRequest from './request/bond/GetCouponForRequest.js';
+import GetCouponRequest from './request/bond/GetCouponRequest.js';
 import { GetCouponForQuery } from '../../app/usecase/query/bond/coupons/getCouponFor/GetCouponForQuery.js';
 import { GetCouponQuery } from '../../app/usecase/query/bond/coupons/getCoupon/GetCouponQuery.js';
 import { GetCouponCountQuery } from '../../app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQuery.js';
 import { ONE_THOUSAND } from '../../domain/context/shared/SecurityDate.js';
-import CreateBondRequest from './request/CreateBondRequest.js';
+import CreateBondRequest from './request/bond/CreateBondRequest.js';
 import { SecurityViewModel } from './Security.js';
 import { CommandBus } from '../../core/command/CommandBus.js';
 import NetworkService from '../../app/service/NetworkService.js';
@@ -231,13 +231,13 @@ import { CreateBondCommand } from '../../app/usecase/command/bond/create/CreateB
 import ContractId from '../../domain/context/contract/ContractId.js';
 import { GetSecurityQuery } from '../../app/usecase/query/security/get/GetSecurityQuery.js';
 import BigDecimal from '../../domain/context/shared/BigDecimal.js';
-import SetCouponRequest from './request/SetCouponRequest.js';
+import SetCouponRequest from './request/bond/SetCouponRequest.js';
 import { SetCouponCommand } from '../../app/usecase/command/bond/coupon/set/SetCouponCommand.js';
 import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../domain/context/factory/RegulationType.js';
-import UpdateMaturityDateRequest from './request/UpdateMaturityDateRequest.js';
+import UpdateMaturityDateRequest from './request/bond/UpdateMaturityDateRequest.js';
 import { UpdateMaturityDateCommand } from '../../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand.js';
 
 interface IBondInPort {
@@ -273,7 +273,7 @@ class BondInPort implements IBondInPort {
     req: CreateBondRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }> {
     handleValidation('CreateBondRequest', req);
-    const { diamondOwnerAccount } = req;
+    const { diamondOwnerAccount, externalControlLists } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
     const resolver = this.networkService.configuration.resolverAddress;
@@ -313,6 +313,7 @@ class BondInPort implements IBondInPort {
         req.configId,
         req.configVersion,
         diamondOwnerAccount,
+        externalControlLists,
       ),
     );
 

@@ -217,11 +217,11 @@ import EvmAddress from '../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
 import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
-import HWCSettings from '../../domain/context/walletConnect/HWCSettings';
+import HWCSettings from '../../core/settings/walletConnect/HWCSettings.js';
 import { ContractId } from '@hashgraph/sdk';
-import DfnsSettings from '../../domain/context/custodialWalletSettings/DfnsSettings.js';
-import FireblocksSettings from '../../domain/context/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../domain/context/custodialWalletSettings/AWSKMSSettings.js';
+import DfnsSettings from '../../core/settings/custodialWalletSettings/DfnsSettings.js';
+import FireblocksSettings from '../../core/settings/custodialWalletSettings/FireblocksSettings.js';
+import AWSKMSSettings from '../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
 import { ClearingOperationType } from '../../domain/context/security/Clearing.js';
 
 export interface InitializationData {
@@ -248,6 +248,7 @@ interface ITransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -259,6 +260,7 @@ interface ITransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -805,6 +807,15 @@ interface IClearingAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IExternalControlListsAdapter {
+  updateExternalControlLists(
+    security: EvmAddress,
+    externalControlListsAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -813,7 +824,8 @@ export default abstract class TransactionAdapter
     IHoldTransactionAdapter,
     ISSIManagementTransactionAdapter,
     IKYCTransactionAdapter,
-    IClearingAdapter
+    IClearingAdapter,
+    IExternalControlListsAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -903,6 +915,7 @@ export default abstract class TransactionAdapter
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -916,6 +929,7 @@ export default abstract class TransactionAdapter
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -1536,6 +1550,14 @@ export default abstract class TransactionAdapter
     sourceId: EvmAddress,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  updateExternalControlLists(
+    security: EvmAddress,
+    externalControlListsAddresses: EvmAddress[],
+    actives: boolean[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

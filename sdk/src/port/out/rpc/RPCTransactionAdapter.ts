@@ -325,6 +325,7 @@ import {
   OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+  UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -361,6 +362,7 @@ import {
   ClearingTransferFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
+  ExternalControlListManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -400,6 +402,8 @@ import {
   ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
+import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
+import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -449,18 +453,15 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -494,7 +495,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
-        externalControlLists: [],
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -564,18 +566,15 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
       if (!securityInfo.regulationType) {
-        throw new Error(
-          'regulation Type cannot be empty when creating a security',
-        );
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new Error(
-          'regulation subType cannot be empty when creating a security',
-        );
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -609,7 +608,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
-        externalControlLists: [],
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
       const bondDetails: BondDetailsData = {
@@ -824,7 +824,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             factoryId = result.factory.toString();
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Factories could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -839,7 +839,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             resolverId = result.resolver.toString();
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Resolvers could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -854,7 +854,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             mirrorNode = result.mirrorNode;
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `Mirror Nodes could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
@@ -869,14 +869,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             rpcNode = result.jsonRpcRelay;
           }
         } catch (e) {
-          console.error(
+          LogService.logError(
             `RPC Nodes could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
         }
       }
       LogService.logTrace('Metamask Network:', chainId);
     } else {
-      console.error(chainId + ' not an hedera network');
+      LogService.logError(chainId + ' not an hedera network');
     }
 
     await this.commandBus.execute(
@@ -2791,6 +2791,30 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         targetId.toString(),
         {
           gasLimit: OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async updateExternalControlLists(
+    security: EvmAddress,
+    externalControlListsAddresses: EvmAddress[],
+    actives: boolean[],
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating External Control Lists for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalControlListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateExternalControlLists(
+        externalControlListsAddresses.map((address) => address.toString()),
+        actives,
+        {
+          gasLimit: UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
         },
       ),
       this.networkService.environment,

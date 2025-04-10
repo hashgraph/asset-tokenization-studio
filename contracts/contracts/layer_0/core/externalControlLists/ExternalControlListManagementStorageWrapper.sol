@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {
     ProtectedPartitionsStorageWrapper
 } from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
-import {LibCommon} from '../../common/LibCommon.sol';
+import {LibCommon} from '../../common/libraries/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';

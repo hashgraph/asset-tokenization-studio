@@ -205,7 +205,7 @@
 
 pragma solidity 0.8.18;
 
-import {LibCommon} from '..//common/LibCommon.sol';
+import {LibCommon} from '..//common/libraries/LibCommon.sol';
 import {_LOCK_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     EnumerableSet
