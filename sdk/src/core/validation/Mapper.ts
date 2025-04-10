@@ -205,85 +205,19 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // import LogService from '../../../../app/service/LogService.js';
-import Account from '../../../../domain/context/account/Account.js';
-import PublicKey from '../../../../domain/context/account/PublicKey.js';
-import { RequestAccount } from '../BaseRequest.js';
-import {
-  AWSKMSConfigRequest,
-  DFNSConfigRequest,
-  FireblocksConfigRequest,
-  HWCRequestSettings,
-} from '../network/ConnectRequest.js';
-import HWCSettings from '../../../../core/settings/walletConnect/HWCSettings.js';
-import DfnsSettings from '../../../../core/settings/custodialWalletSettings/DfnsSettings.js';
-import FireblocksSettings from '../../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
 
-export default class RequestMapper {
-  public static mapAccount(account?: RequestAccount): Account | undefined {
-    return account
-      ? new Account({
-          id: account.accountId,
-          evmAddress: account.evmAddress,
-          publicKey:
-            account.publicKey?.key && account.publicKey.type
-              ? new PublicKey({
-                  key: account.publicKey?.key ?? '',
-                  type: account.publicKey?.type ?? '',
-                })
-              : undefined,
-        })
-      : undefined;
-  }
-
-  public static hwcRequestToHWCSettings(req: HWCRequestSettings): HWCSettings {
-    return new HWCSettings(
-      req.projectId,
-      req.dappName,
-      req.dappDescription,
-      req.dappURL,
-      req.dappIcons,
-    );
-  }
-
-  public static dfnsRequestToDfnsSettings(
-    req: DFNSConfigRequest,
-  ): DfnsSettings {
-    return new DfnsSettings(
-      req.serviceAccountPrivateKey,
-      req.credentialId,
-      req.authorizationToken,
-      req.urlApplicationOrigin,
-      req.applicationId,
-      req.baseUrl,
-      req.walletId,
-      req.hederaAccountId,
-      req.publicKey,
-    );
-  }
-
-  public static fireblocksRequestToFireblocksSettings(
-    req: FireblocksConfigRequest,
-  ): FireblocksSettings {
-    return new FireblocksSettings(
-      req.apiKey,
-      req.apiSecretKey,
-      req.baseUrl,
-      req.assetId,
-      req.vaultAccountId,
-      req.hederaAccountId,
-    );
-  }
-
-  public static awsKmsRequestToAwsKmsSettings(
-    req: AWSKMSConfigRequest,
-  ): AWSKMSSettings {
-    return new AWSKMSSettings(
-      req.awsAccessKeyId,
-      req.awsSecretAccessKey,
-      req.awsRegion,
-      req.awsKmsKeyId,
-      req.hederaAccountId,
-    );
+export default class Mapper {
+  public static renamePrivateProps(keys: string[]): string[];
+  public static renamePrivateProps(keys: string): string;
+  public static renamePrivateProps(keys: string | string[]): any {
+    if (typeof keys === 'string') {
+      return keys.startsWith('_') || keys.startsWith('#')
+        ? keys.substring(1)
+        : keys;
+    } else {
+      return keys.map((key) =>
+        key.startsWith('_') || key.startsWith('#') ? key.substring(1) : key,
+      );
+    }
   }
 }

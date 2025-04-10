@@ -208,7 +208,7 @@ import 'reflect-metadata';
 import { ValidationSchema, ValidatedArgsKey } from './ValidationSchema.js';
 import ValidationResponse from './ValidationResponse.js';
 import { EmptyValue } from '../../port/in/request/error/EmptyValue.js';
-import RequestMapper from '../../port/in/request/mapping/RequestMapper.js';
+import Mapper from './Mapper.js';
 import { getOptionalFields } from '../decorator/OptionalDecorator.js';
 import BaseError from '../error/BaseError.js';
 import { RuntimeError } from '../error/RuntimeError.js';
@@ -292,7 +292,7 @@ export default class ValidatedArgs<T extends BaseArgs> extends Validation {
 
   private filterSchemaFromProps(): ValidatedArgsKey<T>[] {
     const schemaEntries = Object.keys(this.schema) as ValidatedArgsKey<T>[];
-    const entries = RequestMapper.renamePrivateProps(
+    const entries = Mapper.renamePrivateProps(
       Object.keys(this),
     ) as ValidatedArgsKey<T>[];
     const filteredEntries = schemaEntries.filter((value) =>
