@@ -203,71 +203,55 @@
 
 */
 
-import UpdateExternalControlListsRequest from '../../../src/port/in/request/security/externalControlLists/UpdateExternalControlListsRequest';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { UpdateExternalControlListsCommand } from '../../../src/app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
-import { GetExternalControlListsCountQuery } from '../../../src/app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery';
-import { GetExternalControlListsMembersQuery } from '../../../src/app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery';
-import { IsExternalControlListQuery } from '../../../src/app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery';
-import IsExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/IsExternalControlListRequest';
-import GetExternalControlListsMembersRequest from '../../../src/port/in/request/security/externalControlLists/GetExternalControlListsMembersRequest';
-import GetExternalControlListsCountRequest from '../../../src/port/in/request/security/externalControlLists/GetExternalControlListsCountRequest';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import {
+  GetExternalControlListsMembersQuery,
+  GetExternalControlListsMembersQueryResponse,
+} from './GetExternalControlListsMembersQuery.js';
+import ContractService from '../../../../../../app/service/ContractService.js';
+import AccountService from '../../../../../../app/service/AccountService.js';
 
-export const UpdateExternalControlListsCommandFixture =
-  createFixture<UpdateExternalControlListsCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    command.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
+@QueryHandler(GetExternalControlListsMembersQuery)
+export class GetExternalControlListsMembersQueryHandler
+  implements IQueryHandler<GetExternalControlListsMembersQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
 
-export const UpdateExternalControlListsRequestFixture =
-  createFixture<UpdateExternalControlListsRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    request.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
+  async execute(
+    query: GetExternalControlListsMembersQuery,
+  ): Promise<GetExternalControlListsMembersQueryResponse> {
+    const { securityId, start, end } = query;
+    await this.securityService.get(securityId);
 
-export const GetExternalControlListsCountQueryFixture =
-  createFixture<GetExternalControlListsCountQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
 
-export const GetExternalControlListsMembersQueryFixture =
-  createFixture<GetExternalControlListsMembersQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    query.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
-
-export const IsExternalControlListQueryFixture =
-  createFixture<IsExternalControlListQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
+    const res = await this.queryAdapter.getExternalControlListsMembers(
+      securityEvmAddress,
+      start,
+      end,
     );
-  });
 
-export const IsExternalControlListRequestFixture =
-  createFixture<IsExternalControlListRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
+    const updatedRes = await Promise.all(
+      res.map(async (address) =>
+        (await this.accountService.getAccountInfo(address)).id.toString(),
+      ),
     );
-  });
 
-export const GetExternalControlListsMembersRequestFixture =
-  createFixture<GetExternalControlListsMembersRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    request.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
-
-export const GetExternalControlListsCountRequestFixture =
-  createFixture<GetExternalControlListsCountRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
+    return new GetExternalControlListsMembersQueryResponse(updatedRes);
+  }
+}

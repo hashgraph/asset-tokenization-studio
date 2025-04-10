@@ -203,71 +203,83 @@
 
 */
 
-import UpdateExternalControlListsRequest from '../../../src/port/in/request/security/externalControlLists/UpdateExternalControlListsRequest';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { UpdateExternalControlListsCommand } from '../../../src/app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
-import { GetExternalControlListsCountQuery } from '../../../src/app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery';
-import { GetExternalControlListsMembersQuery } from '../../../src/app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery';
-import { IsExternalControlListQuery } from '../../../src/app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery';
-import IsExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/IsExternalControlListRequest';
-import GetExternalControlListsMembersRequest from '../../../src/port/in/request/security/externalControlLists/GetExternalControlListsMembersRequest';
-import GetExternalControlListsCountRequest from '../../../src/port/in/request/security/externalControlLists/GetExternalControlListsCountRequest';
+import { createMock } from '@golevelup/ts-jest';
+import { EvmAddressPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { IsExternalControlListQueryFixture } from '../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { IsExternalControlListQueryHandler } from './IsExternalControlListQueryHandler.js';
+import {
+  IsExternalControlListQuery,
+  IsExternalControlListQueryResponse,
+} from './IsExternalControlListQuery.js';
 
-export const UpdateExternalControlListsCommandFixture =
-  createFixture<UpdateExternalControlListsCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    command.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
+describe('IsExternalControlListQueryHandler', () => {
+  let handler: IsExternalControlListQueryHandler;
+  let query: IsExternalControlListQuery;
 
-export const UpdateExternalControlListsRequestFixture =
-  createFixture<UpdateExternalControlListsRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    request.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
+  const securityServiceMock = createMock<SecurityService>();
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
 
-export const GetExternalControlListsCountQueryFixture =
-  createFixture<GetExternalControlListsCountQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalControlListEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const security = new Security(SecurityPropsFixture.create());
 
-export const GetExternalControlListsMembersQueryFixture =
-  createFixture<GetExternalControlListsMembersQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    query.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
-
-export const IsExternalControlListQueryFixture =
-  createFixture<IsExternalControlListQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
+  beforeEach(() => {
+    handler = new IsExternalControlListQueryHandler(
+      securityServiceMock,
+      contractServiceMock,
+      queryAdapterServiceMock,
     );
+    query = IsExternalControlListQueryFixture.create();
   });
 
-export const IsExternalControlListRequestFixture =
-  createFixture<IsExternalControlListRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalControlListAddress.as(
-      () => HederaIdPropsFixture.create().value,
-    );
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
-export const GetExternalControlListsMembersRequestFixture =
-  createFixture<GetExternalControlListsMembersRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    request.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
+  describe('execute', () => {
+    it('should successfully validate if is external control list', async () => {
+      securityServiceMock.get.mockResolvedValueOnce(security);
+      contractServiceMock.getContractEvmAddress
+        .mockResolvedValueOnce(evmAddress)
+        .mockResolvedValueOnce(externalControlListEvmAddress);
 
-export const GetExternalControlListsCountRequestFixture =
-  createFixture<GetExternalControlListsCountRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
+      queryAdapterServiceMock.isExternalControlList.mockResolvedValue(true);
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(IsExternalControlListQueryResponse);
+      expect(result.payload).toBe(true);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        2,
+      );
+      expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
+      expect(
+        queryAdapterServiceMock.isExternalControlList,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        1,
+        query.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        2,
+        query.externalControlListAddress,
+      );
+
+      expect(
+        queryAdapterServiceMock.isExternalControlList,
+      ).toHaveBeenCalledWith(evmAddress, externalControlListEvmAddress);
+    });
   });
+});
