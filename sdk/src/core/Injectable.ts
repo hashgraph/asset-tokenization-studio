@@ -365,6 +365,9 @@ import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/quer
 import { UpdateExternalControlListsCommandHandler } from '../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommandHandler.js';
 import { AddExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommandHandler.js';
 import { RemoveExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommandHandler.js';
+import { IsExternalControlListQueryHandler } from '../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQueryHandler.js';
+import { GetExternalControlListsCountQueryHandler } from '../app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQueryHandler.js';
+import { GetExternalControlListsMembersQueryHandler } from '../app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -932,6 +935,18 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: CanRedeemByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsExternalControlListQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalControlListsCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalControlListsMembersQueryHandler,
   },
 ];
 

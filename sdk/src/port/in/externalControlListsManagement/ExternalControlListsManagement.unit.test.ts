@@ -210,6 +210,9 @@ import {
   AddExternalControlListRequest,
   RemoveExternalControlListRequest,
   UpdateExternalControlListsRequest,
+  GetExternalControlListsCountRequest,
+  GetExternalControlListsMembersRequest,
+  IsExternalControlListRequest,
 } from '../request';
 import * as Common from '../Common';
 import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
@@ -217,18 +220,32 @@ import {
   AddExternalControlListsRequestFixture,
   RemoveExternalControlListsRequestFixture,
   UpdateExternalControlListsRequestFixture,
+  GetExternalControlListsCountRequestFixture,
+  GetExternalControlListsMembersRequestFixture,
+  IsExternalControlListRequestFixture,
 } from '../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture';
-import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
+import {
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '../../../../__tests__/fixtures/shared/DataFixture';
 import LogService from '../../../app/service/LogService';
 import { ValidationError } from '../request/error/ValidationError';
 import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
 import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
+import { QueryBus } from '../../../core/query/QueryBus';
+import { IsExternalControlListQuery } from '../../../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery';
+import { GetExternalControlListsCountQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery';
+import { GetExternalControlListsMembersQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery';
 
 describe('ExternalControlListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
   let updateExternalControlListsRequest: UpdateExternalControlListsRequest;
   let addExternalControlListsRequest: AddExternalControlListRequest;
   let removeExternalControlListsRequest: RemoveExternalControlListRequest;
+  let isExternalControlListRequest: IsExternalControlListRequest;
+  let getExternalControlListsCountRequest: GetExternalControlListsCountRequest;
+  let getExternalControlListsMembersRequest: GetExternalControlListsMembersRequest;
   let handleValidationSpy: jest.SpyInstance;
 
   const transactionId = TransactionIdFixture.create().id;
@@ -240,9 +257,11 @@ describe('ExternalControlListsManagement', () => {
 
   beforeEach(() => {
     commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
     handleValidationSpy = jest.spyOn(Common, 'handleValidation');
     jest.spyOn(LogService, 'logError').mockImplementation(() => {});
     (ExternalControlListsManagement as any).commandBus = commandBusMock;
+    (ExternalControlListsManagement as any).queryBus = queryBusMock;
   });
 
   afterEach(() => {
@@ -503,6 +522,258 @@ describe('ExternalControlListsManagement', () => {
       await expect(
         ExternalControlListsManagement.removeExternalControlList(
           addExternalControlListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('isExternalControlList', () => {
+    isExternalControlListRequest = new IsExternalControlListRequest(
+      IsExternalControlListRequestFixture.create(),
+    );
+    const expectedQueryResponse = {
+      payload: true,
+    };
+
+    it('should check if is external control list successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result = await ExternalControlListsManagement.isExternalControlList(
+        isExternalControlListRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsExternalControlListRequest',
+        isExternalControlListRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsExternalControlListQuery(
+          isExternalControlListRequest.securityId,
+          isExternalControlListRequest.externalControlListAddress,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalControlListsManagement.isExternalControlList(
+          isExternalControlListRequest,
+        ),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsExternalControlListRequest',
+        isExternalControlListRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsExternalControlListQuery(
+          isExternalControlListRequest.securityId,
+          isExternalControlListRequest.externalControlListAddress,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      isExternalControlListRequest = new IsExternalControlListRequest({
+        ...IsExternalControlListRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalControlListsManagement.isExternalControlList(
+          isExternalControlListRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalControlListAddress is invalid', async () => {
+      isExternalControlListRequest = new IsExternalControlListRequest({
+        ...IsExternalControlListRequestFixture.create({
+          externalControlListAddress: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalControlListsManagement.isExternalControlList(
+          isExternalControlListRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getExternalControlListsCount', () => {
+    getExternalControlListsCountRequest =
+      new GetExternalControlListsCountRequest(
+        GetExternalControlListsCountRequestFixture.create(),
+      );
+    const expectedQueryResponse = {
+      payload: 1,
+    };
+
+    it('should get external control lists count successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result =
+        await ExternalControlListsManagement.getExternalControlListsCount(
+          getExternalControlListsCountRequest,
+        );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetExternalControlListsCountRequest',
+        getExternalControlListsCountRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetExternalControlListsCountQuery(
+          getExternalControlListsCountRequest.securityId,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalControlListsManagement.getExternalControlListsCount(
+          getExternalControlListsCountRequest,
+        ),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetExternalControlListsCountRequest',
+        getExternalControlListsCountRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetExternalControlListsCountQuery(
+          getExternalControlListsCountRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getExternalControlListsCountRequest =
+        new GetExternalControlListsCountRequest({
+          ...GetExternalControlListsCountRequestFixture.create({
+            securityId: 'invalid',
+          }),
+        });
+
+      await expect(
+        ExternalControlListsManagement.getExternalControlListsCount(
+          getExternalControlListsCountRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getExternalControlListsMembers', () => {
+    getExternalControlListsMembersRequest =
+      new GetExternalControlListsMembersRequest(
+        GetExternalControlListsMembersRequestFixture.create(),
+      );
+    const expectedQueryResponse = {
+      payload: [HederaIdPropsFixture.create().value],
+    };
+
+    it('should get external control lists members successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result =
+        await ExternalControlListsManagement.getExternalControlListsMembers(
+          getExternalControlListsMembersRequest,
+        );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetExternalControlListsMembersRequest',
+        getExternalControlListsMembersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetExternalControlListsMembersQuery(
+          getExternalControlListsMembersRequest.securityId,
+          getExternalControlListsMembersRequest.start,
+          getExternalControlListsMembersRequest.end,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalControlListsManagement.getExternalControlListsMembers(
+          getExternalControlListsMembersRequest,
+        ),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetExternalControlListsMembersRequest',
+        getExternalControlListsMembersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetExternalControlListsMembersQuery(
+          getExternalControlListsMembersRequest.securityId,
+          getExternalControlListsMembersRequest.start,
+          getExternalControlListsMembersRequest.end,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getExternalControlListsMembersRequest =
+        new GetExternalControlListsMembersRequest({
+          ...GetExternalControlListsMembersRequestFixture.create({
+            securityId: 'invalid',
+          }),
+        });
+
+      await expect(
+        ExternalControlListsManagement.getExternalControlListsMembers(
+          getExternalControlListsMembersRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if start is negative', async () => {
+      getExternalControlListsMembersRequest =
+        new GetExternalControlListsMembersRequest({
+          ...GetExternalControlListsMembersRequestFixture.create({
+            start: -1,
+          }),
+        });
+
+      await expect(
+        ExternalControlListsManagement.getExternalControlListsMembers(
+          getExternalControlListsMembersRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if end is negative', async () => {
+      getExternalControlListsMembersRequest =
+        new GetExternalControlListsMembersRequest({
+          ...GetExternalControlListsMembersRequestFixture.create({
+            end: -1,
+          }),
+        });
+
+      await expect(
+        ExternalControlListsManagement.getExternalControlListsMembers(
+          getExternalControlListsMembersRequest,
         ),
       ).rejects.toThrow(ValidationError);
     });

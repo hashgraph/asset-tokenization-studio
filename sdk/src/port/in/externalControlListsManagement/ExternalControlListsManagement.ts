@@ -212,10 +212,17 @@ import {
   AddExternalControlListRequest,
   RemoveExternalControlListRequest,
   UpdateExternalControlListsRequest,
+  GetExternalControlListsCountRequest,
+  GetExternalControlListsMembersRequest,
+  IsExternalControlListRequest,
 } from '../request/index.js';
 import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand.js';
 import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand.js';
 import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import { IsExternalControlListQuery } from '../../../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery.js';
+import { GetExternalControlListsCountQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery.js';
+import { GetExternalControlListsMembersQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery.js';
 
 interface IExternalControlListsInPort {
   updateExternalControlListsPauses(
@@ -227,10 +234,20 @@ interface IExternalControlListsInPort {
   removeExternalControlList(
     request: RemoveExternalControlListRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  isExternalControlList(
+    request: IsExternalControlListRequest,
+  ): Promise<boolean>;
+  getExternalControlListsCount(
+    request: GetExternalControlListsCountRequest,
+  ): Promise<number>;
+  getExternalControlListsMembers(
+    request: GetExternalControlListsMembersRequest,
+  ): Promise<string[]>;
 }
 
 class ExternalControlListsInPort implements IExternalControlListsInPort {
   constructor(
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
     private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
   ) {}
 
@@ -275,6 +292,48 @@ class ExternalControlListsInPort implements IExternalControlListsInPort {
         externalControlListAddress,
       ),
     );
+  }
+
+  @LogError
+  async isExternalControlList(
+    request: IsExternalControlListRequest,
+  ): Promise<boolean> {
+    const { securityId, externalControlListAddress } = request;
+    handleValidation('IsExternalControlListRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new IsExternalControlListQuery(securityId, externalControlListAddress),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getExternalControlListsCount(
+    request: GetExternalControlListsCountRequest,
+  ): Promise<number> {
+    const { securityId } = request;
+    handleValidation('GetExternalControlListsCountRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetExternalControlListsCountQuery(securityId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getExternalControlListsMembers(
+    request: GetExternalControlListsMembersRequest,
+  ): Promise<string[]> {
+    const { securityId, start, end } = request;
+    handleValidation('GetExternalControlListsMembersRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetExternalControlListsMembersQuery(securityId, start, end),
+      )
+    ).payload;
   }
 }
 
