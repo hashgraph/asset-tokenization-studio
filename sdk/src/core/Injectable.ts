@@ -365,7 +365,6 @@ import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/quer
 import { UpdateExternalControlListsCommandHandler } from '../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommandHandler.js';
 import { AddExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommandHandler.js';
 import { RemoveExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommandHandler.js';
-import { UpdateExternalControlListsCommandHandler } from '../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommandHandler.js';
 import { IsExternalControlListQueryHandler } from '../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQueryHandler.js';
 import { GetExternalControlListsCountQueryHandler } from '../app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQueryHandler.js';
 import { GetExternalControlListsMembersQueryHandler } from '../app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQueryHandler.js';

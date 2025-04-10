@@ -210,9 +210,9 @@ import {
   AddExternalControlListRequest,
   RemoveExternalControlListRequest,
   UpdateExternalControlListsRequest,
-    GetExternalControlListsCountRequest,
-    GetExternalControlListsMembersRequest,
-    IsExternalControlListRequest,
+  GetExternalControlListsCountRequest,
+  GetExternalControlListsMembersRequest,
+  IsExternalControlListRequest,
 } from '../request';
 import * as Common from '../Common';
 import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
@@ -220,12 +220,10 @@ import {
   AddExternalControlListsRequestFixture,
   RemoveExternalControlListsRequestFixture,
   UpdateExternalControlListsRequestFixture,
-    GetExternalControlListsCountRequestFixture,
-    GetExternalControlListsMembersRequestFixture,
-    IsExternalControlListRequestFixture,
+  GetExternalControlListsCountRequestFixture,
+  GetExternalControlListsMembersRequestFixture,
+  IsExternalControlListRequestFixture,
 } from '../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture';
-import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
-import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand';
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,

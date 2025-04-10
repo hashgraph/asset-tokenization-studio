@@ -212,14 +212,13 @@ import {
   AddExternalControlListRequest,
   RemoveExternalControlListRequest,
   UpdateExternalControlListsRequest,
-    GetExternalControlListsCountRequest,
-    GetExternalControlListsMembersRequest,
-    IsExternalControlListRequest,
+  GetExternalControlListsCountRequest,
+  GetExternalControlListsMembersRequest,
+  IsExternalControlListRequest,
 } from '../request/index.js';
 import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand.js';
 import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand.js';
 import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand.js';
-import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlList/updateExternalControlLists/UpdateExternalControlListsCommand.js';
 import { QueryBus } from '../../../core/query/QueryBus.js';
 import { IsExternalControlListQuery } from '../../../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery.js';
 import { GetExternalControlListsCountQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery.js';
