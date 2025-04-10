@@ -217,6 +217,7 @@ import { useUserStore } from "../../store/userStore";
 import { StepNewSerie } from "./Components/StepNewSerie";
 import { StepReview } from "./Components/StepReview";
 import { StepRegulation } from "../CreateSecurityCommons/StepRegulation";
+import { StepExternalManagement } from "../CreateSecurityCommons/StepExternalManagement";
 
 export const CreateEquity = () => {
   const { t } = useTranslation("security", { keyPrefix: "createEquity" });
@@ -242,6 +243,7 @@ export const CreateEquity = () => {
       regulationSubType: 0,
       countriesListType: 1,
       countriesList: [] as string[],
+      externalPausesList: [],
     },
   });
 
@@ -253,6 +255,10 @@ export const CreateEquity = () => {
     {
       title: t("stepNewSerie.title"),
       content: <StepNewSerie />,
+    },
+    {
+      title: t("stepExternalManagement.title"),
+      content: <StepExternalManagement />,
     },
     {
       title: t("header.regulation"),

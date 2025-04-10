@@ -203,135 +203,121 @@
 
 */
 
-export default {
-  header: {
-    title: "Bond creation",
-    details: "Details",
-    configuration: "Configuration",
-    coupon: "Coupon",
-    regulation: "Regulation",
-    review: "Review",
-  },
+import { UseQueryOptions, useQueries, useQuery } from "@tanstack/react-query";
+import SDKService from "../../services/SDKService";
+import {
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
+  IsExternalPauseRequest,
+  IsPausedMockRequest,
+} from "@hashgraph/asset-tokenization-sdk";
 
-  stepTokenDetails: {
-    title: "Bond details",
-    subtitle:
-      "Enter the basics details of the digital security to start creating it.",
-    mandatoryFields: "*Mandatory fields",
-    generalInformation: "General information",
-    name: "Name",
-    nameTooltip: "Bond’s name.",
-    placeholderName: "Enter name",
-    symbol: "Symbol",
-    symbolTooltip: "Bond’s symbol.",
-    placeholderSymbol: "Enter Symbol",
-    decimals: "Decimals",
-    decimalsTooltip: "Number of decimals units.",
-    placeholderDecimals: "6",
-    isin: "ISIN",
-    isinTooltip: "International security identification number.",
-    placeholderIsin: "12",
-    bondPermissions: "Bond permissions",
-    permissionControllable: "Controllable",
-    permissionBlocklist: "Blocklist",
-    permissionApprovalList: "Approval list",
-    permissionControllableTooltip:
-      "Enable Token Controller role and compliance control operations",
-    permissionBlocklistTooltip:
-      "Enable access control to the security using a list of blocked accounts",
-    permissionApprovalListTooltip:
-      "Enable access control to the security using a list of allowed accounts",
-    configuration: "Bond configuration",
-    isClearing: "Clearing mode enabled",
-    isClearingTooltip: "Enable or disable clearing mode",
-  },
+export const GET_EXTERNAL_PAUSES_COUNT = (securityId: string) =>
+  `GET_EXTERNAL_PAUSES_COUNT_${securityId}`;
 
-  stepConfiguration: {
-    title: "Configuration",
-    subtitle: "Enter the bond details such as currency type, amount...  ",
-    mandatoryFields: "*Mandatory fields",
-    currency: "Currency",
-    nominalValue: "Nominal value",
-    nominalValueTooltip:
-      "Vale of each token of the bond’s principal (in the selected currency), which will be returned to the bondholder at maturity.",
-    nominalValuePlaceHolder: "Enter nominal value",
-    numberOfUnits: "Number of bond units",
-    numberOfUnitsTooltip: "Bond’s maximum supply.",
-    numberOfUnitsPlaceHolder: "Enter bond units",
-    totalAmount: "Total value",
-    totalAmountTooltip:
-      "Total tokenized value resulting of multiply number of shares * nominal value.",
-    startingDate: "Starting date",
-    startingDateTooltip: "Beginning of the bond's interest-earning period.",
-    startingDatePlaceHolder: "Choose mint date",
-    maturityDate: "Maturity date",
-    maturityDateTooltip:
-      "Date at which the bond’s principal will be returned to the bondholder.",
-    maturityDatePlaceHolder: "Choose maturity date",
-  },
+export const GET_CONTROL_LIST_MEMBERS = (
+  securityId: string,
+  start: number,
+  end: number,
+) => `GET_EXTERNAL_PAUSES_MEMBERS_${securityId}_${start}_${end}`;
 
-  stepCoupon: {
-    title: "Coupon details",
-    mandatoryFields: "*Mandatory fields",
-    couponType: "Coupon type",
-    couponTypeTooltip:
-      "<strong>- Fixed</strong>: Create a bond with a fixed coupon.<br /> <strong>- Custom</strong>: Create a bond with a zero-coupon by default. For floating coupons, can be added in the Set Coupons tab.",
-    couponTypePlaceHolder: "Choose a coupon type",
-    couponRate: "Coupon rate",
-    couponRateTooltip: "Interest rate per coupon.",
-    couponRatePlaceHolder: "Max 3 decimals",
-    couponFrequency: "Coupon frequency",
-    couponFrequencyTooltip:
-      "Number of months between two consecutive coupons (each month represents 30 days).",
-    couponFrequencyPlaceHolder: "Enter coupon frequency",
-    firstCouponDate: "First coupon date",
-    firstCouponDateTooltip:
-      "First coupon record date. The subsequent coupon’s record dates will be calculated using the coupon frequency and the first coupon’s date.",
-    firstCouponDatePlaceHolder: "Choose first coupon date",
-    lastCouponDate: "Last coupon date",
-    totalCoupons: "Total coupons",
-  },
+export const GET_EXTERNAL_PAUSE = (securityId: string) =>
+  `GET_EXTERNAL_PAUSE_${securityId}`;
 
-  stepExternalManagement: {
-    title: "External Lists",
-    subtitle: "Add external lists configurations",
-    externalPause: "External Pause",
-    pauseList: "Pause list",
-    pauseListPlaceholder: "Choose external pause ...",
-    externalPausesSelected: "External pauses selected:",
-  },
+export const GET_IS_EXTERNAL_PAUSE = (securityId: string) =>
+  `GET_IS_EXTERNAL_PAUSE_${securityId}`;
 
-  stepReview: {
-    title: "Review",
-    tokenDetails: "Digital security details",
-    serieDetails: "Serie details",
-  },
+export const GET_IS_PAUSE_MOCK = (securityId: string) =>
+  `GET_IS_PAUSE_MOCK_${securityId}`;
 
-  messages: {
-    succes: "Success: ",
-    creationSuccessful: "Security creation was successful: ",
-    error: "Error: ",
-    creationFailed: "Security creation failed",
-  },
+export const useGetExternalPausesCount = <TError, TData = number>(
+  request: GetExternalPausesCountRequest,
+  options?: UseQueryOptions<number, TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_EXTERNAL_PAUSES_COUNT(request.securityId)],
+    () => SDKService.getExternalPausesCount(request),
+    options,
+  );
+};
 
-  cancelSecurityPopUp: {
-    title: "You will lose your changes!",
-    description:
-      "You will lose changes if you go out. Are you sure you want to leave this process?",
-    confirmText: "Leave process",
-    cancelText: "Cancel",
-  },
+export const useGetExternalPausesMembers = <TError, TData = string[]>(
+  params: GetExternalPausesMembersRequest,
+  options?: UseQueryOptions<string[], TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_CONTROL_LIST_MEMBERS(params.securityId, params.start, params.end)],
+    () => SDKService.getExternalPausesMembers(params),
+    options,
+  );
+};
 
-  createSecurityPopUp: {
-    title: "Is everything correct?",
-    description:
-      "Make sure that all the data is correct. You won't be able to edit it later.",
-    confirmText: "Accept",
-    cancelText: "Cancel",
-  },
+export const useGetExternalPauses = (securityId: string, start: number = 0) => {
+  const countQuery = useGetExternalPausesCount(
+    new GetExternalPausesCountRequest({ securityId }),
+    {
+      retry: false,
+    },
+  );
 
-  createTokenButton: "Create Bond",
-  cancelButton: "Cancel",
-  nextStepButton: "Next step",
-  previousStepButton: "Previous step",
+  const membersQuery = useGetExternalPausesMembers(
+    new GetExternalPausesMembersRequest({
+      securityId,
+      start,
+      end: countQuery.data ?? 0,
+    }),
+    { retry: false },
+  );
+
+  const pauseStatusQueries = useQueries({
+    queries: (membersQuery.data ?? []).map((memberId) => ({
+      queryKey: [GET_IS_EXTERNAL_PAUSE(memberId)],
+      queryFn: () =>
+        SDKService.isPauseMock(
+          new IsPausedMockRequest({
+            contractId: memberId,
+          }),
+        ),
+      enabled: !!membersQuery.data,
+      retry: false,
+    })),
+  });
+
+  const isLoading =
+    membersQuery.isLoading || pauseStatusQueries.some((q) => q.isLoading);
+  const isError =
+    membersQuery.isError || pauseStatusQueries.some((q) => q.isError);
+
+  const data = (membersQuery.data ?? []).map((memberId, index) => ({
+    id: memberId,
+    isPaused: pauseStatusQueries[index]?.data ?? false,
+  }));
+
+  return {
+    isLoading,
+    isError,
+    data,
+  };
+};
+
+export const useIsExternalPause = <TError, TData = string[]>(
+  request: IsExternalPauseRequest,
+  options?: UseQueryOptions<boolean, TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_IS_EXTERNAL_PAUSE(request.securityId)],
+    () => SDKService.isExternalPause(request),
+    options,
+  );
+};
+
+export const useIsPauseMock = <TError, TData = boolean>(
+  request: IsPausedMockRequest,
+  options?: UseQueryOptions<boolean, TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_IS_PAUSE_MOCK(request.contractId)],
+    () => SDKService.isPauseMock(request),
+    options,
+  );
 };

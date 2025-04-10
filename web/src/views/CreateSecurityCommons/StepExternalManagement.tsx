@@ -203,135 +203,137 @@
 
 */
 
-export default {
-  header: {
-    title: "Bond creation",
-    details: "Details",
-    configuration: "Configuration",
-    coupon: "Coupon",
-    regulation: "Regulation",
-    review: "Review",
-  },
+import {
+  FormControl,
+  HStack,
+  SimpleGrid,
+  Stack,
+  VStack,
+} from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
+import { X } from "@phosphor-icons/react";
+import {
+  PhosphorIcon,
+  Text,
+  InfoDivider,
+  SelectController,
+  Tag,
+  PanelTitle,
+} from "io-bricks-ui";
+import { useFormContext, useFormState } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useExternalPauseStore } from "../../store/externalPauseStore";
+import { ICreateEquityFormValues } from "../CreateEquity/ICreateEquityFormValues";
+import { ICreateBondFormValues } from "../CreateBond/ICreateBondFormValues";
+import { FormStepContainer } from "../../components/FormStepContainer";
+import { CancelButton } from "../../components/CancelButton";
+import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
+import { NextStepButton } from "../CreateEquity/Components/NextStepButton";
 
-  stepTokenDetails: {
-    title: "Bond details",
-    subtitle:
-      "Enter the basics details of the digital security to start creating it.",
-    mandatoryFields: "*Mandatory fields",
-    generalInformation: "General information",
-    name: "Name",
-    nameTooltip: "Bond’s name.",
-    placeholderName: "Enter name",
-    symbol: "Symbol",
-    symbolTooltip: "Bond’s symbol.",
-    placeholderSymbol: "Enter Symbol",
-    decimals: "Decimals",
-    decimalsTooltip: "Number of decimals units.",
-    placeholderDecimals: "6",
-    isin: "ISIN",
-    isinTooltip: "International security identification number.",
-    placeholderIsin: "12",
-    bondPermissions: "Bond permissions",
-    permissionControllable: "Controllable",
-    permissionBlocklist: "Blocklist",
-    permissionApprovalList: "Approval list",
-    permissionControllableTooltip:
-      "Enable Token Controller role and compliance control operations",
-    permissionBlocklistTooltip:
-      "Enable access control to the security using a list of blocked accounts",
-    permissionApprovalListTooltip:
-      "Enable access control to the security using a list of allowed accounts",
-    configuration: "Bond configuration",
-    isClearing: "Clearing mode enabled",
-    isClearingTooltip: "Enable or disable clearing mode",
-  },
+type SelectOption = {
+  value: string;
+  label: string;
+};
 
-  stepConfiguration: {
-    title: "Configuration",
-    subtitle: "Enter the bond details such as currency type, amount...  ",
-    mandatoryFields: "*Mandatory fields",
-    currency: "Currency",
-    nominalValue: "Nominal value",
-    nominalValueTooltip:
-      "Vale of each token of the bond’s principal (in the selected currency), which will be returned to the bondholder at maturity.",
-    nominalValuePlaceHolder: "Enter nominal value",
-    numberOfUnits: "Number of bond units",
-    numberOfUnitsTooltip: "Bond’s maximum supply.",
-    numberOfUnitsPlaceHolder: "Enter bond units",
-    totalAmount: "Total value",
-    totalAmountTooltip:
-      "Total tokenized value resulting of multiply number of shares * nominal value.",
-    startingDate: "Starting date",
-    startingDateTooltip: "Beginning of the bond's interest-earning period.",
-    startingDatePlaceHolder: "Choose mint date",
-    maturityDate: "Maturity date",
-    maturityDateTooltip:
-      "Date at which the bond’s principal will be returned to the bondholder.",
-    maturityDatePlaceHolder: "Choose maturity date",
-  },
+export const StepExternalManagement = () => {
+  const { t } = useTranslation("security", {
+    keyPrefix: "createEquity.stepExternalManagement",
+  });
 
-  stepCoupon: {
-    title: "Coupon details",
-    mandatoryFields: "*Mandatory fields",
-    couponType: "Coupon type",
-    couponTypeTooltip:
-      "<strong>- Fixed</strong>: Create a bond with a fixed coupon.<br /> <strong>- Custom</strong>: Create a bond with a zero-coupon by default. For floating coupons, can be added in the Set Coupons tab.",
-    couponTypePlaceHolder: "Choose a coupon type",
-    couponRate: "Coupon rate",
-    couponRateTooltip: "Interest rate per coupon.",
-    couponRatePlaceHolder: "Max 3 decimals",
-    couponFrequency: "Coupon frequency",
-    couponFrequencyTooltip:
-      "Number of months between two consecutive coupons (each month represents 30 days).",
-    couponFrequencyPlaceHolder: "Enter coupon frequency",
-    firstCouponDate: "First coupon date",
-    firstCouponDateTooltip:
-      "First coupon record date. The subsequent coupon’s record dates will be calculated using the coupon frequency and the first coupon’s date.",
-    firstCouponDatePlaceHolder: "Choose first coupon date",
-    lastCouponDate: "Last coupon date",
-    totalCoupons: "Total coupons",
-  },
+  const { externalPauses } = useExternalPauseStore();
 
-  stepExternalManagement: {
-    title: "External Lists",
-    subtitle: "Add external lists configurations",
-    externalPause: "External Pause",
-    pauseList: "Pause list",
-    pauseListPlaceholder: "Choose external pause ...",
-    externalPausesSelected: "External pauses selected:",
-  },
+  const { control, watch, setValue } = useFormContext<
+    ICreateEquityFormValues | ICreateBondFormValues
+  >();
 
-  stepReview: {
-    title: "Review",
-    tokenDetails: "Digital security details",
-    serieDetails: "Serie details",
-  },
+  const stepFormState = useFormState({
+    control,
+  });
 
-  messages: {
-    succes: "Success: ",
-    creationSuccessful: "Security creation was successful: ",
-    error: "Error: ",
-    creationFailed: "Security creation failed",
-  },
+  const [externalPausesSelected, setExternalPausesSelected] = useState<
+    string[]
+  >(watch("externalPausesList") ?? []);
 
-  cancelSecurityPopUp: {
-    title: "You will lose your changes!",
-    description:
-      "You will lose changes if you go out. Are you sure you want to leave this process?",
-    confirmText: "Leave process",
-    cancelText: "Cancel",
-  },
+  useEffect(() => {
+    setValue("externalPausesList", externalPausesSelected);
+  }, [setExternalPausesSelected, externalPausesSelected, setValue]);
 
-  createSecurityPopUp: {
-    title: "Is everything correct?",
-    description:
-      "Make sure that all the data is correct. You won't be able to edit it later.",
-    confirmText: "Accept",
-    cancelText: "Cancel",
-  },
+  const externalPauseOptions = externalPauses
+    .map(({ address }) => ({
+      label: address,
+      value: address,
+    }))
+    .filter((option) => !externalPausesSelected.includes(option.value));
 
-  createTokenButton: "Create Bond",
-  cancelButton: "Cancel",
-  nextStepButton: "Next step",
-  previousStepButton: "Previous step",
+  const handlePauseSelect = (option: SelectOption[]) => {
+    const selectedAddress = option[0].value;
+
+    setExternalPausesSelected((prev) => {
+      if (prev.includes(selectedAddress)) return prev;
+
+      return [...prev, selectedAddress];
+    });
+  };
+
+  const handlePauseRemove = (addressToRemove: string) => {
+    setExternalPausesSelected((prev) =>
+      prev.filter((address) => address !== addressToRemove),
+    );
+  };
+
+  return (
+    <FormStepContainer>
+      <Stack gap={2}>
+        <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+        <Text textStyle="BodyTextRegularMD">{t("subtitle")}</Text>
+      </Stack>
+      <InfoDivider title={t("externalPause")} type="main" />
+      <VStack w="full">
+        <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">{t("pauseList")}</Text>
+            </HStack>
+            <SelectController
+              control={control}
+              id="externalPausesList"
+              placeholder={t("pauseListPlaceholder")}
+              options={externalPauseOptions}
+              isMulti
+              setsFullOption
+              onChange={(option) =>
+                handlePauseSelect(option as unknown as SelectOption[])
+              }
+            />
+          </Stack>
+          <VStack w="auto" layerStyle="whiteContainer">
+            <PanelTitle title={t("externalPausesSelected")} />
+            <HStack layerStyle="whiteContainer" noOfLines={20} lineHeight={10}>
+              {externalPausesSelected.map((item) => (
+                <Tag
+                  key={item}
+                  label={item}
+                  size="sm"
+                  rightIcon={<PhosphorIcon as={X} />}
+                  onClick={() => handlePauseRemove(item)}
+                />
+              ))}
+            </HStack>
+          </VStack>
+        </FormControl>
+      </VStack>
+
+      <HStack
+        gap={4}
+        w="full"
+        h="100px"
+        align="end"
+        justifyContent={"flex-end"}
+      >
+        <CancelButton />
+        <PreviousStepButton />
+        <NextStepButton isDisabled={!stepFormState.isValid} />
+      </HStack>
+    </FormStepContainer>
+  );
 };

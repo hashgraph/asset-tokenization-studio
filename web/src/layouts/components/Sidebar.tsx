@@ -205,7 +205,7 @@
 
 import { Stack } from "@chakra-ui/react";
 import { Sidebar as BaseSidebar, SidebarItem } from "io-bricks-ui";
-import { ChartPie, House } from "@phosphor-icons/react";
+import { House, Pause } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { RouteName } from "../../router/RouteName";
@@ -226,6 +226,18 @@ export const Sidebar = () => {
       isActive: location.pathname === RoutePath.DASHBOARD,
       to: RouteName.Dashboard,
     },
+    // {
+    //   label: t(RouteName.ExternalControlList),
+    //   icon: HandPalm,
+    //   isActive: location.pathname === RoutePath.EXTERNAL_CONTROL_LIST,
+    //   to: RouteName.ExternalControlList,
+    // },
+    {
+      label: t(RouteName.ExternalPauseList),
+      icon: Pause,
+      isActive: location.pathname.includes(RoutePath.EXTERNAL_PAUSE_LIST),
+      to: RouteName.ExternalPauseList,
+    },
   ];
 
   return (
@@ -237,8 +249,9 @@ export const Sidebar = () => {
             <SidebarItem
               {...props}
               key={index}
-              icon={ChartPie}
+              icon={props.icon}
               onClick={() => RouterManager.to(props.to)}
+              textAlign={"center"}
             />
           ))}
         </Stack>
@@ -252,7 +265,7 @@ export const Sidebar = () => {
         justifyContent: "space-between",
         pt: 16,
         pb: 10,
-        maxW: "104px",
+        w: "104px",
       }}
     />
   );
