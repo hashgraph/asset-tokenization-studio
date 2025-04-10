@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 
 import {
     ExternalControlListManagement
-} from '../../../layer_1/externalControlList/ExternalControlListManagement.sol';
+} from '../../../layer_1/externalControlLists/ExternalControlListManagement.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
