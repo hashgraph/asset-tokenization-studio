@@ -326,6 +326,12 @@ import RemoveExternalControlListRequest from './security/externalControlLists/Re
 import GetExternalControlListsCountRequest from './security/externalControlLists/GetExternalControlListsCountRequest.js';
 import IsExternalControlListRequest from './security/externalControlLists/IsExternalControlListRequest.js';
 import GetExternalControlListsMembersRequest from './security/externalControlLists/GetExternalControlListsMembersRequest.js';
+import AddToBlackListMockRequest from './security/externalControlLists/mock/AddToBlackListMockRequest.js';
+import AddToWhiteListMockRequest from './security/externalControlLists/mock/AddToWhiteListMockRequest.js';
+import RemoveFromBlackListMockRequest from './security/externalControlLists/mock/RemoveFromBlackListMockRequest.js';
+import RemoveFromWhiteListMockRequest from './security/externalControlLists/mock/RemoveFromWhiteListMockRequest.js';
+import IsAuthorizedBlackListMockRequest from './security/externalControlLists/mock/IsAuthorizedBlackListMockRequest.js';
+import IsAuthorizedWhiteListMockRequest from './security/externalControlLists/mock/IsAuthorizedWhiteListMockRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -451,4 +457,10 @@ export {
   GetExternalControlListsCountRequest,
   IsExternalControlListRequest,
   GetExternalControlListsMembersRequest,
+  AddToBlackListMockRequest,
+  AddToWhiteListMockRequest,
+  RemoveFromBlackListMockRequest,
+  RemoveFromWhiteListMockRequest,
+  IsAuthorizedBlackListMockRequest,
+  IsAuthorizedWhiteListMockRequest,
 };
