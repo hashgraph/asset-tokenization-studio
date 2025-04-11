@@ -328,6 +328,12 @@ import {
   UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
   ADD_EXTERNAL_CONTROL_LIST_GAS,
   REMOVE_EXTERNAL_CONTROL_LIST_GAS,
+  ADD_TO_BLACK_LIST_MOCK_GAS,
+  ADD_TO_WHITE_LIST_MOCK_GAS,
+  REMOVE_FROM_BLACK_LIST_MOCK_GAS,
+  REMOVE_FROM_WHITE_LIST_MOCK_GAS,
+  CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
+  CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -365,6 +371,8 @@ import {
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
   ExternalControlListManagement__factory,
+  MockedBlacklist__factory,
+  MockedWhitelist__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -2859,5 +2867,111 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       }),
       this.networkService.environment,
     );
+  }
+
+  async addToBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding address ${targetId.toString()} to external Control black List mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedBlacklist__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).addToBlacklist(targetId.toString(), {
+        gasLimit: ADD_TO_BLACK_LIST_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async addToWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding address ${targetId.toString()} to external Control white List mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedWhitelist__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).addToWhitelist(targetId.toString(), {
+        gasLimit: ADD_TO_WHITE_LIST_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeFromBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing address ${targetId.toString()} from external Control black List mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedBlacklist__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).removeFromBlacklist(targetId.toString(), {
+        gasLimit: REMOVE_FROM_BLACK_LIST_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeFromWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing address ${targetId.toString()} from external Control white List mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedWhitelist__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).removeFromWhitelist(targetId.toString(), {
+        gasLimit: REMOVE_FROM_WHITE_LIST_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async createExternalBlackListMock(): Promise<string> {
+    LogService.logTrace(`Deploying External Control Black List Mock contract`);
+
+    const factory = new MockedBlacklist__factory(
+      this.signerOrProvider as Signer,
+    );
+
+    const contract = await factory.deploy({
+      gasLimit: CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
+    });
+    await contract.deployed();
+
+    return contract.address;
+  }
+
+  async createExternalWhiteListMock(): Promise<string> {
+    LogService.logTrace(`Deploying External Control White List Mock contract`);
+
+    const factory = new MockedWhitelist__factory(
+      this.signerOrProvider as Signer,
+    );
+
+    const contract = await factory.deploy({
+      gasLimit: CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
+    });
+    await contract.deployed();
+
+    return contract.address;
   }
 }

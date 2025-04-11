@@ -208,6 +208,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-case-declarations */
 import {
+  ContractCreateTransaction,
   ContractExecuteTransaction,
   ContractFunctionParameters,
   ContractId,
@@ -237,6 +238,8 @@ import {
   ClearingHoldCreationFacet__factory,
   ClearingActionsFacet__factory,
   ExternalControlListManagement__factory,
+  MockedBlacklist__factory,
+  MockedWhitelist__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -309,6 +312,12 @@ import {
   UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
   ADD_EXTERNAL_CONTROL_LIST_GAS,
   REMOVE_EXTERNAL_CONTROL_LIST_GAS,
+  ADD_TO_BLACK_LIST_MOCK_GAS,
+  ADD_TO_WHITE_LIST_MOCK_GAS,
+  REMOVE_FROM_BLACK_LIST_MOCK_GAS,
+  REMOVE_FROM_WHITE_LIST_MOCK_GAS,
+  CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
+  CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -3160,6 +3169,160 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
+  }
+
+  async addToBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'addToBlacklist';
+    LogService.logTrace(
+      `Adding address ${targetId.toString()} to external Control black List mock ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedBlacklist__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(ADD_TO_BLACK_LIST_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async addToWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'addToWhitelist';
+    LogService.logTrace(
+      `Adding address ${targetId.toString()} to external Control white List mock ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedWhitelist__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(ADD_TO_WHITE_LIST_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async removeFromBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'removeFromBlacklist';
+    LogService.logTrace(
+      `Removing address ${targetId.toString()} from external Control black List mock ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedBlacklist__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(REMOVE_FROM_BLACK_LIST_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async removeFromWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'removeFromWhitelist';
+    LogService.logTrace(
+      `Removing address ${targetId.toString()} from external Control white List mock ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedWhitelist__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(REMOVE_FROM_WHITE_LIST_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async createExternalBlackListMock(): Promise<TransactionResponse> {
+    LogService.logTrace(`Deploying External Control Black List Mock contract`);
+
+    const bytecodeHex = MockedBlacklist__factory.bytecode.startsWith('0x')
+      ? MockedBlacklist__factory.bytecode.slice(2)
+      : MockedBlacklist__factory.bytecode;
+    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, 'hex'));
+
+    const contractCreate = new ContractCreateTransaction()
+      .setBytecode(bytecode)
+      .setGas(CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS);
+
+    return this.signAndSendTransaction(contractCreate);
+  }
+
+  async createExternalWhiteListMock(): Promise<TransactionResponse> {
+    LogService.logTrace(`Deploying External Control White List Mock contract`);
+
+    const bytecodeHex = MockedWhitelist__factory.bytecode.startsWith('0x')
+      ? MockedWhitelist__factory.bytecode.slice(2)
+      : MockedWhitelist__factory.bytecode;
+    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, 'hex'));
+
+    const contractCreate = new ContractCreateTransaction()
+      .setBytecode(bytecode)
+      .setGas(CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS);
+
+    return this.signAndSendTransaction(contractCreate);
   }
 
   // * Definition of the abstract methods
