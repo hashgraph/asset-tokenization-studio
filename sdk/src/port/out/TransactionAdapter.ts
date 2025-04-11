@@ -826,6 +826,31 @@ interface IExternalControlListsAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IExternalControlListsMockAdapter {
+  addToBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  addToWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeFromWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeFromBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  createExternalBlackListMock(): Promise<string | TransactionResponse>;
+  createExternalWhiteListMock(): Promise<string | TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -835,7 +860,8 @@ export default abstract class TransactionAdapter
     ISSIManagementTransactionAdapter,
     IKYCTransactionAdapter,
     IClearingAdapter,
-    IExternalControlListsAdapter
+    IExternalControlListsAdapter,
+    IExternalControlListsMockAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1584,6 +1610,40 @@ export default abstract class TransactionAdapter
     externalControlListAddress: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addToBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addToWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeFromWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeFromBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createExternalBlackListMock(): Promise<string | TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createExternalWhiteListMock(): Promise<string | TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }

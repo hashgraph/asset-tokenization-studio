@@ -203,268 +203,116 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from '../Common';
-import Injectable from '../../../core/Injectable';
-import { CommandBus } from '../../../core/command/CommandBus';
+import TransactionService from '../../../../../../service/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
 import {
-  AddExternalControlListRequest,
-  RemoveExternalControlListRequest,
-  UpdateExternalControlListsRequest,
-  GetExternalControlListsCountRequest,
-  GetExternalControlListsMembersRequest,
-  IsExternalControlListRequest,
-  AddToBlackListMockRequest,
-  AddToWhiteListMockRequest,
-  RemoveFromBlackListMockRequest,
-  RemoveFromWhiteListMockRequest,
-  IsAuthorizedBlackListMockRequest,
-  IsAuthorizedWhiteListMockRequest,
-} from '../request/index.js';
-import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand.js';
-import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand.js';
-import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import { IsExternalControlListQuery } from '../../../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery.js';
-import { GetExternalControlListsCountQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery.js';
-import { GetExternalControlListsMembersQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery.js';
-import { AddToBlackListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/addToBlackListMock/AddToBlackListMockCommand.js';
-import { AddToWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/addToWhiteListMock/AddToWhiteListMockCommand.js';
-import { RemoveFromBlackListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommand.js';
-import { RemoveFromWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommand.js';
-import { CreateExternalBlackListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/createExternalBlackListMock/CreateExternalBlackListMockCommand.js';
-import { CreateExternalWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/createExternalWhiteListMock/CreateExternalWhiteListMockCommand.js';
-import { IsAuthorizedBlackListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery.js';
-import { IsAuthorizedWhiteListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery.js';
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { CreateExternalWhiteListMockCommandHandler } from './CreateExternalWhiteListMockCommandHandler.js';
+import { CreateExternalWhiteListMockCommandResponse } from './CreateExternalWhiteListMockCommand.js';
+import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import Account from '../../../../../../../domain/context/account/Account.js';
+import { EmptyResponse } from '../../../error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
 
-interface IExternalControlListsInPort {
-  updateExternalControlListsPauses(
-    request: UpdateExternalControlListsRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  addExternalControlList(
-    request: AddExternalControlListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  removeExternalControlList(
-    request: RemoveExternalControlListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  isExternalControlList(
-    request: IsExternalControlListRequest,
-  ): Promise<boolean>;
-  getExternalControlListsCount(
-    request: GetExternalControlListsCountRequest,
-  ): Promise<number>;
-  getExternalControlListsMembers(
-    request: GetExternalControlListsMembersRequest,
-  ): Promise<string[]>;
-}
+describe('CreateExternalWhiteListMockCommandHandler', () => {
+  let handler: CreateExternalWhiteListMockCommandHandler;
 
-interface IExternalControlListsInPortMocksInPort {
-  addToBlackListMock(
-    request: AddToBlackListMockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  addToWhiteListMock(
-    request: AddToWhiteListMockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  removeFromBlackListMock(
-    request: RemoveFromBlackListMockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  removeFromWhiteListMock(
-    request: RemoveFromWhiteListMockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  createExternalBlackListMock(): Promise<string>;
-  createExternalWhiteListMock(): Promise<string>;
-  isAuthorizedBlackListMock(
-    request: IsAuthorizedBlackListMockRequest,
-  ): Promise<boolean>;
-  isAuthorizedWhiteListMock(
-    request: IsAuthorizedWhiteListMockRequest,
-  ): Promise<boolean>;
-}
+  const transactionServiceMock = createMock<TransactionService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
 
-class ExternalControlListsInPort
-  implements IExternalControlListsInPort, IExternalControlListsInPortMocksInPort
-{
-  constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-  ) {}
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const transactionId = TransactionIdFixture.create().id;
 
-  @LogError
-  async updateExternalControlListsPauses(
-    request: UpdateExternalControlListsRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalControlListsAddresses, actives } = request;
-    handleValidation('UpdateExternalControlListsRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateExternalControlListsCommand(
-        securityId,
-        externalControlListsAddresses,
-        actives,
-      ),
+  beforeEach(() => {
+    handler = new CreateExternalWhiteListMockCommandHandler(
+      mirrorNodeAdapterMock,
+      transactionServiceMock,
     );
-  }
+  });
 
-  @LogError
-  async addExternalControlList(
-    request: AddExternalControlListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalControlListAddress } = request;
-    handleValidation('AddExternalControlListRequest', request);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    return await this.commandBus.execute(
-      new AddExternalControlListCommand(securityId, externalControlListAddress),
-    );
-  }
+  describe('execute', () => {
+    it('should successfully create white list mock if return an Id', async () => {
+      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
 
-  @LogError
-  async removeExternalControlList(
-    request: RemoveExternalControlListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalControlListAddress } = request;
-    handleValidation('RemoveExternalControlListRequest', request);
+      transactionServiceMock
+        .getHandler()
+        .createExternalWhiteListMock.mockResolvedValue(transactionId);
 
-    return await this.commandBus.execute(
-      new RemoveExternalControlListCommand(
-        securityId,
-        externalControlListAddress,
-      ),
-    );
-  }
+      const result = await handler.execute();
 
-  @LogError
-  async isExternalControlList(
-    request: IsExternalControlListRequest,
-  ): Promise<boolean> {
-    const { securityId, externalControlListAddress } = request;
-    handleValidation('IsExternalControlListRequest', request);
+      expect(result).toBeInstanceOf(CreateExternalWhiteListMockCommandResponse);
+      expect(result.payload).toBe(account.id.toString());
 
-    return (
-      await this.queryBus.execute(
-        new IsExternalControlListQuery(securityId, externalControlListAddress),
-      )
-    ).payload;
-  }
+      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().createExternalWhiteListMock,
+      ).toHaveBeenCalledTimes(1);
+      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
+        transactionId,
+      );
+      expect(
+        transactionServiceMock.getHandler().createExternalWhiteListMock,
+      ).toHaveBeenCalledWith();
+    });
 
-  @LogError
-  async getExternalControlListsCount(
-    request: GetExternalControlListsCountRequest,
-  ): Promise<number> {
-    const { securityId } = request;
-    handleValidation('GetExternalControlListsCountRequest', request);
+    it('should successfully create white list mock if return an address', async () => {
+      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
 
-    return (
-      await this.queryBus.execute(
-        new GetExternalControlListsCountQuery(securityId),
-      )
-    ).payload;
-  }
+      transactionServiceMock
+        .getHandler()
+        .createExternalWhiteListMock.mockResolvedValue(transactionId);
 
-  @LogError
-  async getExternalControlListsMembers(
-    request: GetExternalControlListsMembersRequest,
-  ): Promise<string[]> {
-    const { securityId, start, end } = request;
-    handleValidation('GetExternalControlListsMembersRequest', request);
+      const result = await handler.execute();
 
-    return (
-      await this.queryBus.execute(
-        new GetExternalControlListsMembersQuery(securityId, start, end),
-      )
-    ).payload;
-  }
+      expect(result).toBeInstanceOf(CreateExternalWhiteListMockCommandResponse);
+      expect(result.payload).toBe(account.id.toString());
 
-  @LogError
-  async addToBlackListMock(
-    request: AddToBlackListMockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { contractId, targetId } = request;
-    handleValidation('AddToBlackListMockRequest', request);
+      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().createExternalWhiteListMock,
+      ).toHaveBeenCalledTimes(1);
 
-    return await this.commandBus.execute(
-      new AddToBlackListMockCommand(contractId, targetId),
-    );
-  }
+      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
+        transactionId,
+      );
 
-  @LogError
-  async addToWhiteListMock(
-    request: AddToWhiteListMockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { contractId, targetId } = request;
-    handleValidation('AddToWhiteListMockRequest', request);
+      expect(
+        transactionServiceMock.getHandler().createExternalWhiteListMock,
+      ).toHaveBeenCalledWith();
+    });
 
-    return await this.commandBus.execute(
-      new AddToWhiteListMockCommand(contractId, targetId),
-    );
-  }
+    it('throws error when transaction response id is missing', async () => {
+      transactionServiceMock
+        .getHandler()
+        .createExternalWhiteListMock.mockResolvedValue({ id: undefined });
 
-  @LogError
-  async removeFromBlackListMock(
-    request: RemoveFromBlackListMockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { contractId, targetId } = request;
-    handleValidation('RemoveFromBlackListMockRequest', request);
+      await expect(handler.execute()).rejects.toThrow(EmptyResponse);
+    });
 
-    return await this.commandBus.execute(
-      new RemoveFromBlackListMockCommand(contractId, targetId),
-    );
-  }
+    it('throws error when result length is different', async () => {
+      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+      mirrorNodeAdapterMock.getContractResults.mockResolvedValueOnce([
+        account.id.toString(),
+        account.id.toString(),
+      ]);
 
-  @LogError
-  async removeFromWhiteListMock(
-    request: RemoveFromWhiteListMockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { contractId, targetId } = request;
-    handleValidation('RemoveFromWhiteListMockRequest', request);
+      transactionServiceMock
+        .getHandler()
+        .createExternalWhiteListMock.mockResolvedValue({
+          id: transactionId,
+        });
 
-    return await this.commandBus.execute(
-      new RemoveFromWhiteListMockCommand(contractId, targetId),
-    );
-  }
-
-  @LogError
-  async createExternalBlackListMock(): Promise<string> {
-    return (
-      await this.commandBus.execute(new CreateExternalBlackListMockCommand())
-    ).payload;
-  }
-
-  @LogError
-  async createExternalWhiteListMock(): Promise<string> {
-    return (
-      await this.commandBus.execute(new CreateExternalWhiteListMockCommand())
-    ).payload;
-  }
-
-  @LogError
-  async isAuthorizedBlackListMock(
-    request: IsAuthorizedBlackListMockRequest,
-  ): Promise<boolean> {
-    const { contractId, targetId } = request;
-    handleValidation('IsAuthorizedBlackListMockRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new IsAuthorizedBlackListMockQuery(contractId, targetId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async isAuthorizedWhiteListMock(
-    request: IsAuthorizedWhiteListMockRequest,
-  ): Promise<boolean> {
-    const { contractId, targetId } = request;
-    handleValidation('IsAuthorizedWhiteListMockRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new IsAuthorizedWhiteListMockQuery(contractId, targetId),
-      )
-    ).payload;
-  }
-}
-
-const ExternalControlListsManagement = new ExternalControlListsInPort();
-export default ExternalControlListsManagement;
+      await expect(handler.execute()).rejects.toThrow(InvalidResponse);
+    });
+  });
+});

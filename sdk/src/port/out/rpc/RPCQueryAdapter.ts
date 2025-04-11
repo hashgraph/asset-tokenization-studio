@@ -250,6 +250,8 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ExternalControlListManagement__factory,
+  MockedWhitelist__factory,
+  MockedBlacklist__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1658,5 +1660,33 @@ export class RPCQueryAdapter {
       ExternalControlListManagement__factory,
       address.toString(),
     ).getExternalControlListsMembers(start, end);
+  }
+
+  async isAuthorizedBlackListMock(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if address ${targetId.toString()} is authorized in external black list ${address.toString()}`,
+    );
+
+    return await this.connect(
+      MockedBlacklist__factory,
+      address.toString(),
+    ).isAuthorized(targetId.toString());
+  }
+
+  async isAuthorizedWhiteListMock(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if address ${targetId.toString()} is authorized in external white list ${address.toString()}`,
+    );
+
+    return await this.connect(
+      MockedWhitelist__factory,
+      address.toString(),
+    ).isAuthorized(targetId.toString());
   }
 }
