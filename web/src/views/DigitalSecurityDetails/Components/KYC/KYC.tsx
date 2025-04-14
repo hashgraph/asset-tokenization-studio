@@ -10,8 +10,8 @@ import {
   useGetKYCList,
 } from "../../../../hooks/queries/useKYC";
 import {
-  GetKYCAccountsDataRequest,
-  RevokeKYCRequest,
+  GetKycAccountsDataRequest,
+  RevokeKycRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
 import { useRevokeKYC } from "../../../../hooks/mutations/useKYC";
@@ -75,7 +75,7 @@ export const KYC = () => {
 
   const { mutate: revokeKYC } = useRevokeKYC();
   const { data: KYCList, isLoading: isLoadingKYCList } = useGetKYCList(
-    new GetKYCAccountsDataRequest({
+    new GetKycAccountsDataRequest({
       securityId,
       kycStatus: 1,
       start: 0,
@@ -221,7 +221,7 @@ export const KYC = () => {
         onConfirm={() => {
           setIsRemoving(true);
 
-          const request = new RevokeKYCRequest({
+          const request = new RevokeKycRequest({
             securityId,
             targetId: accountToRemove,
           });

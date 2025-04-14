@@ -206,23 +206,23 @@
 import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
 import FormatValidation from '../../FormatValidation.js';
 
-export default class GetKYCAccountsCountRequest extends ValidatedRequest<GetKYCAccountsCountRequest> {
+export default class GetKycForRequest extends ValidatedRequest<GetKycForRequest> {
   securityId: string;
-  kycStatus: number;
+  targetId: string;
 
   constructor({
     securityId,
-    kycStatus,
+    targetId,
   }: {
     securityId: string;
-    kycStatus: number;
+    targetId: string;
   }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      kycStatus: FormatValidation.checkNumber({ min: 0 }),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
 
     this.securityId = securityId;
-    this.kycStatus = kycStatus;
+    this.targetId = targetId;
   }
 }

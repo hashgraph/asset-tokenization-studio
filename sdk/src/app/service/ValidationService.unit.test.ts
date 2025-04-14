@@ -254,7 +254,7 @@ import { GetControlListTypeQuery } from '../../app/usecase/query/security/contro
 import { GetControlListCountQuery } from '../../app/usecase/query/security/controlList/getControlListCount/GetControlListCountQuery';
 import { GetControlListMembersQuery } from '../../app/usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery';
 import { AccountNotInWhiteList } from '../../app/usecase/command/security/error/AccountNotInWhiteList';
-import { GetKYCStatusForQuery } from '../../app/usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQuery';
+import { GetKycStatusForQuery } from '../../app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
 import { IsClearingActivatedQuery } from '../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
 import { IsOperatorQuery } from '../../app/usecase/query/security/operator/isOperator/IsOperatorQuery';
 import { IsOperatorForPartitionQuery } from '../../app/usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQuery';
@@ -337,11 +337,11 @@ describe('ValidationService', () => {
       expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
         1,
-        new GetKYCStatusForQuery(securityId.value, firstAddress.value),
+        new GetKycStatusForQuery(securityId.value, firstAddress.value),
       );
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
         2,
-        new GetKYCStatusForQuery(securityId.value, secondAddress.value),
+        new GetKycStatusForQuery(securityId.value, secondAddress.value),
       );
     });
 

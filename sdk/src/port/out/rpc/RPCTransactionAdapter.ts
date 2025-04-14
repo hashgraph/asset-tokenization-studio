@@ -2145,7 +2145,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async grantKYC(
+  async grantKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     VCId: string,
@@ -2175,7 +2175,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async revokeKYC(
+  async revokeKyc(
     security: EvmAddress,
     targetId: EvmAddress,
   ): Promise<TransactionResponse> {

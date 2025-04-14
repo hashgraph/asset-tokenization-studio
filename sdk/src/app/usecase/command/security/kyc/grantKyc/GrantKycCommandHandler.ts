@@ -203,36 +203,88 @@
 
 */
 
-import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../FormatValidation.js';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
+import AccountService from '../../../../../service/AccountService';
+import ValidationService from '../../../../../service/ValidationService';
+import { GrantKycCommand, GrantKycCommandResponse } from './GrantKycCommand';
+import TransactionService from '../../../../../service/TransactionService';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
+import { Terminal3VC } from '../../../../../../domain/context/kyc/Terminal3';
+import { verifyVc } from '@terminal3/verify_vc';
+import { SignedCredential } from '@terminal3/vc_core';
+import { InvalidVC } from '../../error/InvalidVC';
+import ContractService from '../../../../../service/ContractService';
 
-export default class GetKYCAccountsDataRequest extends ValidatedRequest<GetKYCAccountsDataRequest> {
-  securityId: string;
-  kycStatus: number;
-  start: number;
-  end: number;
+@CommandHandler(GrantKycCommand)
+export class GrantKycCommandHandler
+  implements ICommandHandler<GrantKycCommand>
+{
+  constructor(
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
+  ) {}
 
-  constructor({
-    securityId,
-    kycStatus,
-    start,
-    end,
-  }: {
-    securityId: string;
-    kycStatus: number;
-    start: number;
-    end: number;
-  }) {
-    super({
-      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      kycStatus: FormatValidation.checkNumber({ min: 0 }),
-      start: FormatValidation.checkNumber({ min: 0 }),
-      end: FormatValidation.checkNumber({ min: 0 }),
-    });
+  async execute(command: GrantKycCommand): Promise<GrantKycCommandResponse> {
+    const { securityId, targetId, vcBase64 } = command;
 
-    this.securityId = securityId;
-    this.kycStatus = kycStatus;
-    this.start = start;
-    this.end = end;
+    const signedCredential: SignedCredential =
+      Terminal3VC.vcFromBase64(vcBase64);
+    const verificationResult = await verifyVc(signedCredential);
+    if (!verificationResult.isValid) {
+      throw new InvalidVC();
+    }
+
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
+
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
+
+    const [issuer, updatedSignedCredential] =
+      await this.validationService.checkValidVc(
+        signedCredential,
+        targetEvmAddress,
+        securityId,
+      );
+
+    const issuerEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(issuer);
+
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkRole(
+      SecurityRole._KYC_ROLE,
+      account.id.toString(),
+      securityId,
+    );
+
+    const res = await handler.grantKyc(
+      securityEvmAddress,
+      targetEvmAddress,
+      updatedSignedCredential.id,
+      BigDecimal.fromString(
+        (updatedSignedCredential.validFrom as string).substring(0, 10),
+      ),
+      BigDecimal.fromString(
+        (updatedSignedCredential.validUntil as string).substring(0, 10),
+      ),
+      issuerEvmAddress,
+    );
+
+    return Promise.resolve(
+      new GrantKycCommandResponse(res.error === undefined, res.id!),
+    );
   }
 }

@@ -617,7 +617,7 @@ interface IHoldTransactionAdapter {
   ): Promise<TransactionResponse>;
 }
 
-interface ISSIManagementTransactionAdapter {
+interface ISsiManagementTransactionAdapter {
   setRevocationRegistryAddress(
     security: EvmAddress,
     revocationRegistry: EvmAddress,
@@ -635,8 +635,8 @@ interface ISSIManagementTransactionAdapter {
   ): Promise<TransactionResponse>;
 }
 
-interface IKYCTransactionAdapter {
-  grantKYC(
+interface IKycTransactionAdapter {
+  grantKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     VCId: string,
@@ -645,7 +645,7 @@ interface IKYCTransactionAdapter {
     issuer: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  revokeKYC(
+  revokeKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     securityId?: ContractId | string,
@@ -811,8 +811,8 @@ export default abstract class TransactionAdapter
     RoleTransactionAdapter,
     IManagementTransactionAdapter,
     IHoldTransactionAdapter,
-    ISSIManagementTransactionAdapter,
-    IKYCTransactionAdapter,
+    ISsiManagementTransactionAdapter,
+    IKycTransactionAdapter,
     IClearingAdapter
 {
   triggerPendingScheduledSnapshots(
@@ -1338,7 +1338,7 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
-  grantKYC(
+  grantKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     VCId: string,
@@ -1349,7 +1349,7 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
-  revokeKYC(
+  revokeKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     securityId?: ContractId | string,

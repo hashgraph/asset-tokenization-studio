@@ -203,26 +203,18 @@
 
 */
 
-import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../FormatValidation.js';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 
-export default class GetKYCForRequest extends ValidatedRequest<GetKYCForRequest> {
-  securityId: string;
-  targetId: string;
+export class GetKycAccountsCountQueryResponse implements QueryResponse {
+  constructor(public readonly payload: number) {}
+}
 
-  constructor({
-    securityId,
-    targetId,
-  }: {
-    securityId: string;
-    targetId: string;
-  }) {
-    super({
-      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-    });
-
-    this.securityId = securityId;
-    this.targetId = targetId;
+export class GetKycAccountsCountQuery extends Query<GetKycAccountsCountQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly kycStatus: number,
+  ) {
+    super();
   }
 }

@@ -210,7 +210,7 @@ import Service from './Service.js';
 import { singleton } from 'tsyringe';
 import { AccountNotKycd } from '../usecase/command/security/error/AccountNotKycd.js';
 import { IsIssuerQuery } from '../usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
-import { GetKYCStatusForQuery } from '../usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQuery.js';
+import { GetKycStatusForQuery } from '../usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery.js';
 import { IsClearingActivatedQuery } from '../usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
 import { ClearingDeactivated } from '../usecase/command/security/error/ClearingDeactivated.js';
 import { ClearingActivated } from '../usecase/command/security/error/ClearingActivated.js';
@@ -289,7 +289,7 @@ export default class ValidationService extends Service {
     let res;
     for (const address of addresses) {
       res = await this.queryBus.execute(
-        new GetKYCStatusForQuery(securityId, address),
+        new GetKycStatusForQuery(securityId, address),
       );
       if (res.payload != 1) {
         throw new AccountNotKycd(address);

@@ -212,7 +212,7 @@ import Event from './Event.js';
 import Network from './Network.js';
 import Factory from './Factory.js';
 import Management from './Management.js';
-import SSIManagement from './SSIManagement.js';
+import SsiManagement from './SsiManagement.js';
 import Kyc from './Kyc.js';
 
 export {
@@ -225,7 +225,7 @@ export {
   Network,
   Factory,
   Management,
-  SSIManagement,
+  SsiManagement,
   Kyc,
 };
 
@@ -243,4 +243,4 @@ export * from './Network.js';
 export * from './Factory.js';
 export * from './Management.js';
 export * from './Kyc.js';
-export * from './SSIManagement.js';
+export * from './SsiManagement.js';

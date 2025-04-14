@@ -203,22 +203,36 @@
 
 */
 
-import { Command } from '../../../../../../core/command/Command';
-import { CommandResponse } from '../../../../../../core/command/CommandResponse';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../FormatValidation.js';
 
-export class GrantKYCCommandResponse implements CommandResponse {
-  constructor(
-    public readonly payload: boolean,
-    public readonly transactionId: string,
-  ) {}
-}
+export default class GetKycAccountsDataRequest extends ValidatedRequest<GetKycAccountsDataRequest> {
+  securityId: string;
+  kycStatus: number;
+  start: number;
+  end: number;
 
-export class GrantKYCCommand extends Command<GrantKYCCommandResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly targetId: string,
-    public readonly vcBase64: string,
-  ) {
-    super();
+  constructor({
+    securityId,
+    kycStatus,
+    start,
+    end,
+  }: {
+    securityId: string;
+    kycStatus: number;
+    start: number;
+    end: number;
+  }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      kycStatus: FormatValidation.checkNumber({ min: 0 }),
+      start: FormatValidation.checkNumber({ min: 0 }),
+      end: FormatValidation.checkNumber({ min: 0 }),
+    });
+
+    this.securityId = securityId;
+    this.kycStatus = kycStatus;
+    this.start = start;
+    this.end = end;
   }
 }

@@ -203,12 +203,21 @@
 
 */
 
-import { QueryResponse } from 'core/query/QueryResponse';
+import { Command } from '../../../../../../core/command/Command';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse';
 
-export default interface KYCViewModel extends QueryResponse {
-  validFrom: string;
-  validTo: string;
-  VCid: string;
-  issuer: string;
-  status: number;
+export class RevokeKycCommandResponse implements CommandResponse {
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
+}
+
+export class RevokeKycCommand extends Command<RevokeKycCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly targetId: string,
+  ) {
+    super();
+  }
 }

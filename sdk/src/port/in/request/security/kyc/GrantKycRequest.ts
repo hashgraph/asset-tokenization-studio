@@ -203,88 +203,31 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/AccountService';
-import ValidationService from '../../../../../service/ValidationService';
-import { GrantKYCCommand, GrantKYCCommandResponse } from './GrantKYCCommand';
-import TransactionService from '../../../../../service/TransactionService';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import { Terminal3VC } from '../../../../../../domain/context/kyc/Terminal3';
-import { verifyVc } from '@terminal3/verify_vc';
-import { SignedCredential } from '@terminal3/vc_core';
-import { InvalidVC } from '../../error/InvalidVC';
-import ContractService from '../../../../../service/ContractService';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../FormatValidation.js';
 
-@CommandHandler(GrantKYCCommand)
-export class GrantKYCCommandHandler
-  implements ICommandHandler<GrantKYCCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(ContractService)
-    public readonly contractService: ContractService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
-  ) {}
+export default class GrantKycRequest extends ValidatedRequest<GrantKycRequest> {
+  securityId: string;
+  targetId: string;
+  vcBase64: string;
 
-  async execute(command: GrantKYCCommand): Promise<GrantKYCCommandResponse> {
-    const { securityId, targetId, vcBase64 } = command;
+  constructor({
+    securityId,
+    targetId,
+    vcBase64,
+  }: {
+    securityId: string;
+    targetId: string;
+    vcBase64: string;
+  }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      vcBase64: FormatValidation.checkBase64Format(),
+    });
 
-    const signedCredential: SignedCredential =
-      Terminal3VC.vcFromBase64(vcBase64);
-    const verificationResult = await verifyVc(signedCredential);
-    if (!verificationResult.isValid) {
-      throw new InvalidVC();
-    }
-
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-
-    const [issuer, updatedSignedCredential] =
-      await this.validationService.checkValidVc(
-        signedCredential,
-        targetEvmAddress,
-        securityId,
-      );
-
-    const issuerEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(issuer);
-
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkRole(
-      SecurityRole._KYC_ROLE,
-      account.id.toString(),
-      securityId,
-    );
-
-    const res = await handler.grantKYC(
-      securityEvmAddress,
-      targetEvmAddress,
-      updatedSignedCredential.id,
-      BigDecimal.fromString(
-        (updatedSignedCredential.validFrom as string).substring(0, 10),
-      ),
-      BigDecimal.fromString(
-        (updatedSignedCredential.validUntil as string).substring(0, 10),
-      ),
-      issuerEvmAddress,
-    );
-
-    return Promise.resolve(
-      new GrantKYCCommandResponse(res.error === undefined, res.id!),
-    );
+    this.securityId = securityId;
+    this.targetId = targetId;
+    this.vcBase64 = vcBase64;
   }
 }

@@ -203,40 +203,19 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import {
-  GetKYCAccountsCountQuery,
-  GetKYCAccountsCountQueryResponse,
-} from './GetKYCAccountsCountQuery.js';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { Kyc } from '../../../../../../domain/context/kyc/Kyc.js';
 
-@QueryHandler(GetKYCAccountsCountQuery)
-export class GetKYCAccountsCountQueryHandler
-  implements IQueryHandler<GetKYCAccountsCountQuery>
-{
+export class GetKycForQueryResponse implements QueryResponse {
+  constructor(public readonly payload: Kyc) {}
+}
+
+export class GetKycForQuery extends Query<GetKycForQueryResponse> {
   constructor(
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(ContractService)
-    public readonly contractService: ContractService,
-  ) {}
-
-  async execute(
-    query: GetKYCAccountsCountQuery,
-  ): Promise<GetKYCAccountsCountQueryResponse> {
-    const { securityId, kycStatus } = query;
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getKYCAccountsCount(
-      securityEvmAddress,
-      kycStatus,
-    );
-
-    return new GetKYCAccountsCountQueryResponse(res);
+    public readonly securityId: string,
+    public readonly targetId: string,
+  ) {
+    super();
   }
 }
