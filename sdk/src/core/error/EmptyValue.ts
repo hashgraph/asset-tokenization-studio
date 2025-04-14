@@ -203,69 +203,10 @@
 
 */
 
-import { singleton } from 'tsyringe';
-import Injectable from '../../core/Injectable.js';
-import { RPCTransactionAdapter } from '../../port/out/rpc/RPCTransactionAdapter.js';
-import TransactionAdapter from '../../port/out/TransactionAdapter.js';
-import Service from './Service.js';
-import { SupportedWallets } from '../../domain/context/network/Wallet';
-import { InvalidWalletTypeError } from '../../domain/context/network/error/InvalidWalletAccountTypeError';
-import LogService from './LogService.js';
-import { HederaWalletConnectTransactionAdapter } from '../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
-import { DFNSTransactionAdapter } from '../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import { FireblocksTransactionAdapter } from '../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import { AWSKMSTransactionAdapter } from '../../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
-import { WalletNotSupported } from './error/WalletNotSupported.js';
+import BaseError, { ErrorCode } from './BaseError.js';
 
-@singleton()
-export default class TransactionService extends Service {
-  constructor() {
-    super();
-  }
-
-  getHandler(): TransactionAdapter {
-    return Injectable.resolveTransactionHandler();
-  }
-
-  setHandler(adp: TransactionAdapter): TransactionAdapter {
-    Injectable.registerTransactionHandler(adp);
-    return adp;
-  }
-
-  static getHandlerClass(type: SupportedWallets): TransactionAdapter {
-    switch (type) {
-      case SupportedWallets.METAMASK:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('METAMASK TransactionAdapter');
-        return Injectable.resolve(RPCTransactionAdapter);
-      case SupportedWallets.HWALLETCONNECT:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('HWALLETCONNECT TransactionAdapter');
-        return Injectable.resolve(HederaWalletConnectTransactionAdapter);
-      case SupportedWallets.DFNS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('DFNS TransactionAdapter');
-        return Injectable.resolve(DFNSTransactionAdapter);
-      case SupportedWallets.FIREBLOCKS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('FIREBLOCKS TransactionAdapter');
-        return Injectable.resolve(FireblocksTransactionAdapter);
-      case SupportedWallets.AWSKMS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('AWSKMS TransactionAdapter');
-        return Injectable.resolve(AWSKMSTransactionAdapter);
-      default:
-        throw new WalletNotSupported();
-    }
+export class EmptyValue extends BaseError {
+  constructor(val: unknown) {
+    super(ErrorCode.EmptyValue, `Value ${val} cannot be empty`);
   }
 }

@@ -207,7 +207,7 @@ import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
 import AccountService from '../../../../../service/AccountService';
 import { RevokeKYCCommand, RevokeKYCCommandResponse } from './RevokeKYCCommand';
-import TransactionService from '../../../../../service/TransactionService';
+import TransactionService from '../../../../../service/transaction/TransactionService';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';

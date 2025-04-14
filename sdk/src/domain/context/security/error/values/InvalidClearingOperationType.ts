@@ -203,13 +203,22 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export default class InvalidAmount extends BaseError {
-  constructor(val: number | string, expected: number | string) {
+export class InvalidClearingOperationType extends BaseError {
+  constructor(value: string) {
     super(
-      ErrorCode.InvalidAmount,
-      `Invalid Amount ${val}, expected ${expected} decimals`,
+      ErrorCode.InvalidClearingOperationType,
+      `Invalid clearing operation type ${value}`,
+    );
+  }
+}
+
+export class InvalidClearingOperationTypeNumber extends BaseError {
+  constructor(id: number) {
+    super(
+      ErrorCode.InvalidClearingOperationTypeNumber,
+      `Invalid clearing operation type id number ${id}`,
     );
   }
 }

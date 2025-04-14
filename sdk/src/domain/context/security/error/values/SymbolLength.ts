@@ -203,13 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class InvalidResponse extends BaseError {
-  constructor(val: unknown) {
+export default class SymbolLength extends BaseError {
+  constructor(val: string, len: number) {
     super(
-      ErrorCode.InvalidResponse,
-      `An invalid response was received from the server: ${val}`,
+      ErrorCode.InvalidLength,
+      `Symbol ${val} length is longer than ${len}`,
     );
   }
 }

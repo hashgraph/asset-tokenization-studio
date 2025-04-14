@@ -213,7 +213,7 @@ import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDeco
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
-import TransactionService from '../../../../service/TransactionService.js';
+import TransactionService from '../../../../service/transaction/TransactionService.js';
 import NetworkService from '../../../../service/NetworkService.js';
 import {
   ADDRESS_LENGTH,

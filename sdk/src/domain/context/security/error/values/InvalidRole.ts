@@ -205,11 +205,8 @@
 
 import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class InvalidVCHolder extends BaseError {
-  constructor() {
-    super(
-      ErrorCode.InvalidVCHolder,
-      `The VC holder does not match target account`,
-    );
+export class InvalidRole extends BaseError {
+  constructor(role: string) {
+    super(ErrorCode.InvalidRole, `Role ${role} does not exist`);
   }
 }

@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export default class NameEmpty extends BaseError {
+export class InvalidVc extends BaseError {
   constructor() {
-    super(ErrorCode.EmptyValue, `Name is empty`);
+    super(ErrorCode.InvalidVc, `The provided VC is not valid`);
   }
 }

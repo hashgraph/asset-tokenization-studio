@@ -203,13 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export default class SymbolLength extends BaseError {
-  constructor(val: string, len: number) {
+export class InvalidVcHolder extends BaseError {
+  constructor() {
     super(
-      ErrorCode.InvalidLength,
-      `Symbol ${val} length is longer than ${len}`,
+      ErrorCode.InvalidVcHolder,
+      `The VC holder does not match target account`,
     );
   }
 }

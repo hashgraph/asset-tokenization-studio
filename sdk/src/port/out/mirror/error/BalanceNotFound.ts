@@ -205,11 +205,11 @@
 
 import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export default class InvalidSupply extends BaseError {
-  constructor(totalSupply: string, maxSupply: string) {
+export class BalanceNotFound extends BaseError {
+  constructor() {
     super(
-      ErrorCode.InvalidSupply,
-      `Total supply ${totalSupply} exceeds max supply ${maxSupply}`,
+      ErrorCode.BalanceNotFound,
+      `Response does not contain a balances result`,
     );
   }
 }

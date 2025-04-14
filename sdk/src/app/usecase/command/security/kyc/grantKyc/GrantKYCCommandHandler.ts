@@ -208,7 +208,7 @@ import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerD
 import AccountService from '../../../../../service/AccountService';
 import ValidationService from '../../../../../service/ValidationService';
 import { GrantKYCCommand, GrantKYCCommandResponse } from './GrantKYCCommand';
-import TransactionService from '../../../../../service/TransactionService';
+import TransactionService from '../../../../../service/transaction/TransactionService';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
@@ -216,7 +216,7 @@ import { SecurityRole } from '../../../../../../domain/context/security/Security
 import { Terminal3VC } from '../../../../../../domain/context/kyc/Terminal3';
 import { verifyVc } from '@terminal3/verify_vc';
 import { SignedCredential } from '@terminal3/vc_core';
-import { InvalidVC } from '../../error/InvalidVC';
+import { InvalidVc } from '../../../../../../domain/context/security/error/operations/InvalidVc';
 import ContractService from '../../../../../service/ContractService';
 
 @CommandHandler(GrantKYCCommand)
@@ -241,7 +241,7 @@ export class GrantKYCCommandHandler
       Terminal3VC.vcFromBase64(vcBase64);
     const verificationResult = await verifyVc(signedCredential);
     if (!verificationResult.isValid) {
-      throw new InvalidVC();
+      throw new InvalidVc();
     }
 
     const handler = this.transactionService.getHandler();

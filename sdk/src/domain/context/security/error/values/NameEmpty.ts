@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class BalanceNotFound extends BaseError {
+export default class NameEmpty extends BaseError {
   constructor() {
-    super(
-      ErrorCode.BalanceNotFound,
-      `Response does not contain a balances result`,
-    );
+    super(ErrorCode.EmptyValue, `Name is empty`);
   }
 }

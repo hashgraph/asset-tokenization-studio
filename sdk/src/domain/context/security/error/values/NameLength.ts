@@ -203,8 +203,10 @@
 
 */
 
-export class TransactionBuildingError extends Error {
-  constructor(val: unknown) {
-    super(`An error ocurred when building the transaction: ${val}`);
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
+
+export default class NameLength extends BaseError {
+  constructor(val: string, len: number) {
+    super(ErrorCode.InvalidLength, `Name ${val} length is longer than ${len}`);
   }
 }

@@ -204,7 +204,7 @@
 */
 
 import NetworkService from '../../app/service/NetworkService.js';
-import SecurityService from '../../app/service/SecurityService.js';
+import SecurityService from '../../app/service/security/SecurityService.js';
 import { GrantRoleCommand } from '../../app/usecase/command/security/roles/grantRole/GrantRoleCommand.js';
 import { RevokeRoleCommand } from '../../app/usecase/command/security/roles/revokeRole/RevokeRoleCommand.js';
 import { GetRoleCountForQuery } from '../../app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery.js';

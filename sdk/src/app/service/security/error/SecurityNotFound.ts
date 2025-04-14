@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export class InvalidVC extends BaseError {
-  constructor() {
-    super(ErrorCode.InvalidVC, `The provided VC is not valid`);
+export class SecurityNotFound extends BaseError {
+  constructor(val: unknown) {
+    super(ErrorCode.NotFound, `${val} was not found`);
   }
 }

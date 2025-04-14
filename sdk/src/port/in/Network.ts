@@ -215,7 +215,7 @@ import ConnectRequest, {
   SupportedWallets,
 } from './request/network/ConnectRequest.js';
 import RequestMapper from './request/mapping/RequestMapper.js';
-import TransactionService from '../../app/service/TransactionService.js';
+import TransactionService from '../../app/service/transaction/TransactionService.js';
 import NetworkService from '../../app/service/NetworkService.js';
 import SetNetworkRequest from './request/network/SetNetworkRequest.js';
 import { SetNetworkCommand } from '../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';

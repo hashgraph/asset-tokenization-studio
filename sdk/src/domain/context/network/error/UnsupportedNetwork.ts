@@ -205,8 +205,8 @@
 
 import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export class EmptyValue extends BaseError {
-  constructor(val: unknown) {
-    super(ErrorCode.EmptyValue, `Value ${val} cannot be empty`);
+export class UnsupportedNetwork extends BaseError {
+  constructor() {
+    super(ErrorCode.UnsupportedNetwork, `Network not supported`);
   }
 }

@@ -203,13 +203,15 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, {
+  ErrorCode,
+} from '../../../../../../core/error/BaseError.js';
 
-export class SigningError extends BaseError {
-  constructor(val: unknown) {
+export class PublickKeyNotFound extends BaseError {
+  constructor() {
     super(
-      ErrorCode.SigningError,
-      `An error ocurred when singing the transaction: ${val}`,
+      ErrorCode.PublickKeyNotFound,
+      `PublicKey not found in the mirror node`,
     );
   }
 }

@@ -203,16 +203,13 @@
 
 */
 
-import { SecurityRole } from '../../../../../domain/context/security/SecurityRole';
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError';
+import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export class PartitionsProtected extends BaseError {
-  constructor(role?: SecurityRole | string) {
+export class TransactionResultNotFound extends BaseError {
+  constructor() {
     super(
-      ErrorCode.PartitionsProtected,
-      role
-        ? `Partitions are protected and account does not have the role (${role})`
-        : `Partitions are protected`,
+      ErrorCode.TransactionResultNotFound,
+      `Response does not contain any transaction`,
     );
   }
 }

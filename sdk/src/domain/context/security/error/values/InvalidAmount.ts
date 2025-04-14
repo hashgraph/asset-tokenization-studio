@@ -203,13 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class ErrorRetrievingEvmAddress extends BaseError {
-  constructor(accountId: string, error: unknown) {
+export default class InvalidAmount extends BaseError {
+  constructor(val: number | string, expected: number | string) {
     super(
-      ErrorCode.ErrorRetrievingEvmAddress,
-      `EVM address could not be retrieved for ${accountId}, error: ${(error as Error).message}`,
+      ErrorCode.InvalidAmount,
+      `Invalid Amount ${val}, expected ${expected} decimals`,
     );
   }
 }
