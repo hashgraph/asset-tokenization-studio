@@ -294,6 +294,7 @@ export class MirrorNodeAdapter {
   public async getContractResults(
     transactionId: string,
     numberOfResultItems: number,
+    evmAddress = false,
     timeout = 15,
     requestInterval = 2,
   ): Promise<string[] | null> {
@@ -322,6 +323,11 @@ export class MirrorNodeAdapter {
               call_OK = true;
 
               const data = response.data.call_result;
+
+              if (evmAddress) {
+                results.push(response.data.address);
+                return results;
+              }
 
               if (numberOfResultItems == 0) {
                 numberOfResultItems = (data.length - 2) / BYTES_32_LENGTH;
