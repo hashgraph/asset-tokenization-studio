@@ -7,6 +7,7 @@ import { ControlList } from "../ControlList";
 import { SecurityViewModel } from "@hashgraph/asset-tokenization-sdk";
 import { useMemo } from "react";
 import { ExternalPause } from "../ExternalPause/ExternalPause";
+import { ExternalControl } from "../ExternalControl/ExternalControl";
 
 interface ControlTabProps {
   details: SecurityViewModel;
@@ -41,6 +42,10 @@ export const ControlTab = ({ details, config }: ControlTabProps) => {
     }
 
     tabs.push({ content: <ExternalPause />, header: tTabs("externalPause") });
+    tabs.push({
+      content: <ExternalControl />,
+      header: tTabs("externalControlList"),
+    });
 
     return tabs;
   }, [config, tTabs, isWhiteList]);

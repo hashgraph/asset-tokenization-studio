@@ -226,6 +226,10 @@ import { DigitalSecurityLocker } from "../views/DigitalSecurityLocker/DigitalSec
 import { ExternalPauseList } from "../views/ExternalPauseList/ExternalPauseList";
 import { CreateExternalPause } from "../views/CreateExternalPause/CreateExternalPause";
 import { AddExternalPause } from "../views/AddExternalPause/AddExternalPause";
+import { ExternalControlList } from "../views/ExternalControlList/ExternalControlList";
+import { CreateExternalControl } from "../views/CreateExternalControl/CreateExternalControl";
+import { AddExternalControl } from "../views/AddExternalControl/AddExternalControl";
+import { ExternalControlDetails } from "../views/ExternalControlDetails/ExternalControlDetails";
 
 const t = (key: RouteName) => i18n.t(`routes:${key}`);
 
@@ -271,6 +275,43 @@ export const routes = [
         element: (
           <PrivateRoute>
             <AddExternalPause />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: RoutePath.EXTERNAL_CONTROL_LIST,
+        breadcrumb: t(RouteName.ExternalControlList),
+        element: (
+          <PrivateRoute>
+            <ExternalControlList />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: RoutePath.EXTERNAL_CONTROL_DETAILS,
+        breadcrumb: t(RouteName.ExternalControlDetails),
+        element: (
+          <PrivateRoute>
+            <ExternalControlDetails />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: RoutePath.CREATE_EXTERNAL_CONTROL,
+        breadcrumb: t(RouteName.CreateExternalControl),
+        element: (
+          <PrivateRoute>
+            <CreateExternalControl />
+          </PrivateRoute>
+        ),
+      },
+
+      {
+        path: RoutePath.ADD_EXTERNAL_CONTROL,
+        breadcrumb: t(RouteName.AddExternalControl),
+        element: (
+          <PrivateRoute>
+            <AddExternalControl />
           </PrivateRoute>
         ),
       },

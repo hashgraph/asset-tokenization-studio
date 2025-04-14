@@ -203,131 +203,44 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
-import balanceAdjustment from "./balanceAdjustment";
-import locker from "./locker";
-import cap from "./cap";
-import hold from "./hold";
-import kyc from "./kyc";
-import ssiManager from "./ssiManager";
-import clearingOperations from "./clearingOperations";
-import externalPause from "./externalPause";
-import externalControl from "./externalControl";
-
 export default {
-  header: {
-    title: "Digital security details",
+  search: {
+    placeholder: "Add address account",
+    add: "Add",
   },
-  tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    balanceAdjustment: "Balance Adjustment",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
-    locker: "Locker",
-    cap: "Cap",
-    hold: "Hold",
-    kyc: "KYC",
-    ssiManager: "SSI Manager",
-    clearingOperations: "Clearing Operations",
-    configuration: "Configuration",
-    operations: "Operations",
-    control: "Control",
-    corporateActions: "Corporate Actions",
-    externalControlList: "External Control",
-    externalPause: "External Pause",
+  table: {
+    address: "Address",
+    actions: "Actions",
+    empty: "No results found",
   },
-  actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
-    dangerZone: {
-      title: "Danger zone",
-      pauseSecurityTokenTitle: "Pause Security Token",
-      pauseSecurityTokenDescription:
-        "Pause all activity related to the security token as a protective measure. While paused, transfers and interactions will be restricted",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
-      clearingModeTitle: "Clearing mode",
-      clearingModeDescription:
-        "Restrict token interactions to clearing operations only. While enabled, other types of transactions will be blocked",
-      activate: "Activate",
-      deactivate: "Deactivate",
+  modal: {
+    addAddress: {
+      title: "Add Address",
+      description: "Are you sure you want to add this address?",
+      confirmText: "Yes, add it",
+      cancelText: "Cancel",
+    },
+    removeAddress: {
+      title: "Remove Address",
+      description: "Are you sure you want to remove this address?",
+      confirmText: "Yes, remove it",
+      cancelText: "Cancel",
     },
   },
-  dividends,
-  balanceAdjustment,
-  coupons,
-  balance: {
-    search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
+  messages: {
+    addAddress: {
+      success: "Success: ",
+      descriptionSuccess: "The address has been added",
+      error: "Failed: ",
+      descriptionFailed:
+        "There was an error adding the address. Please try again",
     },
-    details: {
-      title: "Details",
-      availableBalance: "Available balance",
-      lockBalance: "Lock balance",
-      heldBalance: "Held balance",
-      clearedBalance: "Cleared balance",
-    },
-    error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
-    },
-  },
-  roleManagement,
-  management,
-  allowedList,
-  votingRights,
-  locker,
-  cap,
-  hold,
-  kyc,
-  ssiManager,
-  clearingOperations,
-  externalPause,
-  externalControl,
-  benefits: {
-    dividends: "Dividends",
-    balanceAdjustments: "Balance Adjustments",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-    factor: "Factor",
-    decimals: "Decimals",
-  },
-  bond: {
-    updateMaturityDate: {
-      toast: {
-        title: "Confirmation",
-        subtitle: "Are you sure you want to change the maturity date?",
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Confirm",
-      },
-      messages: {
-        success: "Success: ",
-        updateMaturityDateSuccessful:
-          "Maturity date has been updated successfully",
-        error: "Error: ",
-        updateMaturityDateFailed: "Update maturity date failed",
-      },
+    removeAddress: {
+      success: "Success: ",
+      descriptionSuccess: "The address has been removed",
+      error: "Deletion failed: ",
+      descriptionFailed:
+        "There was an error deleting the address. Please try again",
     },
   },
 };
