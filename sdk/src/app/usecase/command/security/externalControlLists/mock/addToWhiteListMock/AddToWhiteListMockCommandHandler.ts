@@ -212,6 +212,7 @@ import {
 import TransactionService from '../../../../../../service/TransactionService';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
 import ContractService from '../../../../../../../app/service/ContractService';
+import AccountService from '../../../../../../../app/service/AccountService';
 
 @CommandHandler(AddToWhiteListMockCommand)
 export class AddToWhiteListMockCommandHandler
@@ -222,6 +223,8 @@ export class AddToWhiteListMockCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(ContractService)
     public readonly contractService: ContractService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -233,12 +236,12 @@ export class AddToWhiteListMockCommandHandler
     const contractEvmAddress =
       await this.contractService.getContractEvmAddress(contractId);
 
-    const targetEvmAddresses =
-      await this.contractService.getContractEvmAddress(targetId);
+    const targetEvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
 
     const res = await handler.addToWhiteListMock(
       contractEvmAddress,
-      targetEvmAddresses,
+      targetEvmAddress,
       contractId,
     );
 

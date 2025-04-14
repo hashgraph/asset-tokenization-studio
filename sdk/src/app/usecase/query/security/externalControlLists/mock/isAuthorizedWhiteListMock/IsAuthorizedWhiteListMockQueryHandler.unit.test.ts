@@ -214,6 +214,7 @@ import {
   IsAuthorizedWhiteListMockQueryResponse,
 } from './IsAuthorizedWhiteListMockQuery.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import AccountService from '../../../../../../../app/service/AccountService.js';
 
 describe('IsAuthorizedWhiteListMockQueryHandler', () => {
   let handler: IsAuthorizedWhiteListMockQueryHandler;
@@ -221,6 +222,7 @@ describe('IsAuthorizedWhiteListMockQueryHandler', () => {
 
   const rpcQueryAdapterMock = createMock<RPCQueryAdapter>();
   const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
   const contractEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
@@ -233,6 +235,7 @@ describe('IsAuthorizedWhiteListMockQueryHandler', () => {
     handler = new IsAuthorizedWhiteListMockQueryHandler(
       contractServiceMock,
       rpcQueryAdapterMock,
+      accountServiceMock,
     );
     query = IsAuthorizedWhiteListMockQueryFixture.create();
   });
@@ -243,9 +246,12 @@ describe('IsAuthorizedWhiteListMockQueryHandler', () => {
 
   describe('execute', () => {
     it('should successfully verify if is authorized', async () => {
-      contractServiceMock.getContractEvmAddress
-        .mockResolvedValueOnce(contractEvmAddress)
-        .mockResolvedValueOnce(targetEvmAddress);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        contractEvmAddress,
+      );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        targetEvmAddress,
+      );
 
       rpcQueryAdapterMock.isAuthorizedWhiteListMock.mockResolvedValue(true);
 
@@ -255,18 +261,15 @@ describe('IsAuthorizedWhiteListMockQueryHandler', () => {
       expect(result.payload).toBe(true);
 
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        2,
+        1,
       );
       expect(
         rpcQueryAdapterMock.isAuthorizedWhiteListMock,
       ).toHaveBeenCalledTimes(1);
-
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        1,
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.contractId,
       );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        2,
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
         query.targetId,
       );
 

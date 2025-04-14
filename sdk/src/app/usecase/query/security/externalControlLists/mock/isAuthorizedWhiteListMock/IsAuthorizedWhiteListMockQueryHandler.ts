@@ -212,6 +212,7 @@ import { IQueryHandler } from '../../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import ContractService from '../../../../../../../app/service/ContractService.js';
+import AccountService from '../../../../../../../app/service/AccountService';
 
 @QueryHandler(IsAuthorizedWhiteListMockQuery)
 export class IsAuthorizedWhiteListMockQueryHandler
@@ -222,6 +223,8 @@ export class IsAuthorizedWhiteListMockQueryHandler
     public readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -232,12 +235,12 @@ export class IsAuthorizedWhiteListMockQueryHandler
     const contractEvmAddress =
       await this.contractService.getContractEvmAddress(contractId);
 
-    const targetEvmAddresses =
-      await this.contractService.getContractEvmAddress(targetId);
+    const targetEvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
 
     const res = await this.queryAdapter.isAuthorizedWhiteListMock(
       contractEvmAddress,
-      targetEvmAddresses,
+      targetEvmAddress,
     );
     return new IsAuthorizedWhiteListMockQueryResponse(res);
   }

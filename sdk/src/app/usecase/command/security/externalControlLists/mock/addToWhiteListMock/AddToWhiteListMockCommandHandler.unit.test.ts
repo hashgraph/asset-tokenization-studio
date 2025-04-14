@@ -217,6 +217,7 @@ import {
   AddToWhiteListMockCommandResponse,
 } from './AddToWhiteListMockCommand.js';
 import { AddToWhiteListMockCommandHandler } from './AddToWhiteListMockCommandHandler.js';
+import AccountService from '../../../../../../../app/service/AccountService.js';
 
 describe('AddToWhiteListMockCommandHandler', () => {
   let handler: AddToWhiteListMockCommandHandler;
@@ -224,6 +225,7 @@ describe('AddToWhiteListMockCommandHandler', () => {
 
   const transactionServiceMock = createMock<TransactionService>();
   const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
   const contractEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
@@ -238,6 +240,7 @@ describe('AddToWhiteListMockCommandHandler', () => {
     handler = new AddToWhiteListMockCommandHandler(
       transactionServiceMock,
       contractServiceMock,
+      accountServiceMock,
     );
     command = AddToWhiteListMockCommandFixture.create();
   });
@@ -248,9 +251,13 @@ describe('AddToWhiteListMockCommandHandler', () => {
 
   describe('execute', () => {
     it('should successfully add to white list mock', async () => {
-      contractServiceMock.getContractEvmAddress
-        .mockResolvedValueOnce(contractEvmAddress)
-        .mockResolvedValueOnce(targetEvmAddress);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        contractEvmAddress,
+      );
+
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        targetEvmAddress,
+      );
 
       transactionServiceMock.getHandler().addToWhiteListMock.mockResolvedValue({
         id: transactionId,
@@ -263,18 +270,17 @@ describe('AddToWhiteListMockCommandHandler', () => {
       expect(result.transactionId).toBe(transactionId);
 
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        2,
+        1,
       );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(
         transactionServiceMock.getHandler().addToWhiteListMock,
       ).toHaveBeenCalledTimes(1);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        1,
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         command.contractId,
       );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        2,
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
         command.targetId,
       );
 

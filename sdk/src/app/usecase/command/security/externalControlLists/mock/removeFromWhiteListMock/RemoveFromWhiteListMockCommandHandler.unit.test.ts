@@ -212,6 +212,7 @@ import {
 import ContractService from '../../../../../../service/ContractService.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { RemoveFromWhiteListMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
+import AccountService from '../../../../../../../app/service/AccountService.js';
 import {
   RemoveFromWhiteListMockCommand,
   RemoveFromWhiteListMockCommandResponse,
@@ -224,6 +225,7 @@ describe('RemoveFromWhiteListMockCommandHandler', () => {
 
   const transactionServiceMock = createMock<TransactionService>();
   const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
   const contractEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
@@ -238,6 +240,7 @@ describe('RemoveFromWhiteListMockCommandHandler', () => {
     handler = new RemoveFromWhiteListMockCommandHandler(
       transactionServiceMock,
       contractServiceMock,
+      accountServiceMock,
     );
     command = RemoveFromWhiteListMockCommandFixture.create();
   });
@@ -248,9 +251,12 @@ describe('RemoveFromWhiteListMockCommandHandler', () => {
 
   describe('execute', () => {
     it('should successfully remove from white list mock', async () => {
-      contractServiceMock.getContractEvmAddress
-        .mockResolvedValueOnce(contractEvmAddress)
-        .mockResolvedValueOnce(targetEvmAddress);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        contractEvmAddress,
+      );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        targetEvmAddress,
+      );
 
       transactionServiceMock
         .getHandler()
@@ -265,18 +271,15 @@ describe('RemoveFromWhiteListMockCommandHandler', () => {
       expect(result.transactionId).toBe(transactionId);
 
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        2,
+        1,
       );
       expect(
         transactionServiceMock.getHandler().removeFromWhiteListMock,
       ).toHaveBeenCalledTimes(1);
-
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        1,
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         command.contractId,
       );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        2,
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
         command.targetId,
       );
 

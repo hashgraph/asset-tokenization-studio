@@ -239,7 +239,7 @@ import { IsAuthorizedBlackListMockQuery } from '../../../app/usecase/query/secur
 import { IsAuthorizedWhiteListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery.js';
 
 interface IExternalControlListsInPort {
-  updateExternalControlListsPauses(
+  updateExternalControlLists(
     request: UpdateExternalControlListsRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   addExternalControlList(
@@ -291,7 +291,7 @@ class ExternalControlListsInPort
   ) {}
 
   @LogError
-  async updateExternalControlListsPauses(
+  async updateExternalControlLists(
     request: UpdateExternalControlListsRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, externalControlListsAddresses, actives } = request;

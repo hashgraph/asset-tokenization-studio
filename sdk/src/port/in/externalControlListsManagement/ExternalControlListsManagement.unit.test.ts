@@ -305,7 +305,7 @@ describe('ExternalControlListsManagement', () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result =
-        await ExternalControlListsManagement.updateExternalControlListsPauses(
+        await ExternalControlListsManagement.updateExternalControlLists(
           updateExternalControlListsRequest,
         );
 
@@ -330,7 +330,7 @@ describe('ExternalControlListsManagement', () => {
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        ExternalControlListsManagement.updateExternalControlListsPauses(
+        ExternalControlListsManagement.updateExternalControlLists(
           updateExternalControlListsRequest,
         ),
       ).rejects.toThrow('Command execution failed');
@@ -359,7 +359,7 @@ describe('ExternalControlListsManagement', () => {
       );
 
       await expect(
-        ExternalControlListsManagement.updateExternalControlListsPauses(
+        ExternalControlListsManagement.updateExternalControlLists(
           updateExternalControlListsRequest,
         ),
       ).rejects.toThrow(ValidationError);
@@ -375,7 +375,7 @@ describe('ExternalControlListsManagement', () => {
       );
 
       await expect(
-        ExternalControlListsManagement.updateExternalControlListsPauses(
+        ExternalControlListsManagement.updateExternalControlLists(
           updateExternalControlListsRequest,
         ),
       ).rejects.toThrow(ValidationError);
@@ -391,7 +391,7 @@ describe('ExternalControlListsManagement', () => {
       );
 
       await expect(
-        ExternalControlListsManagement.updateExternalControlListsPauses(
+        ExternalControlListsManagement.updateExternalControlLists(
           updateExternalControlListsRequest,
         ),
       ).rejects.toThrow(ValidationError);

@@ -217,6 +217,7 @@ import {
   AddToBlackListMockCommandResponse,
 } from './AddToBlackListMockCommand.js';
 import { AddToBlackListMockCommandHandler } from './AddToBlackListMockCommandHandler.js';
+import AccountService from '../../../../../../../app/service/AccountService.js';
 
 describe('AddToBlackListMockCommandHandler', () => {
   let handler: AddToBlackListMockCommandHandler;
@@ -224,6 +225,7 @@ describe('AddToBlackListMockCommandHandler', () => {
 
   const transactionServiceMock = createMock<TransactionService>();
   const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
   const contractEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
@@ -238,6 +240,7 @@ describe('AddToBlackListMockCommandHandler', () => {
     handler = new AddToBlackListMockCommandHandler(
       transactionServiceMock,
       contractServiceMock,
+      accountServiceMock,
     );
     command = AddToBlackListMockCommandFixture.create();
   });
@@ -248,9 +251,13 @@ describe('AddToBlackListMockCommandHandler', () => {
 
   describe('execute', () => {
     it('should successfully add to black list mock', async () => {
-      contractServiceMock.getContractEvmAddress
-        .mockResolvedValueOnce(contractEvmAddress)
-        .mockResolvedValueOnce(targetEvmAddress);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        contractEvmAddress,
+      );
+
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        targetEvmAddress,
+      );
 
       transactionServiceMock.getHandler().addToBlackListMock.mockResolvedValue({
         id: transactionId,
@@ -263,18 +270,15 @@ describe('AddToBlackListMockCommandHandler', () => {
       expect(result.transactionId).toBe(transactionId);
 
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        2,
+        1,
       );
       expect(
         transactionServiceMock.getHandler().addToBlackListMock,
       ).toHaveBeenCalledTimes(1);
-
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        1,
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         command.contractId,
       );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        2,
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
         command.targetId,
       );
 
