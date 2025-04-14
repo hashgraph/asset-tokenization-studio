@@ -203,10 +203,90 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import { createMock } from '@golevelup/ts-jest';
+import {
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { GetListedWhiteListAddressesMockQueryFixture } from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
+import { GetListedWhiteListAddressesMockQueryHandler } from './GetListedWhiteListAddressesMockQueryHandler.js';
+import {
+  GetListedWhiteListAddressesMockQuery,
+  GetListedWhiteListAddressesMockQueryResponse,
+} from './GetListedWhiteListAddressesMockQuery.js';
+import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import AccountService from '../../../../../../service/AccountService.js';
+import Account from '../../../../../../../domain/context/account/Account.js';
 
-interface IExternalControlList {
-    function isAuthorized(address account) external view returns (bool);
-    function getListedAddresses() external view returns (address[] memory);
-}
+describe('GetListedWhiteListAddressesMockQueryHandler', () => {
+  let handler: GetListedWhiteListAddressesMockQueryHandler;
+  let query: GetListedWhiteListAddressesMockQuery;
+
+  const rpcQueryAdapterMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
+
+  const contractEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+
+  beforeEach(() => {
+    handler = new GetListedWhiteListAddressesMockQueryHandler(
+      contractServiceMock,
+      accountServiceMock,
+      rpcQueryAdapterMock,
+    );
+    query = GetListedWhiteListAddressesMockQueryFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    it('should successfully return list of addresses', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        contractEvmAddress,
+      );
+
+      rpcQueryAdapterMock.getListedWhiteListAddressesMock.mockResolvedValue([
+        evmAddress.toString(),
+      ]);
+
+      accountServiceMock.getAccountInfo.mockResolvedValueOnce(account);
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(
+        GetListedWhiteListAddressesMockQueryResponse,
+      );
+      expect(result.payload).toStrictEqual([account.id.toString()]);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledTimes(1);
+      expect(
+        rpcQueryAdapterMock.getListedWhiteListAddressesMock,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.contractId,
+      );
+      expect(
+        rpcQueryAdapterMock.getListedWhiteListAddressesMock,
+      ).toHaveBeenCalledWith(contractEvmAddress);
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(
+        evmAddress.toString(),
+      );
+    });
+  });
+});

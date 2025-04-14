@@ -203,10 +203,17 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import ValidatedRequest from '../../../validation/ValidatedRequest.js';
+import Validation from '../../../validation/Validation.js';
 
-interface IExternalControlList {
-    function isAuthorized(address account) external view returns (bool);
-    function getListedAddresses() external view returns (address[] memory);
+export default class GetListedBlackListAddressesMockRequest extends ValidatedRequest<GetListedBlackListAddressesMockRequest> {
+  contractId: string;
+
+  constructor({ contractId }: { contractId: string }) {
+    super({
+      contractId: Validation.checkHederaIdFormatOrEvmAddress(),
+    });
+    this.contractId = contractId;
+  }
 }

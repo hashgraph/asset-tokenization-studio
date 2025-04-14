@@ -203,10 +203,49 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import {
+  GetListedWhiteListAddressesMockQuery,
+  GetListedWhiteListAddressesMockQueryResponse,
+} from './GetListedWhiteListAddressesMockQuery.js';
+import { QueryHandler } from '../../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import ContractService from '../../../../../../service/ContractService.js';
+import AccountService from '../../../../../../service/AccountService.js';
 
-interface IExternalControlList {
-    function isAuthorized(address account) external view returns (bool);
-    function getListedAddresses() external view returns (address[] memory);
+@QueryHandler(GetListedWhiteListAddressesMockQuery)
+export class GetListedWhiteListAddressesMockQueryHandler
+  implements IQueryHandler<GetListedWhiteListAddressesMockQuery>
+{
+  constructor(
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
+
+  async execute(
+    query: GetListedWhiteListAddressesMockQuery,
+  ): Promise<GetListedWhiteListAddressesMockQueryResponse> {
+    const { contractId } = query;
+
+    const contractEvmAddress =
+      await this.contractService.getContractEvmAddress(contractId);
+
+    const res =
+      await this.queryAdapter.getListedWhiteListAddressesMock(
+        contractEvmAddress,
+      );
+
+    const updatedRes = await Promise.all(
+      res.map(async (address) =>
+        (await this.accountService.getAccountInfo(address)).id.toString(),
+      ),
+    );
+
+    return new GetListedWhiteListAddressesMockQueryResponse(updatedRes);
+  }
 }

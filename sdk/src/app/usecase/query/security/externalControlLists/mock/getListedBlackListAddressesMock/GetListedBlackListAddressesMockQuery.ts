@@ -203,10 +203,17 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import { Query } from '../../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../../core/query/QueryResponse.js';
 
-interface IExternalControlList {
-    function isAuthorized(address account) external view returns (bool);
-    function getListedAddresses() external view returns (address[] memory);
+export class GetListedBlackListAddressesMockQueryResponse
+  implements QueryResponse
+{
+  constructor(public readonly payload: string[]) {}
+}
+
+export class GetListedBlackListAddressesMockQuery extends Query<GetListedBlackListAddressesMockQueryResponse> {
+  constructor(public readonly contractId: string) {
+    super();
+  }
 }

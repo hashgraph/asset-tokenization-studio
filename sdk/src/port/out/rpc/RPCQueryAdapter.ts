@@ -1744,4 +1744,30 @@ export class RPCQueryAdapter {
       address.toString(),
     ).isAuthorized(targetId.toString());
   }
+
+  async getListedBlackListAddressesMock(
+    address: EvmAddress,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting list addresses from external control black list mock contract ${address.toString()}`,
+    );
+
+    return await this.connect(
+      MockedBlacklist__factory,
+      address.toString(),
+    ).getListedAddresses();
+  }
+
+  async getListedWhiteListAddressesMock(
+    address: EvmAddress,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting list addresses from external control white list mock contract ${address.toString()}`,
+    );
+
+    return await this.connect(
+      MockedWhitelist__factory,
+      address.toString(),
+    ).getListedAddresses();
+  }
 }

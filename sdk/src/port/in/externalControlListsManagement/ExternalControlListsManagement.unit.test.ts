@@ -219,6 +219,8 @@ import {
   RemoveFromWhiteListMockRequest,
   IsAuthorizedBlackListMockRequest,
   IsAuthorizedWhiteListMockRequest,
+  GetListedWhiteListAddressesMockRequest,
+  GetListedBlackListAddressesMockRequest,
 } from '../request';
 import * as Common from '../Common';
 import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
@@ -235,6 +237,8 @@ import {
   RemoveFromWhiteListMockRequestFixture,
   IsAuthorizedBlackListMockRequestFixture,
   IsAuthorizedWhiteListMockRequestFixture,
+  GetListedWhiteListAddressesMockRequestFixture,
+  GetListedBlackListAddressesMockRequestFixture,
 } from '../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture';
 import {
   HederaIdPropsFixture,
@@ -256,6 +260,8 @@ import { CreateExternalBlackListMockCommand } from '../../../app/usecase/command
 import { CreateExternalWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/createExternalWhiteListMock/CreateExternalWhiteListMockCommand';
 import { IsAuthorizedBlackListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery';
 import { IsAuthorizedWhiteListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery';
+import { GetListedWhiteListAddressesMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/getListedWhiteListAddressesMock/GetListedWhiteListAddressesMockQuery';
+import { GetListedBlackListAddressesMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/getListedBlackListAddressesMock/GetListedBlackListAddressesMockQuery';
 
 describe('ExternalControlListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -272,6 +278,8 @@ describe('ExternalControlListsManagement', () => {
   let removeFromWhiteListMockRequest: RemoveFromWhiteListMockRequest;
   let isAuthorizedBlackListMockRequest: IsAuthorizedBlackListMockRequest;
   let isAuthorizedWhiteListMockRequest: IsAuthorizedWhiteListMockRequest;
+  let getListedWhiteListAddressesMockRequest: GetListedWhiteListAddressesMockRequest;
+  let getListedBlackListAddressesMockRequest: GetListedBlackListAddressesMockRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -1344,6 +1352,143 @@ describe('ExternalControlListsManagement', () => {
       await expect(
         ExternalControlListsManagement.isAuthorizedWhiteListMock(
           isAuthorizedWhiteListMockRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+  describe('getListedWhiteListAddressesMock', () => {
+    getListedWhiteListAddressesMockRequest =
+      new GetListedWhiteListAddressesMockRequest(
+        GetListedWhiteListAddressesMockRequestFixture.create(),
+      );
+    const expectedQueryResponse = {
+      payload: [HederaIdPropsFixture.create().value],
+    };
+
+    it('should get listed addresses successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result =
+        await ExternalControlListsManagement.getListedWhiteListAddressesMock(
+          getListedWhiteListAddressesMockRequest,
+        );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetListedWhiteListAddressesMockRequest',
+        getListedWhiteListAddressesMockRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetListedWhiteListAddressesMockQuery(
+          getListedWhiteListAddressesMockRequest.contractId,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalControlListsManagement.getListedWhiteListAddressesMock(
+          getListedWhiteListAddressesMockRequest,
+        ),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetListedWhiteListAddressesMockRequest',
+        getListedWhiteListAddressesMockRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetListedWhiteListAddressesMockQuery(
+          getListedWhiteListAddressesMockRequest.contractId,
+        ),
+      );
+    });
+
+    it('should throw error if contractId is invalid', async () => {
+      getListedWhiteListAddressesMockRequest =
+        new GetListedWhiteListAddressesMockRequest({
+          ...GetListedWhiteListAddressesMockRequestFixture.create({
+            contractId: 'invalid',
+          }),
+        });
+
+      await expect(
+        ExternalControlListsManagement.getListedWhiteListAddressesMock(
+          getListedWhiteListAddressesMockRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getListedBlackListAddressesMock', () => {
+    getListedBlackListAddressesMockRequest =
+      new GetListedBlackListAddressesMockRequest(
+        GetListedBlackListAddressesMockRequestFixture.create(),
+      );
+    const expectedQueryResponse = {
+      payload: [HederaIdPropsFixture.create().value],
+    };
+
+    it('should get listed addresses successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result =
+        await ExternalControlListsManagement.getListedBlackListAddressesMock(
+          getListedBlackListAddressesMockRequest,
+        );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetListedBlackListAddressesMockRequest',
+        getListedBlackListAddressesMockRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetListedBlackListAddressesMockQuery(
+          getListedBlackListAddressesMockRequest.contractId,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalControlListsManagement.getListedBlackListAddressesMock(
+          getListedBlackListAddressesMockRequest,
+        ),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetListedBlackListAddressesMockRequest',
+        getListedBlackListAddressesMockRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetListedBlackListAddressesMockQuery(
+          getListedBlackListAddressesMockRequest.contractId,
+        ),
+      );
+    });
+
+    it('should throw error if contractId is invalid', async () => {
+      getListedBlackListAddressesMockRequest =
+        new GetListedBlackListAddressesMockRequest({
+          ...GetListedBlackListAddressesMockRequestFixture.create({
+            contractId: 'invalid',
+          }),
+        });
+
+      await expect(
+        ExternalControlListsManagement.getListedBlackListAddressesMock(
+          getListedBlackListAddressesMockRequest,
         ),
       ).rejects.toThrow(ValidationError);
     });

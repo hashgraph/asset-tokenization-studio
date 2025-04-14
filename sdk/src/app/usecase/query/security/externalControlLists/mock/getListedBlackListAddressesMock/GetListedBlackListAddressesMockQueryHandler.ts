@@ -203,10 +203,49 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import {
+  GetListedBlackListAddressesMockQuery,
+  GetListedBlackListAddressesMockQueryResponse,
+} from './GetListedBlackListAddressesMockQuery.js';
+import { QueryHandler } from '../../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import ContractService from '../../../../../../service/ContractService.js';
+import AccountService from '../../../../../../../app/service/AccountService.js';
 
-interface IExternalControlList {
-    function isAuthorized(address account) external view returns (bool);
-    function getListedAddresses() external view returns (address[] memory);
+@QueryHandler(GetListedBlackListAddressesMockQuery)
+export class GetListedBlackListAddressesMockQueryHandler
+  implements IQueryHandler<GetListedBlackListAddressesMockQuery>
+{
+  constructor(
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
+
+  async execute(
+    query: GetListedBlackListAddressesMockQuery,
+  ): Promise<GetListedBlackListAddressesMockQueryResponse> {
+    const { contractId } = query;
+
+    const contractEvmAddress =
+      await this.contractService.getContractEvmAddress(contractId);
+
+    const res =
+      await this.queryAdapter.getListedBlackListAddressesMock(
+        contractEvmAddress,
+      );
+
+    const updatedRes = await Promise.all(
+      res.map(async (address) =>
+        (await this.accountService.getAccountInfo(address)).id.toString(),
+      ),
+    );
+
+    return new GetListedBlackListAddressesMockQueryResponse(updatedRes);
+  }
 }

@@ -385,6 +385,8 @@ import { CreateExternalWhiteListMockCommandHandler } from '../app/usecase/comman
 import { CreateExternalBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/createExternalBlackListMock/CreateExternalBlackListMockCommandHandler.js';
 import { RemoveFromBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommandHandler.js';
 import { RemoveFromWhiteListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommandHandler.js';
+import { GetListedBlackListAddressesMockQueryHandler } from '../app/usecase/query/security/externalControlLists/mock/getListedBlackListAddressesMock/GetListedBlackListAddressesMockQueryHandler.js';
+import { GetListedWhiteListAddressesMockQueryHandler } from '../app/usecase/query/security/externalControlLists/mock/getListedWhiteListAddressesMock/GetListedWhiteListAddressesMockQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -735,6 +737,14 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsAuthorizedWhiteListMockQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetListedBlackListAddressesMockQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetListedWhiteListAddressesMockQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,

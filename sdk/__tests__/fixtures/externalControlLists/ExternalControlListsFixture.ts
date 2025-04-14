@@ -229,6 +229,10 @@ import RemoveFromWhiteListMockRequest from '../../../src/port/in/request/securit
 import RemoveFromBlackListMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/RemoveFromBlackListMockRequest';
 import IsAuthorizedBlackListMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/IsAuthorizedBlackListMockRequest';
 import IsAuthorizedWhiteListMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/IsAuthorizedWhiteListMockRequest';
+import { GetListedBlackListAddressesMockQuery } from '../../../src/app/usecase/query/security/externalControlLists/mock/getListedBlackListAddressesMock/GetListedBlackListAddressesMockQuery';
+import { GetListedWhiteListAddressesMockQuery } from '../../../src/app/usecase/query/security/externalControlLists/mock/getListedWhiteListAddressesMock/GetListedWhiteListAddressesMockQuery';
+import GetListedWhiteListAddressesMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/GetListedWhiteListAddressesMockRequest';
+import GetListedBlackListAddressesMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/GetListedBlackListAddressesMockRequest';
 
 export const UpdateExternalControlListsCommandFixture =
   createFixture<UpdateExternalControlListsCommand>((command) => {
@@ -289,6 +293,16 @@ export const IsAuthorizedWhiteListMockQueryFixture =
   createFixture<IsAuthorizedWhiteListMockQuery>((query) => {
     query.contractId.as(() => HederaIdPropsFixture.create().value);
     query.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetListedBlackListAddressesMockQueryFixture =
+  createFixture<GetListedBlackListAddressesMockQuery>((query) => {
+    query.contractId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetListedWhiteListAddressesMockQueryFixture =
+  createFixture<GetListedWhiteListAddressesMockQuery>((query) => {
+    query.contractId.as(() => HederaIdPropsFixture.create().value);
   });
 
 export const UpdateExternalControlListsRequestFixture =
@@ -390,4 +404,14 @@ export const IsAuthorizedWhiteListMockRequestFixture =
   createFixture<IsAuthorizedWhiteListMockRequest>((request) => {
     request.contractId.as(() => HederaIdPropsFixture.create().value);
     request.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetListedWhiteListAddressesMockRequestFixture =
+  createFixture<GetListedWhiteListAddressesMockRequest>((request) => {
+    request.contractId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetListedBlackListAddressesMockRequestFixture =
+  createFixture<GetListedBlackListAddressesMockRequest>((request) => {
+    request.contractId.as(() => HederaIdPropsFixture.create().value);
   });

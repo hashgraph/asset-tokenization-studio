@@ -340,6 +340,8 @@ import RemoveFromBlackListMockRequest from './security/externalControlLists/mock
 import RemoveFromWhiteListMockRequest from './security/externalControlLists/mock/RemoveFromWhiteListMockRequest.js';
 import IsAuthorizedBlackListMockRequest from './security/externalControlLists/mock/IsAuthorizedBlackListMockRequest.js';
 import IsAuthorizedWhiteListMockRequest from './security/externalControlLists/mock/IsAuthorizedWhiteListMockRequest.js';
+import GetListedBlackListAddressesMockRequest from './security/externalControlLists/mock/GetListedBlackListAddressesMockRequest.js';
+import GetListedWhiteListAddressesMockRequest from './security/externalControlLists/mock/GetListedWhiteListAddressesMockRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -479,4 +481,6 @@ export {
   RemoveFromWhiteListMockRequest,
   IsAuthorizedBlackListMockRequest,
   IsAuthorizedWhiteListMockRequest,
+  GetListedBlackListAddressesMockRequest,
+  GetListedWhiteListAddressesMockRequest,
 };

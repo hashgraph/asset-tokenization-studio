@@ -221,6 +221,8 @@ import {
   RemoveFromWhiteListMockRequest,
   IsAuthorizedBlackListMockRequest,
   IsAuthorizedWhiteListMockRequest,
+  GetListedWhiteListAddressesMockRequest,
+  GetListedBlackListAddressesMockRequest,
 } from '../request/index.js';
 import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand.js';
 import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand.js';
@@ -237,6 +239,8 @@ import { CreateExternalBlackListMockCommand } from '../../../app/usecase/command
 import { CreateExternalWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/createExternalWhiteListMock/CreateExternalWhiteListMockCommand.js';
 import { IsAuthorizedBlackListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery.js';
 import { IsAuthorizedWhiteListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery.js';
+import { GetListedWhiteListAddressesMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/getListedWhiteListAddressesMock/GetListedWhiteListAddressesMockQuery.js';
+import { GetListedBlackListAddressesMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/getListedBlackListAddressesMock/GetListedBlackListAddressesMockQuery.js';
 
 interface IExternalControlListsInPort {
   updateExternalControlListsPauses(
@@ -280,6 +284,12 @@ interface IExternalControlListsInPortMocksInPort {
   isAuthorizedWhiteListMock(
     request: IsAuthorizedWhiteListMockRequest,
   ): Promise<boolean>;
+  getListedWhiteListAddressesMock(
+    request: GetListedWhiteListAddressesMockRequest,
+  ): Promise<string[]>;
+  getListedBlackListAddressesMock(
+    request: GetListedBlackListAddressesMockRequest,
+  ): Promise<string[]>;
 }
 
 class ExternalControlListsInPort
@@ -461,6 +471,34 @@ class ExternalControlListsInPort
     return (
       await this.queryBus.execute(
         new IsAuthorizedWhiteListMockQuery(contractId, targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getListedWhiteListAddressesMock(
+    request: GetListedWhiteListAddressesMockRequest,
+  ): Promise<string[]> {
+    const { contractId } = request;
+    handleValidation('GetListedWhiteListAddressesMockRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetListedWhiteListAddressesMockQuery(contractId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getListedBlackListAddressesMock(
+    request: GetListedBlackListAddressesMockRequest,
+  ): Promise<string[]> {
+    const { contractId } = request;
+    handleValidation('GetListedBlackListAddressesMockRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetListedBlackListAddressesMockQuery(contractId),
       )
     ).payload;
   }
