@@ -204,7 +204,7 @@
 */
 
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '..//FormatValidation.js';
+import FormatValidation from '../FormatValidation.js';
 
 export default class GetEquityDetailsRequest extends ValidatedRequest<GetEquityDetailsRequest> {
   equityId: string;

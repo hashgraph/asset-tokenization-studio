@@ -205,7 +205,7 @@
 
 import { MIN_ID } from '../../../../domain/context/security/CorporateAction.js';
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '..//FormatValidation.js';
+import FormatValidation from '../FormatValidation.js';
 
 export default class GetScheduledBalanceAdjustmentRequest extends ValidatedRequest<GetScheduledBalanceAdjustmentRequest> {
   securityId: string;

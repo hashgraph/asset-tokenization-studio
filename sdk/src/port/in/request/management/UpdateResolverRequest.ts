@@ -204,7 +204,7 @@
 */
 
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '..//FormatValidation.js';
+import FormatValidation from '../FormatValidation.js';
 
 export default class UpdateResolverRequest extends ValidatedRequest<UpdateResolverRequest> {
   securityId: string;

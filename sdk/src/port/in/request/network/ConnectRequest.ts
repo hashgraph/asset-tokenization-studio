@@ -210,7 +210,7 @@ import { JsonRpcRelay } from '../../../../domain/context/network/JsonRpcRelay.js
 import { SupportedWallets } from '../../../../domain/context/network/Wallet.js';
 import { BaseRequest, RequestAccount } from '../BaseRequest.js';
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '..//FormatValidation.js';
+import FormatValidation from '../FormatValidation.js';
 
 export { SupportedWallets };
 

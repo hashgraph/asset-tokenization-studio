@@ -206,7 +206,7 @@
 import { OptionalField } from '../../../../core/decorator/OptionalDecorator.js';
 import { Security } from '../../../../domain/context/security/Security.js';
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '..//FormatValidation.js';
+import FormatValidation from '../FormatValidation.js';
 
 import { SecurityDate } from '../../../../domain/context/shared/SecurityDate.js';
 import { Factory } from '../../../../domain/context/factory/Factories.js';

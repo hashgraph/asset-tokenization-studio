@@ -204,7 +204,6 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import LogService from '../../../../app/service/LogService.js';
 
 export default class Mapper {
   public static renamePrivateProps(keys: string[]): string[];

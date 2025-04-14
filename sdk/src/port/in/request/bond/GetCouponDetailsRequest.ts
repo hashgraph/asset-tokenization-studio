@@ -204,7 +204,7 @@
 */
 
 import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '..//FormatValidation.js';
+import FormatValidation from '../FormatValidation.js';
 
 export default class GetCouponDetailsRequest extends ValidatedRequest<GetCouponDetailsRequest> {
   bondId: string;
