@@ -320,6 +320,14 @@ import OperatorClearingTransferByPartitionRequest from './security/operations/cl
 import GetClearingCreateHoldForByPartitionRequest from './security/operations/clearing/GetClearingCreateHoldForByPartitionRequest.js';
 import GetClearingRedeemForByPartitionRequest from './security/operations/clearing/GetClearingRedeemForByPartitionRequest.js';
 import GetClearingTransferForByPartitionRequest from './security/operations/clearing/GetClearingTransferForByPartitionRequest.js';
+import UpdateExternalPausesRequest from './security/externalPauses/UpdateExternalPausesRequest.js';
+import AddExternalPauseRequest from './security/externalPauses/AddExternalPauseRequest.js';
+import RemoveExternalPauseRequest from './security/externalPauses/RemoveExternalPauseRequest.js';
+import IsExternalPauseRequest from './security/externalPauses/IsExternalPauseRequest.js';
+import GetExternalPausesCountRequest from './security/externalPauses/GetExternalPausesCountRequest.js';
+import GetExternalPausesMembersRequest from './security/externalPauses/GetExternalPausesMembersRequest.js';
+import IsPausedMockRequest from './security/externalPauses/mock/IsPausedMockRequest.js';
+import SetPausedMockRequest from './security/externalPauses/mock/SetPausedMockRequest.js';
 import UpdateExternalControlListsRequest from './security/externalControlLists/UpdateExternalControlListsRequest.js';
 import AddExternalControlListRequest from './security/externalControlLists/AddExternalControlListRequest.js';
 import RemoveExternalControlListRequest from './security/externalControlLists/RemoveExternalControlListRequest.js';
@@ -451,6 +459,14 @@ export {
   OperatorClearingCreateHoldByPartitionRequest,
   OperatorClearingRedeemByPartitionRequest,
   OperatorClearingTransferByPartitionRequest,
+  UpdateExternalPausesRequest,
+  AddExternalPauseRequest,
+  RemoveExternalPauseRequest,
+  IsExternalPauseRequest,
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
+  IsPausedMockRequest,
+  SetPausedMockRequest,
   UpdateExternalControlListsRequest,
   AddExternalControlListRequest,
   RemoveExternalControlListRequest,

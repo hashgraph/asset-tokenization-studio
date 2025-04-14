@@ -273,6 +273,8 @@ import {
     ClearingReadFacetTimeTravel__factory,
     ClearingActionsFacet__factory,
     ClearingActionsFacetTimeTravel__factory,
+    ExternalPauseManagement__factory,
+    ExternalPauseManagementTimeTravel__factory,
     ExternalControlListManagement__factory,
     ExternalControlListManagementTimeTravel__factory,
 } from '@typechain'
@@ -765,6 +767,19 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        externalPauseManagement: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ExternalPauseManagement__factory(),
+                new ExternalPauseManagementTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ExternalPauseManagement.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
         externalControlListManagement: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ExternalControlListManagement__factory(),
@@ -986,6 +1001,14 @@ export async function deployAtsContracts({
             ).then((result) => {
                 console.log(
                     'ClearingActionsFacet has been deployed successfully'
+                )
+                return result
+            }),
+            externalPauseManagement: await deployContractWithFactory(
+                commands.externalPauseManagement
+            ).then((result) => {
+                console.log(
+                    'ExternalPauseManagement has been deployed successfully'
                 )
                 return result
             }),

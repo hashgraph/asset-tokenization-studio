@@ -325,6 +325,11 @@ import {
   OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+  UPDATE_EXTERNAL_PAUSES_GAS,
+  ADD_EXTERNAL_PAUSE_GAS,
+  REMOVE_EXTERNAL_PAUSE_GAS,
+  SET_PAUSED_MOCK_GAS,
+  CREATE_EXTERNAL_PAUSE_MOCK_GAS,
   UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
   ADD_EXTERNAL_CONTROL_LIST_GAS,
   REMOVE_EXTERNAL_CONTROL_LIST_GAS,
@@ -370,6 +375,8 @@ import {
   ClearingTransferFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
+  ExternalPauseManagement__factory,
+  MockedExternalPause__factory,
   ExternalControlListManagement__factory,
   MockedBlacklist__factory,
   MockedWhitelist__factory,
@@ -463,6 +470,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
@@ -505,6 +513,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
           externalControlLists?.map((address) => address.toString()) ?? [],
       };
@@ -576,6 +586,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
@@ -618,6 +629,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
           externalControlLists?.map((address) => address.toString()) ?? [],
       };
@@ -2805,6 +2818,102 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       ),
       this.networkService.environment,
     );
+  }
+
+  async updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating External Pauses for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalPauseManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateExternalPauses(
+        externalPausesAddresses.map((address) => address.toString()),
+        actives,
+        {
+          gasLimit: UPDATE_EXTERNAL_PAUSES_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding External Pause for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalPauseManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addExternalPause(externalPauseAddress.toString(), {
+        gasLimit: ADD_EXTERNAL_PAUSE_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing External Pause for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalPauseManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeExternalPause(externalPauseAddress.toString(), {
+        gasLimit: REMOVE_EXTERNAL_PAUSE_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting paused to external pause mock contract ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedExternalPause__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).setPaused(paused, {
+        gasLimit: SET_PAUSED_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async createExternalPauseMock(): Promise<string> {
+    LogService.logTrace(`Deploying External Pause Mock contract`);
+
+    const factory = new MockedExternalPause__factory(
+      this.signerOrProvider as Signer,
+    );
+
+    const contract = await factory.deploy({
+      gasLimit: CREATE_EXTERNAL_PAUSE_MOCK_GAS,
+    });
+    await contract.deployed();
+
+    return contract.address;
   }
 
   async updateExternalControlLists(

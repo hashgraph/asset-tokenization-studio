@@ -292,6 +292,15 @@ export default {
     totalCoupons: "Total coupons",
   },
 
+  stepExternalManagement: {
+    title: "External Lists",
+    subtitle: "Add external lists configurations",
+    externalPause: "External Pause",
+    pauseList: "Pause list",
+    pauseListPlaceholder: "Choose external pause ...",
+    externalPausesSelected: "External pauses selected:",
+  },
+
   stepReview: {
     title: "Review",
     tokenDetails: "Digital security details",

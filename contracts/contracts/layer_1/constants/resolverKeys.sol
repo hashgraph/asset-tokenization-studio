@@ -283,5 +283,8 @@ bytes32 constant _CLEARING_READ_RESOLVER_KEY = 0xebb2e29bdf4edaf4ca66a3f9b773508
 // keccak256("security.token.standard.clearing.actions.resolverKey")
 bytes32 constant _CLEARING_ACTIONS_RESOLVER_KEY = 0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74;
 
+// keccak256("security.token.standard.pause.management.resolverKey")
+bytes32 constant _PAUSE_MANAGEMENT_RESOLVER_KEY = 0xadd2e196c17b4f607e327e46341eedbbbc3dce86ac90ceb3e7244b0a5f8590ac;
+
 // keccak256("security.token.standard.controllist.management.resolverKey")
 bytes32 constant _CONTROL_LIST_MANAGEMENT_RESOLVER_KEY = 0xb28d59e89fa116cebe06d8de737191b637a49d95f7d8d947d47ac000463e7c71;

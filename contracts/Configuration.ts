@@ -256,6 +256,7 @@ export const CONTRACT_NAMES = [
     'ClearingTransferFacet',
     'ClearingReadFacet',
     'ClearingActionsFacet',
+    'ExternalPauseManagement',
     'ExternalControlListManagement',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]

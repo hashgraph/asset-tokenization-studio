@@ -239,6 +239,9 @@ import {
     IProtectedPartitions
 } from '../layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol';
 import {
+    IExternalPauseManagement
+} from '../layer_1/interfaces/externalPauses/IExternalPauseManagement.sol';
+import {
     IExternalControlListManagement
 } from '../layer_1/interfaces/externalControlLists/IExternalControlListManagement.sol';
 import {validateISIN} from './isinValidator.sol';
@@ -430,6 +433,10 @@ contract Factory is IFactory, LocalContext {
 
         IClearingActions(securityAddress_).initializeClearing(
             _securityData.clearingActive
+        );
+
+        IExternalPauseManagement(securityAddress_).initialize_ExternalPauses(
+            _securityData.externalPauses
         );
 
         IExternalControlListManagement(securityAddress_)

@@ -369,6 +369,7 @@ describe('CreateBondCommandHandler', () => {
           evmAddress,
           command.configId,
           command.configVersion,
+          [],
           [externalEvmAddress],
           evmAddress,
           command.factory?.toString(),

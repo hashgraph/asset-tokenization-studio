@@ -248,6 +248,7 @@ interface ITransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
@@ -260,6 +261,7 @@ interface ITransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
@@ -807,6 +809,34 @@ interface IClearingAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IExternalPausesAdapter {
+  updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
+interface IExternalPausesMockAdapter {
+  setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  createExternalPauseMock(): Promise<string | TransactionResponse>;
+}
+
 interface IExternalControlListsAdapter {
   updateExternalControlLists(
     security: EvmAddress,
@@ -859,6 +889,9 @@ export default abstract class TransactionAdapter
     IHoldTransactionAdapter,
     ISSIManagementTransactionAdapter,
     IKYCTransactionAdapter,
+    IClearingAdapter,
+    IExternalPausesAdapter,
+    IExternalPausesMockAdapter,
     IClearingAdapter,
     IExternalControlListsAdapter,
     IExternalControlListsMockAdapter
@@ -951,6 +984,7 @@ export default abstract class TransactionAdapter
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
@@ -965,6 +999,7 @@ export default abstract class TransactionAdapter
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
@@ -1588,6 +1623,38 @@ export default abstract class TransactionAdapter
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createExternalPauseMock(): Promise<string | TransactionResponse> {
     throw new Error('Method not implemented.');
   }
   updateExternalControlLists(
