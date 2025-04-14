@@ -210,9 +210,7 @@ import {
 } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../../../service/ContractService.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import {
-  GetListedBlackListAddressesMockQueryFixture,
-} from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
+import { GetListedBlackListAddressesMockQueryFixture } from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
 import { GetListedBlackListAddressesMockQueryHandler } from './GetListedBlackListAddressesMockQueryHandler.js';
 import {
   GetListedBlackListAddressesMockQuery,
