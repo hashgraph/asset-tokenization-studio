@@ -203,19 +203,16 @@
 
 */
 
-import BaseError from '../../../../core/error/BaseError.js';
-import safeStringify from 'fast-safe-stringify';
-export default class ValidationResponse {
-  name: string;
-  errors: BaseError[];
+import { ValidationError } from './ValidationError';
+import { BaseArgs } from './BaseArgs';
+import ValidatedArgs from './ValidatedArgs';
 
-  constructor(name: string, errors: BaseError[]) {
-    this.name = name;
-    this.errors = errors;
-    Object.setPrototypeOf(this, ValidationResponse.prototype);
-  }
-
-  toString(): string {
-    return safeStringify(this, undefined, 4);
-  }
+export class Validation {
+  public static handleValidation = <T extends BaseArgs>(
+    name: string,
+    args: ValidatedArgs<T>,
+  ): void => {
+    const validation = args.validate();
+    if (validation.length > 0) throw new ValidationError(name, validation);
+  };
 }

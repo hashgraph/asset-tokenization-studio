@@ -203,15 +203,17 @@
 
 */
 
-export enum Operation {
-  ISSUE = 'Issue',
-  CONTROLLER = 'Controller',
-  PAUSE = 'Pause',
-  CONTROLLIST = 'Control_List',
-  CORPORATEACTIONS = 'Corporate_Actions',
-  ROLE_ADMIN_MANAGEMENT = 'Admin_Role',
-}
+import BaseError from '../error/BaseError.js';
+import { BaseArgs } from './BaseArgs.js';
 
-export class Capability {
-  constructor(public readonly operation: Operation) {}
-}
+export type ValidatedArgsKey<T extends BaseArgs> = keyof Omit<
+  T,
+  'validations' | 'validate'
+>;
+
+export type ValidationFn<K> = (val: K) => BaseError[] | void;
+export type PropType<TObj, TProp extends keyof TObj> = TObj[TProp];
+
+export type ValidationSchema<T extends BaseArgs> = Partial<{
+  [K in ValidatedArgsKey<T>]: ValidationFn<PropType<T, K>>;
+}>;

@@ -2190,10 +2190,12 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     security: EvmAddress,
     _maturityDate: number,
   ) {
-    bondInfo = {
-      ...bondInfo,
-      maturityDate: _maturityDate,
-    };
+    bondInfo = new BondDetails(
+      bondInfo.currency,
+      bondInfo.nominalValue,
+      bondInfo.startingDate,
+      _maturityDate,
+    );
 
     return { status: 'success', data: [] } as TransactionResponse<
       string[],

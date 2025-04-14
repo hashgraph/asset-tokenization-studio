@@ -203,17 +203,19 @@
 
 */
 
-import BaseError from '../../../../core/error/BaseError.js';
-import { BaseRequest } from '../BaseRequest.js';
+import BaseError from '../error/BaseError.js';
+import safeStringify from 'fast-safe-stringify';
+export default class ValidationResponse {
+  name: string;
+  errors: BaseError[];
 
-export type ValidatedRequestKey<T extends BaseRequest> = keyof Omit<
-  T,
-  'validations' | 'validate'
->;
+  constructor(name: string, errors: BaseError[]) {
+    this.name = name;
+    this.errors = errors;
+    Object.setPrototypeOf(this, ValidationResponse.prototype);
+  }
 
-export type ValidationFn<K> = (val: K) => BaseError[] | void;
-export type PropType<TObj, TProp extends keyof TObj> = TObj[TProp];
-
-export type ValidationSchema<T extends BaseRequest> = Partial<{
-  [K in ValidatedRequestKey<T>]: ValidationFn<PropType<T, K>>;
-}>;
+  toString(): string {
+    return safeStringify(this, undefined, 4);
+  }
+}

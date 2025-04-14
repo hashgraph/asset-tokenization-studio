@@ -206,7 +206,8 @@
 import AccountViewModel from './response/AccountViewModel.js';
 import GetAccountInfoRequest from './request/account/GetAccountInfoRequest.js';
 import GetAccountBalanceRequest from './request/account/GetAccountBalanceRequest.js';
-import { handleValidation } from './Common.js';
+import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+
 import { GetAccountInfoQuery } from '../../app/usecase/query/account/info/GetAccountInfoQuery.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
 import Injectable from '../../core/Injectable.js';
@@ -226,7 +227,7 @@ class AccountInPort implements IAccountInPort {
 
   @LogError
   async getInfo(request: GetAccountInfoRequest): Promise<AccountViewModel> {
-    handleValidation('GetAccountInfoRequest', request);
+    ValidatedRequest.handleValidation('GetAccountInfoRequest', request);
     const res = await this.queryBus.execute(
       new GetAccountInfoQuery(HederaId.from(request.account.accountId)),
     );
@@ -242,7 +243,7 @@ class AccountInPort implements IAccountInPort {
 
   @LogError
   async getBalance(request: GetAccountBalanceRequest): Promise<BigDecimal> {
-    handleValidation('GetAccountBalanceRequest', request);
+    ValidatedRequest.handleValidation('GetAccountBalanceRequest', request);
     const res = await this.queryBus.execute(
       new GetAccountBalanceQuery(request.securityId, request.targetId),
     );

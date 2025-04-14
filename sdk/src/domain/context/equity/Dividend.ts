@@ -203,9 +203,11 @@
 
 */
 
+import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
 import BigDecimal from '../shared/BigDecimal.js';
+import { SecurityDate } from '../shared/SecurityDate.js';
 
-export class Dividend {
+export class Dividend extends ValidatedDomain<Dividend> {
   amountPerUnitOfSecurity: BigDecimal;
   recordTimeStamp: number;
   executionTimeStamp: number;
@@ -217,9 +219,17 @@ export class Dividend {
     executionTimeStamp: number,
     snapshotId?: number,
   ) {
+    super({
+      executionTimeStamp: (val) => {
+        return SecurityDate.checkDateTimestamp(val, this.recordTimeStamp);
+      },
+    });
+
     this.amountPerUnitOfSecurity = amountPerUnitOfSecurity;
     this.recordTimeStamp = recordTimeStamp;
     this.executionTimeStamp = executionTimeStamp;
     this.snapshotId = snapshotId ? snapshotId : undefined;
+
+    ValidatedDomain.handleValidation(Dividend.name, this);
   }
 }

@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../FormatValidation.js';
 
 export default class AddIssuerRequest extends ValidatedRequest<AddIssuerRequest> {
   securityId: string;
@@ -218,8 +218,8 @@ export default class AddIssuerRequest extends ValidatedRequest<AddIssuerRequest>
     securityId: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      issuerId: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      issuerId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
 
     this.securityId = securityId;

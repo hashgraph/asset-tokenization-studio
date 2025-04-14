@@ -604,12 +604,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         clearingActive: securityInfo.clearingActive,
       };
 
-      const bondDetails: BondDetailsData = {
-        currency: bondInfo.currency,
-        nominalValue: bondInfo.nominalValue.toString(),
-        startingDate: bondInfo.startingDate.toString(),
-        maturityDate: bondInfo.maturityDate.toString(),
-      };
+      const bondDetails = new BondDetailsData(
+        bondInfo.currency,
+        bondInfo.nominalValue.toString(),
+        bondInfo.startingDate.toString(),
+        bondInfo.maturityDate.toString(),
+      );
 
       const couponDetails: CouponDetailsData = {
         couponFrequency: couponInfo.couponFrequency.toString(),
@@ -1872,7 +1872,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold__factory.connect(
         security.toString(),
@@ -1904,7 +1903,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold__factory.connect(
         security.toString(),
@@ -1942,7 +1940,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold__factory.connect(
         security.toString(),
@@ -1983,9 +1980,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     const protectedHold: ProtectedHold = {
-      hold,
+      hold: hold,
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
     };

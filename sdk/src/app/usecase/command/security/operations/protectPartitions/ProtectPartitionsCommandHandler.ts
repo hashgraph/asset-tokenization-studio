@@ -211,8 +211,8 @@ import {
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import AccountService from '../../../../../service/AccountService';
-import SecurityService from '../../../../..//service/SecurityService';
-import TransactionService from '../../../../..//service/TransactionService';
+import SecurityService from '../../../../../service/SecurityService';
+import TransactionService from '../../../../../service/TransactionService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import ValidationService from '../../../../../service/ValidationService';

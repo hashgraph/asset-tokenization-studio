@@ -203,15 +203,15 @@
 
 */
 
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../FormatValidation.js';
 
 export default class GetAllVotingRightsRequest extends ValidatedRequest<GetAllVotingRightsRequest> {
   securityId: string;
 
   constructor({ securityId }: { securityId: string }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
     this.securityId = securityId;
   }
