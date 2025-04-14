@@ -216,10 +216,18 @@ import { DFNSTransactionAdapter } from '../../port/out/hs/hts/custodial/DFNSTran
 import { FireblocksTransactionAdapter } from '../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
 import { AWSKMSTransactionAdapter } from '../../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
 import { WalletNotSupported } from './error/WalletNotSupported.js';
+import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
+import { InvalidResponse } from '../../port/out/mirror/error/InvalidResponse.js';
+import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter.js';
+import { EmptyResponse } from '../usecase/command/security/error/EmptyResponse.js';
 
 @singleton()
 export default class TransactionService extends Service {
-  constructor() {
+  constructor(
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
+      MirrorNodeAdapter,
+    ),
+  ) {
     super();
   }
 
@@ -267,5 +275,32 @@ export default class TransactionService extends Service {
       default:
         throw new WalletNotSupported();
     }
+  }
+
+  async getTransactionResult(
+    res: TransactionResponse,
+    result: any,
+    className: string,
+    position: number,
+    numberOfResultsItems: number,
+  ): Promise<string> {
+    if (!res.id) throw new EmptyResponse(className);
+    let output: string;
+
+    if (res.response && result) {
+      output = result;
+    } else {
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
+
+      if (!results || results.length !== numberOfResultsItems) {
+        throw new InvalidResponse(results);
+      }
+
+      output = results[position];
+    }
+    return output;
   }
 }

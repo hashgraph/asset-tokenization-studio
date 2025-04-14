@@ -212,13 +212,11 @@ import {
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import AccountService from '../../../../../service/AccountService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
 import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
 
 @CommandHandler(SetScheduledBalanceAdjustmentCommand)
@@ -228,8 +226,6 @@ export class SetScheduledBalanceAdjustmentCommandHandler
   constructor(
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(ValidationService)
@@ -267,25 +263,16 @@ export class SetScheduledBalanceAdjustmentCommandHandler
     if (!res.id)
       throw new EmptyResponse(SetScheduledBalanceAdjustmentCommandHandler.name);
 
-    let balanceAdjustmentId: string;
-
-    if (res.response && res.response.balanceAdjustmentID) {
-      balanceAdjustmentId = res.response.balanceAdjustmentID;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
+    const numberOfResultsItems = 2;
+    const position = 1;
+    const balanceAdjustmentId =
+      await this.transactionService.getTransactionResult(
+        res,
+        res.response?.balanceAdjustmentID,
+        SetScheduledBalanceAdjustmentCommandHandler.name,
+        position,
         numberOfResultsItems,
       );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      balanceAdjustmentId = results[1];
-    }
 
     return Promise.resolve(
       new SetScheduledBalanceAdjustmentCommandResponse(

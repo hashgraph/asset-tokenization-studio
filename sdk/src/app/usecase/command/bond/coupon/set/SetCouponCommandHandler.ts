@@ -211,11 +211,8 @@ import {
 } from './SetCouponCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
 
 @CommandHandler(SetCouponCommand)
 export class SetCouponCommandHandler
@@ -224,8 +221,6 @@ export class SetCouponCommandHandler
   constructor(
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
   ) {}
@@ -245,26 +240,16 @@ export class SetCouponCommandHandler
       address,
     );
 
-    if (!res.id) throw new EmptyResponse(SetCouponCommandHandler.name);
-    let couponId: string;
+    const numberOfResultsItems = 2;
+    const position = 1;
 
-    if (res.response && res.response.couponID) {
-      couponId = res.response.couponID;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      couponId = results[1];
-    }
+    const couponId = await this.transactionService.getTransactionResult(
+      res,
+      res.response?.couponID,
+      SetCouponCommandHandler.name,
+      position,
+      numberOfResultsItems,
+    );
 
     return Promise.resolve(
       new SetCouponCommandResponse(parseInt(couponId, 16), res.id!),

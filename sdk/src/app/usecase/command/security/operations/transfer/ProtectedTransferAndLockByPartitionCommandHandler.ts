@@ -214,12 +214,9 @@ import {
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
-import { EmptyResponse } from '../../error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
 
 @CommandHandler(ProtectedTransferAndLockByPartitionCommand)
 export class ProtectedTransferAndLockByPartitionCommandHandler
@@ -232,8 +229,6 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
     @lazyInject(ContractService)
@@ -306,30 +301,15 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
       signature,
     );
 
-    if (!res.id)
-      throw new EmptyResponse(
-        ProtectedTransferAndLockByPartitionCommandHandler.name,
-      );
-
-    let lockId: string;
-
-    if (res.response && res.response.lockId) {
-      lockId = res.response.lockId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      lockId = results[1];
-    }
+    const numberOfResultsItems = 2;
+    const position = 1;
+    const lockId = await this.transactionService.getTransactionResult(
+      res,
+      res.response?.lockId,
+      ProtectedTransferAndLockByPartitionCommandHandler.name,
+      position,
+      numberOfResultsItems,
+    );
 
     return Promise.resolve(
       new ProtectedTransferAndLockByPartitionCommandResponse(

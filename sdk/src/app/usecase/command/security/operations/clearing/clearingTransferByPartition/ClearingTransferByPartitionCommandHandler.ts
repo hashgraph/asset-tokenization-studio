@@ -218,8 +218,6 @@ import {
 } from './ClearingTransferByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../error/EmptyResponse.js';
 
 @CommandHandler(ClearingTransferByPartitionCommand)
 export class ClearingTransferByPartitionCommandHandler
@@ -286,28 +284,16 @@ export class ClearingTransferByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id)
-      throw new EmptyResponse(ClearingTransferByPartitionCommandHandler.name);
+    const numberOfResultsItems = 2;
+    const position = 1;
 
-    let clearingId: string;
-
-    if (res.response && res.response.clearingId) {
-      clearingId = res.response.clearingId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      clearingId = results[1];
-    }
+    const clearingId = await this.transactionService.getTransactionResult(
+      res,
+      res.response?.clearingId,
+      ClearingTransferByPartitionCommandHandler.name,
+      position,
+      numberOfResultsItems,
+    );
 
     return Promise.resolve(
       new ClearingTransferByPartitionCommandResponse(

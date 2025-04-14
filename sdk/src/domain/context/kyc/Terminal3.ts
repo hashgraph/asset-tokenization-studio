@@ -207,8 +207,8 @@ import { SignedCredential } from '@terminal3/vc_core';
 import BigDecimal from '../shared/BigDecimal.js';
 import { InvalidVcFormat } from './error/InvalidVcFormat.js';
 import { ErrorDecodingVc } from './error/ErrorDecodingVc.js';
-import { MissingVcData } from './error/MissingVcData.js';
 import { InvalidVcDates } from './error/InvalidVcDates.js';
+import { EmptyValue } from '../../../port/in/request/error/EmptyValue.js';
 
 export class Terminal3VC {
   public static vcFromBase64(base64: string): SignedCredential {
@@ -228,13 +228,13 @@ export class Terminal3VC {
 
   public static extractHolder(signedCredential: SignedCredential): string {
     const holder = signedCredential.credentialSubject.id.split(':').pop();
-    if (!holder) throw new MissingVcData('holder');
+    if (!holder) throw new EmptyValue('holder');
     return holder;
   }
 
   public static extractIssuer(signedCredential: SignedCredential): string {
     const issuer = signedCredential.issuer.split(':').pop();
-    if (!issuer) throw new MissingVcData('issuer');
+    if (!issuer) throw new EmptyValue('issuer');
     return issuer;
   }
 

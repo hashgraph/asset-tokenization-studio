@@ -211,10 +211,6 @@ import { InvalidRequest } from '../../error/InvalidRequest.js';
 import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import {
-  ADDRESS_LENGTH,
-  BYTES_32_LENGTH,
-} from '../../../../../core/Constants.js';
 import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
 import AccountService from '../../../../service/AccountService.js';
@@ -225,7 +221,6 @@ import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../port/out/mirror/error/InvalidResponse.js';
 import { EmptyResponse } from '../../security/error/EmptyResponse.js';
 
 @CommandHandler(CreateBondCommand)
@@ -316,28 +311,19 @@ export class CreateBondCommandHandler
 
     if (!res.id) throw new EmptyResponse(CreateBondCommandHandler.name);
 
-    let contractAddress: string;
     try {
-      if (res.response && res.response.bondAddress) {
-        contractAddress = res.response.bondAddress;
-      } else {
-        // * Recover the new contract ID from Event data from the Mirror Node
+      const numberOfResultsItems = 1;
+      const position = 0;
 
-        const results = await this.mirrorNodeAdapter.getContractResults(
-          res.id.toString(),
-          1,
+      const contractAddress =
+        await this.transactionService.getTransactionResult(
+          res,
+          res.response?.bondAddress,
+          CreateBondCommandHandler.name,
+          position,
+          numberOfResultsItems,
         );
 
-        if (!results || results.length !== 1) {
-          throw new InvalidResponse(results);
-        }
-
-        const data = results.map((result) =>
-          result.substring(BYTES_32_LENGTH - ADDRESS_LENGTH + 2),
-        );
-
-        contractAddress = '0x' + data[0];
-      }
       const contractId =
         await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
           contractAddress,

@@ -211,15 +211,12 @@ import TransactionService from '../../../../../../service/TransactionService.js'
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import {
   ClearingRedeemFromByPartitionCommand,
   ClearingRedeemFromByPartitionCommandResponse,
 } from './ClearingRedeemFromByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../error/EmptyResponse.js';
 
 @CommandHandler(ClearingRedeemFromByPartitionCommand)
 export class ClearingRedeemFromByPartitionCommandHandler
@@ -232,8 +229,6 @@ export class ClearingRedeemFromByPartitionCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
     @lazyInject(ContractService)
@@ -284,28 +279,15 @@ export class ClearingRedeemFromByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id)
-      throw new EmptyResponse(ClearingRedeemFromByPartitionCommandHandler.name);
-
-    let clearingId: string;
-
-    if (res.response && res.response.clearingId) {
-      clearingId = res.response.clearingId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      clearingId = results[1];
-    }
+    const numberOfResultsItems = 2;
+    const position = 1;
+    const clearingId = await this.transactionService.getTransactionResult(
+      res,
+      res.response?.clearingId,
+      ClearingRedeemFromByPartitionCommandHandler.name,
+      position,
+      numberOfResultsItems,
+    );
 
     return Promise.resolve(
       new ClearingRedeemFromByPartitionCommandResponse(
