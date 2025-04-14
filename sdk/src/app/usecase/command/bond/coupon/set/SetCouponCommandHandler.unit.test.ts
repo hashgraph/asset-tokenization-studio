@@ -211,7 +211,7 @@ import { SetCouponCommandHandler } from './SetCouponCommandHandler.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { SetCouponCommandFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
 import { createMock } from '@golevelup/ts-jest';
-import TransactionService from '../../../../../service/TransactionService.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import {
   CouponIdFixture,
@@ -221,8 +221,8 @@ import {
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../../service/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { EmptyResponse } from '../../../../../../app/usecase/command/security/error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../../../service/transaction/error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../core/error/InvalidResponse.js';
 
 describe('SetCouponCommandHandler', () => {
   let handler: SetCouponCommandHandler;

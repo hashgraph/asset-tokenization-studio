@@ -218,8 +218,8 @@ import AccountService from '../../../../../service/AccountService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../core/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../../../service/transaction/error/EmptyResponse.js';
 
 @CommandHandler(SetScheduledBalanceAdjustmentCommand)
 export class SetScheduledBalanceAdjustmentCommandHandler

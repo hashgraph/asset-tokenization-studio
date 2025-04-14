@@ -224,8 +224,8 @@ import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { EquityDetails } from '../../../../../domain/context/equity/EquityDetails.js';
 import ContractService from '../../../../service/ContractService.js';
 import AccountService from '../../../../service/AccountService.js';
-import { InvalidResponse } from '../../../../../port/out/mirror/error/InvalidResponse.js';
-import { EmptyResponse } from '../../security/error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../core/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../../service/transaction/error/EmptyResponse.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 
 @CommandHandler(CreateEquityCommand)

@@ -219,7 +219,7 @@ import { WalletNotSupported } from './error/WalletNotSupported.js';
 import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
 import { InvalidResponse } from '../../../core/error/InvalidResponse.js';
 import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter.js';
-import { EmptyResponse } from '../../../domain/context/security/error/operations/EmptyResponse.js';
+import { EmptyResponse } from './error/EmptyResponse.js';
 
 @singleton()
 export default class TransactionService extends Service {

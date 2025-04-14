@@ -214,8 +214,8 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../core/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../../../service/transaction/error/EmptyResponse.js';
 
 @CommandHandler(SetCouponCommand)
 export class SetCouponCommandHandler

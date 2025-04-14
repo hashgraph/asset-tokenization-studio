@@ -218,8 +218,8 @@ import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeA
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
-import { EmptyResponse } from '../../error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { InvalidResponse } from '../../../../../../core/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../../../service/transaction/error/EmptyResponse.js';
 
 @CommandHandler(ProtectedTransferAndLockByPartitionCommand)
 export class ProtectedTransferAndLockByPartitionCommandHandler

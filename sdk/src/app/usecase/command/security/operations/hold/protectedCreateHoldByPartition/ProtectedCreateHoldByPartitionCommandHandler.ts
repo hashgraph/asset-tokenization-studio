@@ -219,8 +219,8 @@ import {
 } from './ProtectedCreateHoldByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
 
 @CommandHandler(ProtectedCreateHoldByPartitionCommand)
 export class ProtectedCreateHoldByPartitionCommandHandler

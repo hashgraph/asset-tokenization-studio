@@ -218,8 +218,8 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService.js';
-import { EmptyResponse } from '../../error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { InvalidResponse } from '../../../../../../core/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../../../service/transaction/error/EmptyResponse.js';
 
 @CommandHandler(TransferAndLockCommand)
 export class TransferAndLockCommandHandler
