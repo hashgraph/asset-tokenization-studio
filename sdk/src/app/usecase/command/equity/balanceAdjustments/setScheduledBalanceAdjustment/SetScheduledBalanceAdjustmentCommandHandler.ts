@@ -217,7 +217,6 @@ import AccountService from '../../../../../service/AccountService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
-import { EmptyResponse } from '../../../security/error/EmptyResponse.js';
 
 @CommandHandler(SetScheduledBalanceAdjustmentCommand)
 export class SetScheduledBalanceAdjustmentCommandHandler
@@ -260,19 +259,14 @@ export class SetScheduledBalanceAdjustmentCommandHandler
       securityId,
     );
 
-    if (!res.id)
-      throw new EmptyResponse(SetScheduledBalanceAdjustmentCommandHandler.name);
-
-    const numberOfResultsItems = 2;
-    const position = 1;
     const balanceAdjustmentId =
-      await this.transactionService.getTransactionResult(
+      await this.transactionService.getTransactionResult({
         res,
-        res.response?.balanceAdjustmentID,
-        SetScheduledBalanceAdjustmentCommandHandler.name,
-        position,
-        numberOfResultsItems,
-      );
+        result: res.response?.balanceAdjustmentID,
+        className: SetScheduledBalanceAdjustmentCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
     return Promise.resolve(
       new SetScheduledBalanceAdjustmentCommandResponse(

@@ -240,15 +240,13 @@ export class SetVotingRightsCommandHandler
       address,
     );
 
-    const numberOfResultsItems = 2;
-    const position = 1;
-    const voteId = await this.transactionService.getTransactionResult(
+    const voteId = await this.transactionService.getTransactionResult({
       res,
-      res.response?.voteId,
-      SetVotingRightsCommandHandler.name,
-      position,
-      numberOfResultsItems,
-    );
+      result: res.response?.voteId,
+      className: SetVotingRightsCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new SetVotingRightsCommandResponse(parseInt(voteId, 16), res.id!),

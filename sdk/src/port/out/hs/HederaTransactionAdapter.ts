@@ -363,7 +363,8 @@ import {
   ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
-import { EmptyValue } from '../../in/request/error/EmptyValue.js';
+import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
+import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -429,10 +430,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'deployEquity';
     try {
       if (!securityInfo.regulationType) {
-        throw new EmptyValue('regulationType');
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new EmptyValue('regulationsubType');
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {
@@ -542,10 +543,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'deployBond';
     try {
       if (!securityInfo.regulationType) {
-        throw new EmptyValue('regulationType');
+        throw new MissingRegulationType();
       }
       if (!securityInfo.regulationsubType) {
-        throw new EmptyValue('regulationSubType');
+        throw new MissingRegulationSubType();
       }
 
       const rbacAdmin: Rbac = {

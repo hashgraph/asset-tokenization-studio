@@ -313,16 +313,14 @@ export class CreateEquityCommandHandler
     );
 
     try {
-      const numberOfResultsItems = 1;
-      const position = 0;
       const contractAddress =
-        await this.transactionService.getTransactionResult(
+        await this.transactionService.getTransactionResult({
           res,
-          res.response?.equityAddress,
-          CreateEquityCommandHandler.name,
-          position,
-          numberOfResultsItems,
-        );
+          result: res.response?.equityAddress,
+          className: CreateEquityCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
+        });
 
       const contractId =
         await this.mirrorNodeAdapter.getHederaIdfromContractAddress(

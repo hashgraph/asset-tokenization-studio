@@ -289,15 +289,13 @@ export class OperatorClearingRedeemByPartitionCommandHandler
       securityId,
     );
 
-    const numberOfResultsItems = 2;
-    const position = 1;
-    const clearingId = await this.transactionService.getTransactionResult(
+    const clearingId = await this.transactionService.getTransactionResult({
       res,
-      res.response?.clearingId,
-      OperatorClearingRedeemByPartitionCommandHandler.name,
-      position,
-      numberOfResultsItems,
-    );
+      result: res.response?.clearingId,
+      className: OperatorClearingRedeemByPartitionCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new OperatorClearingRedeemByPartitionCommandResponse(

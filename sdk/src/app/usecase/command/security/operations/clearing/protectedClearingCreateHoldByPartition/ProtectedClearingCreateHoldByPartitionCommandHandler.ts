@@ -303,15 +303,13 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
       securityId,
     );
 
-    const numberOfResultsItems = 2;
-    const position = 1;
-    const clearingId = await this.transactionService.getTransactionResult(
+    const clearingId = await this.transactionService.getTransactionResult({
       res,
-      res.response?.clearingId,
-      ProtectedClearingCreateHoldByPartitionCommandHandler.name,
-      position,
-      numberOfResultsItems,
-    );
+      result: res.response?.clearingId,
+      className: ProtectedClearingCreateHoldByPartitionCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new ProtectedClearingCreateHoldByPartitionCommandResponse(

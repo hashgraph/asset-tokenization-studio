@@ -301,15 +301,13 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
       signature,
     );
 
-    const numberOfResultsItems = 2;
-    const position = 1;
-    const lockId = await this.transactionService.getTransactionResult(
+    const lockId = await this.transactionService.getTransactionResult({
       res,
-      res.response?.lockId,
-      ProtectedTransferAndLockByPartitionCommandHandler.name,
-      position,
-      numberOfResultsItems,
-    );
+      result: res.response?.lockId,
+      className: ProtectedTransferAndLockByPartitionCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new ProtectedTransferAndLockByPartitionCommandResponse(

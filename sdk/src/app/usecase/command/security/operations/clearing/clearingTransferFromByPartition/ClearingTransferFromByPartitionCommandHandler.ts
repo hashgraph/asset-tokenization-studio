@@ -287,15 +287,13 @@ export class ClearingTransferFromByPartitionCommandHandler
       securityId,
     );
 
-    const numberOfResultsItems = 2;
-    const position = 1;
-    const clearingId = await this.transactionService.getTransactionResult(
+    const clearingId = await this.transactionService.getTransactionResult({
       res,
-      res.response?.clearingId,
-      ClearingTransferFromByPartitionCommandHandler.name,
-      position,
-      numberOfResultsItems,
-    );
+      result: res.response?.clearingId,
+      className: ClearingTransferFromByPartitionCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new ClearingTransferFromByPartitionCommandResponse(

@@ -364,14 +364,16 @@ describe('CreateBondCommandHandler', () => {
         expect(
           transactionServiceMock.getTransactionResult,
         ).toHaveBeenCalledWith(
-          {
-            id: transactionId,
-            response: { bondAddress: evmAddress.value },
-          },
-          evmAddress.value,
-          CreateBondCommandHandler.name,
-          0,
-          1,
+          expect.objectContaining({
+            res: {
+              id: transactionId,
+              response: { bondAddress: evmAddress.value },
+            },
+            result: evmAddress.value,
+            className: CreateBondCommandHandler.name,
+            position: 0,
+            numberOfResultsItems: 1,
+          }),
         );
       });
 

@@ -220,6 +220,7 @@ import TransactionResponse from '../../domain/context/transaction/TransactionRes
 import { InvalidResponse } from '../../port/out/mirror/error/InvalidResponse.js';
 import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter.js';
 import { EmptyResponse } from '../usecase/command/security/error/EmptyResponse.js';
+import { Response } from '../../domain/context/transaction/Response';
 
 @singleton()
 export default class TransactionService extends Service {
@@ -277,18 +278,23 @@ export default class TransactionService extends Service {
     }
   }
 
-  async getTransactionResult(
-    res: TransactionResponse,
-    result: any,
-    className: string,
-    position: number,
-    numberOfResultsItems: number,
-  ): Promise<string> {
+  async getTransactionResult({
+    res,
+    result,
+    className,
+    position,
+    numberOfResultsItems,
+  }: {
+    res: TransactionResponse;
+    result?: Response;
+    className: string;
+    position: number;
+    numberOfResultsItems: number;
+  }): Promise<string> {
     if (!res.id) throw new EmptyResponse(className);
-    let output: string;
 
     if (res.response && result) {
-      output = result;
+      return result;
     } else {
       const results = await this.mirrorNodeAdapter.getContractResults(
         res.id.toString(),
@@ -299,8 +305,7 @@ export default class TransactionService extends Service {
         throw new InvalidResponse(results);
       }
 
-      output = results[position];
+      return results[position];
     }
-    return output;
   }
 }

@@ -240,16 +240,13 @@ export class SetCouponCommandHandler
       address,
     );
 
-    const numberOfResultsItems = 2;
-    const position = 1;
-
-    const couponId = await this.transactionService.getTransactionResult(
+    const couponId = await this.transactionService.getTransactionResult({
       res,
-      res.response?.couponID,
-      SetCouponCommandHandler.name,
-      position,
-      numberOfResultsItems,
-    );
+      result: res.response?.couponID,
+      className: SetCouponCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new SetCouponCommandResponse(parseInt(couponId, 16), res.id!),

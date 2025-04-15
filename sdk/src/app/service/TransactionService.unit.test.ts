@@ -239,25 +239,25 @@ describe('TransactioNService', () => {
           id: undefined,
         };
         await expect(
-          service.getTransactionResult(
-            response,
-            undefined,
-            SetCouponCommandHandler.name,
+          service.getTransactionResult({
+            res: response,
+            result: undefined,
+            className: SetCouponCommandHandler.name,
             position,
             numberOfResultsItems,
-          ),
+          }),
         ).rejects.toThrow(EmptyResponse);
       });
       it('should throw an error when transaction response is empty', async () => {
         mirrorNodeAdapterMock.getContractResults.mockResolvedValue(null);
         await expect(
-          service.getTransactionResult(
-            transactionResponse,
-            undefined,
-            SetCouponCommandHandler.name,
+          service.getTransactionResult({
+            res: transactionResponse,
+            result: undefined,
+            className: SetCouponCommandHandler.name,
             position,
             numberOfResultsItems,
-          ),
+          }),
         ).rejects.toThrow(InvalidResponse);
       });
     });
@@ -265,30 +265,33 @@ describe('TransactioNService', () => {
     describe('success cases', () => {
       it('should retrieve transaction result from event data', async () => {
         await expect(
-          service.getTransactionResult(
-            transactionResponse,
+          service.getTransactionResult({
+            res: transactionResponse,
             result,
-            SetCouponCommandHandler.name,
+            className: SetCouponCommandHandler.name,
             position,
             numberOfResultsItems,
-          ),
+          }),
         ).resolves.toBe(result);
       });
       it('should retrieve transaction result from mirror node', async () => {
         const results = ['1', result];
         mirrorNodeAdapterMock.getContractResults.mockResolvedValue(results);
         await expect(
-          service.getTransactionResult(
-            transactionResponse,
-            undefined,
-            SetCouponCommandHandler.name,
+          service.getTransactionResult({
+            res: transactionResponse,
+            result: undefined,
+            className: SetCouponCommandHandler.name,
             position,
             numberOfResultsItems,
-          ),
+          }),
         ).resolves.toBe(results[position]);
         expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
           transactionResponse.id,
           numberOfResultsItems,
+        );
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledTimes(
+          1,
         );
       });
     });

@@ -296,14 +296,16 @@ describe('SetCouponCommandHandler', () => {
       command.address,
     );
     expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith(
-      {
-        id: transactionId,
-        response: { couponID: couponId },
-      },
-      couponId,
-      SetCouponCommandHandler.name,
-      1,
-      2,
+      expect.objectContaining({
+        res: {
+          id: transactionId,
+          response: { couponID: couponId },
+        },
+        result: couponId,
+        className: SetCouponCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      }),
     );
   }
 });

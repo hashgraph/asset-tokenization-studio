@@ -284,15 +284,13 @@ export class CreateHoldByPartitionCommandHandler
       securityId,
     );
 
-    const numberOfResultsItems = 2;
-    const position = 1;
-    const holdId = await this.transactionService.getTransactionResult(
+    const holdId = await this.transactionService.getTransactionResult({
       res,
-      res.response?.holdId,
-      CreateHoldByPartitionCommandHandler.name,
-      position,
-      numberOfResultsItems,
-    );
+      result: res.response?.holdId,
+      className: CreateHoldByPartitionCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new CreateHoldByPartitionCommandResponse(parseInt(holdId, 16), res.id!),

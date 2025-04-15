@@ -221,7 +221,6 @@ import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../service/ContractService.js';
-import { EmptyResponse } from '../../security/error/EmptyResponse.js';
 
 @CommandHandler(CreateBondCommand)
 export class CreateBondCommandHandler
@@ -309,20 +308,15 @@ export class CreateBondCommandHandler
       factory.toString(),
     );
 
-    if (!res.id) throw new EmptyResponse(CreateBondCommandHandler.name);
-
     try {
-      const numberOfResultsItems = 1;
-      const position = 0;
-
       const contractAddress =
-        await this.transactionService.getTransactionResult(
+        await this.transactionService.getTransactionResult({
           res,
-          res.response?.bondAddress,
-          CreateBondCommandHandler.name,
-          position,
-          numberOfResultsItems,
-        );
+          result: res.response?.bondAddress,
+          className: CreateBondCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
+        });
 
       const contractId =
         await this.mirrorNodeAdapter.getHederaIdfromContractAddress(

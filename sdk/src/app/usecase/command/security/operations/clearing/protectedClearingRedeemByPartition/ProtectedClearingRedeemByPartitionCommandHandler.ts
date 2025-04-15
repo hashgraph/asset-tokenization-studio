@@ -302,15 +302,13 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
       securityId,
     );
 
-    const numberOfResultsItems = 2;
-    const position = 1;
-    const clearingId = await this.transactionService.getTransactionResult(
+    const clearingId = await this.transactionService.getTransactionResult({
       res,
-      res.response?.clearingId,
-      ProtectedClearingRedeemByPartitionCommandHandler.name,
-      position,
-      numberOfResultsItems,
-    );
+      result: res.response?.clearingId,
+      className: ProtectedClearingRedeemByPartitionCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new ProtectedClearingRedeemByPartitionCommandResponse(

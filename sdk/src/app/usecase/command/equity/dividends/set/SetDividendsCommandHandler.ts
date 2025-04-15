@@ -241,15 +241,13 @@ export class SetDividendsCommandHandler
       address,
     );
 
-    const numberOfResultsItems = 2;
-    const position = 1;
-    const dividendId = await this.transactionService.getTransactionResult(
+    const dividendId = await this.transactionService.getTransactionResult({
       res,
-      res.response?.dividendID,
-      SetDividendsCommandHandler.name,
-      position,
-      numberOfResultsItems,
-    );
+      result: res.response?.dividendID,
+      className: SetDividendsCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new SetDividendsCommandResponse(parseInt(dividendId, 16), res.id!),
