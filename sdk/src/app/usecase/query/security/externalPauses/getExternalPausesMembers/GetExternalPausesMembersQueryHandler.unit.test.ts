@@ -203,172 +203,91 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from './Common';
-import Injectable from '../../core/Injectable';
-import { CommandBus } from '../../core/command/CommandBus';
+import { createMock } from '@golevelup/ts-jest';
 import {
-  AddExternalPauseRequest,
-  RemoveExternalPauseRequest,
-  UpdateExternalPausesRequest,
-  GetExternalPausesCountRequest,
-  GetExternalPausesMembersRequest,
-  IsExternalPauseRequest,
-  IsPausedMockRequest,
-  SetPausedMockRequest,
-} from './request';
-import { UpdateExternalPausesCommand } from '../../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
-import { SetPausedMockCommand } from '../../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommand.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import { IsPausedMockQuery } from '../../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery.js';
-import { AddExternalPauseCommand } from '../../app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommand.js';
-import { RemoveExternalPauseCommand } from '../../app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand.js';
-import { IsExternalPauseQuery } from '../../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery.js';
-import { GetExternalPausesCountQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery.js';
-import { GetExternalPausesMembersQuery } from '../../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery.js';
-import { CreateExternalPauseMockCommand } from '../../app/usecase/command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommand.js';
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import AccountService from '../../../../../service/AccountService.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { GetExternalPausesMembersQueryHandler } from './GetExternalPausesMembersQueryHandler.js';
+import {
+  GetExternalPausesMembersQuery,
+  GetExternalPausesMembersQueryResponse,
+} from './GetExternalPausesMembersQuery.js';
+import { GetExternalPausesMembersQueryFixture } from '../../../../../../../__tests__/fixtures/externalPauses/ExternalPausesFixture.js';
 
-interface IExternalPausesInPort {
-  updateExternalPauses(
-    request: UpdateExternalPausesRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  addExternalPause(
-    request: AddExternalPauseRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  removeExternalPause(
-    request: RemoveExternalPauseRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  isExternalPause(request: IsExternalPauseRequest): Promise<boolean>;
-  getExternalPausesCount(
-    request: GetExternalPausesCountRequest,
-  ): Promise<number>;
-  getExternalPausesMembers(
-    request: GetExternalPausesMembersRequest,
-  ): Promise<string[]>;
-}
+describe('GetExternalPausesMembersQueryHandler', () => {
+  let handler: GetExternalPausesMembersQueryHandler;
+  let query: GetExternalPausesMembersQuery;
 
-interface IExternalPausesMocksInPort {
-  setPausedMock(
-    request: SetPausedMockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  isPausedMock(request: IsPausedMockRequest): Promise<boolean>;
-  createMock(): Promise<string>;
-}
+  const securityServiceMock = createMock<SecurityService>();
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
-class ExternalPausesInPort
-  implements IExternalPausesInPort, IExternalPausesMocksInPort
-{
-  constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-  ) {}
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const security = new Security(SecurityPropsFixture.create());
 
-  @LogError
-  async updateExternalPauses(
-    request: UpdateExternalPausesRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalPausesAddresses, actives } = request;
-    handleValidation('UpdateExternalPausesRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateExternalPausesCommand(
-        securityId,
-        externalPausesAddresses,
-        actives,
-      ),
+  beforeEach(() => {
+    handler = new GetExternalPausesMembersQueryHandler(
+      securityServiceMock,
+      accountServiceMock,
+      contractServiceMock,
+      queryAdapterServiceMock,
     );
-  }
+    query = GetExternalPausesMembersQueryFixture.create();
+  });
 
-  @LogError
-  async addExternalPause(
-    request: AddExternalPauseRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalPauseAddress } = request;
-    handleValidation('AddExternalPauseRequest', request);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    return await this.commandBus.execute(
-      new AddExternalPauseCommand(securityId, externalPauseAddress),
-    );
-  }
+  describe('execute', () => {
+    it('should successfully get external pauses members', async () => {
+      securityServiceMock.get.mockResolvedValueOnce(security);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      queryAdapterServiceMock.getExternalPausesMembers.mockResolvedValue([
+        evmAddress.toString(),
+      ]);
+      accountServiceMock.getAccountInfo.mockResolvedValueOnce(account);
 
-  @LogError
-  async removeExternalPause(
-    request: RemoveExternalPauseRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalPauseAddress } = request;
-    handleValidation('RemoveExternalPauseRequest', request);
+      const result = await handler.execute(query);
 
-    return await this.commandBus.execute(
-      new RemoveExternalPauseCommand(securityId, externalPauseAddress),
-    );
-  }
+      expect(result).toBeInstanceOf(GetExternalPausesMembersQueryResponse);
+      expect(result.payload).toStrictEqual([account.id.toString()]);
 
-  @LogError
-  async isExternalPause(request: IsExternalPauseRequest): Promise<boolean> {
-    const { securityId, externalPauseAddress } = request;
-    handleValidation('IsExternalPauseRequest', request);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledTimes(1);
+      expect(
+        queryAdapterServiceMock.getExternalPausesMembers,
+      ).toHaveBeenCalledTimes(1);
 
-    return (
-      await this.queryBus.execute(
-        new IsExternalPauseQuery(securityId, externalPauseAddress),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getExternalPausesCount(
-    request: GetExternalPausesCountRequest,
-  ): Promise<number> {
-    const { securityId } = request;
-    handleValidation('GetExternalPausesCountRequest', request);
-
-    return (
-      await this.queryBus.execute(new GetExternalPausesCountQuery(securityId))
-    ).payload;
-  }
-
-  @LogError
-  async getExternalPausesMembers(
-    request: GetExternalPausesMembersRequest,
-  ): Promise<string[]> {
-    const { securityId, start, end } = request;
-    handleValidation('GetExternalPausesMembersRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetExternalPausesMembersQuery(securityId, start, end),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async setPausedMock(
-    request: SetPausedMockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { contractId, paused } = request;
-    handleValidation('SetPausedMockRequest', request);
-
-    return await this.commandBus.execute(
-      new SetPausedMockCommand(contractId, paused),
-    );
-  }
-
-  @LogError
-  async isPausedMock(request: IsPausedMockRequest): Promise<boolean> {
-    const { contractId } = request;
-    handleValidation('IsPausedMockRequest', request);
-
-    return (await this.queryBus.execute(new IsPausedMockQuery(contractId)))
-      .payload;
-  }
-
-  @LogError
-  async createMock(): Promise<string> {
-    return (await this.commandBus.execute(new CreateExternalPauseMockCommand()))
-      .payload;
-  }
-}
-
-const ExternalPausesManagement = new ExternalPausesInPort();
-export default ExternalPausesManagement;
+      expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+      expect(
+        queryAdapterServiceMock.getExternalPausesMembers,
+      ).toHaveBeenCalledWith(evmAddress, query.start, query.end);
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(
+        evmAddress.toString(),
+      );
+    });
+  });
+});

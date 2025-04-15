@@ -203,58 +203,75 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import { createMock } from '@golevelup/ts-jest';
+import { EvmAddressPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
 import {
-  CreateExternalPauseMockCommand,
-  CreateExternalPauseMockCommandResponse,
-} from './CreateExternalPauseMockCommand';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../../app/service/TransactionService';
-import { EmptyResponse } from '../../../error/EmptyResponse';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse';
+  GetExternalPausesCountQuery,
+  GetExternalPausesCountQueryResponse,
+} from './GetExternalPausesCountQuery.js';
+import { GetExternalPausesCountQueryHandler } from './GetExternalPausesCountQueryHandler.js';
+import { GetExternalPausesCountQueryFixture } from '../../../../../../../__tests__/fixtures/externalPauses/ExternalPausesFixture.js';
 
-@CommandHandler(CreateExternalPauseMockCommand)
-export class CreateExternalPauseMockCommandHandler
-  implements ICommandHandler<CreateExternalPauseMockCommand>
-{
-  constructor(
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-  ) {}
+describe('GetExternalPausesCountQueryHandler', () => {
+  let handler: GetExternalPausesCountQueryHandler;
+  let query: GetExternalPausesCountQuery;
 
-  async execute(): Promise<CreateExternalPauseMockCommandResponse> {
-    const handler = this.transactionService.getHandler();
+  const securityServiceMock = createMock<SecurityService>();
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
 
-    const res = await handler.createExternalPauseMock();
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const security = new Security(SecurityPropsFixture.create());
 
-    let contractAddress: string;
+  beforeEach(() => {
+    handler = new GetExternalPausesCountQueryHandler(
+      securityServiceMock,
+      contractServiceMock,
+      queryAdapterServiceMock,
+    );
+    query = GetExternalPausesCountQueryFixture.create();
+  });
 
-    if (typeof res === 'string') {
-      contractAddress = res;
-    } else {
-      if (!res.id)
-        throw new EmptyResponse(CreateExternalPauseMockCommandHandler.name);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        1,
-        true,
+  describe('execute', () => {
+    it('should successfully get external pauses count', async () => {
+      securityServiceMock.get.mockResolvedValueOnce(security);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
       );
 
-      if (!results || results.length !== 1) {
-        throw new InvalidResponse(results);
-      }
-      contractAddress = results[0];
-    }
+      queryAdapterServiceMock.getExternalPausesCount.mockResolvedValue(1);
 
-    const address = (
-      await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-    ).id.toString();
+      const result = await handler.execute(query);
 
-    return Promise.resolve(new CreateExternalPauseMockCommandResponse(address));
-  }
-}
+      expect(result).toBeInstanceOf(GetExternalPausesCountQueryResponse);
+      expect(result.payload).toBe(1);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
+      expect(
+        queryAdapterServiceMock.getExternalPausesCount,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+
+      expect(
+        queryAdapterServiceMock.getExternalPausesCount,
+      ).toHaveBeenCalledWith(evmAddress);
+    });
+  });
+});

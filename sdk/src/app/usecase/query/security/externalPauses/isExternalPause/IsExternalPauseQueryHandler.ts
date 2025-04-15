@@ -208,13 +208,11 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../../service/SecurityService.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import {
   IsExternalPauseQuery,
   IsExternalPauseQueryResponse,
 } from './IsExternalPauseQuery.js';
+import ContractService from '../../../../../../app/service/ContractService.js';
 
 @QueryHandler(IsExternalPauseQuery)
 export class IsExternalPauseQueryHandler
@@ -223,8 +221,8 @@ export class IsExternalPauseQueryHandler
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
   ) {}
@@ -233,21 +231,13 @@ export class IsExternalPauseQueryHandler
     query: IsExternalPauseQuery,
   ): Promise<IsExternalPauseQueryResponse> {
     const { securityId, externalPauseAddress } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
+    await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+    const securityEvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
 
-    const externalPauseEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(externalPauseAddress)
-        ? (await this.mirrorNodeAdapter.getContractInfo(externalPauseAddress))
-            .evmAddress
-        : externalPauseAddress.toString(),
-    );
+    const externalPauseEvmAddress =
+      await this.contractService.getContractEvmAddress(externalPauseAddress);
 
     const res = await this.queryAdapter.isExternalPause(
       securityEvmAddress,

@@ -212,13 +212,9 @@ import {
 } from './AddExternalPauseCommand';
 import TransactionService from '../../../../../service/TransactionService';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { SecurityPaused } from '../../error/SecurityPaused';
+import ContractService from '../../../../../../app/service/ContractService';
+import ValidationService from '../../../../../../app/service/ValidationService';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import { NotGrantedRole } from '../../error/NotGrantedRole';
 
 @CommandHandler(AddExternalPauseCommand)
 export class AddExternalPauseCommandHandler
@@ -229,10 +225,10 @@ export class AddExternalPauseCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -242,33 +238,19 @@ export class AddExternalPauseCommandHandler
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
+    const securityEvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkRole(
+      SecurityRole._PAUSE_MANAGER_ROLE,
+      account.id.toString(),
+      securityId,
     );
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._PAUSE_MANAGER_ROLE,
-      ))
-    ) {
-      throw new NotGrantedRole(SecurityRole._PAUSE_MANAGER_ROLE);
-    }
-
-    const externalPausesEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(externalPauseAddress)
-        ? (await this.mirrorNodeAdapter.getContractInfo(externalPauseAddress))
-            .evmAddress
-        : externalPauseAddress.toString(),
-    );
+    const externalPausesEvmAddress =
+      await this.contractService.getContractEvmAddress(externalPauseAddress);
 
     const res = await handler.addExternalPause(
       securityEvmAddress,
