@@ -257,7 +257,7 @@ import { NotIssuable } from '../../domain/context/security/error/operations/NotI
 import { _PARTITION_ID_1 } from '../../core/Constants.js';
 import { Terminal3Vc } from '../../domain/context/kyc/Terminal3.js';
 import { SignedCredential } from '@terminal3/vc_core';
-import { InvalidVcHolder } from '../usecase/command/security/error/InvalidVcHolder.js';
+import { InvalidVcHolder } from '../../domain/context/security/error/operations/InvalidVcHolder.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress';
 import { GetTotalSupplyByPartitionQuery } from '../usecase/query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery.js';
 import { BigNumber } from 'ethers';

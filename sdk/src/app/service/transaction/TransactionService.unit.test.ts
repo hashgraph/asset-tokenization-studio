@@ -203,15 +203,15 @@
 
 */
 
-import Injectable from '../../core/Injectable';
+import Injectable from '../../../core/Injectable';
 import { createMock } from '@golevelup/ts-jest';
-import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter';
+import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter';
 import TransactionService from './TransactionService';
-import { SetCouponCommandHandler } from '../usecase/command/bond/coupon/set/SetCouponCommandHandler';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse';
-import { EmptyResponse } from '../usecase/command/security/error/EmptyResponse';
-import { TransactionResponseFixture } from '../../../__tests__/fixtures/shared/DataFixture';
-import { InvalidResponse } from '../../port/out/mirror/error/InvalidResponse';
+import { SetCouponCommandHandler } from '../../usecase/command/bond/coupon/set/SetCouponCommandHandler';
+import TransactionResponse from '../../../domain/context/transaction/TransactionResponse';
+import { EmptyResponse } from './error/EmptyResponse';
+import { TransactionResponseFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
+import { InvalidResponse } from '../../../core/error/InvalidResponse';
 import { faker } from '@faker-js/faker/.';
 
 describe('TransactioNService', () => {

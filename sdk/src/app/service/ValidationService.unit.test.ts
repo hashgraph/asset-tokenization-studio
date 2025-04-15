@@ -253,7 +253,7 @@ import { SecurityControlListType } from '../../domain/context/security/SecurityC
 import { GetControlListTypeQuery } from '../../app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery';
 import { GetControlListCountQuery } from '../../app/usecase/query/security/controlList/getControlListCount/GetControlListCountQuery';
 import { GetControlListMembersQuery } from '../../app/usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery';
-import { AccountNotInWhiteList } from '../../app/usecase/command/security/error/AccountNotInWhiteList';
+import { AccountNotInWhiteList } from '../../domain/context/security/error/operations/AccountNotInWhiteList';
 import { GetKycStatusForQuery } from '../../app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
 import { IsClearingActivatedQuery } from '../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
 import { IsOperatorQuery } from '../../app/usecase/query/security/operator/isOperator/IsOperatorQuery';
@@ -262,11 +262,11 @@ import { HasRoleQuery } from '../../app/usecase/query/security/roles/hasRole/Has
 import { IsPausedQuery } from '../../app/usecase/query/security/isPaused/IsPausedQuery';
 import { SecurityUnPaused } from '../../domain/context/security/error/operations/SecurityUnPaused';
 import { _PARTITION_ID_1 } from '../../core/Constants';
-import { NotAllowedInMultiPartition } from '../../app/usecase/command/security/error/NotAllowedInMultiPartition';
-import { OnlyDefaultPartitionAllowed } from '../../app/usecase/command/security/error/OnlyDefaultPartitionAllowed';
-import { NotIssuable } from '../../app/usecase/command/security/error/NotIssuable';
+import { NotAllowedInMultiPartition } from '../../domain/context/security/error/operations/NotAllowedInMultiPartition';
+import { OnlyDefaultPartitionAllowed } from '../../domain/context/security/error/operations/OnlyDefaultPartitionAllowed';
+import { NotIssuable } from '../../domain/context/security/error/operations/NotIssuable';
 import { Terminal3Vc } from '../../domain/context/kyc/Terminal3';
-import { InvalidVcHolder } from '../usecase/command/security/error/InvalidVcHolder';
+import { InvalidVcHolder } from '../../domain/context/security/error/operations/InvalidVcHolder';
 import { SignedCredential } from '@terminal3/vc_core';
 import EvmAddress from '../../domain/context/contract/EvmAddress';
 import { GetBondDetailsQuery } from '../../app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery';
