@@ -124,7 +124,7 @@ export const KYC = () => {
         return <Box>{formattedDate}</Box>;
       },
     }),
-    columnsHelper.accessor("VCid", {
+    columnsHelper.accessor("vcId", {
       header: tTable("fields.vcId"),
       enableSorting: false,
     }),
