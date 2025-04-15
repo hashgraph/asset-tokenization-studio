@@ -211,7 +211,6 @@ import TransactionService from '../../../../../../service/TransactionService.js'
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   ProtectedCreateHoldByPartitionCommand,
@@ -219,8 +218,6 @@ import {
 } from './ProtectedCreateHoldByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../error/EmptyResponse.js';
 
 @CommandHandler(ProtectedCreateHoldByPartitionCommand)
 export class ProtectedCreateHoldByPartitionCommandHandler
@@ -237,8 +234,6 @@ export class ProtectedCreateHoldByPartitionCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
   ) {}
@@ -305,30 +300,13 @@ export class ProtectedCreateHoldByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id)
-      throw new EmptyResponse(
-        ProtectedCreateHoldByPartitionCommandHandler.name,
-      );
-
-    let holdId: string;
-
-    if (res.response && res.response.holdId) {
-      holdId = res.response.holdId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      holdId = results[1];
-    }
+    const holdId = await this.transactionService.getTransactionResult({
+      res,
+      result: res.response?.holdId,
+      className: ProtectedCreateHoldByPartitionCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new ProtectedCreateHoldByPartitionCommandResponse(

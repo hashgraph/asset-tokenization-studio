@@ -203,78 +203,94 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
-import SecurityService from '../../../../../service/SecurityService.js';
-import {
-  TransferAndLockCommand,
-  TransferAndLockCommandResponse,
-} from './TransferAndLockCommand.js';
-import TransactionService from '../../../../../service/TransactionService.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
+import Injectable from '../../core/Injectable';
+import { createMock } from '@golevelup/ts-jest';
+import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter';
+import TransactionService from './TransactionService';
+import { SetCouponCommandHandler } from '../usecase/command/bond/coupon/set/SetCouponCommandHandler';
+import TransactionResponse from '../../domain/context/transaction/TransactionResponse';
+import { EmptyResponse } from '../usecase/command/security/error/EmptyResponse';
+import { TransactionResponseFixture } from '../../../__tests__/fixtures/shared/DataFixture';
+import { InvalidResponse } from '../../port/out/mirror/error/InvalidResponse';
+import { faker } from '@faker-js/faker/.';
 
-@CommandHandler(TransferAndLockCommand)
-export class TransferAndLockCommandHandler
-  implements ICommandHandler<TransferAndLockCommand>
-{
-  constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+describe('TransactioNService', () => {
+  let service: TransactionService;
+  const position = 1;
+  const numberOfResultsItems = 2;
 
-  async execute(
-    command: TransferAndLockCommand,
-  ): Promise<TransferAndLockCommandResponse> {
-    const { securityId, targetId, amount, expirationDate } = command;
-    const handler = this.transactionService.getHandler();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+  const transactionResponse = TransactionResponseFixture.create();
+  const result = faker.number.int({ min: 1, max: 999 }).toString();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+  beforeEach(() => {
+    jest.spyOn(Injectable, 'resolve').mockReturnValue(mirrorNodeAdapterMock);
+    service = new TransactionService();
+  });
 
-    const security = await this.securityService.get(securityId);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    await this.validationService.checkDecimals(security, amount);
-
-    await this.validationService.checkCanTransfer(securityId, targetId, amount);
-
-    const amountBd: BigDecimal = BigDecimal.fromString(
-      amount,
-      security.decimals,
-    );
-
-    const res = await handler.transferAndLock(
-      securityEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      BigDecimal.fromString(expirationDate),
-      securityId,
-    );
-
-    const lockId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.lockId,
-      className: TransferAndLockCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
+  describe('getTransactionResult', () => {
+    describe('error cases', () => {
+      it('should throw an error when transaction response id is missing', async () => {
+        const response: TransactionResponse = {
+          id: undefined,
+        };
+        await expect(
+          service.getTransactionResult({
+            res: response,
+            className: SetCouponCommandHandler.name,
+            position,
+            numberOfResultsItems,
+          }),
+        ).rejects.toThrow(EmptyResponse);
+      });
+      it('should throw an error when transaction response is empty', async () => {
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue(null);
+        await expect(
+          service.getTransactionResult({
+            res: transactionResponse,
+            className: SetCouponCommandHandler.name,
+            position,
+            numberOfResultsItems,
+          }),
+        ).rejects.toThrow(InvalidResponse);
+      });
     });
 
-    return Promise.resolve(
-      new TransferAndLockCommandResponse(parseInt(lockId, 16), res.id!),
-    );
-  }
-}
+    describe('success cases', () => {
+      it('should retrieve transaction result from event data', async () => {
+        await expect(
+          service.getTransactionResult({
+            res: transactionResponse,
+            result,
+            className: SetCouponCommandHandler.name,
+            position,
+            numberOfResultsItems,
+          }),
+        ).resolves.toBe(result);
+      });
+      it('should retrieve transaction result from mirror node', async () => {
+        const results = ['1', result];
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue(results);
+        await expect(
+          service.getTransactionResult({
+            res: transactionResponse,
+            className: SetCouponCommandHandler.name,
+            position,
+            numberOfResultsItems,
+          }),
+        ).resolves.toBe(results[position]);
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
+          transactionResponse.id,
+          numberOfResultsItems,
+        );
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledTimes(
+          1,
+        );
+      });
+    });
+  });
+});

@@ -212,34 +212,27 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { SetCouponCommandFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
 import { createMock } from '@golevelup/ts-jest';
 import TransactionService from '../../../../../service/TransactionService.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import {
   CouponIdFixture,
   EvmAddressPropsFixture,
-  GetContractInvalidStringFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../../service/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { EmptyResponse } from '../../../../../../app/usecase/command/security/error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../port/out/mirror/error/InvalidResponse.js';
 
 describe('SetCouponCommandHandler', () => {
   let handler: SetCouponCommandHandler;
   let command: SetCouponCommand;
   const transactionServiceMock = createMock<TransactionService>();
   const contractServiceMock = createMock<ContractService>();
-  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const transactionId = TransactionIdFixture.create().id;
   const couponId = CouponIdFixture.create().id;
-  const getResultInvalid = GetContractInvalidStringFixture.create().value;
 
   beforeEach(() => {
     handler = new SetCouponCommandHandler(
       transactionServiceMock,
-      mirrorNodeAdapterMock,
       contractServiceMock,
     );
     command = SetCouponCommandFixture.create();
@@ -250,34 +243,11 @@ describe('SetCouponCommandHandler', () => {
   });
 
   describe('execute', () => {
-    describe('error cases', () => {
-      it('throws error when transaction response id is missing', async () => {
-        setupContractEvmAddressMock();
-        transactionServiceMock
-          .getHandler()
-          .setCoupon.mockResolvedValue({ id: undefined });
-
-        await expect(handler.execute(command)).rejects.toThrow(EmptyResponse);
-      });
-
-      it('throws error when mirror node returns invalid results', async () => {
-        setupContractEvmAddressMock();
-        transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
-          id: transactionId,
-          response: null,
-        });
-        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
-          getResultInvalid,
-        ]);
-
-        await expect(handler.execute(command)).rejects.toThrow(InvalidResponse);
-      });
-    });
-
     describe('success cases', () => {
-      it('successfully sets coupon with couponID in response', async () => {
+      it('successfully sets coupon', async () => {
         setupContractEvmAddressMock();
         setupSuccessfulTransactionMock();
+        setupSuccesfulTransactionResultMock();
 
         const result = await handler.execute(command);
 
@@ -286,26 +256,9 @@ describe('SetCouponCommandHandler', () => {
         expect(
           transactionServiceMock.getHandler().setCoupon,
         ).toHaveBeenCalledTimes(1);
-      });
-
-      it('recovers coupon ID from mirror node when not in response', async () => {
-        setupContractEvmAddressMock();
-        transactionServiceMock.getHandler().setCoupon.mockResolvedValue({
-          id: transactionId,
-          response: null,
-        });
-        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
-          getResultInvalid,
-          couponId,
-        ]);
-
-        const result = await handler.execute(command);
-
-        expectSuccessfulResponse(result);
-        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
-          transactionId,
-          2,
-        );
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -319,6 +272,10 @@ describe('SetCouponCommandHandler', () => {
       id: transactionId,
       response: { couponID: couponId },
     });
+  }
+
+  function setupSuccesfulTransactionResultMock(): void {
+    transactionServiceMock.getTransactionResult.mockResolvedValue(couponId);
   }
 
   function expectSuccessfulResponse(result: SetCouponCommandResponse): void {
@@ -337,6 +294,18 @@ describe('SetCouponCommandHandler', () => {
       BigDecimal.fromString(command.executionDate),
       BigDecimal.fromString(command.rate),
       command.address,
+    );
+    expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        res: {
+          id: transactionId,
+          response: { couponID: couponId },
+        },
+        result: couponId,
+        className: SetCouponCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      }),
     );
   }
 });

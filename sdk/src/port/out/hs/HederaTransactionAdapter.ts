@@ -363,8 +363,8 @@ import {
   ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
-import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
 import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
+import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;

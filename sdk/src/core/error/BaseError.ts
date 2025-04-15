@@ -234,12 +234,8 @@ export enum ErrorCode {
   InvalidClearingOperationType = '10032',
   InvalidClearingOperationTypeNumber = '10033',
   InvalidVcFormat = '10034',
-  MissingVcData = '10035',
   InvalidVcDates = '10036',
   InvalidTimeUnits = '10037',
-  MissingRegulationSubType = '10038',
-  MissingRegulationType = '10039',
-  InvalidOperation = '10040',
 
   // Error codes for Logic Errors (Prefix: 2XXXX)
   AccountAlreadyInControlList = '20013',

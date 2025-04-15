@@ -205,8 +205,8 @@
 
 import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export class MissingVcData extends BaseError {
-  constructor(missingField: string) {
-    super(ErrorCode.MissingVcData, `VC must include a valid ${missingField}`);
+export class MissingVcHolder extends BaseError {
+  constructor() {
+    super(ErrorCode.EmptyValue, `VC holder field is missing`);
   }
 }

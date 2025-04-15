@@ -205,8 +205,8 @@
 
 import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export default class InvalidOperation extends BaseError {
-  constructor(val: number) {
-    super(ErrorCode.InvalidOperation, `Operation type ${val} is not valid`);
+export class MissingVcIssuer extends BaseError {
+  constructor() {
+    super(ErrorCode.EmptyValue, `VC issuer field is missing`);
   }
 }
