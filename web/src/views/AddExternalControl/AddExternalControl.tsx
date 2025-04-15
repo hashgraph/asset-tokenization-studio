@@ -3,7 +3,13 @@ import { History } from "../../components/History";
 import { RouteName } from "../../router/RouteName";
 import { useTranslation } from "react-i18next";
 import { RoutePath } from "../../router/RoutePath";
-import { Button, InputController, Text, useToast } from "io-bricks-ui";
+import {
+  Button,
+  InputController,
+  SelectController,
+  Text,
+  useToast,
+} from "io-bricks-ui";
 import { isHederaValidAddress, required } from "../../utils/rules";
 import { useForm } from "react-hook-form";
 import { RouterManager } from "../../router/RouterManager";
@@ -12,6 +18,7 @@ import { useExternalControlStore } from "../../store/externalControlStore";
 
 export interface FormValues {
   externalControlId: string;
+  type: "whitelist" | "blacklist";
 }
 
 export const AddExternalControl = () => {
@@ -21,9 +28,6 @@ export const AddExternalControl = () => {
 
   const { t: tAdd } = useTranslation("externalControl", {
     keyPrefix: "add",
-  });
-  const { t: tMessages } = useTranslation("externalControl", {
-    keyPrefix: "messages",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,37 +45,20 @@ export const AddExternalControl = () => {
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
 
-    try {
-      const result = {
-        error: undefined,
-        data: undefined,
-      };
+    addExternalControl({
+      address: values.externalControlId,
+      type: values.type,
+    });
 
-      if (result.error) {
-        throw new Error();
-      }
+    toast.show({
+      status: "success",
+      title: tAdd("messages.addExternalControl.success"),
+      description: tAdd("messages.addExternalControl.descriptionSuccess"),
+    });
 
-      if (result.data !== undefined) {
-        addExternalControl({
-          address: values.externalControlId,
-          type: result.data,
-        });
-        toast.show({
-          status: "success",
-          title: tMessages("addExternalControl.success"),
-          description: tMessages("addExternalControl.descriptionSuccess"),
-        });
-      }
-    } catch (error) {
-      toast.show({
-        status: "error",
-        title: tMessages("addExternalControl.error"),
-        description: tMessages("addExternalControl.descriptionFailed"),
-      });
-    } finally {
-      setIsSubmitting(false);
-      RouterManager.to(RouteName.ExternalControlList);
-    }
+    setIsSubmitting(false);
+
+    RouterManager.to(RouteName.ExternalControlList);
   };
 
   return (
@@ -112,6 +99,29 @@ export const AddExternalControl = () => {
               rules={{
                 required,
                 validate: { isHederaValidAddress },
+              }}
+            />
+          </VStack>
+          <Text textStyle="BodyTextRegularSM" mt={4}>
+            {tAdd("input.type.label")}
+          </Text>
+          <VStack w="450px" alignItems="flex-start">
+            <SelectController
+              id="type"
+              control={control}
+              placeholder={tAdd("input.type.placeholder")}
+              options={[
+                {
+                  label: "Whitelist",
+                  value: "whitelist",
+                },
+                {
+                  label: "Blacklist",
+                  value: "blacklist",
+                },
+              ]}
+              rules={{
+                required,
               }}
             />
           </VStack>

@@ -210,7 +210,7 @@ import { AddExternalControlButton } from "./AddExternalControlButton";
 import { CreateNewExternalControlButton } from "./CreateNewExternalControlButton";
 
 export const Header = () => {
-  const { t } = useTranslation("externalControlList", { keyPrefix: "header" });
+  const { t } = useTranslation("externalControl", { keyPrefix: "list.header" });
 
   return (
     <HStack gap={5} justifyContent={"space-between"}>

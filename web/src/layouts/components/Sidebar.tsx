@@ -235,7 +235,7 @@ export const Sidebar = () => {
     {
       label: t(RouteName.ExternalControlList),
       icon: HandPalm,
-      isActive: location.pathname === RoutePath.EXTERNAL_CONTROL_LIST,
+      isActive: location.pathname.includes(RoutePath.EXTERNAL_CONTROL_LIST),
       to: RouteName.ExternalControlList,
     },
   ];

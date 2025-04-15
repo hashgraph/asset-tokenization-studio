@@ -253,6 +253,10 @@ export default {
         label: "External Control ID*",
         placeholder: "0.0.12345",
       },
+      type: {
+        label: "Type*",
+        placeholder: "Select external control type",
+      },
     },
     create: "Add external control",
     cancel: "Cancel",

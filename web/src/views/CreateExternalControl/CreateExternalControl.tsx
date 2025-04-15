@@ -112,7 +112,7 @@ export const CreateExternalControl = () => {
                 value: "blacklist",
               },
             ]}
-            rules={required}
+            rules={{ required }}
           />
           <HStack pt={20} justifyContent={"flex-end"} w={"full"}>
             <Button
