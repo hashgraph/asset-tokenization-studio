@@ -203,58 +203,18 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/AccountService';
-import { RevokeKYCCommand, RevokeKYCCommandResponse } from './RevokeKYCCommand';
-import TransactionService from '../../../../../service/TransactionService';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import ValidationService from '../../../../../service/ValidationService';
-import ContractService from '../../../../../service/ContractService';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 
-@CommandHandler(RevokeKYCCommand)
-export class RevokeKYCCommandHandler
-  implements ICommandHandler<RevokeKYCCommand>
-{
+export class GetKycAccountsCountQueryResponse implements QueryResponse {
+  constructor(public readonly payload: number) {}
+}
+
+export class GetKycAccountsCountQuery extends Query<GetKycAccountsCountQueryResponse> {
   constructor(
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(ContractService)
-    public readonly contractService: ContractService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-  ) {}
-
-  async execute(command: RevokeKYCCommand): Promise<RevokeKYCCommandResponse> {
-    const { securityId, targetId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkRole(
-      SecurityRole._KYC_ROLE,
-      account.id.toString(),
-      securityId,
-    );
-
-    const res = await handler.revokeKYC(
-      securityEvmAddress,
-      targetEvmAddress,
-      securityId,
-    );
-
-    return Promise.resolve(
-      new RevokeKYCCommandResponse(res.error === undefined, res.id!),
-    );
+    public readonly securityId: string,
+    public readonly kycStatus: number,
+  ) {
+    super();
   }
 }

@@ -203,13 +203,18 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 
-export class InvalidVCHolder extends BaseError {
-  constructor() {
-    super(
-      ErrorCode.InvalidVCHolder,
-      `The VC holder does not match target account`,
-    );
+export class GetKycStatusForQueryResponse implements QueryResponse {
+  constructor(public readonly payload: number) {}
+}
+
+export class GetKycStatusForQuery extends Query<GetKycStatusForQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly targetId: string,
+  ) {
+    super();
   }
 }

@@ -295,17 +295,16 @@ export default class TransactionService extends Service {
 
     if (res.response && result) {
       return result;
-    } else {
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      return results[position];
     }
+    const results = await this.mirrorNodeAdapter.getContractResults(
+      res.id.toString(),
+      numberOfResultsItems,
+    );
+
+    if (!results || results.length !== numberOfResultsItems) {
+      throw new InvalidResponse(results);
+    }
+
+    return results[position];
   }
 }

@@ -203,36 +203,21 @@
 
 */
 
-import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../FormatValidation.js';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { KycAccountData } from '../../../../../../domain/context/kyc/KycAccountData.js';
 
-export default class GetKYCAccountsDataRequest extends ValidatedRequest<GetKYCAccountsDataRequest> {
-  securityId: string;
-  kycStatus: number;
-  start: number;
-  end: number;
+export class GetKycAccountsDataQueryResponse implements QueryResponse {
+  constructor(public readonly payload: KycAccountData[]) {}
+}
 
-  constructor({
-    securityId,
-    kycStatus,
-    start,
-    end,
-  }: {
-    securityId: string;
-    kycStatus: number;
-    start: number;
-    end: number;
-  }) {
-    super({
-      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      kycStatus: FormatValidation.checkNumber({ min: 0 }),
-      start: FormatValidation.checkNumber({ min: 0 }),
-      end: FormatValidation.checkNumber({ min: 0 }),
-    });
-
-    this.securityId = securityId;
-    this.kycStatus = kycStatus;
-    this.start = start;
-    this.end = end;
+export class GetKycAccountsDataQuery extends Query<GetKycAccountsDataQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly kycStatus: number,
+    public readonly start: number,
+    public readonly end: number,
+  ) {
+    super();
   }
 }

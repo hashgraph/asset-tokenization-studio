@@ -203,143 +203,40 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
-import { QueryBus } from '../../core/query/QueryBus';
-import Injectable from '../../core/Injectable';
-import { CommandBus } from '../../core/command/CommandBus';
-import IsIssuerRequest from './request/security/operations/issue/IsIssuerRequest.js';
-import { IsIssuerQuery } from '../../app/usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
-import { AddIssuerCommand } from '../../app/usecase/command/security/ssi/addIssuer/AddIssuerCommand.js';
-import { SetRevocationRegistryAddressCommand } from '../../app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand.js';
-import { RemoveIssuerCommand } from '../../app/usecase/command/security/ssi/removeIssuer/RemoveIssuerCommand.js';
-import SetRevocationRegistryAddressRequest from './request/security/ssi/SetRevocationRegistryAddressRequest.js';
-import AddIssuerRequest from './request/security/ssi/AddIssuerRequest.js';
-import RemoveIssuerRequest from './request/security/operations/issue/RemoveIssuerRequest.js';
-import GetRevocationRegistryAddressRequest from './request/security/ssi/GetRevocationRegistryAddressRequest.js';
-import GetIssuerListCountRequest from './request/security/ssi/GetIssuerListCountRequest.js';
-import GetIssuerListMembersRequest from './request/security/ssi/GetIssuerListMembersRequest.js';
-import { GetRevocationRegistryAddressQuery } from '../../app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery.js';
-import { GetIssuerListCountQuery } from '../../app/usecase/query/security/ssi/getIssuerListCount/GetIssuerListCountQuery.js';
-import { GetIssuerListMembersQuery } from '../../app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/ContractService.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import {
+  GetKycAccountsCountQuery,
+  GetKycAccountsCountQueryResponse,
+} from './GetKycAccountsCountQuery.js';
 
-interface ISSIManagementInPort {
-  setRevocationRegistryAddress(
-    request: SetRevocationRegistryAddressRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  addIssuer(
-    request: AddIssuerRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  removeIssuer(
-    request: RemoveIssuerRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  getRevocationRegistryAddress(
-    request: GetRevocationRegistryAddressRequest,
-  ): Promise<string>;
-  getIssuerListCount(request: GetIssuerListCountRequest): Promise<number>;
-  getIssuerListMembers(request: GetIssuerListMembersRequest): Promise<string[]>;
-  isIssuer(request: IsIssuerRequest): Promise<boolean>;
-}
-
-class SSIManagementInPort implements ISSIManagementInPort {
+@QueryHandler(GetKycAccountsCountQuery)
+export class GetKycAccountsCountQueryHandler
+  implements IQueryHandler<GetKycAccountsCountQuery>
+{
   constructor(
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
-  @LogError
-  async addIssuer(
-    request: AddIssuerRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, issuerId } = request;
-    ValidatedRequest.handleValidation('AddIssuerRequest', request);
+  async execute(
+    query: GetKycAccountsCountQuery,
+  ): Promise<GetKycAccountsCountQueryResponse> {
+    const { securityId, kycStatus } = query;
 
-    return await this.commandBus.execute(
-      new AddIssuerCommand(securityId, issuerId),
-    );
-  }
-
-  @LogError
-  async setRevocationRegistryAddress(
-    request: SetRevocationRegistryAddressRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, revocationRegistryId } = request;
-    ValidatedRequest.handleValidation(
-      'SetRevocationRegistryAddressRequest',
-      request,
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const res = await this.queryAdapter.getKycAccountsCount(
+      securityEvmAddress,
+      kycStatus,
     );
 
-    return await this.commandBus.execute(
-      new SetRevocationRegistryAddressCommand(securityId, revocationRegistryId),
-    );
-  }
-
-  @LogError
-  async removeIssuer(
-    request: RemoveIssuerRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, issuerId } = request;
-    ValidatedRequest.handleValidation('RemoveIssuerRequest', request);
-
-    return await this.commandBus.execute(
-      new RemoveIssuerCommand(securityId, issuerId),
-    );
-  }
-
-  @LogError
-  async getRevocationRegistryAddress(
-    request: GetRevocationRegistryAddressRequest,
-  ): Promise<string> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation(
-      'GetRevocationRegistryAddressRequest',
-      request,
-    );
-
-    return (
-      await this.queryBus.execute(
-        new GetRevocationRegistryAddressQuery(securityId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getIssuerListCount(
-    request: GetIssuerListCountRequest,
-  ): Promise<number> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation('GetIssuerListCountRequest', request);
-
-    return (
-      await this.queryBus.execute(new GetIssuerListCountQuery(securityId))
-    ).payload;
-  }
-
-  @LogError
-  async getIssuerListMembers(
-    request: GetIssuerListMembersRequest,
-  ): Promise<string[]> {
-    const { securityId, start, end } = request;
-    ValidatedRequest.handleValidation('GetIssuerListMembersRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetIssuerListMembersQuery(securityId, start, end),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async isIssuer(request: IsIssuerRequest): Promise<boolean> {
-    const { securityId, issuerId } = request;
-    ValidatedRequest.handleValidation('IsIssuerRequest', request);
-
-    return (
-      await this.queryBus.execute(new IsIssuerQuery(securityId, issuerId))
-    ).payload;
+    return new GetKycAccountsCountQueryResponse(res);
   }
 }
-
-const SSIManagement = new SSIManagementInPort();
-export default SSIManagement;

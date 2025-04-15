@@ -2242,7 +2242,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     return this.signAndSendTransaction(transaction);
   }
 
-  async grantKYC(
+  async grantKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     vcBase64: string,
@@ -2281,7 +2281,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     return this.signAndSendTransaction(transaction);
   }
 
-  async revokeKYC(
+  async revokeKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     securityId: ContractId | string,

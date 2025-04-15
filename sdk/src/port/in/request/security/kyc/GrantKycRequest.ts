@@ -206,23 +206,28 @@
 import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
 import FormatValidation from '../../FormatValidation.js';
 
-export default class RevokeKYCRequest extends ValidatedRequest<RevokeKYCRequest> {
+export default class GrantKycRequest extends ValidatedRequest<GrantKycRequest> {
   securityId: string;
   targetId: string;
+  vcBase64: string;
 
   constructor({
     securityId,
     targetId,
+    vcBase64,
   }: {
     securityId: string;
     targetId: string;
+    vcBase64: string;
   }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      vcBase64: FormatValidation.checkBase64Format(),
     });
 
     this.securityId = securityId;
     this.targetId = targetId;
+    this.vcBase64 = vcBase64;
   }
 }

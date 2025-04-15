@@ -203,26 +203,13 @@
 
 */
 
-import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../FormatValidation.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export default class GetKYCAccountsCountRequest extends ValidatedRequest<GetKYCAccountsCountRequest> {
-  securityId: string;
-  kycStatus: number;
-
-  constructor({
-    securityId,
-    kycStatus,
-  }: {
-    securityId: string;
-    kycStatus: number;
-  }) {
-    super({
-      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      kycStatus: FormatValidation.checkNumber({ min: 0 }),
-    });
-
-    this.securityId = securityId;
-    this.kycStatus = kycStatus;
+export class InvalidVcHolder extends BaseError {
+  constructor() {
+    super(
+      ErrorCode.InvalidVcHolder,
+      `The VC holder does not match target account`,
+    );
   }
 }

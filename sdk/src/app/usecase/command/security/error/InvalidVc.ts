@@ -203,31 +203,10 @@
 
 */
 
-import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../FormatValidation.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export default class GrantKYCRequest extends ValidatedRequest<GrantKYCRequest> {
-  securityId: string;
-  targetId: string;
-  vcBase64: string;
-
-  constructor({
-    securityId,
-    targetId,
-    vcBase64,
-  }: {
-    securityId: string;
-    targetId: string;
-    vcBase64: string;
-  }) {
-    super({
-      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      vcBase64: FormatValidation.checkBase64Format(),
-    });
-
-    this.securityId = securityId;
-    this.targetId = targetId;
-    this.vcBase64 = vcBase64;
+export class InvalidVc extends BaseError {
+  constructor() {
+    super(ErrorCode.InvalidVc, `The provided VC is not valid`);
   }
 }

@@ -211,7 +211,7 @@ import { InvalidVcDates } from './error/InvalidVcDates.js';
 import { MissingVcHolder } from './error/MissingVcHolder.js';
 import { MissingVcIssuer } from './error/MissingVcIssuer.js';
 
-export class Terminal3VC {
+export class Terminal3Vc {
   public static vcFromBase64(base64: string): SignedCredential {
     try {
       const jsonString = Buffer.from(base64, 'base64').toString('utf-8');

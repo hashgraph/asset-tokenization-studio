@@ -203,46 +203,26 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import {
-  GetKYCStatusForQuery,
-  GetKYCStatusForQueryResponse,
-} from './GetKYCStatusForQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../FormatValidation.js';
 
-@QueryHandler(GetKYCStatusForQuery)
-export class GetKYCStatusForQueryHandler
-  implements IQueryHandler<GetKYCStatusForQuery>
-{
-  constructor(
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(ContractService)
-    public readonly contractService: ContractService,
-  ) {}
+export default class RevokeKycRequest extends ValidatedRequest<RevokeKycRequest> {
+  securityId: string;
+  targetId: string;
 
-  async execute(
-    query: GetKYCStatusForQuery,
-  ): Promise<GetKYCStatusForQueryResponse> {
-    const { securityId, targetId } = query;
+  constructor({
+    securityId,
+    targetId,
+  }: {
+    securityId: string;
+    targetId: string;
+  }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+    });
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-
-    const res = await this.queryAdapter.getKYCStatusFor(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
-
-    return new GetKYCStatusForQueryResponse(res);
+    this.securityId = securityId;
+    this.targetId = targetId;
   }
 }

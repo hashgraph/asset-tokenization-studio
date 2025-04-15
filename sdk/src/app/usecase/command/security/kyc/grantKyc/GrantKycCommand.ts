@@ -203,10 +203,22 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
+import { Command } from '../../../../../../core/command/Command';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse';
 
-export class InvalidVC extends BaseError {
-  constructor() {
-    super(ErrorCode.InvalidVC, `The provided VC is not valid`);
+export class GrantKycCommandResponse implements CommandResponse {
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
+}
+
+export class GrantKycCommand extends Command<GrantKycCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly targetId: string,
+    public readonly vcBase64: string,
+  ) {
+    super();
   }
 }

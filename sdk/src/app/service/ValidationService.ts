@@ -210,7 +210,7 @@ import Service from './Service.js';
 import { singleton } from 'tsyringe';
 import { AccountNotKycd } from '../usecase/command/security/error/AccountNotKycd.js';
 import { IsIssuerQuery } from '../usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
-import { GetKYCStatusForQuery } from '../usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQuery.js';
+import { GetKycStatusForQuery } from '../usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery.js';
 import { IsClearingActivatedQuery } from '../usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
 import { ClearingDeactivated } from '../usecase/command/security/error/ClearingDeactivated.js';
 import { ClearingActivated } from '../usecase/command/security/error/ClearingActivated.js';
@@ -255,9 +255,9 @@ import { NotAllowedInMultiPartition } from '../usecase/command/security/error/No
 import { OnlyDefaultPartitionAllowed } from '../usecase/command/security/error/OnlyDefaultPartitionAllowed.js';
 import { NotIssuable } from '../usecase/command/security/error/NotIssuable.js';
 import { _PARTITION_ID_1 } from '../../core/Constants.js';
-import { Terminal3VC } from '../../domain/context/kyc/Terminal3.js';
+import { Terminal3Vc } from '../../domain/context/kyc/Terminal3.js';
 import { SignedCredential } from '@terminal3/vc_core';
-import { InvalidVCHolder } from '../usecase/command/security/error/InvalidVCHolder.js';
+import { InvalidVcHolder } from '../usecase/command/security/error/InvalidVcHolder.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress';
 import { GetTotalSupplyByPartitionQuery } from '../usecase/query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery.js';
 import { BigNumber } from 'ethers';
@@ -289,7 +289,7 @@ export default class ValidationService extends Service {
     let res;
     for (const address of addresses) {
       res = await this.queryBus.execute(
-        new GetKYCStatusForQuery(securityId, address),
+        new GetKycStatusForQuery(securityId, address),
       );
       if (res.payload != 1) {
         throw new AccountNotKycd(address);
@@ -644,12 +644,12 @@ export default class ValidationService extends Service {
     targetEvmAddress: EvmAddress,
     securityId: string,
   ): Promise<[string, SignedCredential]> {
-    const issuer = Terminal3VC.extractIssuer(signedCredential);
-    signedCredential = Terminal3VC.checkValidDates(signedCredential);
-    const holder = Terminal3VC.extractHolder(signedCredential);
+    const issuer = Terminal3Vc.extractIssuer(signedCredential);
+    signedCredential = Terminal3Vc.checkValidDates(signedCredential);
+    const holder = Terminal3Vc.extractHolder(signedCredential);
 
     if (targetEvmAddress.toString().toLowerCase() !== holder.toLowerCase()) {
-      throw new InvalidVCHolder();
+      throw new InvalidVcHolder();
     }
 
     await this.checkIssuer(securityId, issuer);

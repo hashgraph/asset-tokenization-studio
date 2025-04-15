@@ -203,13 +203,13 @@
 
 */
 
-import { QueryResponse } from 'core/query/QueryResponse';
+import { QueryResponse } from '../../../core/query/QueryResponse';
 
 export default interface KycAccountDataViewModel extends QueryResponse {
   account: string;
   validFrom: string;
   validTo: string;
-  VCid: string;
+  vcId: string;
   issuer: string;
   status: number;
 }

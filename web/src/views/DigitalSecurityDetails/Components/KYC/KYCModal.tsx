@@ -14,7 +14,7 @@ import { Button, InputController, PhosphorIcon, Text } from "io-bricks-ui";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useGrantKYC } from "../../../../hooks/mutations/useKYC";
-import { GrantKYCRequest } from "@hashgraph/asset-tokenization-sdk";
+import { GrantKycRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
 import { FileArchive } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
@@ -71,7 +71,7 @@ export const KYCModal = ({ isOpen, onClose }: KYCModalProps) => {
   const onSubmit = (values: FormValues) => {
     setIsLoading(true);
 
-    const request = new GrantKYCRequest({
+    const request = new GrantKycRequest({
       securityId,
       targetId: values.accountId,
       vcBase64: values.vcFile,
