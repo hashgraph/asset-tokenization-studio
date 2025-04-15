@@ -883,7 +883,6 @@ Updates the active status of multiple external pause addresses for a specific as
   - TransactionId:
     Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
-
 ## Factory
 
 ### getRegulationDetails
