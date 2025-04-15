@@ -203,13 +203,15 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export default class InvalidAmount extends BaseError {
-  constructor(val: number | string, expected: number | string) {
+export default class InvalidDecimalRange extends BaseError {
+  constructor(val: number | string, min: number, max?: number) {
     super(
-      ErrorCode.InvalidAmount,
-      `Invalid Amount ${val}, expected ${expected} decimals`,
+      ErrorCode.InvalidRange,
+      `Invalid Decimal Value ${val}, outside range ${
+        max !== undefined ? `[${min}, ${max}]` : min
+      }`,
     );
   }
 }

@@ -203,16 +203,10 @@
 
 */
 
-import { SecurityRole } from '../../../../../domain/context/security/SecurityRole';
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError';
+import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export class PartitionsProtected extends BaseError {
-  constructor(role?: SecurityRole | string) {
-    super(
-      ErrorCode.PartitionsProtected,
-      role
-        ? `Partitions are protected and account does not have the role (${role})`
-        : `Partitions are protected`,
-    );
+export class WalletNotSupported extends BaseError {
+  constructor() {
+    super(ErrorCode.WalletNotSupported, `Invalid wallet type`);
   }
 }

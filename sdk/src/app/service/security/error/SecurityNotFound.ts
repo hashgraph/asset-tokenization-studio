@@ -205,8 +205,8 @@
 
 import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export class InvalidRole extends BaseError {
-  constructor(role: string) {
-    super(ErrorCode.InvalidRole, `Role ${role} does not exist`);
+export class SecurityNotFound extends BaseError {
+  constructor(val: unknown) {
+    super(ErrorCode.NotFound, `${val} was not found`);
   }
 }

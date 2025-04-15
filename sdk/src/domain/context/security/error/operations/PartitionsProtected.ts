@@ -203,15 +203,16 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import { SecurityRole } from '../../SecurityRole';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError';
 
-export default class InvalidDecimalRange extends BaseError {
-  constructor(val: number | string, min: number, max?: number) {
+export class PartitionsProtected extends BaseError {
+  constructor(role?: SecurityRole | string) {
     super(
-      ErrorCode.InvalidRange,
-      `Invalid Decimal Value ${val}, outside range ${
-        max !== undefined ? `[${min}, ${max}]` : min
-      }`,
+      ErrorCode.PartitionsProtected,
+      role
+        ? `Partitions are protected and account does not have the role (${role})`
+        : `Partitions are protected`,
     );
   }
 }

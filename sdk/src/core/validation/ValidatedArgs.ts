@@ -207,7 +207,7 @@
 import 'reflect-metadata';
 import { ValidationSchema, ValidatedArgsKey } from './ValidationSchema.js';
 import ValidationResponse from './ValidationResponse.js';
-import { EmptyValue } from '../../port/in/request/error/EmptyValue.js';
+import { EmptyValue } from '../error/EmptyValue.js';
 import Mapper from './Mapper.js';
 import { getOptionalFields } from '../decorator/OptionalDecorator.js';
 import BaseError from '../error/BaseError.js';

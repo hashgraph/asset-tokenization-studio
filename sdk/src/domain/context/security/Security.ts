@@ -206,16 +206,16 @@
 import BaseError from '../../../core/error/BaseError.js';
 import CheckNums from '../../../core/checks/numbers/CheckNums.js';
 import CheckStrings from '../../../core/checks/strings/CheckStrings.js';
-import InvalidDecimalRange from './error/InvalidDecimalRange.js';
-import NameEmpty from './error/NameEmpty.js';
-import NameLength from './error/NameLength.js';
-import SymbolEmpty from './error/SymbolEmpty.js';
-import SymbolLength from './error/SymbolLength.js';
+import InvalidDecimalRange from './error/values/InvalidDecimalRange.js';
+import NameEmpty from './error/values/NameEmpty.js';
+import NameLength from './error/values/NameLength.js';
+import SymbolEmpty from './error/values/SymbolEmpty.js';
+import SymbolLength from './error/values/SymbolLength.js';
 import EvmAddress from '../contract/EvmAddress.js';
 import BigDecimal from '../shared/BigDecimal.js';
 import { HederaId } from '../shared/HederaId.js';
 import { InvalidType } from '../../../port/in/request/error/InvalidType.js';
-import InvalidAmount from './error/InvalidAmount.js';
+import InvalidAmount from './error/values/InvalidAmount.js';
 import { SecurityType } from '../factory/SecurityType.js';
 import { Regulation } from '../factory/Regulation.js';
 import {
@@ -227,7 +227,7 @@ import {
 import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
 import { Factory } from '../factory/Factories.js';
 import { OptionalField } from '../../../core/decorator/OptionalDecorator.js';
-import InvalidSupply from './error/InvalidSupply.js';
+import InvalidSupply from './error/values/InvalidSupply.js';
 
 const TWELVE = 12;
 const TEN = 10;

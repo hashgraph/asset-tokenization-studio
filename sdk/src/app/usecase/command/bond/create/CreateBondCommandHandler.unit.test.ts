@@ -203,7 +203,7 @@
 
 */
 
-import TransactionService from '../../../../service/TransactionService.js';
+import TransactionService from '../../../../service/transaction/TransactionService.js';
 import { CreateBondCommandHandler } from './CreateBondCommandHandler.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { createMock } from '@golevelup/ts-jest';

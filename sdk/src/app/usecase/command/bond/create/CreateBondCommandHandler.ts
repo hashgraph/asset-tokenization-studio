@@ -214,7 +214,7 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
 import AccountService from '../../../../service/AccountService.js';
-import TransactionService from '../../../../service/TransactionService.js';
+import TransactionService from '../../../../service/transaction/TransactionService.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';

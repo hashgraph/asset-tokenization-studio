@@ -203,13 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from './BaseError.js';
 
-export default class InvalidSupply extends BaseError {
-  constructor(totalSupply: string, maxSupply: string) {
+export class InvalidResponse extends BaseError {
+  constructor(val: unknown) {
     super(
-      ErrorCode.InvalidSupply,
-      `Total supply ${totalSupply} exceeds max supply ${maxSupply}`,
+      ErrorCode.InvalidResponse,
+      `An invalid response was received from the server: ${val}`,
     );
   }
 }

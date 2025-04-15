@@ -212,7 +212,7 @@ import { HederaId } from '../../domain/context/shared/HederaId.js';
 import { GetAccountInfoQuery } from '../usecase/query/account/info/GetAccountInfoQuery.js';
 import NetworkService from './NetworkService.js';
 import Service from './Service.js';
-import TransactionService from './TransactionService.js';
+import TransactionService from './transaction/TransactionService.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress';
 import { HEDERA_FORMAT_ID_REGEX } from '../../domain/context/shared/HederaId';
 import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter';

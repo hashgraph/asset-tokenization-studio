@@ -209,7 +209,7 @@ import {
   SetCouponCommand,
   SetCouponCommandResponse,
 } from './SetCouponCommand.js';
-import TransactionService from '../../../../../service/TransactionService.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../../service/ContractService.js';

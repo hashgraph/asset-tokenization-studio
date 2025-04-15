@@ -211,7 +211,7 @@ import { SetCouponCommandHandler } from './SetCouponCommandHandler.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { SetCouponCommandFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
 import { createMock } from '@golevelup/ts-jest';
-import TransactionService from '../../../../../service/TransactionService.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import {
   CouponIdFixture,
   EvmAddressPropsFixture,

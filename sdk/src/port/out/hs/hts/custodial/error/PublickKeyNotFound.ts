@@ -203,8 +203,15 @@
 
 */
 
-export class TransactionBuildingError extends Error {
-  constructor(val: unknown) {
-    super(`An error ocurred when building the transaction: ${val}`);
+import BaseError, {
+  ErrorCode,
+} from '../../../../../../core/error/BaseError.js';
+
+export class PublickKeyNotFound extends BaseError {
+  constructor() {
+    super(
+      ErrorCode.PublickKeyNotFound,
+      `PublicKey not found in the mirror node`,
+    );
   }
 }

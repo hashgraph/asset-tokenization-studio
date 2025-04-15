@@ -203,13 +203,22 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class SigningError extends BaseError {
-  constructor(val: unknown) {
+export class InvalidClearingOperationType extends BaseError {
+  constructor(value: string) {
     super(
-      ErrorCode.SigningError,
-      `An error ocurred when singing the transaction: ${val}`,
+      ErrorCode.InvalidClearingOperationType,
+      `Invalid clearing operation type ${value}`,
+    );
+  }
+}
+
+export class InvalidClearingOperationTypeNumber extends BaseError {
+  constructor(id: number) {
+    super(
+      ErrorCode.InvalidClearingOperationTypeNumber,
+      `Invalid clearing operation type id number ${id}`,
     );
   }
 }

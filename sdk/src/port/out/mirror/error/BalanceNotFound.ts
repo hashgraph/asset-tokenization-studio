@@ -203,10 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export class WalletNotSupported extends BaseError {
+export class BalanceNotFound extends BaseError {
   constructor() {
-    super(ErrorCode.WalletNotSupported, `Invalid wallet type`);
+    super(
+      ErrorCode.BalanceNotFound,
+      `Response does not contain a balances result`,
+    );
   }
 }

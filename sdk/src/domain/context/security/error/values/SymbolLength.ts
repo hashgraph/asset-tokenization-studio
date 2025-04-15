@@ -203,108 +203,13 @@
 
 */
 
-import { singleton } from 'tsyringe';
-import Injectable from '../../core/Injectable.js';
-import { RPCTransactionAdapter } from '../../port/out/rpc/RPCTransactionAdapter.js';
-import TransactionAdapter from '../../port/out/TransactionAdapter.js';
-import Service from './Service.js';
-import { SupportedWallets } from '../../domain/context/network/Wallet';
-import { InvalidWalletTypeError } from '../../domain/context/network/error/InvalidWalletAccountTypeError';
-import LogService from './LogService.js';
-import { HederaWalletConnectTransactionAdapter } from '../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
-import { DFNSTransactionAdapter } from '../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import { FireblocksTransactionAdapter } from '../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import { AWSKMSTransactionAdapter } from '../../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
-import { WalletNotSupported } from './error/WalletNotSupported.js';
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import { InvalidResponse } from '../../port/out/mirror/error/InvalidResponse.js';
-import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter.js';
-import { EmptyResponse } from '../usecase/command/security/error/EmptyResponse.js';
-import { Response } from '../../domain/context/transaction/Response';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-@singleton()
-export default class TransactionService extends Service {
-  constructor(
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
-      MirrorNodeAdapter,
-    ),
-  ) {
-    super();
-  }
-
-  getHandler(): TransactionAdapter {
-    return Injectable.resolveTransactionHandler();
-  }
-
-  setHandler(adp: TransactionAdapter): TransactionAdapter {
-    Injectable.registerTransactionHandler(adp);
-    return adp;
-  }
-
-  static getHandlerClass(type: SupportedWallets): TransactionAdapter {
-    switch (type) {
-      case SupportedWallets.METAMASK:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('METAMASK TransactionAdapter');
-        return Injectable.resolve(RPCTransactionAdapter);
-      case SupportedWallets.HWALLETCONNECT:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('HWALLETCONNECT TransactionAdapter');
-        return Injectable.resolve(HederaWalletConnectTransactionAdapter);
-      case SupportedWallets.DFNS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('DFNS TransactionAdapter');
-        return Injectable.resolve(DFNSTransactionAdapter);
-      case SupportedWallets.FIREBLOCKS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('FIREBLOCKS TransactionAdapter');
-        return Injectable.resolve(FireblocksTransactionAdapter);
-      case SupportedWallets.AWSKMS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('AWSKMS TransactionAdapter');
-        return Injectable.resolve(AWSKMSTransactionAdapter);
-      default:
-        throw new WalletNotSupported();
-    }
-  }
-
-  async getTransactionResult({
-    res,
-    result,
-    className,
-    position,
-    numberOfResultsItems,
-  }: {
-    res: TransactionResponse;
-    result?: Response;
-    className: string;
-    position: number;
-    numberOfResultsItems: number;
-  }): Promise<string> {
-    if (!res.id) throw new EmptyResponse(className);
-
-    if (res.response && result) {
-      return result;
-    }
-    const results = await this.mirrorNodeAdapter.getContractResults(
-      res.id.toString(),
-      numberOfResultsItems,
+export default class SymbolLength extends BaseError {
+  constructor(val: string, len: number) {
+    super(
+      ErrorCode.InvalidLength,
+      `Symbol ${val} length is longer than ${len}`,
     );
-
-    if (!results || results.length !== numberOfResultsItems) {
-      throw new InvalidResponse(results);
-    }
-
-    return results[position];
   }
 }

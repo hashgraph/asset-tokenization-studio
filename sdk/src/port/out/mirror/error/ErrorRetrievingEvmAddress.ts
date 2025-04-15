@@ -203,13 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-export class BalanceNotFound extends BaseError {
-  constructor() {
+export class ErrorRetrievingEvmAddress extends BaseError {
+  constructor(accountId: string, error: unknown) {
     super(
-      ErrorCode.BalanceNotFound,
-      `Response does not contain a balances result`,
+      ErrorCode.ErrorRetrievingEvmAddress,
+      `EVM address could not be retrieved for ${accountId}, error: ${(error as Error).message}`,
     );
   }
 }
