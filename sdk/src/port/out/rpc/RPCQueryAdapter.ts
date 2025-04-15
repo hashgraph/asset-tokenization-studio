@@ -1374,7 +1374,7 @@ export class RPCQueryAdapter {
     ).isIssuer(issuer.toString());
   }
 
-  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<Kyc> {
+  async getKycFor(address: EvmAddress, targetId: EvmAddress): Promise<Kyc> {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
     const kycData = await this.connect(
@@ -1391,7 +1391,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getKYCStatusFor(
+  async getKycStatusFor(
     address: EvmAddress,
     targetId: EvmAddress,
   ): Promise<number> {
@@ -1405,7 +1405,7 @@ export class RPCQueryAdapter {
     return kycData;
   }
 
-  async getKYCAccountsData(
+  async getKycAccountsData(
     address: EvmAddress,
     kycStatus: number,
     start: number,
@@ -1431,7 +1431,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getKYCAccountsCount(
+  async getKycAccountsCount(
     address: EvmAddress,
     kycStatus: number,
   ): Promise<number> {

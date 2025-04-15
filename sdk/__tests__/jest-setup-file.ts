@@ -1047,10 +1047,10 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
 
       if (!balance) return [false, '0x48', ''];
 
-      if (!singletonInstance.getKYCStatusFor(address, sourceId))
+      if (!singletonInstance.getKycStatusFor(address, sourceId))
         return [false, '0x50', ''];
 
-      if (!singletonInstance.getKYCStatusFor(address, targetId))
+      if (!singletonInstance.getKycStatusFor(address, targetId))
         return [false, '0x51', ''];
 
       if (securityInfo.clearingActive) return [false, '0x52', ''];
@@ -1099,10 +1099,10 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
 
       if (amount.isLowerThan(balance)) return [false, '0x46', ''];
 
-      if (!singletonInstance.getKYCStatusFor(address, operator))
+      if (!singletonInstance.getKycStatusFor(address, operator))
         return [false, '0x50', ''];
 
-      if (!singletonInstance.getKYCStatusFor(address, targetId))
+      if (!singletonInstance.getKycStatusFor(address, targetId))
         return [false, '0x51', ''];
 
       if (securityInfo.clearingActive) return [false, '0x52', ''];
@@ -1173,7 +1173,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
 
       if (!balance) return [false, '0x48', ''];
 
-      if (!singletonInstance.getKYCStatusFor(address, sourceId))
+      if (!singletonInstance.getKycStatusFor(address, sourceId))
         return [false, '0x50', ''];
 
       if (securityInfo.clearingActive) return [false, '0x52', ''];
@@ -1347,7 +1347,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
-  singletonInstance.getKYCStatusFor = jest.fn(
+  singletonInstance.getKycStatusFor = jest.fn(
     async (address: EvmAddress, target: EvmAddress) => {
       const account = '0x' + target.toString().toUpperCase().substring(2);
 
@@ -1357,7 +1357,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
-  singletonInstance.getKYCAccountsData = jest.fn(
+  singletonInstance.getKycAccountsData = jest.fn(
     async (
       address: EvmAddress,
       kycStatus: number,
@@ -1374,7 +1374,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
                 account,
                 kycData.validFrom.toString(),
                 kycData.validTo.toString(),
-                kycData.VCid,
+                kycData.vcId,
                 kycData.issuer,
                 kycData.status,
               )
@@ -1387,14 +1387,14 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
-  singletonInstance.getKYCFor = jest.fn(
+  singletonInstance.getKycFor = jest.fn(
     async (address: EvmAddress, target: EvmAddress) => {
       const account = '0x' + target.toString().toUpperCase().substring(2);
       return kycAccountsData.get(account);
     },
   );
 
-  singletonInstance.getKYCAccountsCount = jest.fn(
+  singletonInstance.getKycAccountsCount = jest.fn(
     async (address: EvmAddress, kycStatus: number) => {
       const kycAccounts = kycAccountsByStatus.get(1) || [];
       return kycAccounts.length;
@@ -2330,11 +2330,11 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     },
   );
 
-  singletonInstance.grantKYC = jest.fn(
+  singletonInstance.grantKyc = jest.fn(
     async (
       security: EvmAddress,
       targetId: EvmAddress,
-      VCId: string,
+      vcId: string,
       validFrom: BigDecimal,
       validTo: BigDecimal,
       issuer: EvmAddress,
@@ -2352,7 +2352,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
           new Kyc(
             validFrom.toString(),
             validTo.toString(),
-            VCId,
+            vcId,
             issuer.toString(),
             kycStatus,
           ),
@@ -2366,7 +2366,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     },
   );
 
-  singletonInstance.revokeKYC = jest.fn(
+  singletonInstance.revokeKyc = jest.fn(
     async (security: EvmAddress, targetId: EvmAddress) => {
       const account = '0x' + targetId.toString().toUpperCase().substring(2);
       const kycStatus = 1;

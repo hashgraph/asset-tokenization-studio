@@ -203,12 +203,26 @@
 
 */
 
-import { QueryResponse } from 'core/query/QueryResponse';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../FormatValidation.js';
 
-export default interface KYCViewModel extends QueryResponse {
-  validFrom: string;
-  validTo: string;
-  VCid: string;
-  issuer: string;
-  status: number;
+export default class GetKycForRequest extends ValidatedRequest<GetKycForRequest> {
+  securityId: string;
+  targetId: string;
+
+  constructor({
+    securityId,
+    targetId,
+  }: {
+    securityId: string;
+    targetId: string;
+  }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+    });
+
+    this.securityId = securityId;
+    this.targetId = targetId;
+  }
 }

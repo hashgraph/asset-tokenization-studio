@@ -203,17 +203,20 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { Command } from '../../../../../../core/command/Command';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse';
 
-export class GetKYCAccountsCountQueryResponse implements QueryResponse {
-  constructor(public readonly payload: number) {}
+export class RevokeKycCommandResponse implements CommandResponse {
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
 }
 
-export class GetKYCAccountsCountQuery extends Query<GetKYCAccountsCountQueryResponse> {
+export class RevokeKycCommand extends Command<RevokeKycCommandResponse> {
   constructor(
     public readonly securityId: string,
-    public readonly kycStatus: number,
+    public readonly targetId: string,
   ) {
     super();
   }

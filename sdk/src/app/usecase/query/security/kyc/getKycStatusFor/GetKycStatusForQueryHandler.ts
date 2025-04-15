@@ -203,88 +203,46 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/AccountService';
-import ValidationService from '../../../../../service/ValidationService';
-import { GrantKYCCommand, GrantKYCCommandResponse } from './GrantKYCCommand';
-import TransactionService from '../../../../../service/TransactionService';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import { Terminal3VC } from '../../../../../../domain/context/kyc/Terminal3';
-import { verifyVc } from '@terminal3/verify_vc';
-import { SignedCredential } from '@terminal3/vc_core';
-import { InvalidVC } from '../../error/InvalidVC';
-import ContractService from '../../../../../service/ContractService';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import AccountService from '../../../../../service/AccountService.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import {
+  GetKycStatusForQuery,
+  GetKycStatusForQueryResponse,
+} from './GetKycStatusForQuery.js';
+import ContractService from '../../../../../service/ContractService.js';
 
-@CommandHandler(GrantKYCCommand)
-export class GrantKYCCommandHandler
-  implements ICommandHandler<GrantKYCCommand>
+@QueryHandler(GetKycStatusForQuery)
+export class GetKycStatusForQueryHandler
+  implements IQueryHandler<GetKycStatusForQuery>
 {
   constructor(
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(ContractService)
     public readonly contractService: ContractService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
   ) {}
 
-  async execute(command: GrantKYCCommand): Promise<GrantKYCCommandResponse> {
-    const { securityId, targetId, vcBase64 } = command;
-
-    const signedCredential: SignedCredential =
-      Terminal3VC.vcFromBase64(vcBase64);
-    const verificationResult = await verifyVc(signedCredential);
-    if (!verificationResult.isValid) {
-      throw new InvalidVC();
-    }
-
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+  async execute(
+    query: GetKycStatusForQuery,
+  ): Promise<GetKycStatusForQueryResponse> {
+    const { securityId, targetId } = query;
 
     const securityEvmAddress: EvmAddress =
       await this.contractService.getContractEvmAddress(securityId);
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 
-    const [issuer, updatedSignedCredential] =
-      await this.validationService.checkValidVc(
-        signedCredential,
-        targetEvmAddress,
-        securityId,
-      );
-
-    const issuerEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(issuer);
-
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkRole(
-      SecurityRole._KYC_ROLE,
-      account.id.toString(),
-      securityId,
-    );
-
-    const res = await handler.grantKYC(
+    const res = await this.queryAdapter.getKycStatusFor(
       securityEvmAddress,
       targetEvmAddress,
-      updatedSignedCredential.id,
-      BigDecimal.fromString(
-        (updatedSignedCredential.validFrom as string).substring(0, 10),
-      ),
-      BigDecimal.fromString(
-        (updatedSignedCredential.validUntil as string).substring(0, 10),
-      ),
-      issuerEvmAddress,
     );
 
-    return Promise.resolve(
-      new GrantKYCCommandResponse(res.error === undefined, res.id!),
-    );
+    return new GetKycStatusForQueryResponse(res);
   }
 }

@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SDKService from "../../services/SDKService";
 import {
-  GrantKYCRequest,
-  RevokeKYCRequest,
+  GrantKycRequest,
+  RevokeKycRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useToast } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
@@ -15,7 +15,7 @@ export const useGrantKYC = () => {
     keyPrefix: "details.kyc.messages",
   });
 
-  return useMutation((req: GrantKYCRequest) => SDKService.grantKYC(req), {
+  return useMutation((req: GrantKycRequest) => SDKService.grantKYC(req), {
     onSuccess(data, variables) {
       queryClient.invalidateQueries({
         queryKey: [GET_KYC_LIST(variables.securityId)],
@@ -56,7 +56,7 @@ export const useRevokeKYC = () => {
     keyPrefix: "details.kyc.messages",
   });
 
-  return useMutation((req: RevokeKYCRequest) => SDKService.revokeKYC(req), {
+  return useMutation((req: RevokeKycRequest) => SDKService.revokeKYC(req), {
     onSuccess(data, variables) {
       queryClient.invalidateQueries({
         queryKey: [GET_KYC_LIST(variables.securityId)],

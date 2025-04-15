@@ -206,7 +206,7 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import SDKService from "../../services/SDKService";
 import {
-  GetKYCAccountsDataRequest,
+  GetKycAccountsDataRequest,
   IsIssuerRequest,
   KycAccountDataViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
@@ -220,7 +220,7 @@ export const GET_KYC_LIST = (securityId: string) =>
   `GET_KYC_LIST_${securityId}`;
 
 export const useGetKYCList = (
-  request: GetKYCAccountsDataRequest,
+  request: GetKycAccountsDataRequest,
   options?: UseQueryOptions<
     KycAccountDataViewModelResponse[],
     unknown,
