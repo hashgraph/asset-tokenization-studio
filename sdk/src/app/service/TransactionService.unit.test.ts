@@ -241,7 +241,6 @@ describe('TransactioNService', () => {
         await expect(
           service.getTransactionResult({
             res: response,
-            result: undefined,
             className: SetCouponCommandHandler.name,
             position,
             numberOfResultsItems,
@@ -253,7 +252,6 @@ describe('TransactioNService', () => {
         await expect(
           service.getTransactionResult({
             res: transactionResponse,
-            result: undefined,
             className: SetCouponCommandHandler.name,
             position,
             numberOfResultsItems,
@@ -280,7 +278,6 @@ describe('TransactioNService', () => {
         await expect(
           service.getTransactionResult({
             res: transactionResponse,
-            result: undefined,
             className: SetCouponCommandHandler.name,
             position,
             numberOfResultsItems,
