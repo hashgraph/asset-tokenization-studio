@@ -217,6 +217,7 @@ import kyc from "./kyc";
 import ssiManager from "./ssiManager";
 import clearingOperations from "./clearingOperations";
 import externalPause from "./externalPause";
+import externalControl from "./externalControl";
 
 export default {
   header: {
@@ -298,6 +299,7 @@ export default {
   ssiManager,
   clearingOperations,
   externalPause,
+  externalControl,
   benefits: {
     dividends: "Dividends",
     balanceAdjustments: "Balance Adjustments",

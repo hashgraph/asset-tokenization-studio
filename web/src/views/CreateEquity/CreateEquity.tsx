@@ -244,6 +244,7 @@ export const CreateEquity = () => {
       countriesListType: 1,
       countriesList: [] as string[],
       externalPausesList: [],
+      externalControlList: [],
     },
   });
 

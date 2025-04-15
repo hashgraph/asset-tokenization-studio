@@ -208,7 +208,10 @@ import { RouteName } from "../../router/RouteName";
 export default {
   configuration: "Configuration",
   [RouteName.Dashboard]: "Dashboard",
-  [RouteName.ExternalControlList]: "Control List",
+  [RouteName.ExternalControlList]: "External Control",
+  [RouteName.ExternalControlDetails]: "External Control Details",
+  [RouteName.CreateExternalControl]: "External Control creation",
+  [RouteName.AddExternalControl]: "Import a external control",
   [RouteName.ExternalPauseList]: "External Pause",
   [RouteName.CreateExternalPause]: "External Pause creation",
   [RouteName.AddExternalPause]: "Import a external pause",

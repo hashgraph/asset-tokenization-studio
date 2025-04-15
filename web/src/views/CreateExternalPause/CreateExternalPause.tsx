@@ -7,7 +7,11 @@ import { Button, Text, ToggleController } from "io-bricks-ui";
 import { RouterManager } from "../../router/RouterManager";
 import { useForm } from "react-hook-form";
 import { useExternalPauseStore } from "../../store/externalPauseStore";
-import { useCreatePauseMock } from "../../hooks/mutations/useExternalPause";
+import {
+  useCreatePauseMock,
+  useSetPausedMock,
+} from "../../hooks/mutations/useExternalPause";
+import { SetPausedMockRequest } from "@hashgraph/asset-tokenization-sdk";
 
 export interface FormValues {
   isActivated: boolean;
@@ -29,18 +33,35 @@ export const CreateExternalPause = () => {
   });
 
   const { mutateAsync, isLoading } = useCreatePauseMock();
+  const { mutateAsync: setPauseMockMutate, isLoading: isLoadingSetPauseMock } =
+    useSetPausedMock();
 
-  const onSubmit = () => {
-    mutateAsync().then((response) => {
+  const onSubmit = async (values: FormValues) => {
+    const { isActivated } = values;
+
+    try {
+      const response = await mutateAsync();
+
       if (response) {
+        if (isActivated) {
+          await setPauseMockMutate(
+            new SetPausedMockRequest({
+              contractId: response,
+              paused: isActivated,
+            }),
+          );
+        }
+
         addExternalPause({
           address: response,
-          isPaused: false,
+          isPaused: isActivated,
         });
 
         RouterManager.goBack();
       }
-    });
+    } catch (error) {
+      console.error("Error en onSubmit:", error);
+    }
   };
 
   return (
@@ -87,8 +108,8 @@ export const CreateExternalPause = () => {
             </Button>
             <Button
               size={"md"}
-              isDisabled={!isValid || isLoading}
-              isLoading={isLoading}
+              isDisabled={!isValid || isLoading || isLoadingSetPauseMock}
+              isLoading={isLoading || isLoadingSetPauseMock}
               onClick={handleSubmit(onSubmit)}
             >
               {tCreate("create")}

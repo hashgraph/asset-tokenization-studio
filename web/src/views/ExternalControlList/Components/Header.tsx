@@ -206,8 +206,8 @@
 import { HStack } from "@chakra-ui/react";
 import { Text } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
-import { CreateNewSecurityButton } from "./CreateNewSecurityButton";
-import { AddSecurityButton } from "./AddSecurityButton";
+import { AddExternalControlButton } from "./AddExternalControlButton";
+import { CreateNewExternalControlButton } from "./CreateNewExternalControlButton";
 
 export const Header = () => {
   const { t } = useTranslation("externalControlList", { keyPrefix: "header" });
@@ -216,8 +216,8 @@ export const Header = () => {
     <HStack gap={5} justifyContent={"space-between"}>
       <Text textStyle="HeadingBoldXL">{t("title")}</Text>
       <HStack gap={4}>
-        <AddSecurityButton />
-        <CreateNewSecurityButton variant="secondary" />
+        <AddExternalControlButton />
+        <CreateNewExternalControlButton variant="secondary" />
       </HStack>
     </HStack>
   );

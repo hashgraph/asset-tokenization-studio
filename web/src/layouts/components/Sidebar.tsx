@@ -205,7 +205,7 @@
 
 import { Stack } from "@chakra-ui/react";
 import { Sidebar as BaseSidebar, SidebarItem } from "io-bricks-ui";
-import { House, Pause } from "@phosphor-icons/react";
+import { House, Pause, HandPalm } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { RouteName } from "../../router/RouteName";
@@ -226,17 +226,17 @@ export const Sidebar = () => {
       isActive: location.pathname === RoutePath.DASHBOARD,
       to: RouteName.Dashboard,
     },
-    // {
-    //   label: t(RouteName.ExternalControlList),
-    //   icon: HandPalm,
-    //   isActive: location.pathname === RoutePath.EXTERNAL_CONTROL_LIST,
-    //   to: RouteName.ExternalControlList,
-    // },
     {
       label: t(RouteName.ExternalPauseList),
       icon: Pause,
       isActive: location.pathname.includes(RoutePath.EXTERNAL_PAUSE_LIST),
       to: RouteName.ExternalPauseList,
+    },
+    {
+      label: t(RouteName.ExternalControlList),
+      icon: HandPalm,
+      isActive: location.pathname === RoutePath.EXTERNAL_CONTROL_LIST,
+      to: RouteName.ExternalControlList,
     },
   ];
 

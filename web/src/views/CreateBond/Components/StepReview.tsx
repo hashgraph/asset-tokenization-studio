@@ -288,6 +288,7 @@ export const StepReview = () => {
   const countriesListType = getValues("countriesListType");
   let countriesList = getValues("countriesList");
   const externalPausesList = getValues("externalPausesList");
+  const externalControlList = getValues("externalControlList");
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
@@ -339,6 +340,10 @@ export const StepReview = () => {
       ...(externalPausesList &&
         externalPausesList.length > 0 && {
           externalPauses: externalPausesList,
+        }),
+      ...(externalControlList &&
+        externalControlList.length > 0 && {
+          externalControlLists: externalControlList,
         }),
     });
 
@@ -396,6 +401,12 @@ export const StepReview = () => {
       title: t("stepExternalManagement.externalPause"),
       value: externalPausesList
         ? externalPausesList?.map((pause) => " " + pause).toString()
+        : "-",
+    },
+    {
+      title: t("stepExternalManagement.externalControl"),
+      value: externalControlList
+        ? externalControlList?.map((control) => " " + control).toString()
         : "-",
     },
   ];

@@ -211,6 +211,7 @@ import security from "./security";
 import initialization from "./initialization";
 import externalControlList from "./externalControlList";
 import externalPause from "./externalPause";
+import externalControlDetails from "./externalControlDetails";
 
 export default {
   globals: {
@@ -317,13 +318,15 @@ export default {
     clearing: "Clearing role",
     clearingValidator: "Clearing Validator role",
     pauseManager: "Pause Manager role",
+    controlListManager: "Control Manager role",
   },
   landing,
   routes,
   dashboard,
-  externalControlList,
   externalPause,
   rules,
   security,
   initialization,
+  externalControl: externalControlList,
+  externalControlDetails,
 };

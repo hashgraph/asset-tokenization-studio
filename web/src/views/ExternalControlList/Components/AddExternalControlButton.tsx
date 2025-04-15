@@ -203,25 +203,28 @@
 
 */
 
-import { Button } from "io-bricks-ui";
+import { PhosphorIcon, Button } from "io-bricks-ui";
 import type { ButtonProps } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { RouterManager } from "../../../router/RouterManager";
 import { RouteName } from "../../../router/RouteName";
 import { Link as RouterLink } from "react-router-dom";
+import { Plus } from "@phosphor-icons/react";
 
-export const CreateNewSecurityButton = (props: ButtonProps) => {
-  const { t } = useTranslation("externalControlList", { keyPrefix: "commons" });
+export const AddExternalControlButton = (props: ButtonProps) => {
+  const { t } = useTranslation("routes");
 
   return (
     <Button
-      data-testid="create-external-control-list-button"
+      data-testid="add-external-control-button"
       as={RouterLink}
-      to={RouterManager.getUrl(RouteName.CreateSecurity)}
+      to={RouterManager.getUrl(RouteName.AddExternalControl)}
       size="md"
+      variant="secondary"
+      leftIcon={<PhosphorIcon as={Plus} />}
       {...props}
     >
-      {t("createNewSecurity")}
+      {t(RouteName.AddExternalControl)}
     </Button>
   );
 };
