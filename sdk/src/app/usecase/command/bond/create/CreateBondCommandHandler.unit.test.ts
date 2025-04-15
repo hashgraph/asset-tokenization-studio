@@ -223,7 +223,7 @@ import {
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../service/ContractService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { EmptyResponse } from '../../security/error/EmptyResponse.js';
+import { EmptyResponse } from '../../../../service/transaction/error/EmptyResponse.js';
 
 describe('CreateBondCommandHandler', () => {
   let handler: CreateBondCommandHandler;
