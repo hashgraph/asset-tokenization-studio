@@ -203,10 +203,19 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { Kyc } from '../../../../../../domain/context/kyc/Kyc.js';
 
-export class MissingVcData extends BaseError {
-  constructor(missingField: string) {
-    super(ErrorCode.MissingVcData, `VC must include a valid ${missingField}`);
+export class GetKycForQueryResponse implements QueryResponse {
+  constructor(public readonly payload: Kyc) {}
+}
+
+export class GetKycForQuery extends Query<GetKycForQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly targetId: string,
+  ) {
+    super();
   }
 }

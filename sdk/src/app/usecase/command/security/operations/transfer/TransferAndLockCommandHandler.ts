@@ -215,11 +215,8 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import ValidationService from '../../../../../service/ValidationService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../core/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../../../service/transaction/error/EmptyResponse.js';
 
 @CommandHandler(TransferAndLockCommand)
 export class TransferAndLockCommandHandler
@@ -232,8 +229,6 @@ export class TransferAndLockCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(ContractService)
@@ -270,27 +265,13 @@ export class TransferAndLockCommandHandler
       securityId,
     );
 
-    if (!res.id) throw new EmptyResponse(TransferAndLockCommandHandler.name);
-
-    let lockId: string;
-
-    if (res.response && res.response.lockId) {
-      lockId = res.response.lockId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      lockId = results[1];
-    }
+    const lockId = await this.transactionService.getTransactionResult({
+      res,
+      result: res.response?.lockId,
+      className: TransferAndLockCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new TransferAndLockCommandResponse(parseInt(lockId, 16), res.id!),

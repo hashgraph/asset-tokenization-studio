@@ -220,6 +220,7 @@ import TransactionResponse from '../../../domain/context/transaction/Transaction
 import { InvalidResponse } from '../../../core/error/InvalidResponse.js';
 import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter.js';
 import { EmptyResponse } from './error/EmptyResponse.js';
+import { Response } from '../../../domain/context/transaction/Response';
 
 @singleton()
 export default class TransactionService extends Service {
@@ -277,30 +278,33 @@ export default class TransactionService extends Service {
     }
   }
 
-  async getTransactionResult(
-    res: TransactionResponse,
-    result: any,
-    className: string,
-    position: number,
-    numberOfResultsItems: number,
-  ): Promise<string> {
+  async getTransactionResult({
+    res,
+    result,
+    className,
+    position,
+    numberOfResultsItems,
+  }: {
+    res: TransactionResponse;
+    result?: Response;
+    className: string;
+    position: number;
+    numberOfResultsItems: number;
+  }): Promise<string> {
     if (!res.id) throw new EmptyResponse(className);
-    let output: string;
 
     if (res.response && result) {
-      output = result;
-    } else {
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      output = results[position];
+      return result;
     }
-    return output;
+    const results = await this.mirrorNodeAdapter.getContractResults(
+      res.id.toString(),
+      numberOfResultsItems,
+    );
+
+    if (!results || results.length !== numberOfResultsItems) {
+      throw new InvalidResponse(results);
+    }
+
+    return results[position];
   }
 }

@@ -203,10 +203,26 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../FormatValidation.js';
 
-export default class InvalidOperation extends BaseError {
-  constructor(val: number) {
-    super(ErrorCode.InvalidOperation, `Operation type ${val} is not valid`);
+export default class GetKycAccountsCountRequest extends ValidatedRequest<GetKycAccountsCountRequest> {
+  securityId: string;
+  kycStatus: number;
+
+  constructor({
+    securityId,
+    kycStatus,
+  }: {
+    securityId: string;
+    kycStatus: number;
+  }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      kycStatus: FormatValidation.checkNumber({ min: 0 }),
+    });
+
+    this.securityId = securityId;
+    this.kycStatus = kycStatus;
   }
 }

@@ -210,13 +210,13 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import ContractService from '../../../../../service/ContractService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
-  GetKYCAccountsCountQuery,
-  GetKYCAccountsCountQueryResponse,
-} from './GetKYCAccountsCountQuery.js';
+  GetKycAccountsCountQuery,
+  GetKycAccountsCountQueryResponse,
+} from './GetKycAccountsCountQuery.js';
 
-@QueryHandler(GetKYCAccountsCountQuery)
-export class GetKYCAccountsCountQueryHandler
-  implements IQueryHandler<GetKYCAccountsCountQuery>
+@QueryHandler(GetKycAccountsCountQuery)
+export class GetKycAccountsCountQueryHandler
+  implements IQueryHandler<GetKycAccountsCountQuery>
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
@@ -226,17 +226,17 @@ export class GetKYCAccountsCountQueryHandler
   ) {}
 
   async execute(
-    query: GetKYCAccountsCountQuery,
-  ): Promise<GetKYCAccountsCountQueryResponse> {
+    query: GetKycAccountsCountQuery,
+  ): Promise<GetKycAccountsCountQueryResponse> {
     const { securityId, kycStatus } = query;
 
     const securityEvmAddress: EvmAddress =
       await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getKYCAccountsCount(
+    const res = await this.queryAdapter.getKycAccountsCount(
       securityEvmAddress,
       kycStatus,
     );
 
-    return new GetKYCAccountsCountQueryResponse(res);
+    return new GetKycAccountsCountQueryResponse(res);
   }
 }

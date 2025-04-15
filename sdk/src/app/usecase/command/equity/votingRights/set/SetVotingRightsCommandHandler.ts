@@ -211,11 +211,8 @@ import {
 } from './SetVotingRightsCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../core/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../../../service/transaction/error/EmptyResponse.js';
 
 @CommandHandler(SetVotingRightsCommand)
 export class SetVotingRightsCommandHandler
@@ -224,8 +221,6 @@ export class SetVotingRightsCommandHandler
   constructor(
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ContractService)
     public readonly contractService: ContractService,
   ) {}
@@ -245,27 +240,13 @@ export class SetVotingRightsCommandHandler
       address,
     );
 
-    if (!res.id) throw new EmptyResponse(SetVotingRightsCommandHandler.name);
-
-    let voteId: string;
-
-    if (res.response && res.response.voteId) {
-      voteId = res.response.voteId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      voteId = results[1];
-    }
+    const voteId = await this.transactionService.getTransactionResult({
+      res,
+      result: res.response?.voteId,
+      className: SetVotingRightsCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new SetVotingRightsCommandResponse(parseInt(voteId, 16), res.id!),

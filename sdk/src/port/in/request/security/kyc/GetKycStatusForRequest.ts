@@ -203,21 +203,26 @@
 
 */
 
-import { Command } from '../../../../../../core/command/Command';
-import { CommandResponse } from '../../../../../../core/command/CommandResponse';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../FormatValidation.js';
 
-export class RevokeKYCCommandResponse implements CommandResponse {
-  constructor(
-    public readonly payload: boolean,
-    public readonly transactionId: string,
-  ) {}
-}
+export default class GetKycStatusForRequest extends ValidatedRequest<GetKycStatusForRequest> {
+  securityId: string;
+  targetId: string;
 
-export class RevokeKYCCommand extends Command<RevokeKYCCommandResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly targetId: string,
-  ) {
-    super();
+  constructor({
+    securityId,
+    targetId,
+  }: {
+    securityId: string;
+    targetId: string;
+  }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+    });
+
+    this.securityId = securityId;
+    this.targetId = targetId;
   }
 }

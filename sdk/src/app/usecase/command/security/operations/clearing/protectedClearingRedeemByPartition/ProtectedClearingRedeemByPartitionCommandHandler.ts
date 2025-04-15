@@ -211,7 +211,6 @@ import TransactionService from '../../../../../../service/transaction/Transactio
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   ProtectedClearingRedeemByPartitionCommand,
@@ -219,8 +218,6 @@ import {
 } from './ProtectedClearingRedeemByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
 
 @CommandHandler(ProtectedClearingRedeemByPartitionCommand)
 export class ProtectedClearingRedeemByPartitionCommandHandler
@@ -235,8 +232,6 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
     @lazyInject(ContractService)
@@ -307,30 +302,13 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id)
-      throw new EmptyResponse(
-        ProtectedClearingRedeemByPartitionCommandHandler.name,
-      );
-
-    let clearingId: string;
-
-    if (res.response && res.response.clearingId) {
-      clearingId = res.response.clearingId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      clearingId = results[1];
-    }
+    const clearingId = await this.transactionService.getTransactionResult({
+      res,
+      result: res.response?.clearingId,
+      className: ProtectedClearingRedeemByPartitionCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new ProtectedClearingRedeemByPartitionCommandResponse(

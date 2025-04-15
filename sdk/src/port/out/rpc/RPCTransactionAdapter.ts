@@ -2145,16 +2145,16 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async grantKYC(
+  async grantKyc(
     security: EvmAddress,
     targetId: EvmAddress,
-    VCId: string,
+    vcId: string,
     validFrom: BigDecimal,
     validTo: BigDecimal,
     issuer: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC id ${VCId}`,
+      `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC id ${vcId}`,
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
@@ -2163,7 +2163,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).grantKyc(
         targetId.toString(),
-        VCId,
+        vcId,
         validFrom.toBigNumber(),
         validTo.toBigNumber(),
         issuer.toString(),
@@ -2175,7 +2175,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async revokeKYC(
+  async revokeKyc(
     security: EvmAddress,
     targetId: EvmAddress,
   ): Promise<TransactionResponse> {

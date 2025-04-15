@@ -210,14 +210,14 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import AccountService from '../../../../../service/AccountService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
-  GetKYCStatusForQuery,
-  GetKYCStatusForQueryResponse,
-} from './GetKYCStatusForQuery.js';
+  GetKycStatusForQuery,
+  GetKycStatusForQueryResponse,
+} from './GetKycStatusForQuery.js';
 import ContractService from '../../../../../service/ContractService.js';
 
-@QueryHandler(GetKYCStatusForQuery)
-export class GetKYCStatusForQueryHandler
-  implements IQueryHandler<GetKYCStatusForQuery>
+@QueryHandler(GetKycStatusForQuery)
+export class GetKycStatusForQueryHandler
+  implements IQueryHandler<GetKycStatusForQuery>
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
@@ -229,8 +229,8 @@ export class GetKYCStatusForQueryHandler
   ) {}
 
   async execute(
-    query: GetKYCStatusForQuery,
-  ): Promise<GetKYCStatusForQueryResponse> {
+    query: GetKycStatusForQuery,
+  ): Promise<GetKycStatusForQueryResponse> {
     const { securityId, targetId } = query;
 
     const securityEvmAddress: EvmAddress =
@@ -238,11 +238,11 @@ export class GetKYCStatusForQueryHandler
     const targetEvmAddress: EvmAddress =
       await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getKYCStatusFor(
+    const res = await this.queryAdapter.getKycStatusFor(
       securityEvmAddress,
       targetEvmAddress,
     );
 
-    return new GetKYCStatusForQueryResponse(res);
+    return new GetKycStatusForQueryResponse(res);
   }
 }

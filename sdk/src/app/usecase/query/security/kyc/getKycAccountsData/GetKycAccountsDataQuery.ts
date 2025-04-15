@@ -203,63 +203,21 @@
 
 */
 
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
-import {
-  GetKycAccountsDataRequest,
-  IsIssuerRequest,
-  KycAccountDataViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { KycAccountData } from '../../../../../../domain/context/kyc/KycAccountData.js';
 
-export interface KycAccountDataViewModelResponse
-  extends KycAccountDataViewModel {
-  isIssuer: boolean | null;
+export class GetKycAccountsDataQueryResponse implements QueryResponse {
+  constructor(public readonly payload: KycAccountData[]) {}
 }
 
-export const GET_KYC_LIST = (securityId: string) =>
-  `GET_KYC_LIST_${securityId}`;
-
-export const useGetKYCList = (
-  request: GetKycAccountsDataRequest,
-  options?: UseQueryOptions<
-    KycAccountDataViewModelResponse[],
-    unknown,
-    KycAccountDataViewModelResponse[],
-    string[]
-  >,
-) => {
-  return useQuery(
-    [GET_KYC_LIST(request.securityId)],
-    async () => {
-      try {
-        const kycAccounts = await SDKService.getKYCAccountsData(request);
-
-        const kycAccountsWithIssuerStatus = await Promise.all(
-          kycAccounts.map(async (kycAccount) => {
-            try {
-              const isIssuer = await SDKService.isIssuer(
-                new IsIssuerRequest({
-                  securityId: request.securityId,
-                  issuerId: kycAccount.issuer,
-                }),
-              );
-              return {
-                ...kycAccount,
-                isIssuer,
-              } as KycAccountDataViewModelResponse;
-            } catch (error) {
-              console.error("Error fetching issuer status", error);
-              return { ...kycAccount, isIssuer: null };
-            }
-          }),
-        );
-
-        return kycAccountsWithIssuerStatus;
-      } catch (error) {
-        console.error("Error fetching KYC Accounts", error);
-        throw error;
-      }
-    },
-    options,
-  );
-};
+export class GetKycAccountsDataQuery extends Query<GetKycAccountsDataQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly kycStatus: number,
+    public readonly start: number,
+    public readonly end: number,
+  ) {
+    super();
+  }
+}

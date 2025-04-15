@@ -203,58 +203,58 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import {
-  GetKYCAccountsDataQuery,
-  GetKYCAccountsDataQueryResponse,
-} from './GetKYCAccountsDataQuery.js';
-import { KycAccountData } from '../../../../../../domain/context/kyc/KycAccountData.js';
-import ContractService from '../../../../../service/ContractService.js';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
+import AccountService from '../../../../../service/AccountService';
+import { RevokeKycCommand, RevokeKycCommandResponse } from './RevokeKycCommand';
+import TransactionService from '../../../../../service/TransactionService';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
+import ValidationService from '../../../../../service/ValidationService';
+import ContractService from '../../../../../service/ContractService';
 
-@QueryHandler(GetKYCAccountsDataQuery)
-export class GetKYCAccountsDataQueryHandler
-  implements IQueryHandler<GetKYCAccountsDataQuery>
+@CommandHandler(RevokeKycCommand)
+export class RevokeKycCommandHandler
+  implements ICommandHandler<RevokeKycCommand>
 {
   constructor(
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(ContractService)
     public readonly contractService: ContractService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
   ) {}
 
-  async execute(
-    query: GetKYCAccountsDataQuery,
-  ): Promise<GetKYCAccountsDataQueryResponse> {
-    const { securityId, kycStatus, start, end } = query;
+  async execute(command: RevokeKycCommand): Promise<RevokeKycCommandResponse> {
+    const { securityId, targetId } = command;
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
 
     const securityEvmAddress: EvmAddress =
       await this.contractService.getContractEvmAddress(securityId);
-    const kycAccountsData = await this.queryAdapter.getKYCAccountsData(
-      securityEvmAddress,
-      kycStatus,
-      start,
-      end,
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
+
+    await this.validationService.checkPause(securityId);
+
+    await this.validationService.checkRole(
+      SecurityRole._KYC_ROLE,
+      account.id.toString(),
+      securityId,
     );
 
-    const kycDataHederaIdFormat = (await Promise.all(
-      kycAccountsData.map(async (item) => ({
-        ...item,
-        issuer: (
-          await this.accountService.getAccountInfo(item.issuer)
-        ).id.toString(),
-        account: (
-          await this.accountService.getAccountInfo(item.account)
-        ).id.toString(),
-      })),
-    )) as KycAccountData[];
+    const res = await handler.revokeKyc(
+      securityEvmAddress,
+      targetEvmAddress,
+      securityId,
+    );
 
-    return new GetKYCAccountsDataQueryResponse(kycDataHederaIdFormat);
+    return Promise.resolve(
+      new RevokeKycCommandResponse(res.error === undefined, res.id!),
+    );
   }
 }

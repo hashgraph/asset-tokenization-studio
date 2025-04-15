@@ -203,19 +203,94 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import { Kyc } from '../../../../../../domain/context/kyc/Kyc.js';
+import Injectable from '../../core/Injectable';
+import { createMock } from '@golevelup/ts-jest';
+import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter';
+import TransactionService from './TransactionService';
+import { SetCouponCommandHandler } from '../usecase/command/bond/coupon/set/SetCouponCommandHandler';
+import TransactionResponse from '../../domain/context/transaction/TransactionResponse';
+import { EmptyResponse } from '../usecase/command/security/error/EmptyResponse';
+import { TransactionResponseFixture } from '../../../__tests__/fixtures/shared/DataFixture';
+import { InvalidResponse } from '../../port/out/mirror/error/InvalidResponse';
+import { faker } from '@faker-js/faker/.';
 
-export class GetKYCForQueryResponse implements QueryResponse {
-  constructor(public readonly payload: Kyc) {}
-}
+describe('TransactioNService', () => {
+  let service: TransactionService;
+  const position = 1;
+  const numberOfResultsItems = 2;
 
-export class GetKYCForQuery extends Query<GetKYCForQueryResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly targetId: string,
-  ) {
-    super();
-  }
-}
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+  const transactionResponse = TransactionResponseFixture.create();
+  const result = faker.number.int({ min: 1, max: 999 }).toString();
+
+  beforeEach(() => {
+    jest.spyOn(Injectable, 'resolve').mockReturnValue(mirrorNodeAdapterMock);
+    service = new TransactionService();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('getTransactionResult', () => {
+    describe('error cases', () => {
+      it('should throw an error when transaction response id is missing', async () => {
+        const response: TransactionResponse = {
+          id: undefined,
+        };
+        await expect(
+          service.getTransactionResult({
+            res: response,
+            className: SetCouponCommandHandler.name,
+            position,
+            numberOfResultsItems,
+          }),
+        ).rejects.toThrow(EmptyResponse);
+      });
+      it('should throw an error when transaction response is empty', async () => {
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue(null);
+        await expect(
+          service.getTransactionResult({
+            res: transactionResponse,
+            className: SetCouponCommandHandler.name,
+            position,
+            numberOfResultsItems,
+          }),
+        ).rejects.toThrow(InvalidResponse);
+      });
+    });
+
+    describe('success cases', () => {
+      it('should retrieve transaction result from event data', async () => {
+        await expect(
+          service.getTransactionResult({
+            res: transactionResponse,
+            result,
+            className: SetCouponCommandHandler.name,
+            position,
+            numberOfResultsItems,
+          }),
+        ).resolves.toBe(result);
+      });
+      it('should retrieve transaction result from mirror node', async () => {
+        const results = ['1', result];
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue(results);
+        await expect(
+          service.getTransactionResult({
+            res: transactionResponse,
+            className: SetCouponCommandHandler.name,
+            position,
+            numberOfResultsItems,
+          }),
+        ).resolves.toBe(results[position]);
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
+          transactionResponse.id,
+          numberOfResultsItems,
+        );
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledTimes(
+          1,
+        );
+      });
+    });
+  });
+});

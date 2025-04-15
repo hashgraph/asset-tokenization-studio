@@ -205,18 +205,15 @@
 
 import { Query } from '../../../../../../core/query/Query.js';
 import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import { KycAccountData } from '../../../../../../domain/context/kyc/KycAccountData.js';
 
-export class GetKYCAccountsDataQueryResponse implements QueryResponse {
-  constructor(public readonly payload: KycAccountData[]) {}
+export class GetKycStatusForQueryResponse implements QueryResponse {
+  constructor(public readonly payload: number) {}
 }
 
-export class GetKYCAccountsDataQuery extends Query<GetKYCAccountsDataQueryResponse> {
+export class GetKycStatusForQuery extends Query<GetKycStatusForQueryResponse> {
   constructor(
     public readonly securityId: string,
-    public readonly kycStatus: number,
-    public readonly start: number,
-    public readonly end: number,
+    public readonly targetId: string,
   ) {
     super();
   }

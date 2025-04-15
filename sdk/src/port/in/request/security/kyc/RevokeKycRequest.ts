@@ -206,7 +206,7 @@
 import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
 import FormatValidation from '../../FormatValidation.js';
 
-export default class RevokeKYCRequest extends ValidatedRequest<RevokeKYCRequest> {
+export default class RevokeKycRequest extends ValidatedRequest<RevokeKycRequest> {
   securityId: string;
   targetId: string;
 

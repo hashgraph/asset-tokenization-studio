@@ -203,39 +203,21 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { GetKYCForQuery, GetKYCForQueryResponse } from './GetKYCForQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import { Command } from '../../../../../../core/command/Command';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse';
 
-@QueryHandler(GetKYCForQuery)
-export class GetKYCForQueryHandler implements IQueryHandler<GetKYCForQuery> {
+export class RevokeKycCommandResponse implements CommandResponse {
   constructor(
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    public readonly payload: boolean,
+    public readonly transactionId: string,
   ) {}
+}
 
-  async execute(query: GetKYCForQuery): Promise<GetKYCForQueryResponse> {
-    const { securityId, targetId } = query;
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-
-    const res = await this.queryAdapter.getKYCFor(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
-
-    return new GetKYCForQueryResponse(res);
+export class RevokeKycCommand extends Command<RevokeKycCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly targetId: string,
+  ) {
+    super();
   }
 }

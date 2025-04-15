@@ -215,17 +215,11 @@ import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
 import TransactionService from '../../../../service/transaction/TransactionService.js';
 import NetworkService from '../../../../service/NetworkService.js';
-import {
-  ADDRESS_LENGTH,
-  BYTES_32_LENGTH,
-} from '../../../../../core/Constants.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { EquityDetails } from '../../../../../domain/context/equity/EquityDetails.js';
 import ContractService from '../../../../service/ContractService.js';
 import AccountService from '../../../../service/AccountService.js';
-import { InvalidResponse } from '../../../../../core/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../../service/transaction/error/EmptyResponse.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 
 @CommandHandler(CreateEquityCommand)
@@ -318,29 +312,16 @@ export class CreateEquityCommandHandler
       factory.toString(),
     );
 
-    if (!res.id) throw new EmptyResponse(CreateEquityCommandHandler.name);
-
-    let contractAddress: string;
     try {
-      if (res.response && res.response.equityAddress) {
-        contractAddress = res.response.equityAddress;
-      } else {
-        // * Recover the new contract ID from Event data from the Mirror Node
-        const results = await this.mirrorNodeAdapter.getContractResults(
-          res.id.toString(),
-          1,
-        );
+      const contractAddress =
+        await this.transactionService.getTransactionResult({
+          res,
+          result: res.response?.equityAddress,
+          className: CreateEquityCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
+        });
 
-        if (!results || results.length !== 1) {
-          throw new InvalidResponse(results);
-        }
-
-        const data = results.map((result) =>
-          result.substring(BYTES_32_LENGTH - ADDRESS_LENGTH + 2),
-        );
-
-        contractAddress = '0x' + data[0];
-      }
       const contractId =
         await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
           contractAddress,
