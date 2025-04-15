@@ -639,7 +639,7 @@ interface IKycTransactionAdapter {
   grantKyc(
     security: EvmAddress,
     targetId: EvmAddress,
-    VCId: string,
+    vcId: string,
     validFrom: BigDecimal,
     validTo: BigDecimal,
     issuer: EvmAddress,
@@ -1341,7 +1341,7 @@ export default abstract class TransactionAdapter
   grantKyc(
     security: EvmAddress,
     targetId: EvmAddress,
-    VCId: string,
+    vcId: string,
     validFrom: BigDecimal,
     validTo: BigDecimal,
     issuer: EvmAddress,

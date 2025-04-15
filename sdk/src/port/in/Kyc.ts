@@ -285,7 +285,7 @@ class KycInPort implements IKycInPort {
     const kyc: KycViewModel = {
       validFrom: res.validFrom,
       validTo: res.validTo,
-      VCid: res.VCid,
+      vcId: res.vcId,
       issuer: res.issuer,
       status: res.status,
     };
@@ -329,7 +329,7 @@ class KycInPort implements IKycInPort {
       account: item.account,
       validFrom: item.validFrom,
       validTo: item.validTo,
-      VCid: item.VCid,
+      vcId: item.vcId,
       issuer: item.issuer,
       status: item.status,
     }));

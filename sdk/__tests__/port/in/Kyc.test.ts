@@ -246,7 +246,7 @@ import { ethers, Wallet } from 'ethers';
 import SsiManagement from '../../../src/port/in/SsiManagement';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
 import createVcT3 from '../../utils/verifiableCredentials';
-import { Terminal3VC } from '../../../src/domain/context/kyc/Terminal3.js';
+import { Terminal3Vc } from '../../../src/domain/context/kyc/Terminal3.js';
 import { HederaId } from '../../../src/domain/context/shared/HederaId.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
@@ -405,9 +405,9 @@ describe('🧪 Kyc tests', () => {
       ).payload,
     ).toBe(true);
 
-    let vcDecoded = Terminal3VC.vcFromBase64(vcBase64);
-    const issuer = Terminal3VC.extractIssuer(vcDecoded);
-    vcDecoded = Terminal3VC.checkValidDates(vcDecoded);
+    let vcDecoded = Terminal3Vc.vcFromBase64(vcBase64);
+    const issuer = Terminal3Vc.extractIssuer(vcDecoded);
+    vcDecoded = Terminal3Vc.checkValidDates(vcDecoded);
 
     const issuerId = CLIENT_ACCOUNT_ECDSA.id.toString();
     const accountId = CLIENT_ACCOUNT_ECDSA_A.id.toString();
@@ -432,7 +432,7 @@ describe('🧪 Kyc tests', () => {
         account: CLIENT_ACCOUNT_ECDSA_A.id.toString(),
         validFrom: vcDecoded.validFrom?.substring(0, 10),
         validTo: vcDecoded.validUntil?.substring(0, 10),
-        VCid: vcDecoded.id,
+        vcId: vcDecoded.id,
         issuer: CLIENT_ACCOUNT_ECDSA.id.toString(),
         status: 1,
       },
@@ -448,7 +448,7 @@ describe('🧪 Kyc tests', () => {
     ).toEqual({
       validFrom: vcDecoded.validFrom?.substring(0, 10),
       validTo: vcDecoded.validUntil?.substring(0, 10),
-      VCid: vcDecoded.id,
+      vcId: vcDecoded.id,
       issuer: issuer,
       status: 1,
     });

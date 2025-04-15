@@ -1374,7 +1374,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
                 account,
                 kycData.validFrom.toString(),
                 kycData.validTo.toString(),
-                kycData.VCid,
+                kycData.vcId,
                 kycData.issuer,
                 kycData.status,
               )
@@ -2334,7 +2334,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     async (
       security: EvmAddress,
       targetId: EvmAddress,
-      VCId: string,
+      vcId: string,
       validFrom: BigDecimal,
       validTo: BigDecimal,
       issuer: EvmAddress,
@@ -2352,7 +2352,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
           new Kyc(
             validFrom.toString(),
             validTo.toString(),
-            VCId,
+            vcId,
             issuer.toString(),
             kycStatus,
           ),

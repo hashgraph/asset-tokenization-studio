@@ -210,7 +210,7 @@ export class KycAccountData extends ValidatedDomain<KycAccountData> {
   public account: string;
   public validFrom: string;
   public validTo: string;
-  public VCid: string;
+  public vcId: string;
   public issuer: string;
   public status: number;
 
@@ -218,7 +218,7 @@ export class KycAccountData extends ValidatedDomain<KycAccountData> {
     account: string,
     validFrom: string,
     validTo: string,
-    VCid: string,
+    vcId: string,
     issuer: string,
     status: number,
   ) {
@@ -234,7 +234,7 @@ export class KycAccountData extends ValidatedDomain<KycAccountData> {
     this.account = account;
     this.validFrom = validFrom;
     this.validTo = validTo;
-    this.VCid = VCid;
+    this.vcId = vcId;
     this.issuer = issuer;
     this.status = status;
 

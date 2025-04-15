@@ -205,8 +205,11 @@
 
 import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class InvalidVC extends BaseError {
+export class InvalidVcHolder extends BaseError {
   constructor() {
-    super(ErrorCode.InvalidVC, `The provided VC is not valid`);
+    super(
+      ErrorCode.InvalidVcHolder,
+      `The VC holder does not match target account`,
+    );
   }
 }
