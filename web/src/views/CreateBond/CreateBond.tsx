@@ -238,6 +238,7 @@ export const CreateBond = () => {
       countriesListType: 1,
       countriesList: [] as string[],
       externalPausesList: [],
+      externalControlList: [],
     },
   });
 

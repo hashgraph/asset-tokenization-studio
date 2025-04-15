@@ -281,6 +281,10 @@ export default {
     pauseList: "Pause list",
     pauseListPlaceholder: "Choose external pause ...",
     externalPausesSelected: "External pauses selected:",
+    externalControl: "External Control",
+    controlList: "Control list",
+    controlListPlaceholder: "Choose external control ...",
+    externalControlsSelected: "External controls selected:",
   },
 
   stepReview: {

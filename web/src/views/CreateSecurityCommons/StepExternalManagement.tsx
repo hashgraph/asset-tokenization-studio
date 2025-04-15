@@ -229,6 +229,7 @@ import { FormStepContainer } from "../../components/FormStepContainer";
 import { CancelButton } from "../../components/CancelButton";
 import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
 import { NextStepButton } from "../CreateEquity/Components/NextStepButton";
+import { useExternalControlStore } from "../../store/externalControlStore";
 
 type SelectOption = {
   value: string;
@@ -241,6 +242,7 @@ export const StepExternalManagement = () => {
   });
 
   const { externalPauses } = useExternalPauseStore();
+  const { externalControls } = useExternalControlStore();
 
   const { control, watch, setValue } = useFormContext<
     ICreateEquityFormValues | ICreateBondFormValues
@@ -253,10 +255,14 @@ export const StepExternalManagement = () => {
   const [externalPausesSelected, setExternalPausesSelected] = useState<
     string[]
   >(watch("externalPausesList") ?? []);
+  const [externalControlsSelected, setExternalControlsSelected] = useState<
+    string[]
+  >(watch("externalControlList") ?? []);
 
   useEffect(() => {
     setValue("externalPausesList", externalPausesSelected);
-  }, [setExternalPausesSelected, externalPausesSelected, setValue]);
+    setValue("externalControlList", externalControlsSelected);
+  }, [externalPausesSelected, externalControlsSelected, setValue]);
 
   const externalPauseOptions = externalPauses
     .map(({ address }) => ({
@@ -264,6 +270,13 @@ export const StepExternalManagement = () => {
       value: address,
     }))
     .filter((option) => !externalPausesSelected.includes(option.value));
+
+  const externalControlOptions = externalControls
+    .map(({ address }) => ({
+      label: address,
+      value: address,
+    }))
+    .filter((option) => !externalControlsSelected.includes(option.value));
 
   const handlePauseSelect = (option: SelectOption[]) => {
     const selectedAddress = option[0].value;
@@ -277,6 +290,22 @@ export const StepExternalManagement = () => {
 
   const handlePauseRemove = (addressToRemove: string) => {
     setExternalPausesSelected((prev) =>
+      prev.filter((address) => address !== addressToRemove),
+    );
+  };
+
+  const handleControlSelect = (option: SelectOption[]) => {
+    const selectedAddress = option[0].value;
+
+    setExternalControlsSelected((prev) => {
+      if (prev.includes(selectedAddress)) return prev;
+
+      return [...prev, selectedAddress];
+    });
+  };
+
+  const handleControlRemove = (addressToRemove: string) => {
+    setExternalControlsSelected((prev) =>
       prev.filter((address) => address !== addressToRemove),
     );
   };
@@ -306,7 +335,7 @@ export const StepExternalManagement = () => {
               }
             />
           </Stack>
-          <VStack w="auto" layerStyle="whiteContainer">
+          <VStack w="auto" layerStyle="whiteContainer" mb={3}>
             <PanelTitle title={t("externalPausesSelected")} />
             <HStack layerStyle="whiteContainer" noOfLines={20} lineHeight={10}>
               {externalPausesSelected.map((item) => (
@@ -316,6 +345,37 @@ export const StepExternalManagement = () => {
                   size="sm"
                   rightIcon={<PhosphorIcon as={X} />}
                   onClick={() => handlePauseRemove(item)}
+                />
+              ))}
+            </HStack>
+          </VStack>
+          <InfoDivider title={t("externalControl")} type="main" />
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">{t("controlList")}</Text>
+            </HStack>
+            <SelectController
+              control={control}
+              id="externalPausesList"
+              placeholder={t("controlListPlaceholder")}
+              options={externalControlOptions}
+              isMulti
+              setsFullOption
+              onChange={(option) =>
+                handleControlSelect(option as unknown as SelectOption[])
+              }
+            />
+          </Stack>
+          <VStack w="auto" layerStyle="whiteContainer">
+            <PanelTitle title={t("externalControlsSelected")} />
+            <HStack layerStyle="whiteContainer" noOfLines={20} lineHeight={10}>
+              {externalControlsSelected.map((item) => (
+                <Tag
+                  key={item}
+                  label={item}
+                  size="sm"
+                  rightIcon={<PhosphorIcon as={X} />}
+                  onClick={() => handleControlRemove(item)}
                 />
               ))}
             </HStack>
