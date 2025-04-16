@@ -216,11 +216,11 @@ import ContractService from '../../../../service/ContractService.js';
 export class LocksIdQueryHandler implements IQueryHandler<LocksIdQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: LocksIdQuery): Promise<LocksIdQueryResponse> {
