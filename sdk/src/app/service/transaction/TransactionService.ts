@@ -225,7 +225,7 @@ import { Response } from '../../../domain/context/transaction/Response';
 @singleton()
 export default class TransactionService extends Service {
   constructor(
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
       MirrorNodeAdapter,
     ),
   ) {

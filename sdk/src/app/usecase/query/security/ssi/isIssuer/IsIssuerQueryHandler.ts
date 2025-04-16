@@ -216,11 +216,11 @@ import AccountService from '../../../../../service/AccountService';
 export class IsIssuerQueryHandler implements IQueryHandler<IsIssuerQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(query: IsIssuerQuery): Promise<IsIssuerQueryResponse> {

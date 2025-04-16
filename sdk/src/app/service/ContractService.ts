@@ -206,9 +206,7 @@
 import { singleton } from 'tsyringe';
 import Injectable from '../../core/Injectable.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
-import NetworkService from './NetworkService.js';
 import Service from './Service.js';
-import TransactionService from './transaction/TransactionService.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress.js';
 import { HEDERA_FORMAT_ID_REGEX } from '../../domain/context/shared/HederaId.js';
 import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter.js';
@@ -217,13 +215,7 @@ export default class ContractService extends Service {
   queryBus: QueryBus;
 
   constructor(
-    public readonly networkService: NetworkService = Injectable.resolve(
-      NetworkService,
-    ),
-    public readonly transactionService: TransactionService = Injectable.resolve(
-      TransactionService,
-    ),
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
       MirrorNodeAdapter,
     ),
   ) {

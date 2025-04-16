@@ -210,7 +210,6 @@ import Account from '../../domain/context/account/Account.js';
 import { AccountIdNotValid } from '../../domain/context/account/error/AccountIdNotValid.js';
 import { HederaId } from '../../domain/context/shared/HederaId.js';
 import { GetAccountInfoQuery } from '../usecase/query/account/info/GetAccountInfoQuery.js';
-import NetworkService from './NetworkService.js';
 import Service from './Service.js';
 import TransactionService from './transaction/TransactionService.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress';
@@ -222,13 +221,10 @@ export default class AccountService extends Service {
   queryBus: QueryBus;
 
   constructor(
-    public readonly networkService: NetworkService = Injectable.resolve(
-      NetworkService,
-    ),
-    public readonly transactionService: TransactionService = Injectable.resolve(
+    private readonly transactionService: TransactionService = Injectable.resolve(
       TransactionService,
     ),
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
       MirrorNodeAdapter,
     ),
   ) {
