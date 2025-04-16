@@ -215,8 +215,8 @@ import {
     IFactory,
     BusinessLogicResolver,
     SsiManagement,
-    T3RevocationRegistry,
-    T3RevocationRegistry__factory,
+    MockedT3RevocationRegistry,
+    MockedT3RevocationRegistry__factory,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -246,7 +246,7 @@ describe('SSI Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let pauseFacet: Pause
     let ssiManagementFacet: SsiManagement
-    let revocationList: T3RevocationRegistry
+    let revocationList: MockedT3RevocationRegistry
 
     let snapshot: SnapshotRestorer
 
@@ -272,13 +272,13 @@ describe('SSI Tests', () => {
 
         const reovationListDeployed = await deployContractWithFactory(
             new DeployContractWithFactoryCommand({
-                factory: new T3RevocationRegistry__factory(),
+                factory: new MockedT3RevocationRegistry__factory(),
                 signer: signer_A,
             })
         )
 
         revocationList = await ethers.getContractAt(
-            'T3RevocationRegistry',
+            'MockedT3RevocationRegistry',
             reovationListDeployed.address,
             signer_C
         )
