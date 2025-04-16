@@ -211,20 +211,15 @@ import { QueryHandler } from '../../../../../../../core/decorator/QueryHandlerDe
 import { IQueryHandler } from '../../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../../../service/SecurityService.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
+import ContractService from '../../../../../../../app/service/ContractService.js';
 
 @QueryHandler(IsPausedMockQuery)
 export class IsPausedMockQueryHandler
   implements IQueryHandler<IsPausedMockQuery>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
   ) {}
@@ -232,11 +227,8 @@ export class IsPausedMockQueryHandler
   async execute(query: IsPausedMockQuery): Promise<IsPausedMockQueryResponse> {
     const { contractId } = query;
 
-    const contractEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(contractId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(contractId)).evmAddress
-        : contractId.toString(),
-    );
+    const contractEvmAddress =
+      await this.contractService.getContractEvmAddress(contractId);
 
     const res = await this.queryAdapter.isPausedMock(contractEvmAddress);
     return new IsPausedMockQueryResponse(res);

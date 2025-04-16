@@ -203,58 +203,82 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import { createMock } from '@golevelup/ts-jest';
+import { EvmAddressPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { IsExternalPauseQueryHandler } from './IsExternalPauseQueryHandler.js';
 import {
-  CreateExternalPauseMockCommand,
-  CreateExternalPauseMockCommandResponse,
-} from './CreateExternalPauseMockCommand';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../../app/service/TransactionService';
-import { EmptyResponse } from '../../../error/EmptyResponse';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse';
+  IsExternalPauseQuery,
+  IsExternalPauseQueryResponse,
+} from './IsExternalPauseQuery.js';
+import { IsExternalPauseQueryFixture } from '../../../../../../../__tests__/fixtures/externalPauses/ExternalPausesFixture.js';
 
-@CommandHandler(CreateExternalPauseMockCommand)
-export class CreateExternalPauseMockCommandHandler
-  implements ICommandHandler<CreateExternalPauseMockCommand>
-{
-  constructor(
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-  ) {}
+describe('IsExternalPauseQueryHandler', () => {
+  let handler: IsExternalPauseQueryHandler;
+  let query: IsExternalPauseQuery;
 
-  async execute(): Promise<CreateExternalPauseMockCommandResponse> {
-    const handler = this.transactionService.getHandler();
+  const securityServiceMock = createMock<SecurityService>();
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
 
-    const res = await handler.createExternalPauseMock();
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalPauseEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const security = new Security(SecurityPropsFixture.create());
 
-    let contractAddress: string;
+  beforeEach(() => {
+    handler = new IsExternalPauseQueryHandler(
+      securityServiceMock,
+      contractServiceMock,
+      queryAdapterServiceMock,
+    );
+    query = IsExternalPauseQueryFixture.create();
+  });
 
-    if (typeof res === 'string') {
-      contractAddress = res;
-    } else {
-      if (!res.id)
-        throw new EmptyResponse(CreateExternalPauseMockCommandHandler.name);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
+  describe('execute', () => {
+    it('should successfully validate if is external pause', async () => {
+      securityServiceMock.get.mockResolvedValueOnce(security);
+      contractServiceMock.getContractEvmAddress
+        .mockResolvedValueOnce(evmAddress)
+        .mockResolvedValueOnce(externalPauseEvmAddress);
+
+      queryAdapterServiceMock.isExternalPause.mockResolvedValue(true);
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(IsExternalPauseQueryResponse);
+      expect(result.payload).toBe(true);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        2,
+      );
+      expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
+      expect(queryAdapterServiceMock.isExternalPause).toHaveBeenCalledTimes(1);
+
+      expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
         1,
-        true,
+        query.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        2,
+        query.externalPauseAddress,
       );
 
-      if (!results || results.length !== 1) {
-        throw new InvalidResponse(results);
-      }
-      contractAddress = results[0];
-    }
-
-    const address = (
-      await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-    ).id.toString();
-
-    return Promise.resolve(new CreateExternalPauseMockCommandResponse(address));
-  }
-}
+      expect(queryAdapterServiceMock.isExternalPause).toHaveBeenCalledWith(
+        evmAddress,
+        externalPauseEvmAddress,
+      );
+    });
+  });
+});

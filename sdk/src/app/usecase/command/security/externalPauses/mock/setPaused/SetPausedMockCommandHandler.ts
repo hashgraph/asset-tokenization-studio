@@ -211,10 +211,7 @@ import {
 } from './SetPausedMockCommand';
 import TransactionService from '../../../../../../service/TransactionService';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter';
+import ContractService from '../../../../../../../app/service/ContractService';
 
 @CommandHandler(SetPausedMockCommand)
 export class SetPausedMockCommandHandler
@@ -223,10 +220,8 @@ export class SetPausedMockCommandHandler
   constructor(
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    public readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -235,13 +230,14 @@ export class SetPausedMockCommandHandler
     const { contractId, paused } = command;
     const handler = this.transactionService.getHandler();
 
-    const contractEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(contractId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(contractId)).evmAddress
-        : contractId.toString(),
-    );
+    const contractEvmAddress =
+      await this.contractService.getContractEvmAddress(contractId);
 
-    const res = await handler.setPausedMock(contractEvmAddress, paused);
+    const res = await handler.setPausedMock(
+      contractEvmAddress,
+      paused,
+      contractId,
+    );
 
     return Promise.resolve(
       new SetPausedMockCommandResponse(res.error === undefined, res.id!),

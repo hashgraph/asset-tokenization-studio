@@ -838,6 +838,51 @@ Revokes a role from an account
   - TransactionId:
     Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
+## External Pauses Management
+
+### addExternalPause
+
+Adds a new external pause address to a specific asset.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - externalPauseAddress: address of the external pause to be added.
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId:
+    Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### removeExternalPause
+
+Removes an existing external pause address from a specific asset.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - externalPauseAddress: address of the external pause to be removed.
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId:
+    Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### updateExternalPauses
+
+Updates the active status of multiple external pause addresses for a specific asset.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - externalPausesAddresses: List of external pause addresses.
+  - actives: list of boolean indicating whether the correspond externalPause (from the above mentioned role list) should be added or removed.
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId:
+    Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
 ## External Control Lists Management
 
 ### addExternalControlList
@@ -876,7 +921,7 @@ Updates the active status of multiple external control list addresses for a spec
 
   - securityId: Hedera id of the diamond contract representing the asset
   - externalControlListsAddresses: List of external control list addresses.
-  - actives: list of boolean indicating whether the correspond externalControlList (from the above mentioned role list) should be added or removed.
+  - actives: list of boolean indicating whether the correspond externalControlList (from the above mentioned external control list) should be added or removed.
 
 - Response
   - Payload: True (success), false (failed)

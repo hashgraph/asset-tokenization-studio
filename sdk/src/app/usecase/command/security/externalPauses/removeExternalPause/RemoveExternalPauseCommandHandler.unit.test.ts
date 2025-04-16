@@ -203,58 +203,111 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import TransactionService from '../../../../../service/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/AccountService.js';
 import {
-  CreateExternalPauseMockCommand,
-  CreateExternalPauseMockCommandResponse,
-} from './CreateExternalPauseMockCommand';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../../app/service/TransactionService';
-import { EmptyResponse } from '../../../error/EmptyResponse';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse';
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import {
+  RemoveExternalPauseCommand,
+  RemoveExternalPauseCommandResponse,
+} from './RemoveExternalPauseCommand.js';
+import { RemoveExternalPauseCommandHandler } from './RemoveExternalPauseCommandHandler.js';
+import { RemoveExternalPauseCommandFixture } from '../../../../../../../__tests__/fixtures/externalPauses/ExternalPausesFixture.js';
 
-@CommandHandler(CreateExternalPauseMockCommand)
-export class CreateExternalPauseMockCommandHandler
-  implements ICommandHandler<CreateExternalPauseMockCommand>
-{
-  constructor(
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-  ) {}
+describe('RemoveExternalPauseCommandHandler', () => {
+  let handler: RemoveExternalPauseCommandHandler;
+  let command: RemoveExternalPauseCommand;
 
-  async execute(): Promise<CreateExternalPauseMockCommandResponse> {
-    const handler = this.transactionService.getHandler();
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-    const res = await handler.createExternalPauseMock();
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const transactionId = TransactionIdFixture.create().id;
 
-    let contractAddress: string;
+  beforeEach(() => {
+    handler = new RemoveExternalPauseCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      contractServiceMock,
+      validationServiceMock,
+    );
+    command = RemoveExternalPauseCommandFixture.create();
+  });
 
-    if (typeof res === 'string') {
-      contractAddress = res;
-    } else {
-      if (!res.id)
-        throw new EmptyResponse(CreateExternalPauseMockCommandHandler.name);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
+  describe('execute', () => {
+    it('should successfully remove pause', async () => {
+      contractServiceMock.getContractEvmAddress
+        .mockResolvedValueOnce(evmAddress)
+        .mockResolvedValueOnce(externalEvmAddress);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+      validationServiceMock.checkPause.mockResolvedValue(undefined);
+      validationServiceMock.checkRole.mockResolvedValue(undefined);
+      transactionServiceMock
+        .getHandler()
+        .removeExternalPause.mockResolvedValue({
+          id: transactionId,
+        });
+
+      const result = await handler.execute(command);
+
+      expect(result).toBeInstanceOf(RemoveExternalPauseCommandResponse);
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        2,
+      );
+      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().removeExternalPause,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+        SecurityRole._PAUSE_MANAGER_ROLE,
+        account.id.toString(),
+        command.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
         1,
-        true,
+        command.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        2,
+        command.externalPauseAddress,
       );
 
-      if (!results || results.length !== 1) {
-        throw new InvalidResponse(results);
-      }
-      contractAddress = results[0];
-    }
-
-    const address = (
-      await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-    ).id.toString();
-
-    return Promise.resolve(new CreateExternalPauseMockCommandResponse(address));
-  }
-}
+      expect(
+        transactionServiceMock.getHandler().removeExternalPause,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        externalEvmAddress,
+        command.securityId,
+      );
+    });
+  });
+});

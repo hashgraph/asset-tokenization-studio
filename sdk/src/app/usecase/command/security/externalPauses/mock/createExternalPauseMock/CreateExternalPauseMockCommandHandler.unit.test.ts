@@ -203,58 +203,116 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import TransactionService from '../../../../../../service/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
 import {
-  CreateExternalPauseMockCommand,
-  CreateExternalPauseMockCommandResponse,
-} from './CreateExternalPauseMockCommand';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../../app/service/TransactionService';
-import { EmptyResponse } from '../../../error/EmptyResponse';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse';
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import Account from '../../../../../../../domain/context/account/Account.js';
+import { EmptyResponse } from '../../../error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { CreateExternalPauseMockCommandHandler } from './CreateExternalPauseMockCommandHandler.js';
+import { CreateExternalPauseMockCommandResponse } from './CreateExternalPauseMockCommand.js';
 
-@CommandHandler(CreateExternalPauseMockCommand)
-export class CreateExternalPauseMockCommandHandler
-  implements ICommandHandler<CreateExternalPauseMockCommand>
-{
-  constructor(
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-  ) {}
+describe('CreateExternalPauseMockCommandHandler', () => {
+  let handler: CreateExternalPauseMockCommandHandler;
 
-  async execute(): Promise<CreateExternalPauseMockCommandResponse> {
-    const handler = this.transactionService.getHandler();
+  const transactionServiceMock = createMock<TransactionService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
 
-    const res = await handler.createExternalPauseMock();
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const transactionId = TransactionIdFixture.create().id;
 
-    let contractAddress: string;
+  beforeEach(() => {
+    handler = new CreateExternalPauseMockCommandHandler(
+      mirrorNodeAdapterMock,
+      transactionServiceMock,
+    );
+  });
 
-    if (typeof res === 'string') {
-      contractAddress = res;
-    } else {
-      if (!res.id)
-        throw new EmptyResponse(CreateExternalPauseMockCommandHandler.name);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        1,
-        true,
+  describe('execute', () => {
+    it('should successfully create external pause mock if return an Id', async () => {
+      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+
+      transactionServiceMock
+        .getHandler()
+        .createExternalPauseMock.mockResolvedValue(transactionId);
+
+      const result = await handler.execute();
+
+      expect(result).toBeInstanceOf(CreateExternalPauseMockCommandResponse);
+      expect(result.payload).toBe(account.id.toString());
+
+      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().createExternalPauseMock,
+      ).toHaveBeenCalledTimes(1);
+      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
+        transactionId,
+      );
+      expect(
+        transactionServiceMock.getHandler().createExternalPauseMock,
+      ).toHaveBeenCalledWith();
+    });
+
+    it('should successfully create external pause mock if return an address', async () => {
+      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+
+      transactionServiceMock
+        .getHandler()
+        .createExternalPauseMock.mockResolvedValue(transactionId);
+
+      const result = await handler.execute();
+
+      expect(result).toBeInstanceOf(CreateExternalPauseMockCommandResponse);
+      expect(result.payload).toBe(account.id.toString());
+
+      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().createExternalPauseMock,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
+        transactionId,
       );
 
-      if (!results || results.length !== 1) {
-        throw new InvalidResponse(results);
-      }
-      contractAddress = results[0];
-    }
+      expect(
+        transactionServiceMock.getHandler().createExternalPauseMock,
+      ).toHaveBeenCalledWith();
+    });
 
-    const address = (
-      await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-    ).id.toString();
+    it('throws error when transaction response id is missing', async () => {
+      transactionServiceMock
+        .getHandler()
+        .createExternalPauseMock.mockResolvedValue({ id: undefined });
 
-    return Promise.resolve(new CreateExternalPauseMockCommandResponse(address));
-  }
-}
+      await expect(handler.execute()).rejects.toThrow(EmptyResponse);
+    });
+
+    it('throws error when result length is different', async () => {
+      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+      mirrorNodeAdapterMock.getContractResults.mockResolvedValueOnce([
+        account.id.toString(),
+        account.id.toString(),
+      ]);
+
+      transactionServiceMock
+        .getHandler()
+        .createExternalPauseMock.mockResolvedValue({
+          id: transactionId,
+        });
+
+      await expect(handler.execute()).rejects.toThrow(InvalidResponse);
+    });
+  });
+});

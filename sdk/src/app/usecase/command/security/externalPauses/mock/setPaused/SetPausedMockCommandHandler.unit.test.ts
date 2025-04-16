@@ -203,258 +203,80 @@
 
 */
 
+import TransactionService from '../../../../../../service/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
 import {
-  AddExternalPauseRequest,
-  CreateEquityRequest,
-  Equity,
-  GetExternalPausesCountRequest,
-  GetExternalPausesMembersRequest,
-  IsExternalPauseRequest,
-  LoggerTransports,
-  RemoveExternalPauseRequest,
-  Role,
-  RoleRequest,
-  SDK,
-  UpdateExternalPausesRequest,
-} from '../../../src';
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import {
-  CastRegulationSubType,
-  CastRegulationType,
-  RegulationSubType,
-  RegulationType,
-} from '../../../src/domain/context/factory/RegulationType';
-import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';
-import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter';
-import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter';
-import NetworkService from '../../../src/app/service/NetworkService';
-import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter';
-import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel';
-import {
-  CLIENT_ACCOUNT_ECDSA,
-  CLIENT_ACCOUNT_ECDSA_A,
-  FACTORY_ADDRESS,
-  RESOLVER_ADDRESS,
-} from '../../config';
-import Injectable from '../../../src/core/Injectable';
-import Account from '../../../src/domain/context/account/Account';
-import { ethers, Wallet } from 'ethers';
-import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
-import ExternalPausesManagement from '../../../src/port/in/ExternalPausesManagement';
+  SetPausedMockCommand,
+  SetPausedMockCommandResponse,
+} from './SetPausedMockCommand.js';
+import { SetPausedMockCommandHandler } from './SetPausedMockCommandHandler.js';
+import { SetPausedMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalPauses/ExternalPausesFixture.js';
 
-SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
+describe('SetPausedMockCommandHandler', () => {
+  let handler: SetPausedMockCommandHandler;
+  let command: SetPausedMockCommand;
 
-const decimals = 0;
-const name = 'TEST_SECURITY_TOKEN';
-const symbol = 'TEST';
-const isin = 'ABCDE123456Z';
-const votingRight = true;
-const informationRight = false;
-const liquidationRight = true;
-const subscriptionRight = false;
-const conversionRight = true;
-const redemptionRight = false;
-const putRight = true;
-const dividendRight = 1;
-const currency = '0x345678';
-const numberOfShares = 0;
-const nominalValue = 1000;
-const regulationType = RegulationType.REG_D;
-const regulationSubType = RegulationSubType.B_506;
-const countries = 'AF,HG,BN';
-const info = 'Anything';
-const configId =
-  '0x0000000000000000000000000000000000000000000000000000000000000000';
-const configVersion = 1;
+  const transactionServiceMock = createMock<TransactionService>();
+  const contractServiceMock = createMock<ContractService>();
 
-const mirrorNode: MirrorNode = {
-  name: 'testmirrorNode',
-  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
-};
-
-const rpcNode: JsonRpcRelay = {
-  name: 'testrpcNode',
-  baseUrl: 'http://127.0.0.1:7546/api',
-};
-
-let th: RPCTransactionAdapter;
-let mirrorNodeAdapter: MirrorNodeAdapter;
-
-describe('🧪 External Pauses Management tests', () => {
-  let ns: NetworkService;
-  let rpcQueryAdapter: RPCQueryAdapter;
-  let equity: SecurityViewModel;
-
-  const url = 'http://127.0.0.1:7546';
-  const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
-
-  const wallet = new Wallet(
-    CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-    customHttpProvider,
+  const contractEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
   );
 
-  beforeAll(async () => {
-    try {
-      mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
-      mirrorNodeAdapter.set(mirrorNode);
+  const transactionId = TransactionIdFixture.create().id;
 
-      th = Injectable.resolve(RPCTransactionAdapter);
-      ns = Injectable.resolve(NetworkService);
-      rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
-
-      rpcQueryAdapter.init();
-      ns.environment = 'testnet';
-      ns.configuration = {
-        factoryAddress: FACTORY_ADDRESS,
-        resolverAddress: RESOLVER_ADDRESS,
-      };
-      ns.mirrorNode = mirrorNode;
-      ns.rpcNode = rpcNode;
-
-      await th.init(true);
-      const account = new Account({
-        id: CLIENT_ACCOUNT_ECDSA.id.toString(),
-        evmAddress: CLIENT_ACCOUNT_ECDSA.evmAddress,
-        alias: CLIENT_ACCOUNT_ECDSA.alias,
-        privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
-        publicKey: CLIENT_ACCOUNT_ECDSA.publicKey,
-      });
-      await th.register(account, true);
-
-      th.signerOrProvider = wallet;
-
-      const requestST = new CreateEquityRequest({
-        name,
-        symbol,
-        isin,
-        decimals,
-        isWhiteList: false,
-        isControllable: true,
-        arePartitionsProtected: false,
-        clearingActive: false,
-        isMultiPartition: false,
-        diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
-        votingRight,
-        informationRight,
-        liquidationRight,
-        subscriptionRight,
-        conversionRight,
-        redemptionRight,
-        putRight,
-        dividendRight,
-        currency,
-        numberOfShares: numberOfShares.toString(),
-        nominalValue: nominalValue.toString(),
-        regulationType: CastRegulationType.toNumber(regulationType),
-        regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
-        isCountryControlListWhiteList: true,
-        countries,
-        info,
-        configId,
-        configVersion,
-        externalPauses: [CLIENT_ACCOUNT_ECDSA.id.toString()],
-      });
-
-      equity = (await Equity.create(requestST)).security;
-    } catch (error) {
-      console.error('Error in beforeAll setup:', error);
-    }
-
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._PAUSE_MANAGER_ROLE,
-      }),
+  beforeEach(() => {
+    handler = new SetPausedMockCommandHandler(
+      transactionServiceMock,
+      contractServiceMock,
     );
-  }, 900_000);
+    command = SetPausedMockCommandFixture.create();
+  });
 
-  it('External Pause functionality work successfully', async () => {
-    expect(
-      await ExternalPausesManagement.getExternalPausesCount(
-        new GetExternalPausesCountRequest({
-          securityId: equity.evmDiamondAddress!,
-        }),
-      ),
-    ).toEqual(1);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    expect(
-      (
-        await ExternalPausesManagement.updateExternalPauses(
-          new UpdateExternalPausesRequest({
-            securityId: equity.evmDiamondAddress!,
-            externalPausesAddresses: [
-              CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-            ],
-            actives: [true],
-          }),
-        )
-      ).payload,
-    ).toBe(true);
+  describe('execute', () => {
+    it('should successfully set pause mock', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        contractEvmAddress,
+      );
 
-    expect(
-      await ExternalPausesManagement.isExternalPause(
-        new IsExternalPauseRequest({
-          securityId: equity.evmDiamondAddress!,
-          externalPauseAddress: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-        }),
-      ),
-    ).toBe(true);
+      transactionServiceMock.getHandler().setPausedMock.mockResolvedValue({
+        id: transactionId,
+      });
 
-    expect(
-      await ExternalPausesManagement.getExternalPausesCount(
-        new GetExternalPausesCountRequest({
-          securityId: equity.evmDiamondAddress!,
-        }),
-      ),
-    ).toEqual(2);
+      const result = await handler.execute(command);
 
-    expect(
-      await ExternalPausesManagement.getExternalPausesMembers(
-        new GetExternalPausesMembersRequest({
-          securityId: equity.evmDiamondAddress!,
-          start: 0,
-          end: 2,
-        }),
-      ),
-    ).toContain(CLIENT_ACCOUNT_ECDSA_A.id!.toString());
+      expect(result).toBeInstanceOf(SetPausedMockCommandResponse);
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
 
-    expect(
-      (
-        await ExternalPausesManagement.removeExternalPause(
-          new RemoveExternalPauseRequest({
-            securityId: equity.evmDiamondAddress!,
-            externalPauseAddress: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-          }),
-        )
-      ).payload,
-    ).toBe(true);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(
+        transactionServiceMock.getHandler().setPausedMock,
+      ).toHaveBeenCalledTimes(1);
 
-    expect(
-      await ExternalPausesManagement.getExternalPausesCount(
-        new GetExternalPausesCountRequest({
-          securityId: equity.evmDiamondAddress!,
-        }),
-      ),
-    ).toEqual(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        command.contractId,
+      );
 
-    expect(
-      (
-        await ExternalPausesManagement.addExternalPause(
-          new AddExternalPauseRequest({
-            securityId: equity.evmDiamondAddress!,
-            externalPauseAddress: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-          }),
-        )
-      ).payload,
-    ).toBe(true);
-
-    expect(
-      await ExternalPausesManagement.getExternalPausesCount(
-        new GetExternalPausesCountRequest({
-          securityId: equity.evmDiamondAddress!,
-        }),
-      ),
-    ).toEqual(2);
-  }, 600_000);
+      expect(
+        transactionServiceMock.getHandler().setPausedMock,
+      ).toHaveBeenCalledWith(
+        contractEvmAddress,
+        command.paused,
+        command.contractId,
+      );
+    });
+  });
 });

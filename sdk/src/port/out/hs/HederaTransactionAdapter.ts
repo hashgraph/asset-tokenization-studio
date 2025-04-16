@@ -315,6 +315,7 @@ import {
   REMOVE_EXTERNAL_PAUSE_GAS,
   ADD_EXTERNAL_PAUSE_GAS,
   CREATE_EXTERNAL_PAUSE_MOCK_GAS,
+  SET_PAUSED_MOCK_GAS,
   UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
   ADD_EXTERNAL_CONTROL_LIST_GAS,
   REMOVE_EXTERNAL_CONTROL_LIST_GAS,
@@ -3175,6 +3176,37 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(REMOVE_EXTERNAL_PAUSE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'setPaused';
+    LogService.logTrace(
+      `Setting paused to external pause mock contract ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedExternalPause__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [paused],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(SET_PAUSED_MOCK_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
