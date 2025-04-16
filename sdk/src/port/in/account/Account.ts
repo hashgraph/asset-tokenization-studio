@@ -203,178 +203,53 @@
 
 */
 
-import NetworkService from '../../app/service/NetworkService.js';
-import SecurityService from '../../app/service/security/SecurityService.js';
-import { GrantRoleCommand } from '../../app/usecase/command/security/roles/grantRole/GrantRoleCommand.js';
-import { RevokeRoleCommand } from '../../app/usecase/command/security/roles/revokeRole/RevokeRoleCommand.js';
-import { GetRoleCountForQuery } from '../../app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery.js';
-import { GetRoleMemberCountQuery } from '../../app/usecase/query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery.js';
-import { GetRoleMembersQuery } from '../../app/usecase/query/security/roles/getRoleMembers/GetRoleMembersQuery.js';
-import { GetRolesForQuery } from '../../app/usecase/query/security/roles/getRolesFor/GetRolesForQuery.js';
-import { HasRoleQuery } from '../../app/usecase/query/security/roles/hasRole/HasRoleQuery.js';
-import Injectable from '../../core/Injectable.js';
-import { CommandBus } from '../../core/command/CommandBus.js';
-import { lazyInject } from '../../core/decorator/LazyInjectDecorator.js';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+import AccountViewModel from './../response/AccountViewModel.js';
+import GetAccountInfoRequest from './../request/account/GetAccountInfoRequest.js';
+import GetAccountBalanceRequest from './../request/account/GetAccountBalanceRequest.js';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
-import GetRoleCountForRequest from './request/security/roles/GetRoleCountForRequest.js';
-import GetRoleMemberCountRequest from './request/security/roles/GetRoleMemberCountRequest.js';
-import GetRoleMembersRequest from './request/security/roles/GetRoleMembersRequest.js';
-import GetRolesForRequest from './request/security/roles/GetRolesForRequest.js';
-import RoleRequest from './request/security/roles/RoleRequest.js';
-import ApplyRolesRequest from './request/security/roles/ApplyRolesRequest.js';
-import { ApplyRolesCommand } from '../../app/usecase/command/security/roles/applyRoles/ApplyRolesCommand.js';
+import { GetAccountInfoQuery } from '../../../app/usecase/query/account/info/GetAccountInfoQuery.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import Injectable from '../../../core/Injectable.js';
+import { HederaId } from '../../../domain/context/shared/HederaId.js';
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+import { GetAccountBalanceQuery } from '../../../app/usecase/query/account/balance/GetAccountBalanceQuery.js';
+import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
 
-interface IRole {
-  hasRole(request: RoleRequest): Promise<boolean>;
-  grantRole(
-    request: RoleRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  revokeRole(
-    request: RoleRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  getRoleCountFor(request: GetRoleCountForRequest): Promise<number>;
-  getRolesFor(request: GetRolesForRequest): Promise<string[]>;
-  getRoleMemberCount(request: GetRoleMemberCountRequest): Promise<number>;
-  getRoleMembers(request: GetRoleMembersRequest): Promise<string[]>;
-  applyRoles(
-    request: ApplyRolesRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
+interface IAccountInPort {
+  getInfo(request: GetAccountInfoRequest): Promise<AccountViewModel>;
 }
 
-class RoleInPort implements IRole {
+class AccountInPort implements IAccountInPort {
   constructor(
     private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly securityService: SecurityService = Injectable.resolve(
-      SecurityService,
-    ),
-    private readonly networkService: NetworkService = Injectable.resolve(
-      NetworkService,
-    ),
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
-      MirrorNodeAdapter,
-    ),
   ) {}
 
   @LogError
-  async hasRole(request: RoleRequest): Promise<boolean> {
-    const { securityId, targetId, role } = request;
-    ValidatedRequest.handleValidation('RoleRequest', request);
-    return (
-      await this.queryBus.execute(new HasRoleQuery(role!, targetId, securityId))
-    ).payload;
-  }
-
-  @LogError
-  async grantRole(
-    request: RoleRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, targetId, role } = request;
-    ValidatedRequest.handleValidation('RoleRequest', request);
-
-    return await this.commandBus.execute(
-      new GrantRoleCommand(role!, targetId, securityId),
+  async getInfo(request: GetAccountInfoRequest): Promise<AccountViewModel> {
+    ValidatedRequest.handleValidation('GetAccountInfoRequest', request);
+    const res = await this.queryBus.execute(
+      new GetAccountInfoQuery(HederaId.from(request.account.accountId)),
     );
+    const account: AccountViewModel = {
+      id: res.account.id.toString(),
+      accountEvmAddress: res.account.evmAddress,
+      publicKey: res.account.publicKey ? res.account.publicKey : undefined,
+      alias: res.account.alias,
+    };
+
+    return account;
   }
 
   @LogError
-  async revokeRole(
-    request: RoleRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, targetId, role } = request;
-    ValidatedRequest.handleValidation('RoleRequest', request);
-
-    return await this.commandBus.execute(
-      new RevokeRoleCommand(role!, targetId, securityId),
+  async getBalance(request: GetAccountBalanceRequest): Promise<BigDecimal> {
+    ValidatedRequest.handleValidation('GetAccountBalanceRequest', request);
+    const res = await this.queryBus.execute(
+      new GetAccountBalanceQuery(request.securityId, request.targetId),
     );
-  }
-
-  @LogError
-  async getRoleCountFor(request: GetRoleCountForRequest): Promise<number> {
-    ValidatedRequest.handleValidation('GetRoleCountForRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetRoleCountForQuery(request.targetId, request.securityId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getRolesFor(request: GetRolesForRequest): Promise<string[]> {
-    ValidatedRequest.handleValidation('GetRolesForRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetRolesForQuery(
-          request.targetId,
-          request.securityId,
-          request.start,
-          request.end,
-        ),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getRoleMemberCount(
-    request: GetRoleMemberCountRequest,
-  ): Promise<number> {
-    ValidatedRequest.handleValidation('GetRoleMemberCountRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetRoleMemberCountQuery(request.role!, request.securityId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getRoleMembers(request: GetRoleMembersRequest): Promise<string[]> {
-    ValidatedRequest.handleValidation('GetRoleMembersRequest', request);
-
-    const membersIds: string[] = [];
-
-    const membersEvmAddresses = (
-      await this.queryBus.execute(
-        new GetRoleMembersQuery(
-          request.role!,
-          request.securityId,
-          request.start,
-          request.end,
-        ),
-      )
-    ).payload;
-
-    let mirrorAccount;
-
-    for (let i = 0; i < membersEvmAddresses.length; i++) {
-      mirrorAccount = await this.mirrorNode.getAccountInfo(
-        membersEvmAddresses[i],
-      );
-      membersIds.push(mirrorAccount.id.toString());
-    }
-
-    return membersIds;
-  }
-
-  @LogError
-  async applyRoles(
-    request: ApplyRolesRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, targetId, roles, actives } = request;
-    ValidatedRequest.handleValidation('ApplyRolesRequest', request);
-
-    return await this.commandBus.execute(
-      new ApplyRolesCommand(roles, actives, targetId, securityId),
-    );
+    return res.payload;
   }
 }
 
-const Role = new RoleInPort();
-export default Role;
+const Account = new AccountInPort();
+export default Account;

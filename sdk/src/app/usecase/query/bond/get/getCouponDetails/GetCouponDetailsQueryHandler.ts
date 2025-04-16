@@ -211,7 +211,7 @@ import {
   GetCouponDetailsQuery,
   GetCouponDetailsQueryResponse,
 } from './GetCouponDetailsQuery.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { CouponDetails } from '../../../../../../domain/context/bond/CouponDetails.js';
 

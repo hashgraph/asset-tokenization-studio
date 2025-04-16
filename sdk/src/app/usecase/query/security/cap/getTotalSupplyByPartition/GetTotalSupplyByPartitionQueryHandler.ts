@@ -214,7 +214,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 
 @QueryHandler(GetTotalSupplyByPartitionQuery)
 export class GetMaxSupplyByPartitionQueryHandler

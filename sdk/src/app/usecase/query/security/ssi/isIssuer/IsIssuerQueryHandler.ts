@@ -209,8 +209,8 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter'
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { IsIssuerQuery, IsIssuerQueryResponse } from './IsIssuerQuery';
-import ContractService from '../../../../../service/ContractService';
-import AccountService from '../../../../../service/AccountService';
+import ContractService from '../../../../../service/contract/ContractService';
+import AccountService from '../../../../../service/account/AccountService';
 
 @QueryHandler(IsIssuerQuery)
 export class IsIssuerQueryHandler implements IQueryHandler<IsIssuerQuery> {

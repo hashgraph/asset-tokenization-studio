@@ -212,7 +212,7 @@ import {
   IsClearingActivatedQuery,
   IsClearingActivatedQueryResponse,
 } from './IsClearingActivatedQuery';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 
 @QueryHandler(IsClearingActivatedQuery)
 export class IsClearingActivatedQueryHandler

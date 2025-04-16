@@ -212,7 +212,7 @@ import {
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 
 @CommandHandler(SetDividendsCommand)
 export class SetDividendsCommandHandler

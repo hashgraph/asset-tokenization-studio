@@ -213,14 +213,14 @@ import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDeco
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import TransactionService from '../../../../service/transaction/TransactionService.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
 
 @CommandHandler(CreateBondCommand)
 export class CreateBondCommandHandler

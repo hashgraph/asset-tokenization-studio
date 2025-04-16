@@ -213,10 +213,10 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 
 @CommandHandler(SetScheduledBalanceAdjustmentCommand)
 export class SetScheduledBalanceAdjustmentCommandHandler
