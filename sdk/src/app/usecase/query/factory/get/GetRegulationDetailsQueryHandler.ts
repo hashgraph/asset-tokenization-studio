@@ -213,7 +213,7 @@ import {
   GetRegulationDetailsQueryResponse,
 } from './GetRegulationDetailsQuery.js';
 import { Regulation } from '../../../../../domain/context/factory/Regulation.js';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import { InvalidRequest } from '../../error/InvalidRequest.js';
 
 @QueryHandler(GetRegulationDetailsQuery)

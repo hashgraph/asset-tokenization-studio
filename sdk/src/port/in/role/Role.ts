@@ -203,253 +203,178 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import Injectable from '../../core/Injectable.js';
-import { CommandBus } from '../../core/command/CommandBus.js';
-import { InitializationData, NetworkData } from '../out/TransactionAdapter.js';
-import { ConnectCommand } from '../../app/usecase/command/network/connect/ConnectCommand.js';
-import ConnectRequest, {
-  AWSKMSConfigRequest,
-  DFNSConfigRequest,
-  FireblocksConfigRequest,
-  SupportedWallets,
-} from './request/network/ConnectRequest.js';
-import RequestMapper from './request/mapping/RequestMapper.js';
-import TransactionService from '../../app/service/transaction/TransactionService.js';
-import NetworkService from '../../app/service/NetworkService.js';
-import SetNetworkRequest from './request/network/SetNetworkRequest.js';
-import { SetNetworkCommand } from '../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
-import { SetConfigurationCommand } from '../../app/usecase/command/network/setConfiguration/SetConfigurationCommand.js';
-import {
-  Environment,
-  unrecognized,
-} from '../../domain/context/network/Environment.js';
-import InitializationRequest from './request/network/InitializationRequest.js';
-import Event from './Event.js';
-import { RPCTransactionAdapter } from '../out/rpc/RPCTransactionAdapter.js';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import SetConfigurationRequest from './request/management/SetConfigurationRequest.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+import NetworkService from '../../../app/service/network/NetworkService.js';
+import SecurityService from '../../../app/service/security/SecurityService.js';
+import { GrantRoleCommand } from '../../../app/usecase/command/security/roles/grantRole/GrantRoleCommand.js';
+import { RevokeRoleCommand } from '../../../app/usecase/command/security/roles/revokeRole/RevokeRoleCommand.js';
+import { GetRoleCountForQuery } from '../../../app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery.js';
+import { GetRoleMemberCountQuery } from '../../../app/usecase/query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery.js';
+import { GetRoleMembersQuery } from '../../../app/usecase/query/security/roles/getRoleMembers/GetRoleMembersQuery.js';
+import { GetRolesForQuery } from '../../../app/usecase/query/security/roles/getRolesFor/GetRolesForQuery.js';
+import { HasRoleQuery } from '../../../app/usecase/query/security/roles/hasRole/HasRoleQuery.js';
+import Injectable from '../../../core/Injectable.js';
+import { CommandBus } from '../../../core/command/CommandBus.js';
+import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import { MirrorNodeAdapter } from '../../out/mirror/MirrorNodeAdapter.js';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
-import { MirrorNode } from '../../domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
-import { HederaWalletConnectTransactionAdapter } from '../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
-import { DFNSTransactionAdapter } from '../out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import DfnsSettings from '../../core/settings/custodialWalletSettings/DfnsSettings.js';
-import { FireblocksTransactionAdapter } from '../out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import FireblocksSettings from '../../core/settings/custodialWalletSettings/FireblocksSettings.js';
-import { AWSKMSTransactionAdapter } from '../out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
-import LogService from '../../app/service/LogService.js';
+import GetRoleCountForRequest from '../request/security/roles/GetRoleCountForRequest.js';
+import GetRoleMemberCountRequest from '../request/security/roles/GetRoleMemberCountRequest.js';
+import GetRoleMembersRequest from '../request/security/roles/GetRoleMembersRequest.js';
+import GetRolesForRequest from '../request/security/roles/GetRolesForRequest.js';
+import RoleRequest from '../request/security/roles/RoleRequest.js';
+import ApplyRolesRequest from '../request/security/roles/ApplyRolesRequest.js';
+import { ApplyRolesCommand } from '../../../app/usecase/command/security/roles/applyRoles/ApplyRolesCommand.js';
 
-export { InitializationData, NetworkData, SupportedWallets };
-
-export type NetworkResponse = {
-  environment: Environment;
-  mirrorNode: MirrorNode;
-  rpcNode: JsonRpcRelay;
-  consensusNodes: string;
-};
-
-export type ConfigResponse = {
-  factoryAddress: string;
-  resolverAddress: string;
-};
-
-interface INetworkInPort {
-  connect(req: ConnectRequest): Promise<InitializationData>;
-  disconnect(): Promise<boolean>;
-  setNetwork(req: SetNetworkRequest): Promise<NetworkResponse>;
-  setConfig(req: SetConfigurationRequest): Promise<ConfigResponse>;
-  getFactoryAddress(): string;
-  getResolverAddress(): string;
-  getNetwork(): string;
-  isNetworkRecognized(): boolean;
+interface IRole {
+  hasRole(request: RoleRequest): Promise<boolean>;
+  grantRole(
+    request: RoleRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  revokeRole(
+    request: RoleRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  getRoleCountFor(request: GetRoleCountForRequest): Promise<number>;
+  getRolesFor(request: GetRolesForRequest): Promise<string[]>;
+  getRoleMemberCount(request: GetRoleMemberCountRequest): Promise<number>;
+  getRoleMembers(request: GetRoleMembersRequest): Promise<string[]>;
+  applyRoles(
+    request: ApplyRolesRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
-class NetworkInPort implements INetworkInPort {
+class RoleInPort implements IRole {
   constructor(
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
     private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly transactionService: TransactionService = Injectable.resolve(
-      TransactionService,
+    private readonly securityService: SecurityService = Injectable.resolve(
+      SecurityService,
     ),
     private readonly networkService: NetworkService = Injectable.resolve(
       NetworkService,
     ),
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
+      MirrorNodeAdapter,
+    ),
   ) {}
 
   @LogError
-  async setConfig(req: SetConfigurationRequest): Promise<ConfigResponse> {
-    ValidatedRequest.handleValidation('SetConfigurationRequest', req);
-
-    const res = await this.commandBus.execute(
-      new SetConfigurationCommand(req.factoryAddress, req.resolverAddress),
-    );
-    return res;
+  async hasRole(request: RoleRequest): Promise<boolean> {
+    const { securityId, targetId, role } = request;
+    ValidatedRequest.handleValidation('RoleRequest', request);
+    return (
+      await this.queryBus.execute(new HasRoleQuery(role!, targetId, securityId))
+    ).payload;
   }
 
   @LogError
-  public getFactoryAddress(): string {
-    return this.networkService.configuration
-      ? this.networkService.configuration.factoryAddress
-      : '';
+  async grantRole(
+    request: RoleRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, targetId, role } = request;
+    ValidatedRequest.handleValidation('RoleRequest', request);
+
+    return await this.commandBus.execute(
+      new GrantRoleCommand(role!, targetId, securityId),
+    );
   }
 
   @LogError
-  public getResolverAddress(): string {
-    return this.networkService.configuration
-      ? this.networkService.configuration.resolverAddress
-      : '';
+  async revokeRole(
+    request: RoleRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, targetId, role } = request;
+    ValidatedRequest.handleValidation('RoleRequest', request);
+
+    return await this.commandBus.execute(
+      new RevokeRoleCommand(role!, targetId, securityId),
+    );
   }
 
   @LogError
-  public getNetwork(): string {
-    return this.networkService.environment;
+  async getRoleCountFor(request: GetRoleCountForRequest): Promise<number> {
+    ValidatedRequest.handleValidation('GetRoleCountForRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetRoleCountForQuery(request.targetId, request.securityId),
+      )
+    ).payload;
   }
 
   @LogError
-  public isNetworkRecognized(): boolean {
-    return this.networkService.environment != unrecognized;
+  async getRolesFor(request: GetRolesForRequest): Promise<string[]> {
+    ValidatedRequest.handleValidation('GetRolesForRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetRolesForQuery(
+          request.targetId,
+          request.securityId,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
   }
 
   @LogError
-  async setNetwork(req: SetNetworkRequest): Promise<NetworkResponse> {
-    ValidatedRequest.handleValidation('SetNetworkRequest', req);
+  async getRoleMemberCount(
+    request: GetRoleMemberCountRequest,
+  ): Promise<number> {
+    ValidatedRequest.handleValidation('GetRoleMemberCountRequest', request);
 
-    const res = await this.commandBus.execute(
-      new SetNetworkCommand(
-        req.environment,
-        req.mirrorNode,
-        req.rpcNode,
-        req.consensusNodes,
-      ),
-    );
-    return res;
+    return (
+      await this.queryBus.execute(
+        new GetRoleMemberCountQuery(request.role!, request.securityId),
+      )
+    ).payload;
   }
 
   @LogError
-  async init(req: InitializationRequest): Promise<SupportedWallets[]> {
-    ValidatedRequest.handleValidation('InitializationRequest', req);
+  async getRoleMembers(request: GetRoleMembersRequest): Promise<string[]> {
+    ValidatedRequest.handleValidation('GetRoleMembersRequest', request);
 
-    await this.setNetwork(
-      new SetNetworkRequest({
-        environment: req.network,
-        mirrorNode: req.mirrorNode,
-        rpcNode: req.rpcNode,
-      }),
-    );
+    const membersIds: string[] = [];
 
-    if (req.configuration)
-      if (req.configuration.factoryAddress && req.configuration.resolverAddress)
-        await this.setConfig(
-          new SetConfigurationRequest({
-            factoryAddress: req.configuration.factoryAddress,
-            resolverAddress: req.configuration.resolverAddress,
-          }),
-        );
+    const membersEvmAddresses = (
+      await this.queryBus.execute(
+        new GetRoleMembersQuery(
+          request.role!,
+          request.securityId,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
 
-    req.events && Event.register(req.events);
-    const wallets: SupportedWallets[] = [];
-    const instances = Injectable.registerTransactionAdapterInstances();
-    for (const val of instances) {
-      if (val instanceof RPCTransactionAdapter) {
-        wallets.push(SupportedWallets.METAMASK);
-      } else if (val instanceof HederaWalletConnectTransactionAdapter) {
-        wallets.push(SupportedWallets.HWALLETCONNECT);
-      } else if (val instanceof DFNSTransactionAdapter) {
-        wallets.push(SupportedWallets.DFNS);
-      } else if (val instanceof FireblocksTransactionAdapter) {
-        wallets.push(SupportedWallets.FIREBLOCKS);
-      } else if (val instanceof AWSKMSTransactionAdapter) {
-        wallets.push(SupportedWallets.AWSKMS);
-      }
-      await val.init();
+    let mirrorAccount;
 
-      if (val instanceof RPCTransactionAdapter) {
-        val.setMirrorNodes(req.mirrorNodes);
-        val.setJsonRpcRelays(req.jsonRpcRelays);
-        val.setFactories(req.factories);
-        val.setResolvers(req.resolvers);
-      }
-    }
-    return wallets;
-  }
-
-  @LogError
-  async connect(req: ConnectRequest): Promise<InitializationData> {
-    LogService.logInfo('ConnectRequest from network', req);
-    ValidatedRequest.handleValidation('ConnectRequest', req);
-
-    const account = req.account
-      ? RequestMapper.mapAccount(req.account)
-      : undefined;
-    const debug = req.debug ?? false;
-    const hwcSettings = req.hwcSettings
-      ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings)
-      : undefined;
-    const custodialSettings = this.getCustodialSettings(req);
-    LogService.logTrace(
-      'SetNetworkCommand',
-      req.network,
-      req.mirrorNode,
-      req.rpcNode,
-    );
-    await this.commandBus.execute(
-      new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode),
-    );
-
-    LogService.logTrace(
-      'ConnectRequest',
-      req.wallet,
-      account,
-      hwcSettings,
-      debug,
-      custodialSettings,
-    );
-    const res = await this.commandBus.execute(
-      new ConnectCommand(
-        req.network,
-        req.wallet,
-        account,
-        hwcSettings,
-        debug,
-        custodialSettings,
-      ),
-    );
-    return res.payload;
-  }
-
-  private getCustodialSettings(
-    req: ConnectRequest,
-  ): DfnsSettings | FireblocksSettings | AWSKMSConfigRequest | undefined {
-    if (!req.custodialWalletSettings) {
-      return undefined;
+    for (let i = 0; i < membersEvmAddresses.length; i++) {
+      mirrorAccount = await this.mirrorNode.getAccountInfo(
+        membersEvmAddresses[i],
+      );
+      membersIds.push(mirrorAccount.id.toString());
     }
 
-    switch (req.wallet) {
-      case SupportedWallets.DFNS:
-        return RequestMapper.dfnsRequestToDfnsSettings(
-          req.custodialWalletSettings as DFNSConfigRequest,
-        );
-
-      case SupportedWallets.FIREBLOCKS:
-        return RequestMapper.fireblocksRequestToFireblocksSettings(
-          req.custodialWalletSettings as FireblocksConfigRequest,
-        );
-
-      case SupportedWallets.AWSKMS:
-        return RequestMapper.awsKmsRequestToAwsKmsSettings(
-          req.custodialWalletSettings as AWSKMSConfigRequest,
-        );
-
-      default:
-        return undefined;
-    }
+    return membersIds;
   }
 
-  disconnect(): Promise<boolean> {
-    return this.transactionService.getHandler().stop();
+  @LogError
+  async applyRoles(
+    request: ApplyRolesRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, targetId, roles, actives } = request;
+    ValidatedRequest.handleValidation('ApplyRolesRequest', request);
+
+    return await this.commandBus.execute(
+      new ApplyRolesCommand(roles, actives, targetId, securityId),
+    );
   }
 }
 
-const Network = new NetworkInPort();
-export default Network;
+const Role = new RoleInPort();
+export default Role;

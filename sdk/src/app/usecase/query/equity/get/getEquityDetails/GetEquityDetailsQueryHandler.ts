@@ -211,7 +211,7 @@ import {
   GetEquityDetailsQuery,
   GetEquityDetailsQueryResponse,
 } from './GetEquityDetailsQuery.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { EquityDetails } from '../../../../../../domain/context/equity/EquityDetails.js';
 

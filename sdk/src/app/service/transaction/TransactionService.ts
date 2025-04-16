@@ -210,7 +210,7 @@ import TransactionAdapter from '../../../port/out/TransactionAdapter.js';
 import Service from '../Service.js';
 import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
 import { InvalidWalletTypeError } from '../../../domain/context/network/error/InvalidWalletAccountTypeError.js';
-import LogService from '../LogService.js';
+import LogService from '../log/LogService.js';
 import { HederaWalletConnectTransactionAdapter } from '../../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.js';
 import { DFNSTransactionAdapter } from '../../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
 import { FireblocksTransactionAdapter } from '../../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';

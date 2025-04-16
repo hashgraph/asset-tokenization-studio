@@ -205,7 +205,7 @@
 
 import { singleton } from 'tsyringe';
 import Injectable from '../../../core/Injectable.js';
-import AccountService from '../AccountService.js';
+import AccountService from '../account/AccountService.js';
 import Service from '../Service.js';
 import { QueryBus } from '../../../core/query/QueryBus.js';
 import { Security } from '../../../domain/context/security/Security.js';

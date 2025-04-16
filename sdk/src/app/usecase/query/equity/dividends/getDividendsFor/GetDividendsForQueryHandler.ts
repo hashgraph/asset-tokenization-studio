@@ -211,9 +211,9 @@ import {
   GetDividendsForQueryResponse,
 } from './GetDividendsForQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 
 @QueryHandler(GetDividendsForQuery)
 export class GetDividendsForQueryHandler

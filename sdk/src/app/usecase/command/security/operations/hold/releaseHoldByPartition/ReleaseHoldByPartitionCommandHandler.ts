@@ -214,9 +214,9 @@ import TransactionService from '../../../../../../service/transaction/Transactio
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 
 @CommandHandler(ReleaseHoldByPartitionCommand)
 export class ReleaseHoldByPartitionCommandHandler

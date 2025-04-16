@@ -212,8 +212,8 @@ import {
 } from './GetRoleCountForQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService';
-import ContractService from '../../../../../service/ContractService.js';
+import AccountService from '../../../../../service/account/AccountService';
+import ContractService from '../../../../../service/contract/ContractService.js';
 
 @QueryHandler(GetRoleCountForQuery)
 export class GetRoleCountForQueryHandler

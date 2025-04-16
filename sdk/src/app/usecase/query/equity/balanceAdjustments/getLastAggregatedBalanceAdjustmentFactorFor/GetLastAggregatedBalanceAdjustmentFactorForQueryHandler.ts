@@ -207,13 +207,13 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetLastAggregatedBalanceAdjustmentFactorForQuery,
   GetLastAggregatedBalanceAdjustmentFactorForQueryResponse,
 } from './GetLastAggregatedBalanceAdjustmentFactorForQuery';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 
 @QueryHandler(GetLastAggregatedBalanceAdjustmentFactorForQuery)
 export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler

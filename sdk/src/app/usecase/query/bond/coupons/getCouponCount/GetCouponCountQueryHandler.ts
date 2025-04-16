@@ -212,7 +212,7 @@ import {
 } from './GetCouponCountQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 
 @QueryHandler(GetCouponCountQuery)
 export class GetCouponCountQueryHandler

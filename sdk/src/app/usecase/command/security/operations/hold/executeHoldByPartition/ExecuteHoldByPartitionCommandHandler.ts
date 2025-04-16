@@ -215,9 +215,9 @@ import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecora
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 
 @CommandHandler(ExecuteHoldByPartitionCommand)
 export class ExecuteHoldByPartitionCommandHandler

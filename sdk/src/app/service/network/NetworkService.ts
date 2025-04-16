@@ -203,53 +203,71 @@
 
 */
 
-import AccountViewModel from './response/AccountViewModel.js';
-import GetAccountInfoRequest from './request/account/GetAccountInfoRequest.js';
-import GetAccountBalanceRequest from './request/account/GetAccountBalanceRequest.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+import { singleton, inject } from 'tsyringe';
+import Configuration from '../../../domain/context/network/Configuration.js';
+import { Environment } from '../../../domain/context/network/Environment.js';
+import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
+import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay.js';
+import Service from '../Service.js';
 
-import { GetAccountInfoQuery } from '../../app/usecase/query/account/info/GetAccountInfoQuery.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import Injectable from '../../core/Injectable.js';
-import { HederaId } from '../../domain/context/shared/HederaId.js';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { GetAccountBalanceQuery } from '../../app/usecase/query/account/balance/GetAccountBalanceQuery.js';
-import BigDecimal from '../../domain/context/shared/BigDecimal.js';
-
-interface IAccountInPort {
-  getInfo(request: GetAccountInfoRequest): Promise<AccountViewModel>;
+export interface NetworkProps {
+  environment: Environment;
+  mirrorNode: MirrorNode;
+  rpcNode: JsonRpcRelay;
+  consensusNodes?: string;
+  configuration?: Configuration;
 }
 
-class AccountInPort implements IAccountInPort {
-  constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-  ) {}
+@singleton()
+export default class NetworkService extends Service implements NetworkProps {
+  private _environment: Environment;
+  private _mirrorNode: MirrorNode;
+  private _rpcNode: JsonRpcRelay;
+  private _consensusNodes?: string | undefined;
+  private _configuration: Configuration;
 
-  @LogError
-  async getInfo(request: GetAccountInfoRequest): Promise<AccountViewModel> {
-    ValidatedRequest.handleValidation('GetAccountInfoRequest', request);
-    const res = await this.queryBus.execute(
-      new GetAccountInfoQuery(HederaId.from(request.account.accountId)),
-    );
-    const account: AccountViewModel = {
-      id: res.account.id.toString(),
-      accountEvmAddress: res.account.evmAddress,
-      publicKey: res.account.publicKey ? res.account.publicKey : undefined,
-      alias: res.account.alias,
-    };
-
-    return account;
+  public set environment(value: Environment) {
+    this._environment = value;
   }
 
-  @LogError
-  async getBalance(request: GetAccountBalanceRequest): Promise<BigDecimal> {
-    ValidatedRequest.handleValidation('GetAccountBalanceRequest', request);
-    const res = await this.queryBus.execute(
-      new GetAccountBalanceQuery(request.securityId, request.targetId),
-    );
-    return res.payload;
+  public get environment(): Environment {
+    return this._environment;
+  }
+
+  public set configuration(value: Configuration) {
+    this._configuration = value;
+  }
+
+  public get configuration(): Configuration {
+    return this._configuration;
+  }
+
+  public get mirrorNode(): MirrorNode {
+    return this._mirrorNode;
+  }
+
+  public set mirrorNode(value: MirrorNode) {
+    this._mirrorNode = value;
+  }
+
+  public get rpcNode(): JsonRpcRelay {
+    return this._rpcNode;
+  }
+
+  public set rpcNode(value: JsonRpcRelay) {
+    this._rpcNode = value;
+  }
+
+  public get consensusNodes(): string | undefined {
+    return this._consensusNodes;
+  }
+
+  public set consensusNodes(value: string | undefined) {
+    this._consensusNodes = value;
+  }
+
+  constructor(@inject('NetworkProps') props?: NetworkProps) {
+    super();
+    Object.assign(this, props);
   }
 }
-
-const Account = new AccountInPort();
-export default Account;

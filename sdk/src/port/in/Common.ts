@@ -206,7 +206,7 @@
 import { transports } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import TransportStream from 'winston-transport';
-import LogService from '../../app/service/LogService.js';
+import LogService from '../../app/service/log/LogService.js';
 
 // App Metadata
 export type AppMetadata = {

@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
@@ -213,9 +213,9 @@ import {
   CancelClearingOperationByPartitionCommand,
   CancelClearingOperationByPartitionCommandResponse,
 } from './CancelClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 
 @CommandHandler(CancelClearingOperationByPartitionCommand)
 export class CancelClearingOperationByPartitionCommandHandler

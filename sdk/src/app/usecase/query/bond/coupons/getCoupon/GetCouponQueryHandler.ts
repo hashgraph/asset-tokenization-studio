@@ -209,7 +209,7 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { GetCouponQuery, GetCouponQueryResponse } from './GetCouponQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 
 @QueryHandler(GetCouponQuery)
 export class GetCouponQueryHandler implements IQueryHandler<GetCouponQuery> {

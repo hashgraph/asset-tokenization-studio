@@ -214,12 +214,12 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
 import TransactionService from '../../../../service/transaction/TransactionService.js';
-import NetworkService from '../../../../service/NetworkService.js';
+import NetworkService from '../../../../service/network/NetworkService.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { EquityDetails } from '../../../../../domain/context/equity/EquityDetails.js';
-import ContractService from '../../../../service/ContractService.js';
-import AccountService from '../../../../service/AccountService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 
 @CommandHandler(CreateEquityCommand)

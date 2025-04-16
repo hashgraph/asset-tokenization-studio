@@ -210,13 +210,13 @@ import {
 } from './ProtectPartitionsCommand';
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import AccountService from '../../../../../service/AccountService';
+import AccountService from '../../../../../service/account/AccountService';
 import SecurityService from '../../../../../service/security/SecurityService';
 import TransactionService from '../../../../../service/transaction/TransactionService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import ValidationService from '../../../../../service/ValidationService';
-import ContractService from '../../../../../service/ContractService';
+import ValidationService from '../../../../../service/validation/ValidationService';
+import ContractService from '../../../../../service/contract/ContractService';
 
 @CommandHandler(ProtectPartitionsCommand)
 export class ProtectPartitionsCommandHandler

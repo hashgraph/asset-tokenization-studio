@@ -179,7 +179,7 @@ import {
   UpdateResolverCommand,
   UpdateResolverCommandResponse,
 } from './updateResolverCommand';
-import ContractService from '../../../../service/ContractService';
+import ContractService from '../../../../service/contract/ContractService';
 
 @CommandHandler(UpdateResolverCommand)
 export class UpdateResolverCommandHandler

@@ -212,9 +212,9 @@ import {
 } from './GetCouponForQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 
 @QueryHandler(GetCouponForQuery)
 export class GetCouponForQueryHandler

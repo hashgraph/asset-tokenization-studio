@@ -210,10 +210,10 @@ import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js'
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../service/security/SecurityService.js';
 import { Lock } from '../../../../../domain/context/security/Lock.js';
-import AccountService from '../../../../service/AccountService';
+import AccountService from '../../../../service/account/AccountService';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
 
 @QueryHandler(GetLockQuery)
 export class GetLockQueryHandler implements IQueryHandler<GetLockQuery> {

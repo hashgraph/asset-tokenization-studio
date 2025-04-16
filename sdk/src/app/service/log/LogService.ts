@@ -203,111 +203,95 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import UpdateConfigVersionRequest from './request/management/UpdateConfigVersionRequest';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs';
-import { UpdateConfigVersionCommand } from '../../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
-import { QueryBus } from '../../core/query/QueryBus';
-import Injectable from '../../core/Injectable';
-import { CommandBus } from '../../core/command/CommandBus';
-import { GetConfigInfoRequest } from './request';
-import UpdateResolverRequest from './request/management/UpdateResolverRequest';
-import { UpdateResolverCommand } from '../../app/usecase/command/management/updateResolver/updateResolverCommand';
-import ContractId from '../../domain/context/contract/ContractId.js';
-import { GetConfigInfoQuery } from '../../app/usecase/query/management/GetConfigInfoQuery';
-import ConfigInfoViewModel from './response/ConfigInfoViewModel';
-import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter';
-import { lazyInject } from '../../core/decorator/LazyInjectDecorator';
-import { UpdateConfigRequest } from './request';
-import { UpdateConfigCommand } from '../../app/usecase/command/management/updateConfig/updateConfigCommand';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createLogger, LoggerOptions, transports, format } from 'winston';
+import safeStringify from 'fast-safe-stringify';
+import BaseError from '../../../core/error/BaseError.js';
+//import { SDK } from '../../port/in/Common.js';
+//import Injectable from '../../core/Injectable.js';
 
-interface IManagementInPort {
-  updateConfigVersion(
-    request: UpdateConfigVersionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  updateConfig(
-    request: UpdateConfigRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
+const { Console } = transports;
+const { printf } = format;
 
-  getConfigInfo(request: GetConfigInfoRequest): Promise<ConfigInfoViewModel>;
-  updateResolver(
-    request: UpdateResolverRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
+export enum LogLevel {
+  TRACE = 'TRACE',
+  INFO = 'INFO',
+  ERROR = 'ERROR',
 }
 
-class ManagementInPort implements IManagementInPort {
-  constructor(
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
-      MirrorNodeAdapter,
-    ),
-  ) {}
+export const LoggerOptionLevels = {
+  [LogLevel.TRACE]: 3,
+  [LogLevel.INFO]: 2,
+  [LogLevel.ERROR]: 0,
+};
 
-  @LogError
-  async updateConfigVersion(
-    request: UpdateConfigVersionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configVersion, securityId } = request;
-    ValidatedRequest.handleValidation('UpdateConfigVersionRequest', request);
+export default class LogService {
+  public static instance: LogService = new LogService();
+  public static defaultFormat = printf(
+    ({ level, message, timestamp, other }) => {
+      const formatOther = (val: any[]): string => {
+        return val
+          .map((e) => {
+            switch (typeof e) {
+              case 'object':
+                return safeStringify(e);
+              default:
+                return e;
+            }
+          })
+          .join('\t');
+      };
+      return `${timestamp} - [${level}]\t${message}\t${formatOther(other as any[])}`;
+    },
+  );
 
-    return await this.commandBus.execute(
-      new UpdateConfigVersionCommand(configVersion, securityId),
-    );
+  private logger;
+  private readonly coreConfig: LoggerOptions = {
+    levels: LoggerOptionLevels,
+    exitOnError: false,
+  };
+  private readonly defaultConfig: LoggerOptions = {
+    transports: new Console(),
+    level: LogLevel.ERROR,
+    format: LogService.defaultFormat,
+  };
+
+  constructor(opts?: LoggerOptions) {
+    LogService.instance = this;
+    this.logger = createLogger({
+      ...(opts ? { ...this.defaultConfig, ...opts } : this.defaultConfig),
+      ...this.coreConfig,
+    });
   }
 
-  @LogError
-  async updateConfig(
-    request: UpdateConfigRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configId, configVersion, securityId } = request;
-    ValidatedRequest.handleValidation('UpdateConfigRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateConfigCommand(configId, configVersion, securityId),
-    );
+  public static log(level: LogLevel, message: any, params: any[]): void {
+    this.instance.logger.log(level, message, {
+      timestamp: new Date().toISOString(),
+      other: params,
+    });
   }
 
-  @LogError
-  async updateResolver(
-    request: UpdateResolverRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configId, securityId, resolver, configVersion } = request;
-    ValidatedRequest.handleValidation('UpdateResolverRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateResolverCommand(
-        configVersion,
-        securityId,
-        configId,
-        new ContractId(resolver),
-      ),
-    );
+  public static logError(error: unknown, ...params: any[]): void;
+  public static logError(error: BaseError, ...params: any[]): void {
+    if (error instanceof BaseError) {
+      this.log(
+        LogLevel.ERROR,
+        error
+          .toString
+          //Injectable.resolve<typeof SDK>('SDK').log.level === 'TRACE',
+          (),
+        params,
+      );
+    } else {
+      this.log(LogLevel.ERROR, error, params);
+    }
   }
 
-  @LogError
-  async getConfigInfo(
-    request: GetConfigInfoRequest,
-  ): Promise<ConfigInfoViewModel> {
-    ValidatedRequest.handleValidation('GetConfigInfoRequest', request);
+  public static logInfo(message: any, ...params: any[]): void {
+    this.log(LogLevel.INFO, message, params);
+  }
 
-    const { payload } = await this.queryBus.execute(
-      new GetConfigInfoQuery(request.securityId),
-    );
-    const { resolverAddress, configId, configVersion } = payload;
-
-    const resolverId = (await this.mirrorNode.getContractInfo(resolverAddress))
-      .id;
-
-    return {
-      resolverAddress: resolverId,
-      configId,
-      configVersion,
-    };
+  public static logTrace(message: any, ...params: any[]): void {
+    this.log(LogLevel.TRACE, message, params);
   }
 }
-
-const Management = new ManagementInPort();
-export default Management;

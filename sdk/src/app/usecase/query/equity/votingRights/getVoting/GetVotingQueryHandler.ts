@@ -209,7 +209,7 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { GetVotingQuery, GetVotingQueryResponse } from './GetVotingQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 
 @QueryHandler(GetVotingQuery)
 export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
