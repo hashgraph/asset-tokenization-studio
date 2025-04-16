@@ -235,6 +235,8 @@ import {
     ClearingHoldCreationFacet,
     ClearingReadFacet,
     ClearingActionsFacet,
+    ExternalPauseManagement,
+    ExternalControlListManagement,
     TimeTravel,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
@@ -270,6 +272,8 @@ export interface DeployAtsContractsResultParams {
     clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
     clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
     clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
+    externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
+    externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     deployer?: Signer
 }
@@ -305,6 +309,8 @@ export default class DeployAtsContractsResult {
     public readonly clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
     public readonly clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
     public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
+    public readonly externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
+    public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     public readonly deployer?: Signer
 
@@ -339,6 +345,8 @@ export default class DeployAtsContractsResult {
         clearingHoldCreationFacet,
         clearingReadFacet,
         clearingActionsFacet,
+        externalPauseManagement,
+        externalControlListManagement,
         timeTravel,
         deployer,
     }: DeployAtsContractsResultParams) {
@@ -372,6 +380,8 @@ export default class DeployAtsContractsResult {
         this.clearingHoldCreationFacet = clearingHoldCreationFacet
         this.clearingReadFacet = clearingReadFacet
         this.clearingActionsFacet = clearingActionsFacet
+        this.externalPauseManagement = externalPauseManagement
+        this.externalControlListManagement = externalControlListManagement
         this.timeTravel = timeTravel
         // Deployer
         this.deployer = deployer

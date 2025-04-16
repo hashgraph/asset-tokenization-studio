@@ -298,6 +298,8 @@ function buildEmptyEnvironment(): Environment {
             adjustBalances: {} as IStaticFunctionSelectors,
             protectedPartitions: {} as IStaticFunctionSelectors,
             Hold: {} as IStaticFunctionSelectors,
+            externalPauseManagement: {} as IStaticFunctionSelectors,
+            externalControlListManagement: {} as IStaticFunctionSelectors,
         },
         facetIdsEquities: [],
         facetVersionsEquities: [],

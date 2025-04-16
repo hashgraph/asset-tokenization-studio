@@ -228,6 +228,12 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   clearingActive: boolean;
 
   @OptionalField()
+  externalPauses?: string[];
+
+  @OptionalField()
+  externalControlLists?: string[];
+
+  @OptionalField()
   diamondOwnerAccount?: string;
 
   currency: string;
@@ -256,6 +262,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     arePartitionsProtected,
     isMultiPartition,
     clearingActive,
+    externalPauses,
+    externalControlLists,
     diamondOwnerAccount,
     currency,
     numberOfUnits,
@@ -282,6 +290,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     arePartitionsProtected: boolean;
     isMultiPartition: boolean;
     clearingActive: boolean;
+    externalPauses?: string[];
+    externalControlLists?: string[];
     diamondOwnerAccount?: string;
     currency: string;
     numberOfUnits: string;
@@ -348,6 +358,20 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
       configId: Validation.checkBytes32Format(),
+      externalPauses: (val) => {
+        return Validation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalPauses',
+          true,
+        );
+      },
+      externalControlLists: (val) => {
+        return Validation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalControlLists',
+          true,
+        );
+      },
     });
     this.name = name;
     this.symbol = symbol;
@@ -360,6 +384,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.isMultiPartition = isMultiPartition;
     this.clearingActive = clearingActive;
     this.diamondOwnerAccount = diamondOwnerAccount;
+    this.externalPauses = externalPauses;
+    this.externalControlLists = externalControlLists;
     this.currency = currency;
     this.numberOfUnits = numberOfUnits;
     this.nominalValue = nominalValue;
