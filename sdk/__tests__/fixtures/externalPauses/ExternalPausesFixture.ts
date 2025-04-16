@@ -203,58 +203,132 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
-import {
-  CreateExternalPauseMockCommand,
-  CreateExternalPauseMockCommandResponse,
-} from './CreateExternalPauseMockCommand';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../../app/service/TransactionService';
-import { EmptyResponse } from '../../../error/EmptyResponse';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse';
+import { AddExternalPauseCommand } from '../../../src/app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommand';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { createFixture } from '../config';
+import { SetPausedMockCommand } from '../../../src/app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommand';
+import { RemoveExternalPauseCommand } from '../../../src/app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand';
+import { UpdateExternalPausesCommand } from '../../../src/app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
+import UpdateExternalPausesRequest from '../../../src/port/in/request/security/externalPauses/UpdateExternalPausesRequest';
+import AddExternalPauseRequest from '../../../src/port/in/request/security/externalPauses/AddExternalPauseRequest';
+import RemoveExternalPauseRequest from '../../../src/port/in/request/security/externalPauses/RemoveExternalPauseRequest';
+import IsExternalPauseRequest from '../../../src/port/in/request/security/externalPauses/IsExternalPauseRequest';
+import GetExternalPausesCountRequest from '../../../src/port/in/request/security/externalPauses/GetExternalPausesCountRequest';
+import GetExternalPausesMembersRequest from '../../../src/port/in/request/security/externalPauses/GetExternalPausesMembersRequest';
+import SetPausedMockRequest from '../../../src/port/in/request/security/externalPauses/mock/SetPausedMockRequest';
+import IsPausedMockRequest from '../../../src/port/in/request/security/externalPauses/mock/IsPausedMockRequest';
+import { GetExternalPausesCountQuery } from '../../../src/app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery';
+import { GetExternalPausesMembersQuery } from '../../../src/app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery';
+import { IsExternalPauseQuery } from '../../../src/app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery';
+import { IsPausedMockQuery } from '../../../src/app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery';
 
-@CommandHandler(CreateExternalPauseMockCommand)
-export class CreateExternalPauseMockCommandHandler
-  implements ICommandHandler<CreateExternalPauseMockCommand>
-{
-  constructor(
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-  ) {}
+export const AddExternalPauseCommandFixture =
+  createFixture<AddExternalPauseCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.externalPauseAddress.as(() => HederaIdPropsFixture.create().value);
+  });
 
-  async execute(): Promise<CreateExternalPauseMockCommandResponse> {
-    const handler = this.transactionService.getHandler();
+export const SetPausedMockCommandFixture = createFixture<SetPausedMockCommand>(
+  (command) => {
+    command.contractId.as(() => HederaIdPropsFixture.create().value);
+    command.paused.faker((faker) => faker.datatype.boolean());
+  },
+);
 
-    const res = await handler.createExternalPauseMock();
+export const RemoveExternalPauseCommandFixture =
+  createFixture<RemoveExternalPauseCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.externalPauseAddress.as(() => HederaIdPropsFixture.create().value);
+  });
 
-    let contractAddress: string;
+export const UpdateExternalPausesCommandFixture =
+  createFixture<UpdateExternalPausesCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.externalPausesAddresses.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    command.actives.faker((faker) => [faker.datatype.boolean()]);
+  });
 
-    if (typeof res === 'string') {
-      contractAddress = res;
-    } else {
-      if (!res.id)
-        throw new EmptyResponse(CreateExternalPauseMockCommandHandler.name);
+export const GetExternalPausesCountQueryFixture =
+  createFixture<GetExternalPausesCountQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
 
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        1,
-        true,
-      );
+export const GetExternalPausesMembersQueryFixture =
+  createFixture<GetExternalPausesMembersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
 
-      if (!results || results.length !== 1) {
-        throw new InvalidResponse(results);
-      }
-      contractAddress = results[0];
-    }
+export const IsExternalPauseQueryFixture = createFixture<IsExternalPauseQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.externalPauseAddress.as(() => HederaIdPropsFixture.create().value);
+  },
+);
 
-    const address = (
-      await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-    ).id.toString();
+export const IsPausedMockQueryFixture = createFixture<IsPausedMockQuery>(
+  (query) => {
+    query.contractId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
 
-    return Promise.resolve(new CreateExternalPauseMockCommandResponse(address));
-  }
-}
+export const UpdateExternalPausesRequestFixture =
+  createFixture<UpdateExternalPausesRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.externalPausesAddresses.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    request.actives.faker((faker) => [faker.datatype.boolean()]);
+  });
+
+export const AddExternalPauseRequestFixture =
+  createFixture<AddExternalPauseRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.externalPauseAddress.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+  });
+
+export const RemoveExternalPauseRequestFixture =
+  createFixture<RemoveExternalPauseRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.externalPauseAddress.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+  });
+
+export const IsExternalPauseRequestFixture =
+  createFixture<IsExternalPauseRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.externalPauseAddress.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+  });
+
+export const GetExternalPausesCountRequestFixture =
+  createFixture<GetExternalPausesCountRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetExternalPausesMembersRequestFixture =
+  createFixture<GetExternalPausesMembersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const SetPausedMockRequestFixture = createFixture<SetPausedMockRequest>(
+  (request) => {
+    request.contractId.as(() => HederaIdPropsFixture.create().value);
+    request.paused.faker((faker) => faker.datatype.boolean());
+  },
+);
+
+export const IsPausedMockRequestFixture = createFixture<IsPausedMockRequest>(
+  (request) => {
+    request.contractId.as(() => HederaIdPropsFixture.create().value);
+  },
+);

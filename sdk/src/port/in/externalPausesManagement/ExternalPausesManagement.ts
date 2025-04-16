@@ -203,58 +203,172 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+import { handleValidation } from '../Common.js';
+import Injectable from '../../../core/Injectable.js';
+import { CommandBus } from '../../../core/command/CommandBus.js';
 import {
-  CreateExternalPauseMockCommand,
-  CreateExternalPauseMockCommandResponse,
-} from './CreateExternalPauseMockCommand';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../../app/service/TransactionService';
-import { EmptyResponse } from '../../../error/EmptyResponse';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse';
+  AddExternalPauseRequest,
+  RemoveExternalPauseRequest,
+  UpdateExternalPausesRequest,
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
+  IsExternalPauseRequest,
+  IsPausedMockRequest,
+  SetPausedMockRequest,
+} from '../request/index.js';
+import { UpdateExternalPausesCommand } from '../../../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand.js';
+import { SetPausedMockCommand } from '../../../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommand.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import { IsPausedMockQuery } from '../../../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery.js';
+import { AddExternalPauseCommand } from '../../../app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommand.js';
+import { RemoveExternalPauseCommand } from '../../../app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand.js';
+import { IsExternalPauseQuery } from '../../../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery.js';
+import { GetExternalPausesCountQuery } from '../../../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery.js';
+import { GetExternalPausesMembersQuery } from '../../../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery.js';
+import { CreateExternalPauseMockCommand } from '../../../app/usecase/command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommand.js';
 
-@CommandHandler(CreateExternalPauseMockCommand)
-export class CreateExternalPauseMockCommandHandler
-  implements ICommandHandler<CreateExternalPauseMockCommand>
+interface IExternalPausesInPort {
+  updateExternalPauses(
+    request: UpdateExternalPausesRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  addExternalPause(
+    request: AddExternalPauseRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeExternalPause(
+    request: RemoveExternalPauseRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  isExternalPause(request: IsExternalPauseRequest): Promise<boolean>;
+  getExternalPausesCount(
+    request: GetExternalPausesCountRequest,
+  ): Promise<number>;
+  getExternalPausesMembers(
+    request: GetExternalPausesMembersRequest,
+  ): Promise<string[]>;
+}
+
+interface IExternalPausesMocksInPort {
+  setPausedMock(
+    request: SetPausedMockRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  isPausedMock(request: IsPausedMockRequest): Promise<boolean>;
+  createMock(): Promise<string>;
+}
+
+class ExternalPausesInPort
+  implements IExternalPausesInPort, IExternalPausesMocksInPort
 {
   constructor(
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
+    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
   ) {}
 
-  async execute(): Promise<CreateExternalPauseMockCommandResponse> {
-    const handler = this.transactionService.getHandler();
+  @LogError
+  async updateExternalPauses(
+    request: UpdateExternalPausesRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, externalPausesAddresses, actives } = request;
+    handleValidation('UpdateExternalPausesRequest', request);
 
-    const res = await handler.createExternalPauseMock();
+    return await this.commandBus.execute(
+      new UpdateExternalPausesCommand(
+        securityId,
+        externalPausesAddresses,
+        actives,
+      ),
+    );
+  }
 
-    let contractAddress: string;
+  @LogError
+  async addExternalPause(
+    request: AddExternalPauseRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, externalPauseAddress } = request;
+    handleValidation('AddExternalPauseRequest', request);
 
-    if (typeof res === 'string') {
-      contractAddress = res;
-    } else {
-      if (!res.id)
-        throw new EmptyResponse(CreateExternalPauseMockCommandHandler.name);
+    return await this.commandBus.execute(
+      new AddExternalPauseCommand(securityId, externalPauseAddress),
+    );
+  }
 
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        1,
-        true,
-      );
+  @LogError
+  async removeExternalPause(
+    request: RemoveExternalPauseRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, externalPauseAddress } = request;
+    handleValidation('RemoveExternalPauseRequest', request);
 
-      if (!results || results.length !== 1) {
-        throw new InvalidResponse(results);
-      }
-      contractAddress = results[0];
-    }
+    return await this.commandBus.execute(
+      new RemoveExternalPauseCommand(securityId, externalPauseAddress),
+    );
+  }
 
-    const address = (
-      await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-    ).id.toString();
+  @LogError
+  async isExternalPause(request: IsExternalPauseRequest): Promise<boolean> {
+    const { securityId, externalPauseAddress } = request;
+    handleValidation('IsExternalPauseRequest', request);
 
-    return Promise.resolve(new CreateExternalPauseMockCommandResponse(address));
+    return (
+      await this.queryBus.execute(
+        new IsExternalPauseQuery(securityId, externalPauseAddress),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getExternalPausesCount(
+    request: GetExternalPausesCountRequest,
+  ): Promise<number> {
+    const { securityId } = request;
+    handleValidation('GetExternalPausesCountRequest', request);
+
+    return (
+      await this.queryBus.execute(new GetExternalPausesCountQuery(securityId))
+    ).payload;
+  }
+
+  @LogError
+  async getExternalPausesMembers(
+    request: GetExternalPausesMembersRequest,
+  ): Promise<string[]> {
+    const { securityId, start, end } = request;
+    handleValidation('GetExternalPausesMembersRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetExternalPausesMembersQuery(securityId, start, end),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async setPausedMock(
+    request: SetPausedMockRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { contractId, paused } = request;
+    handleValidation('SetPausedMockRequest', request);
+
+    return await this.commandBus.execute(
+      new SetPausedMockCommand(contractId, paused),
+    );
+  }
+
+  @LogError
+  async isPausedMock(request: IsPausedMockRequest): Promise<boolean> {
+    const { contractId } = request;
+    handleValidation('IsPausedMockRequest', request);
+
+    return (await this.queryBus.execute(new IsPausedMockQuery(contractId)))
+      .payload;
+  }
+
+  @LogError
+  async createMock(): Promise<string> {
+    return (await this.commandBus.execute(new CreateExternalPauseMockCommand()))
+      .payload;
   }
 }
+
+const ExternalPausesManagement = new ExternalPausesInPort();
+export default ExternalPausesManagement;

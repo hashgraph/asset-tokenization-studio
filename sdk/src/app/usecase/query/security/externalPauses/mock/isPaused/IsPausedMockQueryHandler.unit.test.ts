@@ -203,58 +203,63 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import { createMock } from '@golevelup/ts-jest';
+import { EvmAddressPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { IsPausedMockQueryHandler } from './IsPausedMockQueryHandler.js';
 import {
-  CreateExternalPauseMockCommand,
-  CreateExternalPauseMockCommandResponse,
-} from './CreateExternalPauseMockCommand';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../../app/service/TransactionService';
-import { EmptyResponse } from '../../../error/EmptyResponse';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse';
+  IsPausedMockQuery,
+  IsPausedMockQueryResponse,
+} from './IsPausedMockQuery.js';
+import { IsPausedMockQueryFixture } from '../../../../../../../../__tests__/fixtures/externalPauses/ExternalPausesFixture.js';
 
-@CommandHandler(CreateExternalPauseMockCommand)
-export class CreateExternalPauseMockCommandHandler
-  implements ICommandHandler<CreateExternalPauseMockCommand>
-{
-  constructor(
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-  ) {}
+describe('IsPausedMockQueryHandler', () => {
+  let handler: IsPausedMockQueryHandler;
+  let query: IsPausedMockQuery;
 
-  async execute(): Promise<CreateExternalPauseMockCommandResponse> {
-    const handler = this.transactionService.getHandler();
+  const rpcQueryAdapterMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
 
-    const res = await handler.createExternalPauseMock();
+  const contractEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
 
-    let contractAddress: string;
+  beforeEach(() => {
+    handler = new IsPausedMockQueryHandler(
+      contractServiceMock,
+      rpcQueryAdapterMock,
+    );
+    query = IsPausedMockQueryFixture.create();
+  });
 
-    if (typeof res === 'string') {
-      contractAddress = res;
-    } else {
-      if (!res.id)
-        throw new EmptyResponse(CreateExternalPauseMockCommandHandler.name);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        1,
-        true,
+  describe('execute', () => {
+    it('should successfully verify if is pause', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        contractEvmAddress,
       );
+      rpcQueryAdapterMock.isPausedMock.mockResolvedValue(true);
 
-      if (!results || results.length !== 1) {
-        throw new InvalidResponse(results);
-      }
-      contractAddress = results[0];
-    }
+      const result = await handler.execute(query);
 
-    const address = (
-      await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-    ).id.toString();
+      expect(result).toBeInstanceOf(IsPausedMockQueryResponse);
+      expect(result.payload).toBe(true);
 
-    return Promise.resolve(new CreateExternalPauseMockCommandResponse(address));
-  }
-}
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(rpcQueryAdapterMock.isPausedMock).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.contractId,
+      );
+      expect(rpcQueryAdapterMock.isPausedMock).toHaveBeenCalledWith(
+        contractEvmAddress,
+      );
+    });
+  });
+});

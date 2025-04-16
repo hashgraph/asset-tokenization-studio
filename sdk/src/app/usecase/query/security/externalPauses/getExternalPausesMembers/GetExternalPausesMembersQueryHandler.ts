@@ -208,13 +208,13 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../../service/SecurityService.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import {
   GetExternalPausesMembersQuery,
   GetExternalPausesMembersQueryResponse,
 } from './GetExternalPausesMembersQuery.js';
+import ContractService from '../../../../../../app/service/ContractService.js';
+import AccountService from '../../../../../../app/service/AccountService.js';
 
 @QueryHandler(GetExternalPausesMembersQuery)
 export class GetExternalPausesMembersQueryHandler
@@ -223,8 +223,10 @@ export class GetExternalPausesMembersQueryHandler
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
   ) {}
@@ -233,14 +235,10 @@ export class GetExternalPausesMembersQueryHandler
     query: GetExternalPausesMembersQuery,
   ): Promise<GetExternalPausesMembersQueryResponse> {
     const { securityId, start, end } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
+    await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
 
     const res = await this.queryAdapter.getExternalPausesMembers(
       securityEvmAddress,
@@ -250,7 +248,7 @@ export class GetExternalPausesMembersQueryHandler
 
     const updatedRes = await Promise.all(
       res.map(async (address) =>
-        (await this.mirrorNodeAdapter.getAccountInfo(address)).id.toString(),
+        (await this.accountService.getAccountInfo(address)).id.toString(),
       ),
     );
 
