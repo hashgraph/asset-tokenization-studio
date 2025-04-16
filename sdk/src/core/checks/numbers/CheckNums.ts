@@ -265,6 +265,7 @@ export default class CheckNums {
 
   public static isBigDecimal(value: any): boolean {
     try {
+      if (value instanceof BigDecimal) return true;
       BigDecimal.fromString(value);
       return true;
     } catch (err) {

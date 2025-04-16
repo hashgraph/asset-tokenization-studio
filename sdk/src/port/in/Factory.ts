@@ -208,7 +208,8 @@ import Injectable from '../../core/Injectable.js';
 import GetRegulationDetailsRequest from './request/factory/GetRegulationDetailsRequest.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import RegulationViewModel from './response/RegulationViewModel.js';
-import { handleValidation } from './Common.js';
+import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+
 import { GetRegulationDetailsQuery } from '../../app/usecase/query/factory/get/GetRegulationDetailsQuery.js';
 import ContractId from '../../domain/context/contract/ContractId.js';
 import NetworkService from '../../app/service/NetworkService.js';
@@ -231,7 +232,7 @@ class FactoryInPort implements IFactoryInPort {
   async getRegulationDetails(
     request: GetRegulationDetailsRequest,
   ): Promise<RegulationViewModel> {
-    handleValidation('GetRegulationDetailsRequest', request);
+    ValidatedRequest.handleValidation('GetRegulationDetailsRequest', request);
 
     const securityFactory = this.networkService.configuration.factoryAddress;
 

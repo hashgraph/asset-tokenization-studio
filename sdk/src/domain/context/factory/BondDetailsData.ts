@@ -203,9 +203,35 @@
 
 */
 
-export class BondDetailsData {
+import ValidatedDomain from '../../../core/validation/ValidatedArgs';
+import { SecurityDate } from '../shared/SecurityDate';
+
+export class BondDetailsData extends ValidatedDomain<BondDetailsData> {
   public currency: string;
   public nominalValue: string;
   public startingDate: string;
   public maturityDate: string;
+
+  constructor(
+    currency: string,
+    nominalValue: string,
+    startingDate: string,
+    maturityDate: string,
+  ) {
+    super({
+      maturityDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          parseInt(this.startingDate),
+        );
+      },
+    });
+
+    this.currency = currency;
+    this.nominalValue = nominalValue;
+    this.startingDate = startingDate;
+    this.maturityDate = maturityDate;
+
+    ValidatedDomain.handleValidation(BondDetailsData.name, this);
+  }
 }

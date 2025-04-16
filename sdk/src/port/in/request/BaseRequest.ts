@@ -203,10 +203,9 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export interface BaseRequest {
-  [n: string]: any;
-}
+import { BaseArgs as BaseRequest } from '../../../core/validation/BaseArgs';
+
+export { BaseArgs as BaseRequest } from '../../../core/validation/BaseArgs';
 
 export interface RequestAccount {
   accountId: string;

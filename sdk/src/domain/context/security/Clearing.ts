@@ -208,7 +208,7 @@ import BigDecimal from '../shared/BigDecimal';
 import {
   InvalidClearingOperationType,
   InvalidClearingOperationTypeNumber,
-} from './error/InvalidClearingOperationType';
+} from './error/values/InvalidClearingOperationType';
 
 export class ClearingOperation {
   partition: string;

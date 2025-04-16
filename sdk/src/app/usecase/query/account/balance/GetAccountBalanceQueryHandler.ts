@@ -212,7 +212,7 @@ import {
   GetAccountBalanceQueryResponse,
 } from './GetAccountBalanceQuery.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import SecurityService from '../../../../service/SecurityService.js';
+import SecurityService from '../../../../service/security/SecurityService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import AccountService from '../../../../service/AccountService.js';
 import ContractService from '../../../../service/ContractService.js';

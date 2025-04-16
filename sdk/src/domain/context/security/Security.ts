@@ -203,26 +203,31 @@
 
 */
 
-import BaseEntity from '../BaseEntity.js';
 import BaseError from '../../../core/error/BaseError.js';
 import CheckNums from '../../../core/checks/numbers/CheckNums.js';
 import CheckStrings from '../../../core/checks/strings/CheckStrings.js';
-import InvalidDecimalRange from './error/InvalidDecimalRange.js';
-import NameEmpty from './error/NameEmpty.js';
-import NameLength from './error/NameLength.js';
-import SymbolEmpty from './error/SymbolEmpty.js';
-import SymbolLength from './error/SymbolLength.js';
+import InvalidDecimalRange from './error/values/InvalidDecimalRange.js';
+import NameEmpty from './error/values/NameEmpty.js';
+import NameLength from './error/values/NameLength.js';
+import SymbolEmpty from './error/values/SymbolEmpty.js';
+import SymbolLength from './error/values/SymbolLength.js';
 import EvmAddress from '../contract/EvmAddress.js';
 import BigDecimal from '../shared/BigDecimal.js';
 import { HederaId } from '../shared/HederaId.js';
 import { InvalidType } from '../../../port/in/request/error/InvalidType.js';
-import InvalidAmount from './error/InvalidAmount.js';
+import InvalidAmount from './error/values/InvalidAmount.js';
 import { SecurityType } from '../factory/SecurityType.js';
 import { Regulation } from '../factory/Regulation.js';
 import {
+  CastRegulationSubType,
+  CastRegulationType,
   RegulationSubType,
   RegulationType,
 } from '../factory/RegulationType.js';
+import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
+import { Factory } from '../factory/Factories.js';
+import { OptionalField } from '../../../core/decorator/OptionalDecorator.js';
+import InvalidSupply from './error/values/InvalidSupply.js';
 
 const TWELVE = 12;
 const TEN = 10;
@@ -255,7 +260,10 @@ export interface SecurityProps {
   info?: string;
 }
 
-export class Security extends BaseEntity implements SecurityProps {
+export class Security
+  extends ValidatedDomain<Security>
+  implements SecurityProps
+{
   name: string;
   symbol: string;
   isin: string;
@@ -267,12 +275,16 @@ export class Security extends BaseEntity implements SecurityProps {
   arePartitionsProtected: boolean;
   clearingActive: boolean;
   isIssuable?: boolean;
+  @OptionalField()
   totalSupply?: BigDecimal;
+  @OptionalField()
   maxSupply?: BigDecimal;
   diamondAddress?: HederaId;
   evmDiamondAddress?: EvmAddress;
   paused?: boolean;
+  @OptionalField()
   regulationType?: RegulationType;
+  @OptionalField()
   regulationsubType?: RegulationSubType;
   regulation?: Regulation;
   isCountryControlListWhiteList: boolean;
@@ -280,6 +292,20 @@ export class Security extends BaseEntity implements SecurityProps {
   info?: string;
 
   constructor(params: SecurityProps) {
+    super({
+      regulationType: (val) => {
+        return Factory.checkRegulationType(CastRegulationType.toNumber(val!));
+      },
+      regulationsubType: (val) => {
+        return Factory.checkRegulationSubType(
+          CastRegulationSubType.toNumber(val!),
+          CastRegulationType.toNumber(this.regulationType!),
+        );
+      },
+      totalSupply: (val) => {
+        return Security.checkSupply(val!, this.maxSupply!);
+      },
+    });
     const {
       name,
       symbol,
@@ -304,7 +330,6 @@ export class Security extends BaseEntity implements SecurityProps {
       countries,
       info,
     } = params;
-    super();
     this.name = name;
     this.symbol = symbol;
     this.isin = isin;
@@ -327,6 +352,8 @@ export class Security extends BaseEntity implements SecurityProps {
     this.isCountryControlListWhiteList = isCountryControlListWhiteList;
     this.countries = countries;
     this.info = info;
+
+    ValidatedDomain.handleValidation(Security.name, this);
   }
 
   public static checkName(value: string): BaseError[] {
@@ -402,5 +429,18 @@ export class Security extends BaseEntity implements SecurityProps {
     const val = amount.toString().split('.');
     const decimals = val.length > 1 ? val[1]?.length : 0;
     return decimals <= this.decimals;
+  }
+
+  public static checkSupply(
+    totalSupply: BigDecimal,
+    maxSupply: BigDecimal,
+  ): BaseError[] {
+    const errorList: BaseError[] = [];
+    if (totalSupply.isGreaterThan(maxSupply)) {
+      errorList.push(
+        new InvalidSupply(totalSupply.toString(), maxSupply.toString()),
+      );
+    }
+    return errorList;
   }
 }

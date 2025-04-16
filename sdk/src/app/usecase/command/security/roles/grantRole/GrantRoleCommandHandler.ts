@@ -208,7 +208,7 @@ import { ICommandHandler } from '../../../../../../core/command/CommandHandler.j
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
-import TransactionService from '../../../../../service/TransactionService.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import {
   GrantRoleCommand,
   GrantRoleCommandResponse,

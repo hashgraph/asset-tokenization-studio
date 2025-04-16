@@ -293,7 +293,7 @@ import {
   ReleaseHoldByPartitionRequest,
   ExecuteHoldByPartitionRequest,
   GetHeldAmountForRequest,
-  SSIManagement,
+  SsiManagement,
   GetRevocationRegistryAddressRequest,
   SetRevocationRegistryAddressRequest,
   GetIssuerListCountRequest,
@@ -301,13 +301,13 @@ import {
   AddIssuerRequest,
   RemoveIssuerRequest,
   IsIssuerRequest,
-  GetKYCForRequest,
-  GrantKYCRequest,
-  RevokeKYCRequest,
+  GetKycForRequest,
+  GrantKycRequest,
+  RevokeKycRequest,
   Kyc,
-  KYCViewModel,
+  KycViewModel,
   KycAccountDataViewModel,
-  GetKYCAccountsDataRequest,
+  GetKycAccountsDataRequest,
   ActivateClearingRequest,
   DeactivateClearingRequest,
   ReclaimClearingOperationByPartitionRequest,
@@ -854,60 +854,60 @@ export class SDKService {
   public static async getRevocationRegistryAddress(
     req: GetRevocationRegistryAddressRequest,
   ): Promise<string> {
-    return await SSIManagement.getRevocationRegistryAddress(req);
+    return await SsiManagement.getRevocationRegistryAddress(req);
   }
 
   public static async setRevocationRegistryAddress(
     req: SetRevocationRegistryAddressRequest,
   ): Promise<boolean> {
-    const response = await SSIManagement.setRevocationRegistryAddress(req);
+    const response = await SsiManagement.setRevocationRegistryAddress(req);
     return response.payload;
   }
 
   public static async getIssuerListCount(
     req: GetIssuerListCountRequest,
   ): Promise<number> {
-    return await SSIManagement.getIssuerListCount(req);
+    return await SsiManagement.getIssuerListCount(req);
   }
 
   public static async getIssuerListMembers(
     req: GetIssuerListMembersRequest,
   ): Promise<string[]> {
-    return await SSIManagement.getIssuerListMembers(req);
+    return await SsiManagement.getIssuerListMembers(req);
   }
 
   public static async addIssuer(req: AddIssuerRequest): Promise<boolean> {
-    const response = await SSIManagement.addIssuer(req);
+    const response = await SsiManagement.addIssuer(req);
     return response.payload;
   }
 
   public static async removeIssuer(req: RemoveIssuerRequest): Promise<boolean> {
-    const response = await SSIManagement.removeIssuer(req);
+    const response = await SsiManagement.removeIssuer(req);
     return response.payload;
   }
 
   public static async isIssuer(req: IsIssuerRequest): Promise<boolean> {
-    return await SSIManagement.isIssuer(req);
+    return await SsiManagement.isIssuer(req);
   }
 
   // KYC ////////////////////////////////////////////
-  public static async getKYCFor(req: GetKYCForRequest): Promise<KYCViewModel> {
-    return await Kyc.getKYCFor(req);
+  public static async getKYCFor(req: GetKycForRequest): Promise<KycViewModel> {
+    return await Kyc.getKycFor(req);
   }
 
   public static async getKYCAccountsData(
-    req: GetKYCAccountsDataRequest,
+    req: GetKycAccountsDataRequest,
   ): Promise<KycAccountDataViewModel[]> {
-    return await Kyc.getKYCAccountsData(req);
+    return await Kyc.getKycAccountsData(req);
   }
 
-  public static async grantKYC(req: GrantKYCRequest): Promise<boolean> {
-    const response = await Kyc.grantKYC(req);
+  public static async grantKYC(req: GrantKycRequest): Promise<boolean> {
+    const response = await Kyc.grantKyc(req);
     return response.payload;
   }
 
-  public static async revokeKYC(req: RevokeKYCRequest): Promise<boolean> {
-    const response = await Kyc.revokeKYC(req);
+  public static async revokeKYC(req: RevokeKycRequest): Promise<boolean> {
+    const response = await Kyc.revokeKyc(req);
     return response.payload;
   }
 

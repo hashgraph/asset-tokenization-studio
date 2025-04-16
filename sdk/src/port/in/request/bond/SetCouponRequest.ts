@@ -203,8 +203,9 @@
 
 */
 
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../FormatValidation.js';
+
 import { SecurityDate } from '../../../../domain/context/shared/SecurityDate.js';
 
 export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest> {
@@ -225,7 +226,7 @@ export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest>
     executionTimestamp: string;
   }) {
     super({
-      rate: Validation.checkAmount(),
+      rate: FormatValidation.checkAmount(),
       recordTimestamp: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),
@@ -240,7 +241,7 @@ export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest>
           undefined,
         );
       },
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
 
     this.securityId = securityId;

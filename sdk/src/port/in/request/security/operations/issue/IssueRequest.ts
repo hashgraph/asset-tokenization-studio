@@ -203,9 +203,9 @@
 
 */
 
-import { BaseRequest } from '../../../BaseRequest.js';
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../FormatValidation.js';
+import { BaseArgs as BaseRequest } from '../../../../../../core/validation/BaseArgs.js';
 
 export default class IssueRequest
   extends ValidatedRequest<IssueRequest>
@@ -225,9 +225,9 @@ export default class IssueRequest
     securityId: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      amount: Validation.checkAmount(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      amount: FormatValidation.checkAmount(),
     });
     this.securityId = securityId;
     this.targetId = targetId;

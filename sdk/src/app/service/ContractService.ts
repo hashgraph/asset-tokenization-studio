@@ -208,7 +208,7 @@ import Injectable from '../../core/Injectable.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
 import NetworkService from './NetworkService.js';
 import Service from './Service.js';
-import TransactionService from './TransactionService.js';
+import TransactionService from './transaction/TransactionService.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress.js';
 import { HEDERA_FORMAT_ID_REGEX } from '../../domain/context/shared/HederaId.js';
 import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter.js';

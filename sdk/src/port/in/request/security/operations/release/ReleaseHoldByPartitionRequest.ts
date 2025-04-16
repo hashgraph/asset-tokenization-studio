@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../FormatValidation.js';
 
 export default class ReleaseHoldByPartitionRequest extends ValidatedRequest<ReleaseHoldByPartitionRequest> {
   securityId: string;
@@ -227,11 +227,11 @@ export default class ReleaseHoldByPartitionRequest extends ValidatedRequest<Rele
     amount: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
-      amount: Validation.checkAmount(),
-      holdId: Validation.checkNumber({ min: 0 }),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: FormatValidation.checkBytes32Format(),
+      amount: FormatValidation.checkAmount(),
+      holdId: FormatValidation.checkNumber({ min: 0 }),
     });
 
     this.securityId = securityId;

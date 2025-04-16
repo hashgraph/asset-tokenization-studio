@@ -363,8 +363,8 @@ import {
   ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
-import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
 import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
+import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -582,12 +582,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         clearingActive: securityInfo.clearingActive,
       };
 
-      const bondDetails: BondDetailsData = {
-        currency: bondInfo.currency,
-        nominalValue: bondInfo.nominalValue.toString(),
-        startingDate: bondInfo.startingDate.toString(),
-        maturityDate: bondInfo.maturityDate.toString(),
-      };
+      const bondDetails = new BondDetailsData(
+        bondInfo.currency,
+        bondInfo.nominalValue.toString(),
+        bondInfo.startingDate.toString(),
+        bondInfo.maturityDate.toString(),
+      );
 
       const couponDetails: CouponDetailsData = {
         couponFrequency: couponInfo.couponFrequency.toString(),
@@ -1894,7 +1894,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
       [partitionId, hold],
@@ -1936,7 +1935,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
       [partitionId, sourceId.toString(), hold, '0x'],
@@ -1978,7 +1976,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
       [partitionId, sourceId.toString(), hold, '0x'],
@@ -2023,9 +2020,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     const protectedHold: ProtectedHold = {
-      hold,
+      hold: hold,
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
     };
@@ -2246,7 +2242,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     return this.signAndSendTransaction(transaction);
   }
 
-  async grantKYC(
+  async grantKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     vcBase64: string,
@@ -2285,7 +2281,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     return this.signAndSendTransaction(transaction);
   }
 
-  async revokeKYC(
+  async revokeKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     securityId: ContractId | string,
