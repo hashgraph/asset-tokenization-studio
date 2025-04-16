@@ -876,7 +876,7 @@ Updates the active status of multiple external pause addresses for a specific as
 
   - securityId: Hedera id of the diamond contract representing the asset
   - externalPausesAddresses: List of external pause addresses.
-  - actives: list of boolean indicating whether the correspond externalPause (from the above mentioned role list) should be added or removed.
+  - actives: list of boolean indicating whether the correspond externalPause (from the above mentioned external pauses list) should be added or removed.
 
 - Response
   - Payload: True (success), false (failed)
