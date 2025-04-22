@@ -211,6 +211,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { GetKycForQuery, GetKycForQueryResponse } from './GetKycForQuery.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { GetKycForQueryError } from './error/GetKycForQueryError.js';
 
 @QueryHandler(GetKycForQuery)
 export class GetKycForQueryHandler implements IQueryHandler<GetKycForQuery> {
@@ -224,18 +225,22 @@ export class GetKycForQueryHandler implements IQueryHandler<GetKycForQuery> {
   ) {}
 
   async execute(query: GetKycForQuery): Promise<GetKycForQueryResponse> {
-    const { securityId, targetId } = query;
+    try {
+      const { securityId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getKycFor(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
+      const res = await this.queryAdapter.getKycFor(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
 
-    return new GetKycForQueryResponse(res);
+      return new GetKycForQueryResponse(res);
+    } catch (error) {
+      throw new GetKycForQueryError(query, error as Error);
+    }
   }
 }

@@ -214,6 +214,7 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { TransferCommandError } from './error/TransferCommandError.js';
 
 @CommandHandler(TransferCommand)
 export class TransferCommandHandler
@@ -233,36 +234,44 @@ export class TransferCommandHandler
   ) {}
 
   async execute(command: TransferCommand): Promise<TransferCommandResponse> {
-    const { securityId, targetId, amount } = command;
+    try {
+      const { securityId, targetId, amount } = command;
 
-    await this.validationService.checkClearingDeactivated(securityId);
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
+      await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkKycAddresses(securityId, [targetId]);
 
-    const handler = this.transactionService.getHandler();
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const security = await this.securityService.get(securityId);
-    await this.validationService.checkDecimals(security, amount);
+      const security = await this.securityService.get(securityId);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkCanTransfer(securityId, targetId, amount);
+      await this.validationService.checkCanTransfer(
+        securityId,
+        targetId,
+        amount,
+      );
 
-    const amountBd: BigDecimal = BigDecimal.fromString(
-      amount,
-      security.decimals,
-    );
+      const amountBd: BigDecimal = BigDecimal.fromString(
+        amount,
+        security.decimals,
+      );
 
-    const res = await handler.transfer(
-      securityEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      securityId,
-    );
-    return Promise.resolve(
-      new TransferCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.transfer(
+        securityEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        securityId,
+      );
+      return Promise.resolve(
+        new TransferCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new TransferCommandError(command, error as Error);
+    }
   }
 }

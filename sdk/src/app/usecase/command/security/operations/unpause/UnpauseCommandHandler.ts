@@ -213,6 +213,7 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { UnpauseCommand, UnpauseCommandResponse } from './UnpauseCommand.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { UnpauseCommandError } from './error/UnpauseCommandError.js';
 
 @CommandHandler(UnpauseCommand)
 export class UnpauseCommandHandler implements ICommandHandler<UnpauseCommand> {
@@ -228,23 +229,27 @@ export class UnpauseCommandHandler implements ICommandHandler<UnpauseCommand> {
   ) {}
 
   async execute(command: UnpauseCommand): Promise<UnpauseCommandResponse> {
-    const { securityId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkRole(
-      SecurityRole._PAUSER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkRole(
+        SecurityRole._PAUSER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkUnpause(securityId);
+      await this.validationService.checkUnpause(securityId);
 
-    const res = await handler.unpause(securityEvmAddress, securityId);
-    return Promise.resolve(
-      new UnpauseCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.unpause(securityEvmAddress, securityId);
+      return Promise.resolve(
+        new UnpauseCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new UnpauseCommandError(command, error as Error);
+    }
   }
 }

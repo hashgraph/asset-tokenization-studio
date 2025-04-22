@@ -213,6 +213,7 @@ import {
   GetKycAccountsCountQuery,
   GetKycAccountsCountQueryResponse,
 } from './GetKycAccountsCountQuery.js';
+import { GetKycAccountsCountQueryError } from './error/GetKycAccountsCountQueryError.js';
 
 @QueryHandler(GetKycAccountsCountQuery)
 export class GetKycAccountsCountQueryHandler
@@ -228,15 +229,19 @@ export class GetKycAccountsCountQueryHandler
   async execute(
     query: GetKycAccountsCountQuery,
   ): Promise<GetKycAccountsCountQueryResponse> {
-    const { securityId, kycStatus } = query;
+    try {
+      const { securityId, kycStatus } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getKycAccountsCount(
-      securityEvmAddress,
-      kycStatus,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getKycAccountsCount(
+        securityEvmAddress,
+        kycStatus,
+      );
 
-    return new GetKycAccountsCountQueryResponse(res);
+      return new GetKycAccountsCountQueryResponse(res);
+    } catch (error) {
+      throw new GetKycAccountsCountQueryError(query, error as Error);
+    }
   }
 }

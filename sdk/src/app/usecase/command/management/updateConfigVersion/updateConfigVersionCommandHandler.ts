@@ -213,6 +213,7 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../service/transaction/TransactionService';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
 import ContractService from '../../../../service/ContractService';
+import { UpdateConfigVersionCommandError } from './error/UpdateConfigVersionCommandError';
 
 @CommandHandler(UpdateConfigVersionCommand)
 export class UpdateConfigVersionCommandHandler
@@ -228,19 +229,26 @@ export class UpdateConfigVersionCommandHandler
   async execute(
     command: UpdateConfigVersionCommand,
   ): Promise<UpdateConfigVersionCommandResponse> {
-    const { configVersion, securityId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { configVersion, securityId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await handler.updateConfigVersion(
-      securityEvmAddress,
-      configVersion,
-      securityId,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await handler.updateConfigVersion(
+        securityEvmAddress,
+        configVersion,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new UpdateConfigVersionCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new UpdateConfigVersionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new UpdateConfigVersionCommandError(command, error as Error);
+    }
   }
 }

@@ -217,6 +217,7 @@ import {
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { UnprotectPartitionsCommandError } from './error/UnprotectPartitionsCommandError.js';
 
 @CommandHandler(UnprotectPartitionsCommand)
 export class UnprotectPartitionsCommandHandler
@@ -238,26 +239,33 @@ export class UnprotectPartitionsCommandHandler
   async execute(
     command: UnprotectPartitionsCommand,
   ): Promise<UnprotectPartitionsCommandResponse> {
-    const { securityId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkRole(
-      SecurityRole._PROTECTED_PARTITION_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkRole(
+        SecurityRole._PROTECTED_PARTITION_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkProtectedPartitions(security);
+      await this.validationService.checkProtectedPartitions(security);
 
-    const res = await handler.unprotectPartitions(securityEvmAddress);
-    return Promise.resolve(
-      new UnprotectPartitionsCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.unprotectPartitions(securityEvmAddress);
+      return Promise.resolve(
+        new UnprotectPartitionsCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new UnprotectPartitionsCommandError(command, error as Error);
+    }
   }
 }

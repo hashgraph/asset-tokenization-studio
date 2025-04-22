@@ -213,6 +213,7 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService';
+import { PartitionsProtectedQueryError } from './error/PartitionsProtectedQueryError.js';
 
 @QueryHandler(PartitionsProtectedQuery)
 export class PartitionsProtectedQueryHandler
@@ -228,12 +229,16 @@ export class PartitionsProtectedQueryHandler
   async execute(
     query: PartitionsProtectedQuery,
   ): Promise<PartitionsProtectedQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res =
-      await this.queryAdapter.arePartitionsProtected(securityEvmAddress);
-    return new PartitionsProtectedQueryResponse(res);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res =
+        await this.queryAdapter.arePartitionsProtected(securityEvmAddress);
+      return new PartitionsProtectedQueryResponse(res);
+    } catch (error) {
+      throw new PartitionsProtectedQueryError(query, error as Error);
+    }
   }
 }

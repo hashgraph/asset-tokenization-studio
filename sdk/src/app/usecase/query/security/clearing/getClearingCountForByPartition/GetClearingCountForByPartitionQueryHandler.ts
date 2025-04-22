@@ -214,6 +214,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import AccountService from '../../../../../service/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { GetClearingCountForByPartitionQueryError } from './error/GetClearingCountForByPartitionQueryError.js';
 
 @QueryHandler(GetClearingCountForByPartitionQuery)
 export class GetClearingCountForByPartitionQueryHandler
@@ -231,20 +232,25 @@ export class GetClearingCountForByPartitionQueryHandler
   async execute(
     query: GetClearingCountForByPartitionQuery,
   ): Promise<GetClearingCountForByPartitionQueryResponse> {
-    const { securityId, partitionId, targetId, clearingOperationType } = query;
+    try {
+      const { securityId, partitionId, targetId, clearingOperationType } =
+        query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getClearingCountForByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingOperationType,
-    );
+      const res = await this.queryAdapter.getClearingCountForByPartition(
+        securityEvmAddress,
+        partitionId,
+        targetEvmAddress,
+        clearingOperationType,
+      );
 
-    return new GetClearingCountForByPartitionQueryResponse(res);
+      return new GetClearingCountForByPartitionQueryResponse(res);
+    } catch (error) {
+      throw new GetClearingCountForByPartitionQueryError(query, error as Error);
+    }
   }
 }

@@ -214,6 +214,7 @@ import {
   GetKycStatusForQueryResponse,
 } from './GetKycStatusForQuery.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { GetKycStatusForQueryError } from './error/GetKycStatusForQueryError.js';
 
 @QueryHandler(GetKycStatusForQuery)
 export class GetKycStatusForQueryHandler
@@ -231,18 +232,22 @@ export class GetKycStatusForQueryHandler
   async execute(
     query: GetKycStatusForQuery,
   ): Promise<GetKycStatusForQueryResponse> {
-    const { securityId, targetId } = query;
+    try {
+      const { securityId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getKycStatusFor(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
+      const res = await this.queryAdapter.getKycStatusFor(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
 
-    return new GetKycStatusForQueryResponse(res);
+      return new GetKycStatusForQueryResponse(res);
+    } catch (error) {
+      throw new GetKycStatusForQueryError(query, error as Error);
+    }
   }
 }

@@ -215,6 +215,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { LockCommandError } from './error/LockCommandError.js';
 
 @CommandHandler(LockCommand)
 export class LockCommandHandler implements ICommandHandler<LockCommand> {
@@ -232,37 +233,41 @@ export class LockCommandHandler implements ICommandHandler<LockCommand> {
   ) {}
 
   async execute(command: LockCommand): Promise<LockCommandResponse> {
-    const { securityId, amount, sourceId, expirationDate } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, amount, sourceId, expirationDate } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._LOCKER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._LOCKER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const res = await handler.lock(
-      securityEvmAddress,
-      sourceEvmAddress,
-      amountBd,
-      BigDecimal.fromString(expirationDate),
-    );
+      const res = await handler.lock(
+        securityEvmAddress,
+        sourceEvmAddress,
+        amountBd,
+        BigDecimal.fromString(expirationDate),
+      );
 
-    return Promise.resolve(
-      new LockCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new LockCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new LockCommandError(command, error as Error);
+    }
   }
 }

@@ -218,6 +218,7 @@ import {
 } from './CreateHoldFromByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { CreateHoldFromByPartitionCommandError } from './error/CreateHoldFromByPartitionCommandError.js';
 
 @CommandHandler(CreateHoldFromByPartitionCommand)
 export class CreateHoldFromByPartitionCommandHandler
@@ -241,62 +242,66 @@ export class CreateHoldFromByPartitionCommandHandler
   async execute(
     command: CreateHoldFromByPartitionCommand,
   ): Promise<CreateHoldFromByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      sourceId,
-      targetId,
-      expirationDate,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const escrowEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(escrow);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const escrowEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(escrow);
 
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddressOrNull(targetId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkClearingDeactivated(securityId);
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    const res = await handler.createHoldFromByPartition(
-      securityEvmAddress,
-      partitionId,
-      escrowEvmAddress,
-      amountBd,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      securityId,
-    );
+      const res = await handler.createHoldFromByPartition(
+        securityEvmAddress,
+        partitionId,
+        escrowEvmAddress,
+        amountBd,
+        sourceEvmAddress,
+        targetEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        securityId,
+      );
 
-    const holdId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.holdId,
-      className: CreateHoldFromByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const holdId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.holdId,
+        className: CreateHoldFromByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new CreateHoldFromByPartitionCommandResponse(
-        parseInt(holdId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new CreateHoldFromByPartitionCommandResponse(
+          parseInt(holdId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new CreateHoldFromByPartitionCommandError(command, error as Error);
+    }
   }
 }

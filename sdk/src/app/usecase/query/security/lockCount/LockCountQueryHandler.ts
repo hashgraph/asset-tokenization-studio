@@ -211,6 +211,7 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import AccountService from '../../../../service/AccountService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../service/ContractService.js';
+import { LockCountQueryError } from './error/LockCountQueryError.js';
 
 @QueryHandler(LockCountQuery)
 export class LockCountQueryHandler implements IQueryHandler<LockCountQuery> {
@@ -224,18 +225,22 @@ export class LockCountQueryHandler implements IQueryHandler<LockCountQuery> {
   ) {}
 
   async execute(query: LockCountQuery): Promise<LockCountQueryResponse> {
-    const { targetId, securityId } = query;
+    try {
+      const { targetId, securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getLockCount(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
+      const res = await this.queryAdapter.getLockCount(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
 
-    return new LockCountQueryResponse(res);
+      return new LockCountQueryResponse(res);
+    } catch (error) {
+      throw new LockCountQueryError(query, error as Error);
+    }
   }
 }

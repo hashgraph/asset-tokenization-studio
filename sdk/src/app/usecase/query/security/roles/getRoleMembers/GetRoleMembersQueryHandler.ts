@@ -213,6 +213,7 @@ import {
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ContractService from '../../../../../service/ContractService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { GetRoleMembersQueryError } from './error/GetRoleMembersQueryError.js';
 
 @QueryHandler(GetRoleMembersQuery)
 export class GetRoleMembersQueryHandler
@@ -228,17 +229,21 @@ export class GetRoleMembersQueryHandler
   async execute(
     query: GetRoleMembersQuery,
   ): Promise<GetRoleMembersQueryResponse> {
-    const { role, securityId, start, end } = query;
+    try {
+      const { role, securityId, start, end } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getRoleMembers(
-      securityEvmAddress,
-      role,
-      start,
-      end,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getRoleMembers(
+        securityEvmAddress,
+        role,
+        start,
+        end,
+      );
 
-    return new GetRoleMembersQueryResponse(res);
+      return new GetRoleMembersQueryResponse(res);
+    } catch (error) {
+      throw new GetRoleMembersQueryError(query, error as Error);
+    }
   }
 }

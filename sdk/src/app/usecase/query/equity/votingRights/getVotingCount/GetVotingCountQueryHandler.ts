@@ -213,6 +213,7 @@ import {
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ContractService from '../../../../../service/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { GetVotingCountQueryError } from './error/GetVotingCountQueryError.js';
 
 @QueryHandler(GetVotingCountQuery)
 export class GetVotingCountQueryHandler
@@ -228,12 +229,16 @@ export class GetVotingCountQueryHandler
   async execute(
     query: GetVotingCountQuery,
   ): Promise<GetVotingCountQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getVotingsCount(securityEvmAddress);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getVotingsCount(securityEvmAddress);
 
-    return new GetVotingCountQueryResponse(res);
+      return new GetVotingCountQueryResponse(res);
+    } catch (error) {
+      throw new GetVotingCountQueryError(query, error as Error);
+    }
   }
 }

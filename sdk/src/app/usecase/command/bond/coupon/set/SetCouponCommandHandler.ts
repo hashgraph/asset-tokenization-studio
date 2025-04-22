@@ -213,6 +213,7 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { SetCouponCommandError } from './error/SetCouponCommandError.js';
 
 @CommandHandler(SetCouponCommand)
 export class SetCouponCommandHandler
@@ -226,30 +227,34 @@ export class SetCouponCommandHandler
   ) {}
 
   async execute(command: SetCouponCommand): Promise<SetCouponCommandResponse> {
-    const { address, recordDate, executionDate, rate } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { address, recordDate, executionDate, rate } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress =
-      await this.contractService.getContractEvmAddress(address);
+      const securityEvmAddress =
+        await this.contractService.getContractEvmAddress(address);
 
-    const res = await handler.setCoupon(
-      securityEvmAddress,
-      BigDecimal.fromString(recordDate),
-      BigDecimal.fromString(executionDate),
-      BigDecimal.fromString(rate),
-      address,
-    );
+      const res = await handler.setCoupon(
+        securityEvmAddress,
+        BigDecimal.fromString(recordDate),
+        BigDecimal.fromString(executionDate),
+        BigDecimal.fromString(rate),
+        address,
+      );
 
-    const couponId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.couponID,
-      className: SetCouponCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const couponId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.couponID,
+        className: SetCouponCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new SetCouponCommandResponse(parseInt(couponId, 16), res.id!),
-    );
+      return Promise.resolve(
+        new SetCouponCommandResponse(parseInt(couponId, 16), res.id!),
+      );
+    } catch (error) {
+      throw new SetCouponCommandError(command, error as Error);
+    }
   }
 }

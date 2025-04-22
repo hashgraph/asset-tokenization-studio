@@ -214,6 +214,7 @@ import {
   GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryResponse,
 } from './GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery';
 import ContractService from '../../../../../service/ContractService';
+import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryError } from './error/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryError';
 
 @QueryHandler(GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery)
 export class GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler
@@ -232,22 +233,29 @@ export class GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler
   async execute(
     query: GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery,
   ): Promise<GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryResponse> {
-    const { securityId, targetId, partitionId } = query;
+    try {
+      const { securityId, targetId, partitionId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res =
-      await this.queryAdapter.getLastAggregatedBalanceAdjustmentFactorForByPartition(
-        securityEvmAddress,
-        targetEvmAddress,
-        partitionId,
+      const res =
+        await this.queryAdapter.getLastAggregatedBalanceAdjustmentFactorForByPartition(
+          securityEvmAddress,
+          targetEvmAddress,
+          partitionId,
+        );
+
+      return new GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryResponse(
+        res,
       );
-
-    return new GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryResponse(
-      res,
-    );
+    } catch (error) {
+      throw new GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryError(
+        query,
+        error as Error,
+      );
+    }
   }
 }

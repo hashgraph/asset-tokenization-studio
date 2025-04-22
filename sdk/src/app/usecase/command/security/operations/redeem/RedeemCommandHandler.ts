@@ -215,6 +215,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import ValidationService from '../../../../../service/ValidationService.js';
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { RedeemCommandError } from './error/RedeemCommandError.js';
 
 @CommandHandler(RedeemCommand)
 export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
@@ -233,32 +234,40 @@ export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
   ) {}
 
   async execute(command: RedeemCommand): Promise<RedeemCommandResponse> {
-    const { securityId, amount } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId, amount } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkClearingDeactivated(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkCanRedeem(
-      securityId,
-      account.id.toString(),
-      amount,
-      _PARTITION_ID_1,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkCanRedeem(
+        securityId,
+        account.id.toString(),
+        amount,
+        _PARTITION_ID_1,
+      );
 
-    const security = await this.securityService.get(securityId);
-    await this.validationService.checkDecimals(security, amount);
+      const security = await this.securityService.get(securityId);
+      await this.validationService.checkDecimals(security, amount);
 
-    const amountBd: BigDecimal = BigDecimal.fromString(
-      amount,
-      security.decimals,
-    );
+      const amountBd: BigDecimal = BigDecimal.fromString(
+        amount,
+        security.decimals,
+      );
 
-    const res = await handler.redeem(securityEvmAddress, amountBd, securityId);
-    return Promise.resolve(
-      new RedeemCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.redeem(
+        securityEvmAddress,
+        amountBd,
+        securityId,
+      );
+      return Promise.resolve(
+        new RedeemCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new RedeemCommandError(command, error as Error);
+    }
   }
 }

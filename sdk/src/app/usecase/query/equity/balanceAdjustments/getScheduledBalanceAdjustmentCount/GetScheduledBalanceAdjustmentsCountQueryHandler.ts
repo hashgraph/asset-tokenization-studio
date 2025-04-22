@@ -213,6 +213,7 @@ import {
   GetScheduledBalanceAdjustmentCountQuery,
   GetScheduledBalanceAdjustmentCountQueryResponse,
 } from './GetScheduledBalanceAdjustmentsCountQuery';
+import { GetScheduledBalanceAdjustmentsCountQueryError } from './error/GetScheduledBalanceAdjustmentsCountQueryError';
 
 @QueryHandler(GetScheduledBalanceAdjustmentCountQuery)
 export class GetScheduledBalanceAdjustmentCountQueryHandler
@@ -228,15 +229,22 @@ export class GetScheduledBalanceAdjustmentCountQueryHandler
   async execute(
     query: GetScheduledBalanceAdjustmentCountQuery,
   ): Promise<GetScheduledBalanceAdjustmentCountQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res =
-      await this.queryAdapter.getScheduledBalanceAdjustmentCount(
-        securityEvmAddress,
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res =
+        await this.queryAdapter.getScheduledBalanceAdjustmentCount(
+          securityEvmAddress,
+        );
+
+      return new GetScheduledBalanceAdjustmentCountQueryResponse(res);
+    } catch (error) {
+      throw new GetScheduledBalanceAdjustmentsCountQueryError(
+        query,
+        error as Error,
       );
-
-    return new GetScheduledBalanceAdjustmentCountQueryResponse(res);
+    }
   }
 }

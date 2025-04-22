@@ -217,6 +217,7 @@ import {
 } from './ProtectedRedeemFromByPartitionCommand';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { ProtectedRedeemFromByPartitionCommandError } from './error/ProtectedRedeemFromByPartitionCommandError.js';
 
 @CommandHandler(ProtectedRedeemFromByPartitionCommand)
 export class ProtectedRedeemFromByPartitionCommandHandler
@@ -238,64 +239,75 @@ export class ProtectedRedeemFromByPartitionCommandHandler
   async execute(
     command: ProtectedRedeemFromByPartitionCommand,
   ): Promise<ProtectedRedeemFromByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      sourceId,
-      amount,
-      deadline,
-      nounce,
-      signature,
-    } = command;
+    try {
+      const {
+        securityId,
+        partitionId,
+        sourceId,
+        amount,
+        deadline,
+        nounce,
+        signature,
+      } = command;
 
-    await this.validationService.checkClearingDeactivated(securityId);
-    await this.validationService.checkKycAddresses(securityId, [sourceId]);
+      await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkKycAddresses(securityId, [sourceId]);
 
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkProtectedPartitions(security);
+      await this.validationService.checkProtectedPartitions(security);
 
-    await this.validationService.checkProtectedPartitionRole(
-      partitionId,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkProtectedPartitionRole(
+        partitionId,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkCanRedeem(
-      securityId,
-      sourceId,
-      amount,
-      partitionId,
-      account.id.toString(),
-    );
+      await this.validationService.checkCanRedeem(
+        securityId,
+        sourceId,
+        amount,
+        partitionId,
+        account.id.toString(),
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkValidNounce(securityId, sourceId, nounce);
+      await this.validationService.checkValidNounce(
+        securityId,
+        sourceId,
+        nounce,
+      );
 
-    const res = await handler.protectedRedeemFromByPartition(
-      securityEvmAddress,
-      partitionId,
-      sourceEvmAddress,
-      amountBd,
-      BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nounce.toString()),
-      signature,
-    );
-    return Promise.resolve(
-      new ProtectedRedeemFromByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      const res = await handler.protectedRedeemFromByPartition(
+        securityEvmAddress,
+        partitionId,
+        sourceEvmAddress,
+        amountBd,
+        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(nounce.toString()),
+        signature,
+      );
+      return Promise.resolve(
+        new ProtectedRedeemFromByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ProtectedRedeemFromByPartitionCommandError(
+        command,
+        error as Error,
+      );
+    }
   }
 }

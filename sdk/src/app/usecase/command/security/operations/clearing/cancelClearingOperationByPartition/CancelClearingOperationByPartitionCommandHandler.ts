@@ -216,6 +216,7 @@ import {
 import ValidationService from '../../../../../../service/ValidationService.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { CancelClearingOperationByPartitionCommandError } from './error/CancelClearingOperationByPartitionCommandError.js';
 
 @CommandHandler(CancelClearingOperationByPartitionCommand)
 export class CancelClearingOperationByPartitionCommandHandler
@@ -235,47 +236,54 @@ export class CancelClearingOperationByPartitionCommandHandler
   async execute(
     command: CancelClearingOperationByPartitionCommand,
   ): Promise<CancelClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const {
+        securityId,
+        partitionId,
+        targetId,
+        clearingId,
+        clearingOperationType,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
+      await this.validationService.checkKycAddresses(securityId, [targetId]);
 
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._CLEARING_VALIDATOR_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const res = await handler.cancelClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
+      const res = await handler.cancelClearingOperationByPartition(
+        securityEvmAddress,
+        partitionId,
+        targetEvmAddress,
+        clearingId,
+        clearingOperationType,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new CancelClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new CancelClearingOperationByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new CancelClearingOperationByPartitionCommandError(
+        command,
+        error as Error,
+      );
+    }
   }
 }

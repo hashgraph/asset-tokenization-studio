@@ -215,6 +215,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import ValidationService from '../../../../../service/ValidationService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { IssueCommandError } from './error/IssueCommandError.js';
 
 @CommandHandler(IssueCommand)
 export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
@@ -232,47 +233,55 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
   ) {}
 
   async execute(command: IssueCommand): Promise<IssueCommandResponse> {
-    const { securityId, targetId, amount } = command;
+    try {
+      const { securityId, targetId, amount } = command;
 
-    const handler = this.transactionService.getHandler();
-    const security = await this.securityService.get(securityId);
-    const account = this.accountService.getCurrentAccount();
+      const handler = this.transactionService.getHandler();
+      const security = await this.securityService.get(securityId);
+      const account = this.accountService.getCurrentAccount();
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkMaxSupply(securityId, amountBd, security);
+      await this.validationService.checkMaxSupply(
+        securityId,
+        amountBd,
+        security,
+      );
 
-    await this.validationService.checkControlList(securityId, targetId);
+      await this.validationService.checkControlList(securityId, targetId);
 
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
+      await this.validationService.checkKycAddresses(securityId, [targetId]);
 
-    await this.validationService.checkRole(
-      SecurityRole._ISSUER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._ISSUER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkMultiPartition(security);
+      await this.validationService.checkMultiPartition(security);
 
-    await this.validationService.checkIssuable(security);
+      await this.validationService.checkIssuable(security);
 
-    // Check that the amount to issue + total supply is not greater than max supply
+      // Check that the amount to issue + total supply is not greater than max supply
 
-    const res = await handler.issue(
-      securityEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      securityId,
-    );
-    return Promise.resolve(
-      new IssueCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.issue(
+        securityEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        securityId,
+      );
+      return Promise.resolve(
+        new IssueCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new IssueCommandError(command, error as Error);
+    }
   }
 }

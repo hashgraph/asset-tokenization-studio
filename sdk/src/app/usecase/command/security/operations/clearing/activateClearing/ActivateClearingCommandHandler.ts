@@ -216,6 +216,7 @@ import AccountService from '../../../../../../service/AccountService.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { ActivateClearingCommandError } from './error/ActivateClearingCommandError.js';
 
 @CommandHandler(ActivateClearingCommand)
 export class ActivateClearingCommandHandler
@@ -235,23 +236,27 @@ export class ActivateClearingCommandHandler
   async execute(
     command: ActivateClearingCommand,
   ): Promise<ActivateClearingCommandResponse> {
-    const { securityId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkPause(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._CLEARING_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const res = await handler.activateClearing(securityEvmAddress);
-    return Promise.resolve(
-      new ActivateClearingCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.activateClearing(securityEvmAddress);
+      return Promise.resolve(
+        new ActivateClearingCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new ActivateClearingCommandError(command, error as Error);
+    }
   }
 }

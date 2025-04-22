@@ -215,6 +215,7 @@ import {
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { RemoveFromControlListCommandError } from './error/RemoveFromControlListCommandError.js';
 
 @CommandHandler(RemoveFromControlListCommand)
 export class RemoveFromControlListCommandHandler
@@ -234,33 +235,37 @@ export class RemoveFromControlListCommandHandler
   async execute(
     command: RemoveFromControlListCommand,
   ): Promise<RemoveFromControlListCommandResponse> {
-    const { targetId, securityId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { targetId, securityId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkAccountInControlList(
-      securityId,
-      targetId,
-      false,
-    );
+      await this.validationService.checkAccountInControlList(
+        securityId,
+        targetId,
+        false,
+      );
 
-    const res = await handler.removeFromControlList(
-      securityEvmAddress,
-      targetEvmAddress,
-      securityId,
-    );
-    // return Promise.resolve({ payload: res.response });
-    return Promise.resolve(
-      new RemoveFromControlListCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      const res = await handler.removeFromControlList(
+        securityEvmAddress,
+        targetEvmAddress,
+        securityId,
+      );
+      // return Promise.resolve({ payload: res.response });
+      return Promise.resolve(
+        new RemoveFromControlListCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new RemoveFromControlListCommandError(command, error as Error);
+    }
   }
 }

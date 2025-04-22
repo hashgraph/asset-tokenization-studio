@@ -213,6 +213,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { PauseCommandError } from './error/PauseCommandError.js';
 
 @CommandHandler(PauseCommand)
 export class PauseCommandHandler implements ICommandHandler<PauseCommand> {
@@ -228,23 +229,27 @@ export class PauseCommandHandler implements ICommandHandler<PauseCommand> {
   ) {}
 
   async execute(command: PauseCommand): Promise<PauseCommandResponse> {
-    const { securityId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkRole(
-      SecurityRole._PAUSER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkRole(
+        SecurityRole._PAUSER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    const res = await handler.pause(securityEvmAddress, securityId);
-    return Promise.resolve(
-      new PauseCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.pause(securityEvmAddress, securityId);
+      return Promise.resolve(
+        new PauseCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new PauseCommandError(command, error as Error);
+    }
   }
 }

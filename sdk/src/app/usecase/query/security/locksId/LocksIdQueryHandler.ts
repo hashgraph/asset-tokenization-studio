@@ -211,6 +211,7 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import AccountService from '../../../../service/AccountService';
 import ContractService from '../../../../service/ContractService.js';
+import { LocksIdQueryError } from './error/LocksIdQueryError.js';
 
 @QueryHandler(LocksIdQuery)
 export class LocksIdQueryHandler implements IQueryHandler<LocksIdQuery> {
@@ -224,20 +225,24 @@ export class LocksIdQueryHandler implements IQueryHandler<LocksIdQuery> {
   ) {}
 
   async execute(query: LocksIdQuery): Promise<LocksIdQueryResponse> {
-    const { targetId, securityId, start, end } = query;
+    try {
+      const { targetId, securityId, start, end } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getLocksId(
-      securityEvmAddress,
-      targetEvmAddress,
-      start,
-      end,
-    );
+      const res = await this.queryAdapter.getLocksId(
+        securityEvmAddress,
+        targetEvmAddress,
+        start,
+        end,
+      );
 
-    return new LocksIdQueryResponse(res);
+      return new LocksIdQueryResponse(res);
+    } catch (error) {
+      throw new LocksIdQueryError(query, error as Error);
+    }
   }
 }

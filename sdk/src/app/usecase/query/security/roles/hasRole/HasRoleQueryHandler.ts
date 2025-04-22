@@ -211,6 +211,7 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import AccountService from '../../../../../service/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { HasRoleQueryError } from './error/HasRoleQueryError.js';
 
 @QueryHandler(HasRoleQuery)
 export class HasRoleQueryHandler implements IQueryHandler<HasRoleQuery> {
@@ -224,19 +225,23 @@ export class HasRoleQueryHandler implements IQueryHandler<HasRoleQuery> {
   ) {}
 
   async execute(query: HasRoleQuery): Promise<HasRoleQueryResponse> {
-    const { role, targetId, securityId } = query;
+    try {
+      const { role, targetId, securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.hasRole(
-      securityEvmAddress,
-      targetEvmAddress,
-      role,
-    );
+      const res = await this.queryAdapter.hasRole(
+        securityEvmAddress,
+        targetEvmAddress,
+        role,
+      );
 
-    return new HasRoleQueryResponse(res);
+      return new HasRoleQueryResponse(res);
+    } catch (error) {
+      throw new HasRoleQueryError(query, error as Error);
+    }
   }
 }

@@ -214,6 +214,7 @@ import {
 import AccountService from '../../../../../service/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../../../../../domain/context/bond/BondDetails.js';
+import { GetBondDetailsQueryError } from './error/GetBondDetailsQueryError.js';
 
 @QueryHandler(GetBondDetailsQuery)
 export class GetBondDetailsQueryHandler
@@ -229,14 +230,18 @@ export class GetBondDetailsQueryHandler
   async execute(
     query: GetBondDetailsQuery,
   ): Promise<GetBondDetailsQueryResponse> {
-    const { bondId } = query;
+    try {
+      const { bondId } = query;
 
-    const bondEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(bondId);
+      const bondEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(bondId);
 
-    const bond: BondDetails =
-      await this.queryAdapter.getBondDetails(bondEvmAddress);
+      const bond: BondDetails =
+        await this.queryAdapter.getBondDetails(bondEvmAddress);
 
-    return Promise.resolve(new GetBondDetailsQueryResponse(bond));
+      return Promise.resolve(new GetBondDetailsQueryResponse(bond));
+    } catch (error) {
+      throw new GetBondDetailsQueryError(query, error as Error);
+    }
   }
 }

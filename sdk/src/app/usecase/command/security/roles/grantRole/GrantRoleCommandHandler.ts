@@ -215,6 +215,7 @@ import {
 } from './GrantRoleCommand.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { GrantRoleCommandError } from './error/GrantRoleCommandError.js';
 
 @CommandHandler(GrantRoleCommand)
 export class GrantRoleCommandHandler
@@ -232,25 +233,29 @@ export class GrantRoleCommandHandler
   ) {}
 
   async execute(command: GrantRoleCommand): Promise<GrantRoleCommandResponse> {
-    const { role, targetId, securityId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { role, targetId, securityId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    const res = await handler.grantRole(
-      securityEvmAddress,
-      targetEvmAddress,
-      role,
-      securityId,
-    );
+      const res = await handler.grantRole(
+        securityEvmAddress,
+        targetEvmAddress,
+        role,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new GrantRoleCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new GrantRoleCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new GrantRoleCommandError(command, error as Error);
+    }
   }
 }

@@ -210,6 +210,7 @@ import Injectable from '../../../../../core/Injectable.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import NetworkService from '../../../../service/NetworkService.js';
+import { SetNetworkCommandError } from './error/SetNetworkCommandError.js';
 import {
   SetNetworkCommand,
   SetNetworkCommandResponse,
@@ -229,28 +230,32 @@ export class SetNetworkCommandHandler
   async execute(
     command: SetNetworkCommand,
   ): Promise<SetNetworkCommandResponse> {
-    this.networkService.environment = command.environment;
-    if (command.consensusNodes)
-      this.networkService.consensusNodes = command.consensusNodes;
-    if (command.rpcNode) this.networkService.rpcNode = command.rpcNode;
+    try {
+      this.networkService.environment = command.environment;
+      if (command.consensusNodes)
+        this.networkService.consensusNodes = command.consensusNodes;
+      if (command.rpcNode) this.networkService.rpcNode = command.rpcNode;
 
-    // Init Mirror Node Adapter
-    this.mirrorNodeAdapter.set(command.mirrorNode);
-    this.networkService.mirrorNode = command.mirrorNode;
+      // Init Mirror Node Adapter
+      this.mirrorNodeAdapter.set(command.mirrorNode);
+      this.networkService.mirrorNode = command.mirrorNode;
 
-    // Init RPC Query Adapter
-    Injectable.resolve(RPCQueryAdapter).init(
-      this.networkService.rpcNode.baseUrl,
-      this.networkService.rpcNode.apiKey,
-    );
+      // Init RPC Query Adapter
+      Injectable.resolve(RPCQueryAdapter).init(
+        this.networkService.rpcNode.baseUrl,
+        this.networkService.rpcNode.apiKey,
+      );
 
-    return Promise.resolve(
-      new SetNetworkCommandResponse(
-        this.networkService.environment,
-        this.networkService.mirrorNode ?? '',
-        this.networkService.rpcNode ?? '',
-        this.networkService.consensusNodes ?? '',
-      ),
-    );
+      return Promise.resolve(
+        new SetNetworkCommandResponse(
+          this.networkService.environment,
+          this.networkService.mirrorNode ?? '',
+          this.networkService.rpcNode ?? '',
+          this.networkService.consensusNodes ?? '',
+        ),
+      );
+    } catch (error) {
+      throw new SetNetworkCommandError(command, error as Error);
+    }
   }
 }

@@ -215,6 +215,7 @@ import {
 import ValidationService from '../../../../../service/ValidationService.js';
 import AccountService from '../../../../../service/AccountService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { ApplyRolesCommandError } from './error/ApplyRolesCommandError.js';
 
 @CommandHandler(ApplyRolesCommand)
 export class ApplyRolesCommandHandler
@@ -234,26 +235,30 @@ export class ApplyRolesCommandHandler
   async execute(
     command: ApplyRolesCommand,
   ): Promise<ApplyRolesCommandResponse> {
-    const { roles, actives, targetId, securityId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { roles, actives, targetId, securityId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    const res = await handler.applyRoles(
-      securityEvmAddress,
-      targetEvmAddress,
-      roles,
-      actives,
-      securityId,
-    );
+      const res = await handler.applyRoles(
+        securityEvmAddress,
+        targetEvmAddress,
+        roles,
+        actives,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ApplyRolesCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new ApplyRolesCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new ApplyRolesCommandError(command, error as Error);
+    }
   }
 }

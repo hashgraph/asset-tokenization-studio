@@ -217,6 +217,7 @@ import AccountService from '../../../../service/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import { EMPTY_BYTES } from '../../../../../core/Constants.js';
 import ContractService from '../../../../service/ContractService.js';
+import { CanRedeemByPartitionQueryError } from './error/CanRedeemByPartitionQueryError.js';
 
 @QueryHandler(CanRedeemByPartitionQuery)
 export class CanRedeemByPartitionQueryHandler
@@ -236,26 +237,30 @@ export class CanRedeemByPartitionQueryHandler
   async execute(
     query: CanRedeemByPartitionQuery,
   ): Promise<CanRedeemByPartitionQueryResponse> {
-    const { securityId, sourceId, partitionId, amount } = query;
+    try {
+      const { securityId, sourceId, partitionId, amount } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const security = await this.securityService.get(securityId);
+      const security = await this.securityService.get(securityId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const [, res] = await this.queryAdapter.canRedeemByPartition(
-      securityEvmAddress,
-      sourceEvmAddress,
-      amountBd,
-      partitionId,
-      EMPTY_BYTES,
-      EMPTY_BYTES,
-    );
+      const [, res] = await this.queryAdapter.canRedeemByPartition(
+        securityEvmAddress,
+        sourceEvmAddress,
+        amountBd,
+        partitionId,
+        EMPTY_BYTES,
+        EMPTY_BYTES,
+      );
 
-    return new CanRedeemByPartitionQueryResponse(res);
+      return new CanRedeemByPartitionQueryResponse(res);
+    } catch (error) {
+      throw new CanRedeemByPartitionQueryError(query, error as Error);
+    }
   }
 }

@@ -207,24 +207,29 @@ import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
 import TransactionService from '../../../../service/transaction/TransactionService.js';
 import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand.js';
+import { ConnectCommandError } from './error/ConnectCommandError.js';
 
 @CommandHandler(ConnectCommand)
 export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {
   async execute(command: ConnectCommand): Promise<ConnectCommandResponse> {
-    const handler = TransactionService.getHandlerClass(command.wallet);
-    const debug = command.debug ? command.debug : false;
+    try {
+      const handler = TransactionService.getHandlerClass(command.wallet);
+      const debug = command.debug ? command.debug : false;
 
-    const input =
-      command.custodialSettings === undefined
-        ? command.HWCSettings === undefined
-          ? command.account
-          : command.HWCSettings
-        : command.custodialSettings;
+      const input =
+        command.custodialSettings === undefined
+          ? command.HWCSettings === undefined
+            ? command.account
+            : command.HWCSettings
+          : command.custodialSettings;
 
-    const registration = await handler.register(input, debug);
+      const registration = await handler.register(input, debug);
 
-    return Promise.resolve(
-      new ConnectCommandResponse(registration, command.wallet),
-    );
+      return Promise.resolve(
+        new ConnectCommandResponse(registration, command.wallet),
+      );
+    } catch (error) {
+      throw new ConnectCommandError(command, error as Error);
+    }
   }
 }

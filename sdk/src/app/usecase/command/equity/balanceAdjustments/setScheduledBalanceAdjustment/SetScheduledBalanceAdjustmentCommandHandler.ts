@@ -217,6 +217,7 @@ import AccountService from '../../../../../service/AccountService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { SetScheduledBalanceAdjustmentCommandError } from './error/SetScheduledBalanceAdjustmentCommandError.js';
 
 @CommandHandler(SetScheduledBalanceAdjustmentCommand)
 export class SetScheduledBalanceAdjustmentCommandHandler
@@ -236,43 +237,50 @@ export class SetScheduledBalanceAdjustmentCommandHandler
   async execute(
     command: SetScheduledBalanceAdjustmentCommand,
   ): Promise<SetScheduledBalanceAdjustmentCommandResponse> {
-    const { securityId, executionDate, factor, decimals } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId, executionDate, factor, decimals } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._CORPORATEACTIONS_ROLE,
-      account.evmAddress!,
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._CORPORATEACTIONS_ROLE,
+        account.evmAddress!,
+        securityId,
+      );
 
-    const res = await handler.setScheduledBalanceAdjustment(
-      securityEvmAddress,
-      BigDecimal.fromString(executionDate),
-      BigDecimal.fromString(factor),
-      BigDecimal.fromString(decimals),
-      securityId,
-    );
+      const res = await handler.setScheduledBalanceAdjustment(
+        securityEvmAddress,
+        BigDecimal.fromString(executionDate),
+        BigDecimal.fromString(factor),
+        BigDecimal.fromString(decimals),
+        securityId,
+      );
 
-    const balanceAdjustmentId =
-      await this.transactionService.getTransactionResult({
-        res,
-        result: res.response?.balanceAdjustmentID,
-        className: SetScheduledBalanceAdjustmentCommandHandler.name,
-        position: 1,
-        numberOfResultsItems: 2,
-      });
+      const balanceAdjustmentId =
+        await this.transactionService.getTransactionResult({
+          res,
+          result: res.response?.balanceAdjustmentID,
+          className: SetScheduledBalanceAdjustmentCommandHandler.name,
+          position: 1,
+          numberOfResultsItems: 2,
+        });
 
-    return Promise.resolve(
-      new SetScheduledBalanceAdjustmentCommandResponse(
-        parseInt(balanceAdjustmentId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new SetScheduledBalanceAdjustmentCommandResponse(
+          parseInt(balanceAdjustmentId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new SetScheduledBalanceAdjustmentCommandError(
+        command,
+        error as Error,
+      );
+    }
   }
 }

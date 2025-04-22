@@ -218,6 +218,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import ValidationService from '../../../../../service/ValidationService.js';
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { ControllerRedeemCommandError } from './error/ControllerRedeemCommandError.js';
 
 @CommandHandler(ControllerRedeemCommand)
 export class ControllerRedeemCommandHandler
@@ -239,36 +240,40 @@ export class ControllerRedeemCommandHandler
   async execute(
     command: ControllerRedeemCommand,
   ): Promise<ControllerRedeemCommandResponse> {
-    const { securityId, amount, sourceId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, amount, sourceId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkCanRedeem(
-      securityId,
-      sourceId,
-      amount,
-      _PARTITION_ID_1,
-      account.id.toString(),
-    );
+      await this.validationService.checkCanRedeem(
+        securityId,
+        sourceId,
+        amount,
+        _PARTITION_ID_1,
+        account.id.toString(),
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    const res = await handler.controllerRedeem(
-      securityEvmAddress,
-      sourceEvmAddress,
-      amountBd,
-      securityId,
-    );
-    return Promise.resolve(
-      new ControllerRedeemCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.controllerRedeem(
+        securityEvmAddress,
+        sourceEvmAddress,
+        amountBd,
+        securityId,
+      );
+      return Promise.resolve(
+        new ControllerRedeemCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new ControllerRedeemCommandError(command, error as Error);
+    }
   }
 }

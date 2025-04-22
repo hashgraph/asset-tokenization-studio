@@ -214,6 +214,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import AccountService from '../../../../../service/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { GetHoldCountForByPartitionQueryError } from './error/GetHoldCountForByPartitionQueryError.js';
 
 @QueryHandler(GetHoldCountForByPartitionQuery)
 export class GetHoldCountForByPartitionQueryHandler
@@ -231,19 +232,23 @@ export class GetHoldCountForByPartitionQueryHandler
   async execute(
     query: GetHoldCountForByPartitionQuery,
   ): Promise<GetHoldCountForByPartitionQueryResponse> {
-    const { securityId, partitionId, targetId } = query;
+    try {
+      const { securityId, partitionId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getHoldCountForByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-    );
+      const res = await this.queryAdapter.getHoldCountForByPartition(
+        securityEvmAddress,
+        partitionId,
+        targetEvmAddress,
+      );
 
-    return new GetHoldCountForByPartitionQueryResponse(res);
+      return new GetHoldCountForByPartitionQueryResponse(res);
+    } catch (error) {
+      throw new GetHoldCountForByPartitionQueryError(query, error as Error);
+    }
   }
 }

@@ -182,6 +182,7 @@ import {
 import ValidationService from '../../../../../../service/ValidationService.js';
 import AccountService from '../../../../../../service/AccountService.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { ReclaimHoldByPartitionCommandError } from './error/ReclaimHoldByPartitionCommandError.js';
 
 @CommandHandler(ReclaimHoldByPartitionCommand)
 export class ReclaimHoldByPartitionCommandHandler
@@ -201,29 +202,33 @@ export class ReclaimHoldByPartitionCommandHandler
   async execute(
     command: ReclaimHoldByPartitionCommand,
   ): Promise<ReclaimHoldByPartitionCommandResponse> {
-    const { securityId, partitionId, holdId, targetId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { securityId, partitionId, holdId, targetId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkPause(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkPause(securityId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await handler.reclaimHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      holdId,
-      targetEvmAddress,
-      securityId,
-    );
+      const res = await handler.reclaimHoldByPartition(
+        securityEvmAddress,
+        partitionId,
+        holdId,
+        targetEvmAddress,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ReclaimHoldByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ReclaimHoldByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ReclaimHoldByPartitionCommandError(command, error as Error);
+    }
   }
 }

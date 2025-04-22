@@ -216,6 +216,7 @@ import AccountService from '../../../../../service/AccountService';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import ValidationService from '../../../../../service/ValidationService';
 import ContractService from '../../../../../service/ContractService';
+import { SetRevocationRegistryAddressCommandError } from './error/SetRevocationRegistryAddressCommandError';
 
 @CommandHandler(SetRevocationRegistryAddressCommand)
 export class SetRevocationRegistryAddressCommandHandler
@@ -235,34 +236,41 @@ export class SetRevocationRegistryAddressCommandHandler
   async execute(
     command: SetRevocationRegistryAddressCommand,
   ): Promise<SetRevocationRegistryAddressCommandResponse> {
-    const { securityId, revocationRegistryId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId, revocationRegistryId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkPause(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._SSI_MANAGER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._SSI_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const revocationRegistryEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(revocationRegistryId);
+      const revocationRegistryEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(revocationRegistryId);
 
-    const res = await handler.setRevocationRegistryAddress(
-      securityEvmAddress,
-      revocationRegistryEvmAddress,
-      securityId,
-    );
+      const res = await handler.setRevocationRegistryAddress(
+        securityEvmAddress,
+        revocationRegistryEvmAddress,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new SetRevocationRegistryAddressCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new SetRevocationRegistryAddressCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new SetRevocationRegistryAddressCommandError(
+        command,
+        error as Error,
+      );
+    }
   }
 }

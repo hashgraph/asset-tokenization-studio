@@ -217,6 +217,7 @@ import {
 } from './ClearingCreateHoldByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { ClearingCreateHoldByPartitionCommandError } from './error/ClearingCreateHoldByPartitionCommandError.js';
 
 @CommandHandler(ClearingCreateHoldByPartitionCommand)
 export class ClearingCreateHoldByPartitionCommandHandler
@@ -238,64 +239,71 @@ export class ClearingCreateHoldByPartitionCommandHandler
   async execute(
     command: ClearingCreateHoldByPartitionCommand,
   ): Promise<ClearingCreateHoldByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      targetId,
-      clearingExpirationDate,
-      holdExpirationDate,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        targetId,
+        clearingExpirationDate,
+        holdExpirationDate,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const escrowEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(escrow);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const escrowEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(escrow);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddressOrNull(targetId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkBalance(
-      securityId,
-      account.id.toString(),
-      amountBd,
-    );
-    const res = await handler.clearingCreateHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      escrowEvmAddress,
-      amountBd,
-      targetEvmAddress,
-      BigDecimal.fromString(clearingExpirationDate),
-      BigDecimal.fromString(holdExpirationDate),
-      securityId,
-    );
+      await this.validationService.checkBalance(
+        securityId,
+        account.id.toString(),
+        amountBd,
+      );
+      const res = await handler.clearingCreateHoldByPartition(
+        securityEvmAddress,
+        partitionId,
+        escrowEvmAddress,
+        amountBd,
+        targetEvmAddress,
+        BigDecimal.fromString(clearingExpirationDate),
+        BigDecimal.fromString(holdExpirationDate),
+        securityId,
+      );
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: ClearingCreateHoldByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const clearingId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.clearingId,
+        className: ClearingCreateHoldByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new ClearingCreateHoldByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ClearingCreateHoldByPartitionCommandResponse(
+          parseInt(clearingId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ClearingCreateHoldByPartitionCommandError(
+        command,
+        error as Error,
+      );
+    }
   }
 }

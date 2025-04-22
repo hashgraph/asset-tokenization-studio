@@ -207,6 +207,7 @@ import TransactionService from '../../../../service/transaction/TransactionServi
 import { createMock } from '@golevelup/ts-jest';
 import { UpdateMaturityDateCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
@@ -218,6 +219,8 @@ import {
 import ContractService from '../../../../service/ContractService.js';
 import ValidationService from '../../../../service/ValidationService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import { UpdateMaturityDateCommandError } from './error/UpdateMaturityDateCommandError.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 describe('UpdateMaturityDateCommandHandler', () => {
   let handler: UpdateMaturityDateCommandHandler;
@@ -228,6 +231,7 @@ describe('UpdateMaturityDateCommandHandler', () => {
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new UpdateMaturityDateCommandHandler(
@@ -243,33 +247,63 @@ describe('UpdateMaturityDateCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully update maturity date in response', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-      validationServiceMock.checkMaturityDate.mockResolvedValue(undefined);
+    describe('error cases', () => {
+      it('throws SetCouponCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      transactionServiceMock.getHandler().updateMaturityDate.mockResolvedValue({
-        id: transactionId,
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          UpdateMaturityDateCommandError,
+        );
+
+        await expect(resultPromise).rejects.toThrow(
+          `An error occurred while updating the bond maturity date: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `Command error: An error occurred while updating the bond maturity date: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
+          ),
+          errorCode: ErrorCode.CommandExecutionFailed,
+        });
       });
+    });
+    describe('success cases', () => {
+      it('should successfully update maturity date in response', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        validationServiceMock.checkMaturityDate.mockResolvedValue(undefined);
 
-      const result = await handler.execute(command);
+        transactionServiceMock
+          .getHandler()
+          .updateMaturityDate.mockResolvedValue({
+            id: transactionId,
+          });
 
-      expect(result).toBeInstanceOf(UpdateMaturityDateCommandResponse);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(validationServiceMock.checkMaturityDate).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().updateMaturityDate,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().updateMaturityDate,
-      ).toHaveBeenCalledWith(
-        evmAddress,
-        parseInt(command.maturityDate),
-        command.securityId,
-      );
-      expect(result.payload).toBe(true);
-      expect(result.transactionId).toBe(transactionId);
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(UpdateMaturityDateCommandResponse);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(validationServiceMock.checkMaturityDate).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          transactionServiceMock.getHandler().updateMaturityDate,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().updateMaturityDate,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          parseInt(command.maturityDate),
+          command.securityId,
+        );
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+      });
     });
   });
 });

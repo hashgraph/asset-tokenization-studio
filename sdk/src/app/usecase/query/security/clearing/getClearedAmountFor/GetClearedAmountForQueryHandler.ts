@@ -214,6 +214,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import AccountService from '../../../../../service/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { GetClearedAmountForQueryError } from './error/GetClearedAmountForQueryError.js';
 
 @QueryHandler(GetClearedAmountForQuery)
 export class GetClearedAmountForQueryHandler
@@ -231,18 +232,22 @@ export class GetClearedAmountForQueryHandler
   async execute(
     query: GetClearedAmountForQuery,
   ): Promise<GetClearedAmountForQueryResponse> {
-    const { securityId, targetId } = query;
+    try {
+      const { securityId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getClearedAmountFor(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
+      const res = await this.queryAdapter.getClearedAmountFor(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
 
-    return new GetClearedAmountForQueryResponse(res);
+      return new GetClearedAmountForQueryResponse(res);
+    } catch (error) {
+      throw new GetClearedAmountForQueryError(query, error as Error);
+    }
   }
 }

@@ -215,6 +215,7 @@ import {
 } from './GetKycAccountsDataQuery.js';
 import { KycAccountData } from '../../../../../../domain/context/kyc/KycAccountData.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { GetKycAccountsDataQueryError } from './error/GetKycAccountsDataQueryError.js';
 
 @QueryHandler(GetKycAccountsDataQuery)
 export class GetKycAccountsDataQueryHandler
@@ -232,29 +233,33 @@ export class GetKycAccountsDataQueryHandler
   async execute(
     query: GetKycAccountsDataQuery,
   ): Promise<GetKycAccountsDataQueryResponse> {
-    const { securityId, kycStatus, start, end } = query;
+    try {
+      const { securityId, kycStatus, start, end } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const kycAccountsData = await this.queryAdapter.getKycAccountsData(
-      securityEvmAddress,
-      kycStatus,
-      start,
-      end,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const kycAccountsData = await this.queryAdapter.getKycAccountsData(
+        securityEvmAddress,
+        kycStatus,
+        start,
+        end,
+      );
 
-    const kycDataHederaIdFormat = (await Promise.all(
-      kycAccountsData.map(async (item) => ({
-        ...item,
-        issuer: (
-          await this.accountService.getAccountInfo(item.issuer)
-        ).id.toString(),
-        account: (
-          await this.accountService.getAccountInfo(item.account)
-        ).id.toString(),
-      })),
-    )) as KycAccountData[];
+      const kycDataHederaIdFormat = (await Promise.all(
+        kycAccountsData.map(async (item) => ({
+          ...item,
+          issuer: (
+            await this.accountService.getAccountInfo(item.issuer)
+          ).id.toString(),
+          account: (
+            await this.accountService.getAccountInfo(item.account)
+          ).id.toString(),
+        })),
+      )) as KycAccountData[];
 
-    return new GetKycAccountsDataQueryResponse(kycDataHederaIdFormat);
+      return new GetKycAccountsDataQueryResponse(kycDataHederaIdFormat);
+    } catch (error) {
+      throw new GetKycAccountsDataQueryError(query, error as Error);
+    }
   }
 }

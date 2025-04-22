@@ -216,6 +216,7 @@ import AccountService from '../../../../../service/AccountService';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import ValidationService from '../../../../../service/ValidationService';
 import ContractService from '../../../../../service/ContractService';
+import { RemoveIssuerCommandError } from './error/RemoveIssuerCommandError';
 
 @CommandHandler(RemoveIssuerCommand)
 export class RemoveIssuerCommandHandler
@@ -235,37 +236,41 @@ export class RemoveIssuerCommandHandler
   async execute(
     command: RemoveIssuerCommand,
   ): Promise<RemoveIssuerCommandResponse> {
-    const { securityId, issuerId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId, issuerId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkPause(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._SSI_MANAGER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._SSI_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkAccountInIssuersList(
-      securityId,
-      issuerId,
-      false,
-    );
+      await this.validationService.checkAccountInIssuersList(
+        securityId,
+        issuerId,
+        false,
+      );
 
-    const issuerEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(issuerId);
+      const issuerEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(issuerId);
 
-    const res = await handler.removeIssuer(
-      securityEvmAddress,
-      issuerEvmAddress,
-      securityId,
-    );
+      const res = await handler.removeIssuer(
+        securityEvmAddress,
+        issuerEvmAddress,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new RemoveIssuerCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new RemoveIssuerCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new RemoveIssuerCommandError(command, error as Error);
+    }
   }
 }

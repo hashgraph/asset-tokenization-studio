@@ -218,6 +218,7 @@ import {
 } from './ProtectedClearingCreateHoldByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { ProtectedClearingCreateHoldByPartitionCommandError } from './error/ProtectedClearingCreateHoldByPartitionCommandError.js';
 
 @CommandHandler(ProtectedClearingCreateHoldByPartitionCommand)
 export class ProtectedClearingCreateHoldByPartitionCommandHandler
@@ -241,81 +242,92 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
   async execute(
     command: ProtectedClearingCreateHoldByPartitionCommand,
   ): Promise<ProtectedClearingCreateHoldByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      sourceId,
-      targetId,
-      clearingExpirationDate,
-      holdExpirationDate,
-      deadline,
-      nonce,
-      signature,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        clearingExpirationDate,
+        holdExpirationDate,
+        deadline,
+        nonce,
+        signature,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const escrowEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(escrow);
+      const escrowEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(escrow);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddressOrNull(targetId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkProtectedPartitions(security);
+      await this.validationService.checkProtectedPartitions(security);
 
-    await this.validationService.checkProtectedPartitionRole(
-      partitionId,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkProtectedPartitionRole(
+        partitionId,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    await this.validationService.checkValidNounce(securityId, sourceId, nonce);
+      await this.validationService.checkValidNounce(
+        securityId,
+        sourceId,
+        nonce,
+      );
 
-    const res = await handler.protectedClearingCreateHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      escrowEvmAddress,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(clearingExpirationDate),
-      BigDecimal.fromString(holdExpirationDate),
-      BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nonce.toString()),
-      signature,
-      securityId,
-    );
+      const res = await handler.protectedClearingCreateHoldByPartition(
+        securityEvmAddress,
+        partitionId,
+        amountBd,
+        escrowEvmAddress,
+        sourceEvmAddress,
+        targetEvmAddress,
+        BigDecimal.fromString(clearingExpirationDate),
+        BigDecimal.fromString(holdExpirationDate),
+        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(nonce.toString()),
+        signature,
+        securityId,
+      );
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: ProtectedClearingCreateHoldByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const clearingId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.clearingId,
+        className: ProtectedClearingCreateHoldByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new ProtectedClearingCreateHoldByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ProtectedClearingCreateHoldByPartitionCommandResponse(
+          parseInt(clearingId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ProtectedClearingCreateHoldByPartitionCommandError(
+        command,
+        error as Error,
+      );
+    }
   }
 }

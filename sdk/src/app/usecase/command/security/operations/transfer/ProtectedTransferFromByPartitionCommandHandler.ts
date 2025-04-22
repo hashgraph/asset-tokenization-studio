@@ -217,6 +217,7 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { ProtectedTransferFromByPartitionCommandError } from './error/ProtectedTransferFromByPartitionCommandError.js';
 
 @CommandHandler(ProtectedTransferFromByPartitionCommand)
 export class ProtectedTransferFromByPartitionCommandHandler
@@ -238,71 +239,82 @@ export class ProtectedTransferFromByPartitionCommandHandler
   async execute(
     command: ProtectedTransferFromByPartitionCommand,
   ): Promise<ProtectedTransferFromByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      sourceId,
-      targetId,
-      amount,
-      deadline,
-      nounce,
-      signature,
-    } = command;
+    try {
+      const {
+        securityId,
+        partitionId,
+        sourceId,
+        targetId,
+        amount,
+        deadline,
+        nounce,
+        signature,
+      } = command;
 
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkProtectedPartitions(security);
+      await this.validationService.checkProtectedPartitions(security);
 
-    await this.validationService.checkProtectedPartitionRole(
-      partitionId,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkProtectedPartitionRole(
+        partitionId,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
+      await this.validationService.checkKycAddresses(securityId, [
+        sourceId,
+        targetId,
+      ]);
 
-    await this.validationService.checkControlList(
-      securityId,
-      sourceEvmAddress.toString(),
-      targetEvmAddress.toString(),
-    );
+      await this.validationService.checkControlList(
+        securityId,
+        sourceEvmAddress.toString(),
+        targetEvmAddress.toString(),
+      );
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    await this.validationService.checkValidNounce(securityId, sourceId, nounce);
+      await this.validationService.checkValidNounce(
+        securityId,
+        sourceId,
+        nounce,
+      );
 
-    const res = await handler.protectedTransferFromByPartition(
-      securityEvmAddress,
-      partitionId,
-      sourceEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nounce.toString()),
-      signature,
-    );
-    return Promise.resolve(
-      new ProtectedTransferFromByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      const res = await handler.protectedTransferFromByPartition(
+        securityEvmAddress,
+        partitionId,
+        sourceEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(nounce.toString()),
+        signature,
+      );
+      return Promise.resolve(
+        new ProtectedTransferFromByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ProtectedTransferFromByPartitionCommandError(
+        command,
+        error as Error,
+      );
+    }
   }
 }

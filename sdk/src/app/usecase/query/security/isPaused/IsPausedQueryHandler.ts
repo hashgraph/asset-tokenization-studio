@@ -210,6 +210,7 @@ import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js'
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../service/ContractService.js';
+import { IsPausedQueryError } from './error/IsPausedQueryError.js';
 
 @QueryHandler(IsPausedQuery)
 export class IsPausedQueryHandler implements IQueryHandler<IsPausedQuery> {
@@ -221,11 +222,15 @@ export class IsPausedQueryHandler implements IQueryHandler<IsPausedQuery> {
   ) {}
 
   async execute(query: IsPausedQuery): Promise<IsPausedQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.isPaused(securityEvmAddress);
-    return new IsPausedQueryResponse(res);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.isPaused(securityEvmAddress);
+      return new IsPausedQueryResponse(res);
+    } catch (error) {
+      throw new IsPausedQueryError(query, error as Error);
+    }
   }
 }

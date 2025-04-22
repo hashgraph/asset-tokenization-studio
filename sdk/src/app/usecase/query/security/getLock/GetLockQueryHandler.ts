@@ -214,6 +214,7 @@ import AccountService from '../../../../service/AccountService';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../service/ContractService.js';
+import { GetLockQueryError } from './error/GetLockQueryError.js';
 
 @QueryHandler(GetLockQuery)
 export class GetLockQueryHandler implements IQueryHandler<GetLockQuery> {
@@ -229,26 +230,30 @@ export class GetLockQueryHandler implements IQueryHandler<GetLockQuery> {
   ) {}
 
   async execute(query: GetLockQuery): Promise<GetLockQueryResponse> {
-    const { targetId, securityId, id } = query;
-    const security = await this.securityService.get(securityId);
+    try {
+      const { targetId, securityId, id } = query;
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getLock(
-      securityEvmAddress,
-      targetEvmAddress,
-      id,
-    );
+      const res = await this.queryAdapter.getLock(
+        securityEvmAddress,
+        targetEvmAddress,
+        id,
+      );
 
-    const amount = BigDecimal.fromStringFixed(
-      res[0].toString(),
-      security.decimals,
-    );
-    const expirationDate = res[1];
+      const amount = BigDecimal.fromStringFixed(
+        res[0].toString(),
+        security.decimals,
+      );
+      const expirationDate = res[1];
 
-    return new GetLockQueryResponse(new Lock(id, amount, expirationDate));
+      return new GetLockQueryResponse(new Lock(id, amount, expirationDate));
+    } catch (error) {
+      throw new GetLockQueryError(query, error as Error);
+    }
   }
 }

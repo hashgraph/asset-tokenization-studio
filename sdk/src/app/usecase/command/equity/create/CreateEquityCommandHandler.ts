@@ -221,6 +221,8 @@ import { EquityDetails } from '../../../../../domain/context/equity/EquityDetail
 import ContractService from '../../../../service/ContractService.js';
 import AccountService from '../../../../service/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { Response } from '../../../../../domain/context/transaction/Response';
+import { CreateEquityCommandError } from './error/CreateEquityCommandError.js';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler
@@ -242,77 +244,77 @@ export class CreateEquityCommandHandler
   async execute(
     command: CreateEquityCommand,
   ): Promise<CreateEquityCommandResponse> {
-    const {
-      security,
-      factory,
-      resolver,
-      configId,
-      configVersion,
-      diamondOwnerAccount,
-      votingRight,
-      informationRight,
-      liquidationRight,
-      subscriptionRight,
-      conversionRight,
-      redemptionRight,
-      putRight,
-      dividendRight,
-      currency,
-      nominalValue,
-    } = command;
-
-    if (!factory) {
-      throw new InvalidRequest('Factory not found in request');
-    }
-
-    if (!resolver) {
-      throw new InvalidRequest('Resolver not found in request');
-    }
-
-    if (!configId) {
-      throw new InvalidRequest('Config Id not found in request');
-    }
-
-    if (configVersion === undefined) {
-      throw new InvalidRequest('Config Version not found in request');
-    }
-
-    const diamondOwnerAccountEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
-
-    const factoryEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(factory.toString());
-
-    const resolverEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(resolver.toString());
-
-    const handler = this.transactionService.getHandler();
-
-    const equityInfo = new EquityDetails(
-      votingRight,
-      informationRight,
-      liquidationRight,
-      subscriptionRight,
-      conversionRight,
-      redemptionRight,
-      putRight,
-      dividendRight,
-      currency,
-      BigDecimal.fromString(nominalValue),
-    );
-
-    const res = await handler.createEquity(
-      new Security(security),
-      equityInfo,
-      factoryEvmAddress,
-      resolverEvmAddress,
-      configId,
-      configVersion,
-      diamondOwnerAccountEvmAddress,
-      factory.toString(),
-    );
-
+    let res: Response;
     try {
+      const {
+        security,
+        factory,
+        resolver,
+        configId,
+        configVersion,
+        diamondOwnerAccount,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        nominalValue,
+      } = command;
+
+      if (!factory) {
+        throw new InvalidRequest('Factory not found in request');
+      }
+
+      if (!resolver) {
+        throw new InvalidRequest('Resolver not found in request');
+      }
+
+      if (!configId) {
+        throw new InvalidRequest('Config Id not found in request');
+      }
+
+      if (configVersion === undefined) {
+        throw new InvalidRequest('Config Version not found in request');
+      }
+
+      const diamondOwnerAccountEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
+
+      const factoryEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(factory.toString());
+
+      const resolverEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(resolver.toString());
+
+      const handler = this.transactionService.getHandler();
+
+      const equityInfo = new EquityDetails(
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        BigDecimal.fromString(nominalValue),
+      );
+
+      res = await handler.createEquity(
+        new Security(security),
+        equityInfo,
+        factoryEvmAddress,
+        resolverEvmAddress,
+        configId,
+        configVersion,
+        diamondOwnerAccountEvmAddress,
+        factory.toString(),
+      );
       const contractAddress =
         await this.transactionService.getTransactionResult({
           res,
@@ -330,12 +332,12 @@ export class CreateEquityCommandHandler
       return Promise.resolve(
         new CreateEquityCommandResponse(new ContractId(contractId), res.id!),
       );
-    } catch (e) {
-      if (res.response == 1)
+    } catch (error) {
+      if (res?.response == 1)
         return Promise.resolve(
           new CreateEquityCommandResponse(new ContractId('0.0.0'), res.id!),
         );
-      else throw e;
+      else throw new CreateEquityCommandError(command, error as Error);
     }
   }
 }

@@ -215,6 +215,7 @@ import SecurityService from '../../../../../service/security/SecurityService.js'
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import AccountService from '../../../../../service/AccountService.js';
+import { GetTotalSupplyByPartitionQueryError } from './error/GetTotalSupplyByPartitionQueryError.js';
 
 @QueryHandler(GetTotalSupplyByPartitionQuery)
 export class GetMaxSupplyByPartitionQueryHandler
@@ -232,20 +233,24 @@ export class GetMaxSupplyByPartitionQueryHandler
   async execute(
     query: GetTotalSupplyByPartitionQuery,
   ): Promise<GetTotalSupplyByPartitionQueryResponse> {
-    const { securityId, partitionId } = query;
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, partitionId } = query;
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(securityId);
 
-    const res = await this.queryAdapter.getTotalSupplyByPartition(
-      securityEvmAddress,
-      partitionId,
-    );
-    const amount = BigDecimal.fromStringFixed(
-      res.toString(),
-      security.decimals,
-    );
-    return new GetTotalSupplyByPartitionQueryResponse(amount);
+      const res = await this.queryAdapter.getTotalSupplyByPartition(
+        securityEvmAddress,
+        partitionId,
+      );
+      const amount = BigDecimal.fromStringFixed(
+        res.toString(),
+        security.decimals,
+      );
+      return new GetTotalSupplyByPartitionQueryResponse(amount);
+    } catch (error) {
+      throw new GetTotalSupplyByPartitionQueryError(query, error as Error);
+    }
   }
 }

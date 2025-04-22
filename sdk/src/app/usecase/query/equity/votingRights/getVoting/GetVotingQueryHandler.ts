@@ -210,6 +210,7 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { GetVotingQuery, GetVotingQueryResponse } from './GetVotingQuery.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { GetVotingQueryError } from './error/GetVotingQueryError.js';
 
 @QueryHandler(GetVotingQuery)
 export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
@@ -221,12 +222,19 @@ export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
   ) {}
 
   async execute(query: GetVotingQuery): Promise<GetVotingQueryResponse> {
-    const { securityId, votingId } = query;
+    try {
+      const { securityId, votingId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getVoting(securityEvmAddress, votingId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getVoting(
+        securityEvmAddress,
+        votingId,
+      );
 
-    return Promise.resolve(new GetVotingQueryResponse(res));
+      return Promise.resolve(new GetVotingQueryResponse(res));
+    } catch (error) {
+      throw new GetVotingQueryError(query, error as Error);
+    }
   }
 }

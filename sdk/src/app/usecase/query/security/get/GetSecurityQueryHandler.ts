@@ -215,6 +215,7 @@ import {
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../service/ContractService';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { GetSecurityQueryError } from './error/GetSecurityQueryError.js';
 
 @QueryHandler(GetSecurityQuery)
 export class GetSecurityQueryHandler
@@ -228,24 +229,28 @@ export class GetSecurityQueryHandler
   ) {}
 
   async execute(query: GetSecurityQuery): Promise<GetSecurityQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const security: Security =
-      await this.queryAdapter.getSecurity(securityEvmAddress);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const security: Security =
+        await this.queryAdapter.getSecurity(securityEvmAddress);
 
-    if (security.maxSupply)
-      security.maxSupply = BigDecimal.fromStringFixed(
-        security.maxSupply.toString(),
-        security.decimals,
-      );
-    if (security.totalSupply)
-      security.totalSupply = BigDecimal.fromStringFixed(
-        security.totalSupply.toString(),
-        security.decimals,
-      );
+      if (security.maxSupply)
+        security.maxSupply = BigDecimal.fromStringFixed(
+          security.maxSupply.toString(),
+          security.decimals,
+        );
+      if (security.totalSupply)
+        security.totalSupply = BigDecimal.fromStringFixed(
+          security.totalSupply.toString(),
+          security.decimals,
+        );
 
-    return Promise.resolve(new GetSecurityQueryResponse(security));
+      return Promise.resolve(new GetSecurityQueryResponse(security));
+    } catch (error) {
+      throw new GetSecurityQueryError(query, error as Error);
+    }
   }
 }

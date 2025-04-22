@@ -213,6 +213,7 @@ import AccountService from '../../../../../service/AccountService';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import ValidationService from '../../../../../service/ValidationService';
 import ContractService from '../../../../../service/ContractService';
+import { AddIssuerCommandError } from './error/AddIssuerCommandError';
 
 @CommandHandler(AddIssuerCommand)
 export class AddIssuerCommandHandler
@@ -230,37 +231,41 @@ export class AddIssuerCommandHandler
   ) {}
 
   async execute(command: AddIssuerCommand): Promise<AddIssuerCommandResponse> {
-    const { securityId, issuerId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId, issuerId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkPause(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._SSI_MANAGER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._SSI_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const issuerEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(issuerId);
+      const issuerEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(issuerId);
 
-    await this.validationService.checkAccountInIssuersList(
-      securityId,
-      issuerId,
-      true,
-    );
+      await this.validationService.checkAccountInIssuersList(
+        securityId,
+        issuerId,
+        true,
+      );
 
-    const res = await handler.addIssuer(
-      securityEvmAddress,
-      issuerEvmAddress,
-      securityId,
-    );
+      const res = await handler.addIssuer(
+        securityEvmAddress,
+        issuerEvmAddress,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new AddIssuerCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new AddIssuerCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new AddIssuerCommandError(command, error as Error);
+    }
   }
 }

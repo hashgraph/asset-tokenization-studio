@@ -215,6 +215,7 @@ import SecurityService from '../../../../../service/security/SecurityService.js'
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { GetMaxSupplyQueryError } from './error/GetMaxSupplyQueryError.js';
 
 @QueryHandler(GetMaxSupplyQuery)
 export class GetMaxSupplyQueryHandler
@@ -230,17 +231,21 @@ export class GetMaxSupplyQueryHandler
   ) {}
 
   async execute(query: GetMaxSupplyQuery): Promise<GetMaxSupplyQueryResponse> {
-    const { securityId } = query;
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId } = query;
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    const res = await this.queryAdapter.getMaxSupply(securityEvmAddress);
-    const amount = BigDecimal.fromStringFixed(
-      res.toString(),
-      security.decimals,
-    );
-    return new GetMaxSupplyQueryResponse(amount);
+      const res = await this.queryAdapter.getMaxSupply(securityEvmAddress);
+      const amount = BigDecimal.fromStringFixed(
+        res.toString(),
+        security.decimals,
+      );
+      return new GetMaxSupplyQueryResponse(amount);
+    } catch (error) {
+      throw new GetMaxSupplyQueryError(query, error as Error);
+    }
   }
 }

@@ -216,6 +216,7 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import AccountService from '../../../../../service/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { GetClearingRedeemForByPartitionQueryError } from './error/GetClearingRedeemForByPartitionQueryError.js';
 
 @QueryHandler(GetClearingRedeemForByPartitionQuery)
 export class GetClearingRedeemForByPartitionQueryHandler
@@ -235,26 +236,33 @@ export class GetClearingRedeemForByPartitionQueryHandler
   async execute(
     query: GetClearingRedeemForByPartitionQuery,
   ): Promise<GetClearingRedeemForByPartitionQueryResponse> {
-    const { securityId, partitionId, targetId, clearingId } = query;
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, partitionId, targetId, clearingId } = query;
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const clearing = await this.queryAdapter.getClearingRedeemForByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-    );
+      const clearing = await this.queryAdapter.getClearingRedeemForByPartition(
+        securityEvmAddress,
+        partitionId,
+        targetEvmAddress,
+        clearingId,
+      );
 
-    clearing.amount = BigDecimal.fromStringFixed(
-      clearing.amount.toString(),
-      security.decimals,
-    );
+      clearing.amount = BigDecimal.fromStringFixed(
+        clearing.amount.toString(),
+        security.decimals,
+      );
 
-    return new GetClearingRedeemForByPartitionQueryResponse(clearing);
+      return new GetClearingRedeemForByPartitionQueryResponse(clearing);
+    } catch (error) {
+      throw new GetClearingRedeemForByPartitionQueryError(
+        query,
+        error as Error,
+      );
+    }
   }
 }

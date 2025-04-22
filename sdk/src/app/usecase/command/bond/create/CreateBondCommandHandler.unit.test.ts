@@ -216,6 +216,7 @@ import {
 } from './CreateBondCommand.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   HederaIdZeroAddressFixture,
@@ -223,6 +224,8 @@ import {
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../service/ContractService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import { CreateBondCommandError } from './error/CreateBondCommandError.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 describe('CreateBondCommandHandler', () => {
   let handler: CreateBondCommandHandler;
@@ -237,6 +240,7 @@ describe('CreateBondCommandHandler', () => {
   const transactionId = TransactionIdFixture.create().id;
   const hederaId = HederaIdPropsFixture.create();
   const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new CreateBondCommandHandler(
@@ -298,6 +302,29 @@ describe('CreateBondCommandHandler', () => {
         ).rejects.toThrow(
           new InvalidRequest('Config Version not found in request'),
         );
+      });
+
+      it('throws CreateBondCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        accountServiceMock.getAccountEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          CreateBondCommandError,
+        );
+
+        await expect(resultPromise).rejects.toThrow(
+          `An error occurred while creating the bond: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `Command error: An error occurred while creating the bond: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
+          ),
+          errorCode: ErrorCode.CommandExecutionFailed,
+        });
       });
     });
 
