@@ -325,6 +325,20 @@ import {
   OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+  UPDATE_EXTERNAL_PAUSES_GAS,
+  ADD_EXTERNAL_PAUSE_GAS,
+  REMOVE_EXTERNAL_PAUSE_GAS,
+  SET_PAUSED_MOCK_GAS,
+  CREATE_EXTERNAL_PAUSE_MOCK_GAS,
+  UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
+  ADD_EXTERNAL_CONTROL_LIST_GAS,
+  REMOVE_EXTERNAL_CONTROL_LIST_GAS,
+  ADD_TO_BLACK_LIST_MOCK_GAS,
+  ADD_TO_WHITE_LIST_MOCK_GAS,
+  REMOVE_FROM_BLACK_LIST_MOCK_GAS,
+  REMOVE_FROM_WHITE_LIST_MOCK_GAS,
+  CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
+  CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -361,6 +375,11 @@ import {
   ClearingTransferFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
+  ExternalPauseManagement__factory,
+  MockedExternalPause__factory,
+  ExternalControlListManagement__factory,
+  MockedBlacklist__factory,
+  MockedWhitelist__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -451,6 +470,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
@@ -492,6 +513,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -561,6 +586,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
@@ -602,6 +629,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
       const bondDetails: BondDetailsData = {
@@ -2787,5 +2818,269 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       ),
       this.networkService.environment,
     );
+  }
+
+  async updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating External Pauses for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalPauseManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateExternalPauses(
+        externalPausesAddresses.map((address) => address.toString()),
+        actives,
+        {
+          gasLimit: UPDATE_EXTERNAL_PAUSES_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding External Pause for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalPauseManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addExternalPause(externalPauseAddress.toString(), {
+        gasLimit: ADD_EXTERNAL_PAUSE_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing External Pause for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalPauseManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeExternalPause(externalPauseAddress.toString(), {
+        gasLimit: REMOVE_EXTERNAL_PAUSE_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting paused to external pause mock contract ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedExternalPause__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).setPaused(paused, {
+        gasLimit: SET_PAUSED_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async createExternalPauseMock(): Promise<string> {
+    LogService.logTrace(`Deploying External Pause Mock contract`);
+
+    const factory = new MockedExternalPause__factory(
+      this.signerOrProvider as Signer,
+    );
+
+    const contract = await factory.deploy({
+      gasLimit: CREATE_EXTERNAL_PAUSE_MOCK_GAS,
+    });
+    await contract.deployed();
+
+    return contract.address;
+  }
+
+  async updateExternalControlLists(
+    security: EvmAddress,
+    externalControlListsAddresses: EvmAddress[],
+    actives: boolean[],
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating External Control Lists for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalControlListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateExternalControlLists(
+        externalControlListsAddresses.map((address) => address.toString()),
+        actives,
+        {
+          gasLimit: UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async addExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding External Control List for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalControlListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addExternalControlList(externalControlListAddress.toString(), {
+        gasLimit: ADD_EXTERNAL_CONTROL_LIST_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing External Control List for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalControlListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeExternalControlList(externalControlListAddress.toString(), {
+        gasLimit: REMOVE_EXTERNAL_CONTROL_LIST_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async addToBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding address ${targetId.toString()} to external Control black List mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedBlacklist__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).addToBlacklist(targetId.toString(), {
+        gasLimit: ADD_TO_BLACK_LIST_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async addToWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding address ${targetId.toString()} to external Control white List mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedWhitelist__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).addToWhitelist(targetId.toString(), {
+        gasLimit: ADD_TO_WHITE_LIST_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeFromBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing address ${targetId.toString()} from external Control black List mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedBlacklist__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).removeFromBlacklist(targetId.toString(), {
+        gasLimit: REMOVE_FROM_BLACK_LIST_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeFromWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing address ${targetId.toString()} from external Control white List mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedWhitelist__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).removeFromWhitelist(targetId.toString(), {
+        gasLimit: REMOVE_FROM_WHITE_LIST_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async createExternalBlackListMock(): Promise<string> {
+    LogService.logTrace(`Deploying External Control Black List Mock contract`);
+
+    const factory = new MockedBlacklist__factory(
+      this.signerOrProvider as Signer,
+    );
+
+    const contract = await factory.deploy({
+      gasLimit: CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
+    });
+    await contract.deployed();
+
+    return contract.address;
+  }
+
+  async createExternalWhiteListMock(): Promise<string> {
+    LogService.logTrace(`Deploying External Control White List Mock contract`);
+
+    const factory = new MockedWhitelist__factory(
+      this.signerOrProvider as Signer,
+    );
+
+    const contract = await factory.deploy({
+      gasLimit: CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
+    });
+    await contract.deployed();
+
+    return contract.address;
   }
 }

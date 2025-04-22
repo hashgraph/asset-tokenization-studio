@@ -283,6 +283,8 @@ export interface SecurityData {
     maxSupply: bigint
     erc20MetadataInfo: ERC20MetadataInfo
     clearingActive: boolean
+    externalPauses: string[]
+    externalControlLists: string[]
 }
 
 export interface EquityData {
@@ -367,6 +369,8 @@ export async function setEquityData({
     init_rbacs,
     addAdmin = true,
     businessLogicResolver,
+    externalPauses,
+    externalControlLists,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -392,6 +396,8 @@ export async function setEquityData({
     init_rbacs?: Rbac[]
     addAdmin?: boolean
     businessLogicResolver: string
+    externalPauses?: string[]
+    externalControlLists?: string[]
 }) {
     let rbacs: Rbac[] = []
 
@@ -420,16 +426,18 @@ export async function setEquityData({
     }
 
     const security: SecurityData = {
-        arePartitionsProtected: arePartitionsProtected,
-        isMultiPartition: isMultiPartition,
+        arePartitionsProtected,
+        isMultiPartition,
         resolver: businessLogicResolver,
-        resolverProxyConfiguration: resolverProxyConfiguration,
-        rbacs: rbacs,
-        isControllable: isControllable,
-        isWhiteList: isWhiteList,
+        resolverProxyConfiguration,
+        rbacs,
+        isControllable,
+        isWhiteList,
         maxSupply: numberOfShares,
-        erc20MetadataInfo: erc20MetadataInfo,
-        clearingActive: clearingActive,
+        erc20MetadataInfo,
+        clearingActive,
+        externalPauses: externalPauses ?? [],
+        externalControlLists: externalControlLists ?? [],
     }
 
     const equityDetails: EquityDetailsData = {
@@ -475,6 +483,8 @@ export async function setBondData({
     init_rbacs,
     addAdmin = true,
     businessLogicResolver,
+    externalPauses,
+    externalControlLists,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -497,6 +507,8 @@ export async function setBondData({
     init_rbacs?: Rbac[]
     addAdmin: boolean
     businessLogicResolver: string
+    externalPauses?: string[]
+    externalControlLists?: string[]
 }) {
     let rbacs: Rbac[] = []
 
@@ -525,16 +537,18 @@ export async function setBondData({
     }
 
     const security: SecurityData = {
-        arePartitionsProtected: arePartitionsProtected,
-        isMultiPartition: isMultiPartition,
+        arePartitionsProtected,
+        isMultiPartition,
         resolver: businessLogicResolver,
-        resolverProxyConfiguration: resolverProxyConfiguration,
-        rbacs: rbacs,
-        isControllable: isControllable,
-        isWhiteList: isWhiteList,
+        resolverProxyConfiguration,
+        rbacs,
+        isControllable,
+        isWhiteList,
         maxSupply: numberOfUnits,
-        erc20MetadataInfo: erc20MetadataInfo,
-        clearingActive: clearingActive,
+        erc20MetadataInfo,
+        clearingActive,
+        externalPauses: externalPauses ?? [],
+        externalControlLists: externalControlLists ?? [],
     }
 
     const bondDetails: BondDetailsData = {

@@ -325,6 +325,28 @@ import {
   GetClearingCreateHoldForByPartitionRequest,
   ClearingCreateHoldViewModel,
   GetClearedAmountForRequest,
+  ExternalPausesManagement,
+  AddExternalPauseRequest,
+  UpdateExternalPausesRequest,
+  IsExternalPauseRequest,
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
+  IsPausedMockRequest,
+  SetPausedMockRequest,
+  RemoveExternalPauseRequest,
+  ExternalControlListsManagement,
+  AddExternalControlListRequest,
+  GetExternalControlListsCountRequest,
+  GetExternalControlListsMembersRequest,
+  IsExternalControlListRequest,
+  RemoveExternalControlListRequest,
+  UpdateExternalControlListsRequest,
+  AddToBlackListMockRequest,
+  AddToWhiteListMockRequest,
+  IsAuthorizedBlackListMockRequest,
+  IsAuthorizedWhiteListMockRequest,
+  RemoveFromBlackListMockRequest,
+  RemoveFromWhiteListMockRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -1009,6 +1031,176 @@ export class SDKService {
     req: GetClearedAmountForRequest,
   ): Promise<number> {
     const response = await Security.getClearedAmountFor(req);
+    return response;
+  }
+
+  // EXTERNAL PAUSES //////////////////////////////////////
+  public static async addExternalPause(
+    req: AddExternalPauseRequest,
+  ): Promise<boolean> {
+    const response = await ExternalPausesManagement.addExternalPause(req);
+    return response.payload;
+  }
+
+  public static async removeExternalPause(
+    req: RemoveExternalPauseRequest,
+  ): Promise<boolean> {
+    const response = await ExternalPausesManagement.removeExternalPause(req);
+    return response.payload;
+  }
+
+  public static async updateExternalPauses(
+    req: UpdateExternalPausesRequest,
+  ): Promise<boolean> {
+    const response = await ExternalPausesManagement.updateExternalPauses(req);
+    return response.payload;
+  }
+
+  public static async isExternalPause(
+    req: IsExternalPauseRequest,
+  ): Promise<boolean> {
+    const response = await ExternalPausesManagement.isExternalPause(req);
+    return response;
+  }
+
+  public static async getExternalPausesCount(
+    req: GetExternalPausesCountRequest,
+  ): Promise<number> {
+    const response = await ExternalPausesManagement.getExternalPausesCount(req);
+    return response;
+  }
+
+  public static async getExternalPausesMembers(
+    req: GetExternalPausesMembersRequest,
+  ): Promise<string[]> {
+    const response =
+      await ExternalPausesManagement.getExternalPausesMembers(req);
+    return response;
+  }
+
+  public static async isPauseMock(req: IsPausedMockRequest): Promise<boolean> {
+    const response = await ExternalPausesManagement.isPausedMock(req);
+    return response;
+  }
+
+  public static async setPausedMock(
+    req: SetPausedMockRequest,
+  ): Promise<boolean> {
+    const response = await ExternalPausesManagement.setPausedMock(req);
+    return response.payload;
+  }
+
+  public static async createMock(): Promise<string> {
+    const response = await ExternalPausesManagement.createMock();
+    return response;
+  }
+
+  // External Control
+  public static async createExternalBlackListMock(): Promise<string> {
+    const response =
+      await ExternalControlListsManagement.createExternalBlackListMock();
+    return response;
+  }
+
+  public static async createExternalWhiteListMock(): Promise<string> {
+    const response =
+      await ExternalControlListsManagement.createExternalWhiteListMock();
+    return response;
+  }
+
+  public static async addExternalControlList(
+    req: AddExternalControlListRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalControlListsManagement.addExternalControlList(req);
+    return response.payload;
+  }
+
+  public static async addToBlackListMock(
+    req: AddToBlackListMockRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalControlListsManagement.addToBlackListMock(req);
+    return response.payload;
+  }
+
+  public static async addToWhiteListMock(
+    req: AddToWhiteListMockRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalControlListsManagement.addToWhiteListMock(req);
+    return response.payload;
+  }
+
+  public static async removeExternalControlList(
+    req: RemoveExternalControlListRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalControlListsManagement.removeExternalControlList(req);
+    return response.payload;
+  }
+
+  public static async removeFromBlackListMock(
+    req: RemoveFromBlackListMockRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalControlListsManagement.removeFromBlackListMock(req);
+    return response.payload;
+  }
+
+  public static async removeFromWhiteListMock(
+    req: RemoveFromWhiteListMockRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalControlListsManagement.removeFromWhiteListMock(req);
+    return response.payload;
+  }
+
+  public static async updateExternalControlLists(
+    req: UpdateExternalControlListsRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalControlListsManagement.updateExternalControlLists(req);
+    return response.payload;
+  }
+
+  public static async getExternalControlListsCount(
+    req: GetExternalControlListsCountRequest,
+  ): Promise<number> {
+    const response =
+      await ExternalControlListsManagement.getExternalControlListsCount(req);
+    return response;
+  }
+
+  public static async getExternalControlListsMembers(
+    req: GetExternalControlListsMembersRequest,
+  ): Promise<string[]> {
+    const response =
+      await ExternalControlListsManagement.getExternalControlListsMembers(req);
+    return response;
+  }
+
+  public static async isExternalControlList(
+    req: IsExternalControlListRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalControlListsManagement.isExternalControlList(req);
+    return response;
+  }
+
+  public static async isAuthorizedBlackListMock(
+    req: IsAuthorizedBlackListMockRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalControlListsManagement.isAuthorizedBlackListMock(req);
+    return response;
+  }
+
+  public static async isAuthorizedWhiteListMock(
+    req: IsAuthorizedWhiteListMockRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalControlListsManagement.isAuthorizedWhiteListMock(req);
     return response;
   }
 }

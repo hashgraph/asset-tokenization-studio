@@ -207,7 +207,14 @@ import { RouteName } from "./RouteName";
 
 export const RoutePath: Record<RouteName, string> = {
   [RouteName.Dashboard]: "/",
+  [RouteName.ExternalPauseList]: "/external-pause",
+  [RouteName.CreateExternalPause]: "/external-pause/create",
+  [RouteName.AddExternalPause]: "/external-pause/add",
   [RouteName.Landing]: "/connect-to-metamask",
+  [RouteName.ExternalControlList]: "/external-control",
+  [RouteName.CreateExternalControl]: "/external-control/create",
+  [RouteName.AddExternalControl]: "/external-control/add",
+  [RouteName.ExternalControlDetails]: "/external-control/:id",
   [RouteName.DigitalSecurityDetails]: "/security/:id",
   [RouteName.DigitalSecurityMint]: "/security/:id/mint",
   [RouteName.DigitalSecurityTransfer]: "/security/:id/transfer",

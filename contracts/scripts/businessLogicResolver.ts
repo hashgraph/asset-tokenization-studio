@@ -264,6 +264,8 @@ export interface DeployedBusinessLogics {
     adjustBalances: IStaticFunctionSelectors
     protectedPartitions: IStaticFunctionSelectors
     Hold: IStaticFunctionSelectors
+    externalPauseManagement: IStaticFunctionSelectors
+    externalControlListManagement: IStaticFunctionSelectors
 }
 
 export let businessLogicResolver: IBusinessLogicResolver

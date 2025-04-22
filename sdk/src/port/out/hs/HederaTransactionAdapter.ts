@@ -208,6 +208,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-case-declarations */
 import {
+  ContractCreateTransaction,
   ContractExecuteTransaction,
   ContractFunctionParameters,
   ContractId,
@@ -236,6 +237,11 @@ import {
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
   ClearingActionsFacet__factory,
+  ExternalPauseManagement__factory,
+  MockedExternalPause__factory,
+  ExternalControlListManagement__factory,
+  MockedBlacklist__factory,
+  MockedWhitelist__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -305,6 +311,20 @@ import {
   OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
   OPERATOR_CLEARING_REDEEM_BY_PARTITION,
   OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+  UPDATE_EXTERNAL_PAUSES_GAS,
+  REMOVE_EXTERNAL_PAUSE_GAS,
+  ADD_EXTERNAL_PAUSE_GAS,
+  CREATE_EXTERNAL_PAUSE_MOCK_GAS,
+  SET_PAUSED_MOCK_GAS,
+  UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
+  ADD_EXTERNAL_CONTROL_LIST_GAS,
+  REMOVE_EXTERNAL_CONTROL_LIST_GAS,
+  ADD_TO_BLACK_LIST_MOCK_GAS,
+  ADD_TO_WHITE_LIST_MOCK_GAS,
+  REMOVE_FROM_BLACK_LIST_MOCK_GAS,
+  REMOVE_FROM_WHITE_LIST_MOCK_GAS,
+  CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
+  CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -424,6 +444,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -467,6 +489,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -537,6 +563,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -580,6 +608,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
       const bondDetails: BondDetailsData = {
@@ -3053,6 +3085,397 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
+  }
+
+  async updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateExternalPauses';
+    LogService.logTrace(
+      `Updating External Pauses for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalPauseManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalPausesAddresses.map((address) => address.toString()), actives],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_EXTERNAL_PAUSES_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'addExternalPause';
+    LogService.logTrace(
+      `Adding External Pause for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalPauseManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalPauseAddress.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(ADD_EXTERNAL_PAUSE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'removeExternalPause';
+    LogService.logTrace(
+      `Removing External Pause for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalPauseManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalPauseAddress.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(REMOVE_EXTERNAL_PAUSE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'setPaused';
+    LogService.logTrace(
+      `Setting paused to external pause mock contract ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedExternalPause__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [paused],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(SET_PAUSED_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async createExternalPauseMock(): Promise<TransactionResponse> {
+    LogService.logTrace(`Deploying External Pause Mock contract`);
+
+    const bytecodeHex = MockedExternalPause__factory.bytecode.startsWith('0x')
+      ? MockedExternalPause__factory.bytecode.slice(2)
+      : MockedExternalPause__factory.bytecode;
+    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, 'hex'));
+
+    const contractCreate = new ContractCreateTransaction()
+      .setBytecode(bytecode)
+      .setGas(CREATE_EXTERNAL_PAUSE_MOCK_GAS);
+
+    return this.signAndSendTransaction(contractCreate);
+  }
+
+  async updateExternalControlLists(
+    security: EvmAddress,
+    externalControlListsAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateExternalControlLists';
+    LogService.logTrace(
+      `Updating External Control Lists for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalControlListManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        externalControlListsAddresses.map((address) => address.toString()),
+        actives,
+      ],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_EXTERNAL_CONTROL_LISTS_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async addExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'addExternalControlList';
+    LogService.logTrace(
+      `Adding External Control Lists for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalControlListManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalControlListAddress.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(ADD_EXTERNAL_CONTROL_LIST_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async removeExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'removeExternalControlList';
+    LogService.logTrace(
+      `Removing External Control Lists for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalControlListManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalControlListAddress.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(REMOVE_EXTERNAL_CONTROL_LIST_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async addToBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'addToBlacklist';
+    LogService.logTrace(
+      `Adding address ${targetId.toString()} to external Control black List mock ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedBlacklist__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(ADD_TO_BLACK_LIST_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async addToWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'addToWhitelist';
+    LogService.logTrace(
+      `Adding address ${targetId.toString()} to external Control white List mock ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedWhitelist__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(ADD_TO_WHITE_LIST_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async removeFromBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'removeFromBlacklist';
+    LogService.logTrace(
+      `Removing address ${targetId.toString()} from external Control black List mock ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedBlacklist__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(REMOVE_FROM_BLACK_LIST_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async removeFromWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'removeFromWhitelist';
+    LogService.logTrace(
+      `Removing address ${targetId.toString()} from external Control white List mock ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedWhitelist__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(REMOVE_FROM_WHITE_LIST_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async createExternalBlackListMock(): Promise<TransactionResponse> {
+    LogService.logTrace(`Deploying External Control Black List Mock contract`);
+
+    const bytecodeHex = MockedBlacklist__factory.bytecode.startsWith('0x')
+      ? MockedBlacklist__factory.bytecode.slice(2)
+      : MockedBlacklist__factory.bytecode;
+    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, 'hex'));
+
+    const contractCreate = new ContractCreateTransaction()
+      .setBytecode(bytecode)
+      .setGas(CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS);
+
+    return this.signAndSendTransaction(contractCreate);
+  }
+
+  async createExternalWhiteListMock(): Promise<TransactionResponse> {
+    LogService.logTrace(`Deploying External Control White List Mock contract`);
+
+    const bytecodeHex = MockedWhitelist__factory.bytecode.startsWith('0x')
+      ? MockedWhitelist__factory.bytecode.slice(2)
+      : MockedWhitelist__factory.bytecode;
+    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, 'hex'));
+
+    const contractCreate = new ContractCreateTransaction()
+      .setBytecode(bytecode)
+      .setGas(CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS);
+
+    return this.signAndSendTransaction(contractCreate);
   }
 
   // * Definition of the abstract methods
