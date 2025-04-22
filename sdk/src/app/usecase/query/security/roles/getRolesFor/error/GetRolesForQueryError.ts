@@ -207,8 +207,8 @@ import { QueryError } from '../../../../error/QueryError';
 import { Query } from '../../../../../../../core/query/Query';
 
 export class GetRolesForQueryError extends QueryError {
-  constructor(query: Query<any>, error: Error) {
+  constructor(query: Query<any>, error: any) {
     const msg = `An error occurred while querying account roles: ${error.message}`;
-    super(msg, query);
+    super(msg, query, error.errorCode);
   }
 }

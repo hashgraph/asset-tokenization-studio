@@ -267,7 +267,7 @@ describe('UpdateMaturityDateCommandHandler', () => {
           message: expect.stringContaining(
             `Command error: An error occurred while updating the bond maturity date: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
           ),
-          errorCode: ErrorCode.CommandExecutionFailed,
+          errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });

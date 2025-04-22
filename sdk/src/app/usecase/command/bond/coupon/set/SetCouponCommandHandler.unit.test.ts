@@ -267,7 +267,7 @@ describe('SetCouponCommandHandler', () => {
           message: expect.stringContaining(
             `Command error: An error occurred while setting the coupon: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
           ),
-          errorCode: ErrorCode.CommandExecutionFailed,
+          errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });

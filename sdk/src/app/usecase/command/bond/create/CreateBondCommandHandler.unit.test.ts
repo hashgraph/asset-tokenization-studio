@@ -209,7 +209,6 @@ import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdap
 import { createMock } from '@golevelup/ts-jest';
 import AccountService from '../../../../service/AccountService.js';
 import { CreateBondCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
-import { InvalidRequest } from '../../error/InvalidRequest.js';
 import {
   CreateBondCommand,
   CreateBondCommandResponse,
@@ -264,9 +263,13 @@ describe('CreateBondCommandHandler', () => {
           factory: undefined,
         };
 
-        await expect(handler.execute(commandWithNotFactory)).rejects.toThrow(
-          new InvalidRequest('Factory not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotFactory);
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `Command error: An error occurred while creating the bond: Factory not found in request | Command payload: ${JSON.stringify(commandWithNotFactory)}`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
 
       it('should throw InvalidRequest if resolver is not provided', async () => {
@@ -275,9 +278,13 @@ describe('CreateBondCommandHandler', () => {
           resolver: undefined,
         };
 
-        await expect(handler.execute(commandWithNotResolver)).rejects.toThrow(
-          new InvalidRequest('Resolver not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotResolver);
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `Command error: An error occurred while creating the bond: Resolver not found in request | Command payload: ${JSON.stringify(commandWithNotResolver)}`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
 
       it('should throw InvalidRequest if configId is not provided', async () => {
@@ -286,9 +293,13 @@ describe('CreateBondCommandHandler', () => {
           configId: undefined,
         };
 
-        await expect(handler.execute(commandWithNotConfigId)).rejects.toThrow(
-          new InvalidRequest('Config Id not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotConfigId);
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `Command error: An error occurred while creating the bond: Config Id not found in request | Command payload: ${JSON.stringify(commandWithNotConfigId)}`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
 
       it('should throw InvalidRequest if configVersion is not provided', async () => {
@@ -297,11 +308,13 @@ describe('CreateBondCommandHandler', () => {
           configVersion: undefined,
         };
 
-        await expect(
-          handler.execute(commandWithNotConfigVersion),
-        ).rejects.toThrow(
-          new InvalidRequest('Config Version not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotConfigVersion);
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `Command error: An error occurred while creating the bond: Config Version not found in request | Command payload: ${JSON.stringify(commandWithNotConfigVersion)}`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
 
       it('throws CreateBondCommandError when command fails with uncaught error', async () => {
@@ -315,15 +328,11 @@ describe('CreateBondCommandHandler', () => {
           CreateBondCommandError,
         );
 
-        await expect(resultPromise).rejects.toThrow(
-          `An error occurred while creating the bond: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
-        );
-
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
             `Command error: An error occurred while creating the bond: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
           ),
-          errorCode: ErrorCode.CommandExecutionFailed,
+          errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });

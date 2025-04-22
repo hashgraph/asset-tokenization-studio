@@ -207,8 +207,8 @@ import { Command } from '../../../../../../../core/command/Command';
 import { CommandError } from '../../../../error/CommandError';
 
 export class SetCouponCommandError extends CommandError {
-  constructor(command: Command, error: Error) {
+  constructor(command: Command, error: any) {
     const msg = `An error occurred while setting the coupon: ${error.message}`;
-    super(msg, command);
+    super(msg, command, error.errorCode);
   }
 }

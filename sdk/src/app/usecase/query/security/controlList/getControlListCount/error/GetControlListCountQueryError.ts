@@ -207,8 +207,8 @@ import { QueryError } from '../../../../error/QueryError';
 import { Query } from '../../../../../../../core/query/Query';
 
 export class GetControlListCountQueryError extends QueryError {
-  constructor(query: Query<any>, error: Error) {
+  constructor(query: Query<any>, error: any) {
     const msg = `An error occurred while querying control list count: ${error.message}`;
-    super(msg, query);
+    super(msg, query, error.errorCode);
   }
 }

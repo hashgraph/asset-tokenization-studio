@@ -207,8 +207,8 @@ import { CommandError } from '../../../../error/CommandError';
 import { Command } from '../../../../../../../core/command/Command';
 
 export class ControllerTransferCommandError extends CommandError {
-  constructor(command: Command, error: Error) {
+  constructor(command: Command, error: any) {
     const msg = `An error occurred while force transferring tokens: ${error.message}`;
-    super(msg, command);
+    super(msg, command, error.errorCode);
   }
 }
