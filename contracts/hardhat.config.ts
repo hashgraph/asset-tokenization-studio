@@ -206,9 +206,10 @@
 import { HardhatUserConfig } from 'hardhat/config'
 import 'tsconfig-paths/register'
 import '@nomicfoundation/hardhat-toolbox'
+import '@nomicfoundation/hardhat-chai-matchers'
+import '@typechain/hardhat'
 import 'hardhat-contract-sizer'
-import 'solidity-coverage'
-import '@hashgraph/sdk'
+import 'hardhat-gas-reporter'
 import Configuration from '@configuration'
 import '@tasks'
 
@@ -222,6 +223,12 @@ const config: HardhatUserConfig = {
             },
             evmVersion: 'london',
         },
+    },
+    paths: {
+        sources: './contracts',
+        tests: './test/unitTests',
+        cache: './cache',
+        artifacts: './artifacts',
     },
     defaultNetwork: 'hardhat',
     networks: {
@@ -254,8 +261,14 @@ const config: HardhatUserConfig = {
     contractSizer: {
         alphaSort: true,
         disambiguatePaths: false,
-        runOnCompile: true,
+        runOnCompile: Configuration.contractSizerRunOnCompile,
         strict: true,
+    },
+    gasReporter: {
+        enabled: Configuration.reportGas,
+        showTimeSpent: true,
+        outputFile: 'gas-report.txt', // Force output to a file
+        noColors: true, // Recommended for file output
     },
     typechain: {
         outDir: './typechain-types',
