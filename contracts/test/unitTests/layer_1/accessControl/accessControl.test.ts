@@ -381,11 +381,21 @@ describe('Access Control Tests', () => {
         // revoke role fails
         await expect(
             accessControlFacet.applyRoles(Roles_1, actives_1, account_B)
-        ).to.be.rejectedWith('ApplyRoleContradiction')
+        )
+            .to.be.revertedWithCustomError(
+                accessControlFacet,
+                'ContradictoryValuesInArray'
+            )
+            .withArgs(3, 6)
 
         await expect(
             accessControlFacet.applyRoles(Roles_1, actives_2, account_B)
-        ).to.be.rejectedWith('ApplyRoleContradiction')
+        )
+            .to.be.revertedWithCustomError(
+                accessControlFacet,
+                'ContradictoryValuesInArray'
+            )
+            .withArgs(3, 6)
     })
 
     it('GIVEN a paused Token WHEN grantRole THEN transaction fails with TokenIsPaused', async () => {

@@ -207,6 +207,7 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {LibCommon} from '../../common/libraries/LibCommon.sol';
+import {ArrayLib} from '../../common/libraries/ArrayLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -256,6 +257,14 @@ abstract contract AccessControlStorageWrapper is
         _;
     }
 
+    modifier onlyConsistentRoles(
+        bytes32[] calldata _roles,
+        bool[] calldata _actives
+    ) {
+        ArrayLib.checkUniqueValues(_roles, _actives);
+        _;
+    }
+
     // Internal
     function _grantRole(
         bytes32 _role,
@@ -279,30 +288,22 @@ abstract contract AccessControlStorageWrapper is
         RoleDataStorage storage roleDataStorage = _rolesStorage();
         address sender = _msgSender();
         uint256 length = _roles.length;
-        for (uint256 index; index < length; ++index) {
+        for (uint256 index; index < length; ) {
             _checkRole(_getRoleAdmin(_roles[index]), sender);
             if (_actives[index]) {
                 if (!_has(roleDataStorage, _roles[index], _account))
                     _grant(roleDataStorage, _roles[index], _account);
+                unchecked {
+                    ++index;
+                }
                 continue;
             }
             if (_has(roleDataStorage, _roles[index], _account))
                 _remove(roleDataStorage, _roles[index], _account);
-        }
-        for (uint256 index; index < length; ++index) {
-            if (_actives[index]) {
-                if (!_has(roleDataStorage, _roles[index], _account))
-                    revert ApplyRoleContradiction(
-                        _roles,
-                        _actives,
-                        _roles[index]
-                    );
-                continue;
+            unchecked {
+                ++index;
             }
-            if (_has(roleDataStorage, _roles[index], _account))
-                revert ApplyRoleContradiction(_roles, _actives, _roles[index]);
         }
-
         success_ = true;
     }
 

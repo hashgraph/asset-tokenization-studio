@@ -249,6 +249,11 @@ import {
   ClearingHoldCreationFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
+  ExternalPauseManagement__factory,
+  MockedExternalPause__factory,
+  ExternalControlListManagement__factory,
+  MockedWhitelist__factory,
+  MockedBlacklist__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1615,5 +1620,128 @@ export class RPCQueryAdapter {
       ClearingActionsFacet__factory,
       address.toString(),
     ).isClearingActivated();
+  }
+
+  async isExternalPause(
+    address: EvmAddress,
+    externalPauseAddress: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the address ${externalPauseAddress.toString()} is a external pause for the security: ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ExternalPauseManagement__factory,
+      address.toString(),
+    ).isExternalPause(externalPauseAddress.toString());
+  }
+
+  async getExternalPausesCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(
+      `Getting External Pauses Count for ${address.toString()}`,
+    );
+
+    const getExternalPausesCount = await this.connect(
+      ExternalPauseManagement__factory,
+      address.toString(),
+    ).getExternalPausesCount();
+
+    return getExternalPausesCount.toNumber();
+  }
+
+  async getExternalPausesMembers(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting External Pauses Members For security ${address.toString()} from ${start} to ${end}`,
+    );
+
+    return await this.connect(
+      ExternalPauseManagement__factory,
+      address.toString(),
+    ).getExternalPausesMembers(start, end);
+  }
+
+  async isPausedMock(address: EvmAddress): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the external pause mock contract: ${address.toString()} is paused`,
+    );
+
+    return await this.connect(
+      MockedExternalPause__factory,
+      address.toString(),
+    ).isPaused();
+  }
+
+  async isExternalControlList(
+    address: EvmAddress,
+    externalControlListAddress: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the address ${externalControlListAddress.toString()} is a external control list for the security: ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ExternalControlListManagement__factory,
+      address.toString(),
+    ).isExternalControlList(externalControlListAddress.toString());
+  }
+
+  async getExternalControlListsCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(
+      `Getting External Control Lists Count for ${address.toString()}`,
+    );
+
+    const getExternalPausesCount = await this.connect(
+      ExternalControlListManagement__factory,
+      address.toString(),
+    ).getExternalControlListsCount();
+
+    return getExternalPausesCount.toNumber();
+  }
+
+  async getExternalControlListsMembers(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting External Control Lists Members For security ${address.toString()} from ${start} to ${end}`,
+    );
+
+    return await this.connect(
+      ExternalControlListManagement__factory,
+      address.toString(),
+    ).getExternalControlListsMembers(start, end);
+  }
+
+  async isAuthorizedBlackListMock(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if address ${targetId.toString()} is authorized in external black list ${address.toString()}`,
+    );
+
+    return await this.connect(
+      MockedBlacklist__factory,
+      address.toString(),
+    ).isAuthorized(targetId.toString());
+  }
+
+  async isAuthorizedWhiteListMock(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if address ${targetId.toString()} is authorized in external white list ${address.toString()}`,
+    );
+
+    return await this.connect(
+      MockedWhitelist__factory,
+      address.toString(),
+    ).isAuthorized(targetId.toString());
   }
 }
