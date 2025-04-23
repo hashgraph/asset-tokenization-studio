@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../FormatValidation.js';
 
 export default class GetIssuerListMembersRequest extends ValidatedRequest<GetIssuerListMembersRequest> {
   securityId: string;
@@ -221,9 +221,9 @@ export default class GetIssuerListMembersRequest extends ValidatedRequest<GetIss
     end: number;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      start: Validation.checkNumber({ min: 0 }),
-      end: Validation.checkNumber({ min: 0 }),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      start: FormatValidation.checkNumber({ min: 0 }),
+      end: FormatValidation.checkNumber({ min: 0 }),
     });
     this.securityId = securityId;
     this.start = start;

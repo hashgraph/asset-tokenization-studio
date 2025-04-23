@@ -221,7 +221,7 @@ import { MirrorNodeAdapter } from '../../../mirror/MirrorNodeAdapter';
 import NetworkService from '../../../../../app/service/NetworkService';
 import { Environment } from '../../../../../domain/context/network/Environment';
 import LogService from '../../../../../app/service/LogService';
-import { SigningError } from '../../error/SigningError';
+import { SigningError } from '../../../error/SigningError.js';
 import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
 import {
   WalletEvents,
@@ -236,8 +236,8 @@ import DfnsSettings from '../../../../../core/settings/custodialWalletSettings/D
 import { HederaId } from '../../../../../domain/context/shared/HederaId.js';
 import FireblocksSettings from '../../../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
 import AWSKMSSettings from '../../../../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
-import { PublickKeyNotFound } from '../../../error/PublickKeyNotFound.js';
-import { UnsupportedNetwork } from '../../../error/UnsupportedNetwork.js';
+import { PublickKeyNotFound } from './error/PublickKeyNotFound.js';
+import { UnsupportedNetwork } from '../../../../../domain/context/network/error/UnsupportedNetwork.js';
 
 export abstract class CustodialTransactionAdapter extends HederaTransactionAdapter {
   protected client: Client;

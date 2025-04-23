@@ -206,8 +206,8 @@
 import { Environment } from '../../../../domain/context/network/Environment.js';
 import { MirrorNode } from '../../../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../../../domain/context/network/JsonRpcRelay.js';
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../FormatValidation.js';
 
 export interface SetNetworkRequestProps {
   environment: Environment;
@@ -223,7 +223,7 @@ export default class SetNetworkRequest extends ValidatedRequest<SetNetworkReques
   consensusNodes?: string;
   constructor(props: SetNetworkRequestProps) {
     super({
-      environment: Validation.checkString({ emptyCheck: true }),
+      environment: FormatValidation.checkString({ emptyCheck: true }),
     });
     Object.assign(this, props);
   }

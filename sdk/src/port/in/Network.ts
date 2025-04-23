@@ -215,7 +215,7 @@ import ConnectRequest, {
   SupportedWallets,
 } from './request/network/ConnectRequest.js';
 import RequestMapper from './request/mapping/RequestMapper.js';
-import TransactionService from '../../app/service/TransactionService.js';
+import TransactionService from '../../app/service/transaction/TransactionService.js';
 import NetworkService from '../../app/service/NetworkService.js';
 import SetNetworkRequest from './request/network/SetNetworkRequest.js';
 import { SetNetworkCommand } from '../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
@@ -229,7 +229,8 @@ import Event from './Event.js';
 import { RPCTransactionAdapter } from '../out/rpc/RPCTransactionAdapter.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import SetConfigurationRequest from './request/management/SetConfigurationRequest.js';
-import { handleValidation } from './Common.js';
+import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+
 import { MirrorNode } from '../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
 import { HederaWalletConnectTransactionAdapter } from '../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
@@ -278,7 +279,7 @@ class NetworkInPort implements INetworkInPort {
 
   @LogError
   async setConfig(req: SetConfigurationRequest): Promise<ConfigResponse> {
-    handleValidation('SetConfigurationRequest', req);
+    ValidatedRequest.handleValidation('SetConfigurationRequest', req);
 
     const res = await this.commandBus.execute(
       new SetConfigurationCommand(req.factoryAddress, req.resolverAddress),
@@ -312,7 +313,7 @@ class NetworkInPort implements INetworkInPort {
 
   @LogError
   async setNetwork(req: SetNetworkRequest): Promise<NetworkResponse> {
-    handleValidation('SetNetworkRequest', req);
+    ValidatedRequest.handleValidation('SetNetworkRequest', req);
 
     const res = await this.commandBus.execute(
       new SetNetworkCommand(
@@ -327,7 +328,7 @@ class NetworkInPort implements INetworkInPort {
 
   @LogError
   async init(req: InitializationRequest): Promise<SupportedWallets[]> {
-    handleValidation('InitializationRequest', req);
+    ValidatedRequest.handleValidation('InitializationRequest', req);
 
     await this.setNetwork(
       new SetNetworkRequest({
@@ -376,7 +377,7 @@ class NetworkInPort implements INetworkInPort {
   @LogError
   async connect(req: ConnectRequest): Promise<InitializationData> {
     LogService.logInfo('ConnectRequest from network', req);
-    handleValidation('ConnectRequest', req);
+    ValidatedRequest.handleValidation('ConnectRequest', req);
 
     const account = req.account
       ? RequestMapper.mapAccount(req.account)

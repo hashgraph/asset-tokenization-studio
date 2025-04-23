@@ -206,8 +206,8 @@
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
 import AccountService from '../../../../../../service/AccountService.js';
-import SecurityService from '../../../../../../service/SecurityService.js';
-import TransactionService from '../../../../../../service/TransactionService.js';
+import SecurityService from '../../../../../../service/security/SecurityService.js';
+import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
@@ -218,8 +218,6 @@ import {
 } from './ClearingTransferByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
-import { EmptyResponse } from '../../../error/EmptyResponse.js';
 
 @CommandHandler(ClearingTransferByPartitionCommand)
 export class ClearingTransferByPartitionCommandHandler
@@ -286,28 +284,13 @@ export class ClearingTransferByPartitionCommandHandler
       securityId,
     );
 
-    if (!res.id)
-      throw new EmptyResponse(ClearingTransferByPartitionCommandHandler.name);
-
-    let clearingId: string;
-
-    if (res.response && res.response.clearingId) {
-      clearingId = res.response.clearingId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new InvalidResponse(results);
-      }
-
-      clearingId = results[1];
-    }
+    const clearingId = await this.transactionService.getTransactionResult({
+      res,
+      result: res.response?.clearingId,
+      className: ClearingTransferByPartitionCommandHandler.name,
+      position: 1,
+      numberOfResultsItems: 2,
+    });
 
     return Promise.resolve(
       new ClearingTransferByPartitionCommandResponse(

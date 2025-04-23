@@ -203,7 +203,7 @@
 
 */
 
-import TransactionService from '../../../../../../service/TransactionService.js';
+import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,

@@ -205,7 +205,6 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from '../Common';
 import Injectable from '../../../core/Injectable';
 import { CommandBus } from '../../../core/command/CommandBus';
 import {
@@ -237,6 +236,7 @@ import { CreateExternalBlackListMockCommand } from '../../../app/usecase/command
 import { CreateExternalWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/createExternalWhiteListMock/CreateExternalWhiteListMockCommand.js';
 import { IsAuthorizedBlackListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery.js';
 import { IsAuthorizedWhiteListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery.js';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
 interface IExternalControlListsInPort {
   updateExternalControlLists(
@@ -295,7 +295,10 @@ class ExternalControlListsInPort
     request: UpdateExternalControlListsRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, externalControlListsAddresses, actives } = request;
-    handleValidation('UpdateExternalControlListsRequest', request);
+    ValidatedRequest.handleValidation(
+      'UpdateExternalControlListsRequest',
+      request,
+    );
 
     return await this.commandBus.execute(
       new UpdateExternalControlListsCommand(
@@ -311,7 +314,7 @@ class ExternalControlListsInPort
     request: AddExternalControlListRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, externalControlListAddress } = request;
-    handleValidation('AddExternalControlListRequest', request);
+    ValidatedRequest.handleValidation('AddExternalControlListRequest', request);
 
     return await this.commandBus.execute(
       new AddExternalControlListCommand(securityId, externalControlListAddress),
@@ -323,7 +326,10 @@ class ExternalControlListsInPort
     request: RemoveExternalControlListRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, externalControlListAddress } = request;
-    handleValidation('RemoveExternalControlListRequest', request);
+    ValidatedRequest.handleValidation(
+      'RemoveExternalControlListRequest',
+      request,
+    );
 
     return await this.commandBus.execute(
       new RemoveExternalControlListCommand(
@@ -338,7 +344,7 @@ class ExternalControlListsInPort
     request: IsExternalControlListRequest,
   ): Promise<boolean> {
     const { securityId, externalControlListAddress } = request;
-    handleValidation('IsExternalControlListRequest', request);
+    ValidatedRequest.handleValidation('IsExternalControlListRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -352,7 +358,10 @@ class ExternalControlListsInPort
     request: GetExternalControlListsCountRequest,
   ): Promise<number> {
     const { securityId } = request;
-    handleValidation('GetExternalControlListsCountRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetExternalControlListsCountRequest',
+      request,
+    );
 
     return (
       await this.queryBus.execute(
@@ -366,7 +375,10 @@ class ExternalControlListsInPort
     request: GetExternalControlListsMembersRequest,
   ): Promise<string[]> {
     const { securityId, start, end } = request;
-    handleValidation('GetExternalControlListsMembersRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetExternalControlListsMembersRequest',
+      request,
+    );
 
     return (
       await this.queryBus.execute(
@@ -380,7 +392,7 @@ class ExternalControlListsInPort
     request: AddToBlackListMockRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { contractId, targetId } = request;
-    handleValidation('AddToBlackListMockRequest', request);
+    ValidatedRequest.handleValidation('AddToBlackListMockRequest', request);
 
     return await this.commandBus.execute(
       new AddToBlackListMockCommand(contractId, targetId),
@@ -392,7 +404,7 @@ class ExternalControlListsInPort
     request: AddToWhiteListMockRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { contractId, targetId } = request;
-    handleValidation('AddToWhiteListMockRequest', request);
+    ValidatedRequest.handleValidation('AddToWhiteListMockRequest', request);
 
     return await this.commandBus.execute(
       new AddToWhiteListMockCommand(contractId, targetId),
@@ -404,7 +416,10 @@ class ExternalControlListsInPort
     request: RemoveFromBlackListMockRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { contractId, targetId } = request;
-    handleValidation('RemoveFromBlackListMockRequest', request);
+    ValidatedRequest.handleValidation(
+      'RemoveFromBlackListMockRequest',
+      request,
+    );
 
     return await this.commandBus.execute(
       new RemoveFromBlackListMockCommand(contractId, targetId),
@@ -416,7 +431,10 @@ class ExternalControlListsInPort
     request: RemoveFromWhiteListMockRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { contractId, targetId } = request;
-    handleValidation('RemoveFromWhiteListMockRequest', request);
+    ValidatedRequest.handleValidation(
+      'RemoveFromWhiteListMockRequest',
+      request,
+    );
 
     return await this.commandBus.execute(
       new RemoveFromWhiteListMockCommand(contractId, targetId),
@@ -442,7 +460,10 @@ class ExternalControlListsInPort
     request: IsAuthorizedBlackListMockRequest,
   ): Promise<boolean> {
     const { contractId, targetId } = request;
-    handleValidation('IsAuthorizedBlackListMockRequest', request);
+    ValidatedRequest.handleValidation(
+      'IsAuthorizedBlackListMockRequest',
+      request,
+    );
 
     return (
       await this.queryBus.execute(
@@ -456,7 +477,10 @@ class ExternalControlListsInPort
     request: IsAuthorizedWhiteListMockRequest,
   ): Promise<boolean> {
     const { contractId, targetId } = request;
-    handleValidation('IsAuthorizedWhiteListMockRequest', request);
+    ValidatedRequest.handleValidation(
+      'IsAuthorizedWhiteListMockRequest',
+      request,
+    );
 
     return (
       await this.queryBus.execute(

@@ -203,7 +203,7 @@
 
 */
 
-import TransactionService from '../../../../service/TransactionService.js';
+import TransactionService from '../../../../service/transaction/TransactionService.js';
 import { CreateBondCommandHandler } from './CreateBondCommandHandler.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { createMock } from '@golevelup/ts-jest';
@@ -223,7 +223,6 @@ import {
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../service/ContractService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { EmptyResponse } from '../../security/error/EmptyResponse.js';
 
 describe('CreateBondCommandHandler', () => {
   let handler: CreateBondCommandHandler;
@@ -239,7 +238,6 @@ describe('CreateBondCommandHandler', () => {
     EvmAddressPropsFixture.create().value,
   );
   const transactionId = TransactionIdFixture.create().id;
-  const contractResult = new EvmAddress(EvmAddressPropsFixture.create().value);
   const hederaId = HederaIdPropsFixture.create();
   const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
 
@@ -304,16 +302,6 @@ describe('CreateBondCommandHandler', () => {
           new InvalidRequest('Config Version not found in request'),
         );
       });
-
-      it('throws error when transaction response id is missing', async () => {
-        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-
-        transactionServiceMock
-          .getHandler()
-          .createBond.mockResolvedValue({ id: undefined });
-
-        await expect(handler.execute(command)).rejects.toThrow(EmptyResponse);
-      });
     });
 
     describe('success cases', () => {
@@ -333,6 +321,10 @@ describe('CreateBondCommandHandler', () => {
           transactionId,
         );
 
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          evmAddress.value,
+        );
+
         const result = await handler.execute(command);
 
         expect(result).toBeInstanceOf(CreateBondCommandResponse);
@@ -348,18 +340,21 @@ describe('CreateBondCommandHandler', () => {
           transactionServiceMock.getHandler().createBond,
         ).toHaveBeenCalledTimes(1);
         expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
           mirrorNodeAdapterMock.getHederaIdfromContractAddress,
         ).toHaveBeenCalledTimes(1);
         expect(
           transactionServiceMock.getHandler().createBond,
         ).toHaveBeenCalledWith(
-          command.security,
-          {
+          expect.objectContaining(command.security),
+          expect.objectContaining({
             currency: command.currency,
             nominalValue: BigDecimal.fromString(command.nominalValue),
             startingDate: parseInt(command.startingDate),
             maturityDate: parseInt(command.maturityDate),
-          },
+          }),
           {
             couponFrequency: parseInt(command.couponFrequency),
             couponRate: BigDecimal.fromString(command.couponRate),
@@ -374,32 +369,19 @@ describe('CreateBondCommandHandler', () => {
           evmAddress,
           command.factory?.toString(),
         );
-      });
-
-      it('should recover contract ID from mirror node if bondAddress is not in response', async () => {
-        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-
-        transactionServiceMock.getHandler().createBond.mockResolvedValue({
-          id: transactionId,
-          response: null,
-        });
-
-        mirrorNodeAdapterMock.getContractResults.mockResolvedValue([
-          contractResult.value,
-        ]);
-
-        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(
-          hederaId.value,
-        );
-
-        const result = await handler.execute(command);
-
-        expect(result).toBeInstanceOf(CreateBondCommandResponse);
-        expect(result.securityId.toString()).toBe(hederaId.value);
-        expect(result.transactionId.toString()).toBe(transactionId);
-        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
-          transactionId,
-          1,
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            res: {
+              id: transactionId,
+              response: { bondAddress: evmAddress.value },
+            },
+            result: evmAddress.value,
+            className: CreateBondCommandHandler.name,
+            position: 0,
+            numberOfResultsItems: 1,
+          }),
         );
       });
 

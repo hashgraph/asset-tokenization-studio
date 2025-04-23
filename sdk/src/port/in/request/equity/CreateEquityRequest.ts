@@ -206,8 +206,9 @@
 import { OptionalField } from '../../../../core/decorator/OptionalDecorator.js';
 import { Equity } from '../../../../domain/context/equity/Equity.js';
 import { Security } from '../../../../domain/context/security/Security.js';
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../FormatValidation.js';
+
 import { Factory } from '../../../../domain/context/factory/Factories.js';
 
 export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRequest> {
@@ -331,29 +332,30 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
       decimals: (val) => {
         return Security.checkInteger(val);
       },
-      diamondOwnerAccount: Validation.checkHederaIdFormatOrEvmAddress(false),
+      diamondOwnerAccount:
+        FormatValidation.checkHederaIdFormatOrEvmAddress(false),
       dividendRight: (val) => {
         return Equity.checkDividend(val);
       },
-      currency: Validation.checkBytes3Format(),
-      numberOfShares: Validation.checkNumber(),
-      nominalValue: Validation.checkNumber(),
+      currency: FormatValidation.checkBytes3Format(),
+      numberOfShares: FormatValidation.checkNumber(),
+      nominalValue: FormatValidation.checkNumber(),
       regulationType: (val) => {
         return Factory.checkRegulationType(val);
       },
       regulationSubType: (val) => {
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
-      configId: Validation.checkBytes32Format(),
+      configId: FormatValidation.checkBytes32Format(),
       externalPauses: (val) => {
-        return Validation.checkHederaIdOrEvmAddressArray(
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
           val ?? [],
           'externalPauses',
           true,
         );
       },
       externalControlLists: (val) => {
-        return Validation.checkHederaIdOrEvmAddressArray(
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
           val ?? [],
           'externalControlLists',
           true,

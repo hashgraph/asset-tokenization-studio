@@ -210,7 +210,7 @@ import {
 } from './updateConfigCommand';
 import { ICommandHandler } from '../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
-import TransactionService from '../../../../service/TransactionService';
+import TransactionService from '../../../../service/transaction/TransactionService';
 import ContractService from '../../../../service/ContractService';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
 

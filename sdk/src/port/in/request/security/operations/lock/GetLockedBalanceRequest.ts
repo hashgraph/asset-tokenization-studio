@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../FormatValidation.js';
 
 export default class GetLockedBalanceRequest extends ValidatedRequest<GetLockedBalanceRequest> {
   securityId: string;
@@ -218,8 +218,8 @@ export default class GetLockedBalanceRequest extends ValidatedRequest<GetLockedB
     targetId: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
     this.securityId = securityId;
     this.targetId = targetId;

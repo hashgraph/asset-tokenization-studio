@@ -204,8 +204,8 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../FormatValidation.js';
 import { InvalidValue } from '../../error/InvalidValue.js';
 
 export default class ApplyRolesRequest extends ValidatedRequest<ApplyRolesRequest> {
@@ -226,15 +226,15 @@ export default class ApplyRolesRequest extends ValidatedRequest<ApplyRolesReques
     actives: boolean[];
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       roles: (vals) => {
         if (vals.length == 0) {
           return [new InvalidValue(`The list of roles cannot be empty.`)];
         }
 
         for (let i = 0; i < vals.length; i++) {
-          const err = Validation.checkRole()(vals[i]);
+          const err = FormatValidation.checkRole()(vals[i]);
           if (err.length > 0) {
             return err;
           }
