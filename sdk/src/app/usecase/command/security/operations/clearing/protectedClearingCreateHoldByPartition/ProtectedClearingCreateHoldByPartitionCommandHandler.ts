@@ -325,7 +325,6 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
       );
     } catch (error) {
       throw new ProtectedClearingCreateHoldByPartitionCommandError(
-        command,
         error as Error,
       );
     }

@@ -230,7 +230,7 @@ export class GetAccountInfoQueryHandler
       const res = await this.repo.getAccountInfo(query.id);
       return Promise.resolve(new GetAccountInfoQueryResponse(res));
     } catch (error) {
-      throw new GetAccountInfoQueryError(query, error as Error);
+      throw new GetAccountInfoQueryError(error as Error);
     }
   }
 }

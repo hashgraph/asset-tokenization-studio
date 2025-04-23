@@ -266,7 +266,7 @@ describe('CreateBondCommandHandler', () => {
         const resultPromise = handler.execute(commandWithNotFactory);
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `Command error: An error occurred while creating the bond: Factory not found in request | Command payload: ${JSON.stringify(commandWithNotFactory)}`,
+            `An error occurred while creating the bond: Factory not found in request`,
           ),
           errorCode: ErrorCode.InvalidRequest,
         });
@@ -281,7 +281,7 @@ describe('CreateBondCommandHandler', () => {
         const resultPromise = handler.execute(commandWithNotResolver);
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `Command error: An error occurred while creating the bond: Resolver not found in request | Command payload: ${JSON.stringify(commandWithNotResolver)}`,
+            `An error occurred while creating the bond: Resolver not found in request`,
           ),
           errorCode: ErrorCode.InvalidRequest,
         });
@@ -296,7 +296,7 @@ describe('CreateBondCommandHandler', () => {
         const resultPromise = handler.execute(commandWithNotConfigId);
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `Command error: An error occurred while creating the bond: Config Id not found in request | Command payload: ${JSON.stringify(commandWithNotConfigId)}`,
+            `An error occurred while creating the bond: Config Id not found in request`,
           ),
           errorCode: ErrorCode.InvalidRequest,
         });
@@ -311,7 +311,7 @@ describe('CreateBondCommandHandler', () => {
         const resultPromise = handler.execute(commandWithNotConfigVersion);
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `Command error: An error occurred while creating the bond: Config Version not found in request | Command payload: ${JSON.stringify(commandWithNotConfigVersion)}`,
+            `An error occurred while creating the bond: Config Version not found in request`,
           ),
           errorCode: ErrorCode.InvalidRequest,
         });
@@ -330,7 +330,7 @@ describe('CreateBondCommandHandler', () => {
 
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `Command error: An error occurred while creating the bond: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
+            `An error occurred while creating the bond: ${errorMsg}`,
           ),
           errorCode: ErrorCode.UncaughtCommandError,
         });

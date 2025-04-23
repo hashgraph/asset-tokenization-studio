@@ -268,10 +268,7 @@ export class GetClearingCreateHoldForByPartitionQueryHandler
 
       return new GetClearingCreateHoldForByPartitionQueryResponse(clearing);
     } catch (error) {
-      throw new GetClearingCreateHoldForByPartitionQueryError(
-        query,
-        error as Error,
-      );
+      throw new GetClearingCreateHoldForByPartitionQueryError(error as Error);
     }
   }
 }

@@ -323,10 +323,7 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ProtectedClearingRedeemByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ProtectedClearingRedeemByPartitionCommandError(error as Error);
     }
   }
 }

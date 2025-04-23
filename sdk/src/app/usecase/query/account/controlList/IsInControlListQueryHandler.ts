@@ -247,7 +247,7 @@ export class IsInControlListQueryHandler
 
       return new IsInControlListQueryResponse(res);
     } catch (error) {
-      throw new IsInControlListQueryError(query, error as Error);
+      throw new IsInControlListQueryError(error as Error);
     }
   }
 }

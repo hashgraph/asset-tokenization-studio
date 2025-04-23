@@ -267,10 +267,7 @@ export class SetRevocationRegistryAddressCommandHandler
         ),
       );
     } catch (error) {
-      throw new SetRevocationRegistryAddressCommandError(
-        command,
-        error as Error,
-      );
+      throw new SetRevocationRegistryAddressCommandError(error as Error);
     }
   }
 }

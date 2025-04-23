@@ -247,7 +247,7 @@ export class GetHeldAmountForQueryHandler
 
       return new GetHeldAmountForQueryResponse(res);
     } catch (error) {
-      throw new GetHeldAmountForQueryError(query, error as Error);
+      throw new GetHeldAmountForQueryError(error as Error);
     }
   }
 }

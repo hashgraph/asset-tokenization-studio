@@ -288,7 +288,7 @@ export class ClearingRedeemByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ClearingRedeemByPartitionCommandError(command, error as Error);
+      throw new ClearingRedeemByPartitionCommandError(error as Error);
     }
   }
 }

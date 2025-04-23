@@ -301,10 +301,7 @@ export class ClearingTransferByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ClearingTransferByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ClearingTransferByPartitionCommandError(error as Error);
     }
   }
 }

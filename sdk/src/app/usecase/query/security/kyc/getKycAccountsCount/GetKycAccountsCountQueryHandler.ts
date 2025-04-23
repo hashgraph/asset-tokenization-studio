@@ -241,7 +241,7 @@ export class GetKycAccountsCountQueryHandler
 
       return new GetKycAccountsCountQueryResponse(res);
     } catch (error) {
-      throw new GetKycAccountsCountQueryError(query, error as Error);
+      throw new GetKycAccountsCountQueryError(error as Error);
     }
   }
 }

@@ -300,10 +300,7 @@ export class ClearingCreateHoldFromByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ClearingCreateHoldFromByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ClearingCreateHoldFromByPartitionCommandError(error as Error);
     }
   }
 }

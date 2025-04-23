@@ -259,7 +259,7 @@ export class GetKycAccountsDataQueryHandler
 
       return new GetKycAccountsDataQueryResponse(kycDataHederaIdFormat);
     } catch (error) {
-      throw new GetKycAccountsDataQueryError(query, error as Error);
+      throw new GetKycAccountsDataQueryError(error as Error);
     }
   }
 }

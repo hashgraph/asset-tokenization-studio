@@ -271,10 +271,7 @@ export class ReclaimClearingOperationByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ReclaimClearingOperationByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ReclaimClearingOperationByPartitionCommandError(error as Error);
     }
   }
 }

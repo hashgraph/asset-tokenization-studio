@@ -264,10 +264,7 @@ export class GetClearingTransferForByPartitionQueryHandler
 
       return new GetClearingTransferForByPartitionQueryResponse(clearing);
     } catch (error) {
-      throw new GetClearingTransferForByPartitionQueryError(
-        query,
-        error as Error,
-      );
+      throw new GetClearingTransferForByPartitionQueryError(error as Error);
     }
   }
 }

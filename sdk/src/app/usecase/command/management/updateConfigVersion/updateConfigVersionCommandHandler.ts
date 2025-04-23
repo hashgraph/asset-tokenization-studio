@@ -248,7 +248,7 @@ export class UpdateConfigVersionCommandHandler
         ),
       );
     } catch (error) {
-      throw new UpdateConfigVersionCommandError(command, error as Error);
+      throw new UpdateConfigVersionCommandError(error as Error);
     }
   }
 }

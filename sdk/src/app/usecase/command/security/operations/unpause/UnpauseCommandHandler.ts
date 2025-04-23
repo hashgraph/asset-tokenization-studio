@@ -249,7 +249,7 @@ export class UnpauseCommandHandler implements ICommandHandler<UnpauseCommand> {
         new UnpauseCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new UnpauseCommandError(command, error as Error);
+      throw new UnpauseCommandError(error as Error);
     }
   }
 }

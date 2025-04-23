@@ -240,7 +240,7 @@ export class SetConfigurationCommandHandler
         ),
       );
     } catch (error) {
-      throw new SetConfigurationCommandError(command, error as Error);
+      throw new SetConfigurationCommandError(error as Error);
     }
   }
 }

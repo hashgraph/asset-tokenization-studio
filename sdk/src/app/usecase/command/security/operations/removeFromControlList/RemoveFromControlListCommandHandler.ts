@@ -265,7 +265,7 @@ export class RemoveFromControlListCommandHandler
         ),
       );
     } catch (error) {
-      throw new RemoveFromControlListCommandError(command, error as Error);
+      throw new RemoveFromControlListCommandError(error as Error);
     }
   }
 }

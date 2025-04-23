@@ -247,7 +247,7 @@ export class GetCouponForQueryHandler
 
       return new GetCouponForQueryResponse(new BigDecimal(res));
     } catch (error) {
-      throw new GetCouponForQueryError(query, error as Error);
+      throw new GetCouponForQueryError(error as Error);
     }
   }
 }

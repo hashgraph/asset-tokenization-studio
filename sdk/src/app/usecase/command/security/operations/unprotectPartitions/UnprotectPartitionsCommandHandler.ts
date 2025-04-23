@@ -265,7 +265,7 @@ export class UnprotectPartitionsCommandHandler
         ),
       );
     } catch (error) {
-      throw new UnprotectPartitionsCommandError(command, error as Error);
+      throw new UnprotectPartitionsCommandError(error as Error);
     }
   }
 }

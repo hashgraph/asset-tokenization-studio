@@ -262,7 +262,7 @@ export class AddToControlListCommandHandler
         new AddToControlListCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new AddToControlListCommandError(command, error as Error);
+      throw new AddToControlListCommandError(error as Error);
     }
   }
 }

@@ -245,7 +245,7 @@ export class GetMaxSupplyQueryHandler
       );
       return new GetMaxSupplyQueryResponse(amount);
     } catch (error) {
-      throw new GetMaxSupplyQueryError(query, error as Error);
+      throw new GetMaxSupplyQueryError(error as Error);
     }
   }
 }

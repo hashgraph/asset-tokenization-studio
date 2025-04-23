@@ -296,10 +296,7 @@ export class ClearingRedeemFromByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ClearingRedeemFromByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ClearingRedeemFromByPartitionCommandError(error as Error);
     }
   }
 }

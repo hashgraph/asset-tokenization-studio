@@ -243,7 +243,7 @@ export class IsOperatorQueryHandler implements IQueryHandler<IsOperatorQuery> {
       );
       return new IsOperatorQueryResponse(res);
     } catch (error) {
-      throw new IsOperatorQueryError(query, error as Error);
+      throw new IsOperatorQueryError(error as Error);
     }
   }
 }

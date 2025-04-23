@@ -238,7 +238,7 @@ export class GetVotingCountQueryHandler
 
       return new GetVotingCountQueryResponse(res);
     } catch (error) {
-      throw new GetVotingCountQueryError(query, error as Error);
+      throw new GetVotingCountQueryError(error as Error);
     }
   }
 }

@@ -259,13 +259,9 @@ describe('SetCouponCommandHandler', () => {
           SetCouponCommandError,
         );
 
-        await expect(resultPromise).rejects.toThrow(
-          `An error occurred while setting the coupon: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
-        );
-
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `Command error: An error occurred while setting the coupon: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
+            `An error occurred while setting the coupon: ${errorMsg}`,
           ),
           errorCode: ErrorCode.UncaughtCommandError,
         });

@@ -265,7 +265,7 @@ export class AddIssuerCommandHandler
         new AddIssuerCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new AddIssuerCommandError(command, error as Error);
+      throw new AddIssuerCommandError(error as Error);
     }
   }
 }

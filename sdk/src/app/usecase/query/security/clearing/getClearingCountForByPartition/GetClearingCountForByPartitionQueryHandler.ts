@@ -250,7 +250,7 @@ export class GetClearingCountForByPartitionQueryHandler
 
       return new GetClearingCountForByPartitionQueryResponse(res);
     } catch (error) {
-      throw new GetClearingCountForByPartitionQueryError(query, error as Error);
+      throw new GetClearingCountForByPartitionQueryError(error as Error);
     }
   }
 }

@@ -335,7 +335,7 @@ export class CreateBondCommandHandler
           new CreateBondCommandResponse(new ContractId('0.0.0'), res.id!),
         );
       }
-      throw new CreateBondCommandError(command, error);
+      throw new CreateBondCommandError(error as Error);
     }
   }
 }

@@ -311,10 +311,7 @@ export class ProtectedTransferFromByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ProtectedTransferFromByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ProtectedTransferFromByPartitionCommandError(error as Error);
     }
   }
 }

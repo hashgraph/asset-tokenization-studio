@@ -244,7 +244,7 @@ export class GetConfigInfoQueryHandler
         ),
       );
     } catch (error) {
-      throw new GetConfigInfoQueryError(query, error as Error);
+      throw new GetConfigInfoQueryError(error as Error);
     }
   }
 }

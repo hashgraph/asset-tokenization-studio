@@ -204,11 +204,11 @@
 */
 
 import { CommandError } from '../../../../../error/CommandError';
-import { Command } from '../../../../../../../../core/command/Command';
+import BaseError from '../../../../../../../../core/error/BaseError';
 
 export class ApproveClearingOperationByPartitionCommandError extends CommandError {
-  constructor(command: Command, error: any) {
+  constructor(error: Error | BaseError) {
     const msg = `An error occurred while approving clearing operation: ${error.message}`;
-    super(msg, command, error.errorCode);
+    super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

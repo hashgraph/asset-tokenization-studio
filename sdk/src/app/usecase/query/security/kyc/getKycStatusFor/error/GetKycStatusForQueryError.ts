@@ -204,11 +204,11 @@
 */
 
 import { QueryError } from '../../../../error/QueryError';
-import { Query } from '../../../../../../../core/query/Query';
+import BaseError from '../../../../../../../core/error/BaseError';
 
 export class GetKycStatusForQueryError extends QueryError {
-  constructor(query: Query<any>, error: any) {
+  constructor(error: Error | BaseError) {
     const msg = `An error occurred while querying KYC status: ${error.message}`;
-    super(msg, query, error.errorCode);
+    super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

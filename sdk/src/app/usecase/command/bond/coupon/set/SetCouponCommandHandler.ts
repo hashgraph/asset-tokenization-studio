@@ -254,7 +254,7 @@ export class SetCouponCommandHandler
         new SetCouponCommandResponse(parseInt(couponId, 16), res.id!),
       );
     } catch (error) {
-      throw new SetCouponCommandError(command, error);
+      throw new SetCouponCommandError(error as Error);
     }
   }
 }

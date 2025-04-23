@@ -247,7 +247,7 @@ export class GetRoleCountForQueryHandler
 
       return new GetRoleCountForQueryResponse(res);
     } catch (error) {
-      throw new GetRoleCountForQueryError(query, error as Error);
+      throw new GetRoleCountForQueryError(error as Error);
     }
   }
 }

@@ -251,7 +251,7 @@ export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
         new ReleaseCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new ReleaseCommandError(command, error as Error);
+      throw new ReleaseCommandError(error as Error);
     }
   }
 }

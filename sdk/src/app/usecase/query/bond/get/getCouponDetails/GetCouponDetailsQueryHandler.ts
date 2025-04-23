@@ -241,7 +241,7 @@ export class GetCouponDetailsQueryHandler
 
       return Promise.resolve(new GetCouponDetailsQueryResponse(coupon));
     } catch (error) {
-      throw new GetCouponDetailsQueryError(query, error as Error);
+      throw new GetCouponDetailsQueryError(error as Error);
     }
   }
 }

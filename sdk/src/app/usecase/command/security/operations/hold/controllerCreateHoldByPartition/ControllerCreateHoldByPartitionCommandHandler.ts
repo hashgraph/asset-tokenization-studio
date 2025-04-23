@@ -309,10 +309,7 @@ export class ControllerCreateHoldByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ControllerCreateHoldByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ControllerCreateHoldByPartitionCommandError(error as Error);
     }
   }
 }

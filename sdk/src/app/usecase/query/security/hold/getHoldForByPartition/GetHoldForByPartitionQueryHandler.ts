@@ -259,7 +259,7 @@ export class GetHoldForByPartitionQueryHandler
 
       return new GetHoldForByPartitionQueryResponse(holdDetail);
     } catch (error) {
-      throw new GetHoldForByPartitionQueryError(query, error as Error);
+      throw new GetHoldForByPartitionQueryError(error as Error);
     }
   }
 }

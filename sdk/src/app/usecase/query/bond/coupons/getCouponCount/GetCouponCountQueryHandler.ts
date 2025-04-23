@@ -238,7 +238,7 @@ export class GetCouponCountQueryHandler
 
       return new GetCouponCountQueryResponse(res);
     } catch (error) {
-      throw new GetCouponCountQueryError(query, error as Error);
+      throw new GetCouponCountQueryError(error as Error);
     }
   }
 }

@@ -315,10 +315,7 @@ export class OperatorClearingTransferByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new OperatorClearingTransferByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new OperatorClearingTransferByPartitionCommandError(error as Error);
     }
   }
 }

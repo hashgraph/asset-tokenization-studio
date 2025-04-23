@@ -298,7 +298,7 @@ export class CreateHoldByPartitionCommandHandler
         new CreateHoldByPartitionCommandResponse(parseInt(holdId, 16), res.id!),
       );
     } catch (error) {
-      throw new CreateHoldByPartitionCommandError(command, error as Error);
+      throw new CreateHoldByPartitionCommandError(error as Error);
     }
   }
 }

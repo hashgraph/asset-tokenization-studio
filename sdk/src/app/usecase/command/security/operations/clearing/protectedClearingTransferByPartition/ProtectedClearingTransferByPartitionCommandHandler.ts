@@ -326,7 +326,6 @@ export class ProtectedClearingTransferByPartitionCommandHandler
       );
     } catch (error) {
       throw new ProtectedClearingTransferByPartitionCommandError(
-        command,
         error as Error,
       );
     }

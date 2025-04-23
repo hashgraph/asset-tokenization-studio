@@ -301,7 +301,7 @@ export class CreateHoldFromByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new CreateHoldFromByPartitionCommandError(command, error as Error);
+      throw new CreateHoldFromByPartitionCommandError(error as Error);
     }
   }
 }

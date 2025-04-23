@@ -230,7 +230,7 @@ export class IsPausedQueryHandler implements IQueryHandler<IsPausedQuery> {
       const res = await this.queryAdapter.isPaused(securityEvmAddress);
       return new IsPausedQueryResponse(res);
     } catch (error) {
-      throw new IsPausedQueryError(query, error as Error);
+      throw new IsPausedQueryError(error as Error);
     }
   }
 }

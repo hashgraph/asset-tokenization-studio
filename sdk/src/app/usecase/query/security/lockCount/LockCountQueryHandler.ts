@@ -240,7 +240,7 @@ export class LockCountQueryHandler implements IQueryHandler<LockCountQuery> {
 
       return new LockCountQueryResponse(res);
     } catch (error) {
-      throw new LockCountQueryError(query, error as Error);
+      throw new LockCountQueryError(error as Error);
     }
   }
 }

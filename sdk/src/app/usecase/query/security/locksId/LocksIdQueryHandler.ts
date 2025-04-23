@@ -242,7 +242,7 @@ export class LocksIdQueryHandler implements IQueryHandler<LocksIdQuery> {
 
       return new LocksIdQueryResponse(res);
     } catch (error) {
-      throw new LocksIdQueryError(query, error as Error);
+      throw new LocksIdQueryError(error as Error);
     }
   }
 }

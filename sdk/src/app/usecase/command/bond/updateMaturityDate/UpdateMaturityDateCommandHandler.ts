@@ -218,7 +218,7 @@ export class UpdateMaturityDateCommandHandler
         new UpdateMaturityDateCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new UpdateMaturityDateCommandError(command, error as Error);
+      throw new UpdateMaturityDateCommandError(error as Error);
     }
   }
 }

@@ -281,7 +281,7 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
         new IssueCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new IssueCommandError(command, error as Error);
+      throw new IssueCommandError(error as Error);
     }
   }
 }

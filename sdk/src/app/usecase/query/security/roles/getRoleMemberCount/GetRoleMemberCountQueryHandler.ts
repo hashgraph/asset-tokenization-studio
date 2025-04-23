@@ -241,7 +241,7 @@ export class GetRoleMemberCountQueryHandler
 
       return new GetRoleMemberCountQueryResponse(res);
     } catch (error) {
-      throw new GetRoleMemberCountQueryError(query, error as Error);
+      throw new GetRoleMemberCountQueryError(error as Error);
     }
   }
 }

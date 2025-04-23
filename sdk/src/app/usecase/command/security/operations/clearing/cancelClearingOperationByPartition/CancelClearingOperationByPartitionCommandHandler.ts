@@ -280,10 +280,7 @@ export class CancelClearingOperationByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new CancelClearingOperationByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new CancelClearingOperationByPartitionCommandError(error as Error);
     }
   }
 }

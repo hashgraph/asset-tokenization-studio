@@ -267,7 +267,7 @@ export class LockCommandHandler implements ICommandHandler<LockCommand> {
         new LockCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new LockCommandError(command, error as Error);
+      throw new LockCommandError(error as Error);
     }
   }
 }

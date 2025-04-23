@@ -285,7 +285,7 @@ export class ControllerTransferCommandHandler
         new ControllerTransferCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new ControllerTransferCommandError(command, error as Error);
+      throw new ControllerTransferCommandError(error as Error);
     }
   }
 }

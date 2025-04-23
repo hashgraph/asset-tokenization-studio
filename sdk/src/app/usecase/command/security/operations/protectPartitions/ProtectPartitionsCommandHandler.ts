@@ -263,7 +263,7 @@ export class ProtectPartitionsCommandHandler
         new ProtectPartitionsCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new ProtectPartitionsCommandError(command, error as Error);
+      throw new ProtectPartitionsCommandError(error as Error);
     }
   }
 }

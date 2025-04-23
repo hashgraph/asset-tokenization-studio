@@ -277,10 +277,7 @@ export class SetScheduledBalanceAdjustmentCommandHandler
         ),
       );
     } catch (error) {
-      throw new SetScheduledBalanceAdjustmentCommandError(
-        command,
-        error as Error,
-      );
+      throw new SetScheduledBalanceAdjustmentCommandError(error as Error);
     }
   }
 }

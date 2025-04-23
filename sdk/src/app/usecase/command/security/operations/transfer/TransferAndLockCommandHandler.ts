@@ -283,7 +283,7 @@ export class TransferAndLockCommandHandler
         new TransferAndLockCommandResponse(parseInt(lockId, 16), res.id!),
       );
     } catch (error) {
-      throw new TransferAndLockCommandError(command, error as Error);
+      throw new TransferAndLockCommandError(error as Error);
     }
   }
 }

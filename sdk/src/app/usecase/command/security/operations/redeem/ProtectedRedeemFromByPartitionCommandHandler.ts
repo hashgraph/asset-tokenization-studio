@@ -304,10 +304,7 @@ export class ProtectedRedeemFromByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ProtectedRedeemFromByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ProtectedRedeemFromByPartitionCommandError(error as Error);
     }
   }
 }

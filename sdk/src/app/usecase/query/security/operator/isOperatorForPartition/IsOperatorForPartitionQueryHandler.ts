@@ -251,7 +251,7 @@ export class IsOperatorForPartitionQueryHandler
       );
       return new IsOperatorForPartitionQueryResponse(res);
     } catch (error) {
-      throw new IsOperatorForPartitionQueryError(query, error as Error);
+      throw new IsOperatorForPartitionQueryError(error as Error);
     }
   }
 }

@@ -289,7 +289,7 @@ export class GrantKycCommandHandler
         new GrantKycCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new GrantKycCommandError(command, error as Error);
+      throw new GrantKycCommandError(error as Error);
     }
   }
 }

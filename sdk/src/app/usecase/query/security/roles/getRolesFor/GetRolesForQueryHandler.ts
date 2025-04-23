@@ -247,7 +247,7 @@ export class GetRolesForQueryHandler
 
       return new GetRolesForQueryResponse(res);
     } catch (error) {
-      throw new GetRolesForQueryError(query, error as Error);
+      throw new GetRolesForQueryError(error as Error);
     }
   }
 }

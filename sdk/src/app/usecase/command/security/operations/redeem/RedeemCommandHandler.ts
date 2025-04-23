@@ -267,7 +267,7 @@ export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
         new RedeemCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new RedeemCommandError(command, error as Error);
+      throw new RedeemCommandError(error as Error);
     }
   }
 }

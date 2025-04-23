@@ -294,10 +294,7 @@ export class ApproveClearingOperationByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ApproveClearingOperationByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ApproveClearingOperationByPartitionCommandError(error as Error);
     }
   }
 }

@@ -241,10 +241,7 @@ export class GetAggregatedBalanceAdjustmentFactorQueryHandler
 
       return new GetAggregatedBalanceAdjustmentFactorQueryResponse(res);
     } catch (error) {
-      throw new GetAggregatedBalanceAdjustmentFactorQueryError(
-        query,
-        error as Error,
-      );
+      throw new GetAggregatedBalanceAdjustmentFactorQueryError(error as Error);
     }
   }
 }

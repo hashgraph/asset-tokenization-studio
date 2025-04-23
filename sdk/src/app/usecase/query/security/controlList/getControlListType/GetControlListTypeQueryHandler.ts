@@ -244,7 +244,7 @@ export class GetControlListTypeQueryHandler
           : SecurityControlListType.BLACKLIST,
       );
     } catch (error) {
-      throw new GetControlListTypeQueryError(query, error as Error);
+      throw new GetControlListTypeQueryError(error as Error);
     }
   }
 }

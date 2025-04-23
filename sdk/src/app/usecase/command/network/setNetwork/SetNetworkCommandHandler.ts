@@ -255,7 +255,7 @@ export class SetNetworkCommandHandler
         ),
       );
     } catch (error) {
-      throw new SetNetworkCommandError(command, error as Error);
+      throw new SetNetworkCommandError(error as Error);
     }
   }
 }

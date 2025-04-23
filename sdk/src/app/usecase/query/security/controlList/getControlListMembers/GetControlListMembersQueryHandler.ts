@@ -242,7 +242,7 @@ export class GetControlListMembersQueryHandler
 
       return new GetControlListMembersQueryResponse(res);
     } catch (error) {
-      throw new GetControlListMembersQueryError(query, error as Error);
+      throw new GetControlListMembersQueryError(error as Error);
     }
   }
 }

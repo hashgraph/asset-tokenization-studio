@@ -239,7 +239,7 @@ export class IsClearingActivatedQueryHandler
 
       return new IsClearingActivatedQueryResponse(res);
     } catch (error) {
-      throw new IsClearingActivatedQueryError(query, error as Error);
+      throw new IsClearingActivatedQueryError(error as Error);
     }
   }
 }

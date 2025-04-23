@@ -228,7 +228,7 @@ export class ReclaimHoldByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ReclaimHoldByPartitionCommandError(command, error as Error);
+      throw new ReclaimHoldByPartitionCommandError(error as Error);
     }
   }
 }

@@ -271,7 +271,7 @@ export class TransferCommandHandler
         new TransferCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new TransferCommandError(command, error as Error);
+      throw new TransferCommandError(error as Error);
     }
   }
 }

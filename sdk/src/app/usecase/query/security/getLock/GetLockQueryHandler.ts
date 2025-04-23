@@ -253,7 +253,7 @@ export class GetLockQueryHandler implements IQueryHandler<GetLockQuery> {
 
       return new GetLockQueryResponse(new Lock(id, amount, expirationDate));
     } catch (error) {
-      throw new GetLockQueryError(query, error as Error);
+      throw new GetLockQueryError(error as Error);
     }
   }
 }

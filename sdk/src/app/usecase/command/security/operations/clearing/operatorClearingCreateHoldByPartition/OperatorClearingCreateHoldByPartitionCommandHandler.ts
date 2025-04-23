@@ -311,7 +311,6 @@ export class OperatorClearingCreateHoldByPartitionCommandHandler
       );
     } catch (error) {
       throw new OperatorClearingCreateHoldByPartitionCommandError(
-        command,
         error as Error,
       );
     }

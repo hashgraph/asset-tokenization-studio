@@ -247,7 +247,7 @@ export class GetKycStatusForQueryHandler
 
       return new GetKycStatusForQueryResponse(res);
     } catch (error) {
-      throw new GetKycStatusForQueryError(query, error as Error);
+      throw new GetKycStatusForQueryError(error as Error);
     }
   }
 }

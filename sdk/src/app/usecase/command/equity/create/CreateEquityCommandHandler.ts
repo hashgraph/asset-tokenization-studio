@@ -337,7 +337,7 @@ export class CreateEquityCommandHandler
         return Promise.resolve(
           new CreateEquityCommandResponse(new ContractId('0.0.0'), res.id!),
         );
-      else throw new CreateEquityCommandError(command, error as Error);
+      else throw new CreateEquityCommandError(error as Error);
     }
   }
 }

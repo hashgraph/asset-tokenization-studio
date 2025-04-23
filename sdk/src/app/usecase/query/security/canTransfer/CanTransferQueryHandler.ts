@@ -261,7 +261,7 @@ export class CanTransferQueryHandler
 
       return new CanTransferQueryResponse(res);
     } catch (error) {
-      throw new CanTransferQueryError(query, error as Error);
+      throw new CanTransferQueryError(error as Error);
     }
   }
 }

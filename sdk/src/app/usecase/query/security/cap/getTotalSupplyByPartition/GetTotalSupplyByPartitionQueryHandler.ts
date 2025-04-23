@@ -250,7 +250,7 @@ export class GetMaxSupplyByPartitionQueryHandler
       );
       return new GetTotalSupplyByPartitionQueryResponse(amount);
     } catch (error) {
-      throw new GetTotalSupplyByPartitionQueryError(query, error as Error);
+      throw new GetTotalSupplyByPartitionQueryError(error as Error);
     }
   }
 }

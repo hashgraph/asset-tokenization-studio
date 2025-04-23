@@ -240,7 +240,7 @@ export class GetKycForQueryHandler implements IQueryHandler<GetKycForQuery> {
 
       return new GetKycForQueryResponse(res);
     } catch (error) {
-      throw new GetKycForQueryError(query, error as Error);
+      throw new GetKycForQueryError(error as Error);
     }
   }
 }

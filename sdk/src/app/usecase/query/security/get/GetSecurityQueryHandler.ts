@@ -250,7 +250,7 @@ export class GetSecurityQueryHandler
 
       return Promise.resolve(new GetSecurityQueryResponse(security));
     } catch (error) {
-      throw new GetSecurityQueryError(query, error as Error);
+      throw new GetSecurityQueryError(error as Error);
     }
   }
 }

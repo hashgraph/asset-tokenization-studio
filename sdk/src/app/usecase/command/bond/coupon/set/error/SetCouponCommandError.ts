@@ -203,12 +203,12 @@
 
 */
 
-import { Command } from '../../../../../../../core/command/Command';
+import BaseError from '../../../../../../../core/error/BaseError';
 import { CommandError } from '../../../../error/CommandError';
 
 export class SetCouponCommandError extends CommandError {
-  constructor(command: Command, error: any) {
+  constructor(error: Error | BaseError) {
     const msg = `An error occurred while setting the coupon: ${error.message}`;
-    super(msg, command, error.errorCode);
+    super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

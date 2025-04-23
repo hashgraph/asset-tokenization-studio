@@ -241,7 +241,7 @@ export class HasRoleQueryHandler implements IQueryHandler<HasRoleQuery> {
 
       return new HasRoleQueryResponse(res);
     } catch (error) {
-      throw new HasRoleQueryError(query, error as Error);
+      throw new HasRoleQueryError(error as Error);
     }
   }
 }

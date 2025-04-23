@@ -238,7 +238,7 @@ export class PartitionsProtectedQueryHandler
         await this.queryAdapter.arePartitionsProtected(securityEvmAddress);
       return new PartitionsProtectedQueryResponse(res);
     } catch (error) {
-      throw new PartitionsProtectedQueryError(query, error as Error);
+      throw new PartitionsProtectedQueryError(error as Error);
     }
   }
 }

@@ -243,7 +243,7 @@ export class GetRoleMembersQueryHandler
 
       return new GetRoleMembersQueryResponse(res);
     } catch (error) {
-      throw new GetRoleMembersQueryError(query, error as Error);
+      throw new GetRoleMembersQueryError(error as Error);
     }
   }
 }

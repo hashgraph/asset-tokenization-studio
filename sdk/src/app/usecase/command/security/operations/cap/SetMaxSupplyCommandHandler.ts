@@ -267,7 +267,7 @@ export class SetMaxSupplyCommandHandler
         new SetMaxSupplyCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new SetMaxSupplyCommandError(command, error as Error);
+      throw new SetMaxSupplyCommandError(error as Error);
     }
   }
 }

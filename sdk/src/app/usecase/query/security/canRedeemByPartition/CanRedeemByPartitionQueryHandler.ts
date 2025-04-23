@@ -260,7 +260,7 @@ export class CanRedeemByPartitionQueryHandler
 
       return new CanRedeemByPartitionQueryResponse(res);
     } catch (error) {
-      throw new CanRedeemByPartitionQueryError(query, error as Error);
+      throw new CanRedeemByPartitionQueryError(error as Error);
     }
   }
 }

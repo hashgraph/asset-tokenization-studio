@@ -256,7 +256,7 @@ export class GetAccountBalanceQueryHandler
       );
       return new GetAccountBalanceQueryResponse(amount);
     } catch (error) {
-      throw new GetAccountBalanceQueryError(query, error as Error);
+      throw new GetAccountBalanceQueryError(error as Error);
     }
   }
 }

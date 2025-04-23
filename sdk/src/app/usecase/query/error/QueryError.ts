@@ -203,12 +203,10 @@
 
 */
 
-import { Query } from '../../../../core/query/Query.js';
 import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
 export class QueryError extends BaseError {
-  constructor(msg: string, query: Query<any>, errorCode?: ErrorCode) {
-    const formatted = `Query error: ${msg} | Query payload: ${JSON.stringify(query)}`;
-    super(errorCode ?? ErrorCode.UncaughtQueryError, formatted);
+  constructor(msg: string, errorCode?: ErrorCode) {
+    super(errorCode ?? ErrorCode.UncaughtQueryError, msg);
   }
 }

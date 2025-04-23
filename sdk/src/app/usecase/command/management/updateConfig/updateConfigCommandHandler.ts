@@ -246,7 +246,7 @@ export class UpdateConfigCommandHandler
         new UpdateConfigCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new UpdateConfigCommandError(command, error as Error);
+      throw new UpdateConfigCommandError(error as Error);
     }
   }
 }

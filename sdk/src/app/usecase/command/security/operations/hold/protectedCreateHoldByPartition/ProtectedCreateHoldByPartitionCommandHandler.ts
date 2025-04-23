@@ -321,10 +321,7 @@ export class ProtectedCreateHoldByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ProtectedCreateHoldByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ProtectedCreateHoldByPartitionCommandError(error as Error);
     }
   }
 }

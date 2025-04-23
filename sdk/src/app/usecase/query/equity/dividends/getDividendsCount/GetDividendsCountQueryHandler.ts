@@ -237,7 +237,7 @@ export class GetDividendsCountQueryHandler
 
       return new GetDividendsCountQueryResponse(res);
     } catch (error) {
-      throw new GetDividendsCountQueryError(query, error as Error);
+      throw new GetDividendsCountQueryError(error as Error);
     }
   }
 }

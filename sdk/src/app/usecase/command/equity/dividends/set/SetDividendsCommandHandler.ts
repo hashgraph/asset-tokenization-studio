@@ -255,7 +255,7 @@ export class SetDividendsCommandHandler
         new SetDividendsCommandResponse(parseInt(dividendId, 16), res.id!),
       );
     } catch (error) {
-      throw new SetDividendsCommandError(command, error as Error);
+      throw new SetDividendsCommandError(error as Error);
     }
   }
 }

@@ -259,7 +259,7 @@ export class RevokeKycCommandHandler
         new RevokeKycCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new RevokeKycCommandError(command, error as Error);
+      throw new RevokeKycCommandError(error as Error);
     }
   }
 }

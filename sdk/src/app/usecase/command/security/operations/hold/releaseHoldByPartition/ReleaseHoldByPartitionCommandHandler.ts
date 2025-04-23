@@ -279,7 +279,7 @@ export class ReleaseHoldByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ReleaseHoldByPartitionCommandError(command, error as Error);
+      throw new ReleaseHoldByPartitionCommandError(error as Error);
     }
   }
 }

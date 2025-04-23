@@ -322,10 +322,7 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new ProtectedTransferAndLockByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new ProtectedTransferAndLockByPartitionCommandError(error as Error);
     }
   }
 }

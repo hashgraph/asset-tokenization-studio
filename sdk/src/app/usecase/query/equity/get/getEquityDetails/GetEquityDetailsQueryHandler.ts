@@ -241,7 +241,7 @@ export class GetEquityDetailsQueryHandler
 
       return Promise.resolve(new GetEquityDetailsQueryResponse(equity));
     } catch (error) {
-      throw new GetEquityDetailsQueryError(query, error as Error);
+      throw new GetEquityDetailsQueryError(error as Error);
     }
   }
 }

@@ -256,7 +256,7 @@ export class ActivateClearingCommandHandler
         new ActivateClearingCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new ActivateClearingCommandError(command, error as Error);
+      throw new ActivateClearingCommandError(error as Error);
     }
   }
 }

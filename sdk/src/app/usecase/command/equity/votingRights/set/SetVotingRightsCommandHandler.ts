@@ -254,7 +254,7 @@ export class SetVotingRightsCommandHandler
         new SetVotingRightsCommandResponse(parseInt(voteId, 16), res.id!),
       );
     } catch (error) {
-      throw new SetVotingRightsCommandError(command, error as Error);
+      throw new SetVotingRightsCommandError(error as Error);
     }
   }
 }

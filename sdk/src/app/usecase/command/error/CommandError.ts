@@ -204,11 +204,9 @@
 */
 
 import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
-import { Command } from '../../../../core/command/Command';
 
 export class CommandError extends BaseError {
-  constructor(msg: string, command: Command, errorCode?: ErrorCode) {
-    const formatted = `Command error: ${msg} | Command payload: ${JSON.stringify(command)}`;
-    super(errorCode ?? ErrorCode.UncaughtCommandError, formatted);
+  constructor(msg: string, errorCode?: ErrorCode) {
+    super(errorCode ?? ErrorCode.UncaughtCommandError, msg);
   }
 }

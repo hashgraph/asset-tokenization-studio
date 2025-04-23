@@ -239,7 +239,7 @@ export class GetDividendsQueryHandler
 
       return Promise.resolve(new GetDividendsQueryResponse(res));
     } catch (error) {
-      throw new GetDividendsQueryError(query, error as Error);
+      throw new GetDividendsQueryError(error as Error);
     }
   }
 }

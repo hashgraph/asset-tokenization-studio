@@ -234,7 +234,7 @@ export class GetCouponQueryHandler implements IQueryHandler<GetCouponQuery> {
 
       return Promise.resolve(new GetCouponQueryResponse(res));
     } catch (error) {
-      throw new GetCouponQueryError(query, error as Error);
+      throw new GetCouponQueryError(error as Error);
     }
   }
 }

@@ -273,7 +273,7 @@ export class ControllerRedeemCommandHandler
         new ControllerRedeemCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new ControllerRedeemCommandError(command, error as Error);
+      throw new ControllerRedeemCommandError(error as Error);
     }
   }
 }

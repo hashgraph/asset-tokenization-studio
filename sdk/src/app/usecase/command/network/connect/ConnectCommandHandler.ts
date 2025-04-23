@@ -229,7 +229,7 @@ export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {
         new ConnectCommandResponse(registration, command.wallet),
       );
     } catch (error) {
-      throw new ConnectCommandError(command, error as Error);
+      throw new ConnectCommandError(error as Error);
     }
   }
 }

@@ -250,7 +250,7 @@ export class GetRegulationDetailsQueryHandler
 
       return Promise.resolve(new GetRegulationDetailsQueryResponse(regulation));
     } catch (error) {
-      throw new GetRegulationDetailsQueryError(query, error as Error);
+      throw new GetRegulationDetailsQueryError(error as Error);
     }
   }
 }

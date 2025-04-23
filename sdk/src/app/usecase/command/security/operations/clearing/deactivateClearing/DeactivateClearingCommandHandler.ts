@@ -256,7 +256,7 @@ export class DeactivateClearingCommandHandler
         new DeactivateClearingCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new DeactivateClearingCommandError(command, error as Error);
+      throw new DeactivateClearingCommandError(error as Error);
     }
   }
 }

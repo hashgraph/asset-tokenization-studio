@@ -306,10 +306,7 @@ export class OperatorClearingRedeemByPartitionCommandHandler
         ),
       );
     } catch (error) {
-      throw new OperatorClearingRedeemByPartitionCommandError(
-        command,
-        error as Error,
-      );
+      throw new OperatorClearingRedeemByPartitionCommandError(error as Error);
     }
   }
 }

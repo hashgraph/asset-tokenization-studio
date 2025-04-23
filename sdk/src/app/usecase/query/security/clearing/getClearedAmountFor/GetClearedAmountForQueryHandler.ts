@@ -247,7 +247,7 @@ export class GetClearedAmountForQueryHandler
 
       return new GetClearedAmountForQueryResponse(res);
     } catch (error) {
-      throw new GetClearedAmountForQueryError(query, error as Error);
+      throw new GetClearedAmountForQueryError(error as Error);
     }
   }
 }

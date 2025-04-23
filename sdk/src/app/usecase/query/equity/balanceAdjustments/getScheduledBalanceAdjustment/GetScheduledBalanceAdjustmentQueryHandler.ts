@@ -244,7 +244,7 @@ export class GetScheduledBalanceAdjustmentQueryHandler
         new GetScheduledBalanceAdjustmentQueryResponse(res),
       );
     } catch (error) {
-      throw new GetScheduledBalanceAdjustmentQueryError(query, error as Error);
+      throw new GetScheduledBalanceAdjustmentQueryError(error as Error);
     }
   }
 }

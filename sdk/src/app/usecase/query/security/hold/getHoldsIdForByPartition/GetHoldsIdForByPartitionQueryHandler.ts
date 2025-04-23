@@ -250,7 +250,7 @@ export class GetHoldsIdForByPartitionQueryHandler
 
       return new GetHoldsIdForByPartitionQueryResponse(res);
     } catch (error) {
-      throw new GetHoldsIdForByPartitionQueryError(query, error as Error);
+      throw new GetHoldsIdForByPartitionQueryError(error as Error);
     }
   }
 }

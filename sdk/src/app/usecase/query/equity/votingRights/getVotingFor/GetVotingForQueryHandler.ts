@@ -246,7 +246,7 @@ export class GetVotingForQueryHandler
 
       return new GetVotingForQueryResponse(res.tokenBalance, res.decimals);
     } catch (error) {
-      throw new GetVotingForQueryError(query, error as Error);
+      throw new GetVotingForQueryError(error as Error);
     }
   }
 }

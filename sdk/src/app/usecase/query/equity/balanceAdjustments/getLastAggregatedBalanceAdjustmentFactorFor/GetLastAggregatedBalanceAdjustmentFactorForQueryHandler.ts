@@ -249,7 +249,6 @@ export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler
       return new GetLastAggregatedBalanceAdjustmentFactorForQueryResponse(res);
     } catch (error) {
       throw new GetLastAggregatedBalanceAdjustmentFactorForQueryError(
-        query,
         error as Error,
       );
     }

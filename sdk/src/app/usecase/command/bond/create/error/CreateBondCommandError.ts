@@ -203,12 +203,12 @@
 
 */
 
-import { Command } from '../../../../../../core/command/Command';
+import BaseError from '../../../../../../core/error/BaseError';
 import { CommandError } from '../../../error/CommandError';
 
 export class CreateBondCommandError extends CommandError {
-  constructor(command: Command, error: any) {
+  constructor(error: Error | BaseError) {
     const msg = `An error occurred while creating the bond: ${error.message}`;
-    super(msg, command, error.errorCode);
+    super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

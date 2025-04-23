@@ -258,7 +258,7 @@ export class RevokeRoleCommandHandler
         new RevokeRoleCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new RevokeRoleCommandError(command, error as Error);
+      throw new RevokeRoleCommandError(error as Error);
     }
   }
 }

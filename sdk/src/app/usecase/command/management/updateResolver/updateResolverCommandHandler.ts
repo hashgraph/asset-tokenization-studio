@@ -217,7 +217,7 @@ export class UpdateResolverCommandHandler
         new UpdateResolverCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new UpdateResolverCommandError(command, error as Error);
+      throw new UpdateResolverCommandError(error as Error);
     }
   }
 }

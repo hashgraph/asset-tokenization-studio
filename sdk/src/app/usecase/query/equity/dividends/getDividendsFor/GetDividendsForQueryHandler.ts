@@ -248,7 +248,7 @@ export class GetDividendsForQueryHandler
 
       return new GetDividendsForQueryResponse(res.tokenBalance, res.decimals);
     } catch (error) {
-      throw new GetDividendsForQueryError(query, error as Error);
+      throw new GetDividendsForQueryError(error as Error);
     }
   }
 }

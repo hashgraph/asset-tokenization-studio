@@ -248,7 +248,7 @@ export class BalanceOfQueryHandler implements IQueryHandler<BalanceOfQuery> {
       );
       return new BalanceOfQueryResponse(amount);
     } catch (error) {
-      throw new BalanceOfQueryError(query, error as Error);
+      throw new BalanceOfQueryError(error as Error);
     }
   }
 }

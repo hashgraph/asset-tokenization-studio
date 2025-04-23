@@ -249,7 +249,7 @@ export class PauseCommandHandler implements ICommandHandler<PauseCommand> {
         new PauseCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new PauseCommandError(command, error as Error);
+      throw new PauseCommandError(error as Error);
     }
   }
 }

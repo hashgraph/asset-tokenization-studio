@@ -270,7 +270,7 @@ export class RemoveIssuerCommandHandler
         new RemoveIssuerCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new RemoveIssuerCommandError(command, error as Error);
+      throw new RemoveIssuerCommandError(error as Error);
     }
   }
 }

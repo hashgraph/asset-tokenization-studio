@@ -239,7 +239,7 @@ export class GetControlListCountQueryHandler
 
       return new GetControlListCountQueryResponse(res);
     } catch (error) {
-      throw new GetControlListCountQueryError(query, error as Error);
+      throw new GetControlListCountQueryError(error as Error);
     }
   }
 }

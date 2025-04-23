@@ -248,7 +248,7 @@ export class GetClearedAmountForByPartitionQueryHandler
 
       return new GetClearedAmountForByPartitionQueryResponse(res);
     } catch (error) {
-      throw new GetClearedAmountForByPartitionQueryError(query, error as Error);
+      throw new GetClearedAmountForByPartitionQueryError(error as Error);
     }
   }
 }

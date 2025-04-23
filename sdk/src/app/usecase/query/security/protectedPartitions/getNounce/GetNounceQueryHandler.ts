@@ -239,7 +239,7 @@ export class GetNounceQueryHandler implements IQueryHandler<GetNounceQuery> {
       );
       return new GetNounceQueryResponse(res.toNumber());
     } catch (error) {
-      throw new GetNounceQueryError(query, error as Error);
+      throw new GetNounceQueryError(error as Error);
     }
   }
 }

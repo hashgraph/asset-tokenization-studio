@@ -258,7 +258,7 @@ export class GetClearingsIdForByPartitionQueryHandler
 
       return new GetClearingsIdForByPartitionQueryResponse(res);
     } catch (error) {
-      throw new GetClearingsIdForByPartitionQueryError(query, error as Error);
+      throw new GetClearingsIdForByPartitionQueryError(error as Error);
     }
   }
 }

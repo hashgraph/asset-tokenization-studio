@@ -253,7 +253,6 @@ export class GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler
       );
     } catch (error) {
       throw new GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryError(
-        query,
         error as Error,
       );
     }

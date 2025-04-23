@@ -241,7 +241,7 @@ export class GetBondDetailsQueryHandler
 
       return Promise.resolve(new GetBondDetailsQueryResponse(bond));
     } catch (error) {
-      throw new GetBondDetailsQueryError(query, error as Error);
+      throw new GetBondDetailsQueryError(error as Error);
     }
   }
 }

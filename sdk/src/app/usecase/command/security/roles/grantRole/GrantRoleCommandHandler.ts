@@ -255,7 +255,7 @@ export class GrantRoleCommandHandler
         new GrantRoleCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new GrantRoleCommandError(command, error as Error);
+      throw new GrantRoleCommandError(error as Error);
     }
   }
 }

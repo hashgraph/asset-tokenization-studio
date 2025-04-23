@@ -248,7 +248,7 @@ export class GetHoldCountForByPartitionQueryHandler
 
       return new GetHoldCountForByPartitionQueryResponse(res);
     } catch (error) {
-      throw new GetHoldCountForByPartitionQueryError(query, error as Error);
+      throw new GetHoldCountForByPartitionQueryError(error as Error);
     }
   }
 }

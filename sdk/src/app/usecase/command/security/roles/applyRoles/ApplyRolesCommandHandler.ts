@@ -258,7 +258,7 @@ export class ApplyRolesCommandHandler
         new ApplyRolesCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new ApplyRolesCommandError(command, error as Error);
+      throw new ApplyRolesCommandError(error as Error);
     }
   }
 }

@@ -248,7 +248,7 @@ export class GetHeldAmountForByPartitionQueryHandler
 
       return new GetHeldAmountForByPartitionQueryResponse(res);
     } catch (error) {
-      throw new GetHeldAmountForByPartitionQueryError(query, error as Error);
+      throw new GetHeldAmountForByPartitionQueryError(error as Error);
     }
   }
 }

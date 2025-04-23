@@ -259,13 +259,9 @@ describe('UpdateMaturityDateCommandHandler', () => {
           UpdateMaturityDateCommandError,
         );
 
-        await expect(resultPromise).rejects.toThrow(
-          `An error occurred while updating the bond maturity date: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
-        );
-
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `Command error: An error occurred while updating the bond maturity date: ${errorMsg} | Command payload: ${JSON.stringify(command)}`,
+            `An error occurred while updating the bond maturity date: ${errorMsg}`,
           ),
           errorCode: ErrorCode.UncaughtCommandError,
         });

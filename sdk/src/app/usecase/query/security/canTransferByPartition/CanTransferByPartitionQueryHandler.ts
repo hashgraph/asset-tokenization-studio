@@ -264,7 +264,7 @@ export class CanTransferByPartitionQueryHandler
 
       return new CanTransferByPartitionQueryResponse(res);
     } catch (error) {
-      throw new CanTransferByPartitionQueryError(query, error as Error);
+      throw new CanTransferByPartitionQueryError(error as Error);
     }
   }
 }

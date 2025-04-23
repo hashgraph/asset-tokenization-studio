@@ -259,10 +259,7 @@ export class GetClearingRedeemForByPartitionQueryHandler
 
       return new GetClearingRedeemForByPartitionQueryResponse(clearing);
     } catch (error) {
-      throw new GetClearingRedeemForByPartitionQueryError(
-        query,
-        error as Error,
-      );
+      throw new GetClearingRedeemForByPartitionQueryError(error as Error);
     }
   }
 }

@@ -255,7 +255,7 @@ export class LockedBalanceOfQueryHandler
       );
       return new LockedBalanceOfQueryResponse(amount);
     } catch (error) {
-      throw new LockedBalanceOfQueryError(query, error as Error);
+      throw new LockedBalanceOfQueryError(error as Error);
     }
   }
 }

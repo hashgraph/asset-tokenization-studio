@@ -234,7 +234,7 @@ export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
 
       return Promise.resolve(new GetVotingQueryResponse(res));
     } catch (error) {
-      throw new GetVotingQueryError(query, error as Error);
+      throw new GetVotingQueryError(error as Error);
     }
   }
 }

@@ -241,10 +241,7 @@ export class GetScheduledBalanceAdjustmentCountQueryHandler
 
       return new GetScheduledBalanceAdjustmentCountQueryResponse(res);
     } catch (error) {
-      throw new GetScheduledBalanceAdjustmentsCountQueryError(
-        query,
-        error as Error,
-      );
+      throw new GetScheduledBalanceAdjustmentsCountQueryError(error as Error);
     }
   }
 }
