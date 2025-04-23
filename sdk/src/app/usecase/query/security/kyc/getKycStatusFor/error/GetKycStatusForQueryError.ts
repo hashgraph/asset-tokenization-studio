@@ -207,7 +207,7 @@ import { QueryError } from '../../../../error/QueryError';
 import BaseError from '../../../../../../../core/error/BaseError';
 
 export class GetKycStatusForQueryError extends QueryError {
-  constructor(error: Error | BaseError) {
+  constructor(error: Error) {
     const msg = `An error occurred while querying KYC status: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }

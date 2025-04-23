@@ -207,7 +207,7 @@ import { QueryError } from '../../../../error/QueryError';
 import BaseError from '../../../../../../../core/error/BaseError';
 
 export class GetAggregatedBalanceAdjustmentFactorQueryError extends QueryError {
-  constructor(error: Error | BaseError) {
+  constructor(error: Error) {
     const msg = `An error occurred while querying ABAF: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }

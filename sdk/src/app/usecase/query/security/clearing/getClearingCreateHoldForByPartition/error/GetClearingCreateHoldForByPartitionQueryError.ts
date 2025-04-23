@@ -207,7 +207,7 @@ import { QueryError } from '../../../../error/QueryError';
 import BaseError from '../../../../../../../core/error/BaseError';
 
 export class GetClearingCreateHoldForByPartitionQueryError extends QueryError {
-  constructor(error: Error | BaseError) {
+  constructor(error: Error) {
     const msg = `An error occurred while querying clearing create hold: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }

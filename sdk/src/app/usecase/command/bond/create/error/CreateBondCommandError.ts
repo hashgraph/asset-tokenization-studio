@@ -207,7 +207,7 @@ import BaseError from '../../../../../../core/error/BaseError';
 import { CommandError } from '../../../error/CommandError';
 
 export class CreateBondCommandError extends CommandError {
-  constructor(error: Error | BaseError) {
+  constructor(error: Error) {
     const msg = `An error occurred while creating the bond: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }

@@ -207,7 +207,7 @@ import { CommandError } from '../../../error/CommandError';
 import BaseError from '../../../../../../core/error/BaseError';
 
 export class SetNetworkCommandError extends CommandError {
-  constructor(error: Error | BaseError) {
+  constructor(error: Error) {
     const msg = `An error occurred while setting network: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }

@@ -207,7 +207,7 @@ import { CommandError } from '../../../../error/CommandError';
 import BaseError from '../../../../../../../core/error/BaseError';
 
 export class SetDividendsCommandError extends CommandError {
-  constructor(error: Error | BaseError) {
+  constructor(error: Error) {
     const msg = `An error occurred while setting the dividends: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
