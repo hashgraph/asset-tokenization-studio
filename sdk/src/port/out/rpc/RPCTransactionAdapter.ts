@@ -635,12 +635,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           externalControlLists?.map((address) => address.toString()) ?? [],
       };
 
-      const bondDetails: BondDetailsData = {
-        currency: bondInfo.currency,
-        nominalValue: bondInfo.nominalValue.toString(),
-        startingDate: bondInfo.startingDate.toString(),
-        maturityDate: bondInfo.maturityDate.toString(),
-      };
+      const bondDetails = new BondDetailsData(
+        bondInfo.currency,
+        bondInfo.nominalValue.toString(),
+        bondInfo.startingDate.toString(),
+        bondInfo.maturityDate.toString(),
+      );
 
       const couponDetails: CouponDetailsData = {
         couponFrequency: couponInfo.couponFrequency.toString(),
@@ -1903,7 +1903,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold__factory.connect(
         security.toString(),
@@ -1935,7 +1934,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold__factory.connect(
         security.toString(),
@@ -1973,7 +1971,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold__factory.connect(
         security.toString(),
@@ -2014,9 +2011,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-
     const protectedHold: ProtectedHold = {
-      hold,
+      hold: hold,
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
     };
@@ -2180,16 +2176,16 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async grantKYC(
+  async grantKyc(
     security: EvmAddress,
     targetId: EvmAddress,
-    VCId: string,
+    vcId: string,
     validFrom: BigDecimal,
     validTo: BigDecimal,
     issuer: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC id ${VCId}`,
+      `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC id ${vcId}`,
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
@@ -2198,7 +2194,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).grantKyc(
         targetId.toString(),
-        VCId,
+        vcId,
         validFrom.toBigNumber(),
         validTo.toBigNumber(),
         issuer.toString(),
@@ -2210,7 +2206,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async revokeKYC(
+  async revokeKyc(
     security: EvmAddress,
     targetId: EvmAddress,
   ): Promise<TransactionResponse> {

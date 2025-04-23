@@ -204,7 +204,7 @@
 */
 
 import { Factory } from '../../../../domain/context/factory/Factories.js';
-import ValidatedRequest from '../validation/ValidatedRequest.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
 
 export default class GetRegulationDetailsRequest extends ValidatedRequest<GetRegulationDetailsRequest> {
   regulationType: number;

@@ -205,7 +205,6 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from '../Common.js';
 import Injectable from '../../../core/Injectable.js';
 import { CommandBus } from '../../../core/command/CommandBus.js';
 import {
@@ -228,6 +227,7 @@ import { IsExternalPauseQuery } from '../../../app/usecase/query/security/extern
 import { GetExternalPausesCountQuery } from '../../../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery.js';
 import { GetExternalPausesMembersQuery } from '../../../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery.js';
 import { CreateExternalPauseMockCommand } from '../../../app/usecase/command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommand.js';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
 interface IExternalPausesInPort {
   updateExternalPauses(
@@ -269,7 +269,7 @@ class ExternalPausesInPort
     request: UpdateExternalPausesRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, externalPausesAddresses, actives } = request;
-    handleValidation('UpdateExternalPausesRequest', request);
+    ValidatedRequest.handleValidation('UpdateExternalPausesRequest', request);
 
     return await this.commandBus.execute(
       new UpdateExternalPausesCommand(
@@ -285,7 +285,7 @@ class ExternalPausesInPort
     request: AddExternalPauseRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, externalPauseAddress } = request;
-    handleValidation('AddExternalPauseRequest', request);
+    ValidatedRequest.handleValidation('AddExternalPauseRequest', request);
 
     return await this.commandBus.execute(
       new AddExternalPauseCommand(securityId, externalPauseAddress),
@@ -297,7 +297,7 @@ class ExternalPausesInPort
     request: RemoveExternalPauseRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, externalPauseAddress } = request;
-    handleValidation('RemoveExternalPauseRequest', request);
+    ValidatedRequest.handleValidation('RemoveExternalPauseRequest', request);
 
     return await this.commandBus.execute(
       new RemoveExternalPauseCommand(securityId, externalPauseAddress),
@@ -307,7 +307,7 @@ class ExternalPausesInPort
   @LogError
   async isExternalPause(request: IsExternalPauseRequest): Promise<boolean> {
     const { securityId, externalPauseAddress } = request;
-    handleValidation('IsExternalPauseRequest', request);
+    ValidatedRequest.handleValidation('IsExternalPauseRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -321,7 +321,7 @@ class ExternalPausesInPort
     request: GetExternalPausesCountRequest,
   ): Promise<number> {
     const { securityId } = request;
-    handleValidation('GetExternalPausesCountRequest', request);
+    ValidatedRequest.handleValidation('GetExternalPausesCountRequest', request);
 
     return (
       await this.queryBus.execute(new GetExternalPausesCountQuery(securityId))
@@ -333,7 +333,10 @@ class ExternalPausesInPort
     request: GetExternalPausesMembersRequest,
   ): Promise<string[]> {
     const { securityId, start, end } = request;
-    handleValidation('GetExternalPausesMembersRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetExternalPausesMembersRequest',
+      request,
+    );
 
     return (
       await this.queryBus.execute(
@@ -347,7 +350,7 @@ class ExternalPausesInPort
     request: SetPausedMockRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { contractId, paused } = request;
-    handleValidation('SetPausedMockRequest', request);
+    ValidatedRequest.handleValidation('SetPausedMockRequest', request);
 
     return await this.commandBus.execute(
       new SetPausedMockCommand(contractId, paused),
@@ -357,7 +360,7 @@ class ExternalPausesInPort
   @LogError
   async isPausedMock(request: IsPausedMockRequest): Promise<boolean> {
     const { contractId } = request;
-    handleValidation('IsPausedMockRequest', request);
+    ValidatedRequest.handleValidation('IsPausedMockRequest', request);
 
     return (await this.queryBus.execute(new IsPausedMockQuery(contractId)))
       .payload;

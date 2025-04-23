@@ -204,8 +204,9 @@
 */
 
 import { SecurityDate } from '../../../../../../domain/context/shared/SecurityDate.js';
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+
+import FormatValidation from '../../../FormatValidation.js';
 
 export default class ClearingCreateHoldByPartitionRequest extends ValidatedRequest<ClearingCreateHoldByPartitionRequest> {
   securityId: string;
@@ -234,11 +235,11 @@ export default class ClearingCreateHoldByPartitionRequest extends ValidatedReque
     holdExpirationDate: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkBytes32Format(),
-      amount: Validation.checkAmount(),
-      escrow: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(true),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: FormatValidation.checkBytes32Format(),
+      amount: FormatValidation.checkAmount(),
+      escrow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       clearingExpirationDate: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),

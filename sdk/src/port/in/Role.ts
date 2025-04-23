@@ -204,7 +204,7 @@
 */
 
 import NetworkService from '../../app/service/NetworkService.js';
-import SecurityService from '../../app/service/SecurityService.js';
+import SecurityService from '../../app/service/security/SecurityService.js';
 import { GrantRoleCommand } from '../../app/usecase/command/security/roles/grantRole/GrantRoleCommand.js';
 import { RevokeRoleCommand } from '../../app/usecase/command/security/roles/revokeRole/RevokeRoleCommand.js';
 import { GetRoleCountForQuery } from '../../app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery.js';
@@ -218,7 +218,8 @@ import { lazyInject } from '../../core/decorator/LazyInjectDecorator.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
 import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter.js';
-import { handleValidation } from './Common.js';
+import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+
 import GetRoleCountForRequest from './request/security/roles/GetRoleCountForRequest.js';
 import GetRoleMemberCountRequest from './request/security/roles/GetRoleMemberCountRequest.js';
 import GetRoleMembersRequest from './request/security/roles/GetRoleMembersRequest.js';
@@ -263,7 +264,7 @@ class RoleInPort implements IRole {
   @LogError
   async hasRole(request: RoleRequest): Promise<boolean> {
     const { securityId, targetId, role } = request;
-    handleValidation('RoleRequest', request);
+    ValidatedRequest.handleValidation('RoleRequest', request);
     return (
       await this.queryBus.execute(new HasRoleQuery(role!, targetId, securityId))
     ).payload;
@@ -274,7 +275,7 @@ class RoleInPort implements IRole {
     request: RoleRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, targetId, role } = request;
-    handleValidation('RoleRequest', request);
+    ValidatedRequest.handleValidation('RoleRequest', request);
 
     return await this.commandBus.execute(
       new GrantRoleCommand(role!, targetId, securityId),
@@ -286,7 +287,7 @@ class RoleInPort implements IRole {
     request: RoleRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, targetId, role } = request;
-    handleValidation('RoleRequest', request);
+    ValidatedRequest.handleValidation('RoleRequest', request);
 
     return await this.commandBus.execute(
       new RevokeRoleCommand(role!, targetId, securityId),
@@ -295,7 +296,7 @@ class RoleInPort implements IRole {
 
   @LogError
   async getRoleCountFor(request: GetRoleCountForRequest): Promise<number> {
-    handleValidation('GetRoleCountForRequest', request);
+    ValidatedRequest.handleValidation('GetRoleCountForRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -306,7 +307,7 @@ class RoleInPort implements IRole {
 
   @LogError
   async getRolesFor(request: GetRolesForRequest): Promise<string[]> {
-    handleValidation('GetRolesForRequest', request);
+    ValidatedRequest.handleValidation('GetRolesForRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -324,7 +325,7 @@ class RoleInPort implements IRole {
   async getRoleMemberCount(
     request: GetRoleMemberCountRequest,
   ): Promise<number> {
-    handleValidation('GetRoleMemberCountRequest', request);
+    ValidatedRequest.handleValidation('GetRoleMemberCountRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -335,7 +336,7 @@ class RoleInPort implements IRole {
 
   @LogError
   async getRoleMembers(request: GetRoleMembersRequest): Promise<string[]> {
-    handleValidation('GetRoleMembersRequest', request);
+    ValidatedRequest.handleValidation('GetRoleMembersRequest', request);
 
     const membersIds: string[] = [];
 
@@ -367,7 +368,7 @@ class RoleInPort implements IRole {
     request: ApplyRolesRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, targetId, roles, actives } = request;
-    handleValidation('ApplyRolesRequest', request);
+    ValidatedRequest.handleValidation('ApplyRolesRequest', request);
 
     return await this.commandBus.execute(
       new ApplyRolesCommand(roles, actives, targetId, securityId),

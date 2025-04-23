@@ -206,7 +206,7 @@
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
 import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/TransactionService.js';
+import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
@@ -216,7 +216,7 @@ import {
 } from './ApproveClearingOperationByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/SecurityService.js';
+import SecurityService from '../../../../../../service/security/SecurityService.js';
 import ContractService from '../../../../../../service/ContractService.js';
 
 @CommandHandler(ApproveClearingOperationByPartitionCommand)

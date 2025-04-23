@@ -211,7 +211,7 @@ import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorato
 import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../service/SecurityService.js';
+import SecurityService from '../../../../service/security/SecurityService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import AccountService from '../../../../service/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';

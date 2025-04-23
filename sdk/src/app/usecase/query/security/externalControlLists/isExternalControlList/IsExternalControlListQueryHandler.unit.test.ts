@@ -208,7 +208,7 @@ import { EvmAddressPropsFixture } from '../../../../../../../__tests__/fixtures/
 import ContractService from '../../../../../service/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { IsExternalControlListQueryFixture } from '../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import SecurityService from '../../../../../service/SecurityService.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { Security } from '../../../../../../domain/context/security/Security.js';
 import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';

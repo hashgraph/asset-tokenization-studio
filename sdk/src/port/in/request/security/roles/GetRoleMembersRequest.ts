@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../FormatValidation.js';
 
 export default class GetRoleMembersRequest extends ValidatedRequest<GetRoleMembersRequest> {
   securityId: string;
@@ -224,8 +224,8 @@ export default class GetRoleMembersRequest extends ValidatedRequest<GetRoleMembe
     end: number;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      role: Validation.checkRole(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      role: FormatValidation.checkRole(),
     });
     this.securityId = securityId;
     this.role = role;

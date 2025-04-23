@@ -205,13 +205,11 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '../../../core/command/CommandBus';
-import * as Common from '../Common';
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '../../../../__tests__/fixtures/shared/DataFixture';
 import LogService from '../../../app/service/LogService';
-import { ValidationError } from '../request/error/ValidationError';
 import { QueryBus } from '../../../core/query/QueryBus';
 import ExternalPausesManagement from './ExternalPausesManagement';
 import {
@@ -243,6 +241,8 @@ import { GetExternalPausesMembersQuery } from '../../../app/usecase/query/securi
 import { SetPausedMockCommand } from '../../../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommand';
 import { CreateExternalPauseMockCommand } from '../../../app/usecase/command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommand';
 import { IsPausedMockQuery } from '../../../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs';
+import { ValidationError } from '../../../core/validation/ValidationError';
 
 describe('ExternalPausesManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -269,7 +269,7 @@ describe('ExternalPausesManagement', () => {
   beforeEach(() => {
     commandBusMock = createMock<CommandBus>();
     queryBusMock = createMock<QueryBus>();
-    handleValidationSpy = jest.spyOn(Common, 'handleValidation');
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
     jest.spyOn(LogService, 'logError').mockImplementation(() => {});
     (ExternalPausesManagement as any).commandBus = commandBusMock;
     (ExternalPausesManagement as any).queryBus = queryBusMock;

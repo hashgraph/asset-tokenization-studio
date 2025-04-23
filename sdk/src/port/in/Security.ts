@@ -204,7 +204,7 @@
 */
 
 import SecurityViewModel from './response/SecurityViewModel.js';
-import { handleValidation } from './Common.js';
+import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
 import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter.js';
 import Injectable from '../../core/Injectable.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
@@ -530,7 +530,7 @@ class SecurityInPort implements ISecurityInPort {
     request: LockRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, amount, targetId, expirationTimestamp } = request;
-    handleValidation('LockRequest', request);
+    ValidatedRequest.handleValidation('LockRequest', request);
 
     return await this.commandBus.execute(
       new LockCommand(amount, targetId, securityId, expirationTimestamp),
@@ -542,7 +542,7 @@ class SecurityInPort implements ISecurityInPort {
     request: ReleaseRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, lockId, targetId } = request;
-    handleValidation('ReleaseRequest', request);
+    ValidatedRequest.handleValidation('ReleaseRequest', request);
 
     return await this.commandBus.execute(
       new ReleaseCommand(lockId, targetId, securityId),
@@ -553,7 +553,7 @@ class SecurityInPort implements ISecurityInPort {
   async getLockedBalanceOf(
     request: GetLockedBalanceRequest,
   ): Promise<BalanceViewModel> {
-    handleValidation('GetLockedBalanceRequest', request);
+    ValidatedRequest.handleValidation('GetLockedBalanceRequest', request);
 
     const res = await this.queryBus.execute(
       new LockedBalanceOfQuery(request.securityId, request.targetId),
@@ -566,7 +566,7 @@ class SecurityInPort implements ISecurityInPort {
 
   @LogError
   async getLockCount(request: GetLockCountRequest): Promise<number> {
-    handleValidation('GetLockCountRequest', request);
+    ValidatedRequest.handleValidation('GetLockCountRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -577,7 +577,7 @@ class SecurityInPort implements ISecurityInPort {
 
   @LogError
   async getLocksId(request: GetLocksIdRequest): Promise<string[]> {
-    handleValidation('GetLocksIdRequest', request);
+    ValidatedRequest.handleValidation('GetLocksIdRequest', request);
 
     const res = (
       await this.queryBus.execute(
@@ -597,7 +597,7 @@ class SecurityInPort implements ISecurityInPort {
 
   @LogError
   async getLock(request: GetLockRequest): Promise<LockViewModel> {
-    handleValidation('GetLockRequest', request);
+    ValidatedRequest.handleValidation('GetLockRequest', request);
 
     const res = (
       await this.queryBus.execute(
@@ -619,7 +619,7 @@ class SecurityInPort implements ISecurityInPort {
     request: GetSecurityDetailsRequest,
   ): Promise<SecurityViewModel> {
     const { securityId } = request;
-    handleValidation('GetSecurityDetailsRequest', request);
+    ValidatedRequest.handleValidation('GetSecurityDetailsRequest', request);
     const res = await this.queryBus.execute(new GetSecurityQuery(securityId));
 
     const security: SecurityViewModel = {
@@ -650,7 +650,7 @@ class SecurityInPort implements ISecurityInPort {
     request: IssueRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, amount, targetId } = request;
-    handleValidation('IssueRequest', request);
+    ValidatedRequest.handleValidation('IssueRequest', request);
 
     return await this.commandBus.execute(
       new IssueCommand(amount, targetId, securityId),
@@ -662,7 +662,7 @@ class SecurityInPort implements ISecurityInPort {
     request: RedeemRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, amount } = request;
-    handleValidation('RedeemRequest', request);
+    ValidatedRequest.handleValidation('RedeemRequest', request);
 
     return await this.commandBus.execute(new RedeemCommand(amount, securityId));
   }
@@ -672,7 +672,7 @@ class SecurityInPort implements ISecurityInPort {
     request: ForceRedeemRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, amount, sourceId } = request;
-    handleValidation('ForceRedeemRequest', request);
+    ValidatedRequest.handleValidation('ForceRedeemRequest', request);
 
     return await this.commandBus.execute(
       new ControllerRedeemCommand(amount, sourceId, securityId),
@@ -684,7 +684,7 @@ class SecurityInPort implements ISecurityInPort {
     request: ControlListRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, targetId } = request;
-    handleValidation('ControlListRequest', request);
+    ValidatedRequest.handleValidation('ControlListRequest', request);
 
     return await this.commandBus.execute(
       new AddToControlListCommand(targetId, securityId),
@@ -696,7 +696,7 @@ class SecurityInPort implements ISecurityInPort {
     request: ControlListRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, targetId } = request;
-    handleValidation('ControlListRequest', request);
+    ValidatedRequest.handleValidation('ControlListRequest', request);
 
     return await this.commandBus.execute(
       new RemoveFromControlListCommand(targetId, securityId),
@@ -705,7 +705,7 @@ class SecurityInPort implements ISecurityInPort {
 
   @LogError
   async isAccountInControlList(request: ControlListRequest): Promise<boolean> {
-    handleValidation('ControlListRequest', request);
+    ValidatedRequest.handleValidation('ControlListRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -718,7 +718,7 @@ class SecurityInPort implements ISecurityInPort {
   async getControlListCount(
     request: GetControlListCountRequest,
   ): Promise<number> {
-    handleValidation('GetControlListCountRequest', request);
+    ValidatedRequest.handleValidation('GetControlListCountRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -731,7 +731,7 @@ class SecurityInPort implements ISecurityInPort {
   async getControlListMembers(
     request: GetControlListMembersRequest,
   ): Promise<string[]> {
-    handleValidation('GetControlListMembersRequest', request);
+    ValidatedRequest.handleValidation('GetControlListMembersRequest', request);
 
     const membersIds: string[] = [];
 
@@ -761,7 +761,7 @@ class SecurityInPort implements ISecurityInPort {
   async getControlListType(
     request: GetControlListTypeRequest,
   ): Promise<SecurityControlListType> {
-    handleValidation('GetControlListTypeRequest', request);
+    ValidatedRequest.handleValidation('GetControlListTypeRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -774,7 +774,7 @@ class SecurityInPort implements ISecurityInPort {
   async getBalanceOf(
     request: GetAccountBalanceRequest,
   ): Promise<BalanceViewModel> {
-    handleValidation('GetAccountBalanceRequest', request);
+    ValidatedRequest.handleValidation('GetAccountBalanceRequest', request);
 
     const res = await this.queryBus.execute(
       new BalanceOfQuery(request.securityId, request.targetId),
@@ -790,7 +790,7 @@ class SecurityInPort implements ISecurityInPort {
     request: TransferRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, amount, targetId } = request;
-    handleValidation('TransferRequest', request);
+    ValidatedRequest.handleValidation('TransferRequest', request);
 
     return await this.commandBus.execute(
       new TransferCommand(amount, targetId, securityId),
@@ -802,7 +802,7 @@ class SecurityInPort implements ISecurityInPort {
     request: TransferAndLockRequest,
   ): Promise<{ payload: number; transactionId: string }> {
     const { securityId, amount, targetId, expirationDate } = request;
-    handleValidation('TransferAndLockRequest', request);
+    ValidatedRequest.handleValidation('TransferAndLockRequest', request);
 
     return await this.commandBus.execute(
       new TransferAndLockCommand(amount, targetId, securityId, expirationDate),
@@ -814,7 +814,7 @@ class SecurityInPort implements ISecurityInPort {
     request: ForceTransferRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, amount, targetId, sourceId } = request;
-    handleValidation('ForceTransferRequest', request);
+    ValidatedRequest.handleValidation('ForceTransferRequest', request);
 
     return await this.commandBus.execute(
       new ControllerTransferCommand(amount, sourceId, targetId, securityId),
@@ -826,7 +826,7 @@ class SecurityInPort implements ISecurityInPort {
     request: PauseRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId } = request;
-    handleValidation('PauseRequest', request);
+    ValidatedRequest.handleValidation('PauseRequest', request);
 
     return await this.commandBus.execute(new PauseCommand(securityId));
   }
@@ -836,14 +836,14 @@ class SecurityInPort implements ISecurityInPort {
     request: PauseRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId } = request;
-    handleValidation('PauseRequest', request);
+    ValidatedRequest.handleValidation('PauseRequest', request);
 
     return await this.commandBus.execute(new UnpauseCommand(securityId));
   }
 
   @LogError
   async isPaused(request: PauseRequest): Promise<boolean> {
-    handleValidation('IsPausedRequest', request);
+    ValidatedRequest.handleValidation('IsPausedRequest', request);
 
     return (await this.queryBus.execute(new IsPausedQuery(request.securityId)))
       .payload;
@@ -854,7 +854,7 @@ class SecurityInPort implements ISecurityInPort {
     request: SetMaxSupplyRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, maxSupply } = request;
-    handleValidation('SetMaxSupplyRequest', request);
+    ValidatedRequest.handleValidation('SetMaxSupplyRequest', request);
 
     return await this.commandBus.execute(
       new SetMaxSupplyCommand(maxSupply, securityId),
@@ -865,7 +865,7 @@ class SecurityInPort implements ISecurityInPort {
   async getMaxSupply(
     request: GetMaxSupplyRequest,
   ): Promise<MaxSupplyViewModel> {
-    handleValidation('GetMaxSupplyRequest', request);
+    ValidatedRequest.handleValidation('GetMaxSupplyRequest', request);
 
     const res = await this.queryBus.execute(
       new GetMaxSupplyQuery(request.securityId),
@@ -890,7 +890,10 @@ class SecurityInPort implements ISecurityInPort {
       nounce,
       signature,
     } = request;
-    handleValidation('ProtectedTransferFromByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ProtectedTransferFromByPartitionRequest',
+      request,
+    );
 
     return await this.commandBus.execute(
       new ProtectedTransferFromByPartitionCommand(
@@ -919,7 +922,10 @@ class SecurityInPort implements ISecurityInPort {
       nounce,
       signature,
     } = request;
-    handleValidation('ProtectedRedeemFromByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ProtectedRedeemFromByPartitionRequest',
+      request,
+    );
 
     return await this.commandBus.execute(
       new ProtectedRedeemFromByPartitionCommand(
@@ -938,7 +944,7 @@ class SecurityInPort implements ISecurityInPort {
   async arePartitionsProtected(
     request: PartitionsProtectedRequest,
   ): Promise<boolean> {
-    handleValidation('PartitionsProtectedRequest', request);
+    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -949,7 +955,7 @@ class SecurityInPort implements ISecurityInPort {
 
   @LogError
   async getNounce(request: GetNounceRequest): Promise<number> {
-    handleValidation('GetNounceRequest', request);
+    ValidatedRequest.handleValidation('GetNounceRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -963,7 +969,7 @@ class SecurityInPort implements ISecurityInPort {
     request: PartitionsProtectedRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId } = request;
-    handleValidation('PartitionsProtectedRequest', request);
+    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
 
     return await this.commandBus.execute(
       new ProtectPartitionsCommand(securityId),
@@ -975,7 +981,7 @@ class SecurityInPort implements ISecurityInPort {
     request: PartitionsProtectedRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId } = request;
-    handleValidation('PartitionsProtectedRequest', request);
+    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
 
     return await this.commandBus.execute(
       new UnprotectPartitionsCommand(securityId),
@@ -997,7 +1003,10 @@ class SecurityInPort implements ISecurityInPort {
       nounce,
       signature,
     } = request;
-    handleValidation('ProtectedTransferAndLockByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ProtectedTransferAndLockByPartitionRequest',
+      request,
+    );
 
     return await this.commandBus.execute(
       new ProtectedTransferAndLockByPartitionCommand(
@@ -1026,7 +1035,7 @@ class SecurityInPort implements ISecurityInPort {
       targetId,
       expirationDate,
     } = request;
-    handleValidation('CreateHoldByPartitionRequest', request);
+    ValidatedRequest.handleValidation('CreateHoldByPartitionRequest', request);
 
     return await this.commandBus.execute(
       new CreateHoldByPartitionCommand(
@@ -1053,7 +1062,10 @@ class SecurityInPort implements ISecurityInPort {
       targetId,
       expirationDate,
     } = request;
-    handleValidation('CreateHoldFromByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'CreateHoldFromByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new CreateHoldFromByPartitionCommand(
         securityId,
@@ -1080,7 +1092,10 @@ class SecurityInPort implements ISecurityInPort {
       targetId,
       expirationDate,
     } = request;
-    handleValidation('ControllerCreateHoldByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ControllerCreateHoldByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ControllerCreateHoldByPartitionCommand(
         securityId,
@@ -1110,7 +1125,10 @@ class SecurityInPort implements ISecurityInPort {
       nonce,
       signature,
     } = request;
-    handleValidation('ProtectedCreateHoldByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ProtectedCreateHoldByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ProtectedCreateHoldByPartitionCommand(
         securityId,
@@ -1129,7 +1147,7 @@ class SecurityInPort implements ISecurityInPort {
 
   @LogError
   async getHeldAmountFor(request: GetHeldAmountForRequest): Promise<number> {
-    handleValidation('GetHeldAmountForRequest', request);
+    ValidatedRequest.handleValidation('GetHeldAmountForRequest', request);
 
     return (
       await this.queryBus.execute(
@@ -1142,7 +1160,10 @@ class SecurityInPort implements ISecurityInPort {
   async getHeldAmountForByPartition(
     request: GetHeldAmountForByPartitionRequest,
   ): Promise<number> {
-    handleValidation('GetHeldAmountForByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetHeldAmountForByPartitionRequest',
+      request,
+    );
 
     return (
       await this.queryBus.execute(
@@ -1159,7 +1180,10 @@ class SecurityInPort implements ISecurityInPort {
   async getHoldCountForByPartition(
     request: GetHoldCountForByPartitionRequest,
   ): Promise<number> {
-    handleValidation('GetHoldCountForByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetHoldCountForByPartitionRequest',
+      request,
+    );
 
     return (
       await this.queryBus.execute(
@@ -1176,7 +1200,10 @@ class SecurityInPort implements ISecurityInPort {
   async getHoldsIdForByPartition(
     request: GetHoldsIdForByPartitionRequest,
   ): Promise<number[]> {
-    handleValidation('GetHoldsIdForByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetHoldsIdForByPartitionRequest',
+      request,
+    );
 
     return (
       await this.queryBus.execute(
@@ -1195,7 +1222,7 @@ class SecurityInPort implements ISecurityInPort {
   async getHoldForByPartition(
     request: GetHoldForByPartitionRequest,
   ): Promise<HoldViewModel> {
-    handleValidation('GetHoldForByPartitionRequest', request);
+    ValidatedRequest.handleValidation('GetHoldForByPartitionRequest', request);
 
     const res = (
       await this.queryBus.execute(
@@ -1227,7 +1254,7 @@ class SecurityInPort implements ISecurityInPort {
     request: ReleaseHoldByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, partitionId, amount, targetId, holdId } = request;
-    handleValidation('ReleaseHoldByPartitionRequest', request);
+    ValidatedRequest.handleValidation('ReleaseHoldByPartitionRequest', request);
 
     return await this.commandBus.execute(
       new ReleaseHoldByPartitionCommand(
@@ -1245,7 +1272,7 @@ class SecurityInPort implements ISecurityInPort {
     request: ReclaimHoldByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, partitionId, targetId, holdId } = request;
-    handleValidation('ReclaimHoldByPartitionRequest', request);
+    ValidatedRequest.handleValidation('ReclaimHoldByPartitionRequest', request);
 
     return await this.commandBus.execute(
       new ReclaimHoldByPartitionCommand(
@@ -1263,7 +1290,7 @@ class SecurityInPort implements ISecurityInPort {
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, sourceId, amount, holdId, targetId, partitionId } =
       request;
-    handleValidation('ExecuteHoldByPartitionRequest', request);
+    ValidatedRequest.handleValidation('ExecuteHoldByPartitionRequest', request);
 
     return await this.commandBus.execute(
       new ExecuteHoldByPartitionCommand(
@@ -1281,7 +1308,7 @@ class SecurityInPort implements ISecurityInPort {
   async activateClearing(
     request: ActivateClearingRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    handleValidation('ActivateClearingRequest', request);
+    ValidatedRequest.handleValidation('ActivateClearingRequest', request);
 
     return await this.commandBus.execute(
       new ActivateClearingCommand(request.securityId),
@@ -1292,7 +1319,7 @@ class SecurityInPort implements ISecurityInPort {
   async deactivateClearing(
     request: DeactivateClearingRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    handleValidation('DeactivateClearingRequest', request);
+    ValidatedRequest.handleValidation('DeactivateClearingRequest', request);
 
     return await this.commandBus.execute(
       new DeactivateClearingCommand(request.securityId),
@@ -1303,7 +1330,10 @@ class SecurityInPort implements ISecurityInPort {
   async clearingTransferByPartition(
     request: ClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('ClearingTransferByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ClearingTransferByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ClearingTransferByPartitionCommand(
         request.securityId,
@@ -1319,7 +1349,10 @@ class SecurityInPort implements ISecurityInPort {
   async clearingTransferFromByPartition(
     request: ClearingTransferFromByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('ClearingTransferFromByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ClearingTransferFromByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ClearingTransferFromByPartitionCommand(
         request.securityId,
@@ -1336,7 +1369,10 @@ class SecurityInPort implements ISecurityInPort {
   async protectedClearingTransferByPartition(
     request: ProtectedClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('ProtectedClearingTransferByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ProtectedClearingTransferByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ProtectedClearingTransferByPartitionCommand(
         request.securityId,
@@ -1356,7 +1392,10 @@ class SecurityInPort implements ISecurityInPort {
   async approveClearingOperationByPartition(
     request: ApproveClearingOperationByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    handleValidation('ApproveClearingOperationByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ApproveClearingOperationByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ApproveClearingOperationByPartitionCommand(
         request.securityId,
@@ -1372,7 +1411,10 @@ class SecurityInPort implements ISecurityInPort {
   async cancelClearingOperationByPartition(
     request: CancelClearingOperationByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    handleValidation('CancelClearingOperationByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'CancelClearingOperationByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new CancelClearingOperationByPartitionCommand(
         request.securityId,
@@ -1388,7 +1430,10 @@ class SecurityInPort implements ISecurityInPort {
   async reclaimClearingOperationByPartition(
     request: ReclaimClearingOperationByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    handleValidation('ReclaimClearingOperationByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ReclaimClearingOperationByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ReclaimClearingOperationByPartitionCommand(
         request.securityId,
@@ -1404,7 +1449,10 @@ class SecurityInPort implements ISecurityInPort {
   async clearingRedeemByPartition(
     request: ClearingRedeemByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('ClearingRedeemByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ClearingRedeemByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ClearingRedeemByPartitionCommand(
         request.securityId,
@@ -1419,7 +1467,10 @@ class SecurityInPort implements ISecurityInPort {
   async clearingRedeemFromByPartition(
     request: ClearingRedeemFromByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('ClearingRedeemFromByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ClearingRedeemFromByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ClearingRedeemFromByPartitionCommand(
         request.securityId,
@@ -1435,7 +1486,10 @@ class SecurityInPort implements ISecurityInPort {
   async protectedClearingRedeemByPartition(
     request: ProtectedClearingRedeemByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('ProtectedClearingRedeemByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ProtectedClearingRedeemByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ProtectedClearingRedeemByPartitionCommand(
         request.securityId,
@@ -1454,7 +1508,10 @@ class SecurityInPort implements ISecurityInPort {
   async clearingCreateHoldByPartition(
     request: ClearingCreateHoldByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('ClearingCreateHoldByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ClearingCreateHoldByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ClearingCreateHoldByPartitionCommand(
         request.securityId,
@@ -1472,7 +1529,10 @@ class SecurityInPort implements ISecurityInPort {
   async clearingCreateHoldFromByPartition(
     request: ClearingCreateHoldFromByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('ClearingCreateHoldFromByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ClearingCreateHoldFromByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ClearingCreateHoldFromByPartitionCommand(
         request.securityId,
@@ -1491,7 +1551,10 @@ class SecurityInPort implements ISecurityInPort {
   async protectedClearingCreateHoldByPartition(
     request: ProtectedClearingCreateHoldByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('ProtectedClearingCreateHoldByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'ProtectedClearingCreateHoldByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new ProtectedClearingCreateHoldByPartitionCommand(
         request.securityId,
@@ -1513,7 +1576,10 @@ class SecurityInPort implements ISecurityInPort {
   async getClearedAmountFor(
     request: GetClearedAmountForRequest,
   ): Promise<number> {
-    handleValidation('GetClearedAmountForByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetClearedAmountForByPartitionRequest',
+      request,
+    );
     return (
       await this.queryBus.execute(
         new GetClearedAmountForQuery(request.securityId, request.targetId),
@@ -1525,7 +1591,10 @@ class SecurityInPort implements ISecurityInPort {
   async getClearedAmountForByPartition(
     request: GetClearedAmountForByPartitionRequest,
   ): Promise<number> {
-    handleValidation('GetClearedAmountForByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetClearedAmountForByPartitionRequest',
+      request,
+    );
     return (
       await this.queryBus.execute(
         new GetClearedAmountForByPartitionQuery(
@@ -1541,7 +1610,10 @@ class SecurityInPort implements ISecurityInPort {
   async getClearingCountForByPartition(
     request: GetClearingCountForByPartitionRequest,
   ): Promise<number> {
-    handleValidation('GetClearingCountForByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetClearingCountForByPartitionRequest',
+      request,
+    );
     return (
       await this.queryBus.execute(
         new GetClearingCountForByPartitionQuery(
@@ -1558,7 +1630,10 @@ class SecurityInPort implements ISecurityInPort {
   async getClearingCreateHoldForByPartition(
     request: GetClearingCreateHoldForByPartitionRequest,
   ): Promise<ClearingCreateHoldViewModel> {
-    handleValidation('GetClearingCreateHoldForByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetClearingCreateHoldForByPartitionRequest',
+      request,
+    );
 
     const res = (
       await this.queryBus.execute(
@@ -1590,7 +1665,10 @@ class SecurityInPort implements ISecurityInPort {
   async getClearingRedeemForByPartition(
     request: GetClearingRedeemForByPartitionRequest,
   ): Promise<ClearingRedeemViewModel> {
-    handleValidation('GetClearingRedeemForByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetClearingRedeemForByPartitionRequest',
+      request,
+    );
 
     const res = (
       await this.queryBus.execute(
@@ -1618,7 +1696,10 @@ class SecurityInPort implements ISecurityInPort {
   async getClearingTransferForByPartition(
     request: GetClearingTransferForByPartitionRequest,
   ): Promise<ClearingTransferViewModel> {
-    handleValidation('GetClearingTransferForByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetClearingTransferForByPartitionRequest',
+      request,
+    );
     const res = (
       await this.queryBus.execute(
         new GetClearingTransferForByPartitionQuery(
@@ -1646,7 +1727,10 @@ class SecurityInPort implements ISecurityInPort {
   async getClearingsIdForByPartition(
     request: GetClearingsIdForByPartitionRequest,
   ): Promise<number[]> {
-    handleValidation('GetClearingsIdForByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetClearingsIdForByPartitionRequest',
+      request,
+    );
     return (
       await this.queryBus.execute(
         new GetClearingsIdForByPartitionQuery(
@@ -1665,7 +1749,7 @@ class SecurityInPort implements ISecurityInPort {
   async isClearingActivated(
     request: IsClearingActivatedRequest,
   ): Promise<boolean> {
-    handleValidation('IsClearingActivatedRequest', request);
+    ValidatedRequest.handleValidation('IsClearingActivatedRequest', request);
     return (
       await this.queryBus.execute(
         new IsClearingActivatedQuery(request.securityId),
@@ -1677,7 +1761,10 @@ class SecurityInPort implements ISecurityInPort {
   async operatorClearingCreateHoldByPartition(
     request: OperatorClearingCreateHoldByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('OperatorClearingCreateHoldByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'OperatorClearingCreateHoldByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new OperatorClearingCreateHoldByPartitionCommand(
         request.securityId,
@@ -1696,7 +1783,10 @@ class SecurityInPort implements ISecurityInPort {
   async operatorClearingRedeemByPartition(
     request: OperatorClearingRedeemByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('OperatorClearingRedeemByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'OperatorClearingRedeemByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new OperatorClearingRedeemByPartitionCommand(
         request.securityId,
@@ -1712,7 +1802,10 @@ class SecurityInPort implements ISecurityInPort {
   async operatorClearingTransferByPartition(
     request: OperatorClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    handleValidation('OperatorClearingTransferByPartitionRequest', request);
+    ValidatedRequest.handleValidation(
+      'OperatorClearingTransferByPartitionRequest',
+      request,
+    );
     return await this.commandBus.execute(
       new OperatorClearingTransferByPartitionCommand(
         request.securityId,

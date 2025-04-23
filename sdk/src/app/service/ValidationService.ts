@@ -205,66 +205,66 @@
 
 import Injectable from '../../core/Injectable.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
-import { UnlistedKycIssuer } from '../usecase/command/security/error/UnlistedKycIssuer.js';
+import { UnlistedKycIssuer } from '../../domain/context/security/error/operations/UnlistedKycIssuer.js';
 import Service from './Service.js';
 import { singleton } from 'tsyringe';
-import { AccountNotKycd } from '../usecase/command/security/error/AccountNotKycd.js';
+import { AccountNotKycd } from '../../domain/context/security/error/operations/AccountNotKycd.js';
 import { IsIssuerQuery } from '../usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
-import { GetKYCStatusForQuery } from '../usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQuery.js';
+import { GetKycStatusForQuery } from '../usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery.js';
 import { IsClearingActivatedQuery } from '../usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
-import { ClearingDeactivated } from '../usecase/command/security/error/ClearingDeactivated.js';
-import { ClearingActivated } from '../usecase/command/security/error/ClearingActivated.js';
+import { ClearingDeactivated } from '../../domain/context/security/error/operations/ClearingDeactivated.js';
+import { ClearingActivated } from '../../domain/context/security/error/operations/ClearingActivated.js';
 import { IsOperatorForPartitionQuery } from '../usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQuery.js';
 import { HasRoleQuery } from '../usecase/query/security/roles/hasRole/HasRoleQuery.js';
 import { IsPausedQuery } from '../usecase/query/security/isPaused/IsPausedQuery.js';
 import { IsOperatorQuery } from '../usecase/query/security/operator/isOperator/IsOperatorQuery.js';
-import { AccountIsNotOperator } from '../usecase/command/security/error/AccountIsNotOperator.js';
-import { NotGrantedRole } from '../usecase/command/security/error/NotGrantedRole';
-import { SecurityPaused } from '../usecase/command/security/error/SecurityPaused.js';
-import { DecimalsOverRange } from '../usecase/command/security/error/DecimalsOverRange.js';
-import { PartitionsUnProtected } from '../usecase/command/security/error/PartitionsUnprotected.js';
-import { ContractsErrorMapper } from '../usecase/command/security/error/contractsErrorsMapper/ContractsErrorMapper.js';
+import { AccountIsNotOperator } from '../../domain/context/security/error/operations/AccountIsNotOperator.js';
+import { NotGrantedRole } from '../../domain/context/security/error/operations/NotGrantedRole.js';
+import { SecurityPaused } from '../../domain/context/security/error/operations/SecurityPaused.js';
+import { DecimalsOverRange } from '../../domain/context/security/error/operations/DecimalsOverRange.js';
+import { PartitionsUnProtected } from '../../domain/context/security/error/operations/PartitionsUnprotected.js';
+import { ContractsErrorMapper } from '../../domain/context/security/error/operations/contractsErrorsMapper/ContractsErrorMapper.js';
 import { CanTransferByPartitionQuery } from '../usecase/query/security/canTransferByPartition/CanTransferByPartitionQuery.js';
 import { CanTransferQuery } from '../usecase/query/security/canTransfer/CanTransferQuery.js';
 import { Security } from '../../domain/context/security/Security.js';
 import CheckNums from '../../core/checks/numbers/CheckNums.js';
 import { getProtectedPartitionRole } from '../../domain/context/security/SecurityRole.js';
 import { GetNounceQuery } from '../usecase/query/security/protectedPartitions/getNounce/GetNounceQuery.js';
-import { NounceAlreadyUsed } from '../usecase/command/security/error/NounceAlreadyUsed.js';
+import { NounceAlreadyUsed } from '../../domain/context/security/error/operations/NounceAlreadyUsed.js';
 import { IsInControlListQuery } from '../usecase/query/account/controlList/IsInControlListQuery.js';
-import { AccountNotInControlList } from '../usecase/command/security/error/AccountNotInControlList.js';
-import { AccountAlreadyInControlList } from '../usecase/command/security/error/AccountAlreadyInControlList.js';
-import { AccountIsAlreadyAnIssuer } from '../usecase/command/security/error/AccountAlreadyIsAnIssuer.js';
+import { AccountNotInControlList } from '../../domain/context/security/error/operations/AccountNotInControlList.js';
+import { AccountAlreadyInControlList } from '../../domain/context/security/error/operations/AccountAlreadyInControlList.js';
+import { AccountIsAlreadyAnIssuer } from '../../domain/context/security/error/operations/AccountAlreadyIsAnIssuer.js';
 import { CanRedeemByPartitionQuery } from '../usecase/query/security/canRedeemByPartition/CanRedeemByPartitionQuery.js';
 import BigDecimal from '../../domain/context/shared/BigDecimal.js';
-import { InsufficientHoldBalance } from '../usecase/command/security/error/InsufficientHoldBalance.js';
+import { InsufficientHoldBalance } from '../../domain/context/security/error/operations/InsufficientHoldBalance.js';
 import { BalanceOfQuery } from '../usecase/query/security/balanceof/BalanceOfQuery.js';
-import { InsufficientBalance } from '../usecase/command/security/error/InsufficientBalance.js';
+import { InsufficientBalance } from '../../domain/context/security/error/operations/InsufficientBalance.js';
 import { GetHoldForByPartitionQuery } from '../usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery.js';
 import { GetControlListTypeQuery } from '../usecase/query/security/controlList/getControlListType/GetControlListTypeQuery.js';
 import { SecurityControlListType } from '../../domain/context/security/SecurityControlListType.js';
 import { GetControlListCountQuery } from '../usecase/query/security/controlList/getControlListCount/GetControlListCountQuery.js';
 import { GetControlListMembersQuery } from '../usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery.js';
-import { AccountInBlackList } from '../usecase/command/security/error/AccountInBlackList.js';
-import { AccountNotInWhiteList } from '../usecase/command/security/error/AccountNotInWhiteList.js';
+import { AccountInBlackList } from '../../domain/context/security/error/operations/AccountInBlackList.js';
+import { AccountNotInWhiteList } from '../../domain/context/security/error/operations/AccountNotInWhiteList.js';
 import { GetMaxSupplyQuery } from '../usecase/query/security/cap/getMaxSupply/GetMaxSupplyQuery.js';
 import { GetMaxSupplyByPartitionQuery } from '../usecase/query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQuery.js';
-import { MaxSupplyByPartitionReached } from '../usecase/command/security/error/MaxSupplyByPartitionReached.js';
-import { MaxSupplyReached } from '../usecase/command/security/error/MaxSupplyReached.js';
-import { NotAllowedInMultiPartition } from '../usecase/command/security/error/NotAllowedInMultiPartition.js';
-import { OnlyDefaultPartitionAllowed } from '../usecase/command/security/error/OnlyDefaultPartitionAllowed.js';
-import { NotIssuable } from '../usecase/command/security/error/NotIssuable.js';
+import { MaxSupplyByPartitionReached } from '../../domain/context/security/error/operations/MaxSupplyByPartitionReached.js';
+import { MaxSupplyReached } from '../../domain/context/security/error/operations/MaxSupplyReached.js';
+import { NotAllowedInMultiPartition } from '../../domain/context/security/error/operations/NotAllowedInMultiPartition.js';
+import { OnlyDefaultPartitionAllowed } from '../../domain/context/security/error/operations/OnlyDefaultPartitionAllowed.js';
+import { NotIssuable } from '../../domain/context/security/error/operations/NotIssuable.js';
 import { _PARTITION_ID_1 } from '../../core/Constants.js';
-import { Terminal3VC } from '../../domain/context/kyc/Terminal3.js';
+import { Terminal3Vc } from '../../domain/context/kyc/Terminal3.js';
 import { SignedCredential } from '@terminal3/vc_core';
-import { InvalidVCHolder } from '../usecase/command/security/error/InvalidVCHolder.js';
+import { InvalidVcHolder } from '../../domain/context/security/error/operations/InvalidVcHolder.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress';
 import { GetTotalSupplyByPartitionQuery } from '../usecase/query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery.js';
 import { BigNumber } from 'ethers';
-import { SecurityUnPaused } from '../usecase/command/security/error/SecurityUnPaused.js';
-import { PartitionsProtected } from '../usecase/command/security/error/PartitionsProtected.js';
+import { SecurityUnPaused } from '../../domain/context/security/error/operations/SecurityUnPaused.js';
+import { PartitionsProtected } from '../../domain/context/security/error/operations/PartitionsProtected.js';
 import { GetBondDetailsQuery } from '../usecase/query/bond/get/getBondDetails/GetBondDetailsQuery.js';
-import { OperationNotAllowed } from '../usecase/command/security/error/OperationNotAllowed.js';
+import { OperationNotAllowed } from '../../domain/context/security/error/operations/OperationNotAllowed.js';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -289,7 +289,7 @@ export default class ValidationService extends Service {
     let res;
     for (const address of addresses) {
       res = await this.queryBus.execute(
-        new GetKYCStatusForQuery(securityId, address),
+        new GetKycStatusForQuery(securityId, address),
       );
       if (res.payload != 1) {
         throw new AccountNotKycd(address);
@@ -644,12 +644,12 @@ export default class ValidationService extends Service {
     targetEvmAddress: EvmAddress,
     securityId: string,
   ): Promise<[string, SignedCredential]> {
-    const issuer = Terminal3VC.extractIssuer(signedCredential);
-    signedCredential = Terminal3VC.checkValidDates(signedCredential);
-    const holder = Terminal3VC.extractHolder(signedCredential);
+    const issuer = Terminal3Vc.extractIssuer(signedCredential);
+    signedCredential = Terminal3Vc.checkValidDates(signedCredential);
+    const holder = Terminal3Vc.extractHolder(signedCredential);
 
     if (targetEvmAddress.toString().toLowerCase() !== holder.toLowerCase()) {
-      throw new InvalidVCHolder();
+      throw new InvalidVcHolder();
     }
 
     await this.checkIssuer(securityId, issuer);

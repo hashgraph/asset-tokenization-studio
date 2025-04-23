@@ -206,7 +206,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import UpdateConfigVersionRequest from './request/management/UpdateConfigVersionRequest';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from './Common';
+import ValidatedRequest from '../../core/validation/ValidatedArgs';
 import { UpdateConfigVersionCommand } from '../../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
 import { QueryBus } from '../../core/query/QueryBus';
 import Injectable from '../../core/Injectable';
@@ -251,7 +251,7 @@ class ManagementInPort implements IManagementInPort {
     request: UpdateConfigVersionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { configVersion, securityId } = request;
-    handleValidation('UpdateConfigVersionRequest', request);
+    ValidatedRequest.handleValidation('UpdateConfigVersionRequest', request);
 
     return await this.commandBus.execute(
       new UpdateConfigVersionCommand(configVersion, securityId),
@@ -263,7 +263,7 @@ class ManagementInPort implements IManagementInPort {
     request: UpdateConfigRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { configId, configVersion, securityId } = request;
-    handleValidation('UpdateConfigRequest', request);
+    ValidatedRequest.handleValidation('UpdateConfigRequest', request);
 
     return await this.commandBus.execute(
       new UpdateConfigCommand(configId, configVersion, securityId),
@@ -275,7 +275,7 @@ class ManagementInPort implements IManagementInPort {
     request: UpdateResolverRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { configId, securityId, resolver, configVersion } = request;
-    handleValidation('UpdateResolverRequest', request);
+    ValidatedRequest.handleValidation('UpdateResolverRequest', request);
 
     return await this.commandBus.execute(
       new UpdateResolverCommand(
@@ -291,7 +291,7 @@ class ManagementInPort implements IManagementInPort {
   async getConfigInfo(
     request: GetConfigInfoRequest,
   ): Promise<ConfigInfoViewModel> {
-    handleValidation('GetConfigInfoRequest', request);
+    ValidatedRequest.handleValidation('GetConfigInfoRequest', request);
 
     const { payload } = await this.queryBus.execute(
       new GetConfigInfoQuery(request.securityId),

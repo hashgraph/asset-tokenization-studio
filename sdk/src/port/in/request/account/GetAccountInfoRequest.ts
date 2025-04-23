@@ -204,8 +204,8 @@
 */
 
 import { AccountBaseRequest, RequestAccount } from '../BaseRequest.js';
-import ValidatedRequest from '../validation/ValidatedRequest.js';
-import Validation from '../validation/Validation.js';
+import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../FormatValidation.js';
 
 export default class GetAccountInfoRequest
   extends ValidatedRequest<GetAccountInfoRequest>
@@ -215,7 +215,7 @@ export default class GetAccountInfoRequest
 
   constructor({ account }: { account: RequestAccount }) {
     super({
-      account: Validation.checkAccount(),
+      account: FormatValidation.checkAccount(),
     });
     this.account = account;
   }

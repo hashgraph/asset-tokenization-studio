@@ -217,7 +217,8 @@ import { CommandBus } from '../../core/command/CommandBus.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
 import { ONE_THOUSAND } from '../../domain/context/shared/SecurityDate.js';
-import { handleValidation } from './Common.js';
+import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+
 import GetDividendsForRequest from './request/equity/GetDividendsForRequest.js';
 import GetDividendsRequest from './request/equity/GetDividendsRequest.js';
 import GetAllDividendsRequest from './request/equity/GetAllDividendsRequest.js';
@@ -328,7 +329,7 @@ class EquityInPort implements IEquityInPort {
   async create(
     req: CreateEquityRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }> {
-    handleValidation('CreateEquityRequest', req);
+    ValidatedRequest.handleValidation('CreateEquityRequest', req);
     const { diamondOwnerAccount, externalPauses, externalControlLists } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
@@ -402,7 +403,7 @@ class EquityInPort implements IEquityInPort {
   async getEquityDetails(
     request: GetEquityDetailsRequest,
   ): Promise<EquityDetailsViewModel> {
-    handleValidation('GetEquityDetailsRequest', request);
+    ValidatedRequest.handleValidation('GetEquityDetailsRequest', request);
 
     const res = await this.queryBus.execute(
       new GetEquityDetailsQuery(request.equityId),
@@ -429,7 +430,7 @@ class EquityInPort implements IEquityInPort {
     request: SetVotingRightsRequest,
   ): Promise<{ payload: number; transactionId: string }> {
     const { recordTimestamp, securityId, data } = request;
-    handleValidation('SetVotingRightsRequest', request);
+    ValidatedRequest.handleValidation('SetVotingRightsRequest', request);
 
     return await this.commandBus.execute(
       new SetVotingRightsCommand(securityId, recordTimestamp, data),
@@ -440,7 +441,7 @@ class EquityInPort implements IEquityInPort {
   async getVotingRightsFor(
     request: GetVotingRightsForRequest,
   ): Promise<VotingRightsForViewModel> {
-    handleValidation('GetVotingRightsForRequest', request);
+    ValidatedRequest.handleValidation('GetVotingRightsForRequest', request);
 
     const res = await this.queryBus.execute(
       new GetVotingForQuery(
@@ -462,7 +463,7 @@ class EquityInPort implements IEquityInPort {
   async getVotingRights(
     request: GetVotingRightsRequest,
   ): Promise<VotingRightsViewModel> {
-    handleValidation('GetVotingRightsRequest', request);
+    ValidatedRequest.handleValidation('GetVotingRightsRequest', request);
 
     const res = await this.queryBus.execute(
       new GetVotingQuery(request.securityId, request.votingId),
@@ -481,7 +482,7 @@ class EquityInPort implements IEquityInPort {
   async getAllVotingRights(
     request: GetAllVotingRightsRequest,
   ): Promise<VotingRightsViewModel[]> {
-    handleValidation('GetAllVotingRightsRequest', request);
+    ValidatedRequest.handleValidation('GetAllVotingRightsRequest', request);
 
     const count = await this.queryBus.execute(
       new GetVotingCountQuery(request.securityId),
@@ -518,7 +519,7 @@ class EquityInPort implements IEquityInPort {
       executionTimestamp,
       securityId,
     } = request;
-    handleValidation('SetDividendsRequest', request);
+    ValidatedRequest.handleValidation('SetDividendsRequest', request);
 
     return await this.commandBus.execute(
       new SetDividendsCommand(
@@ -534,7 +535,7 @@ class EquityInPort implements IEquityInPort {
   async getDividendsFor(
     request: GetDividendsForRequest,
   ): Promise<DividendsForViewModel> {
-    handleValidation('GetDividendsForRequest', request);
+    ValidatedRequest.handleValidation('GetDividendsForRequest', request);
 
     const res = await this.queryBus.execute(
       new GetDividendsForQuery(
@@ -556,7 +557,7 @@ class EquityInPort implements IEquityInPort {
   async getDividends(
     request: GetDividendsRequest,
   ): Promise<DividendsViewModel> {
-    handleValidation('GetDividendsRequest', request);
+    ValidatedRequest.handleValidation('GetDividendsRequest', request);
 
     const res = await this.queryBus.execute(
       new GetDividendsQuery(request.securityId, request.dividendId),
@@ -576,7 +577,7 @@ class EquityInPort implements IEquityInPort {
   async getAllDividends(
     request: GetAllDividendsRequest,
   ): Promise<DividendsViewModel[]> {
-    handleValidation('GetAllDividendsRequest', request);
+    ValidatedRequest.handleValidation('GetAllDividendsRequest', request);
 
     const count = await this.queryBus.execute(
       new GetDividendsCountQuery(request.securityId),
@@ -610,7 +611,10 @@ class EquityInPort implements IEquityInPort {
     request: SetScheduledBalanceAdjustmentRequest,
   ): Promise<{ payload: number; transactionId: string }> {
     const { executionDate, factor, decimals, securityId } = request;
-    handleValidation('SetScheduledBalanceAdjustmentRequest', request);
+    ValidatedRequest.handleValidation(
+      'SetScheduledBalanceAdjustmentRequest',
+      request,
+    );
 
     return await this.commandBus.execute(
       new SetScheduledBalanceAdjustmentCommand(
@@ -626,7 +630,10 @@ class EquityInPort implements IEquityInPort {
   async getScheduledBalanceAdjustment(
     request: GetScheduledBalanceAdjustmentRequest,
   ): Promise<ScheduledBalanceAdjustmentViewModel> {
-    handleValidation('GetScheduledBalanceAdjustmentRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetScheduledBalanceAdjustmentRequest',
+      request,
+    );
 
     const res = await this.queryBus.execute(
       new GetScheduledBalanceAdjustmentQuery(
@@ -652,7 +659,10 @@ class EquityInPort implements IEquityInPort {
     request: GetScheduledBalanceAdjustmentCountRequest,
   ): Promise<number> {
     const { securityId } = request;
-    handleValidation('GetScheduledBalanceAdjustmentCountRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetScheduledBalanceAdjustmentCountRequest',
+      request,
+    );
 
     const getScheduledBalanceAdjustmentCountQueryResponse =
       await this.queryBus.execute(
@@ -666,7 +676,10 @@ class EquityInPort implements IEquityInPort {
   async getAllScheduledBalanceAdjustments(
     request: GetAllScheduledBalanceAdjustmentsRequest,
   ): Promise<ScheduledBalanceAdjustmentViewModel[]> {
-    handleValidation('GetAllScheduledBalanceAdjustmentsRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetAllScheduledBalanceAdjustmentsRequest',
+      request,
+    );
 
     const count = await this.queryBus.execute(
       new GetScheduledBalanceAdjustmentCountQuery(request.securityId),
@@ -701,7 +714,7 @@ class EquityInPort implements IEquityInPort {
   async getLastAggregatedBalanceAdjustmentFactorFor(
     request: GetLastAggregatedBalanceAdjustmentFactorForRequest,
   ): Promise<number> {
-    handleValidation(
+    ValidatedRequest.handleValidation(
       'GetLastAggregatedBalanceAdjustmentFactorForRequest',
       request,
     );
@@ -721,7 +734,10 @@ class EquityInPort implements IEquityInPort {
   async getAggregatedBalanceAdjustmentFactor(
     request: GetAggregatedBalanceAdjustmentFactorRequest,
   ): Promise<number> {
-    handleValidation('GetAggregatedBalanceAdjustmentFactorRequest', request);
+    ValidatedRequest.handleValidation(
+      'GetAggregatedBalanceAdjustmentFactorRequest',
+      request,
+    );
 
     const getAggregatedBalanceAdjustmentFactorQueryResponse =
       await this.queryBus.execute(
@@ -735,7 +751,7 @@ class EquityInPort implements IEquityInPort {
   async getLastAggregatedBalanceAdjustmentFactorForByPartition(
     request: GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
   ): Promise<number> {
-    handleValidation(
+    ValidatedRequest.handleValidation(
       'GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest',
       request,
     );

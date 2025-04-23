@@ -210,7 +210,7 @@ import {
   RemoveExternalPauseCommand,
   RemoveExternalPauseCommandResponse,
 } from './RemoveExternalPauseCommand';
-import TransactionService from '../../../../../service/TransactionService';
+import TransactionService from '../../../../../service/transaction/TransactionService';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import ContractService from '../../../../../service/ContractService';

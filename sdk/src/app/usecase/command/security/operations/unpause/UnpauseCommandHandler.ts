@@ -209,7 +209,7 @@ import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerD
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
 import ValidationService from '../../../../../service/ValidationService.js';
-import TransactionService from '../../../../../service/TransactionService.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { UnpauseCommand, UnpauseCommandResponse } from './UnpauseCommand.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ContractService from '../../../../../service/ContractService.js';

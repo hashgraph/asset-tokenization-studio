@@ -1010,10 +1010,15 @@ export class RPCQueryAdapter {
   ): Promise<ScheduledSnapshot[]> {
     LogService.logTrace(`Getting scheduled snapshots from ${start} to ${end}`);
 
-    return await this.connect(
+    const snapshots = await this.connect(
       ScheduledSnapshots__factory,
       address.toString(),
     ).getScheduledSnapshots(start, end);
+
+    return snapshots.map(
+      (s: { scheduledTimestamp: BigNumber; data: string }) =>
+        new ScheduledSnapshot(s.scheduledTimestamp, s.data),
+    );
   }
 
   async scheduledSnapshotCount(address: EvmAddress): Promise<number> {
@@ -1374,7 +1379,7 @@ export class RPCQueryAdapter {
     ).isIssuer(issuer.toString());
   }
 
-  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<Kyc> {
+  async getKycFor(address: EvmAddress, targetId: EvmAddress): Promise<Kyc> {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
     const kycData = await this.connect(
@@ -1391,7 +1396,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getKYCStatusFor(
+  async getKycStatusFor(
     address: EvmAddress,
     targetId: EvmAddress,
   ): Promise<number> {
@@ -1405,7 +1410,7 @@ export class RPCQueryAdapter {
     return kycData;
   }
 
-  async getKYCAccountsData(
+  async getKycAccountsData(
     address: EvmAddress,
     kycStatus: number,
     start: number,
@@ -1431,7 +1436,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getKYCAccountsCount(
+  async getKycAccountsCount(
     address: EvmAddress,
     kycStatus: number,
   ): Promise<number> {

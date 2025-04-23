@@ -208,7 +208,8 @@ import { GetCouponDetailsQuery } from '../../app/usecase/query/bond/get/getCoupo
 import Injectable from '../../core/Injectable.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { QueryBus } from '../../core/query/QueryBus.js';
-import { handleValidation } from './Common.js';
+import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+
 import GetBondDetailsRequest from './request/bond/GetBondDetailsRequest.js';
 import GetCouponDetailsRequest from './request/bond/GetCouponDetailsRequest.js';
 import BondDetailsViewModel from './response/BondDetailsViewModel.js';
@@ -272,7 +273,7 @@ class BondInPort implements IBondInPort {
   async create(
     req: CreateBondRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }> {
-    handleValidation('CreateBondRequest', req);
+    ValidatedRequest.handleValidation('CreateBondRequest', req);
     const { diamondOwnerAccount, externalPauses, externalControlLists } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
@@ -343,7 +344,7 @@ class BondInPort implements IBondInPort {
   async getBondDetails(
     request: GetBondDetailsRequest,
   ): Promise<BondDetailsViewModel> {
-    handleValidation('GetBondDetailsRequest', request);
+    ValidatedRequest.handleValidation('GetBondDetailsRequest', request);
 
     const res = await this.queryBus.execute(
       new GetBondDetailsQuery(request.bondId),
@@ -364,7 +365,7 @@ class BondInPort implements IBondInPort {
     request: SetCouponRequest,
   ): Promise<{ payload: number; transactionId: string }> {
     const { rate, recordTimestamp, executionTimestamp, securityId } = request;
-    handleValidation('SetCouponRequest', request);
+    ValidatedRequest.handleValidation('SetCouponRequest', request);
 
     return await this.commandBus.execute(
       new SetCouponCommand(
@@ -380,7 +381,7 @@ class BondInPort implements IBondInPort {
   async getCouponDetails(
     request: GetCouponDetailsRequest,
   ): Promise<CouponDetailsViewModel> {
-    handleValidation('GetCouponDetailsRequest', request);
+    ValidatedRequest.handleValidation('GetCouponDetailsRequest', request);
 
     const res = await this.queryBus.execute(
       new GetCouponDetailsQuery(request.bondId),
@@ -398,7 +399,7 @@ class BondInPort implements IBondInPort {
   async getCouponFor(
     request: GetCouponForRequest,
   ): Promise<CouponForViewModel> {
-    handleValidation('GetCouponForRequest', request);
+    ValidatedRequest.handleValidation('GetCouponForRequest', request);
 
     const res = await this.queryBus.execute(
       new GetCouponForQuery(
@@ -417,7 +418,7 @@ class BondInPort implements IBondInPort {
 
   @LogError
   async getCoupon(request: GetCouponRequest): Promise<CouponViewModel> {
-    handleValidation('GetCouponRequest', request);
+    ValidatedRequest.handleValidation('GetCouponRequest', request);
 
     const res = await this.queryBus.execute(
       new GetCouponQuery(request.securityId, request.couponId),
@@ -437,7 +438,7 @@ class BondInPort implements IBondInPort {
   async getAllCoupons(
     request: GetAllCouponsRequest,
   ): Promise<CouponViewModel[]> {
-    handleValidation('GetAllCouponRequest', request);
+    ValidatedRequest.handleValidation('GetAllCouponRequest', request);
 
     const count = await this.queryBus.execute(
       new GetCouponCountQuery(request.securityId),
@@ -466,7 +467,7 @@ class BondInPort implements IBondInPort {
     request: UpdateMaturityDateRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { maturityDate, securityId } = request;
-    handleValidation('UpdateMaturityDateRequest', request);
+    ValidatedRequest.handleValidation('UpdateMaturityDateRequest', request);
 
     return await this.commandBus.execute(
       new UpdateMaturityDateCommand(maturityDate, securityId),

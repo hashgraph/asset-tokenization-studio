@@ -207,6 +207,6 @@ import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
 export class MissingRegulationSubType extends BaseError {
   constructor() {
-    super(ErrorCode.MissingRegulationSubType, `Regulation Sub Type is missing`);
+    super(ErrorCode.EmptyValue, `Regulation sub type is missing`);
   }
 }

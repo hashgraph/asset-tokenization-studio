@@ -226,7 +226,7 @@ import {
 import { SignClientTypes } from '@walletconnect/types';
 import { HederaTransactionAdapter } from '../HederaTransactionAdapter';
 import { HederaTransactionResponseAdapter } from '../HederaTransactionResponseAdapter';
-import { SigningError } from '../error/SigningError';
+import { SigningError } from '../../error/SigningError';
 import { InitializationData } from '../../TransactionAdapter';
 import { MirrorNodeAdapter } from '../../mirror/MirrorNodeAdapter';
 import {
@@ -252,7 +252,7 @@ import HWCSettings from '../../../../core/settings/walletConnect/HWCSettings';
 import { NotInitialized } from './error/NotInitialized';
 import { AccountNotSet } from './error/AccountNotSet';
 import { NoSettings } from './error/NoSettings';
-import { UnsupportedNetwork } from '../../error/UnsupportedNetwork';
+import { UnsupportedNetwork } from '../../../../domain/context/network/error/UnsupportedNetwork';
 import { NoSigners } from './error/NoSigners';
 import { AccountNotRetrievedFromSigners } from './error/AccountNotRetrievedFromSigners';
 import { AccountNotFound } from '../error/AccountNotFound';

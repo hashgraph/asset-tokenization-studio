@@ -239,7 +239,7 @@ import {
 import Injectable from '../../../src/core/Injectable';
 import Account from '../../../src/domain/context/account/Account';
 import { ethers, Wallet } from 'ethers';
-import SSIManagement from '../../../src/port/in/SSIManagement';
+import SsiManagement from '../../../src/port/in/SsiManagement';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
@@ -371,7 +371,7 @@ describe('🧪 SSI Management tests', () => {
   it('Set and Get revocation registry successfully', async () => {
     expect(
       (
-        await SSIManagement.setRevocationRegistryAddress(
+        await SsiManagement.setRevocationRegistryAddress(
           new SetRevocationRegistryAddressRequest({
             securityId: equity.evmDiamondAddress!,
             revocationRegistryId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
@@ -381,7 +381,7 @@ describe('🧪 SSI Management tests', () => {
     ).toBe(true);
 
     expect(
-      await SSIManagement.getRevocationRegistryAddress(
+      await SsiManagement.getRevocationRegistryAddress(
         new GetRevocationRegistryAddressRequest({
           securityId: equity.evmDiamondAddress!,
         }),
@@ -393,7 +393,7 @@ describe('🧪 SSI Management tests', () => {
     //Add issuer
     expect(
       (
-        await SSIManagement.addIssuer(
+        await SsiManagement.addIssuer(
           new AddIssuerRequest({
             securityId: equity.evmDiamondAddress!,
             issuerId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
@@ -404,7 +404,7 @@ describe('🧪 SSI Management tests', () => {
 
     //Get Issuer List
     expect(
-      await SSIManagement.getIssuerListCount(
+      await SsiManagement.getIssuerListCount(
         new GetIssuerListCountRequest({
           securityId: equity.evmDiamondAddress!,
         }),
@@ -413,7 +413,7 @@ describe('🧪 SSI Management tests', () => {
 
     //Get Issuer List Members
     expect(
-      await SSIManagement.getIssuerListMembers(
+      await SsiManagement.getIssuerListMembers(
         new GetIssuerListMembersRequest({
           securityId: equity.evmDiamondAddress!,
           start: 0,
@@ -425,7 +425,7 @@ describe('🧪 SSI Management tests', () => {
     //Remove Issuer
     expect(
       (
-        await SSIManagement.removeIssuer(
+        await SsiManagement.removeIssuer(
           new RemoveIssuerRequest({
             securityId: equity.evmDiamondAddress!,
             issuerId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
@@ -436,7 +436,7 @@ describe('🧪 SSI Management tests', () => {
 
     //Get Issuer List
     expect(
-      await SSIManagement.getIssuerListCount(
+      await SsiManagement.getIssuerListCount(
         new GetIssuerListCountRequest({
           securityId: equity.evmDiamondAddress!,
         }),
@@ -448,7 +448,7 @@ describe('🧪 SSI Management tests', () => {
     //Add issuer
     expect(
       (
-        await SSIManagement.addIssuer(
+        await SsiManagement.addIssuer(
           new AddIssuerRequest({
             securityId: equity.evmDiamondAddress!,
             issuerId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
@@ -460,7 +460,7 @@ describe('🧪 SSI Management tests', () => {
     //Try to do Add the same issuer
     let thrownError;
     try {
-      await SSIManagement.addIssuer(
+      await SsiManagement.addIssuer(
         new AddIssuerRequest({
           securityId: equity.evmDiamondAddress!,
           issuerId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),

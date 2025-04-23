@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs';
+import FormatValidation from '../../FormatValidation';
 
 export default class IsExternalPauseRequest extends ValidatedRequest<IsExternalPauseRequest> {
   securityId: string;
@@ -218,8 +218,8 @@ export default class IsExternalPauseRequest extends ValidatedRequest<IsExternalP
     externalPauseAddress: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      externalPauseAddress: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      externalPauseAddress: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
     this.securityId = securityId;
     this.externalPauseAddress = externalPauseAddress;

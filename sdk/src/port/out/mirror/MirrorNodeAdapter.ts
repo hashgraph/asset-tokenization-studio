@@ -207,7 +207,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { AxiosInstance } from 'axios';
 import { singleton } from 'tsyringe';
 import { PublicKey as HPublicKey } from '@hashgraph/sdk';
-import { InvalidResponse } from './error/InvalidResponse.js';
+import { InvalidResponse } from '../../../core/error/InvalidResponse.js';
 import { REGEX_TRANSACTION } from '../error/TransactionResponseError.js';
 import TransactionResultViewModel from '../../in/response/TransactionResultViewModel.js';
 import ContractViewModel from '../../in/response/ContractViewModel.js';
@@ -221,10 +221,10 @@ import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
 import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
 import Account from '../../../domain/context/account/Account.js';
 import { Time } from '../../../core/Time.js';
-import { TransactionNotFound } from '../error/TransactionNotFound.js';
-import { TransactionResultNotFound } from '../error/TransactionResultNotFound.js';
-import { BalanceNotFound } from '../error/BalanceNotFound.js';
-import { ErrorRetrievingEvmAddress } from '../error/ErrorRetrievingEvmAddress.js';
+import { TransactionNotFound } from './error/TransactionNotFound.js';
+import { TransactionResultNotFound } from './error/TransactionResultNotFound.js';
+import { BalanceNotFound } from './error/BalanceNotFound.js';
+import { ErrorRetrievingEvmAddress } from './error/ErrorRetrievingEvmAddress.js';
 
 @singleton()
 export class MirrorNodeAdapter {

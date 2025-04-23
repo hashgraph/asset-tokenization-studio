@@ -211,9 +211,9 @@ import {
 } from './CreateExternalPauseMockCommand';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../../app/service/TransactionService';
-import { EmptyResponse } from '../../../error/EmptyResponse';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse';
+import TransactionService from '../../../../../../../app/service/transaction/TransactionService';
+import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
 
 @CommandHandler(CreateExternalPauseMockCommand)
 export class CreateExternalPauseMockCommandHandler
