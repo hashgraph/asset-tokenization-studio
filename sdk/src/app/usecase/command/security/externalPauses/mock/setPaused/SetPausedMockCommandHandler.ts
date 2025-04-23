@@ -209,7 +209,7 @@ import {
   SetPausedMockCommand,
   SetPausedMockCommandResponse,
 } from './SetPausedMockCommand';
-import TransactionService from '../../../../../../service/TransactionService';
+import TransactionService from '../../../../../../service/transaction/TransactionService';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
 import ContractService from '../../../../../../../app/service/ContractService';
 

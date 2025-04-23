@@ -220,7 +220,6 @@ import {
   IsAuthorizedBlackListMockRequest,
   IsAuthorizedWhiteListMockRequest,
 } from '../request';
-import * as Common from '../Common';
 import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
 import {
   AddExternalControlListsRequestFixture,
@@ -241,7 +240,6 @@ import {
   TransactionIdFixture,
 } from '../../../../__tests__/fixtures/shared/DataFixture';
 import LogService from '../../../app/service/LogService';
-import { ValidationError } from '../request/error/ValidationError';
 import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
 import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
 import { QueryBus } from '../../../core/query/QueryBus';
@@ -256,7 +254,8 @@ import { CreateExternalBlackListMockCommand } from '../../../app/usecase/command
 import { CreateExternalWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/createExternalWhiteListMock/CreateExternalWhiteListMockCommand';
 import { IsAuthorizedBlackListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery';
 import { IsAuthorizedWhiteListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery';
-
+import ValidatedRequest from '../../../core/validation/ValidatedArgs';
+import { ValidationError } from '../../../core/validation/ValidationError';
 describe('ExternalControlListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
@@ -286,7 +285,7 @@ describe('ExternalControlListsManagement', () => {
   beforeEach(() => {
     commandBusMock = createMock<CommandBus>();
     queryBusMock = createMock<QueryBus>();
-    handleValidationSpy = jest.spyOn(Common, 'handleValidation');
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
     jest.spyOn(LogService, 'logError').mockImplementation(() => {});
     (ExternalControlListsManagement as any).commandBus = commandBusMock;
     (ExternalControlListsManagement as any).queryBus = queryBusMock;

@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs';
+import FormatValidation from '../../FormatValidation';
 
 export default class IsExternalControlListRequest extends ValidatedRequest<IsExternalControlListRequest> {
   securityId: string;
@@ -218,8 +218,9 @@ export default class IsExternalControlListRequest extends ValidatedRequest<IsExt
     externalControlListAddress: string;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      externalControlListAddress: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      externalControlListAddress:
+        FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
     this.securityId = securityId;
     this.externalControlListAddress = externalControlListAddress;

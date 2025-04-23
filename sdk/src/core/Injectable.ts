@@ -326,15 +326,15 @@ import { GetIssuerListCountQueryHandler } from '../app/usecase/query/security/ss
 import { GetIssuerListMembersQueryHandler } from '../app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQueryHandler.js';
 import { GetRevocationRegistryAddressQueryHandler } from '../app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQueryHandler.js';
 import { IsIssuerQueryHandler } from '../app/usecase/query/security/ssi/isIssuer/IsIssuerQueryHandler.js';
-import { GetKYCForQueryHandler } from '../app/usecase/query/security/kyc/getKycFor/GetKYCForQueryHandler.js';
-import { GetKYCAccountsCountQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsCount/GetKYCAccountsCountQueryHandler.js';
-import { GrantKYCCommandHandler } from '../app/usecase/command/security/kyc/grantKyc/GrantKYCCommandHandler.js';
-import { RevokeKYCCommandHandler } from '../app/usecase/command/security/kyc/revokeKyc/RevokeKYCCommandHandler.js';
+import { GetKycForQueryHandler } from '../app/usecase/query/security/kyc/getKycFor/GetKycForQueryHandler.js';
+import { GetKycAccountsCountQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsCount/GetKycAccountsCountQueryHandler.js';
+import { GrantKycCommandHandler } from '../app/usecase/command/security/kyc/grantKyc/GrantKycCommandHandler.js';
+import { RevokeKycCommandHandler } from '../app/usecase/command/security/kyc/revokeKyc/RevokeKycCommandHandler.js';
 import { AddIssuerCommandHandler } from '../app/usecase/command/security/ssi/addIssuer/AddIssuerCommandHandler.js';
 import { RemoveIssuerCommandHandler } from '../app/usecase/command/security/ssi/removeIssuer/RemoveIssuerCommandHandler.js';
 import { SetRevocationRegistryAddressCommandHandler } from '../app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommandHandler.js';
-import { GetKYCStatusForQueryHandler } from '../app/usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQueryHandler.js';
-import { GetKYCAccountsDataQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsData/GetKYCAccountsDataQueryHandler.js';
+import { GetKycStatusForQueryHandler } from '../app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQueryHandler.js';
+import { GetKycAccountsDataQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsData/GetKycAccountsDataQueryHandler.js';
 import { ActivateClearingCommandHandler } from '../app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommandHandler.js';
 import { DeactivateClearingCommandHandler } from '../app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommandHandler.js';
 import { ClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommandHandler.js';
@@ -538,11 +538,11 @@ const COMMAND_HANDLERS = [
   },
   {
     token: TOKENS.COMMAND_HANDLER,
-    useClass: GrantKYCCommandHandler,
+    useClass: GrantKycCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,
-    useClass: RevokeKYCCommandHandler,
+    useClass: RevokeKycCommandHandler,
   },
 
   // Bond Operations
@@ -943,19 +943,19 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetKYCForQueryHandler,
+    useClass: GetKycForQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetKYCAccountsCountQueryHandler,
+    useClass: GetKycAccountsCountQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetKYCAccountsDataQueryHandler,
+    useClass: GetKycAccountsDataQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetKYCStatusForQueryHandler,
+    useClass: GetKycStatusForQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,

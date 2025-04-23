@@ -204,8 +204,8 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs';
+import FormatValidation from '../../../FormatValidation';
 
 export default class IsAuthorizedBlackListMockRequest extends ValidatedRequest<IsAuthorizedBlackListMockRequest> {
   contractId: string;
@@ -219,8 +219,8 @@ export default class IsAuthorizedBlackListMockRequest extends ValidatedRequest<I
     targetId: string;
   }) {
     super({
-      contractId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      contractId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
     this.contractId = contractId;
     this.targetId = targetId;

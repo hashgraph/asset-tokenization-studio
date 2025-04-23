@@ -210,7 +210,7 @@ import CreateEquityRequest from './equity/CreateEquityRequest.js';
 import CreateBondRequest from './bond/CreateBondRequest.js';
 import RoleRequest from './security/roles/RoleRequest.js';
 import ApplyRolesRequest from './security/roles/ApplyRolesRequest.js';
-import ValidationResponse from './validation/ValidationResponse.js';
+import ValidationResponse from '../../../core/validation/ValidationResponse.js';
 import TransferRequest from './security/operations/transfer/TransferRequest.js';
 import TransferAndLockRequest from './security/operations/transfer/TransferAndLockRequest.js';
 import ForceTransferRequest from './security/operations/transfer/ForceTransferRequest.js';
@@ -289,12 +289,12 @@ import GetRevocationRegistryAddressRequest from './security/ssi/GetRevocationReg
 import GetIssuerListCountRequest from './security/ssi/GetIssuerListCountRequest.js';
 import GetIssuerListMembersRequest from './security/ssi/GetIssuerListMembersRequest.js';
 import IsIssuerRequest from './security/operations/issue/IsIssuerRequest.js';
-import GetKYCAccountsCountRequest from './security/kyc/GetKYCAccountsCountRequest.js';
-import GetKYCForRequest from './security/kyc/GetKYCForRequest.js';
-import RevokeKYCRequest from './security/kyc/RevokeKYCRequest.js';
-import GrantKYCRequest from './security/kyc/GrantKYCRequest.js';
-import GetKYCAccountsDataRequest from './security/kyc/GetKYCAccountsDataRequest.js';
-import GetKYCStatusForRequest from './security/kyc/GetKYCStatusForRequest.js';
+import GetKycAccountsCountRequest from './security/kyc/GetKycAccountsCountRequest.js';
+import GetKycForRequest from './security/kyc/GetKycForRequest.js';
+import RevokeKycRequest from './security/kyc/RevokeKycRequest.js';
+import GrantKycRequest from './security/kyc/GrantKycRequest.js';
+import GetKycAccountsDataRequest from './security/kyc/GetKycAccountsDataRequest.js';
+import GetKycStatusForRequest from './security/kyc/GetKycStatusForRequest.js';
 import ActivateClearingRequest from './security/operations/clearing/ActivateClearingRequest.js';
 import DeactivateClearingRequest from './security/operations/clearing/DeactivateClearingRequest.js';
 import ClearingTransferByPartitionRequest from './security/operations/clearing/ClearingTransferByPartitionRequest.js';
@@ -341,7 +341,6 @@ import RemoveFromWhiteListMockRequest from './security/externalControlLists/mock
 import IsAuthorizedBlackListMockRequest from './security/externalControlLists/mock/IsAuthorizedBlackListMockRequest.js';
 import IsAuthorizedWhiteListMockRequest from './security/externalControlLists/mock/IsAuthorizedWhiteListMockRequest.js';
 
-export * from './BaseRequest.js';
 export {
   CreateEquityRequest,
   CreateBondRequest,
@@ -428,12 +427,12 @@ export {
   GetIssuerListCountRequest,
   GetIssuerListMembersRequest,
   IsIssuerRequest,
-  GetKYCAccountsCountRequest,
-  GetKYCForRequest,
-  RevokeKYCRequest,
-  GrantKYCRequest,
-  GetKYCAccountsDataRequest,
-  GetKYCStatusForRequest,
+  GetKycAccountsCountRequest,
+  GetKycForRequest,
+  RevokeKycRequest,
+  GrantKycRequest,
+  GetKycAccountsDataRequest,
+  GetKycStatusForRequest,
   ActivateClearingRequest,
   DeactivateClearingRequest,
   ClearingTransferByPartitionRequest,

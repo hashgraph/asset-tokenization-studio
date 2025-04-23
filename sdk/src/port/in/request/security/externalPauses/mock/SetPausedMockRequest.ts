@@ -204,8 +204,8 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs';
+import FormatValidation from '../../../FormatValidation';
 
 export default class SetPausedMockRequest extends ValidatedRequest<SetPausedMockRequest> {
   contractId: string;
@@ -213,7 +213,7 @@ export default class SetPausedMockRequest extends ValidatedRequest<SetPausedMock
 
   constructor({ contractId, paused }: { contractId: string; paused: boolean }) {
     super({
-      contractId: Validation.checkHederaIdFormatOrEvmAddress(),
+      contractId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
     this.contractId = contractId;
     this.paused = paused;

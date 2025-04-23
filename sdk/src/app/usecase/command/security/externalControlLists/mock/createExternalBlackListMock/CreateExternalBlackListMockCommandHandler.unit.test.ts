@@ -203,7 +203,7 @@
 
 */
 
-import TransactionService from '../../../../../../service/TransactionService.js';
+import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,
@@ -214,8 +214,8 @@ import { CreateExternalBlackListMockCommandHandler } from './CreateExternalBlack
 import { CreateExternalBlackListMockCommandResponse } from './CreateExternalBlackListMockCommand.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
-import { EmptyResponse } from '../../../error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse.js';
+import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
 
 describe('CreateExternalBlackListMockCommandHandler', () => {
   let handler: CreateExternalBlackListMockCommandHandler;

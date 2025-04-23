@@ -215,62 +215,62 @@ import {
   PartitionIdFixture,
   RoleFixture,
 } from '../../../__tests__/fixtures/shared/DataFixture';
-import { AccountNotKycd } from '../../app/usecase/command/security/error/AccountNotKycd';
-import { UnlistedKycIssuer } from '../../app/usecase/command/security/error/UnlistedKycIssuer';
-import { ClearingDeactivated } from '../../app/usecase/command/security/error/ClearingDeactivated';
-import { ClearingActivated } from '../../app/usecase/command/security/error/ClearingActivated';
-import { AccountIsNotOperator } from '../../app/usecase/command/security/error/AccountIsNotOperator';
-import { NotGrantedRole } from '../../app/usecase/command/security/error/NotGrantedRole';
-import { SecurityPaused } from '../../app/usecase/command/security/error/SecurityPaused';
+import { AccountNotKycd } from '../../domain/context/security/error/operations/AccountNotKycd';
+import { UnlistedKycIssuer } from '../../domain/context/security/error/operations/UnlistedKycIssuer';
+import { ClearingDeactivated } from '../../domain/context/security/error/operations/ClearingDeactivated';
+import { ClearingActivated } from '../../domain/context/security/error/operations/ClearingActivated';
+import { AccountIsNotOperator } from '../../domain/context/security/error/operations/AccountIsNotOperator';
+import { NotGrantedRole } from '../../domain/context/security/error/operations/NotGrantedRole';
+import { SecurityPaused } from '../../domain/context/security/error/operations/SecurityPaused';
 import { SecurityPropsFixture } from '../../../__tests__/fixtures/shared/SecurityFixture';
 import { Security } from '../../domain/context/security/Security';
-import { PartitionsUnProtected } from '../../app/usecase/command/security/error/PartitionsUnprotected';
-import { PartitionsProtected } from '../../app/usecase/command/security/error/PartitionsProtected';
+import { PartitionsUnProtected } from '../../domain/context/security/error/operations/PartitionsUnprotected';
+import { PartitionsProtected } from '../../domain/context/security/error/operations/PartitionsProtected';
 import { CanTransferByPartitionQuery } from '../../app/usecase/query/security/canTransferByPartition/CanTransferByPartitionQuery';
-import { ContractsErrorMapper } from '../../app/usecase/command/security/error/contractsErrorsMapper/ContractsErrorMapper';
+import { ContractsErrorMapper } from '../../domain/context/security/error/operations/contractsErrorsMapper/ContractsErrorMapper';
 import { CanTransferQuery } from '../../app/usecase/query/security/canTransfer/CanTransferQuery';
 import { CanRedeemByPartitionQuery } from '../../app/usecase/query/security/canRedeemByPartition/CanRedeemByPartitionQuery';
 import { GetMaxSupplyByPartitionQuery } from '../../app/usecase/query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQuery';
 import { GetTotalSupplyByPartitionQuery } from '../../app/usecase/query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery';
-import { MaxSupplyByPartitionReached } from '../../app/usecase/command/security/error/MaxSupplyByPartitionReached';
+import { MaxSupplyByPartitionReached } from '../../domain/context/security/error/operations/MaxSupplyByPartitionReached';
 import { GetMaxSupplyQuery } from '../../app/usecase/query/security/cap/getMaxSupply/GetMaxSupplyQuery';
-import { MaxSupplyReached } from '../../app/usecase/command/security/error/MaxSupplyReached';
+import { MaxSupplyReached } from '../../domain/context/security/error/operations/MaxSupplyReached';
 import CheckNums from '../../core/checks/numbers/CheckNums';
-import { DecimalsOverRange } from '../../app/usecase/command/security/error/DecimalsOverRange';
+import { DecimalsOverRange } from '../../domain/context/security/error/operations/DecimalsOverRange';
 import { GetNounceQuery } from '../../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQuery';
-import { NounceAlreadyUsed } from '../../app/usecase/command/security/error/NounceAlreadyUsed';
+import { NounceAlreadyUsed } from '../../domain/context/security/error/operations/NounceAlreadyUsed';
 import { IsInControlListQuery } from '../../app/usecase/query/account/controlList/IsInControlListQuery';
-import { AccountAlreadyInControlList } from '../../app/usecase/command/security/error/AccountAlreadyInControlList';
-import { AccountNotInControlList } from '../../app/usecase/command/security/error/AccountNotInControlList';
+import { AccountAlreadyInControlList } from '../../domain/context/security/error/operations/AccountAlreadyInControlList';
+import { AccountNotInControlList } from '../../domain/context/security/error/operations/AccountNotInControlList';
 import { IsIssuerQuery } from '../../app/usecase/query/security/ssi/isIssuer/IsIssuerQuery';
-import { AccountIsAlreadyAnIssuer } from '../../app/usecase/command/security/error/AccountAlreadyIsAnIssuer';
+import { AccountIsAlreadyAnIssuer } from '../../domain/context/security/error/operations/AccountAlreadyIsAnIssuer';
 import BigDecimal from '../../domain/context/shared/BigDecimal';
 import { GetHoldForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery';
-import { InsufficientHoldBalance } from '../../app/usecase/command/security/error/InsufficientHoldBalance';
+import { InsufficientHoldBalance } from '../../domain/context/security/error/operations/InsufficientHoldBalance';
 import { BalanceOfQuery } from '../../app/usecase/query/security/balanceof/BalanceOfQuery';
-import { InsufficientBalance } from '../../app/usecase/command/security/error/InsufficientBalance';
+import { InsufficientBalance } from '../../domain/context/security/error/operations/InsufficientBalance';
 import { SecurityControlListType } from '../../domain/context/security/SecurityControlListType';
 import { GetControlListTypeQuery } from '../../app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery';
 import { GetControlListCountQuery } from '../../app/usecase/query/security/controlList/getControlListCount/GetControlListCountQuery';
 import { GetControlListMembersQuery } from '../../app/usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery';
-import { AccountNotInWhiteList } from '../../app/usecase/command/security/error/AccountNotInWhiteList';
-import { GetKYCStatusForQuery } from '../../app/usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQuery';
+import { AccountNotInWhiteList } from '../../domain/context/security/error/operations/AccountNotInWhiteList';
+import { GetKycStatusForQuery } from '../../app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
 import { IsClearingActivatedQuery } from '../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
 import { IsOperatorQuery } from '../../app/usecase/query/security/operator/isOperator/IsOperatorQuery';
 import { IsOperatorForPartitionQuery } from '../../app/usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQuery';
 import { HasRoleQuery } from '../../app/usecase/query/security/roles/hasRole/HasRoleQuery';
 import { IsPausedQuery } from '../../app/usecase/query/security/isPaused/IsPausedQuery';
-import { SecurityUnPaused } from '../../app/usecase/command/security/error/SecurityUnPaused';
+import { SecurityUnPaused } from '../../domain/context/security/error/operations/SecurityUnPaused';
 import { _PARTITION_ID_1 } from '../../core/Constants';
-import { NotAllowedInMultiPartition } from '../../app/usecase/command/security/error/NotAllowedInMultiPartition';
-import { OnlyDefaultPartitionAllowed } from '../../app/usecase/command/security/error/OnlyDefaultPartitionAllowed';
-import { NotIssuable } from '../../app/usecase/command/security/error/NotIssuable';
-import { Terminal3VC } from '../../domain/context/kyc/Terminal3';
-import { InvalidVCHolder } from '../../app/usecase/command/security/error/InvalidVCHolder';
+import { NotAllowedInMultiPartition } from '../../domain/context/security/error/operations/NotAllowedInMultiPartition';
+import { OnlyDefaultPartitionAllowed } from '../../domain/context/security/error/operations/OnlyDefaultPartitionAllowed';
+import { NotIssuable } from '../../domain/context/security/error/operations/NotIssuable';
+import { Terminal3Vc } from '../../domain/context/kyc/Terminal3';
+import { InvalidVcHolder } from '../../domain/context/security/error/operations/InvalidVcHolder';
 import { SignedCredential } from '@terminal3/vc_core';
 import EvmAddress from '../../domain/context/contract/EvmAddress';
 import { GetBondDetailsQuery } from '../../app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery';
-import { OperationNotAllowed } from '../../app/usecase/command/security/error/OperationNotAllowed';
+import { OperationNotAllowed } from '../../domain/context/security/error/operations/OperationNotAllowed';
 
 describe('ValidationService', () => {
   let service: ValidationService;
@@ -337,11 +337,11 @@ describe('ValidationService', () => {
       expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
         1,
-        new GetKYCStatusForQuery(securityId.value, firstAddress.value),
+        new GetKycStatusForQuery(securityId.value, firstAddress.value),
       );
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
         2,
-        new GetKYCStatusForQuery(securityId.value, secondAddress.value),
+        new GetKycStatusForQuery(securityId.value, secondAddress.value),
       );
     });
 
@@ -1175,12 +1175,12 @@ describe('ValidationService', () => {
     const signedCredential = {} as SignedCredential;
 
     beforeEach(() => {
-      jest.spyOn(Terminal3VC, 'extractIssuer').mockReturnValue(issuerId.value);
+      jest.spyOn(Terminal3Vc, 'extractIssuer').mockReturnValue(issuerId.value);
       jest
-        .spyOn(Terminal3VC, 'checkValidDates')
+        .spyOn(Terminal3Vc, 'checkValidDates')
         .mockReturnValue(signedCredential);
       jest
-        .spyOn(Terminal3VC, 'extractHolder')
+        .spyOn(Terminal3Vc, 'extractHolder')
         .mockReturnValue(targetEvmAddress.value.toString());
     });
 
@@ -1195,20 +1195,20 @@ describe('ValidationService', () => {
         securityId.value,
       );
       expect(result).toEqual([issuerId.value, signedCredential]);
-      expect(Terminal3VC.extractIssuer).toHaveBeenCalledWith(signedCredential);
-      expect(Terminal3VC.checkValidDates).toHaveBeenCalledWith(
+      expect(Terminal3Vc.extractIssuer).toHaveBeenCalledWith(signedCredential);
+      expect(Terminal3Vc.checkValidDates).toHaveBeenCalledWith(
         signedCredential,
       );
-      expect(Terminal3VC.extractHolder).toHaveBeenCalledWith(signedCredential);
+      expect(Terminal3Vc.extractHolder).toHaveBeenCalledWith(signedCredential);
       expect(checkIssuerSpy).toHaveBeenCalledWith(
         securityId.value,
         issuerId.value,
       );
     });
 
-    it('should throw InvalidVCHolder when holder mismatch', async () => {
+    it('should throw InvalidVcHolder when holder mismatch', async () => {
       jest
-        .spyOn(Terminal3VC, 'extractHolder')
+        .spyOn(Terminal3Vc, 'extractHolder')
         .mockReturnValue(sourceId.value + '1');
 
       await expect(
@@ -1217,7 +1217,7 @@ describe('ValidationService', () => {
           targetEvmAddress,
           securityId.value,
         ),
-      ).rejects.toThrow(InvalidVCHolder);
+      ).rejects.toThrow(InvalidVcHolder);
     });
   });
 

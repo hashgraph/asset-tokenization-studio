@@ -203,8 +203,9 @@
 
 */
 
-import ValidatedRequest from '../../../validation/ValidatedRequest.js';
-import Validation from '../../../validation/Validation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+
+import FormatValidation from '../../../FormatValidation.js';
 
 export default class GetControlListMembersRequest extends ValidatedRequest<GetControlListMembersRequest> {
   securityId: string;
@@ -221,7 +222,7 @@ export default class GetControlListMembersRequest extends ValidatedRequest<GetCo
     end: number;
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
     this.securityId = securityId;
     this.start = start;

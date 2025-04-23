@@ -203,12 +203,15 @@
 
 */
 
+import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
 import BigDecimal from '../shared/BigDecimal.js';
+import { SecurityDate } from '../shared/SecurityDate.js';
 
-export class Coupon {
+export class Coupon extends ValidatedDomain<Coupon> {
   recordTimeStamp: number;
   executionTimeStamp: number;
   rate: BigDecimal;
+
   snapshotId?: number;
 
   constructor(
@@ -217,9 +220,17 @@ export class Coupon {
     rate: BigDecimal,
     snapshotId?: number,
   ) {
+    super({
+      executionTimeStamp: (val) => {
+        return SecurityDate.checkDateTimestamp(val, this.recordTimeStamp);
+      },
+    });
+
     this.recordTimeStamp = recordTimeStamp;
     this.executionTimeStamp = executionTimeStamp;
     this.rate = rate;
     this.snapshotId = snapshotId ? snapshotId : undefined;
+
+    ValidatedDomain.handleValidation(Coupon.name, this);
   }
 }

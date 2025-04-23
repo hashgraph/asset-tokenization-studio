@@ -213,7 +213,7 @@ import {
   GetExternalControlListsCountQueryResponse,
 } from './GetExternalControlListsCountQuery.js';
 import { GetExternalControlListsCountQueryHandler } from './GetExternalControlListsCountQueryHandler.js';
-import SecurityService from '../../../../../../app/service/SecurityService.js';
+import SecurityService from '../../../../../../app/service/security/SecurityService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { Security } from '../../../../../../domain/context/security/Security.js';
 import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';

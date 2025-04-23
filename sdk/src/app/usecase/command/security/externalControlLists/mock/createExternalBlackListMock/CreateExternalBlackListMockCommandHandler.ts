@@ -211,9 +211,9 @@ import {
 } from './CreateExternalBlackListMockCommand';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../service/TransactionService';
-import { InvalidResponse } from '../../../../../../../port/out/mirror/error/InvalidResponse';
-import { EmptyResponse } from '../../../error/EmptyResponse';
+import TransactionService from '../../../../../../service/transaction/TransactionService';
+import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
+import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
 
 @CommandHandler(CreateExternalBlackListMockCommand)
 export class CreateExternalBlackListMockCommandHandler

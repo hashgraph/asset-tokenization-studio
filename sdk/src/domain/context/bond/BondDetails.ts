@@ -203,9 +203,11 @@
 
 */
 
+import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
 import BigDecimal from '../shared/BigDecimal.js';
+import { SecurityDate } from '../shared/SecurityDate.js';
 
-export class BondDetails {
+export class BondDetails extends ValidatedDomain<BondDetails> {
   currency: string;
   nominalValue: BigDecimal;
   startingDate: number;
@@ -217,9 +219,17 @@ export class BondDetails {
     startingDate: number,
     maturityDate: number,
   ) {
+    super({
+      maturityDate: (val) => {
+        return SecurityDate.checkDateTimestamp(val, this.startingDate);
+      },
+    });
+
     this.currency = currency;
     this.nominalValue = nominalValue;
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
+
+    ValidatedDomain.handleValidation(BondDetails.name, this);
   }
 }

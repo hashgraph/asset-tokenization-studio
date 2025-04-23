@@ -236,9 +236,9 @@ import {
   SDK,
   Security,
   TransferAndLockRequest,
-  GrantKYCRequest,
+  GrantKycRequest,
   AddIssuerRequest,
-  SSIManagement,
+  SsiManagement,
   Kyc,
   ClearingCreateHoldByPartitionRequest,
   GetClearedAmountForRequest,
@@ -503,15 +503,15 @@ describe('🧪 Security tests', () => {
       }),
     );
 
-    await SSIManagement.addIssuer(
+    await SsiManagement.addIssuer(
       new AddIssuerRequest({
         securityId: equity.evmDiamondAddress!,
         issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT as string,
       }),
     );
 
-    await Kyc.grantKYC(
-      new GrantKYCRequest({
+    await Kyc.grantKyc(
+      new GrantKycRequest({
         securityId: equity.evmDiamondAddress!,
         targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
         vcBase64: await createVcT3(
@@ -520,8 +520,8 @@ describe('🧪 Security tests', () => {
       }),
     );
 
-    await Kyc.grantKYC(
-      new GrantKYCRequest({
+    await Kyc.grantKyc(
+      new GrantKycRequest({
         securityId: equity.evmDiamondAddress!,
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
         vcBase64: await createVcT3(CLIENT_ACCOUNT_ECDSA.evmAddress!.toString()),
@@ -537,7 +537,7 @@ describe('🧪 Security tests', () => {
   }, 900_000);
 
   afterAll(async () => {
-    await SSIManagement.removeIssuer(
+    await SsiManagement.removeIssuer(
       new AddIssuerRequest({
         securityId: equity.evmDiamondAddress!,
         issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT as string,

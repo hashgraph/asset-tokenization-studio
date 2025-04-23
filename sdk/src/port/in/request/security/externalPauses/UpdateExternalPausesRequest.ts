@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../validation/ValidatedRequest.js';
-import Validation from '../../validation/Validation.js';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs';
+import FormatValidation from '../../FormatValidation';
 import { InvalidValue } from '../../error/InvalidValue.js';
 
 export default class UpdateExternalPausesRequest extends ValidatedRequest<UpdateExternalPausesRequest> {
@@ -222,9 +222,9 @@ export default class UpdateExternalPausesRequest extends ValidatedRequest<Update
     actives: boolean[];
   }) {
     super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       externalPausesAddresses: (vals) =>
-        Validation.checkHederaIdOrEvmAddressArray(
+        FormatValidation.checkHederaIdOrEvmAddressArray(
           vals,
           'externalPausesAddresses',
         ),

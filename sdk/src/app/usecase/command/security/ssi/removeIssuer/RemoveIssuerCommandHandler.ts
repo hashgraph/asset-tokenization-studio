@@ -210,7 +210,7 @@ import {
 } from './RemoveIssuerCommand';
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import TransactionService from '../../../../../service/TransactionService';
+import TransactionService from '../../../../../service/transaction/TransactionService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import AccountService from '../../../../../service/AccountService';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
