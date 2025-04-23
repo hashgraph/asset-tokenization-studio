@@ -216,8 +216,8 @@ import {
   UpdateMaturityDateCommand,
   UpdateMaturityDateCommandResponse,
 } from './UpdateMaturityDateCommand.js';
-import ContractService from '../../../../service/ContractService.js';
-import ValidationService from '../../../../service/ValidationService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
+import ValidationService from '../../../../service/validation/ValidationService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { UpdateMaturityDateCommandError } from './error/UpdateMaturityDateCommandError.js';
 import { ErrorCode } from '../../../../../core/error/BaseError.js';

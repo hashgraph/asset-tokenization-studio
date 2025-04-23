@@ -208,20 +208,20 @@ import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorato
 import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
 import { LockCountQueryError } from './error/LockCountQueryError.js';
 
 @QueryHandler(LockCountQuery)
 export class LockCountQueryHandler implements IQueryHandler<LockCountQuery> {
   constructor(
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: LockCountQuery): Promise<LockCountQueryResponse> {

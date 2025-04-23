@@ -209,16 +209,16 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { GetVotingQuery, GetVotingQueryResponse } from './GetVotingQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import { GetVotingQueryError } from './error/GetVotingQueryError.js';
 
 @QueryHandler(GetVotingQuery)
 export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetVotingQuery): Promise<GetVotingQueryResponse> {

@@ -205,23 +205,23 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
-import ValidationService from '../../../../../service/ValidationService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
 import { ReleaseCommand, ReleaseCommandResponse } from './ReleaseCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import { ReleaseCommandError } from './error/ReleaseCommandError.js';
 
 @CommandHandler(ReleaseCommand)
 export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
   constructor(
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(ContractService)

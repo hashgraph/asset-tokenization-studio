@@ -204,110 +204,255 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import UpdateConfigVersionRequest from './request/management/UpdateConfigVersionRequest';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs';
-import { UpdateConfigVersionCommand } from '../../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
-import { QueryBus } from '../../core/query/QueryBus';
-import Injectable from '../../core/Injectable';
-import { CommandBus } from '../../core/command/CommandBus';
-import { GetConfigInfoRequest } from './request';
-import UpdateResolverRequest from './request/management/UpdateResolverRequest';
-import { UpdateResolverCommand } from '../../app/usecase/command/management/updateResolver/updateResolverCommand';
-import ContractId from '../../domain/context/contract/ContractId.js';
-import { GetConfigInfoQuery } from '../../app/usecase/query/management/GetConfigInfoQuery';
-import ConfigInfoViewModel from './response/ConfigInfoViewModel';
-import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter';
-import { lazyInject } from '../../core/decorator/LazyInjectDecorator';
-import { UpdateConfigRequest } from './request';
-import { UpdateConfigCommand } from '../../app/usecase/command/management/updateConfig/updateConfigCommand';
+import Injectable from '../../../core/Injectable.js';
+import { CommandBus } from '../../../core/command/CommandBus.js';
+import {
+  InitializationData,
+  NetworkData,
+} from '../../out/TransactionAdapter.js';
+import { ConnectCommand } from '../../../app/usecase/command/network/connect/ConnectCommand.js';
+import ConnectRequest, {
+  AWSKMSConfigRequest,
+  DFNSConfigRequest,
+  FireblocksConfigRequest,
+  SupportedWallets,
+} from '../request/network/ConnectRequest.js';
+import RequestMapper from '../request/mapping/RequestMapper.js';
+import TransactionService from '../../../app/service/transaction/TransactionService.js';
+import NetworkService from '../../../app/service/network/NetworkService.js';
+import SetNetworkRequest from '../request/network/SetNetworkRequest.js';
+import { SetNetworkCommand } from '../../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
+import { SetConfigurationCommand } from '../../../app/usecase/command/network/setConfiguration/SetConfigurationCommand.js';
+import {
+  Environment,
+  unrecognized,
+} from '../../../domain/context/network/Environment.js';
+import InitializationRequest from '../request/network/InitializationRequest.js';
+import Event from '../event/Event.js';
+import { RPCTransactionAdapter } from '../../out/rpc/RPCTransactionAdapter.js';
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+import SetConfigurationRequest from '../request/management/SetConfigurationRequest.js';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
-interface IManagementInPort {
-  updateConfigVersion(
-    request: UpdateConfigVersionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  updateConfig(
-    request: UpdateConfigRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
+import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
+import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay.js';
+import { HederaWalletConnectTransactionAdapter } from '../../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.js';
+import { DFNSTransactionAdapter } from '../../out/hs/hts/custodial/DFNSTransactionAdapter.js';
+import DfnsSettings from '../../../core/settings/custodialWalletSettings/DfnsSettings.js';
+import { FireblocksTransactionAdapter } from '../../out/hs/hts/custodial/FireblocksTransactionAdapter.js';
+import FireblocksSettings from '../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
+import { AWSKMSTransactionAdapter } from '../../out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
+import LogService from '../../../app/service/log/LogService.js';
 
-  getConfigInfo(request: GetConfigInfoRequest): Promise<ConfigInfoViewModel>;
-  updateResolver(
-    request: UpdateResolverRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
+export { InitializationData, NetworkData, SupportedWallets };
+
+export type NetworkResponse = {
+  environment: Environment;
+  mirrorNode: MirrorNode;
+  rpcNode: JsonRpcRelay;
+  consensusNodes: string;
+};
+
+export type ConfigResponse = {
+  factoryAddress: string;
+  resolverAddress: string;
+};
+
+interface INetworkInPort {
+  connect(req: ConnectRequest): Promise<InitializationData>;
+  disconnect(): Promise<boolean>;
+  setNetwork(req: SetNetworkRequest): Promise<NetworkResponse>;
+  setConfig(req: SetConfigurationRequest): Promise<ConfigResponse>;
+  getFactoryAddress(): string;
+  getResolverAddress(): string;
+  getNetwork(): string;
+  isNetworkRecognized(): boolean;
 }
 
-class ManagementInPort implements IManagementInPort {
+class NetworkInPort implements INetworkInPort {
   constructor(
     private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
-      MirrorNodeAdapter,
+    private readonly transactionService: TransactionService = Injectable.resolve(
+      TransactionService,
+    ),
+    private readonly networkService: NetworkService = Injectable.resolve(
+      NetworkService,
     ),
   ) {}
 
   @LogError
-  async updateConfigVersion(
-    request: UpdateConfigVersionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configVersion, securityId } = request;
-    ValidatedRequest.handleValidation('UpdateConfigVersionRequest', request);
+  async setConfig(req: SetConfigurationRequest): Promise<ConfigResponse> {
+    ValidatedRequest.handleValidation('SetConfigurationRequest', req);
 
-    return await this.commandBus.execute(
-      new UpdateConfigVersionCommand(configVersion, securityId),
+    const res = await this.commandBus.execute(
+      new SetConfigurationCommand(req.factoryAddress, req.resolverAddress),
     );
+    return res;
   }
 
   @LogError
-  async updateConfig(
-    request: UpdateConfigRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configId, configVersion, securityId } = request;
-    ValidatedRequest.handleValidation('UpdateConfigRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateConfigCommand(configId, configVersion, securityId),
-    );
+  public getFactoryAddress(): string {
+    return this.networkService.configuration
+      ? this.networkService.configuration.factoryAddress
+      : '';
   }
 
   @LogError
-  async updateResolver(
-    request: UpdateResolverRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configId, securityId, resolver, configVersion } = request;
-    ValidatedRequest.handleValidation('UpdateResolverRequest', request);
+  public getResolverAddress(): string {
+    return this.networkService.configuration
+      ? this.networkService.configuration.resolverAddress
+      : '';
+  }
 
-    return await this.commandBus.execute(
-      new UpdateResolverCommand(
-        configVersion,
-        securityId,
-        configId,
-        new ContractId(resolver),
+  @LogError
+  public getNetwork(): string {
+    return this.networkService.environment;
+  }
+
+  @LogError
+  public isNetworkRecognized(): boolean {
+    return this.networkService.environment != unrecognized;
+  }
+
+  @LogError
+  async setNetwork(req: SetNetworkRequest): Promise<NetworkResponse> {
+    ValidatedRequest.handleValidation('SetNetworkRequest', req);
+
+    const res = await this.commandBus.execute(
+      new SetNetworkCommand(
+        req.environment,
+        req.mirrorNode,
+        req.rpcNode,
+        req.consensusNodes,
       ),
     );
+    return res;
   }
 
   @LogError
-  async getConfigInfo(
-    request: GetConfigInfoRequest,
-  ): Promise<ConfigInfoViewModel> {
-    ValidatedRequest.handleValidation('GetConfigInfoRequest', request);
+  async init(req: InitializationRequest): Promise<SupportedWallets[]> {
+    ValidatedRequest.handleValidation('InitializationRequest', req);
 
-    const { payload } = await this.queryBus.execute(
-      new GetConfigInfoQuery(request.securityId),
+    await this.setNetwork(
+      new SetNetworkRequest({
+        environment: req.network,
+        mirrorNode: req.mirrorNode,
+        rpcNode: req.rpcNode,
+      }),
     );
-    const { resolverAddress, configId, configVersion } = payload;
 
-    const resolverId = (await this.mirrorNode.getContractInfo(resolverAddress))
-      .id;
+    if (req.configuration)
+      if (req.configuration.factoryAddress && req.configuration.resolverAddress)
+        await this.setConfig(
+          new SetConfigurationRequest({
+            factoryAddress: req.configuration.factoryAddress,
+            resolverAddress: req.configuration.resolverAddress,
+          }),
+        );
 
-    return {
-      resolverAddress: resolverId,
-      configId,
-      configVersion,
-    };
+    req.events && Event.register(req.events);
+    const wallets: SupportedWallets[] = [];
+    const instances = Injectable.registerTransactionAdapterInstances();
+    for (const val of instances) {
+      if (val instanceof RPCTransactionAdapter) {
+        wallets.push(SupportedWallets.METAMASK);
+      } else if (val instanceof HederaWalletConnectTransactionAdapter) {
+        wallets.push(SupportedWallets.HWALLETCONNECT);
+      } else if (val instanceof DFNSTransactionAdapter) {
+        wallets.push(SupportedWallets.DFNS);
+      } else if (val instanceof FireblocksTransactionAdapter) {
+        wallets.push(SupportedWallets.FIREBLOCKS);
+      } else if (val instanceof AWSKMSTransactionAdapter) {
+        wallets.push(SupportedWallets.AWSKMS);
+      }
+      await val.init();
+
+      if (val instanceof RPCTransactionAdapter) {
+        val.setMirrorNodes(req.mirrorNodes);
+        val.setJsonRpcRelays(req.jsonRpcRelays);
+        val.setFactories(req.factories);
+        val.setResolvers(req.resolvers);
+      }
+    }
+    return wallets;
+  }
+
+  @LogError
+  async connect(req: ConnectRequest): Promise<InitializationData> {
+    LogService.logInfo('ConnectRequest from network', req);
+    ValidatedRequest.handleValidation('ConnectRequest', req);
+
+    const account = req.account
+      ? RequestMapper.mapAccount(req.account)
+      : undefined;
+    const debug = req.debug ?? false;
+    const hwcSettings = req.hwcSettings
+      ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings)
+      : undefined;
+    const custodialSettings = this.getCustodialSettings(req);
+    LogService.logTrace(
+      'SetNetworkCommand',
+      req.network,
+      req.mirrorNode,
+      req.rpcNode,
+    );
+    await this.commandBus.execute(
+      new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode),
+    );
+
+    LogService.logTrace(
+      'ConnectRequest',
+      req.wallet,
+      account,
+      hwcSettings,
+      debug,
+      custodialSettings,
+    );
+    const res = await this.commandBus.execute(
+      new ConnectCommand(
+        req.network,
+        req.wallet,
+        account,
+        hwcSettings,
+        debug,
+        custodialSettings,
+      ),
+    );
+    return res.payload;
+  }
+
+  private getCustodialSettings(
+    req: ConnectRequest,
+  ): DfnsSettings | FireblocksSettings | AWSKMSConfigRequest | undefined {
+    if (!req.custodialWalletSettings) {
+      return undefined;
+    }
+
+    switch (req.wallet) {
+      case SupportedWallets.DFNS:
+        return RequestMapper.dfnsRequestToDfnsSettings(
+          req.custodialWalletSettings as DFNSConfigRequest,
+        );
+
+      case SupportedWallets.FIREBLOCKS:
+        return RequestMapper.fireblocksRequestToFireblocksSettings(
+          req.custodialWalletSettings as FireblocksConfigRequest,
+        );
+
+      case SupportedWallets.AWSKMS:
+        return RequestMapper.awsKmsRequestToAwsKmsSettings(
+          req.custodialWalletSettings as AWSKMSConfigRequest,
+        );
+
+      default:
+        return undefined;
+    }
+  }
+
+  disconnect(): Promise<boolean> {
+    return this.transactionService.getHandler().stop();
   }
 }
 
-const Management = new ManagementInPort();
-export default Management;
+const Network = new NetworkInPort();
+export default Network;

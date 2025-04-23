@@ -209,7 +209,7 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import Injectable from '../../../../../core/Injectable.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import NetworkService from '../../../../service/NetworkService.js';
+import NetworkService from '../../../../service/network/NetworkService.js';
 import { SetNetworkCommandError } from './error/SetNetworkCommandError.js';
 import {
   SetNetworkCommand,
@@ -222,9 +222,9 @@ export class SetNetworkCommandHandler
 {
   constructor(
     @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
+    private readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
   ) {}
 
   async execute(

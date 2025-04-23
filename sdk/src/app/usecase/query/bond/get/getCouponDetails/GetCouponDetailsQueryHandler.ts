@@ -211,7 +211,7 @@ import {
   GetCouponDetailsQuery,
   GetCouponDetailsQueryResponse,
 } from './GetCouponDetailsQuery.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { CouponDetails } from '../../../../../../domain/context/bond/CouponDetails.js';
 import { GetCouponDetailsQueryError } from './error/GetCouponDetailsQueryError.js';
@@ -222,9 +222,9 @@ export class GetCouponDetailsQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(

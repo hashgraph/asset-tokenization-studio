@@ -213,7 +213,7 @@ import {
   GetSecurityQueryResponse,
 } from './GetSecurityQuery.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../service/ContractService';
+import ContractService from '../../../../service/contract/ContractService';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import { GetSecurityQueryError } from './error/GetSecurityQueryError.js';
 
@@ -223,9 +223,9 @@ export class GetSecurityQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetSecurityQuery): Promise<GetSecurityQueryResponse> {

@@ -210,22 +210,22 @@ import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js'
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../service/security/SecurityService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
 import { BalanceOfQueryError } from './error/BalanceOfQueryError.js';
 
 @QueryHandler(BalanceOfQuery)
 export class BalanceOfQueryHandler implements IQueryHandler<BalanceOfQuery> {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(query: BalanceOfQuery): Promise<BalanceOfQueryResponse> {

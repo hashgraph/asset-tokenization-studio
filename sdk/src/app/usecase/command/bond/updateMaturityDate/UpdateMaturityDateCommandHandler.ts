@@ -179,8 +179,8 @@ import {
   UpdateMaturityDateCommand,
   UpdateMaturityDateCommandResponse,
 } from './UpdateMaturityDateCommand';
-import ContractService from '../../../../service/ContractService';
-import ValidationService from '../../../../service/ValidationService';
+import ContractService from '../../../../service/contract/ContractService';
+import ValidationService from '../../../../service/validation/ValidationService';
 import { UpdateMaturityDateCommandError } from './error/UpdateMaturityDateCommandError';
 
 @CommandHandler(UpdateMaturityDateCommand)
@@ -189,7 +189,7 @@ export class UpdateMaturityDateCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
     @lazyInject(ValidationService)

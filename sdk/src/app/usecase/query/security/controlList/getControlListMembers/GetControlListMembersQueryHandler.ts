@@ -211,7 +211,7 @@ import {
   GetControlListMembersQueryResponse,
 } from './GetControlListMembersQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { GetControlListMembersQueryError } from './error/GetControlListMembersQueryError.js';
 
@@ -221,9 +221,9 @@ export class GetControlListMembersQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(

@@ -212,7 +212,7 @@ import {
 } from './GetControlListTypeQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
 import { GetControlListTypeQueryError } from './error/GetControlListTypeQueryError.js';
 
@@ -222,9 +222,9 @@ export class GetControlListTypeQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(

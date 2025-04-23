@@ -207,7 +207,7 @@ import TransactionService from '../../../../service/transaction/TransactionServi
 import { CreateBondCommandHandler } from './CreateBondCommandHandler.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import { CreateBondCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
 import {
   CreateBondCommand,
@@ -221,7 +221,7 @@ import {
   HederaIdZeroAddressFixture,
   TransactionIdFixture,
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { CreateBondCommandError } from './error/CreateBondCommandError.js';
 import { ErrorCode } from '../../../../../core/error/BaseError.js';

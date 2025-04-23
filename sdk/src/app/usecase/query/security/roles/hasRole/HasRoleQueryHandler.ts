@@ -208,20 +208,20 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import { HasRoleQuery, HasRoleQueryResponse } from './HasRoleQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import AccountService from '../../../../../service/AccountService';
+import AccountService from '../../../../../service/account/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import { HasRoleQueryError } from './error/HasRoleQueryError.js';
 
 @QueryHandler(HasRoleQuery)
 export class HasRoleQueryHandler implements IQueryHandler<HasRoleQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: HasRoleQuery): Promise<HasRoleQueryResponse> {

@@ -218,7 +218,7 @@ export class GetAccountInfoQueryHandler
   implements IQueryHandler<GetAccountInfoQuery>
 {
   constructor(
-    public readonly repo: MirrorNodeAdapter = Injectable.resolve(
+    private readonly repo: MirrorNodeAdapter = Injectable.resolve(
       MirrorNodeAdapter,
     ),
   ) {}

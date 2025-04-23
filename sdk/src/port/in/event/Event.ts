@@ -203,178 +203,45 @@
 
 */
 
-import NetworkService from '../../app/service/NetworkService.js';
-import SecurityService from '../../app/service/security/SecurityService.js';
-import { GrantRoleCommand } from '../../app/usecase/command/security/roles/grantRole/GrantRoleCommand.js';
-import { RevokeRoleCommand } from '../../app/usecase/command/security/roles/revokeRole/RevokeRoleCommand.js';
-import { GetRoleCountForQuery } from '../../app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery.js';
-import { GetRoleMemberCountQuery } from '../../app/usecase/query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery.js';
-import { GetRoleMembersQuery } from '../../app/usecase/query/security/roles/getRoleMembers/GetRoleMembersQuery.js';
-import { GetRolesForQuery } from '../../app/usecase/query/security/roles/getRolesFor/GetRolesForQuery.js';
-import { HasRoleQuery } from '../../app/usecase/query/security/roles/hasRole/HasRoleQuery.js';
-import Injectable from '../../core/Injectable.js';
-import { CommandBus } from '../../core/command/CommandBus.js';
-import { lazyInject } from '../../core/decorator/LazyInjectDecorator.js';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import Injectable from '../../../core/Injectable.js';
+import NetworkService from '../../../app/service/network/NetworkService.js';
+import WalletEvent, {
+  ConnectionState,
+  WalletEvents,
+} from '../../../app/service/event/WalletEvent.js';
+import EventService from '../../../app/service/event/EventService.js';
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
 
-import GetRoleCountForRequest from './request/security/roles/GetRoleCountForRequest.js';
-import GetRoleMemberCountRequest from './request/security/roles/GetRoleMemberCountRequest.js';
-import GetRoleMembersRequest from './request/security/roles/GetRoleMembersRequest.js';
-import GetRolesForRequest from './request/security/roles/GetRolesForRequest.js';
-import RoleRequest from './request/security/roles/RoleRequest.js';
-import ApplyRolesRequest from './request/security/roles/ApplyRolesRequest.js';
-import { ApplyRolesCommand } from '../../app/usecase/command/security/roles/applyRoles/ApplyRolesCommand.js';
+export { WalletEvent, WalletEvents, ConnectionState };
 
-interface IRole {
-  hasRole(request: RoleRequest): Promise<boolean>;
-  grantRole(
-    request: RoleRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  revokeRole(
-    request: RoleRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  getRoleCountFor(request: GetRoleCountForRequest): Promise<number>;
-  getRolesFor(request: GetRolesForRequest): Promise<string[]>;
-  getRoleMemberCount(request: GetRoleMemberCountRequest): Promise<number>;
-  getRoleMembers(request: GetRoleMembersRequest): Promise<string[]>;
-  applyRoles(
-    request: ApplyRolesRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
+export type EventParameter<T extends keyof WalletEvent> = Parameters<
+  WalletEvent[T]
+>[0];
+
+interface EventInPortBase {
+  register(events: Partial<WalletEvent>): void;
 }
 
-class RoleInPort implements IRole {
+class EventInPort implements EventInPortBase {
   constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly securityService: SecurityService = Injectable.resolve(
-      SecurityService,
-    ),
-    private readonly networkService: NetworkService = Injectable.resolve(
+    private readonly networkService: NetworkService = Injectable.resolve<NetworkService>(
       NetworkService,
     ),
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
-      MirrorNodeAdapter,
+    private readonly eventService: EventService = Injectable.resolve(
+      EventService,
     ),
   ) {}
 
   @LogError
-  async hasRole(request: RoleRequest): Promise<boolean> {
-    const { securityId, targetId, role } = request;
-    ValidatedRequest.handleValidation('RoleRequest', request);
-    return (
-      await this.queryBus.execute(new HasRoleQuery(role!, targetId, securityId))
-    ).payload;
-  }
-
-  @LogError
-  async grantRole(
-    request: RoleRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, targetId, role } = request;
-    ValidatedRequest.handleValidation('RoleRequest', request);
-
-    return await this.commandBus.execute(
-      new GrantRoleCommand(role!, targetId, securityId),
-    );
-  }
-
-  @LogError
-  async revokeRole(
-    request: RoleRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, targetId, role } = request;
-    ValidatedRequest.handleValidation('RoleRequest', request);
-
-    return await this.commandBus.execute(
-      new RevokeRoleCommand(role!, targetId, securityId),
-    );
-  }
-
-  @LogError
-  async getRoleCountFor(request: GetRoleCountForRequest): Promise<number> {
-    ValidatedRequest.handleValidation('GetRoleCountForRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetRoleCountForQuery(request.targetId, request.securityId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getRolesFor(request: GetRolesForRequest): Promise<string[]> {
-    ValidatedRequest.handleValidation('GetRolesForRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetRolesForQuery(
-          request.targetId,
-          request.securityId,
-          request.start,
-          request.end,
-        ),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getRoleMemberCount(
-    request: GetRoleMemberCountRequest,
-  ): Promise<number> {
-    ValidatedRequest.handleValidation('GetRoleMemberCountRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetRoleMemberCountQuery(request.role!, request.securityId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getRoleMembers(request: GetRoleMembersRequest): Promise<string[]> {
-    ValidatedRequest.handleValidation('GetRoleMembersRequest', request);
-
-    const membersIds: string[] = [];
-
-    const membersEvmAddresses = (
-      await this.queryBus.execute(
-        new GetRoleMembersQuery(
-          request.role!,
-          request.securityId,
-          request.start,
-          request.end,
-        ),
-      )
-    ).payload;
-
-    let mirrorAccount;
-
-    for (let i = 0; i < membersEvmAddresses.length; i++) {
-      mirrorAccount = await this.mirrorNode.getAccountInfo(
-        membersEvmAddresses[i],
-      );
-      membersIds.push(mirrorAccount.id.toString());
-    }
-
-    return membersIds;
-  }
-
-  @LogError
-  async applyRoles(
-    request: ApplyRolesRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, targetId, roles, actives } = request;
-    ValidatedRequest.handleValidation('ApplyRolesRequest', request);
-
-    return await this.commandBus.execute(
-      new ApplyRolesCommand(roles, actives, targetId, securityId),
-    );
+  register(events: Partial<WalletEvent>): void {
+    Object.entries(events).map(([name, cll]) => {
+      if (name in WalletEvents) {
+        this.eventService.on(name as keyof WalletEvent, cll);
+      }
+    });
   }
 }
 
-const Role = new RoleInPort();
-export default Role;
+const Event = new EventInPort();
+export default Event;

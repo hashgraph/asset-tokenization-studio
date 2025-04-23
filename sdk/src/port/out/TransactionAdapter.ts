@@ -211,7 +211,7 @@ import Account from '../../domain/context/account/Account.js';
 import { HederaId } from '../../domain/context/shared/HederaId.js';
 import { MirrorNodeAdapter } from './mirror/MirrorNodeAdapter.js';
 import { Environment } from '../../domain/context/network/Environment.js';
-import LogService from '../../app/service/LogService.js';
+import LogService from '../../app/service/log/LogService.js';
 import { Security } from '../../domain/context/security/Security.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../domain/context/bond/BondDetails.js';

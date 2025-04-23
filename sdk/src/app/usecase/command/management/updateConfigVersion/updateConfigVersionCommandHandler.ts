@@ -212,7 +212,7 @@ import { ICommandHandler } from '../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../service/transaction/TransactionService';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
-import ContractService from '../../../../service/ContractService';
+import ContractService from '../../../../service/contract/ContractService';
 import { UpdateConfigVersionCommandError } from './error/UpdateConfigVersionCommandError';
 
 @CommandHandler(UpdateConfigVersionCommand)
@@ -221,7 +221,7 @@ export class UpdateConfigVersionCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
   ) {}

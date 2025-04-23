@@ -212,9 +212,9 @@ import {
 } from './GetCouponForQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import { GetCouponForQueryError } from './error/GetCouponForQueryError.js';
 
 @QueryHandler(GetCouponForQuery)
@@ -223,11 +223,11 @@ export class GetCouponForQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetCouponForQuery): Promise<GetCouponForQueryResponse> {

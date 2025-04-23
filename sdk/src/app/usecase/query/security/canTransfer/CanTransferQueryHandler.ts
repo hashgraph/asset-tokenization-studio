@@ -212,12 +212,12 @@ import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../service/security/SecurityService.js';
-import ValidationService from '../../../../service/ValidationService.js';
+import ValidationService from '../../../../service/validation/ValidationService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import { EMPTY_BYTES } from '../../../../../core/Constants.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
 import { CanTransferQueryError } from './error/CanTransferQueryError.js';
 
 @QueryHandler(CanTransferQuery)
@@ -226,15 +226,15 @@ export class CanTransferQueryHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: CanTransferQuery): Promise<CanTransferQueryResponse> {

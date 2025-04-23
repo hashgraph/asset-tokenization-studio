@@ -204,26 +204,26 @@
   */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
-import { QueryBus } from '../../core/query/QueryBus';
-import Injectable from '../../core/Injectable';
-import { CommandBus } from '../../core/command/CommandBus';
-import GrantKycRequest from './request/security/kyc/GrantKycRequest.js';
-import RevokeKycRequest from './request/security/kyc/RevokeKycRequest.js';
-import GetKycAccountsCountRequest from './request/security/kyc/GetKycAccountsCountRequest.js';
-import GetKycForRequest from './request/security/kyc/GetKycForRequest.js';
-import { GrantKycCommand } from '../../app/usecase/command/security/kyc/grantKyc/GrantKycCommand.js';
-import { RevokeKycCommand } from '../../app/usecase/command/security/kyc/revokeKyc/RevokeKycCommand.js';
-import { GetKycForQuery } from '../../app/usecase/query/security/kyc/getKycFor/GetKycForQuery.js';
-import { GetKycAccountsCountQuery } from '../../app/usecase/query/security/kyc/getKycAccountsCount/GetKycAccountsCountQuery.js';
-import { GetKycAccountsDataQuery } from '../../app/usecase/query/security/kyc/getKycAccountsData/GetKycAccountsDataQuery.js';
-import KycViewModel from './response/KycViewModel.js';
-import KycAccountDataViewModel from './response/KycAccountDataViewModel.js';
-import GetKycAccountsDataRequest from './request/security/kyc/GetKycAccountsDataRequest.js';
-import GetKycStatusForRequest from './request/security/kyc/GetKycStatusForRequest.js';
-import { GetKycStatusForQuery } from '../../app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery.js';
+import { QueryBus } from '../../../core/query/QueryBus';
+import Injectable from '../../../core/Injectable';
+import { CommandBus } from '../../../core/command/CommandBus';
+import GrantKycRequest from '../request/security/kyc/GrantKycRequest.js';
+import RevokeKycRequest from '../request/security/kyc/RevokeKycRequest.js';
+import GetKycAccountsCountRequest from '../request/security/kyc/GetKycAccountsCountRequest.js';
+import GetKycForRequest from '../request/security/kyc/GetKycForRequest.js';
+import { GrantKycCommand } from '../../../app/usecase/command/security/kyc/grantKyc/GrantKycCommand.js';
+import { RevokeKycCommand } from '../../../app/usecase/command/security/kyc/revokeKyc/RevokeKycCommand.js';
+import { GetKycForQuery } from '../../../app/usecase/query/security/kyc/getKycFor/GetKycForQuery.js';
+import { GetKycAccountsCountQuery } from '../../../app/usecase/query/security/kyc/getKycAccountsCount/GetKycAccountsCountQuery.js';
+import { GetKycAccountsDataQuery } from '../../../app/usecase/query/security/kyc/getKycAccountsData/GetKycAccountsDataQuery.js';
+import KycViewModel from '../response/KycViewModel.js';
+import KycAccountDataViewModel from '../response/KycAccountDataViewModel.js';
+import GetKycAccountsDataRequest from '../request/security/kyc/GetKycAccountsDataRequest.js';
+import GetKycStatusForRequest from '../request/security/kyc/GetKycStatusForRequest.js';
+import { GetKycStatusForQuery } from '../../../app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery.js';
 
 interface IKycInPort {
   grantKyc(

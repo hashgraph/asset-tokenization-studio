@@ -211,7 +211,7 @@ import { singleton } from 'tsyringe';
 import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
 import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
 import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
-import LogService from '../../../../../app/service/LogService';
+import LogService from '../../../../../app/service/log/LogService';
 import DfnsSettings from '../../../../../core/settings/custodialWalletSettings/DfnsSettings';
 
 @singleton()

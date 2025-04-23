@@ -212,7 +212,7 @@ import {
   IsClearingActivatedQuery,
   IsClearingActivatedQueryResponse,
 } from './IsClearingActivatedQuery';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 import { IsClearingActivatedQueryError } from './error/IsClearingActivatedQueryError';
 
 @QueryHandler(IsClearingActivatedQuery)
@@ -221,9 +221,9 @@ export class IsClearingActivatedQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(

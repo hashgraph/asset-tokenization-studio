@@ -213,7 +213,7 @@ import {
   GetRegulationDetailsQueryResponse,
 } from './GetRegulationDetailsQuery.js';
 import { Regulation } from '../../../../../domain/context/factory/Regulation.js';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import { InvalidRequest } from '../../error/InvalidRequest.js';
 import { GetRegulationDetailsQueryError } from './error/GetRegulationDetailsQueryError.js';
 
@@ -223,9 +223,9 @@ export class GetRegulationDetailsQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(

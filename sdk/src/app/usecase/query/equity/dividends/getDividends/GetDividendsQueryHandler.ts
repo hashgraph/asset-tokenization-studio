@@ -212,7 +212,7 @@ import {
   GetDividendsQuery,
   GetDividendsQueryResponse,
 } from './GetDividendsQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import { GetDividendsQueryError } from './error/GetDividendsQueryError.js';
 
 @QueryHandler(GetDividendsQuery)
@@ -221,9 +221,9 @@ export class GetDividendsQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetDividendsQuery): Promise<GetDividendsQueryResponse> {

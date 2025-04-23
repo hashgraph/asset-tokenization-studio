@@ -212,9 +212,9 @@ import {
   ApplyRolesCommand,
   ApplyRolesCommandResponse,
 } from './ApplyRolesCommand.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import AccountService from '../../../../../service/AccountService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import { ApplyRolesCommandError } from './error/ApplyRolesCommandError.js';
 
 @CommandHandler(ApplyRolesCommand)
@@ -223,7 +223,7 @@ export class ApplyRolesCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(AccountService)

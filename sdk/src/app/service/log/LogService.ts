@@ -203,53 +203,95 @@
 
 */
 
-import AccountViewModel from './response/AccountViewModel.js';
-import GetAccountInfoRequest from './request/account/GetAccountInfoRequest.js';
-import GetAccountBalanceRequest from './request/account/GetAccountBalanceRequest.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createLogger, LoggerOptions, transports, format } from 'winston';
+import safeStringify from 'fast-safe-stringify';
+import BaseError from '../../../core/error/BaseError.js';
+//import { SDK } from '../../port/in/Common.js';
+//import Injectable from '../../core/Injectable.js';
 
-import { GetAccountInfoQuery } from '../../app/usecase/query/account/info/GetAccountInfoQuery.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import Injectable from '../../core/Injectable.js';
-import { HederaId } from '../../domain/context/shared/HederaId.js';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { GetAccountBalanceQuery } from '../../app/usecase/query/account/balance/GetAccountBalanceQuery.js';
-import BigDecimal from '../../domain/context/shared/BigDecimal.js';
+const { Console } = transports;
+const { printf } = format;
 
-interface IAccountInPort {
-  getInfo(request: GetAccountInfoRequest): Promise<AccountViewModel>;
+export enum LogLevel {
+  TRACE = 'TRACE',
+  INFO = 'INFO',
+  ERROR = 'ERROR',
 }
 
-class AccountInPort implements IAccountInPort {
-  constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-  ) {}
+export const LoggerOptionLevels = {
+  [LogLevel.TRACE]: 3,
+  [LogLevel.INFO]: 2,
+  [LogLevel.ERROR]: 0,
+};
 
-  @LogError
-  async getInfo(request: GetAccountInfoRequest): Promise<AccountViewModel> {
-    ValidatedRequest.handleValidation('GetAccountInfoRequest', request);
-    const res = await this.queryBus.execute(
-      new GetAccountInfoQuery(HederaId.from(request.account.accountId)),
-    );
-    const account: AccountViewModel = {
-      id: res.account.id.toString(),
-      accountEvmAddress: res.account.evmAddress,
-      publicKey: res.account.publicKey ? res.account.publicKey : undefined,
-      alias: res.account.alias,
-    };
+export default class LogService {
+  public static instance: LogService = new LogService();
+  public static defaultFormat = printf(
+    ({ level, message, timestamp, other }) => {
+      const formatOther = (val: any[]): string => {
+        return val
+          .map((e) => {
+            switch (typeof e) {
+              case 'object':
+                return safeStringify(e);
+              default:
+                return e;
+            }
+          })
+          .join('\t');
+      };
+      return `${timestamp} - [${level}]\t${message}\t${formatOther(other as any[])}`;
+    },
+  );
 
-    return account;
+  private logger;
+  private readonly coreConfig: LoggerOptions = {
+    levels: LoggerOptionLevels,
+    exitOnError: false,
+  };
+  private readonly defaultConfig: LoggerOptions = {
+    transports: new Console(),
+    level: LogLevel.ERROR,
+    format: LogService.defaultFormat,
+  };
+
+  constructor(opts?: LoggerOptions) {
+    LogService.instance = this;
+    this.logger = createLogger({
+      ...(opts ? { ...this.defaultConfig, ...opts } : this.defaultConfig),
+      ...this.coreConfig,
+    });
   }
 
-  @LogError
-  async getBalance(request: GetAccountBalanceRequest): Promise<BigDecimal> {
-    ValidatedRequest.handleValidation('GetAccountBalanceRequest', request);
-    const res = await this.queryBus.execute(
-      new GetAccountBalanceQuery(request.securityId, request.targetId),
-    );
-    return res.payload;
+  public static log(level: LogLevel, message: any, params: any[]): void {
+    this.instance.logger.log(level, message, {
+      timestamp: new Date().toISOString(),
+      other: params,
+    });
+  }
+
+  public static logError(error: unknown, ...params: any[]): void;
+  public static logError(error: BaseError, ...params: any[]): void {
+    if (error instanceof BaseError) {
+      this.log(
+        LogLevel.ERROR,
+        error
+          .toString
+          //Injectable.resolve<typeof SDK>('SDK').log.level === 'TRACE',
+          (),
+        params,
+      );
+    } else {
+      this.log(LogLevel.ERROR, error, params);
+    }
+  }
+
+  public static logInfo(message: any, ...params: any[]): void {
+    this.log(LogLevel.INFO, message, params);
+  }
+
+  public static logTrace(message: any, ...params: any[]): void {
+    this.log(LogLevel.TRACE, message, params);
   }
 }
-
-const Account = new AccountInPort();
-export default Account;

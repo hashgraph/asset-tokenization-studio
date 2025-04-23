@@ -203,143 +203,178 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import Injectable from '../../core/Injectable.js';
-import { CommandBus } from '../../core/command/CommandBus.js';
-import IsIssuerRequest from './request/security/operations/issue/IsIssuerRequest.js';
-import { IsIssuerQuery } from '../../app/usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
-import { AddIssuerCommand } from '../../app/usecase/command/security/ssi/addIssuer/AddIssuerCommand.js';
-import { SetRevocationRegistryAddressCommand } from '../../app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand.js';
-import { RemoveIssuerCommand } from '../../app/usecase/command/security/ssi/removeIssuer/RemoveIssuerCommand.js';
-import SetRevocationRegistryAddressRequest from './request/security/ssi/SetRevocationRegistryAddressRequest.js';
-import AddIssuerRequest from './request/security/ssi/AddIssuerRequest.js';
-import RemoveIssuerRequest from './request/security/operations/issue/RemoveIssuerRequest.js';
-import GetRevocationRegistryAddressRequest from './request/security/ssi/GetRevocationRegistryAddressRequest.js';
-import GetIssuerListCountRequest from './request/security/ssi/GetIssuerListCountRequest.js';
-import GetIssuerListMembersRequest from './request/security/ssi/GetIssuerListMembersRequest.js';
-import { GetRevocationRegistryAddressQuery } from '../../app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery.js';
-import { GetIssuerListCountQuery } from '../../app/usecase/query/security/ssi/getIssuerListCount/GetIssuerListCountQuery.js';
-import { GetIssuerListMembersQuery } from '../../app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery.js';
+import NetworkService from '../../../app/service/network/NetworkService.js';
+import SecurityService from '../../../app/service/security/SecurityService.js';
+import { GrantRoleCommand } from '../../../app/usecase/command/security/roles/grantRole/GrantRoleCommand.js';
+import { RevokeRoleCommand } from '../../../app/usecase/command/security/roles/revokeRole/RevokeRoleCommand.js';
+import { GetRoleCountForQuery } from '../../../app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery.js';
+import { GetRoleMemberCountQuery } from '../../../app/usecase/query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery.js';
+import { GetRoleMembersQuery } from '../../../app/usecase/query/security/roles/getRoleMembers/GetRoleMembersQuery.js';
+import { GetRolesForQuery } from '../../../app/usecase/query/security/roles/getRolesFor/GetRolesForQuery.js';
+import { HasRoleQuery } from '../../../app/usecase/query/security/roles/hasRole/HasRoleQuery.js';
+import Injectable from '../../../core/Injectable.js';
+import { CommandBus } from '../../../core/command/CommandBus.js';
+import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import { MirrorNodeAdapter } from '../../out/mirror/MirrorNodeAdapter.js';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
-interface ISsiManagementInPort {
-  setRevocationRegistryAddress(
-    request: SetRevocationRegistryAddressRequest,
+import GetRoleCountForRequest from '../request/security/roles/GetRoleCountForRequest.js';
+import GetRoleMemberCountRequest from '../request/security/roles/GetRoleMemberCountRequest.js';
+import GetRoleMembersRequest from '../request/security/roles/GetRoleMembersRequest.js';
+import GetRolesForRequest from '../request/security/roles/GetRolesForRequest.js';
+import RoleRequest from '../request/security/roles/RoleRequest.js';
+import ApplyRolesRequest from '../request/security/roles/ApplyRolesRequest.js';
+import { ApplyRolesCommand } from '../../../app/usecase/command/security/roles/applyRoles/ApplyRolesCommand.js';
+
+interface IRole {
+  hasRole(request: RoleRequest): Promise<boolean>;
+  grantRole(
+    request: RoleRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
-  addIssuer(
-    request: AddIssuerRequest,
+  revokeRole(
+    request: RoleRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
-  removeIssuer(
-    request: RemoveIssuerRequest,
+  getRoleCountFor(request: GetRoleCountForRequest): Promise<number>;
+  getRolesFor(request: GetRolesForRequest): Promise<string[]>;
+  getRoleMemberCount(request: GetRoleMemberCountRequest): Promise<number>;
+  getRoleMembers(request: GetRoleMembersRequest): Promise<string[]>;
+  applyRoles(
+    request: ApplyRolesRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
-  getRevocationRegistryAddress(
-    request: GetRevocationRegistryAddressRequest,
-  ): Promise<string>;
-  getIssuerListCount(request: GetIssuerListCountRequest): Promise<number>;
-  getIssuerListMembers(request: GetIssuerListMembersRequest): Promise<string[]>;
-  isIssuer(request: IsIssuerRequest): Promise<boolean>;
 }
 
-class SsiManagementInPort implements ISsiManagementInPort {
+class RoleInPort implements IRole {
   constructor(
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
     private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
+    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+    private readonly securityService: SecurityService = Injectable.resolve(
+      SecurityService,
+    ),
+    private readonly networkService: NetworkService = Injectable.resolve(
+      NetworkService,
+    ),
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
+      MirrorNodeAdapter,
+    ),
   ) {}
 
   @LogError
-  async addIssuer(
-    request: AddIssuerRequest,
+  async hasRole(request: RoleRequest): Promise<boolean> {
+    const { securityId, targetId, role } = request;
+    ValidatedRequest.handleValidation('RoleRequest', request);
+    return (
+      await this.queryBus.execute(new HasRoleQuery(role!, targetId, securityId))
+    ).payload;
+  }
+
+  @LogError
+  async grantRole(
+    request: RoleRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, issuerId } = request;
-    ValidatedRequest.handleValidation('AddIssuerRequest', request);
+    const { securityId, targetId, role } = request;
+    ValidatedRequest.handleValidation('RoleRequest', request);
 
     return await this.commandBus.execute(
-      new AddIssuerCommand(securityId, issuerId),
+      new GrantRoleCommand(role!, targetId, securityId),
     );
   }
 
   @LogError
-  async setRevocationRegistryAddress(
-    request: SetRevocationRegistryAddressRequest,
+  async revokeRole(
+    request: RoleRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, revocationRegistryId } = request;
-    ValidatedRequest.handleValidation(
-      'SetRevocationRegistryAddressRequest',
-      request,
-    );
+    const { securityId, targetId, role } = request;
+    ValidatedRequest.handleValidation('RoleRequest', request);
 
     return await this.commandBus.execute(
-      new SetRevocationRegistryAddressCommand(securityId, revocationRegistryId),
+      new RevokeRoleCommand(role!, targetId, securityId),
     );
   }
 
   @LogError
-  async removeIssuer(
-    request: RemoveIssuerRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, issuerId } = request;
-    ValidatedRequest.handleValidation('RemoveIssuerRequest', request);
-
-    return await this.commandBus.execute(
-      new RemoveIssuerCommand(securityId, issuerId),
-    );
-  }
-
-  @LogError
-  async getRevocationRegistryAddress(
-    request: GetRevocationRegistryAddressRequest,
-  ): Promise<string> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation(
-      'GetRevocationRegistryAddressRequest',
-      request,
-    );
+  async getRoleCountFor(request: GetRoleCountForRequest): Promise<number> {
+    ValidatedRequest.handleValidation('GetRoleCountForRequest', request);
 
     return (
       await this.queryBus.execute(
-        new GetRevocationRegistryAddressQuery(securityId),
+        new GetRoleCountForQuery(request.targetId, request.securityId),
       )
     ).payload;
   }
 
   @LogError
-  async getIssuerListCount(
-    request: GetIssuerListCountRequest,
+  async getRolesFor(request: GetRolesForRequest): Promise<string[]> {
+    ValidatedRequest.handleValidation('GetRolesForRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetRolesForQuery(
+          request.targetId,
+          request.securityId,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getRoleMemberCount(
+    request: GetRoleMemberCountRequest,
   ): Promise<number> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation('GetIssuerListCountRequest', request);
-
-    return (
-      await this.queryBus.execute(new GetIssuerListCountQuery(securityId))
-    ).payload;
-  }
-
-  @LogError
-  async getIssuerListMembers(
-    request: GetIssuerListMembersRequest,
-  ): Promise<string[]> {
-    const { securityId, start, end } = request;
-    ValidatedRequest.handleValidation('GetIssuerListMembersRequest', request);
+    ValidatedRequest.handleValidation('GetRoleMemberCountRequest', request);
 
     return (
       await this.queryBus.execute(
-        new GetIssuerListMembersQuery(securityId, start, end),
+        new GetRoleMemberCountQuery(request.role!, request.securityId),
       )
     ).payload;
   }
 
   @LogError
-  async isIssuer(request: IsIssuerRequest): Promise<boolean> {
-    const { securityId, issuerId } = request;
-    ValidatedRequest.handleValidation('IsIssuerRequest', request);
+  async getRoleMembers(request: GetRoleMembersRequest): Promise<string[]> {
+    ValidatedRequest.handleValidation('GetRoleMembersRequest', request);
 
-    return (
-      await this.queryBus.execute(new IsIssuerQuery(securityId, issuerId))
+    const membersIds: string[] = [];
+
+    const membersEvmAddresses = (
+      await this.queryBus.execute(
+        new GetRoleMembersQuery(
+          request.role!,
+          request.securityId,
+          request.start,
+          request.end,
+        ),
+      )
     ).payload;
+
+    let mirrorAccount;
+
+    for (let i = 0; i < membersEvmAddresses.length; i++) {
+      mirrorAccount = await this.mirrorNode.getAccountInfo(
+        membersEvmAddresses[i],
+      );
+      membersIds.push(mirrorAccount.id.toString());
+    }
+
+    return membersIds;
+  }
+
+  @LogError
+  async applyRoles(
+    request: ApplyRolesRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, targetId, roles, actives } = request;
+    ValidatedRequest.handleValidation('ApplyRolesRequest', request);
+
+    return await this.commandBus.execute(
+      new ApplyRolesCommand(roles, actives, targetId, securityId),
+    );
   }
 }
 
-const SsiManagement = new SsiManagementInPort();
-export default SsiManagement;
+const Role = new RoleInPort();
+export default Role;

@@ -212,7 +212,7 @@ import {
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import { SetVotingRightsCommandError } from './error/SetVotingRightsCommandError.js';
 
 @CommandHandler(SetVotingRightsCommand)
@@ -221,9 +221,9 @@ export class SetVotingRightsCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(

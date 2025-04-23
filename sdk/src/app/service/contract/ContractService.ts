@@ -203,66 +203,40 @@
 
 */
 
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import {
-  AddToControlListCommand,
-  AddToControlListCommandResponse,
-} from './AddToControlListCommand.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import ContractService from '../../../../../service/ContractService.js';
-import { AddToControlListCommandError } from './error/AddToControlListCommandError.js';
+import { singleton } from 'tsyringe';
+import Injectable from '../../../core/Injectable.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import NetworkService from '../network/NetworkService.js';
+import Service from '../Service.js';
+import TransactionService from '../transaction/TransactionService.js';
+import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../domain/context/shared/HederaId.js';
+import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter.js';
+@singleton()
+export default class ContractService extends Service {
+  queryBus: QueryBus;
 
-@CommandHandler(AddToControlListCommand)
-export class AddToControlListCommandHandler
-  implements ICommandHandler<AddToControlListCommand>
-{
   constructor(
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(ContractService)
-    public readonly contractService: ContractService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-  ) {}
+    public readonly networkService: NetworkService = Injectable.resolve(
+      NetworkService,
+    ),
+    public readonly transactionService: TransactionService = Injectable.resolve(
+      TransactionService,
+    ),
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
+      MirrorNodeAdapter,
+    ),
+  ) {
+    super();
+  }
 
-  async execute(
-    command: AddToControlListCommand,
-  ): Promise<AddToControlListCommandResponse> {
-    try {
-      const { targetId, securityId } = command;
-      const handler = this.transactionService.getHandler();
+  async getContractEvmAddress(contractId: string): Promise<EvmAddress> {
+    const evmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(contractId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(contractId)).evmAddress
+        : contractId.toString(),
+    );
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
-
-      await this.validationService.checkPause(securityId);
-
-      await this.validationService.checkAccountInControlList(
-        securityId,
-        targetId,
-        true,
-      );
-
-      const res = await handler.addToControlList(
-        securityEvmAddress,
-        targetEvmAddress,
-        securityId,
-      );
-
-      return Promise.resolve(
-        new AddToControlListCommandResponse(res.error === undefined, res.id!),
-      );
-    } catch (error) {
-      throw new AddToControlListCommandError(error as Error);
-    }
+    return evmAddress;
   }
 }

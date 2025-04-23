@@ -209,19 +209,19 @@ import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../service/AccountService';
-import ContractService from '../../../../service/ContractService.js';
+import AccountService from '../../../../service/account/AccountService';
+import ContractService from '../../../../service/contract/ContractService.js';
 import { LocksIdQueryError } from './error/LocksIdQueryError.js';
 
 @QueryHandler(LocksIdQuery)
 export class LocksIdQueryHandler implements IQueryHandler<LocksIdQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: LocksIdQuery): Promise<LocksIdQueryResponse> {

@@ -214,12 +214,12 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
 import TransactionService from '../../../../service/transaction/TransactionService.js';
-import NetworkService from '../../../../service/NetworkService.js';
+import NetworkService from '../../../../service/network/NetworkService.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { EquityDetails } from '../../../../../domain/context/equity/EquityDetails.js';
-import ContractService from '../../../../service/ContractService.js';
-import AccountService from '../../../../service/AccountService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import { Response } from '../../../../../domain/context/transaction/Response';
 import { CreateEquityCommandError } from './error/CreateEquityCommandError.js';
@@ -230,15 +230,15 @@ export class CreateEquityCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
+    private readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(

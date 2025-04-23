@@ -203,54 +203,53 @@
 
 */
 
-import { QueryBus } from '../../core/query/QueryBus.js';
-import Injectable from '../../core/Injectable.js';
-import GetRegulationDetailsRequest from './request/factory/GetRegulationDetailsRequest.js';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import RegulationViewModel from './response/RegulationViewModel.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+import AccountViewModel from './../response/AccountViewModel.js';
+import GetAccountInfoRequest from './../request/account/GetAccountInfoRequest.js';
+import GetAccountBalanceRequest from './../request/account/GetAccountBalanceRequest.js';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
-import { GetRegulationDetailsQuery } from '../../app/usecase/query/factory/get/GetRegulationDetailsQuery.js';
-import ContractId from '../../domain/context/contract/ContractId.js';
-import NetworkService from '../../app/service/NetworkService.js';
+import { GetAccountInfoQuery } from '../../../app/usecase/query/account/info/GetAccountInfoQuery.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import Injectable from '../../../core/Injectable.js';
+import { HederaId } from '../../../domain/context/shared/HederaId.js';
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+import { GetAccountBalanceQuery } from '../../../app/usecase/query/account/balance/GetAccountBalanceQuery.js';
+import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
 
-interface IFactoryInPort {
-  getRegulationDetails(
-    request: GetRegulationDetailsRequest,
-  ): Promise<RegulationViewModel>;
+interface IAccountInPort {
+  getInfo(request: GetAccountInfoRequest): Promise<AccountViewModel>;
 }
 
-class FactoryInPort implements IFactoryInPort {
+class AccountInPort implements IAccountInPort {
   constructor(
     private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly networkService: NetworkService = Injectable.resolve(
-      NetworkService,
-    ),
   ) {}
 
   @LogError
-  async getRegulationDetails(
-    request: GetRegulationDetailsRequest,
-  ): Promise<RegulationViewModel> {
-    ValidatedRequest.handleValidation('GetRegulationDetailsRequest', request);
-
-    const securityFactory = this.networkService.configuration.factoryAddress;
-
+  async getInfo(request: GetAccountInfoRequest): Promise<AccountViewModel> {
+    ValidatedRequest.handleValidation('GetAccountInfoRequest', request);
     const res = await this.queryBus.execute(
-      new GetRegulationDetailsQuery(
-        request.regulationType,
-        request.regulationSubType,
-        securityFactory ? new ContractId(securityFactory) : undefined,
-      ),
+      new GetAccountInfoQuery(HederaId.from(request.account.accountId)),
     );
-
-    const regulation = res.regulation;
-
-    return {
-      ...regulation,
+    const account: AccountViewModel = {
+      id: res.account.id.toString(),
+      accountEvmAddress: res.account.evmAddress,
+      publicKey: res.account.publicKey ? res.account.publicKey : undefined,
+      alias: res.account.alias,
     };
+
+    return account;
+  }
+
+  @LogError
+  async getBalance(request: GetAccountBalanceRequest): Promise<BigDecimal> {
+    ValidatedRequest.handleValidation('GetAccountBalanceRequest', request);
+    const res = await this.queryBus.execute(
+      new GetAccountBalanceQuery(request.securityId, request.targetId),
+    );
+    return res.payload;
   }
 }
 
-const Factory = new FactoryInPort();
-export default Factory;
+const Account = new AccountInPort();
+export default Account;

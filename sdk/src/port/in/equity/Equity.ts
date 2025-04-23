@@ -203,65 +203,65 @@
 
 */
 
-import { SetDividendsCommand } from '../../app/usecase/command/equity/dividends/set/SetDividendsCommand.js';
-import { GetDividendsQuery } from '../../app/usecase/query/equity/dividends/getDividends/GetDividendsQuery.js';
-import { GetDividendsCountQuery } from '../../app/usecase/query/equity/dividends/getDividendsCount/GetDividendsCountQuery.js';
-import { GetDividendsForQuery } from '../../app/usecase/query/equity/dividends/getDividendsFor/GetDividendsForQuery.js';
-import { SetVotingRightsCommand } from '../../app/usecase/command/equity/votingRights/set/SetVotingRightsCommand.js';
-import { GetVotingQuery } from '../../app/usecase/query/equity/votingRights/getVoting/GetVotingQuery.js';
-import { GetVotingCountQuery } from '../../app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery.js';
-import { GetVotingForQuery } from '../../app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery.js';
-import { SetScheduledBalanceAdjustmentCommand } from '../../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand.js';
-import Injectable from '../../core/Injectable.js';
-import { CommandBus } from '../../core/command/CommandBus.js';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import { ONE_THOUSAND } from '../../domain/context/shared/SecurityDate.js';
-import ValidatedRequest from '../../core/validation/ValidatedArgs.js';
+import { SetDividendsCommand } from '../../../app/usecase/command/equity/dividends/set/SetDividendsCommand.js';
+import { GetDividendsQuery } from '../../../app/usecase/query/equity/dividends/getDividends/GetDividendsQuery.js';
+import { GetDividendsCountQuery } from '../../../app/usecase/query/equity/dividends/getDividendsCount/GetDividendsCountQuery.js';
+import { GetDividendsForQuery } from '../../../app/usecase/query/equity/dividends/getDividendsFor/GetDividendsForQuery.js';
+import { SetVotingRightsCommand } from '../../../app/usecase/command/equity/votingRights/set/SetVotingRightsCommand.js';
+import { GetVotingQuery } from '../../../app/usecase/query/equity/votingRights/getVoting/GetVotingQuery.js';
+import { GetVotingCountQuery } from '../../../app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery.js';
+import { GetVotingForQuery } from '../../../app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery.js';
+import { SetScheduledBalanceAdjustmentCommand } from '../../../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand.js';
+import Injectable from '../../../core/Injectable.js';
+import { CommandBus } from '../../../core/command/CommandBus.js';
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import { ONE_THOUSAND } from '../../../domain/context/shared/SecurityDate.js';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
-import GetDividendsForRequest from './request/equity/GetDividendsForRequest.js';
-import GetDividendsRequest from './request/equity/GetDividendsRequest.js';
-import GetAllDividendsRequest from './request/equity/GetAllDividendsRequest.js';
-import SetDividendsRequest from './request/equity/SetDividendsRequest.js';
-import DividendsForViewModel from './response/DividendsForViewModel.js';
-import DividendsViewModel from './response/DividendsViewModel.js';
-import SetVotingRightsRequest from './request/equity/SetVotingRightsRequest.js';
-import GetVotingRightsForRequest from './request/equity/GetVotingRightsForRequest.js';
-import GetVotingRightsRequest from './request/equity/GetVotingRightsRequest.js';
-import GetAllVotingRightsRequest from './request/equity/GetAllVotingRightsRequest.js';
-import VotingRightsForViewModel from './response/VotingRightsForViewModel.js';
-import VotingRightsViewModel from './response/VotingRightsViewModel.js';
-import CreateEquityRequest from './request/equity/CreateEquityRequest.js';
-import { SecurityViewModel } from './Security.js';
-import NetworkService from '../../app/service/NetworkService.js';
-import { SecurityProps } from '../../domain/context/security/Security.js';
-import { CreateEquityCommand } from '../../app/usecase/command/equity/create/CreateEquityCommand.js';
-import ContractId from '../../domain/context/contract/ContractId.js';
-import { GetSecurityQuery } from '../../app/usecase/query/security/get/GetSecurityQuery.js';
-import { CastDividendType } from '../../domain/context/equity/DividendType.js';
-import BigDecimal from '../../domain/context/shared/BigDecimal.js';
-import GetEquityDetailsRequest from './request/equity/GetEquityDetailsRequest.js';
-import EquityDetailsViewModel from './response/EquityDetailsViewModel.js';
-import { GetEquityDetailsQuery } from '../../app/usecase/query/equity/get/getEquityDetails/GetEquityDetailsQuery.js';
+import GetDividendsForRequest from '../request/equity/GetDividendsForRequest.js';
+import GetDividendsRequest from '../request/equity/GetDividendsRequest.js';
+import GetAllDividendsRequest from '../request/equity/GetAllDividendsRequest.js';
+import SetDividendsRequest from '../request/equity/SetDividendsRequest.js';
+import DividendsForViewModel from '../response/DividendsForViewModel.js';
+import DividendsViewModel from '../response/DividendsViewModel.js';
+import SetVotingRightsRequest from '../request/equity/SetVotingRightsRequest.js';
+import GetVotingRightsForRequest from '../request/equity/GetVotingRightsForRequest.js';
+import GetVotingRightsRequest from '../request/equity/GetVotingRightsRequest.js';
+import GetAllVotingRightsRequest from '../request/equity/GetAllVotingRightsRequest.js';
+import VotingRightsForViewModel from '../response/VotingRightsForViewModel.js';
+import VotingRightsViewModel from '../response/VotingRightsViewModel.js';
+import CreateEquityRequest from '../request/equity/CreateEquityRequest.js';
+import { SecurityViewModel } from '../security/Security.js';
+import NetworkService from '../../../app/service/network/NetworkService.js';
+import { SecurityProps } from '../../../domain/context/security/Security.js';
+import { CreateEquityCommand } from '../../../app/usecase/command/equity/create/CreateEquityCommand.js';
+import ContractId from '../../../domain/context/contract/ContractId.js';
+import { GetSecurityQuery } from '../../../app/usecase/query/security/get/GetSecurityQuery.js';
+import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
+import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
+import GetEquityDetailsRequest from '../request/equity/GetEquityDetailsRequest.js';
+import EquityDetailsViewModel from '../response/EquityDetailsViewModel.js';
+import { GetEquityDetailsQuery } from '../../../app/usecase/query/equity/get/getEquityDetails/GetEquityDetailsQuery.js';
 import {
   CastRegulationSubType,
   CastRegulationType,
-} from '../../domain/context/factory/RegulationType.js';
-import SetScheduledBalanceAdjustmentRequest from './request/equity/SetScheduledBalanceAdjustmentRequest.js';
-import GetScheduledBalanceAdjustmentRequest from './request/equity/GetScheduledBalanceAdjustmentRequest.js';
-import ScheduledBalanceAdjustmentViewModel from './response/ScheduledBalanceAdjustmentViewModel.js';
-import { GetScheduledBalanceAdjustmentQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
-import GetScheduledBalanceAdjustmentCountRequest from './request/equity/GetScheduledBalanceAdjustmentsCountRequest.js';
-import { GetScheduledBalanceAdjustmentCountQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
+} from '../../../domain/context/factory/RegulationType.js';
+import SetScheduledBalanceAdjustmentRequest from '../request/equity/SetScheduledBalanceAdjustmentRequest.js';
+import GetScheduledBalanceAdjustmentRequest from '../request/equity/GetScheduledBalanceAdjustmentRequest.js';
+import ScheduledBalanceAdjustmentViewModel from '../response/ScheduledBalanceAdjustmentViewModel.js';
+import { GetScheduledBalanceAdjustmentQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
+import GetScheduledBalanceAdjustmentCountRequest from '../request/equity/GetScheduledBalanceAdjustmentsCountRequest.js';
+import { GetScheduledBalanceAdjustmentCountQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery.js';
 import {
   GetAggregatedBalanceAdjustmentFactorRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
-} from './request';
-import GetLastAggregatedBalanceAdjustmentFactorForRequest from './request/equity/GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
-import { GetLastAggregatedBalanceAdjustmentFactorForQuery } from '../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQuery.js';
-import { GetAggregatedBalanceAdjustmentFactorQuery } from '../../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQuery';
-import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from './request/equity/GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
-import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery } from '../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery.js';
+} from '../request/index.js';
+import GetLastAggregatedBalanceAdjustmentFactorForRequest from '../request/equity/GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
+import { GetLastAggregatedBalanceAdjustmentFactorForQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQuery.js';
+import { GetAggregatedBalanceAdjustmentFactorQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQuery.js';
+import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from '../request/equity/GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
+import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery.js';
 
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{

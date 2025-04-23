@@ -207,13 +207,13 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery,
   GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryResponse,
 } from './GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryError } from './error/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryError';
 
 @QueryHandler(GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery)
@@ -223,11 +223,11 @@ export class GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(

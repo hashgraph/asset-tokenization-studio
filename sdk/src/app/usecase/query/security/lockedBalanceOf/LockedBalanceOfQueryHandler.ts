@@ -214,8 +214,8 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import SecurityService from '../../../../service/security/SecurityService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../service/AccountService';
-import ContractService from '../../../../service/ContractService.js';
+import AccountService from '../../../../service/account/AccountService';
+import ContractService from '../../../../service/contract/ContractService.js';
 import { LockedBalanceOfQueryError } from './error/LockedBalanceOfQueryError.js';
 
 @QueryHandler(LockedBalanceOfQuery)
@@ -224,13 +224,13 @@ export class LockedBalanceOfQueryHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(

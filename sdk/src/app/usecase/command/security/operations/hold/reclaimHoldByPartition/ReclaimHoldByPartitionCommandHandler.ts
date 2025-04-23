@@ -179,9 +179,9 @@ import {
   ReclaimHoldByPartitionCommand,
   ReclaimHoldByPartitionCommandResponse,
 } from './ReclaimHoldByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 import { ReclaimHoldByPartitionCommandError } from './error/ReclaimHoldByPartitionCommandError.js';
 
 @CommandHandler(ReclaimHoldByPartitionCommand)
@@ -190,7 +190,7 @@ export class ReclaimHoldByPartitionCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(AccountService)

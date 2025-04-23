@@ -212,8 +212,8 @@ import {
   IsInControlListQueryResponse,
 } from './IsInControlListQuery.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../app/service/AccountService.js';
-import ContractService from '../../../../../app/service/ContractService.js';
+import AccountService from '../../../../../app/service/account/AccountService.js';
+import ContractService from '../../../../../app/service/contract/ContractService.js';
 import { IsInControlListQueryError } from './error/IsInControlListQueryError.js';
 
 @QueryHandler(IsInControlListQuery)
@@ -222,7 +222,7 @@ export class IsInControlListQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
     @lazyInject(ContractService)

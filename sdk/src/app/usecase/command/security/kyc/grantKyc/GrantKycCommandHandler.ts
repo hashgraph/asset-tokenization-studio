@@ -205,8 +205,8 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/AccountService';
-import ValidationService from '../../../../../service/ValidationService';
+import AccountService from '../../../../../service/account/AccountService';
+import ValidationService from '../../../../../service/validation/ValidationService';
 import { GrantKycCommand, GrantKycCommandResponse } from './GrantKycCommand';
 import TransactionService from '../../../../../service/transaction/TransactionService';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
@@ -217,7 +217,7 @@ import { Terminal3Vc } from '../../../../../../domain/context/kyc/Terminal3';
 import { verifyVc } from '@terminal3/verify_vc';
 import { SignedCredential } from '@terminal3/vc_core';
 import { InvalidVc } from '../../../../../../domain/context/security/error/operations/InvalidVc';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 import { GrantKycCommandError } from './error/GrantKycCommandError';
 
 @CommandHandler(GrantKycCommand)
@@ -226,13 +226,13 @@ export class GrantKycCommandHandler
 {
   constructor(
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
   ) {}
 
   async execute(command: GrantKycCommand): Promise<GrantKycCommandResponse> {

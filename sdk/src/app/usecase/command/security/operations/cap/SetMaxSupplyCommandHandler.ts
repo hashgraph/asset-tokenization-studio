@@ -214,10 +214,10 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService.js';
-import ValidationService from '../../../../../service/ValidationService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import { SetMaxSupplyCommandError } from './error/SetMaxSupplyCommandError.js';
 
 @CommandHandler(SetMaxSupplyCommand)
@@ -226,9 +226,9 @@ export class SetMaxSupplyCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
     @lazyInject(ContractService)

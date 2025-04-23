@@ -209,14 +209,14 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { GetCouponQuery, GetCouponQueryResponse } from './GetCouponQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import { GetCouponQueryError } from './error/GetCouponQueryError.js';
 
 @QueryHandler(GetCouponQuery)
 export class GetCouponQueryHandler implements IQueryHandler<GetCouponQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
   ) {}

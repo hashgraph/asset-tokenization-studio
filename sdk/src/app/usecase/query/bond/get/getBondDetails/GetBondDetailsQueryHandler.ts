@@ -211,7 +211,7 @@ import {
   GetBondDetailsQuery,
   GetBondDetailsQueryResponse,
 } from './GetBondDetailsQuery.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../../../../../domain/context/bond/BondDetails.js';
 import { GetBondDetailsQueryError } from './error/GetBondDetailsQueryError.js';
@@ -222,9 +222,9 @@ export class GetBondDetailsQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(

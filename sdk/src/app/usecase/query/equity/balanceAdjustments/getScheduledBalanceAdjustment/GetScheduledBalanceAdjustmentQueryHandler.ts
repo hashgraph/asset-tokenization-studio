@@ -208,7 +208,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import {
   GetScheduledBalanceAdjustmentQuery,
   GetScheduledBalanceAdjustmentQueryResponse,
@@ -221,9 +221,9 @@ export class GetScheduledBalanceAdjustmentQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(

@@ -218,7 +218,7 @@ import { RuntimeError } from '../../../core/error/RuntimeError.js';
 import Account from '../../../domain/context/account/Account.js';
 import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
-import NetworkService from '../../../app/service/NetworkService.js';
+import NetworkService from '../../../app/service/network/NetworkService.js';
 import { MetaMaskInpageProvider } from '@metamask/providers';
 import { WalletConnectError } from '../../../domain/context/network/error/WalletConnectError.js';
 import EventService from '../../../app/service/event/EventService.js';
@@ -227,7 +227,7 @@ import {
   WalletEvents,
 } from '../../../app/service/event/WalletEvent.js';
 import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
-import LogService from '../../../app/service/LogService.js';
+import LogService from '../../../app/service/log/LogService.js';
 import { WalletConnectRejectedError } from '../../../domain/context/network/error/WalletConnectRejectedError.js';
 import {
   HederaNetworks,

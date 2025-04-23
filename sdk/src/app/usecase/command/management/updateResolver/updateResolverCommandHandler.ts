@@ -179,7 +179,7 @@ import {
   UpdateResolverCommand,
   UpdateResolverCommandResponse,
 } from './updateResolverCommand';
-import ContractService from '../../../../service/ContractService';
+import ContractService from '../../../../service/contract/ContractService';
 import { UpdateResolverCommandError } from './error/UpdateResolverCommandError';
 
 @CommandHandler(UpdateResolverCommand)
@@ -188,7 +188,7 @@ export class UpdateResolverCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
   ) {}

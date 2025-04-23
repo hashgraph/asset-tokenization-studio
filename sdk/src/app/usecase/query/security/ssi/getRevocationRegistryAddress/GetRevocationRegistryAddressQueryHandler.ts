@@ -207,13 +207,13 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import AccountService from '../../../../../service/AccountService';
+import AccountService from '../../../../../service/account/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetRevocationRegistryAddressQuery,
   GetRevocationRegistryAddressQueryResponse,
 } from './GetRevocationRegistryAddressQuery';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 
 @QueryHandler(GetRevocationRegistryAddressQuery)
 export class GetRevocationRegistryAddressQueryHandler
@@ -221,11 +221,11 @@ export class GetRevocationRegistryAddressQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(

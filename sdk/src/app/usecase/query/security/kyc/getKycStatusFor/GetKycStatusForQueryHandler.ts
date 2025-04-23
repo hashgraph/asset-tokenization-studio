@@ -207,13 +207,13 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   GetKycStatusForQuery,
   GetKycStatusForQueryResponse,
 } from './GetKycStatusForQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import { GetKycStatusForQueryError } from './error/GetKycStatusForQueryError.js';
 
 @QueryHandler(GetKycStatusForQuery)
@@ -222,11 +222,11 @@ export class GetKycStatusForQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(

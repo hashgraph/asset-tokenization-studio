@@ -211,7 +211,7 @@ import {
   GetRoleMemberCountQueryResponse,
 } from './GetRoleMemberCountQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { GetRoleMemberCountQueryError } from './error/GetRoleMemberCountQueryError.js';
 
@@ -221,9 +221,9 @@ export class GetRoleMemberCountQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
