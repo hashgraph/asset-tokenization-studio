@@ -218,6 +218,7 @@ import {
 } from './OperatorClearingTransferByPartitionCommand.js';
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
+import { OperatorClearingTransferByPartitionCommandError } from './error/OperatorClearingTransferByPartitionCommandError.js';
 
 @CommandHandler(OperatorClearingTransferByPartitionCommand)
 export class OperatorClearingTransferByPartitionCommandHandler
@@ -241,76 +242,80 @@ export class OperatorClearingTransferByPartitionCommandHandler
   async execute(
     command: OperatorClearingTransferByPartitionCommand,
   ): Promise<OperatorClearingTransferByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      amount,
-      sourceId,
-      targetId,
-      expirationDate,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkOperator(
-      securityId,
-      partitionId,
-      account.id.toString(),
-      sourceId,
-    );
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkOperator(
+        securityId,
+        partitionId,
+        account.id.toString(),
+        sourceId,
+      );
+      await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
+      await this.validationService.checkKycAddresses(securityId, [
+        sourceId,
+        targetId,
+      ]);
 
-    await this.validationService.checkControlList(
-      securityId,
-      sourceEvmAddress.toString(),
-      targetEvmAddress.toString(),
-    );
+      await this.validationService.checkControlList(
+        securityId,
+        sourceEvmAddress.toString(),
+        targetEvmAddress.toString(),
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    const res = await handler.operatorClearingTransferByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      securityId,
-    );
+      const res = await handler.operatorClearingTransferByPartition(
+        securityEvmAddress,
+        partitionId,
+        amountBd,
+        sourceEvmAddress,
+        targetEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        securityId,
+      );
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: OperatorClearingTransferByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const clearingId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.clearingId,
+        className: OperatorClearingTransferByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new OperatorClearingTransferByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new OperatorClearingTransferByPartitionCommandResponse(
+          parseInt(clearingId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new OperatorClearingTransferByPartitionCommandError(error as Error);
+    }
   }
 }

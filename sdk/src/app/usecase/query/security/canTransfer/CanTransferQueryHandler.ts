@@ -218,6 +218,7 @@ import AccountService from '../../../../service/account/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import { EMPTY_BYTES } from '../../../../../core/Constants.js';
 import ContractService from '../../../../service/contract/ContractService.js';
+import { CanTransferQueryError } from './error/CanTransferQueryError.js';
 
 @QueryHandler(CanTransferQuery)
 export class CanTransferQueryHandler
@@ -237,26 +238,30 @@ export class CanTransferQueryHandler
   ) {}
 
   async execute(query: CanTransferQuery): Promise<CanTransferQueryResponse> {
-    const { securityId, targetId, amount } = query;
+    try {
+      const { securityId, targetId, amount } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const security = await this.securityService.get(securityId);
+      const security = await this.securityService.get(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const [, res] = await this.queryAdapter.canTransfer(
-      securityEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      EMPTY_BYTES,
-    );
+      const [, res] = await this.queryAdapter.canTransfer(
+        securityEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        EMPTY_BYTES,
+      );
 
-    return new CanTransferQueryResponse(res);
+      return new CanTransferQueryResponse(res);
+    } catch (error) {
+      throw new CanTransferQueryError(error as Error);
+    }
   }
 }

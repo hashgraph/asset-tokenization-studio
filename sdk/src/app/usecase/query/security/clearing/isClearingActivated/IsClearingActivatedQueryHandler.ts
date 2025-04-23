@@ -213,6 +213,7 @@ import {
   IsClearingActivatedQueryResponse,
 } from './IsClearingActivatedQuery';
 import ContractService from '../../../../../service/contract/ContractService';
+import { IsClearingActivatedQueryError } from './error/IsClearingActivatedQueryError';
 
 @QueryHandler(IsClearingActivatedQuery)
 export class IsClearingActivatedQueryHandler
@@ -228,12 +229,17 @@ export class IsClearingActivatedQueryHandler
   async execute(
     query: IsClearingActivatedQuery,
   ): Promise<IsClearingActivatedQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.isClearingActivated(securityEvmAddress);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res =
+        await this.queryAdapter.isClearingActivated(securityEvmAddress);
 
-    return new IsClearingActivatedQueryResponse(res);
+      return new IsClearingActivatedQueryResponse(res);
+    } catch (error) {
+      throw new IsClearingActivatedQueryError(error as Error);
+    }
   }
 }

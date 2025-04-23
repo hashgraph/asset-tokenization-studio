@@ -213,6 +213,7 @@ import {
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ContractService from '../../../../../service/contract/ContractService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { GetControlListMembersQueryError } from './error/GetControlListMembersQueryError.js';
 
 @QueryHandler(GetControlListMembersQuery)
 export class GetControlListMembersQueryHandler
@@ -228,16 +229,20 @@ export class GetControlListMembersQueryHandler
   async execute(
     query: GetControlListMembersQuery,
   ): Promise<GetControlListMembersQueryResponse> {
-    const { securityId, start, end } = query;
+    try {
+      const { securityId, start, end } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getControlListMembers(
-      securityEvmAddress,
-      start,
-      end,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getControlListMembers(
+        securityEvmAddress,
+        start,
+        end,
+      );
 
-    return new GetControlListMembersQueryResponse(res);
+      return new GetControlListMembersQueryResponse(res);
+    } catch (error) {
+      throw new GetControlListMembersQueryError(error as Error);
+    }
   }
 }

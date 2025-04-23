@@ -216,6 +216,7 @@ import SecurityService from '../../../../service/security/SecurityService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import AccountService from '../../../../service/account/AccountService.js';
 import ContractService from '../../../../service/contract/ContractService.js';
+import { GetAccountBalanceQueryError } from './error/GetAccountBalanceQueryError.js';
 
 @QueryHandler(GetAccountBalanceQuery)
 export class GetAccountBalanceQueryHandler
@@ -235,23 +236,27 @@ export class GetAccountBalanceQueryHandler
   async execute(
     query: GetAccountBalanceQuery,
   ): Promise<GetAccountBalanceQueryResponse> {
-    const { securityId, targetId } = query;
+    try {
+      const { securityId, targetId } = query;
 
-    const security = await this.securityService.get(securityId);
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.balanceOf(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
-    const amount = BigDecimal.fromStringFixed(
-      res.toString(),
-      security.decimals,
-    );
-    return new GetAccountBalanceQueryResponse(amount);
+      const res = await this.queryAdapter.balanceOf(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
+      const amount = BigDecimal.fromStringFixed(
+        res.toString(),
+        security.decimals,
+      );
+      return new GetAccountBalanceQueryResponse(amount);
+    } catch (error) {
+      throw new GetAccountBalanceQueryError(error as Error);
+    }
   }
 }

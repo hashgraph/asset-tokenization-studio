@@ -216,6 +216,7 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetClearingTransferForByPartitionQueryError } from './error/GetClearingTransferForByPartitionQueryError.js';
 
 @QueryHandler(GetClearingTransferForByPartitionQuery)
 export class GetClearingTransferForByPartitionQueryHandler
@@ -235,30 +236,35 @@ export class GetClearingTransferForByPartitionQueryHandler
   async execute(
     query: GetClearingTransferForByPartitionQuery,
   ): Promise<GetClearingTransferForByPartitionQueryResponse> {
-    const { securityId, partitionId, targetId, clearingId } = query;
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, partitionId, targetId, clearingId } = query;
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const clearing = await this.queryAdapter.getClearingTransferForByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-    );
+      const clearing =
+        await this.queryAdapter.getClearingTransferForByPartition(
+          securityEvmAddress,
+          partitionId,
+          targetEvmAddress,
+          clearingId,
+        );
 
-    clearing.amount = BigDecimal.fromStringFixed(
-      clearing.amount.toString(),
-      security.decimals,
-    );
+      clearing.amount = BigDecimal.fromStringFixed(
+        clearing.amount.toString(),
+        security.decimals,
+      );
 
-    clearing.destination = (
-      await this.accountService.getAccountInfo(clearing.destination)
-    ).id.toString();
+      clearing.destination = (
+        await this.accountService.getAccountInfo(clearing.destination)
+      ).id.toString();
 
-    return new GetClearingTransferForByPartitionQueryResponse(clearing);
+      return new GetClearingTransferForByPartitionQueryResponse(clearing);
+    } catch (error) {
+      throw new GetClearingTransferForByPartitionQueryError(error as Error);
+    }
   }
 }

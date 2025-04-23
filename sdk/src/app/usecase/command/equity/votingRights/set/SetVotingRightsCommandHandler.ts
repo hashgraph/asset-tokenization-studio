@@ -213,6 +213,7 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
+import { SetVotingRightsCommandError } from './error/SetVotingRightsCommandError.js';
 
 @CommandHandler(SetVotingRightsCommand)
 export class SetVotingRightsCommandHandler
@@ -228,28 +229,32 @@ export class SetVotingRightsCommandHandler
   async execute(
     command: SetVotingRightsCommand,
   ): Promise<SetVotingRightsCommandResponse> {
-    const { address, recordDate, data } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { address, recordDate, data } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress =
-      await this.contractService.getContractEvmAddress(address);
-    const res = await handler.setVotingRights(
-      securityEvmAddress,
-      BigDecimal.fromString(recordDate),
-      data,
-      address,
-    );
+      const securityEvmAddress =
+        await this.contractService.getContractEvmAddress(address);
+      const res = await handler.setVotingRights(
+        securityEvmAddress,
+        BigDecimal.fromString(recordDate),
+        data,
+        address,
+      );
 
-    const voteId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.voteId,
-      className: SetVotingRightsCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const voteId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.voteId,
+        className: SetVotingRightsCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new SetVotingRightsCommandResponse(parseInt(voteId, 16), res.id!),
-    );
+      return Promise.resolve(
+        new SetVotingRightsCommandResponse(parseInt(voteId, 16), res.id!),
+      );
+    } catch (error) {
+      throw new SetVotingRightsCommandError(error as Error);
+    }
   }
 }

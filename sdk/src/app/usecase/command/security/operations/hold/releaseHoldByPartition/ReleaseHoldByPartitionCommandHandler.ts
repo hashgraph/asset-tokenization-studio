@@ -217,6 +217,7 @@ import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import AccountService from '../../../../../../service/account/AccountService.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ReleaseHoldByPartitionCommandError } from './error/ReleaseHoldByPartitionCommandError.js';
 
 @CommandHandler(ReleaseHoldByPartitionCommand)
 export class ReleaseHoldByPartitionCommandHandler
@@ -238,43 +239,47 @@ export class ReleaseHoldByPartitionCommandHandler
   async execute(
     command: ReleaseHoldByPartitionCommand,
   ): Promise<ReleaseHoldByPartitionCommandResponse> {
-    const { securityId, partitionId, amount, holdId, targetId } = command;
-    const handler = this.transactionService.getHandler();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, partitionId, amount, holdId, targetId } = command;
+      const handler = this.transactionService.getHandler();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkHoldBalance(
-      securityId,
-      partitionId,
-      targetId,
-      holdId,
-      amountBd,
-    );
+      await this.validationService.checkHoldBalance(
+        securityId,
+        partitionId,
+        targetId,
+        holdId,
+        amountBd,
+      );
 
-    const res = await handler.releaseHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      holdId,
-      targetEvmAddress,
-      amountBd,
-      securityId,
-    );
+      const res = await handler.releaseHoldByPartition(
+        securityEvmAddress,
+        partitionId,
+        holdId,
+        targetEvmAddress,
+        amountBd,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ReleaseHoldByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ReleaseHoldByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ReleaseHoldByPartitionCommandError(error as Error);
+    }
   }
 }

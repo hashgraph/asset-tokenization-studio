@@ -214,6 +214,7 @@ import {
 import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { EquityDetails } from '../../../../../../domain/context/equity/EquityDetails.js';
+import { GetEquityDetailsQueryError } from './error/GetEquityDetailsQueryError.js';
 
 @QueryHandler(GetEquityDetailsQuery)
 export class GetEquityDetailsQueryHandler
@@ -229,14 +230,18 @@ export class GetEquityDetailsQueryHandler
   async execute(
     query: GetEquityDetailsQuery,
   ): Promise<GetEquityDetailsQueryResponse> {
-    const { equityId } = query;
+    try {
+      const { equityId } = query;
 
-    const equityEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(equityId);
+      const equityEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(equityId);
 
-    const equity: EquityDetails =
-      await this.queryAdapter.getEquityDetails(equityEvmAddress);
+      const equity: EquityDetails =
+        await this.queryAdapter.getEquityDetails(equityEvmAddress);
 
-    return Promise.resolve(new GetEquityDetailsQueryResponse(equity));
+      return Promise.resolve(new GetEquityDetailsQueryResponse(equity));
+    } catch (error) {
+      throw new GetEquityDetailsQueryError(error as Error);
+    }
   }
 }

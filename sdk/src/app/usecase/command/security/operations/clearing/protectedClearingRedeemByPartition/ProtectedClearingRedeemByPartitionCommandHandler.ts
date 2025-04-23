@@ -218,6 +218,7 @@ import {
 } from './ProtectedClearingRedeemByPartitionCommand.js';
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ProtectedClearingRedeemByPartitionCommandError } from './error/ProtectedClearingRedeemByPartitionCommandError.js';
 
 @CommandHandler(ProtectedClearingRedeemByPartitionCommand)
 export class ProtectedClearingRedeemByPartitionCommandHandler
@@ -241,80 +242,88 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
   async execute(
     command: ProtectedClearingRedeemByPartitionCommand,
   ): Promise<ProtectedClearingRedeemByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      amount,
-      sourceId,
-      expirationDate,
-      deadline,
-      nonce,
-      signature,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        amount,
+        sourceId,
+        expirationDate,
+        deadline,
+        nonce,
+        signature,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      account.id.toString(),
-    ]);
+      await this.validationService.checkKycAddresses(securityId, [
+        sourceId,
+        account.id.toString(),
+      ]);
 
-    await this.validationService.checkProtectedPartitions(security);
+      await this.validationService.checkProtectedPartitions(security);
 
-    await this.validationService.checkProtectedPartitionRole(
-      partitionId,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkProtectedPartitionRole(
+        partitionId,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkControlList(
-      securityId,
-      sourceEvmAddress.toString(),
-    );
+      await this.validationService.checkControlList(
+        securityId,
+        sourceEvmAddress.toString(),
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    await this.validationService.checkValidNounce(securityId, sourceId, nonce);
+      await this.validationService.checkValidNounce(
+        securityId,
+        sourceId,
+        nonce,
+      );
 
-    const res = await handler.protectedClearingRedeemByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      sourceEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nonce.toString()),
-      signature,
-      securityId,
-    );
+      const res = await handler.protectedClearingRedeemByPartition(
+        securityEvmAddress,
+        partitionId,
+        amountBd,
+        sourceEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(nonce.toString()),
+        signature,
+        securityId,
+      );
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: ProtectedClearingRedeemByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const clearingId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.clearingId,
+        className: ProtectedClearingRedeemByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new ProtectedClearingRedeemByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ProtectedClearingRedeemByPartitionCommandResponse(
+          parseInt(clearingId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ProtectedClearingRedeemByPartitionCommandError(error as Error);
+    }
   }
 }

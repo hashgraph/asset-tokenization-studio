@@ -213,6 +213,7 @@ import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import AccountService from '../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../service/contract/ContractService.js';
+import { BalanceOfQueryError } from './error/BalanceOfQueryError.js';
 
 @QueryHandler(BalanceOfQuery)
 export class BalanceOfQueryHandler implements IQueryHandler<BalanceOfQuery> {
@@ -228,22 +229,26 @@ export class BalanceOfQueryHandler implements IQueryHandler<BalanceOfQuery> {
   ) {}
 
   async execute(query: BalanceOfQuery): Promise<BalanceOfQueryResponse> {
-    const { targetId, securityId } = query;
-    const security = await this.securityService.get(securityId);
+    try {
+      const { targetId, securityId } = query;
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.balanceOf(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
-    const amount = BigDecimal.fromStringFixed(
-      res.toString(),
-      security.decimals,
-    );
-    return new BalanceOfQueryResponse(amount);
+      const res = await this.queryAdapter.balanceOf(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
+      const amount = BigDecimal.fromStringFixed(
+        res.toString(),
+        security.decimals,
+      );
+      return new BalanceOfQueryResponse(amount);
+    } catch (error) {
+      throw new BalanceOfQueryError(error as Error);
+    }
   }
 }

@@ -219,6 +219,7 @@ import {
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ControllerCreateHoldByPartitionCommandError } from './error/ControllerCreateHoldByPartitionCommandError.js';
 
 @CommandHandler(ControllerCreateHoldByPartitionCommand)
 export class ControllerCreateHoldByPartitionCommandHandler
@@ -242,69 +243,73 @@ export class ControllerCreateHoldByPartitionCommandHandler
   async execute(
     command: ControllerCreateHoldByPartitionCommand,
   ): Promise<ControllerCreateHoldByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      sourceId,
-      targetId,
-      expirationDate,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const escrowEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(escrow);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const escrowEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(escrow);
 
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddressOrNull(targetId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkClearingDeactivated(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._CONTROLLER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._CONTROLLER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    const res = await handler.controllerCreateHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      escrowEvmAddress,
-      amountBd,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      securityId,
-    );
+      const res = await handler.controllerCreateHoldByPartition(
+        securityEvmAddress,
+        partitionId,
+        escrowEvmAddress,
+        amountBd,
+        sourceEvmAddress,
+        targetEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        securityId,
+      );
 
-    const holdId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.holdId,
-      className: ControllerCreateHoldByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const holdId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.holdId,
+        className: ControllerCreateHoldByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new ControllerCreateHoldByPartitionCommandResponse(
-        parseInt(holdId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ControllerCreateHoldByPartitionCommandResponse(
+          parseInt(holdId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ControllerCreateHoldByPartitionCommandError(error as Error);
+    }
   }
 }

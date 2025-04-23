@@ -221,6 +221,8 @@ import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../service/contract/ContractService.js';
+import { CreateBondCommandError } from './error/CreateBondCommandError.js';
+import { Response } from '../../../../../domain/context/transaction/Response';
 
 @CommandHandler(CreateBondCommand)
 export class CreateBondCommandHandler
@@ -240,75 +242,76 @@ export class CreateBondCommandHandler
   async execute(
     command: CreateBondCommand,
   ): Promise<CreateBondCommandResponse> {
-    const {
-      security,
-      currency,
-      nominalValue,
-      startingDate,
-      maturityDate,
-      couponFrequency,
-      couponRate,
-      firstCouponDate,
-      factory,
-      resolver,
-      configId,
-      configVersion,
-      diamondOwnerAccount,
-    } = command;
-
-    if (!factory) {
-      throw new InvalidRequest('Factory not found in request');
-    }
-
-    if (!resolver) {
-      throw new InvalidRequest('Resolver not found in request');
-    }
-
-    if (!configId) {
-      throw new InvalidRequest('Config Id not found in request');
-    }
-
-    if (configVersion === undefined) {
-      throw new InvalidRequest('Config Version not found in request');
-    }
-
-    const diamondOwnerAccountEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
-
-    const factoryEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(factory.toString());
-
-    const resolverEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(resolver.toString());
-
-    const handler = this.transactionService.getHandler();
-
-    const bondInfo = new BondDetails(
-      currency,
-      BigDecimal.fromString(nominalValue),
-      parseInt(startingDate),
-      parseInt(maturityDate),
-    );
-
-    const couponInfo = new CouponDetails(
-      parseInt(couponFrequency),
-      BigDecimal.fromString(couponRate),
-      parseInt(firstCouponDate),
-    );
-
-    const res = await handler.createBond(
-      new Security(security),
-      bondInfo,
-      couponInfo,
-      factoryEvmAddress,
-      resolverEvmAddress,
-      configId,
-      configVersion,
-      diamondOwnerAccountEvmAddress,
-      factory.toString(),
-    );
-
+    let res: Response;
     try {
+      const {
+        security,
+        currency,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+        factory,
+        resolver,
+        configId,
+        configVersion,
+        diamondOwnerAccount,
+      } = command;
+
+      if (!factory) {
+        throw new InvalidRequest('Factory not found in request');
+      }
+
+      if (!resolver) {
+        throw new InvalidRequest('Resolver not found in request');
+      }
+
+      if (!configId) {
+        throw new InvalidRequest('Config Id not found in request');
+      }
+
+      if (configVersion === undefined) {
+        throw new InvalidRequest('Config Version not found in request');
+      }
+
+      const diamondOwnerAccountEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
+
+      const factoryEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(factory.toString());
+
+      const resolverEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(resolver.toString());
+
+      const handler = this.transactionService.getHandler();
+
+      const bondInfo = new BondDetails(
+        currency,
+        BigDecimal.fromString(nominalValue),
+        parseInt(startingDate),
+        parseInt(maturityDate),
+      );
+
+      const couponInfo = new CouponDetails(
+        parseInt(couponFrequency),
+        BigDecimal.fromString(couponRate),
+        parseInt(firstCouponDate),
+      );
+
+      res = await handler.createBond(
+        new Security(security),
+        bondInfo,
+        couponInfo,
+        factoryEvmAddress,
+        resolverEvmAddress,
+        configId,
+        configVersion,
+        diamondOwnerAccountEvmAddress,
+        factory.toString(),
+      );
+
       const contractAddress =
         await this.transactionService.getTransactionResult({
           res,
@@ -326,12 +329,13 @@ export class CreateBondCommandHandler
       return Promise.resolve(
         new CreateBondCommandResponse(new ContractId(contractId), res.id!),
       );
-    } catch (e) {
-      if (res.response == 1)
+    } catch (error) {
+      if (res?.response == 1) {
         return Promise.resolve(
           new CreateBondCommandResponse(new ContractId('0.0.0'), res.id!),
         );
-      else throw e;
+      }
+      throw new CreateBondCommandError(error as Error);
     }
   }
 }

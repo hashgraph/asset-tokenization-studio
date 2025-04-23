@@ -213,6 +213,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
+import { ReleaseCommandError } from './error/ReleaseCommandError.js';
 
 @CommandHandler(ReleaseCommand)
 export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
@@ -228,25 +229,29 @@ export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
   ) {}
 
   async execute(command: ReleaseCommand): Promise<ReleaseCommandResponse> {
-    const { securityId, lockId, sourceId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { securityId, lockId, sourceId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    const lockIdBd: BigDecimal = BigDecimal.fromString(lockId.toString());
+      const lockIdBd: BigDecimal = BigDecimal.fromString(lockId.toString());
 
-    const res = await handler.release(
-      securityEvmAddress,
-      sourceEvmAddress,
-      lockIdBd,
-    );
-    return Promise.resolve(
-      new ReleaseCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.release(
+        securityEvmAddress,
+        sourceEvmAddress,
+        lockIdBd,
+      );
+      return Promise.resolve(
+        new ReleaseCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new ReleaseCommandError(error as Error);
+    }
   }
 }

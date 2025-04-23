@@ -217,6 +217,7 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
+import { TransferAndLockCommandError } from './error/TransferAndLockCommandError.js';
 
 @CommandHandler(TransferAndLockCommand)
 export class TransferAndLockCommandHandler
@@ -238,43 +239,51 @@ export class TransferAndLockCommandHandler
   async execute(
     command: TransferAndLockCommand,
   ): Promise<TransferAndLockCommandResponse> {
-    const { securityId, targetId, amount, expirationDate } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { securityId, targetId, amount, expirationDate } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const security = await this.securityService.get(securityId);
+      const security = await this.securityService.get(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkCanTransfer(securityId, targetId, amount);
+      await this.validationService.checkCanTransfer(
+        securityId,
+        targetId,
+        amount,
+      );
 
-    const amountBd: BigDecimal = BigDecimal.fromString(
-      amount,
-      security.decimals,
-    );
+      const amountBd: BigDecimal = BigDecimal.fromString(
+        amount,
+        security.decimals,
+      );
 
-    const res = await handler.transferAndLock(
-      securityEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      BigDecimal.fromString(expirationDate),
-      securityId,
-    );
+      const res = await handler.transferAndLock(
+        securityEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        BigDecimal.fromString(expirationDate),
+        securityId,
+      );
 
-    const lockId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.lockId,
-      className: TransferAndLockCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const lockId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.lockId,
+        className: TransferAndLockCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new TransferAndLockCommandResponse(parseInt(lockId, 16), res.id!),
-    );
+      return Promise.resolve(
+        new TransferAndLockCommandResponse(parseInt(lockId, 16), res.id!),
+      );
+    } catch (error) {
+      throw new TransferAndLockCommandError(error as Error);
+    }
   }
 }

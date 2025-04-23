@@ -215,6 +215,7 @@ import {
 } from './RevokeRoleCommand.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
+import { RevokeRoleCommandError } from './error/RevokeRoleCommandError.js';
 
 @CommandHandler(RevokeRoleCommand)
 export class RevokeRoleCommandHandler
@@ -234,26 +235,30 @@ export class RevokeRoleCommandHandler
   async execute(
     command: RevokeRoleCommand,
   ): Promise<RevokeRoleCommandResponse> {
-    const { role, targetId, securityId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { role, targetId, securityId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    const res = await handler.revokeRole(
-      securityEvmAddress,
-      targetEvmAddress,
-      role,
-      securityId,
-    );
+      const res = await handler.revokeRole(
+        securityEvmAddress,
+        targetEvmAddress,
+        role,
+        securityId,
+      );
 
-    // return Promise.resolve({ payload: res.response ?? false });
-    return Promise.resolve(
-      new RevokeRoleCommandResponse(res.error === undefined, res.id!),
-    );
+      // return Promise.resolve({ payload: res.response ?? false });
+      return Promise.resolve(
+        new RevokeRoleCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new RevokeRoleCommandError(error as Error);
+    }
   }
 }

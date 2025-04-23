@@ -218,6 +218,7 @@ import {
 } from './CreateHoldByPartitionCommand.js';
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
+import { CreateHoldByPartitionCommandError } from './error/CreateHoldByPartitionCommandError.js';
 
 @CommandHandler(CreateHoldByPartitionCommand)
 export class CreateHoldByPartitionCommandHandler
@@ -241,59 +242,63 @@ export class CreateHoldByPartitionCommandHandler
   async execute(
     command: CreateHoldByPartitionCommand,
   ): Promise<CreateHoldByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      targetId,
-      expirationDate,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        targetId,
+        expirationDate,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkClearingDeactivated(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const escrowEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(escrow);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const escrowEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(escrow);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddressOrNull(targetId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkBalance(
-      securityId,
-      account.id.toString(),
-      amountBd,
-    );
+      await this.validationService.checkBalance(
+        securityId,
+        account.id.toString(),
+        amountBd,
+      );
 
-    const res = await handler.createHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      escrowEvmAddress,
-      amountBd,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      securityId,
-    );
+      const res = await handler.createHoldByPartition(
+        securityEvmAddress,
+        partitionId,
+        escrowEvmAddress,
+        amountBd,
+        targetEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        securityId,
+      );
 
-    const holdId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.holdId,
-      className: CreateHoldByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const holdId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.holdId,
+        className: CreateHoldByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new CreateHoldByPartitionCommandResponse(parseInt(holdId, 16), res.id!),
-    );
+      return Promise.resolve(
+        new CreateHoldByPartitionCommandResponse(parseInt(holdId, 16), res.id!),
+      );
+    } catch (error) {
+      throw new CreateHoldByPartitionCommandError(error as Error);
+    }
   }
 }

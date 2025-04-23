@@ -213,6 +213,7 @@ import {
   GetAggregatedBalanceAdjustmentFactorQuery,
   GetAggregatedBalanceAdjustmentFactorQueryResponse,
 } from './GetAggregatedBalanceAdjustmentFactorQuery';
+import { GetAggregatedBalanceAdjustmentFactorQueryError } from './error/GetAggregatedBalanceAdjustmentFactorQueryError';
 
 @QueryHandler(GetAggregatedBalanceAdjustmentFactorQuery)
 export class GetAggregatedBalanceAdjustmentFactorQueryHandler
@@ -228,15 +229,19 @@ export class GetAggregatedBalanceAdjustmentFactorQueryHandler
   async execute(
     query: GetAggregatedBalanceAdjustmentFactorQuery,
   ): Promise<GetAggregatedBalanceAdjustmentFactorQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res =
-      await this.queryAdapter.getAggregatedBalanceAdjustmentFactor(
-        securityEvmAddress,
-      );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res =
+        await this.queryAdapter.getAggregatedBalanceAdjustmentFactor(
+          securityEvmAddress,
+        );
 
-    return new GetAggregatedBalanceAdjustmentFactorQueryResponse(res);
+      return new GetAggregatedBalanceAdjustmentFactorQueryResponse(res);
+    } catch (error) {
+      throw new GetAggregatedBalanceAdjustmentFactorQueryError(error as Error);
+    }
   }
 }

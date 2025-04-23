@@ -214,6 +214,7 @@ import {
   GetLastAggregatedBalanceAdjustmentFactorForQueryResponse,
 } from './GetLastAggregatedBalanceAdjustmentFactorForQuery';
 import ContractService from '../../../../../service/contract/ContractService';
+import { GetLastAggregatedBalanceAdjustmentFactorForQueryError } from './error/GetLastAggregatedBalanceAdjustmentFactorForQueryError';
 
 @QueryHandler(GetLastAggregatedBalanceAdjustmentFactorForQuery)
 export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler
@@ -231,19 +232,25 @@ export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler
   async execute(
     query: GetLastAggregatedBalanceAdjustmentFactorForQuery,
   ): Promise<GetLastAggregatedBalanceAdjustmentFactorForQueryResponse> {
-    const { securityId, targetId } = query;
+    try {
+      const { securityId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res =
-      await this.queryAdapter.getLastAggregatedBalanceAdjustmentFactorFor(
-        securityEvmAddress,
-        targetEvmAddress,
+      const res =
+        await this.queryAdapter.getLastAggregatedBalanceAdjustmentFactorFor(
+          securityEvmAddress,
+          targetEvmAddress,
+        );
+
+      return new GetLastAggregatedBalanceAdjustmentFactorForQueryResponse(res);
+    } catch (error) {
+      throw new GetLastAggregatedBalanceAdjustmentFactorForQueryError(
+        error as Error,
       );
-
-    return new GetLastAggregatedBalanceAdjustmentFactorForQueryResponse(res);
+    }
   }
 }

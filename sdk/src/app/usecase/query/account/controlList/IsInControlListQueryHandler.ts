@@ -214,6 +214,7 @@ import {
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import AccountService from '../../../../../app/service/account/AccountService.js';
 import ContractService from '../../../../../app/service/contract/ContractService.js';
+import { IsInControlListQueryError } from './error/IsInControlListQueryError.js';
 
 @QueryHandler(IsInControlListQuery)
 export class IsInControlListQueryHandler
@@ -231,18 +232,22 @@ export class IsInControlListQueryHandler
   async execute(
     query: IsInControlListQuery,
   ): Promise<IsInControlListQueryResponse> {
-    const { securityId, targetId } = query;
+    try {
+      const { securityId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.isAccountInControlList(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
+      const res = await this.queryAdapter.isAccountInControlList(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
 
-    return new IsInControlListQueryResponse(res);
+      return new IsInControlListQueryResponse(res);
+    } catch (error) {
+      throw new IsInControlListQueryError(error as Error);
+    }
   }
 }

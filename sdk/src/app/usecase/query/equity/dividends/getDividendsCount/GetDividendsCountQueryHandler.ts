@@ -213,6 +213,7 @@ import {
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { GetDividendsCountQueryError } from './error/GetDividendsCountQueryError.js';
 
 @QueryHandler(GetDividendsCountQuery)
 export class GetDividendsCountQueryHandler
@@ -229,11 +230,14 @@ export class GetDividendsCountQueryHandler
     query: GetDividendsCountQuery,
   ): Promise<GetDividendsCountQueryResponse> {
     const { securityId } = query;
+    try {
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getDividendsCount(securityEvmAddress);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getDividendsCount(securityEvmAddress);
-
-    return new GetDividendsCountQueryResponse(res);
+      return new GetDividendsCountQueryResponse(res);
+    } catch (error) {
+      throw new GetDividendsCountQueryError(error as Error);
+    }
   }
 }

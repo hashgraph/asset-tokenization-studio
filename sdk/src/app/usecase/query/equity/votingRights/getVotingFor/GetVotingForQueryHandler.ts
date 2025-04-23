@@ -214,6 +214,7 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetVotingForQueryError } from './error/GetVotingForQueryError.js';
 
 @QueryHandler(GetVotingForQuery)
 export class GetVotingForQueryHandler
@@ -229,19 +230,23 @@ export class GetVotingForQueryHandler
   ) {}
 
   async execute(query: GetVotingForQuery): Promise<GetVotingForQueryResponse> {
-    const { targetId, securityId, votingId } = query;
+    try {
+      const { targetId, securityId, votingId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getVotingFor(
-      securityEvmAddress,
-      targetEvmAddress,
-      votingId,
-    );
+      const res = await this.queryAdapter.getVotingFor(
+        securityEvmAddress,
+        targetEvmAddress,
+        votingId,
+      );
 
-    return new GetVotingForQueryResponse(res.tokenBalance, res.decimals);
+      return new GetVotingForQueryResponse(res.tokenBalance, res.decimals);
+    } catch (error) {
+      throw new GetVotingForQueryError(error as Error);
+    }
   }
 }

@@ -219,6 +219,7 @@ import { SecurityRole } from '../../../../../../domain/context/security/Security
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
+import { ControllerTransferCommandError } from './error/ControllerTransferCommandError copy.js';
 
 @CommandHandler(ControllerTransferCommand)
 export class ControllerTransferCommandHandler
@@ -240,47 +241,51 @@ export class ControllerTransferCommandHandler
   async execute(
     command: ControllerTransferCommand,
   ): Promise<ControllerTransferCommandResponse> {
-    const { securityId, targetId, sourceId, amount } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, targetId, sourceId, amount } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkCanTransfer(
-      securityId,
-      targetId,
-      amount,
-      sourceId,
-      _PARTITION_ID_1,
-      account.id.toString(),
-    );
+      await this.validationService.checkCanTransfer(
+        securityId,
+        targetId,
+        amount,
+        sourceId,
+        _PARTITION_ID_1,
+        account.id.toString(),
+      );
 
-    await this.validationService.checkRole(
-      SecurityRole._CONTROLLER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._CONTROLLER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const res = await handler.controllerTransfer(
-      securityEvmAddress,
-      sourceEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      securityId,
-    );
-    return Promise.resolve(
-      new ControllerTransferCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.controllerTransfer(
+        securityEvmAddress,
+        sourceEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        securityId,
+      );
+      return Promise.resolve(
+        new ControllerTransferCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new ControllerTransferCommandError(error as Error);
+    }
   }
 }
