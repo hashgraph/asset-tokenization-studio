@@ -378,8 +378,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   protected signer: Signer;
 
   constructor(
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    public readonly networkService: NetworkService,
+    protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    protected readonly networkService: NetworkService,
   ) {
     super();
   }

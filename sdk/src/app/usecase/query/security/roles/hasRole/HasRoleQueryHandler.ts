@@ -216,11 +216,11 @@ import ContractService from '../../../../../service/contract/ContractService.js'
 export class HasRoleQueryHandler implements IQueryHandler<HasRoleQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: HasRoleQuery): Promise<HasRoleQueryResponse> {

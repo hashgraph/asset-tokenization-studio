@@ -218,9 +218,9 @@ import ContractService from '../../../../../service/contract/ContractService.js'
 export class UnpauseCommandHandler implements ICommandHandler<UnpauseCommand> {
   constructor(
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
     @lazyInject(ValidationService)

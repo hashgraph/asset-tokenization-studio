@@ -274,11 +274,11 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
 
   constructor(
     @lazyInject(EventService)
-    public readonly eventService: EventService,
+    private readonly eventService: EventService,
     @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
+    protected readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
   ) {
     super(mirrorNodeAdapter, networkService);
     this.projectId = '';

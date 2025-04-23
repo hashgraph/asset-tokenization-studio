@@ -215,9 +215,9 @@ import ContractService from '../../../../../service/contract/ContractService.js'
 export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetVotingQuery): Promise<GetVotingQueryResponse> {

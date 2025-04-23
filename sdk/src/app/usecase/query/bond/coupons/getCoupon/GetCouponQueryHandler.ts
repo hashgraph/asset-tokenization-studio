@@ -215,7 +215,7 @@ import ContractService from '../../../../../service/contract/ContractService.js'
 export class GetCouponQueryHandler implements IQueryHandler<GetCouponQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
   ) {}

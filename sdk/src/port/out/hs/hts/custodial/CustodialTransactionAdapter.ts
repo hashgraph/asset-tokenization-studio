@@ -246,11 +246,11 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
   protected network: Environment;
 
   constructor(
-    @lazyInject(EventService) public readonly eventService: EventService,
+    @lazyInject(EventService) protected readonly eventService: EventService,
     @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
+    protected readonly networkService: NetworkService,
   ) {
     super(mirrorNodeAdapter, networkService);
   }
