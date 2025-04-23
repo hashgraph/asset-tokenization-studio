@@ -216,6 +216,8 @@ import hold from "./hold";
 import kyc from "./kyc";
 import ssiManager from "./ssiManager";
 import clearingOperations from "./clearingOperations";
+import externalPause from "./externalPause";
+import externalControl from "./externalControl";
 
 export default {
   header: {
@@ -242,6 +244,8 @@ export default {
     operations: "Operations",
     control: "Control",
     corporateActions: "Corporate Actions",
+    externalControlList: "External Control",
+    externalPause: "External Pause",
   },
   actions: {
     redeem: "Redeem",
@@ -294,6 +298,8 @@ export default {
   kyc,
   ssiManager,
   clearingOperations,
+  externalPause,
+  externalControl,
   benefits: {
     dividends: "Dividends",
     balanceAdjustments: "Balance Adjustments",

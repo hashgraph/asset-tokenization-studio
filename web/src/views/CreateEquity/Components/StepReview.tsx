@@ -286,6 +286,8 @@ export const StepReview = () => {
   const regulationSubType = getValues("regulationSubType");
   const countriesListType = getValues("countriesListType");
   let countriesList: string[] = getValues("countriesList");
+  const externalPausesList = getValues("externalPausesList");
+  const externalControlList = getValues("externalControlList");
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
@@ -327,6 +329,14 @@ export const StepReview = () => {
       configVersion: parseInt(
         process.env.REACT_APP_EQUITY_CONFIG_VERSION ?? "0",
       ),
+      ...(externalPausesList &&
+        externalPausesList.length > 0 && {
+          externalPauses: externalPausesList,
+        }),
+      ...(externalControlList &&
+        externalControlList.length > 0 && {
+          externalControlLists: externalControlList,
+        }),
     });
 
     createSecurity(request);
@@ -374,6 +384,21 @@ export const StepReview = () => {
     {
       title: t("stepNewSerie.dividendType"),
       value: transformDividendType(dividendType.toString()),
+    },
+  ];
+
+  const externalManagement: DetailReviewProps[] = [
+    {
+      title: t("stepExternalManagement.externalPause"),
+      value: externalPausesList
+        ? externalPausesList?.map((pause) => " " + pause).toString()
+        : "-",
+    },
+    {
+      title: t("stepExternalManagement.externalControl"),
+      value: externalControlList
+        ? externalControlList?.map((control) => " " + control).toString()
+        : "-",
     },
   ];
 
@@ -452,7 +477,18 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
-          <InfoDivider step={3} title={tRegulation("title")} type="main" />
+          <InfoDivider
+            step={3}
+            title={t("stepExternalManagement.title")}
+            type="main"
+          />
+          <SimpleGrid columns={1} gap={6} w="full">
+            {externalManagement.map((props) => (
+              <DetailReview {...props} />
+            ))}
+          </SimpleGrid>
+
+          <InfoDivider step={4} title={tRegulation("title")} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">
             {regulationDetails.map((props) => (
               <DetailReview {...props} />

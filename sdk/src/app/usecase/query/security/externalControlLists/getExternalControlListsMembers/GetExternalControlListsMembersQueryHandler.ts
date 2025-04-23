@@ -203,19 +203,55 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import {
+  GetExternalControlListsMembersQuery,
+  GetExternalControlListsMembersQueryResponse,
+} from './GetExternalControlListsMembersQuery.js';
+import ContractService from '../../../../../../app/service/ContractService.js';
+import AccountService from '../../../../../../app/service/AccountService.js';
 
-contract T3RevocationRegistry {
-    mapping(address => mapping(string => bool)) public revoked;
+@QueryHandler(GetExternalControlListsMembersQuery)
+export class GetExternalControlListsMembersQueryHandler
+  implements IQueryHandler<GetExternalControlListsMembersQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
 
-    constructor() {}
+  async execute(
+    query: GetExternalControlListsMembersQuery,
+  ): Promise<GetExternalControlListsMembersQueryResponse> {
+    const { securityId, start, end } = query;
+    await this.securityService.get(securityId);
 
-    function revoke(string memory vcId) public {
-        revoked[msg.sender][vcId] = true;
-    }
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
 
-    function cancelRevoke(string memory vcId) public {
-        delete revoked[msg.sender][vcId];
-    }
+    const res = await this.queryAdapter.getExternalControlListsMembers(
+      securityEvmAddress,
+      start,
+      end,
+    );
+
+    const updatedRes = await Promise.all(
+      res.map(async (address) =>
+        (await this.accountService.getAccountInfo(address)).id.toString(),
+      ),
+    );
+
+    return new GetExternalControlListsMembersQueryResponse(updatedRes);
+  }
 }

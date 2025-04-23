@@ -274,6 +274,19 @@ export default {
     nominalValuePlaceHolder: "Enter nominal value",
   },
 
+  stepExternalManagement: {
+    title: "External Lists",
+    subtitle: "Add external lists configurations",
+    externalPause: "External Pause",
+    pauseList: "Pause list",
+    pauseListPlaceholder: "Choose external pause ...",
+    externalPausesSelected: "External pauses selected:",
+    externalControl: "External Control",
+    controlList: "Control list",
+    controlListPlaceholder: "Choose external control ...",
+    externalControlsSelected: "External controls selected:",
+  },
+
   stepReview: {
     title: "Review",
     tokenDetails: "Digital security details",

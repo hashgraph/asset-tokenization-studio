@@ -234,6 +234,9 @@ describe('CreateBondCommandHandler', () => {
   const contractServiceMock = createMock<ContractService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
   const transactionId = TransactionIdFixture.create().id;
   const hederaId = HederaIdPropsFixture.create();
   const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
@@ -302,8 +305,11 @@ describe('CreateBondCommandHandler', () => {
     });
 
     describe('success cases', () => {
-      it('should successfully create a bond', async () => {
-        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+      it('should successfully create a bond with bondAddress in response', async () => {
+        contractServiceMock.getContractEvmAddress
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(externalEvmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
 
         transactionServiceMock.getHandler().createBond.mockResolvedValue({
@@ -325,7 +331,7 @@ describe('CreateBondCommandHandler', () => {
         expect(result.securityId.value).toBe(transactionId);
         expect(result.transactionId).toBe(transactionId);
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          2,
+          3,
         );
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
           1,
@@ -358,6 +364,8 @@ describe('CreateBondCommandHandler', () => {
           evmAddress,
           command.configId,
           command.configVersion,
+          [],
+          [externalEvmAddress],
           evmAddress,
           command.factory?.toString(),
         );

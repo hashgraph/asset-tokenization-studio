@@ -229,6 +229,12 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   clearingActive: boolean;
 
   @OptionalField()
+  externalPauses?: string[];
+
+  @OptionalField()
+  externalControlLists?: string[];
+
+  @OptionalField()
   diamondOwnerAccount?: string;
 
   votingRight: boolean;
@@ -260,6 +266,8 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     arePartitionsProtected,
     isMultiPartition,
     clearingActive,
+    externalPauses,
+    externalControlLists,
     diamondOwnerAccount,
     votingRight,
     informationRight,
@@ -289,6 +297,8 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     arePartitionsProtected: boolean;
     clearingActive: boolean;
     isMultiPartition: boolean;
+    externalPauses?: string[];
+    externalControlLists?: string[];
     diamondOwnerAccount?: string;
     votingRight: boolean;
     informationRight: boolean;
@@ -337,6 +347,20 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
       configId: FormatValidation.checkBytes32Format(),
+      externalPauses: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalPauses',
+          true,
+        );
+      },
+      externalControlLists: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalControlLists',
+          true,
+        );
+      },
     });
     this.name = name;
     this.symbol = symbol;
@@ -348,7 +372,9 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
     this.clearingActive = clearingActive;
+    this.externalPauses = externalPauses;
     this.diamondOwnerAccount = diamondOwnerAccount;
+    this.externalControlLists = externalControlLists;
     this.votingRight = votingRight;
     this.informationRight = informationRight;
     this.liquidationRight = liquidationRight;

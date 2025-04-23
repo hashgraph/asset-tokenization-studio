@@ -362,6 +362,29 @@ import { OperatorClearingTransferByPartitionCommandHandler } from '../app/usecas
 import { GetClearingCreateHoldForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler.js';
 import { GetClearingTransferForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler.js';
 import { GetClearingRedeemForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler.js';
+import { UpdateExternalPausesCommandHandler } from '../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommandHandler.js';
+import { AddExternalPauseCommandHandler } from '../app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommandHandler.js';
+import { RemoveExternalPauseCommandHandler } from '../app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommandHandler.js';
+import { GetExternalPausesCountQueryHandler } from '../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQueryHandler.js';
+import { GetExternalPausesMembersQueryHandler } from '../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQueryHandler.js';
+import { IsExternalPauseQueryHandler } from '../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQueryHandler.js';
+import { SetPausedMockCommandHandler } from '../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommandHandler.js';
+import { IsPausedMockQueryHandler } from '../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQueryHandler.js';
+import { CreateExternalPauseMockCommandHandler } from '../app/usecase/command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommandHandler.js';
+import { UpdateExternalControlListsCommandHandler } from '../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommandHandler.js';
+import { AddExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommandHandler.js';
+import { RemoveExternalControlListCommandHandler } from '../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommandHandler.js';
+import { IsExternalControlListQueryHandler } from '../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQueryHandler.js';
+import { GetExternalControlListsCountQueryHandler } from '../app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQueryHandler.js';
+import { GetExternalControlListsMembersQueryHandler } from '../app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQueryHandler.js';
+import { IsAuthorizedBlackListMockQueryHandler } from '../app/usecase/query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQueryHandler.js';
+import { IsAuthorizedWhiteListMockQueryHandler } from '../app/usecase/query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQueryHandler.js';
+import { AddToBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/addToBlackListMock/AddToBlackListMockCommandHandler.js';
+import { AddToWhiteListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/addToWhiteListMock/AddToWhiteListMockCommandHandler.js';
+import { CreateExternalWhiteListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/createExternalWhiteListMock/CreateExternalWhiteListMockCommandHandler.js';
+import { CreateExternalBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/createExternalBlackListMock/CreateExternalBlackListMockCommandHandler.js';
+import { RemoveFromBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommandHandler.js';
+import { RemoveFromWhiteListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -374,6 +397,38 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: ConcreteCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetPausedMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateExternalPauseMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddToBlackListMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddToWhiteListMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateExternalWhiteListMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateExternalBlackListMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveFromBlackListMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveFromWhiteListMockCommandHandler,
   },
   // Security Creation
   {
@@ -638,12 +693,48 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: OperatorClearingTransferByPartitionCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UpdateExternalPausesCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddExternalPauseCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveExternalPauseCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UpdateExternalControlListsCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddExternalControlListCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveExternalControlListCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: ConcreteQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsPausedMockQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsAuthorizedBlackListMockQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsAuthorizedWhiteListMockQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
@@ -917,6 +1008,30 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: CanRedeemByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalPausesCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalPausesMembersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsExternalPauseQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsExternalControlListQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalControlListsCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalControlListsMembersQueryHandler,
   },
 ];
 

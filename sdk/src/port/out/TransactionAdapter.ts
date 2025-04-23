@@ -248,6 +248,8 @@ interface ITransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -259,6 +261,8 @@ interface ITransactionAdapter {
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -805,6 +809,78 @@ interface IClearingAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IExternalPausesAdapter {
+  updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
+interface IExternalPausesMockAdapter {
+  setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  createExternalPauseMock(): Promise<string | TransactionResponse>;
+}
+
+interface IExternalControlListsAdapter {
+  updateExternalControlLists(
+    security: EvmAddress,
+    externalControlListsAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  addExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
+interface IExternalControlListsMockAdapter {
+  addToBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  addToWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeFromWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeFromBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  createExternalBlackListMock(): Promise<string | TransactionResponse>;
+  createExternalWhiteListMock(): Promise<string | TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -813,7 +889,12 @@ export default abstract class TransactionAdapter
     IHoldTransactionAdapter,
     ISsiManagementTransactionAdapter,
     IKycTransactionAdapter,
-    IClearingAdapter
+    IClearingAdapter,
+    IExternalPausesAdapter,
+    IExternalPausesMockAdapter,
+    IClearingAdapter,
+    IExternalControlListsAdapter,
+    IExternalControlListsMockAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -903,6 +984,8 @@ export default abstract class TransactionAdapter
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -916,6 +999,8 @@ export default abstract class TransactionAdapter
     resolver: EvmAddress,
     configId: string,
     configVersion: number,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -1538,6 +1623,94 @@ export default abstract class TransactionAdapter
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  updateExternalPauses(
+    security: EvmAddress,
+    externalPausesAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeExternalPause(
+    security: EvmAddress,
+    externalPauseAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setPausedMock(
+    contract: EvmAddress,
+    paused: boolean,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createExternalPauseMock(): Promise<string | TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  updateExternalControlLists(
+    security: EvmAddress,
+    externalControlListsAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeExternalControlList(
+    security: EvmAddress,
+    externalControlListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addToBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addToWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeFromWhiteListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeFromBlackListMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createExternalBlackListMock(): Promise<string | TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createExternalWhiteListMock(): Promise<string | TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }

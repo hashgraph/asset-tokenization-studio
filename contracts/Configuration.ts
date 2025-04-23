@@ -256,6 +256,8 @@ export const CONTRACT_NAMES = [
     'ClearingTransferFacet',
     'ClearingReadFacet',
     'ClearingActionsFacet',
+    'ExternalPauseManagement',
+    'ExternalControlListManagement',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
 export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
@@ -287,6 +289,33 @@ export default class Configuration {
     // private _privateKeys: Record<Network, string[]>;
     // private _endpoints: Record<Network, Endpoints>;
     // private _contracts: Record<ContractName, ContractConfig>;
+    /**
+     * Determines whether the contract sizer should run on compile.
+     *
+     * @returns {boolean} True if the contract sizer should run on compile, false otherwise.
+     */
+    public static get contractSizerRunOnCompile(): boolean {
+        return (
+            Configuration._getEnvironmentVariable({
+                name: 'CONTRACT_SIZER_RUN_ON_COMPILE',
+                defaultValue: 'true',
+            }).toLowerCase() === 'true'
+        )
+    }
+
+    /**
+     * Determines whether gas reporting is enabled.
+     *
+     * @returns {boolean} True if gas reporting is enabled, false otherwise.
+     */
+    public static get reportGas(): boolean {
+        return (
+            Configuration._getEnvironmentVariable({
+                name: 'REPORT_GAS',
+                defaultValue: 'true',
+            }).toLowerCase() === 'true'
+        )
+    }
 
     public static get privateKeys(): Record<Network, string[]> {
         return NETWORKS.reduce(

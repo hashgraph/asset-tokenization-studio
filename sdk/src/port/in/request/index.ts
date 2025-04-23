@@ -320,6 +320,26 @@ import OperatorClearingTransferByPartitionRequest from './security/operations/cl
 import GetClearingCreateHoldForByPartitionRequest from './security/operations/clearing/GetClearingCreateHoldForByPartitionRequest.js';
 import GetClearingRedeemForByPartitionRequest from './security/operations/clearing/GetClearingRedeemForByPartitionRequest.js';
 import GetClearingTransferForByPartitionRequest from './security/operations/clearing/GetClearingTransferForByPartitionRequest.js';
+import UpdateExternalPausesRequest from './security/externalPauses/UpdateExternalPausesRequest.js';
+import AddExternalPauseRequest from './security/externalPauses/AddExternalPauseRequest.js';
+import RemoveExternalPauseRequest from './security/externalPauses/RemoveExternalPauseRequest.js';
+import IsExternalPauseRequest from './security/externalPauses/IsExternalPauseRequest.js';
+import GetExternalPausesCountRequest from './security/externalPauses/GetExternalPausesCountRequest.js';
+import GetExternalPausesMembersRequest from './security/externalPauses/GetExternalPausesMembersRequest.js';
+import IsPausedMockRequest from './security/externalPauses/mock/IsPausedMockRequest.js';
+import SetPausedMockRequest from './security/externalPauses/mock/SetPausedMockRequest.js';
+import UpdateExternalControlListsRequest from './security/externalControlLists/UpdateExternalControlListsRequest.js';
+import AddExternalControlListRequest from './security/externalControlLists/AddExternalControlListRequest.js';
+import RemoveExternalControlListRequest from './security/externalControlLists/RemoveExternalControlListRequest.js';
+import GetExternalControlListsCountRequest from './security/externalControlLists/GetExternalControlListsCountRequest.js';
+import IsExternalControlListRequest from './security/externalControlLists/IsExternalControlListRequest.js';
+import GetExternalControlListsMembersRequest from './security/externalControlLists/GetExternalControlListsMembersRequest.js';
+import AddToBlackListMockRequest from './security/externalControlLists/mock/AddToBlackListMockRequest.js';
+import AddToWhiteListMockRequest from './security/externalControlLists/mock/AddToWhiteListMockRequest.js';
+import RemoveFromBlackListMockRequest from './security/externalControlLists/mock/RemoveFromBlackListMockRequest.js';
+import RemoveFromWhiteListMockRequest from './security/externalControlLists/mock/RemoveFromWhiteListMockRequest.js';
+import IsAuthorizedBlackListMockRequest from './security/externalControlLists/mock/IsAuthorizedBlackListMockRequest.js';
+import IsAuthorizedWhiteListMockRequest from './security/externalControlLists/mock/IsAuthorizedWhiteListMockRequest.js';
 
 export {
   CreateEquityRequest,
@@ -438,4 +458,24 @@ export {
   OperatorClearingCreateHoldByPartitionRequest,
   OperatorClearingRedeemByPartitionRequest,
   OperatorClearingTransferByPartitionRequest,
+  UpdateExternalPausesRequest,
+  AddExternalPauseRequest,
+  RemoveExternalPauseRequest,
+  IsExternalPauseRequest,
+  GetExternalPausesCountRequest,
+  GetExternalPausesMembersRequest,
+  IsPausedMockRequest,
+  SetPausedMockRequest,
+  UpdateExternalControlListsRequest,
+  AddExternalControlListRequest,
+  RemoveExternalControlListRequest,
+  GetExternalControlListsCountRequest,
+  IsExternalControlListRequest,
+  GetExternalControlListsMembersRequest,
+  AddToBlackListMockRequest,
+  AddToWhiteListMockRequest,
+  RemoveFromBlackListMockRequest,
+  RemoveFromWhiteListMockRequest,
+  IsAuthorizedBlackListMockRequest,
+  IsAuthorizedWhiteListMockRequest,
 };
