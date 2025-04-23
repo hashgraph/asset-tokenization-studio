@@ -233,9 +233,9 @@ import {
   WalletEvents,
   WalletPairedEvent,
 } from '../../../../app/service/event/WalletEvent';
-import LogService from '../../../../app/service/LogService';
+import LogService from '../../../../app/service/log/LogService';
 import EventService from '../../../../app/service/event/EventService';
-import NetworkService from '../../../../app/service/NetworkService';
+import NetworkService from '../../../../app/service/network/NetworkService';
 import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator';
 import Injectable from '../../../../core/Injectable';
 import Hex from '../../../../core/Hex';

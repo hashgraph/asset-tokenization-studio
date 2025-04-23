@@ -203,32 +203,71 @@
 
 */
 
-import { singleton } from 'tsyringe';
-import Injectable from '../../core/Injectable.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import Service from './Service.js';
-import EvmAddress from '../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../domain/context/shared/HederaId.js';
-import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter.js';
-@singleton()
-export default class ContractService extends Service {
-  queryBus: QueryBus;
+import { singleton, inject } from 'tsyringe';
+import Configuration from '../../../domain/context/network/Configuration.js';
+import { Environment } from '../../../domain/context/network/Environment.js';
+import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
+import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay.js';
+import Service from '../Service.js';
 
-  constructor(
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
-      MirrorNodeAdapter,
-    ),
-  ) {
-    super();
+export interface NetworkProps {
+  environment: Environment;
+  mirrorNode: MirrorNode;
+  rpcNode: JsonRpcRelay;
+  consensusNodes?: string;
+  configuration?: Configuration;
+}
+
+@singleton()
+export default class NetworkService extends Service implements NetworkProps {
+  private _environment: Environment;
+  private _mirrorNode: MirrorNode;
+  private _rpcNode: JsonRpcRelay;
+  private _consensusNodes?: string | undefined;
+  private _configuration: Configuration;
+
+  public set environment(value: Environment) {
+    this._environment = value;
   }
 
-  async getContractEvmAddress(contractId: string): Promise<EvmAddress> {
-    const evmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(contractId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(contractId)).evmAddress
-        : contractId.toString(),
-    );
+  public get environment(): Environment {
+    return this._environment;
+  }
 
-    return evmAddress;
+  public set configuration(value: Configuration) {
+    this._configuration = value;
+  }
+
+  public get configuration(): Configuration {
+    return this._configuration;
+  }
+
+  public get mirrorNode(): MirrorNode {
+    return this._mirrorNode;
+  }
+
+  public set mirrorNode(value: MirrorNode) {
+    this._mirrorNode = value;
+  }
+
+  public get rpcNode(): JsonRpcRelay {
+    return this._rpcNode;
+  }
+
+  public set rpcNode(value: JsonRpcRelay) {
+    this._rpcNode = value;
+  }
+
+  public get consensusNodes(): string | undefined {
+    return this._consensusNodes;
+  }
+
+  public set consensusNodes(value: string | undefined) {
+    this._consensusNodes = value;
+  }
+
+  constructor(@inject('NetworkProps') props?: NetworkProps) {
+    super();
+    Object.assign(this, props);
   }
 }

@@ -203,61 +203,95 @@
 
 */
 
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import {
-  AddToControlListCommand,
-  AddToControlListCommandResponse,
-} from './AddToControlListCommand.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import ContractService from '../../../../../service/ContractService.js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createLogger, LoggerOptions, transports, format } from 'winston';
+import safeStringify from 'fast-safe-stringify';
+import BaseError from '../../../core/error/BaseError.js';
+//import { SDK } from '../../port/in/Common.js';
+//import Injectable from '../../core/Injectable.js';
 
-@CommandHandler(AddToControlListCommand)
-export class AddToControlListCommandHandler
-  implements ICommandHandler<AddToControlListCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-  ) {}
+const { Console } = transports;
+const { printf } = format;
 
-  async execute(
-    command: AddToControlListCommand,
-  ): Promise<AddToControlListCommandResponse> {
-    const { targetId, securityId } = command;
-    const handler = this.transactionService.getHandler();
+export enum LogLevel {
+  TRACE = 'TRACE',
+  INFO = 'INFO',
+  ERROR = 'ERROR',
+}
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+export const LoggerOptionLevels = {
+  [LogLevel.TRACE]: 3,
+  [LogLevel.INFO]: 2,
+  [LogLevel.ERROR]: 0,
+};
 
-    await this.validationService.checkPause(securityId);
+export default class LogService {
+  public static instance: LogService = new LogService();
+  public static defaultFormat = printf(
+    ({ level, message, timestamp, other }) => {
+      const formatOther = (val: any[]): string => {
+        return val
+          .map((e) => {
+            switch (typeof e) {
+              case 'object':
+                return safeStringify(e);
+              default:
+                return e;
+            }
+          })
+          .join('\t');
+      };
+      return `${timestamp} - [${level}]\t${message}\t${formatOther(other as any[])}`;
+    },
+  );
 
-    await this.validationService.checkAccountInControlList(
-      securityId,
-      targetId,
-      true,
-    );
+  private logger;
+  private readonly coreConfig: LoggerOptions = {
+    levels: LoggerOptionLevels,
+    exitOnError: false,
+  };
+  private readonly defaultConfig: LoggerOptions = {
+    transports: new Console(),
+    level: LogLevel.ERROR,
+    format: LogService.defaultFormat,
+  };
 
-    const res = await handler.addToControlList(
-      securityEvmAddress,
-      targetEvmAddress,
-      securityId,
-    );
+  constructor(opts?: LoggerOptions) {
+    LogService.instance = this;
+    this.logger = createLogger({
+      ...(opts ? { ...this.defaultConfig, ...opts } : this.defaultConfig),
+      ...this.coreConfig,
+    });
+  }
 
-    return Promise.resolve(
-      new AddToControlListCommandResponse(res.error === undefined, res.id!),
-    );
+  public static log(level: LogLevel, message: any, params: any[]): void {
+    this.instance.logger.log(level, message, {
+      timestamp: new Date().toISOString(),
+      other: params,
+    });
+  }
+
+  public static logError(error: unknown, ...params: any[]): void;
+  public static logError(error: BaseError, ...params: any[]): void {
+    if (error instanceof BaseError) {
+      this.log(
+        LogLevel.ERROR,
+        error
+          .toString
+          //Injectable.resolve<typeof SDK>('SDK').log.level === 'TRACE',
+          (),
+        params,
+      );
+    } else {
+      this.log(LogLevel.ERROR, error, params);
+    }
+  }
+
+  public static logInfo(message: any, ...params: any[]): void {
+    this.log(LogLevel.INFO, message, params);
+  }
+
+  public static logTrace(message: any, ...params: any[]): void {
+    this.log(LogLevel.TRACE, message, params);
   }
 }

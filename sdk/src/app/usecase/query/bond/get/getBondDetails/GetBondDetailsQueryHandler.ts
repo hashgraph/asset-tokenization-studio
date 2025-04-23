@@ -211,7 +211,7 @@ import {
   GetBondDetailsQuery,
   GetBondDetailsQueryResponse,
 } from './GetBondDetailsQuery.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../../../../../domain/context/bond/BondDetails.js';
 

@@ -209,8 +209,8 @@ import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../service/AccountService';
-import ContractService from '../../../../service/ContractService.js';
+import AccountService from '../../../../service/account/AccountService';
+import ContractService from '../../../../service/contract/ContractService.js';
 
 @QueryHandler(LocksIdQuery)
 export class LocksIdQueryHandler implements IQueryHandler<LocksIdQuery> {

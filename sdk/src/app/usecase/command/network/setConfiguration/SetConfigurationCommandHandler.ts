@@ -207,7 +207,7 @@ import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import NetworkService from '../../../../service/NetworkService.js';
+import NetworkService from '../../../../service/network/NetworkService.js';
 import {
   SetConfigurationCommand,
   SetConfigurationCommandResponse,

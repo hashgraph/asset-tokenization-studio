@@ -204,7 +204,7 @@
 */
 
 import { ethers } from 'ethers';
-import LogService from '../../../app/service/LogService.js';
+import LogService from '../../../app/service/log/LogService.js';
 import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
 import { TransactionResponseError } from '../error/TransactionResponseError.js';
 import { TransactionResponseAdapter } from '../TransactionResponseAdapter.js';

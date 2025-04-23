@@ -212,7 +212,7 @@ import {
   GetDividendsQuery,
   GetDividendsQueryResponse,
 } from './GetDividendsQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 
 @QueryHandler(GetDividendsQuery)
 export class GetDividendsQueryHandler

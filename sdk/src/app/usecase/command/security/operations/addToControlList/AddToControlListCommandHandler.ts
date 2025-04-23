@@ -203,59 +203,61 @@
 
 */
 
-import { singleton } from 'tsyringe';
-import Injectable from '../../core/Injectable.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import Account from '../../domain/context/account/Account.js';
-import { AccountIdNotValid } from '../../domain/context/account/error/AccountIdNotValid.js';
-import { HederaId } from '../../domain/context/shared/HederaId.js';
-import { GetAccountInfoQuery } from '../usecase/query/account/info/GetAccountInfoQuery.js';
-import Service from './Service.js';
-import TransactionService from './transaction/TransactionService.js';
-import EvmAddress from '../../domain/context/contract/EvmAddress';
-import { HEDERA_FORMAT_ID_REGEX } from '../../domain/context/shared/HederaId';
-import { MirrorNodeAdapter } from '../../port/out/mirror/MirrorNodeAdapter';
-import { EVM_ZERO_ADDRESS } from '../../core/Constants.js';
-@singleton()
-export default class AccountService extends Service {
-  queryBus: QueryBus;
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import {
+  AddToControlListCommand,
+  AddToControlListCommandResponse,
+} from './AddToControlListCommand.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 
+@CommandHandler(AddToControlListCommand)
+export class AddToControlListCommandHandler
+  implements ICommandHandler<AddToControlListCommand>
+{
   constructor(
-    private readonly transactionService: TransactionService = Injectable.resolve(
-      TransactionService,
-    ),
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
-      MirrorNodeAdapter,
-    ),
-  ) {
-    super();
-  }
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(TransactionService)
+    private readonly transactionService: TransactionService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
+  ) {}
 
-  getCurrentAccount(): Account {
-    this.queryBus = Injectable.resolve(QueryBus);
-    return this.transactionService.getHandler().getAccount();
-  }
+  async execute(
+    command: AddToControlListCommand,
+  ): Promise<AddToControlListCommandResponse> {
+    const { targetId, securityId } = command;
+    const handler = this.transactionService.getHandler();
 
-  async getAccountInfo(id: HederaId | string): Promise<Account> {
-    this.queryBus = Injectable.resolve(QueryBus);
-    const account = (await this.queryBus.execute(new GetAccountInfoQuery(id)))
-      .account;
-    if (!account.id) throw new AccountIdNotValid(id.toString());
-    return account;
-  }
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
 
-  async getAccountEvmAddress(accountId: string): Promise<EvmAddress> {
-    const evmAddress = HEDERA_FORMAT_ID_REGEX.test(accountId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(accountId)
-      : new EvmAddress(accountId);
-    return evmAddress;
-  }
+    await this.validationService.checkPause(securityId);
 
-  async getAccountEvmAddressOrNull(accountId: string): Promise<EvmAddress> {
-    const evmAddress: EvmAddress =
-      accountId === '0.0.0'
-        ? new EvmAddress(EVM_ZERO_ADDRESS)
-        : await this.getAccountEvmAddress(accountId);
-    return evmAddress;
+    await this.validationService.checkAccountInControlList(
+      securityId,
+      targetId,
+      true,
+    );
+
+    const res = await handler.addToControlList(
+      securityEvmAddress,
+      targetEvmAddress,
+      securityId,
+    );
+
+    return Promise.resolve(
+      new AddToControlListCommandResponse(res.error === undefined, res.id!),
+    );
   }
 }

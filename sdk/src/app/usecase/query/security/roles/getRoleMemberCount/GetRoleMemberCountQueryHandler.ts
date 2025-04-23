@@ -211,7 +211,7 @@ import {
   GetRoleMemberCountQueryResponse,
 } from './GetRoleMemberCountQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 
 @QueryHandler(GetRoleMemberCountQuery)

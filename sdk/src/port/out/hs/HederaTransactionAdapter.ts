@@ -309,8 +309,8 @@ import {
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
 import { SigningError } from '../error/SigningError.js';
-import NetworkService from '../../../app/service/NetworkService.js';
-import LogService from '../../../app/service/LogService.js';
+import NetworkService from '../../../app/service/network/NetworkService.js';
+import LogService from '../../../app/service/log/LogService.js';
 import {
   FactoryBondToken,
   FactoryEquityToken,

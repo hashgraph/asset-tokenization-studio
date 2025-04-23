@@ -203,45 +203,54 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import Injectable from '../../core/Injectable.js';
-import NetworkService from '../../app/service/NetworkService.js';
-import WalletEvent, {
-  ConnectionState,
-  WalletEvents,
-} from '../../app/service/event/WalletEvent.js';
-import EventService from '../../app/service/event/EventService.js';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import Injectable from '../../../core/Injectable.js';
+import GetRegulationDetailsRequest from '../request/factory/GetRegulationDetailsRequest.js';
+import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+import RegulationViewModel from '../response/RegulationViewModel.js';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
-export { WalletEvent, WalletEvents, ConnectionState };
+import { GetRegulationDetailsQuery } from '../../../app/usecase/query/factory/get/GetRegulationDetailsQuery.js';
+import ContractId from '../../../domain/context/contract/ContractId.js';
+import NetworkService from '../../../app/service/network/NetworkService.js';
 
-export type EventParameter<T extends keyof WalletEvent> = Parameters<
-  WalletEvent[T]
->[0];
-
-interface EventInPortBase {
-  register(events: Partial<WalletEvent>): void;
+interface IFactoryInPort {
+  getRegulationDetails(
+    request: GetRegulationDetailsRequest,
+  ): Promise<RegulationViewModel>;
 }
 
-class EventInPort implements EventInPortBase {
+class FactoryInPort implements IFactoryInPort {
   constructor(
-    private readonly networkService: NetworkService = Injectable.resolve<NetworkService>(
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
+    private readonly networkService: NetworkService = Injectable.resolve(
       NetworkService,
-    ),
-    private readonly eventService: EventService = Injectable.resolve(
-      EventService,
     ),
   ) {}
 
   @LogError
-  register(events: Partial<WalletEvent>): void {
-    Object.entries(events).map(([name, cll]) => {
-      if (name in WalletEvents) {
-        this.eventService.on(name as keyof WalletEvent, cll);
-      }
-    });
+  async getRegulationDetails(
+    request: GetRegulationDetailsRequest,
+  ): Promise<RegulationViewModel> {
+    ValidatedRequest.handleValidation('GetRegulationDetailsRequest', request);
+
+    const securityFactory = this.networkService.configuration.factoryAddress;
+
+    const res = await this.queryBus.execute(
+      new GetRegulationDetailsQuery(
+        request.regulationType,
+        request.regulationSubType,
+        securityFactory ? new ContractId(securityFactory) : undefined,
+      ),
+    );
+
+    const regulation = res.regulation;
+
+    return {
+      ...regulation,
+    };
   }
 }
 
-const Event = new EventInPort();
-export default Event;
+const Factory = new FactoryInPort();
+export default Factory;
