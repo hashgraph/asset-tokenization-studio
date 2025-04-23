@@ -213,7 +213,7 @@ import {
   GetSecurityQueryResponse,
 } from './GetSecurityQuery.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../service/ContractService';
+import ContractService from '../../../../service/contract/ContractService';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 
 @QueryHandler(GetSecurityQuery)

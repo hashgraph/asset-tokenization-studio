@@ -208,7 +208,7 @@ import {
   CustodialWalletService,
 } from '@hashgraph/hedera-custodians-integration';
 import { singleton } from 'tsyringe';
-import LogService from '../../../../../app/service/LogService';
+import LogService from '../../../../../app/service/log/LogService';
 import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
 import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
 import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';

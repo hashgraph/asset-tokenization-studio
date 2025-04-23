@@ -207,7 +207,7 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetAggregatedBalanceAdjustmentFactorQuery,

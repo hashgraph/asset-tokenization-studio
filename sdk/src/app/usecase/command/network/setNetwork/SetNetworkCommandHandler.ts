@@ -209,7 +209,7 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import Injectable from '../../../../../core/Injectable.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import NetworkService from '../../../../service/NetworkService.js';
+import NetworkService from '../../../../service/network/NetworkService.js';
 import {
   SetNetworkCommand,
   SetNetworkCommandResponse,

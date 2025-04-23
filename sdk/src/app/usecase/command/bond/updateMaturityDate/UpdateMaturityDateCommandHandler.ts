@@ -384,8 +384,8 @@ import {
   UpdateMaturityDateCommand,
   UpdateMaturityDateCommandResponse,
 } from './UpdateMaturityDateCommand';
-import ContractService from '../../../../service/ContractService';
-import ValidationService from '../../../../service/ValidationService';
+import ContractService from '../../../../service/contract/ContractService';
+import ValidationService from '../../../../service/validation/ValidationService';
 
 @CommandHandler(UpdateMaturityDateCommand)
 export class UpdateMaturityDateCommandHandler

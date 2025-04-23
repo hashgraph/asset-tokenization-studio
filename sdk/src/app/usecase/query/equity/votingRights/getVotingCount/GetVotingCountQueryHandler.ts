@@ -211,7 +211,7 @@ import {
   GetVotingCountQueryResponse,
 } from './GetVotingCountQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 
 @QueryHandler(GetVotingCountQuery)

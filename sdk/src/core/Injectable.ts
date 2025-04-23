@@ -225,7 +225,7 @@ import { IssueCommandHandler } from '../app/usecase/command/security/operations/
 import { RedeemCommandHandler } from '../app/usecase/command/security/operations/redeem/RedeemCommandHandler.js';
 import { TransferCommandHandler } from '../app/usecase/command/security/operations/transfer/TransferCommandHandler.js';
 import { TransferAndLockCommandHandler } from '../app/usecase/command/security/operations/transfer/TransferAndLockCommandHandler.js';
-import { AddToControlListCommandHandler } from '../app/usecase/command/security/operations/AddToControlList/AddToControlListCommandHandler.js';
+import { AddToControlListCommandHandler } from '../app/usecase/command/security/operations/addToControlList/AddToControlListCommandHandler.js';
 import { PauseCommandHandler } from '../app/usecase/command/security/operations/pause/PauseCommandHandler.js';
 import { RemoveFromControlListCommandHandler } from '../app/usecase/command/security/operations/removeFromControlList/RemoveFromControlListCommandHandler.js';
 import { UnpauseCommandHandler } from '../app/usecase/command/security/operations/unpause/UnpauseCommandHandler.js';
@@ -253,7 +253,7 @@ import { ExecuteHoldByPartitionCommandHandler } from '../app/usecase/command/sec
 import { WalletEvents } from '../app/service/event/WalletEvent.js';
 import { CommandHandlerType } from './command/CommandBus.js';
 import { QueryHandlerType } from './query/QueryBus.js';
-import { NetworkProps } from '../app/service/NetworkService.js';
+import { NetworkProps } from '../app/service/network/NetworkService.js';
 // eslint-disable-next-line jest/no-mocks-import
 import { ConcreteQueryHandler } from '../../__tests__/integration/__mocks__/ConcreteQueryHandler.js';
 // eslint-disable-next-line jest/no-mocks-import
