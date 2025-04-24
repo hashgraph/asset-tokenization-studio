@@ -96,7 +96,7 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@openzeppelin/contracts": "^4.9.6",
     "@openzeppelin/contracts-upgradeable": "^4.9.6",
-    "@openzeppelin/hardhat-upgrades": "^1.22.1",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
     "@terminal3/ecdsa_vc": "^0.1.19",
     "@thomaschaplin/isin-generator": "^1.0.3",
     "@typechain/ethers-v5": "^11.1.2",
