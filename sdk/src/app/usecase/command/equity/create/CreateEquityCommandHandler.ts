@@ -263,6 +263,8 @@ export class CreateEquityCommandHandler
         dividendRight,
         currency,
         nominalValue,
+        externalPauses,
+        externalControlLists,
       } = command;
 
       if (!factory) {
@@ -290,6 +292,30 @@ export class CreateEquityCommandHandler
       const resolverEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(resolver.toString());
 
+      let externalPausesEvmAddresses: EvmAddress[] = [];
+      if (externalPauses) {
+        externalPausesEvmAddresses = await Promise.all(
+          externalPauses.map(
+            async (address) =>
+              await this.contractService.getContractEvmAddress(
+                address.toString(),
+              ),
+          ),
+        );
+      }
+
+      let externalControlListsEvmAddresses: EvmAddress[] = [];
+      if (externalControlLists) {
+        externalControlListsEvmAddresses = await Promise.all(
+          externalControlLists.map(
+            async (address) =>
+              await this.contractService.getContractEvmAddress(
+                address.toString(),
+              ),
+          ),
+        );
+      }
+
       const handler = this.transactionService.getHandler();
 
       const equityInfo = new EquityDetails(
@@ -305,16 +331,19 @@ export class CreateEquityCommandHandler
         BigDecimal.fromString(nominalValue),
       );
 
-      res = await handler.createEquity(
+      const res = await handler.createEquity(
         new Security(security),
         equityInfo,
         factoryEvmAddress,
         resolverEvmAddress,
         configId,
         configVersion,
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
         diamondOwnerAccountEvmAddress,
         factory.toString(),
       );
+
       const contractAddress =
         await this.transactionService.getTransactionResult({
           res,
@@ -323,7 +352,6 @@ export class CreateEquityCommandHandler
           position: 0,
           numberOfResultsItems: 1,
         });
-
       const contractId =
         await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
           contractAddress,

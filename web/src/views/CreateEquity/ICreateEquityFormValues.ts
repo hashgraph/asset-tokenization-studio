@@ -228,4 +228,6 @@ export interface ICreateEquityFormValues {
   regulationSubType: number;
   countriesListType: number;
   countriesList: string[];
+  externalPausesList?: string[];
+  externalControlList?: string[];
 }

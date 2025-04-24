@@ -203,19 +203,18 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 
-contract T3RevocationRegistry {
-    mapping(address => mapping(string => bool)) public revoked;
+export class IsExternalControlListQueryResponse implements QueryResponse {
+  constructor(public readonly payload: boolean) {}
+}
 
-    constructor() {}
-
-    function revoke(string memory vcId) public {
-        revoked[msg.sender][vcId] = true;
-    }
-
-    function cancelRevoke(string memory vcId) public {
-        delete revoked[msg.sender][vcId];
-    }
+export class IsExternalControlListQuery extends Query<IsExternalControlListQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly externalControlListAddress: string,
+  ) {
+    super();
+  }
 }

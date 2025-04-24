@@ -213,7 +213,9 @@ import Network from './network/Network.js';
 import Factory from './factory/Factory.js';
 import Management from './management/Management.js';
 import SsiManagement from './ssiManagement/SsiManagement.js';
+import ExternalPausesManagement from './externalPausesManagement/ExternalPausesManagement.js';
 import Kyc from './kyc/Kyc.js';
+import ExternalControlListsManagement from './externalControlListsManagement/ExternalControlListsManagement.js';
 
 export {
   Security,
@@ -227,6 +229,8 @@ export {
   Management,
   SsiManagement,
   Kyc,
+  ExternalPausesManagement,
+  ExternalControlListsManagement,
 };
 
 export * from './request';
@@ -244,3 +248,5 @@ export * from './factory/Factory.js';
 export * from './management/Management.js';
 export * from './kyc/Kyc.js';
 export * from './ssiManagement/SsiManagement.js';
+export * from './externalPausesManagement/ExternalPausesManagement.js';
+export * from './externalControlListsManagement/ExternalControlListsManagement.js';

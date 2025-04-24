@@ -217,12 +217,12 @@ import {
     _CONTROL_LIST_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {
-    ProtectedPartitionsStorageWrapper
-} from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
+    ExternalControlListManagementStorageWrapper
+} from '../externalControlLists/ExternalControlListManagementStorageWrapper.sol';
 
 abstract contract ControlListStorageWrapper is
     IControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper
+    ExternalControlListManagementStorageWrapper
 {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -279,8 +279,9 @@ abstract contract ControlListStorageWrapper is
         return _controlListStorage().list.contains(_account);
     }
 
-    function _isAbleToAccess(address account) internal view returns (bool) {
-        return _getControlListType() == _isInControlList(account);
+    function _isAbleToAccess(address _account) internal view returns (bool) {
+        return (_getControlListType() == _isInControlList(_account) &&
+            _isExternallyAuthorized(_account));
     }
 
     function _checkControlList(address _account) internal view {

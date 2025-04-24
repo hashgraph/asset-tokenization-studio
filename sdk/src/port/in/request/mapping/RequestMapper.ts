@@ -204,7 +204,6 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import LogService from '../../../../app/service/log/LogService.js';
 import Account from '../../../../domain/context/account/Account.js';
 import PublicKey from '../../../../domain/context/account/PublicKey.js';
 import { RequestAccount } from '../BaseRequest.js';

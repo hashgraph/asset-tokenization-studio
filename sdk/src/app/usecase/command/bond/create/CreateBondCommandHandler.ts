@@ -258,6 +258,8 @@ export class CreateBondCommandHandler
         configId,
         configVersion,
         diamondOwnerAccount,
+        externalPauses,
+        externalControlLists,
       } = command;
 
       if (!factory) {
@@ -285,6 +287,30 @@ export class CreateBondCommandHandler
       const resolverEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(resolver.toString());
 
+      let externalPausesEvmAddresses: EvmAddress[] = [];
+      if (externalPauses) {
+        externalPausesEvmAddresses = await Promise.all(
+          externalPauses.map(
+            async (address) =>
+              await this.contractService.getContractEvmAddress(
+                address.toString(),
+              ),
+          ),
+        );
+      }
+
+      let externalControlListsEvmAddresses: EvmAddress[] = [];
+      if (externalControlLists) {
+        externalControlListsEvmAddresses = await Promise.all(
+          externalControlLists.map(
+            async (address) =>
+              await this.contractService.getContractEvmAddress(
+                address.toString(),
+              ),
+          ),
+        );
+      }
+
       const handler = this.transactionService.getHandler();
 
       const bondInfo = new BondDetails(
@@ -308,6 +334,8 @@ export class CreateBondCommandHandler
         resolverEvmAddress,
         configId,
         configVersion,
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
         diamondOwnerAccountEvmAddress,
         factory.toString(),
       );

@@ -38,7 +38,8 @@ const getStatus = ({ kyc }: { kyc: KycAccountDataViewModelResponse }) => {
   if (currentTimestamp >= validToTimestamp) return STATUS.EXPIRED;
   if (
     Number(kyc.validTo) > 1e13 ||
-    (currentTimestamp >= validFromTimestamp && currentTimestamp < validToTimestamp)
+    (currentTimestamp >= validFromTimestamp &&
+      currentTimestamp < validToTimestamp)
   )
     return STATUS.VALID;
 
