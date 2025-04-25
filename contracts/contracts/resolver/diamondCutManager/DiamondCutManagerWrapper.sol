@@ -213,8 +213,8 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {
-    IDiamondLoupe
-} from '../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
+    IResolverLoupe
+} from '../../interfaces/resolver/resolverProxy/IResolverLoupe.sol';
 import {
     BusinessLogicResolverWrapper
 } from '../BusinessLogicResolverWrapper.sol';
@@ -527,7 +527,7 @@ abstract contract DiamondCutManagerWrapper is
         uint256 _version,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
+    ) internal view returns (IResolverLoupe.ResolverFacet[] memory facets_) {
         bytes32[] memory facetIds = _dcms.facetIds[
             _buildHash(
                 _configurationId,
@@ -539,7 +539,7 @@ abstract contract DiamondCutManagerWrapper is
             _pageLength
         );
         uint256 size = LibCommon.getSize(start, end, facetIds.length);
-        facets_ = new IDiamondLoupe.Facet[](size);
+        facets_ = new IResolverLoupe.ResolverFacet[](size);
         uint256 version = _resolveVersion(_dcms, _configurationId, _version);
         for (uint256 index; index < size; ) {
             facets_[index] = _getFacetByConfigurationIdVersionAndFacetId(
@@ -666,13 +666,13 @@ abstract contract DiamondCutManagerWrapper is
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
-    ) internal view returns (IDiamondLoupe.Facet memory facet_) {
+    ) internal view returns (IResolverLoupe.ResolverFacet memory facet_) {
         bytes32 facetIdHash = _buildHash(
             _configurationId,
             _resolveVersion(_dcms, _configurationId, _version),
             _facetId
         );
-        facet_ = IDiamondLoupe.Facet({
+        facet_ = IResolverLoupe.ResolverFacet({
             id: _facetId,
             addr: _dcms.addr[facetIdHash],
             selectors: _dcms.selectors[facetIdHash],

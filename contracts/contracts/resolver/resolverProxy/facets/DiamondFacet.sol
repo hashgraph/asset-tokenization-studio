@@ -220,18 +220,18 @@ import {
 import {
     IDiamondLoupe
 } from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
-import {IERC165} from '@openzeppelin/contracts/utils/introspection/IERC165.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+    IResolverLoupe
+} from '../../../interfaces/resolver/resolverProxy/IResolverLoupe.sol';
+import {IERC165} from '@openzeppelin/contracts/utils/introspection/IERC165.sol';
 
 // Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
 // The loupe functions are required by the EIP2535 Diamonds standard
-contract DiamondFacet is IDiamond, DiamondCutFacet, DiamondLoupeFacet {
+contract DiamondFacet is DiamondCutFacet, DiamondLoupeFacet {
     function getStaticResolverKey()
         external
         pure
-        override(IStaticFunctionSelectors, DiamondCutFacet, DiamondLoupeFacet)
+        override(DiamondCutFacet, DiamondLoupeFacet)
         returns (bytes32 staticResolverKey_)
     {
         staticResolverKey_ = _DIAMOND_RESOLVER_KEY;
@@ -240,10 +240,10 @@ contract DiamondFacet is IDiamond, DiamondCutFacet, DiamondLoupeFacet {
     function getStaticFunctionSelectors()
         external
         pure
-        override(IStaticFunctionSelectors, DiamondCutFacet, DiamondLoupeFacet)
+        override(DiamondCutFacet, DiamondLoupeFacet)
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](18);
+        staticFunctionSelectors_ = new bytes4[](22);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .updateConfigVersion
@@ -288,6 +288,14 @@ contract DiamondFacet is IDiamond, DiamondCutFacet, DiamondLoupeFacet {
         staticFunctionSelectors_[selectorsIndex++] = this
             .getFacetAddress
             .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.facets.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .facetFunctionSelectors
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .facetAddresses
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.facetAddress.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .supportsInterface
             .selector;
@@ -296,14 +304,16 @@ contract DiamondFacet is IDiamond, DiamondCutFacet, DiamondLoupeFacet {
     function getStaticInterfaceIds()
         external
         pure
-        override(IStaticFunctionSelectors, DiamondCutFacet, DiamondLoupeFacet)
+        override(DiamondCutFacet, DiamondLoupeFacet)
         returns (bytes4[] memory staticInterfaceIds_)
     {
-        staticInterfaceIds_ = new bytes4[](4);
+        staticInterfaceIds_ = new bytes4[](5);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IDiamond).interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(IDiamondCut).interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(IDiamondLoupe).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IResolverLoupe)
+            .interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(IERC165).interfaceId;
     }
 }

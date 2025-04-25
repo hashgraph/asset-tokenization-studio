@@ -212,6 +212,7 @@ import 'hardhat-contract-sizer'
 import 'hardhat-gas-reporter'
 import Configuration from '@configuration'
 import '@tasks'
+import 'hardhat-gas-reporter'
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -276,6 +277,9 @@ const config: HardhatUserConfig = {
     },
     mocha: {
         timeout: 3_000_000,
+    },
+    gasReporter: {
+        enabled: true,
     },
 }
 

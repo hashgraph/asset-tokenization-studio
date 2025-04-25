@@ -293,7 +293,7 @@ describe('ResolverProxy Tests', () => {
         businessLogicsRegistryDatas: BusinessLogicRegistryData[],
         diamondLoupe: DiamondLoupeFacet
     ) {
-        const expectedFacets = await Promise.all(
+        const expectedResolverFacets = await Promise.all(
             businessLogicsRegistryDatas.map(async (data) => {
                 const staticFunctionSelectors = await ethers.getContractAt(
                     'IStaticFunctionSelectors',
@@ -310,12 +310,14 @@ describe('ResolverProxy Tests', () => {
             })
         )
 
-        assertObject(await diamondLoupe.getFacets(), expectedFacets)
+        assertObject(await diamondLoupe.getFacets(), expectedResolverFacets)
 
-        const expectedFacetIds = expectedFacets.map((facet) => facet.id)
-        const expectedFacetAddresses = expectedFacets.map((facet) => facet.addr)
+        const expectedFacetIds = expectedResolverFacets.map((facet) => facet.id)
+        const expectedFacetAddresses = expectedResolverFacets.map(
+            (facet) => facet.addr
+        )
 
-        for (const facet of expectedFacets) {
+        for (const facet of expectedResolverFacets) {
             expect(
                 await diamondLoupe.getFacetSelectors(facet.id)
             ).to.deep.equal(facet.selectors)
@@ -332,6 +334,24 @@ describe('ResolverProxy Tests', () => {
         expect(await diamondLoupe.getFacetAddresses()).to.deep.equal(
             expectedFacetAddresses
         )
+        const expectedFacets = expectedResolverFacets.map((data) => {
+            return {
+                facetAddress: data.addr,
+                functionSelectors: data.selectors,
+            }
+        })
+        assertObject(await diamondLoupe.facets(), expectedFacets)
+        assertObject(
+            await diamondLoupe.facetAddresses(),
+            expectedFacetAddresses
+        )
+        for (const facet of expectedFacets) {
+            for (const selector of facet.functionSelectors) {
+                expect(await diamondLoupe.facetAddress(selector)).to.be.equal(
+                    facet.facetAddress
+                )
+            }
+        }
     }
 
     beforeEach(async () => {

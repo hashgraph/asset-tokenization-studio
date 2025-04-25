@@ -213,8 +213,8 @@ import {
     IBusinessLogicResolver
 } from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
 import {
-    IDiamondLoupe
-} from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
+    IResolverLoupe
+} from '../../../interfaces/resolver/resolverProxy/IResolverLoupe.sol';
 import {
     AccessControlStorageWrapper
 } from '../../../layer_0/core/accessControl/AccessControlStorageWrapper.sol';
@@ -305,11 +305,11 @@ abstract contract ResolverProxyUnstructured is
         );
     }
 
-    function _getFacets(
+    function _getResolverFacets(
         ResolverProxyStorage storage _ds,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
+    ) internal view returns (IResolverLoupe.ResolverFacet[] memory facets_) {
         facets_ = _ds.resolver.getFacetsByConfigurationIdAndVersion(
             _ds.resolverProxyConfigurationId,
             _ds.version,
@@ -390,7 +390,7 @@ abstract contract ResolverProxyUnstructured is
     function _getFacet(
         ResolverProxyStorage storage _ds,
         bytes32 _facetId
-    ) internal view returns (IDiamondLoupe.Facet memory facet_) {
+    ) internal view returns (IResolverLoupe.ResolverFacet memory facet_) {
         facet_ = _ds.resolver.getFacetByConfigurationIdVersionAndFacetId(
             _ds.resolverProxyConfigurationId,
             _ds.version,

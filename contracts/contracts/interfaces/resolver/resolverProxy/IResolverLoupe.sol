@@ -204,296 +204,121 @@
 */
 
 pragma solidity 0.8.18;
-
-import {_DEFAULT_ADMIN_ROLE} from '../../layer_1/constants/roles.sol';
-import {Pause} from '../../layer_1/pause/Pause.sol';
-import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
-import {DiamondCutManagerWrapper} from './DiamondCutManagerWrapper.sol';
-import {
-    IResolverLoupe
-} from '../../interfaces/resolver/resolverProxy/IResolverLoupe.sol';
-
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract DiamondCutManager is
-    AccessControl,
-    Pause,
-    DiamondCutManagerWrapper
-{
-    modifier validateConfigurationId(bytes32 _configurationId) {
-        _checkConfigurationId(_configurationId);
-        _;
+import {IStaticFunctionSelectors} from './IStaticFunctionSelectors.sol';
+import {IDiamondLoupe} from './IDiamondLoupe.sol';
+
+// A loupe is a small magnifying glass used to look at resolverProxys.
+// These functions look at resolverProxys
+/// #### Structs
+/// ```
+///    struct Facet {
+///        bytes32 facetId;
+///        address facetAddress;
+///        bytes4[] selectors;
+///    }
+///```
+interface IResolverLoupe is IDiamondLoupe, IStaticFunctionSelectors {
+    struct ResolverFacet {
+        bytes32 id;
+        address addr;
+        bytes4[] selectors;
+        bytes4[] interfaceIds;
     }
 
-    function createConfiguration(
-        bytes32 _configurationId,
-        FacetConfiguration[] calldata _facetConfigurations
-    )
-        external
-        override
-        validateConfigurationId(_configurationId)
-        onlyRole(_DEFAULT_ADMIN_ROLE)
-        onlyUnpaused
-    {
-        emit DiamondConfigurationCreated(
-            _configurationId,
-            _facetConfigurations,
-            _createConfiguration(_configurationId, _facetConfigurations)
-        );
-    }
+    /// @notice Gets all facet addresses and their four byte function selectors.
+    /// @return facets_ Facet
+    function getFacets() external view returns (ResolverFacet[] memory facets_);
 
-    function createBatchConfiguration(
-        bytes32 _configurationId,
-        FacetConfiguration[] calldata _facetConfigurations,
-        bool _isLastBatch
-    )
-        external
-        override
-        validateConfigurationId(_configurationId)
-        onlyRole(_DEFAULT_ADMIN_ROLE)
-        onlyUnpaused
-    {
-        emit DiamondBatchConfigurationCreated(
-            _configurationId,
-            _facetConfigurations,
-            _isLastBatch,
-            _createBatchConfiguration(
-                _configurationId,
-                _facetConfigurations,
-                _isLastBatch
-            )
-        );
-    }
+    /// @notice Gets facet length.
+    /// @return facetsLength_ Facets length
+    function getFacetsLength() external view returns (uint256 facetsLength_);
 
-    function cancelBatchConfiguration(
-        bytes32 _configurationId
-    )
-        external
-        override
-        validateConfigurationId(_configurationId)
-        onlyRole(_DEFAULT_ADMIN_ROLE)
-        onlyUnpaused
-    {
-        _cancelBatchConfiguration(_configurationId);
-        emit DiamondBatchConfigurationCanceled(_configurationId);
-    }
-
-    function resolveResolverProxyCall(
-        bytes32 _configurationId,
-        uint256 _version,
-        bytes4 _selector
-    ) external view override returns (address facetAddress_) {
-        facetAddress_ = _resolveResolverProxyCall(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _selector
-        );
-    }
-
-    function resolveSupportsInterface(
-        bytes32 _configurationId,
-        uint256 _version,
-        bytes4 _interfaceId
-    ) external view override returns (bool exists_) {
-        exists_ = _resolveSupportsInterface(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _interfaceId
-        );
-    }
-
-    function isResolverProxyConfigurationRegistered(
-        bytes32 _configurationId,
-        uint256 _version
-    ) external view override returns (bool isRegistered_) {
-        isRegistered_ = _isResolverProxyConfigurationRegistered(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version
-        );
-    }
-
-    function checkResolverProxyConfigurationRegistered(
-        bytes32 _configurationId,
-        uint256 _version
-    ) external view override {
-        _checkResolverProxyConfigurationRegistered(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version
-        );
-    }
-
-    function getConfigurationsLength()
-        external
-        view
-        override
-        returns (uint256 configurationsLength_)
-    {
-        configurationsLength_ = _diamondCutManagerStorage()
-            .configurations
-            .length;
-    }
-
-    function getConfigurations(
+    /// @notice Gets all facet addresses and their four byte function selectors.
+    /// @param _pageIndex members to skip : _pageIndex * _pageLength
+    /// @param _pageLength number of members to return
+    /// @return facets_ Facet
+    function getFacetsByPage(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view override returns (bytes32[] memory configurationIds_) {
-        configurationIds_ = _getConfigurations(
-            _diamondCutManagerStorage(),
-            _pageIndex,
-            _pageLength
-        );
-    }
+    ) external view returns (ResolverFacet[] memory facets_);
 
-    function getLatestVersionByConfiguration(
-        bytes32 _configurationId
-    ) external view override returns (uint256 latestVersion_) {
-        latestVersion_ = _diamondCutManagerStorage().latestVersion[
-            _configurationId
-        ];
-    }
-
-    function getFacetsLengthByConfigurationIdAndVersion(
-        bytes32 _configurationId,
-        uint256 _version
-    ) external view override returns (uint256 facetsLength_) {
-        facetsLength_ = _getFacetsLengthByConfigurationIdAndVersion(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version
-        );
-    }
-
-    function getFacetsByConfigurationIdAndVersion(
-        bytes32 _configurationId,
-        uint256 _version,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        external
-        view
-        override
-        returns (IResolverLoupe.ResolverFacet[] memory facets_)
-    {
-        facets_ = _getFacetsByConfigurationIdAndVersion(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
-        bytes32 _configurationId,
-        uint256 _version,
+    /// @notice Gets all the function selectors supported by a specific facet.
+    /// @param _facetId The facet key for the resolver.
+    /// @return facetSelectors_
+    function getFacetSelectors(
         bytes32 _facetId
-    ) external view override returns (uint256 facetSelectorsLength_) {
-        facetSelectorsLength_ = _getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _facetId
-        );
-    }
+    ) external view returns (bytes4[] memory facetSelectors_);
 
-    function getFacetSelectorsByConfigurationIdVersionAndFacetId(
-        bytes32 _configurationId,
-        uint256 _version,
+    /// @notice Gets the function selectors length.
+    /// @param _facetId The facet key for the resolver.
+    /// @return facetSelectorsLength_
+    function getFacetSelectorsLength(
+        bytes32 _facetId
+    ) external view returns (uint256 facetSelectorsLength_);
+
+    /// @notice Gets all the function selectors supported by a specific facet.
+    /// @param _facetId The facet key for the resolver.
+    /// @param _pageIndex members to skip : _pageIndex * _pageLength
+    /// @param _pageLength number of members to return
+    /// @return facetSelectors_
+    function getFacetSelectorsByPage(
         bytes32 _facetId,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view override returns (bytes4[] memory facetSelectors_) {
-        facetSelectors_ = _getFacetSelectorsByConfigurationIdVersionAndFacetId(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _facetId,
-            _pageIndex,
-            _pageLength
-        );
-    }
+    ) external view returns (bytes4[] memory facetSelectors_);
 
-    function getFacetIdsByConfigurationIdAndVersion(
-        bytes32 _configurationId,
-        uint256 _version,
+    /// @notice Get all the facet addresses used by a resolverProxy.
+    /// @return facetIds_
+    function getFacetIds() external view returns (bytes32[] memory facetIds_);
+
+    /// @notice Get all the facet addresses used by a resolverProxy.
+    /// @param _pageIndex members to skip : _pageIndex * _pageLength
+    /// @param _pageLength number of members to return
+    /// @return facetIds_
+    function getFacetIdsByPage(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view override returns (bytes32[] memory facetIds_) {
-        facetIds_ = _getFacetIdsByConfigurationIdAndVersion(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _pageIndex,
-            _pageLength
-        );
-    }
+    ) external view returns (bytes32[] memory facetIds_);
 
-    function getFacetAddressesByConfigurationIdAndVersion(
-        bytes32 _configurationId,
-        uint256 _version,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (address[] memory facetAddresses_) {
-        facetAddresses_ = _getFacetAddressesByConfigurationIdAndVersion(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function getFacetIdByConfigurationIdVersionAndSelector(
-        bytes32 _configurationId,
-        uint256 _version,
-        bytes4 _selector
-    ) external view override returns (bytes32 facetId_) {
-        facetId_ = _getFacetIdByConfigurationIdVersionAndSelector(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _selector
-        );
-    }
-
-    function getFacetByConfigurationIdVersionAndFacetId(
-        bytes32 _configurationId,
-        uint256 _version,
-        bytes32 _facetId
-    )
+    /// @notice Get all the facet addresses used by a resolverProxy.
+    /// @return facetAddresses_
+    function getFacetAddresses()
         external
         view
-        override
-        returns (IResolverLoupe.ResolverFacet memory facet_)
-    {
-        facet_ = _getFacetByConfigurationIdVersionAndFacetId(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _facetId
-        );
-    }
+        returns (address[] memory facetAddresses_);
 
-    function getFacetAddressByConfigurationIdVersionAndFacetId(
-        bytes32 _configurationId,
-        uint256 _version,
+    /// @notice Get all the facet addresses used by a resolverProxy.
+    /// @param _pageIndex members to skip : _pageIndex * _pageLength
+    /// @param _pageLength number of members to return
+    /// @return facetAddresses_
+    function getFacetAddressesByPage(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory facetAddresses_);
+
+    /// @notice Gets the facet key that supports the given selector.
+    /// @dev If facet is not found return address(0).
+    /// @param _selector The function selector.
+    /// @return facetId_ The facet key.
+    function getFacetIdBySelector(
+        bytes4 _selector
+    ) external view returns (bytes32 facetId_);
+
+    /// @notice Get the information associated with an specific facet.
+    /// @dev If facet is not found return empty Facet struct.
+    /// @param _facetId The facet key for the resolver.
+    /// @return facet_ Facet data.
+    function getFacet(
         bytes32 _facetId
-    ) external view override returns (address facetAddress_) {
-        facetAddress_ = _getFacetAddressByConfigurationIdVersionAndFacetId(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _facetId
-        );
-    }
+    ) external view returns (ResolverFacet memory facet_);
 
-    function _checkConfigurationId(bytes32 _configurationId) private pure {
-        if (uint256(_configurationId) == 0) {
-            revert DefaultValueForConfigurationIdNotPermitted();
-        }
-    }
+    /// @notice Gets the facet that supports the given selector.
+    /// @dev If facet is not found return address(0).
+    /// @param _selector The function selector.
+    /// @return facetAddress_ The facet address.
+    function getFacetAddress(
+        bytes4 _selector
+    ) external view returns (address facetAddress_);
 }
