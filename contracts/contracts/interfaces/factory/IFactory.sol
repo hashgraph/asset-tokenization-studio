@@ -243,6 +243,7 @@ interface IFactory {
         bool clearingActive;
         address[] externalPauses;
         address[] externalControlLists;
+        address[] externalKycLists;
     }
 
     struct EquityData {

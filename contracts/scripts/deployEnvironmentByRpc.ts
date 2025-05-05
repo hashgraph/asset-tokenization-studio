@@ -300,6 +300,7 @@ function buildEmptyEnvironment(): Environment {
             Hold: {} as IStaticFunctionSelectors,
             externalPauseManagement: {} as IStaticFunctionSelectors,
             externalControlListManagement: {} as IStaticFunctionSelectors,
+            externalKycListManagement: {} as IStaticFunctionSelectors,
         },
         facetIdsEquities: [],
         facetVersionsEquities: [],

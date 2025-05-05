@@ -493,6 +493,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
           externalControlLists?.map((address) => address.toString()) ?? [],
+        externalKycLists: [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -612,6 +613,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
           externalControlLists?.map((address) => address.toString()) ?? [],
+        externalKycLists: [],
       };
 
       const bondDetails = new BondDetailsData(
