@@ -233,9 +233,9 @@ import {
   WalletEvents,
   WalletPairedEvent,
 } from '../../../../app/service/event/WalletEvent';
-import LogService from '../../../../app/service/LogService';
+import LogService from '../../../../app/service/log/LogService';
 import EventService from '../../../../app/service/event/EventService';
-import NetworkService from '../../../../app/service/NetworkService';
+import NetworkService from '../../../../app/service/network/NetworkService';
 import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator';
 import Injectable from '../../../../core/Injectable';
 import Hex from '../../../../core/Hex';
@@ -274,11 +274,11 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
 
   constructor(
     @lazyInject(EventService)
-    public readonly eventService: EventService,
+    private readonly eventService: EventService,
     @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
+    protected readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
   ) {
     super(mirrorNodeAdapter, networkService);
     this.projectId = '';

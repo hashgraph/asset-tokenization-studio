@@ -207,7 +207,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import {
@@ -215,8 +215,9 @@ import {
   UnprotectPartitionsCommandResponse,
 } from './UnprotectPartitionsCommand.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { UnprotectPartitionsCommandError } from './error/UnprotectPartitionsCommandError.js';
 
 @CommandHandler(UnprotectPartitionsCommand)
 export class UnprotectPartitionsCommandHandler
@@ -224,11 +225,11 @@ export class UnprotectPartitionsCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(ContractService)
@@ -238,26 +239,33 @@ export class UnprotectPartitionsCommandHandler
   async execute(
     command: UnprotectPartitionsCommand,
   ): Promise<UnprotectPartitionsCommandResponse> {
-    const { securityId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkRole(
-      SecurityRole._PROTECTED_PARTITION_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkRole(
+        SecurityRole._PROTECTED_PARTITION_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkProtectedPartitions(security);
+      await this.validationService.checkProtectedPartitions(security);
 
-    const res = await handler.unprotectPartitions(securityEvmAddress);
-    return Promise.resolve(
-      new UnprotectPartitionsCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.unprotectPartitions(securityEvmAddress);
+      return Promise.resolve(
+        new UnprotectPartitionsCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new UnprotectPartitionsCommandError(error as Error);
+    }
   }
 }

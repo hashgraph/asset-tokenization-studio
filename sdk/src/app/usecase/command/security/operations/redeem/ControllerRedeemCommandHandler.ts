@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import {
   ControllerRedeemCommand,
@@ -215,9 +215,10 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/ValidationService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { ControllerRedeemCommandError } from './error/ControllerRedeemCommandError.js';
 
 @CommandHandler(ControllerRedeemCommand)
 export class ControllerRedeemCommandHandler
@@ -225,50 +226,54 @@ export class ControllerRedeemCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: ControllerRedeemCommand,
   ): Promise<ControllerRedeemCommandResponse> {
-    const { securityId, amount, sourceId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, amount, sourceId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkCanRedeem(
-      securityId,
-      sourceId,
-      amount,
-      _PARTITION_ID_1,
-      account.id.toString(),
-    );
+      await this.validationService.checkCanRedeem(
+        securityId,
+        sourceId,
+        amount,
+        _PARTITION_ID_1,
+        account.id.toString(),
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    const res = await handler.controllerRedeem(
-      securityEvmAddress,
-      sourceEvmAddress,
-      amountBd,
-      securityId,
-    );
-    return Promise.resolve(
-      new ControllerRedeemCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.controllerRedeem(
+        securityEvmAddress,
+        sourceEvmAddress,
+        amountBd,
+        securityId,
+      );
+      return Promise.resolve(
+        new ControllerRedeemCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new ControllerRedeemCommandError(error as Error);
+    }
   }
 }

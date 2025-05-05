@@ -207,12 +207,13 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetAggregatedBalanceAdjustmentFactorQuery,
   GetAggregatedBalanceAdjustmentFactorQueryResponse,
 } from './GetAggregatedBalanceAdjustmentFactorQuery';
+import { GetAggregatedBalanceAdjustmentFactorQueryError } from './error/GetAggregatedBalanceAdjustmentFactorQueryError';
 
 @QueryHandler(GetAggregatedBalanceAdjustmentFactorQuery)
 export class GetAggregatedBalanceAdjustmentFactorQueryHandler
@@ -220,23 +221,27 @@ export class GetAggregatedBalanceAdjustmentFactorQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetAggregatedBalanceAdjustmentFactorQuery,
   ): Promise<GetAggregatedBalanceAdjustmentFactorQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res =
-      await this.queryAdapter.getAggregatedBalanceAdjustmentFactor(
-        securityEvmAddress,
-      );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res =
+        await this.queryAdapter.getAggregatedBalanceAdjustmentFactor(
+          securityEvmAddress,
+        );
 
-    return new GetAggregatedBalanceAdjustmentFactorQueryResponse(res);
+      return new GetAggregatedBalanceAdjustmentFactorQueryResponse(res);
+    } catch (error) {
+      throw new GetAggregatedBalanceAdjustmentFactorQueryError(error as Error);
+    }
   }
 }

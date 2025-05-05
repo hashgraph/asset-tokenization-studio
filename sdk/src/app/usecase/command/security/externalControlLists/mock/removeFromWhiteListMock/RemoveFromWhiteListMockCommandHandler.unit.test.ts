@@ -209,10 +209,10 @@ import {
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { RemoveFromWhiteListMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import AccountService from '../../../../../../../app/service/AccountService.js';
+import AccountService from '../../../../../../../app/service/account/AccountService.js';
 import {
   RemoveFromWhiteListMockCommand,
   RemoveFromWhiteListMockCommandResponse,

@@ -205,8 +205,8 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/AccountService';
-import ValidationService from '../../../../../service/ValidationService';
+import AccountService from '../../../../../service/account/AccountService';
+import ValidationService from '../../../../../service/validation/ValidationService';
 import {
   UpdateExternalControlListsCommand,
   UpdateExternalControlListsCommandResponse,
@@ -215,7 +215,7 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 
 @CommandHandler(UpdateExternalControlListsCommand)
 export class UpdateExternalControlListsCommandHandler

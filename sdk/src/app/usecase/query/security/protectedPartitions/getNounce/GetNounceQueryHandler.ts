@@ -208,33 +208,38 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import { GetNounceQuery, GetNounceQueryResponse } from './GetNounceQuery.js';
-import AccountService from '../../../../../service/AccountService';
+import AccountService from '../../../../../service/account/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetNounceQueryError } from './error/GetNounceQueryError.js';
 
 @QueryHandler(GetNounceQuery)
 export class GetNounceQueryHandler implements IQueryHandler<GetNounceQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetNounceQuery): Promise<GetNounceQueryResponse> {
-    const { securityId, targetId } = query;
+    try {
+      const { securityId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getNounceFor(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
-    return new GetNounceQueryResponse(res.toNumber());
+      const res = await this.queryAdapter.getNounceFor(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
+      return new GetNounceQueryResponse(res.toNumber());
+    } catch (error) {
+      throw new GetNounceQueryError(error as Error);
+    }
   }
 }

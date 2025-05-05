@@ -211,9 +211,10 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import { GetHeldAmountForQueryError } from './error/GetHeldAmountForQueryError.js';
 
 @QueryHandler(GetHeldAmountForQuery)
 export class GetHeldAmountForQueryHandler
@@ -221,28 +222,32 @@ export class GetHeldAmountForQueryHandler
 {
   constructor(
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(
     query: GetHeldAmountForQuery,
   ): Promise<GetHeldAmountForQueryResponse> {
-    const { securityId, targetId } = query;
+    try {
+      const { securityId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getHeldAmountFor(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
+      const res = await this.queryAdapter.getHeldAmountFor(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
 
-    return new GetHeldAmountForQueryResponse(res);
+      return new GetHeldAmountForQueryResponse(res);
+    } catch (error) {
+      throw new GetHeldAmountForQueryError(error as Error);
+    }
   }
 }
