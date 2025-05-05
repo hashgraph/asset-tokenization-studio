@@ -801,8 +801,9 @@ export async function deployAtsContracts({
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ExternalKycListManagement
-                      .addresses?.[network]
+                ? Configuration.contracts.ExternalKycListManagement.addresses?.[
+                      network
+                  ]
                 : undefined,
             overrides,
         }),
