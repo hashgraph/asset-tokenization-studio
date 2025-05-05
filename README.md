@@ -127,6 +127,24 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 
 5. Save the file and proceed with running the application.
 
+## Custodian Integration
+
+The ATS project utilizes a `custodians` library to facilitate interactions with various external custody providers.
+
+The integration with custodian services is **available at the SDK level only**, that means that the current implementation does not support direct dApp integration workflows and is limited to SDK tests right now. You can use your custodian providers using the .env file ([.env.sample](./sdk/.env.sample)).
+
+At the time the integration was first built, the SDKs provided by Dfns and Fireblocks did not yet support direct dApp integration workflows. Consequently, the current implementation focuses solely on SDK-based operations.
+
+### Supported Custodians and SDK Versions
+
+The following custody providers are supported through their respective SDKs within the ATS `custodians` library:
+
+-   **Dfns:** SDK Version `0.1.0-beta.5`
+-   **Fireblocks:** SDK Version `5.11.0`
+-   **AWS KMS:** AWS SDK Version `3.624.0`
+
+For further details or assistance regarding the custodian integration, please consult the relevant source code within the SDK or reach out to the development team. [Custodians Library](https://github.com/hashgraph/hedera-custodians-library)
+
 # Run
 
 In order to run the application locally:
