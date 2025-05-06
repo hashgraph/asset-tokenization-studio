@@ -238,39 +238,15 @@ abstract contract ExternalPauseManagementStorageWrapper is
         address[] calldata _pauses,
         bool[] calldata _actives
     ) internal returns (bool success_) {
-        uint256 length = _pauses.length;
-        unchecked {
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalPause(_pauses[index]))
-                        _addExternalPause(_pauses[index]);
-                    continue;
-                }
-                if (_isExternalPause(_pauses[index]))
-                    _removeExternalPause(_pauses[index]);
-            }
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalPause(_pauses[index]))
-                        revert IExternalPauseManagement
-                            .UpdateExternalPausesContradiction(
-                                _pauses,
-                                _actives,
-                                _pauses[index]
-                            );
-                    continue;
-                }
-                if (_isExternalPause(_pauses[index]))
-                    revert IExternalPauseManagement
-                        .UpdateExternalPausesContradiction(
-                            _pauses,
-                            _actives,
-                            _pauses[index]
-                        );
-            }
-        }
-
-        success_ = true;
+        return
+            LibCommon.updateExternalList(
+                _pauses,
+                _actives,
+                _isExternalPause,
+                _addExternalPause,
+                _removeExternalPause,
+                _revertPauseContradiction
+            );
     }
 
     function _addExternalPause(
@@ -321,6 +297,18 @@ abstract contract ExternalPauseManagementStorageWrapper is
             }
         }
         return false;
+    }
+
+    function _revertPauseContradiction(
+        address[] calldata _pauses,
+        bool[] calldata _actives,
+        address _target
+    ) internal pure {
+        revert IExternalPauseManagement.UpdateExternalPausesContradiction(
+            _pauses,
+            _actives,
+            _target
+        );
     }
 
     function _externalPauseStorage()

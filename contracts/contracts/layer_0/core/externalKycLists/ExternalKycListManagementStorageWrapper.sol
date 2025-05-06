@@ -211,7 +211,7 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    __KYC_MANAGEMENT_STORAGE_POSITION
+    _KYC_MANAGEMENT_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {
     IExternalKycList
@@ -238,39 +238,15 @@ abstract contract ExternalKycListManagementStorageWrapper is
         address[] calldata _kycLists,
         bool[] calldata _actives
     ) internal returns (bool success_) {
-        uint256 length = _kycLists.length;
-        unchecked {
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalKycList(_kycLists[index]))
-                        _addExternalKycList(_kycLists[index]);
-                    continue;
-                }
-                if (_isExternalKycList(_kycLists[index]))
-                    _removeExternalKycList(_kycLists[index]);
-            }
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalKycList(_kycLists[index]))
-                        revert IExternalKycListManagement
-                            .UpdateExternalKycListsContradiction(
-                                _kycLists,
-                                _actives,
-                                _kycLists[index]
-                            );
-                    continue;
-                }
-                if (_isExternalKycList(_kycLists[index]))
-                    revert IExternalKycListManagement
-                        .UpdateExternalKycListsContradiction(
-                            _kycLists,
-                            _actives,
-                            _kycLists[index]
-                        );
-            }
-        }
-
-        success_ = true;
+        return
+            LibCommon.updateExternalList(
+                _kycLists,
+                _actives,
+                _isExternalKycList,
+                _addExternalKycList,
+                _removeExternalKycList,
+                _revertKycContradiction
+            );
     }
 
     function _addExternalKycList(
@@ -326,13 +302,25 @@ abstract contract ExternalKycListManagementStorageWrapper is
         return true;
     }
 
+    function _revertKycContradiction(
+        address[] calldata _kycLists,
+        bool[] calldata _actives,
+        address _target
+    ) internal pure {
+        revert IExternalKycListManagement.UpdateExternalKycListsContradiction(
+            _kycLists,
+            _actives,
+            _target
+        );
+    }
+
     function _externalKycListStorage()
         internal
         pure
         virtual
         returns (ExternalKycListDataStorage storage externalKycList_)
     {
-        bytes32 position = __KYC_MANAGEMENT_STORAGE_POSITION;
+        bytes32 position = _KYC_MANAGEMENT_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             externalKycList_.slot := position

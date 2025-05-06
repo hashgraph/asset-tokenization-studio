@@ -219,6 +219,9 @@ import {
 import {
     IExternalControlList
 } from '../../../layer_1/interfaces/externalControlLists/IExternalControlList.sol';
+import {
+    IExternalControlListManagement
+} from '../../../layer_1/interfaces/externalControlLists/IExternalControlListManagement.sol';
 
 abstract contract ExternalControlListManagementStorageWrapper is
     ProtectedPartitionsStorageWrapper
@@ -235,23 +238,15 @@ abstract contract ExternalControlListManagementStorageWrapper is
         address[] calldata _controlLists,
         bool[] calldata _actives
     ) internal returns (bool success_) {
-        uint256 length = _controlLists.length;
-        for (uint256 index; index < length; ) {
-            if (_actives[index]) {
-                if (!_isExternalControlList(_controlLists[index]))
-                    _addExternalControlList(_controlLists[index]);
-                unchecked {
-                    ++index;
-                }
-                continue;
-            }
-            if (_isExternalControlList(_controlLists[index]))
-                _removeExternalControlList(_controlLists[index]);
-            unchecked {
-                ++index;
-            }
-        }
-        success_ = true;
+        return
+            LibCommon.updateExternalList(
+                _controlLists,
+                _actives,
+                _isExternalControlList,
+                _addExternalControlList,
+                _removeExternalControlList,
+                _revertControlListContradiction
+            );
     }
 
     function _addExternalControlList(
@@ -313,6 +308,19 @@ abstract contract ExternalControlListManagementStorageWrapper is
             }
         }
         return true;
+    }
+
+    function _revertControlListContradiction(
+        address[] calldata _controlLists,
+        bool[] calldata _actives,
+        address _target
+    ) internal pure {
+        revert IExternalControlListManagement
+            .UpdateExternalControlListsContradiction(
+                _controlLists,
+                _actives,
+                _target
+            );
     }
 
     function _externalControlListStorage()
