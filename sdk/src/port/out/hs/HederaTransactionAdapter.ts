@@ -489,6 +489,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        internalKycActivated: true,
         externalPauses:
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
@@ -609,6 +610,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        internalKycActivated: true,
         externalPauses:
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:

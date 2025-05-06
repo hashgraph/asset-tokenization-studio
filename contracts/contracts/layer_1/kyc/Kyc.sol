@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_KYC_ROLE} from '../constants/roles.sol';
+import {_KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE} from '../constants/roles.sol';
 import {IKyc} from '../interfaces/kyc/IKyc.sol';
 import {_KYC_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
@@ -215,6 +215,32 @@ import {
 import {Common} from '../common/Common.sol';
 
 contract Kyc is IKyc, IStaticFunctionSelectors, Common {
+    function initializeInternalKyc(
+        bool _internalKycActivated
+    ) external onlyUninitialized(_kycStorage().initialized) {
+        KycStorage storage kycStorage = _kycStorage();
+        kycStorage.initialized = true;
+        kycStorage.internalKycActivated = _internalKycActivated;
+    }
+
+    function activateInternalKyc()
+        external
+        onlyRole(_INTERNAL_KYC_MANAGER_ROLE)
+        onlyUnpaused
+    {
+        _setInternalKyc(true);
+        emit InternalKycStatusUpdated(_msgSender(), true);
+    }
+
+    function deactivateInternalKyc()
+        external
+        onlyRole(_INTERNAL_KYC_MANAGER_ROLE)
+        onlyUnpaused
+    {
+        _setInternalKyc(false);
+        emit InternalKycStatusUpdated(_msgSender(), false);
+    }
+
     function grantKyc(
         address _account,
         string memory _vcId,
@@ -288,6 +314,16 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
         );
     }
 
+    function isInternalKycActivated()
+        external
+        view
+        virtual
+        override
+        returns (bool)
+    {
+        return _isInternalKycActivated();
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -305,7 +341,16 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](6);
+        staticFunctionSelectors_ = new bytes4[](10);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .initializeInternalKyc
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .activateInternalKyc
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .deactivateInternalKyc
+            .selector;
         staticFunctionSelectors_[selectorIndex++] = this.grantKyc.selector;
         staticFunctionSelectors_[selectorIndex++] = this.revokeKyc.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getKycFor.selector;
@@ -317,6 +362,9 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getKycAccountsData
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isInternalKycActivated
             .selector;
     }
 

@@ -229,6 +229,8 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
     struct KycStorage {
         mapping(address => IKyc.KycData) kyc;
         mapping(IKyc.KycStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
+        bool initialized;
+        bool internalKycActivated;
     }
 
     modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
@@ -239,6 +241,10 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
     modifier onlyValidKycStatus(IKyc.KycStatus _kycStatus, address _account) {
         _checkValidKycStatus(_kycStatus, _account);
         _;
+    }
+
+    function _setInternalKyc(bool _activated) internal {
+        _kycStorage().internalKycActivated = _activated;
     }
 
     function _grantKyc(
@@ -347,7 +353,23 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         IKyc.KycStatus _kycStatus,
         address _account
     ) internal view virtual returns (bool) {
-        return _getKycStatusFor(_account) == _kycStatus;
+        KycStorage storage kycStorage = _kycStorage();
+        bool hasInternalKyc = kycStorage.internalKycActivated;
+        bool hasExternalKyc = _getExternalKycListsCount() > 0;
+
+        if (!hasInternalKyc && !hasExternalKyc) {
+            return true;
+        }
+        if (hasInternalKyc && !hasExternalKyc) {
+            return _getKycStatusFor(_account) == _kycStatus;
+        }
+        if (!hasInternalKyc && hasExternalKyc) {
+            return _isExternallyGranted(_account);
+        }
+        if (_getKycStatusFor(_account) != _kycStatus) {
+            return false;
+        }
+        return _isExternallyGranted(_account);
     }
 
     function _checkValidKycStatus(
@@ -356,6 +378,10 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
     ) internal view {
         if (!_hasSameKycStatus(_kycStatus, _account))
             revert IKyc.InvalidKycStatus();
+    }
+
+    function _isInternalKycActivated() internal view returns (bool) {
+        return _kycStorage().internalKycActivated;
     }
 
     function _kycStorage() internal pure returns (KycStorage storage kyc_) {
