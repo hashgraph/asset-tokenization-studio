@@ -218,7 +218,7 @@ library LibCommon {
     function updateExternalList(
         address[] calldata _addresses,
         bool[] calldata _actives,
-        function(address) view returns (bool) _exists,
+        function(address) internal view returns (bool) _exists,
         function(address) internal returns (bool) _add,
         function(address) internal returns (bool) _remove,
         function(
@@ -228,30 +228,36 @@ library LibCommon {
         ) internal _revertOnContradiction
     ) internal returns (bool success_) {
         uint256 length = _addresses.length;
-        unchecked {
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_exists(_addresses[index])) _add(_addresses[index]);
-                    continue;
+        for (uint256 index; index < length; ) {
+            if (_actives[index]) {
+                if (!_exists(_addresses[index])) _add(_addresses[index]);
+                unchecked {
+                    ++index;
                 }
-                if (_exists(_addresses[index])) _remove(_addresses[index]);
+                continue;
             }
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_exists(_addresses[index]))
-                        _revertOnContradiction(
-                            _addresses,
-                            _actives,
-                            _addresses[index]
-                        );
-                    continue;
-                }
-                if (_exists(_addresses[index]))
+            if (_exists(_addresses[index])) _remove(_addresses[index]);
+            unchecked {
+                ++index;
+            }
+        }
+        for (uint256 index; index < length; ) {
+            if (_actives[index]) {
+                if (!_exists(_addresses[index]))
                     _revertOnContradiction(
                         _addresses,
                         _actives,
                         _addresses[index]
                     );
+                unchecked {
+                    ++index;
+                }
+                continue;
+            }
+            if (_exists(_addresses[index]))
+                _revertOnContradiction(_addresses, _actives, _addresses[index]);
+            unchecked {
+                ++index;
             }
         }
 
