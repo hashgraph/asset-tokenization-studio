@@ -226,11 +226,6 @@ abstract contract ExternalControlListManagementStorageWrapper is
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    struct ExternalControlListDataStorage {
-        bool initialized;
-        EnumerableSet.AddressSet controlLists;
-    }
-
     function _updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
