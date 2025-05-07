@@ -235,35 +235,27 @@ abstract contract ExternalControlListManagementStorageWrapper is
         address[] calldata _controlLists,
         bool[] calldata _actives
     ) internal returns (bool success_) {
-        uint256 length = _controlLists.length;
-        for (uint256 index; index < length; ) {
-            if (_actives[index]) {
-                if (!_isExternalControlList(_controlLists[index]))
-                    _addExternalControlList(_controlLists[index]);
-                unchecked {
-                    ++index;
-                }
-                continue;
-            }
-            if (_isExternalControlList(_controlLists[index]))
-                _removeExternalControlList(_controlLists[index]);
-            unchecked {
-                ++index;
-            }
-        }
-        success_ = true;
+        success_ = _updateExternalLists(
+            _externalControlListStorage(),
+            _controlLists,
+            _actives
+        );
     }
 
     function _addExternalControlList(
         address _controlList
     ) internal returns (bool success_) {
-        success_ = _externalControlListStorage().controlLists.add(_controlList);
+        success_ = _addExternalList(
+            _externalControlListStorage(),
+            _controlList
+        );
     }
 
     function _removeExternalControlList(
         address _controlList
     ) internal returns (bool success_) {
-        success_ = _externalControlListStorage().controlLists.remove(
+        success_ = _removeExternalList(
+            _externalControlListStorage(),
             _controlList
         );
     }
@@ -271,8 +263,7 @@ abstract contract ExternalControlListManagementStorageWrapper is
     function _isExternalControlList(
         address _controlList
     ) internal view returns (bool) {
-        return
-            _externalControlListStorage().controlLists.contains(_controlList);
+        return _isExternalList(_externalControlListStorage(), _controlList);
     }
 
     function _getExternalControlListsCount()
@@ -280,9 +271,9 @@ abstract contract ExternalControlListManagementStorageWrapper is
         view
         returns (uint256 externalControlListsCount_)
     {
-        externalControlListsCount_ = _externalControlListStorage()
-            .controlLists
-            .length();
+        externalControlListsCount_ = _getExternalListsCount(
+            _externalControlListStorage()
+        );
     }
 
     function _getExternalControlListsMembers(
@@ -290,7 +281,8 @@ abstract contract ExternalControlListManagementStorageWrapper is
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
         return
-            _externalControlListStorage().controlLists.getFromSet(
+            _getExternalListsMembers(
+                _externalControlListStorage(),
                 _pageIndex,
                 _pageLength
             );
@@ -299,14 +291,13 @@ abstract contract ExternalControlListManagementStorageWrapper is
     function _isExternallyAuthorized(
         address _account
     ) internal view returns (bool) {
-        ExternalControlListDataStorage
+        ExternalListDataStorage
             storage externalControlListStorage = _externalControlListStorage();
         uint256 length = _getExternalControlListsCount();
         for (uint256 index; index < length; ) {
             if (
-                !IExternalControlList(
-                    externalControlListStorage.controlLists.at(index)
-                ).isAuthorized(_account)
+                !IExternalControlList(externalControlListStorage.list.at(index))
+                    .isAuthorized(_account)
             ) return false;
             unchecked {
                 ++index;
@@ -319,7 +310,7 @@ abstract contract ExternalControlListManagementStorageWrapper is
         internal
         pure
         virtual
-        returns (ExternalControlListDataStorage storage externalControlList_)
+        returns (ExternalListDataStorage storage externalControlList_)
     {
         bytes32 position = _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly

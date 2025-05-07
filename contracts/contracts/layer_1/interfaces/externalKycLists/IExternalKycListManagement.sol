@@ -222,12 +222,6 @@ interface IExternalKycListManagement {
 
     error UnlistedKycList(address kycList);
 
-    error UpdateExternalKycListsContradiction(
-        address[] kycLists,
-        bool[] actives,
-        address kycListContract
-    );
-
     error ExternalKycListsNotUpdated(address[] kycList, bool[] actives);
 
     // solhint-disable-next-line func-name-mixedcase

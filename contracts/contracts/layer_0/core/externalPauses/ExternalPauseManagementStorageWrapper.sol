@@ -229,64 +229,31 @@ abstract contract ExternalPauseManagementStorageWrapper is
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    struct ExternalPauseDataStorage {
-        bool initialized;
-        EnumerableSet.AddressSet pauseList;
-    }
-
     function _updateExternalPauses(
         address[] calldata _pauses,
         bool[] calldata _actives
     ) internal returns (bool success_) {
-        uint256 length = _pauses.length;
-        unchecked {
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalPause(_pauses[index]))
-                        _addExternalPause(_pauses[index]);
-                    continue;
-                }
-                if (_isExternalPause(_pauses[index]))
-                    _removeExternalPause(_pauses[index]);
-            }
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalPause(_pauses[index]))
-                        revert IExternalPauseManagement
-                            .UpdateExternalPausesContradiction(
-                                _pauses,
-                                _actives,
-                                _pauses[index]
-                            );
-                    continue;
-                }
-                if (_isExternalPause(_pauses[index]))
-                    revert IExternalPauseManagement
-                        .UpdateExternalPausesContradiction(
-                            _pauses,
-                            _actives,
-                            _pauses[index]
-                        );
-            }
-        }
-
-        success_ = true;
+        success_ = _updateExternalLists(
+            _externalPauseStorage(),
+            _pauses,
+            _actives
+        );
     }
 
     function _addExternalPause(
         address _pause
     ) internal returns (bool success_) {
-        success_ = _externalPauseStorage().pauseList.add(_pause);
+        success_ = _addExternalList(_externalPauseStorage(), _pause);
     }
 
     function _removeExternalPause(
         address _pause
     ) internal returns (bool success_) {
-        success_ = _externalPauseStorage().pauseList.remove(_pause);
+        success_ = _removeExternalList(_externalPauseStorage(), _pause);
     }
 
     function _isExternalPause(address _pause) internal view returns (bool) {
-        return _externalPauseStorage().pauseList.contains(_pause);
+        return _isExternalList(_externalPauseStorage(), _pause);
     }
 
     function _getExternalPausesCount()
@@ -294,7 +261,7 @@ abstract contract ExternalPauseManagementStorageWrapper is
         view
         returns (uint256 externalPausesCount_)
     {
-        externalPausesCount_ = _externalPauseStorage().pauseList.length();
+        externalPausesCount_ = _getExternalListsCount(_externalPauseStorage());
     }
 
     function _getExternalPausesMembers(
@@ -302,20 +269,21 @@ abstract contract ExternalPauseManagementStorageWrapper is
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
         return
-            _externalPauseStorage().pauseList.getFromSet(
+            _getExternalListsMembers(
+                _externalPauseStorage(),
                 _pageIndex,
                 _pageLength
             );
     }
 
     function _isExternallyPaused() internal view returns (bool) {
-        ExternalPauseDataStorage
+        ExternalListDataStorage
             storage externalPauseDataStorage = _externalPauseStorage();
         uint256 length = _getExternalPausesCount();
         unchecked {
             for (uint256 index = 0; index < length; ++index) {
                 if (
-                    IExternalPause(externalPauseDataStorage.pauseList.at(index))
+                    IExternalPause(externalPauseDataStorage.list.at(index))
                         .isPaused()
                 ) return true;
             }
@@ -327,7 +295,7 @@ abstract contract ExternalPauseManagementStorageWrapper is
         internal
         pure
         virtual
-        returns (ExternalPauseDataStorage storage externalPause_)
+        returns (ExternalListDataStorage storage externalPause_)
     {
         bytes32 position = _PAUSE_MANAGEMENT_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly

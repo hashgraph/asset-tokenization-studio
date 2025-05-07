@@ -229,7 +229,7 @@ contract ExternalKycListManagement is
         override
         onlyUninitialized(_externalKycListStorage().initialized)
     {
-        ExternalKycListDataStorage
+        ExternalListDataStorage
             storage externalKycListDataStorage = _externalKycListStorage();
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {

@@ -225,7 +225,7 @@ contract ExternalPauseManagement is
     function initialize_ExternalPauses(
         address[] calldata _pauses
     ) external override onlyUninitialized(_externalPauseStorage().initialized) {
-        ExternalPauseDataStorage
+        ExternalListDataStorage
             storage externalPauseDataStorage = _externalPauseStorage();
         uint256 length = _pauses.length;
         for (uint256 index = 0; index < length; ) {
@@ -245,6 +245,7 @@ contract ExternalPauseManagement is
         override
         onlyRole(_PAUSE_MANAGER_ROLE)
         onlyUnpaused
+        onlyConsistentActivations(_pauses, _actives)
         returns (bool success_)
     {
         success_ = _updateExternalPauses(_pauses, _actives);

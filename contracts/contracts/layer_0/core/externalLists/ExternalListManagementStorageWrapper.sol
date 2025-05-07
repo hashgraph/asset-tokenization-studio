@@ -203,109 +203,89 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {LibCommon} from '../../common/libraries/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    _KYC_MANAGEMENT_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {
-    IExternalKycList
-} from '../../../layer_1/interfaces/externalKycLists/IExternalKycList.sol';
-import {
-    ExternalListManagementStorageWrapper
-} from '../externalLists/ExternalListManagementStorageWrapper.sol';
-import {
-    IExternalKycListManagement
-} from '../../../layer_1/interfaces/externalKycLists/IExternalKycListManagement.sol';
+    SsiManagementStorageWrapper
+} from '../ssi/SsiManagementStorageWrapper.sol';
 
-abstract contract ExternalKycListManagementStorageWrapper is
-    ExternalListManagementStorageWrapper
+abstract contract ExternalListManagementStorageWrapper is
+    SsiManagementStorageWrapper
 {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    function _updateExternalKycLists(
-        address[] calldata _kycLists,
+    struct ExternalListDataStorage {
+        bool initialized;
+        EnumerableSet.AddressSet list;
+    }
+
+    function _updateExternalLists(
+        ExternalListDataStorage storage _externalListStorage,
+        address[] calldata _lists,
         bool[] calldata _actives
     ) internal returns (bool success_) {
-        success_ = _updateExternalLists(
-            _externalKycListStorage(),
-            _kycLists,
-            _actives
-        );
-    }
-
-    function _addExternalKycList(
-        address _kycList
-    ) internal returns (bool success_) {
-        success_ = _addExternalList(_externalKycListStorage(), _kycList);
-    }
-
-    function _removeExternalKycList(
-        address _kycList
-    ) internal returns (bool success_) {
-        success_ = _removeExternalList(_externalKycListStorage(), _kycList);
-    }
-
-    function _isExternalKycList(address _kycList) internal view returns (bool) {
-        return _isExternalList(_externalKycListStorage(), _kycList);
-    }
-
-    function _getExternalKycListsCount()
-        internal
-        view
-        returns (uint256 externalKycListsCount_)
-    {
-        externalKycListsCount_ = _getExternalListsCount(
-            _externalKycListStorage()
-        );
-    }
-
-    function _getExternalKycListsMembers(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
-        return
-            _getExternalListsMembers(
-                _externalKycListStorage(),
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function _isExternallyGranted(
-        address _account
-    ) internal view returns (bool) {
-        ExternalListDataStorage
-            storage externalKycListStorage = _externalKycListStorage();
-        uint256 length = _getExternalKycListsCount();
+        uint256 length = _lists.length;
         for (uint256 index; index < length; ) {
-            if (
-                !IExternalKycList(externalKycListStorage.list.at(index))
-                    .isGranted(_account)
-            ) return false;
+            if (_actives[index]) {
+                if (!_isExternalList(_externalListStorage, _lists[index])) {
+                    _addExternalList(_externalListStorage, _lists[index]);
+                }
+                unchecked {
+                    ++index;
+                }
+                continue;
+            }
+            if (_isExternalList(_externalListStorage, _lists[index])) {
+                _removeExternalList(_externalListStorage, _lists[index]);
+            }
             unchecked {
                 ++index;
             }
         }
-        return true;
+        success_ = true;
     }
 
-    function _externalKycListStorage()
-        internal
-        pure
-        virtual
-        returns (ExternalListDataStorage storage externalKycList_)
-    {
-        bytes32 position = _KYC_MANAGEMENT_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            externalKycList_.slot := position
-        }
+    function _addExternalList(
+        ExternalListDataStorage storage _externalListStorage,
+        address _list
+    ) internal returns (bool success_) {
+        success_ = _externalListStorage.list.add(_list);
+    }
+
+    function _removeExternalList(
+        ExternalListDataStorage storage _externalListStorage,
+        address _list
+    ) internal returns (bool success_) {
+        success_ = _externalListStorage.list.remove(_list);
+    }
+
+    function _isExternalList(
+        ExternalListDataStorage storage _externalListStorage,
+        address _list
+    ) internal view returns (bool) {
+        return _externalListStorage.list.contains(_list);
+    }
+
+    function _getExternalListsCount(
+        ExternalListDataStorage storage _externalListStorage
+    ) internal view returns (uint256 count_) {
+        count_ = _externalListStorage.list.length();
+    }
+
+    function _getExternalListsMembers(
+        ExternalListDataStorage storage _externalListStorage,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory members_) {
+        members_ = _externalListStorage.list.getFromSet(
+            _pageIndex,
+            _pageLength
+        );
     }
 }

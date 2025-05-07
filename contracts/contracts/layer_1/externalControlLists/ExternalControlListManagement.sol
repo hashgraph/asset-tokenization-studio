@@ -231,7 +231,7 @@ contract ExternalControlListManagement is
         override
         onlyUninitialized(_externalControlListStorage().initialized)
     {
-        ExternalControlListDataStorage
+        ExternalListDataStorage
             storage externalControlListDataStorage = _externalControlListStorage();
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
