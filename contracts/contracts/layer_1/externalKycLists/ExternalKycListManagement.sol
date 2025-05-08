@@ -215,6 +215,9 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_KYC_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {
+    _KYC_MANAGEMENT_STORAGE_POSITION
+} from '../../layer_0/constants/storagePositions.sol';
 
 contract ExternalKycListManagement is
     IExternalKycListManagement,
@@ -227,13 +230,20 @@ contract ExternalKycListManagement is
     )
         external
         override
-        onlyUninitialized(_externalKycListStorage().initialized)
+        onlyUninitialized(
+            _externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized
+        )
     {
-        ExternalKycListDataStorage
-            storage externalKycListDataStorage = _externalKycListStorage();
+        ExternalListDataStorage
+            storage externalKycListDataStorage = _externalListStorage(
+                _KYC_MANAGEMENT_STORAGE_POSITION
+            );
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
-            _addExternalKycList(_kycLists[index]);
+            _addExternalList(
+                _KYC_MANAGEMENT_STORAGE_POSITION,
+                _kycLists[index]
+            );
             unchecked {
                 ++index;
             }
@@ -252,7 +262,11 @@ contract ExternalKycListManagement is
         onlyConsistentActivations(_kycLists, _actives)
         returns (bool success_)
     {
-        success_ = _updateExternalKycLists(_kycLists, _actives);
+        success_ = _updateExternalLists(
+            _KYC_MANAGEMENT_STORAGE_POSITION,
+            _kycLists,
+            _actives
+        );
         if (!success_) {
             revert ExternalKycListsNotUpdated(_kycLists, _actives);
         }
@@ -268,7 +282,10 @@ contract ExternalKycListManagement is
         onlyUnpaused
         returns (bool success_)
     {
-        success_ = _addExternalKycList(_kycLists);
+        success_ = _addExternalList(
+            _KYC_MANAGEMENT_STORAGE_POSITION,
+            _kycLists
+        );
         if (!success_) {
             revert ListedKycList(_kycLists);
         }
@@ -284,7 +301,10 @@ contract ExternalKycListManagement is
         onlyUnpaused
         returns (bool success_)
     {
-        success_ = _removeExternalKycList(_kycLists);
+        success_ = _removeExternalList(
+            _KYC_MANAGEMENT_STORAGE_POSITION,
+            _kycLists
+        );
         if (!success_) {
             revert UnlistedKycList(_kycLists);
         }
@@ -294,7 +314,7 @@ contract ExternalKycListManagement is
     function isExternalKycList(
         address _kycList
     ) external view override returns (bool) {
-        return _isExternalKycList(_kycList);
+        return _isExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycList);
     }
 
     function isExternallyGranted(
@@ -309,14 +329,19 @@ contract ExternalKycListManagement is
         override
         returns (uint256 externalKycListsCount_)
     {
-        return _getExternalKycListsCount();
+        return _getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
     }
 
     function getExternalKycListsMembers(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        return _getExternalKycListsMembers(_pageIndex, _pageLength);
+        return
+            _getExternalListsMembers(
+                _KYC_MANAGEMENT_STORAGE_POSITION,
+                _pageIndex,
+                _pageLength
+            );
     }
 
     function getStaticResolverKey()

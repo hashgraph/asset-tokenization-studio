@@ -211,112 +211,34 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    __KYC_MANAGEMENT_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {
     IExternalKycList
 } from '../../../layer_1/interfaces/externalKycLists/IExternalKycList.sol';
 import {
-    SsiManagementStorageWrapper
-} from '../ssi/SsiManagementStorageWrapper.sol';
+    ExternalListManagementStorageWrapper
+} from '../externalLists/ExternalListManagementStorageWrapper.sol';
 import {
-    IExternalKycListManagement
-} from '../../../layer_1/interfaces/externalKycLists/IExternalKycListManagement.sol';
+    _KYC_MANAGEMENT_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
 
 abstract contract ExternalKycListManagementStorageWrapper is
-    SsiManagementStorageWrapper
+    ExternalListManagementStorageWrapper
 {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    struct ExternalKycListDataStorage {
-        bool initialized;
-        EnumerableSet.AddressSet kycList;
-    }
-
-    function _updateExternalKycLists(
-        address[] calldata _kycLists,
-        bool[] calldata _actives
-    ) internal returns (bool success_) {
-        uint256 length = _kycLists.length;
-        unchecked {
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalKycList(_kycLists[index]))
-                        _addExternalKycList(_kycLists[index]);
-                    continue;
-                }
-                if (_isExternalKycList(_kycLists[index]))
-                    _removeExternalKycList(_kycLists[index]);
-            }
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalKycList(_kycLists[index]))
-                        revert IExternalKycListManagement
-                            .UpdateExternalKycListsContradiction(
-                                _kycLists,
-                                _actives,
-                                _kycLists[index]
-                            );
-                    continue;
-                }
-                if (_isExternalKycList(_kycLists[index]))
-                    revert IExternalKycListManagement
-                        .UpdateExternalKycListsContradiction(
-                            _kycLists,
-                            _actives,
-                            _kycLists[index]
-                        );
-            }
-        }
-
-        success_ = true;
-    }
-
-    function _addExternalKycList(
-        address _kycList
-    ) internal returns (bool success_) {
-        success_ = _externalKycListStorage().kycList.add(_kycList);
-    }
-
-    function _removeExternalKycList(
-        address _kycList
-    ) internal returns (bool success_) {
-        success_ = _externalKycListStorage().kycList.remove(_kycList);
-    }
-
-    function _isExternalKycList(address _kycList) internal view returns (bool) {
-        return _externalKycListStorage().kycList.contains(_kycList);
-    }
-
-    function _getExternalKycListsCount()
-        internal
-        view
-        returns (uint256 externalKycListsCount_)
-    {
-        externalKycListsCount_ = _externalKycListStorage().kycList.length();
-    }
-
-    function _getExternalKycListsMembers(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
-        return
-            _externalKycListStorage().kycList.getFromSet(
-                _pageIndex,
-                _pageLength
-            );
-    }
-
     function _isExternallyGranted(
         address _account
     ) internal view returns (bool) {
-        ExternalKycListDataStorage
-            storage externalKycListStorage = _externalKycListStorage();
-        uint256 length = _getExternalKycListsCount();
+        ExternalListDataStorage
+            storage externalKycListStorage = _externalListStorage(
+                _KYC_MANAGEMENT_STORAGE_POSITION
+            );
+        uint256 length = _getExternalListsCount(
+            _KYC_MANAGEMENT_STORAGE_POSITION
+        );
         for (uint256 index; index < length; ) {
             if (
-                !IExternalKycList(externalKycListStorage.kycList.at(index))
+                !IExternalKycList(externalKycListStorage.list.at(index))
                     .isGranted(_account)
             ) return false;
             unchecked {
@@ -324,18 +246,5 @@ abstract contract ExternalKycListManagementStorageWrapper is
             }
         }
         return true;
-    }
-
-    function _externalKycListStorage()
-        internal
-        pure
-        virtual
-        returns (ExternalKycListDataStorage storage externalKycList_)
-    {
-        bytes32 position = __KYC_MANAGEMENT_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            externalKycList_.slot := position
-        }
     }
 }
