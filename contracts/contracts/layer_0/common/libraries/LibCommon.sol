@@ -215,49 +215,6 @@ library LibCommon {
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    function updateExternalList(
-        address[] calldata _addresses,
-        bool[] calldata _actives,
-        function(address) view returns (bool) _exists,
-        function(address) internal returns (bool) _add,
-        function(address) internal returns (bool) _remove,
-        function(
-            address[] calldata,
-            bool[] calldata,
-            address
-        ) internal _revertOnContradiction
-    ) internal returns (bool success_) {
-        uint256 length = _addresses.length;
-        unchecked {
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_exists(_addresses[index])) _add(_addresses[index]);
-                    continue;
-                }
-                if (_exists(_addresses[index])) _remove(_addresses[index]);
-            }
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_exists(_addresses[index]))
-                        _revertOnContradiction(
-                            _addresses,
-                            _actives,
-                            _addresses[index]
-                        );
-                    continue;
-                }
-                if (_exists(_addresses[index]))
-                    _revertOnContradiction(
-                        _addresses,
-                        _actives,
-                        _addresses[index]
-                    );
-            }
-        }
-
-        success_ = true;
-    }
-
     // functions for set
     function getFromSet(
         EnumerableSet.Bytes32Set storage _set,
