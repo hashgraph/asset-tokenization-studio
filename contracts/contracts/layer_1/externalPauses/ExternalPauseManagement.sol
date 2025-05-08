@@ -239,7 +239,7 @@ contract ExternalPauseManagement is
                 _PAUSE_MANAGEMENT_STORAGE_POSITION
             );
         uint256 length = _pauses.length;
-        for (uint256 index = 0; index < length; ) {
+        for (uint256 index; index < length; ) {
             _addExternalList(
                 _PAUSE_MANAGEMENT_STORAGE_POSITION,
                 _pauses[index]
