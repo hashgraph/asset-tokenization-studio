@@ -235,6 +235,7 @@ export class CreateBondCommand extends Command<CreateBondCommandResponse> {
     public readonly diamondOwnerAccount?: string,
     public readonly externalPauses?: string[],
     public readonly externalControlLists?: string[],
+    public readonly externalKycLists?: string[],
   ) {
     super();
   }

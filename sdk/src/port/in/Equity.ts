@@ -330,7 +330,12 @@ class EquityInPort implements IEquityInPort {
     req: CreateEquityRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }> {
     ValidatedRequest.handleValidation('CreateEquityRequest', req);
-    const { diamondOwnerAccount, externalPauses, externalControlLists } = req;
+    const {
+      diamondOwnerAccount,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+    } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
     const resolver = this.networkService.configuration.resolverAddress;
@@ -375,6 +380,7 @@ class EquityInPort implements IEquityInPort {
         diamondOwnerAccount,
         externalPauses,
         externalControlLists,
+        externalKycLists,
       ),
     );
 
