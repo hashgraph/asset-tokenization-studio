@@ -216,6 +216,7 @@ import SsiManagement from './SsiManagement.js';
 import ExternalPausesManagement from './externalPausesManagement/ExternalPausesManagement.js';
 import Kyc from './Kyc.js';
 import ExternalControlListsManagement from './externalControlListsManagement/ExternalControlListsManagement.js';
+import ExternalKycListsManagement from './externalKycListsManagement/ExternalKycListsManagement.js';
 
 export {
   Security,
@@ -231,6 +232,7 @@ export {
   Kyc,
   ExternalPausesManagement,
   ExternalControlListsManagement,
+  ExternalKycListsManagement,
 };
 
 export * from './request';
@@ -250,3 +252,4 @@ export * from './Kyc.js';
 export * from './SsiManagement.js';
 export * from './externalPausesManagement/ExternalPausesManagement.js';
 export * from './externalControlListsManagement/ExternalControlListsManagement.js';
+export * from './externalKycListsManagement/ExternalKycListsManagement.js';

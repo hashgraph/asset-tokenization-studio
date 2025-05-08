@@ -339,6 +339,7 @@ import {
   REMOVE_FROM_WHITE_LIST_MOCK_GAS,
   CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
   CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
+  UPDATE_EXTERNAL_KYC_LISTS_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -380,6 +381,7 @@ import {
   ExternalControlListManagement__factory,
   MockedBlacklist__factory,
   MockedWhitelist__factory,
+  ExternalKycListManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -472,6 +474,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     configVersion: number,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
@@ -517,7 +520,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
           externalControlLists?.map((address) => address.toString()) ?? [],
-        externalKycLists: [],
+        externalKycLists:
+          externalKycLists?.map((address) => address.toString()) ?? [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -589,6 +593,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     configVersion: number,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
@@ -634,7 +639,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
           externalControlLists?.map((address) => address.toString()) ?? [],
-        externalKycLists: [],
+        externalKycLists:
+          externalKycLists?.map((address) => address.toString()) ?? [],
       };
 
       const bondDetails = new BondDetailsData(
@@ -3080,5 +3086,29 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     await contract.deployed();
 
     return contract.address;
+  }
+
+  async updateExternalKycLists(
+    security: EvmAddress,
+    externalKycListsAddresses: EvmAddress[],
+    actives: boolean[],
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating External Kyc Lists for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalKycListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateExternalKycLists(
+        externalKycListsAddresses.map((address) => address.toString()),
+        actives,
+        {
+          gasLimit: UPDATE_EXTERNAL_KYC_LISTS_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
   }
 }
