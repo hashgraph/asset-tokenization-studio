@@ -217,6 +217,9 @@ import {
 import {
     _CONTROL_LIST_MANAGEMENT_RESOLVER_KEY
 } from '../constants/resolverKeys.sol';
+import {
+    _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+} from '../../layer_0/constants/storagePositions.sol';
 
 contract ExternalControlListManagement is
     IExternalControlListManagement,
@@ -229,13 +232,21 @@ contract ExternalControlListManagement is
     )
         external
         override
-        onlyUninitialized(_externalControlListStorage().initialized)
+        onlyUninitialized(
+            _externalListStorage(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION)
+                .initialized
+        )
     {
         ExternalListDataStorage
-            storage externalControlListDataStorage = _externalControlListStorage();
+            storage externalControlListDataStorage = _externalListStorage(
+                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+            );
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
-            _addExternalControlList(_controlLists[index]);
+            _addExternalList(
+                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+                _controlLists[index]
+            );
             unchecked {
                 ++index;
             }
@@ -254,7 +265,11 @@ contract ExternalControlListManagement is
         onlyConsistentActivations(_controlLists, _actives)
         returns (bool success_)
     {
-        success_ = _updateExternalControlLists(_controlLists, _actives);
+        success_ = _updateExternalLists(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            _controlLists,
+            _actives
+        );
         if (!success_) {
             revert ExternalControlListsNotUpdated(_controlLists, _actives);
         }
@@ -270,7 +285,10 @@ contract ExternalControlListManagement is
         onlyUnpaused
         returns (bool success_)
     {
-        success_ = _addExternalControlList(_controlList);
+        success_ = _addExternalList(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            _controlList
+        );
         if (!success_) {
             revert ListedControlList(_controlList);
         }
@@ -286,7 +304,10 @@ contract ExternalControlListManagement is
         onlyUnpaused
         returns (bool success_)
     {
-        success_ = _removeExternalControlList(_controlList);
+        success_ = _removeExternalList(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            _controlList
+        );
         if (!success_) {
             revert UnlistedControlList(_controlList);
         }
@@ -296,7 +317,11 @@ contract ExternalControlListManagement is
     function isExternalControlList(
         address _controlList
     ) external view override returns (bool) {
-        return _isExternalControlList(_controlList);
+        return
+            _isExternalList(
+                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+                _controlList
+            );
     }
 
     function getExternalControlListsCount()
@@ -305,14 +330,20 @@ contract ExternalControlListManagement is
         override
         returns (uint256 externalControlListsCount_)
     {
-        return _getExternalControlListsCount();
+        return
+            _getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
     function getExternalControlListsMembers(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        return _getExternalControlListsMembers(_pageIndex, _pageLength);
+        return
+            _getExternalListsMembers(
+                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+                _pageIndex,
+                _pageLength
+            );
     }
 
     function getStaticResolverKey()

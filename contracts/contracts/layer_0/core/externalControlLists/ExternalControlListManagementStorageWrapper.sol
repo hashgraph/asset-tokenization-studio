@@ -214,11 +214,11 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {
     IExternalControlList
 } from '../../../layer_1/interfaces/externalControlLists/IExternalControlList.sol';
+import {
+    _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
 
 abstract contract ExternalControlListManagementStorageWrapper is
     ProtectedPartitionsStorageWrapper
@@ -226,69 +226,16 @@ abstract contract ExternalControlListManagementStorageWrapper is
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    function _updateExternalControlLists(
-        address[] calldata _controlLists,
-        bool[] calldata _actives
-    ) internal returns (bool success_) {
-        success_ = _updateExternalLists(
-            _externalControlListStorage(),
-            _controlLists,
-            _actives
-        );
-    }
-
-    function _addExternalControlList(
-        address _controlList
-    ) internal returns (bool success_) {
-        success_ = _addExternalList(
-            _externalControlListStorage(),
-            _controlList
-        );
-    }
-
-    function _removeExternalControlList(
-        address _controlList
-    ) internal returns (bool success_) {
-        success_ = _removeExternalList(
-            _externalControlListStorage(),
-            _controlList
-        );
-    }
-
-    function _isExternalControlList(
-        address _controlList
-    ) internal view returns (bool) {
-        return _isExternalList(_externalControlListStorage(), _controlList);
-    }
-
-    function _getExternalControlListsCount()
-        internal
-        view
-        returns (uint256 externalControlListsCount_)
-    {
-        externalControlListsCount_ = _getExternalListsCount(
-            _externalControlListStorage()
-        );
-    }
-
-    function _getExternalControlListsMembers(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
-        return
-            _getExternalListsMembers(
-                _externalControlListStorage(),
-                _pageIndex,
-                _pageLength
-            );
-    }
-
     function _isExternallyAuthorized(
         address _account
     ) internal view returns (bool) {
         ExternalListDataStorage
-            storage externalControlListStorage = _externalControlListStorage();
-        uint256 length = _getExternalControlListsCount();
+            storage externalControlListStorage = _externalListStorage(
+                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+            );
+        uint256 length = _getExternalListsCount(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+        );
         for (uint256 index; index < length; ) {
             if (
                 !IExternalControlList(externalControlListStorage.list.at(index))
@@ -299,18 +246,5 @@ abstract contract ExternalControlListManagementStorageWrapper is
             }
         }
         return true;
-    }
-
-    function _externalControlListStorage()
-        internal
-        pure
-        virtual
-        returns (ExternalListDataStorage storage externalControlList_)
-    {
-        bytes32 position = _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            externalControlList_.slot := position
-        }
     }
 }
