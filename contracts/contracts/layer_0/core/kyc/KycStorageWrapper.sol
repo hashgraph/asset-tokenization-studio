@@ -214,6 +214,9 @@ import {
     ExternalKycListManagementStorageWrapper
 } from '../externalKycLists/ExternalKycListManagementStorageWrapper.sol';
 import {_KYC_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {
+    _KYC_MANAGEMENT_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
 import {LibCommon} from '../../common/libraries/LibCommon.sol';
 import {
     EnumerableSet
@@ -243,8 +246,9 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         _;
     }
 
-    function _setInternalKyc(bool _activated) internal {
+    function _setInternalKyc(bool _activated) internal returns (bool success_) {
         _kycStorage().internalKycActivated = _activated;
+        success_ = true;
     }
 
     function _grantKyc(
@@ -349,13 +353,15 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         }
     }
 
-    function _hasSameKycStatus(
+    function _verifyKycStatus(
         IKyc.KycStatus _kycStatus,
         address _account
     ) internal view virtual returns (bool) {
         KycStorage storage kycStorage = _kycStorage();
         bool hasInternalKyc = kycStorage.internalKycActivated;
-        bool hasExternalKyc = _getExternalKycListsCount() > 0;
+        bool hasExternalKyc = _getExternalListsCount(
+            _KYC_MANAGEMENT_STORAGE_POSITION
+        ) > 0;
 
         if (!hasInternalKyc && !hasExternalKyc) {
             return true;
@@ -376,7 +382,7 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         IKyc.KycStatus _kycStatus,
         address _account
     ) internal view {
-        if (!_hasSameKycStatus(_kycStatus, _account))
+        if (!_verifyKycStatus(_kycStatus, _account))
             revert IKyc.InvalidKycStatus();
     }
 

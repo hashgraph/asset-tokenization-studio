@@ -227,8 +227,9 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
         external
         onlyRole(_INTERNAL_KYC_MANAGER_ROLE)
         onlyUnpaused
+        returns (bool success_)
     {
-        _setInternalKyc(true);
+        success_ = _setInternalKyc(true);
         emit InternalKycStatusUpdated(_msgSender(), true);
     }
 
@@ -236,8 +237,9 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
         external
         onlyRole(_INTERNAL_KYC_MANAGER_ROLE)
         onlyUnpaused
+        returns (bool success_)
     {
-        _setInternalKyc(false);
+        success_ = _setInternalKyc(false);
         emit InternalKycStatusUpdated(_msgSender(), false);
     }
 

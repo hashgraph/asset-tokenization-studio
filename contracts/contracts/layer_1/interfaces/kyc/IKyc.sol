@@ -259,15 +259,17 @@ interface IKyc {
 
     /**
      * @dev Activate Internal Kyc
+     * @return success_ true or false
      */
 
-    function activateInternalKyc() external;
+    function activateInternalKyc() external returns (bool success_);
 
     /**
      * @dev Deactivate Internal Kyc
+     * @return success_ true or false
      */
 
-    function deactivateInternalKyc() external;
+    function deactivateInternalKyc() external returns (bool success_);
 
     /**
      * @dev Grant kyc to an address
