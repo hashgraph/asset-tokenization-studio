@@ -244,6 +244,9 @@ import {
 import {
     IExternalControlListManagement
 } from '../layer_1/interfaces/externalControlLists/IExternalControlListManagement.sol';
+import {
+    IExternalKycListManagement
+} from '../layer_1/interfaces/externalKycLists/IExternalKycListManagement.sol';
 import {validateISIN} from './isinValidator.sol';
 
 contract Factory is IFactory, LocalContext {
@@ -443,5 +446,8 @@ contract Factory is IFactory, LocalContext {
             .initialize_ExternalControlLists(
                 _securityData.externalControlLists
             );
+
+        IExternalKycListManagement(securityAddress_)
+            .initialize_ExternalKycLists(_securityData.externalKycLists);
     }
 }

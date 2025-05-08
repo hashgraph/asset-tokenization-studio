@@ -220,4 +220,5 @@ export class SecurityData {
   public clearingActive: boolean;
   public externalPauses: string[];
   public externalControlLists: string[];
+  public externalKycLists: string[];
 }

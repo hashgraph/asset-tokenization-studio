@@ -238,6 +238,7 @@ import {
     ExternalPauseManagement,
     ExternalControlListManagement,
     TimeTravel,
+    ExternalKycListManagement,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -274,6 +275,7 @@ export interface DeployAtsContractsResultParams {
     clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
     externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
+    externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
     timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     deployer?: Signer
 }
@@ -311,6 +313,7 @@ export default class DeployAtsContractsResult {
     public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
     public readonly externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
+    public readonly externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
     public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     public readonly deployer?: Signer
 
@@ -347,6 +350,7 @@ export default class DeployAtsContractsResult {
         clearingActionsFacet,
         externalPauseManagement,
         externalControlListManagement,
+        externalKycListManagement,
         timeTravel,
         deployer,
     }: DeployAtsContractsResultParams) {
@@ -382,6 +386,7 @@ export default class DeployAtsContractsResult {
         this.clearingActionsFacet = clearingActionsFacet
         this.externalPauseManagement = externalPauseManagement
         this.externalControlListManagement = externalControlListManagement
+        this.externalKycListManagement = externalKycListManagement
         this.timeTravel = timeTravel
         // Deployer
         this.deployer = deployer

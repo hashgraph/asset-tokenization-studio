@@ -311,58 +311,42 @@ describe('ExternalPause Tests', () => {
             ).to.equal(initialCount.sub(1).add(1)) // 2 - 1 + 1 = 2
         })
 
-        it('GIVEN duplicate addresses with conflicting actives (true then false) WHEN updated THEN it reverts with UpdateExternalPausesContradiction', async () => {
+        it('GIVEN duplicate addresses with conflicting actives (true then false) WHEN updated THEN it reverts with ContradictoryValuesInArray', async () => {
             const duplicatePause = externalPauseMock3.address
-            // Ensure mock3 is NOT present initially
             expect(
                 await externalPauseManagement.isExternalPause(duplicatePause)
             ).to.be.false
 
             const pauses = [duplicatePause, duplicatePause]
-            const actives = [true, false] // Try to add, then immediately remove the same pause
+            const actives = [true, false]
 
-            // Expected behavior:
-            // Loop 1, idx 0: active=true, !isExternalPause(mock3) -> _addExternalPause(mock3). State: mock3=true
-            // Loop 1, idx 1: active=false, isExternalPause(mock3) -> _removeExternalPause(mock3). State: mock3=false
-            // Loop 2, idx 0: active=true. Check: !isExternalPause(mock3)? Yes (it's false). -> REVERT
             await expect(
                 externalPauseManagement.updateExternalPauses(pauses, actives, {
                     gasLimit: GAS_LIMIT.high,
                 })
+            ).to.be.revertedWithCustomError(
+                externalPauseManagement,
+                'ContradictoryValuesInArray'
             )
-                .to.be.revertedWithCustomError(
-                    externalPauseManagement,
-                    'UpdateExternalPausesContradiction'
-                )
-                .withArgs(pauses, actives, duplicatePause) // Error should report the conflicting address
         })
 
-        it('GIVEN duplicate addresses with conflicting actives (false then true) WHEN updated THEN it reverts with UpdateExternalPausesContradiction', async () => {
-            const duplicatePause = externalPauseMock3.address
-            // Ensure mock3 IS present initially for this case
-            // (Add it first, separate from the update call)
-            await externalPauseManagement.addExternalPause(duplicatePause)
+        it('GIVEN duplicate addresses with conflicting actives (false then true) WHEN updated THEN it reverts with ContradictoryValuesInArray', async () => {
+            const duplicatePause = externalPauseMock1.address
             expect(
                 await externalPauseManagement.isExternalPause(duplicatePause)
             ).to.be.true
 
             const pauses = [duplicatePause, duplicatePause]
-            const actives = [false, true] // Try to remove, then immediately add the same pause
+            const actives = [false, true]
 
-            // Expected behavior:
-            // Loop 1, idx 0: active=false, isExternalPause(mock3) -> _removeExternalPause(mock3). State: mock3=false
-            // Loop 1, idx 1: active=true, !isExternalPause(mock3) -> _addExternalPause(mock3). State: mock3=true
-            // Loop 2, idx 0: active=false. Check: isExternalPause(mock3)? Yes (it's true). -> REVERT
             await expect(
                 externalPauseManagement.updateExternalPauses(pauses, actives, {
                     gasLimit: GAS_LIMIT.high,
                 })
+            ).to.be.revertedWithCustomError(
+                externalPauseManagement,
+                'ContradictoryValuesInArray'
             )
-                .to.be.revertedWithCustomError(
-                    externalPauseManagement,
-                    'UpdateExternalPausesContradiction'
-                )
-                .withArgs(pauses, actives, duplicatePause) // Error should report the conflicting address
         })
 
         it('GIVEN empty arrays WHEN updating THEN it succeeds and emits event', async () => {

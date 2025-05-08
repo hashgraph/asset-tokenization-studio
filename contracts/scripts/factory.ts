@@ -285,6 +285,7 @@ export interface SecurityData {
     clearingActive: boolean
     externalPauses: string[]
     externalControlLists: string[]
+    externalKycLists: string[]
 }
 
 export interface EquityData {
@@ -371,6 +372,7 @@ export async function setEquityData({
     businessLogicResolver,
     externalPauses,
     externalControlLists,
+    externalKycLists,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -398,6 +400,7 @@ export async function setEquityData({
     businessLogicResolver: string
     externalPauses?: string[]
     externalControlLists?: string[]
+    externalKycLists?: string[]
 }) {
     let rbacs: Rbac[] = []
 
@@ -438,6 +441,7 @@ export async function setEquityData({
         clearingActive,
         externalPauses: externalPauses ?? [],
         externalControlLists: externalControlLists ?? [],
+        externalKycLists: externalKycLists ?? [],
     }
 
     const equityDetails: EquityDetailsData = {
@@ -485,6 +489,7 @@ export async function setBondData({
     businessLogicResolver,
     externalPauses,
     externalControlLists,
+    externalKycLists,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -509,6 +514,7 @@ export async function setBondData({
     businessLogicResolver: string
     externalPauses?: string[]
     externalControlLists?: string[]
+    externalKycLists?: string[]
 }) {
     let rbacs: Rbac[] = []
 
@@ -549,6 +555,7 @@ export async function setBondData({
         clearingActive,
         externalPauses: externalPauses ?? [],
         externalControlLists: externalControlLists ?? [],
+        externalKycLists: externalKycLists ?? [],
     }
 
     const bondDetails: BondDetailsData = {

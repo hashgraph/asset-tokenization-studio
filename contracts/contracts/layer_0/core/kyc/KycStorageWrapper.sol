@@ -208,8 +208,11 @@ pragma solidity 0.8.18;
 
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
-    SsiManagementStorageWrapper
-} from '../ssi/SsiManagementStorageWrapper.sol';
+    ExternalKycListManagementStorageWrapper
+} from '../externalKycLists/ExternalKycListManagementStorageWrapper.sol';
+import {
+    ExternalKycListManagementStorageWrapper
+} from '../externalKycLists/ExternalKycListManagementStorageWrapper.sol';
 import {_KYC_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {LibCommon} from '../../common/libraries/LibCommon.sol';
 import {
@@ -219,7 +222,7 @@ import {
     IRevocationList
 } from '../../../layer_1/interfaces/kyc/IRevocationList.sol';
 
-abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
+abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
