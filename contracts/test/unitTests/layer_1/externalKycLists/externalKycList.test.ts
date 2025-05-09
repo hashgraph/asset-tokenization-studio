@@ -78,6 +78,7 @@ describe('ExternalKycList Management Tests', () => {
             isControllable: true,
             arePartitionsProtected: false,
             clearingActive: false,
+            internalKycActivated: true,
             isMultiPartition: false,
             name: 'TEST_ExternalKycList',
             symbol: 'TEP',
