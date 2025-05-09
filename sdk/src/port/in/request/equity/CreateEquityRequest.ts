@@ -235,6 +235,9 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   externalControlLists?: string[];
 
   @OptionalField()
+  externalKycLists?: string[];
+
+  @OptionalField()
   diamondOwnerAccount?: string;
 
   votingRight: boolean;
@@ -268,6 +271,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     clearingActive,
     externalPauses,
     externalControlLists,
+    externalKycLists,
     diamondOwnerAccount,
     votingRight,
     informationRight,
@@ -299,6 +303,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     isMultiPartition: boolean;
     externalPauses?: string[];
     externalControlLists?: string[];
+    externalKycLists?: string[];
     diamondOwnerAccount?: string;
     votingRight: boolean;
     informationRight: boolean;
@@ -361,6 +366,13 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
           true,
         );
       },
+      externalKycLists: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalKycLists',
+          true,
+        );
+      },
     });
     this.name = name;
     this.symbol = symbol;
@@ -375,6 +387,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.externalPauses = externalPauses;
     this.diamondOwnerAccount = diamondOwnerAccount;
     this.externalControlLists = externalControlLists;
+    this.externalKycLists = externalKycLists;
     this.votingRight = votingRight;
     this.informationRight = informationRight;
     this.liquidationRight = liquidationRight;

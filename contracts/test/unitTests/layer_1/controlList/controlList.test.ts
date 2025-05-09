@@ -284,6 +284,7 @@ describe('Control List Tests', () => {
             isControllable: true,
             arePartitionsProtected: false,
             clearingActive: false,
+            internalKycActivated: true,
             isMultiPartition: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',

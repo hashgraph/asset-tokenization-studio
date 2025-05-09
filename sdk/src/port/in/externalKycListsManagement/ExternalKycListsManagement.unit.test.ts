@@ -203,215 +203,136 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import { createMock } from '@golevelup/ts-jest';
+import { CommandBus } from '../../../core/command/CommandBus';
+import { UpdateExternalKycListsRequest } from '../request';
+import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
+import LogService from '../../../app/service/LogService';
+import { QueryBus } from '../../../core/query/QueryBus';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs';
+import { ValidationError } from '../../../core/validation/ValidationError';
+import { UpdateExternalKycListsRequestFixture } from '../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture';
+import ExternalKycListsManagement from './ExternalKycListsManagement';
+import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
+describe('ExternalKycListsManagement', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let updateExternalKycListsRequest: UpdateExternalKycListsRequest;
 
-import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {
-    IERC1594StorageWrapper
-} from '../../interfaces/ERC1400/IERC1594StorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _ALLOWANCE_REACHED_ERROR_ID,
-    _SUCCESS,
-    _FROM_ACCOUNT_KYC_ERROR_ID,
-    _TO_ACCOUNT_KYC_ERROR_ID
-} from '../../constants/values.sol';
-import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+  let handleValidationSpy: jest.SpyInstance;
 
-abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
-    struct ERC1594Storage {
-        bool issuance;
-        bool initialized;
-    }
+  const transactionId = TransactionIdFixture.create().id;
 
-    modifier onlyIssuable() {
-        _checkIssuable();
-        _;
-    }
+  const expectedResponse = {
+    payload: true,
+    transactionId: transactionId,
+  };
 
-    // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC1594() internal {
-        _erc1594Storage().issuance = true;
-        _erc1594Storage().initialized = true;
-    }
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (ExternalKycListsManagement as any).commandBus = commandBusMock;
+    (ExternalKycListsManagement as any).queryBus = queryBusMock;
+  });
 
-    /**
-     * @notice This function must be called to increase the total supply (Corresponds to mint function of ERC20).
-     * @dev It only be called by the token issuer or the operator defined by the issuer. ERC1594 doesn't have
-     * have the any logic related to operator but its superset ERC1400 have the operator logic and this function
-     * is allowed to call by the operator.
-     * @param _tokenHolder The account that will receive the created tokens (account should be whitelisted or KYCed).
-     * @param _value The amount of tokens need to be issued
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     */
-    // TODO: In this case are able to perform that operation another role?
-    function _issue(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
-    ) internal {
-        // Add a function to validate the `_data` parameter
-        _mint(_tokenHolder, _value);
-        emit Issued(_msgSender(), _tokenHolder, _value, _data);
-    }
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
 
-    /**
-     * @notice This function redeem an amount of the token of a msg.sender. For doing so msg.sender may incentivize
-     * using different ways that could be implemented with in the `redeem` function definition. But those
-     * implementations are out of the scope of the ERC1594.
-     * @param _value The amount of tokens need to be redeemed
-     * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
-     */
-    function _redeem(uint256 _value, bytes calldata _data) internal {
-        // Add a function to validate the `_data` parameter
-        _burn(_msgSender(), _value);
-        emit Redeemed(address(0), _msgSender(), _value, _data);
-    }
+  describe('updateExternalKycListsPauses', () => {
+    updateExternalKycListsRequest = new UpdateExternalKycListsRequest(
+      UpdateExternalKycListsRequestFixture.create(),
+    );
+    it('should update external kyc lists successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-    /**
-     * @notice This function redeem an amount of the token of a msg.sender. For doing so msg.sender may incentivize
-     * using different ways that could be implemented with in the `redeem` function definition. But those
-     * implementations are out of the scope of the ERC1594.
-     * @dev It is analogy to `transferFrom`
-     * @param _tokenHolder The account whose tokens gets redeemed.
-     * @param _value The amount of tokens need to be redeemed
-     * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
-     */
-    function _redeemFrom(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
-    ) internal {
-        // Add a function to validate the `_data` parameter
-        _burnFrom(_tokenHolder, _value);
-        emit Redeemed(_msgSender(), _tokenHolder, _value, _data);
-    }
+      const result = await ExternalKycListsManagement.updateExternalKycLists(
+        updateExternalKycListsRequest,
+      );
 
-    /**
-     * @notice A security token issuer can specify that issuance has finished for the token
-     * (i.e. no new tokens can be minted or issued).
-     * @dev If a token returns FALSE for `isIssuable()` then it MUST always return FALSE in the future.
-     * If a token returns FALSE for `isIssuable()` then it MUST never allow additional tokens to be issued.
-     * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
-     */
-    function _isIssuable() internal view returns (bool) {
-        return _erc1594Storage().issuance;
-    }
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'UpdateExternalKycListsRequest',
+        updateExternalKycListsRequest,
+      );
 
-    /**
-     * @notice Transfers of securities may fail for a number of reasons. So this function will used to understand the
-     * cause of failure by getting the byte value. Which will be the ESC that follows the EIP 1066. ESC can be mapped
-     * with a reson string to understand the failure cause, table of Ethereum status code will always reside off-chain
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     * @return bool It signifies whether the transaction will be executed or not.
-     * @return byte Ethereum status code (ESC)
-     * @return bytes32 Application specific reason code
-     */
-    function _canTransfer(
-        address _to,
-        uint256 _value,
-        bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_msgSender())) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfAdjusted(_msgSender()) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
-            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
-            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UpdateExternalKycListsCommand(
+          updateExternalKycListsRequest.securityId,
+          updateExternalKycListsRequest.externalKycListsAddresses,
+          updateExternalKycListsRequest.actives,
+        ),
+      );
 
-        return (true, _SUCCESS, bytes32(0));
-    }
+      expect(result).toEqual(expectedResponse);
+    });
 
-    /**
-     * @notice Transfers of securities may fail for a number of reasons. So this function will used to understand the
-     * cause of failure by getting the byte value. Which will be the ESC that follows the EIP 1066. ESC can be mapped
-     * with a reson string to understand the failure cause, table of Ethereum status code will always reside off-chain
-     * @param _from address The address which you want to send tokens from
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     * @return bool It signifies whether the transaction will be executed or not.
-     * @return byte Ethereum status code (ESC)
-     * @return bytes32 Application specific reason code
-     */
-    function _canTransferFrom(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
-            return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfAdjusted(_from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
-            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
 
-        return (true, _SUCCESS, bytes32(0));
-    }
+      await expect(
+        ExternalKycListsManagement.updateExternalKycLists(
+          updateExternalKycListsRequest,
+        ),
+      ).rejects.toThrow('Command execution failed');
 
-    function _erc1594Storage()
-        internal
-        pure
-        returns (ERC1594Storage storage erc1594Storage_)
-    {
-        bytes32 position = _ERC1594_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1594Storage_.slot := position
-        }
-    }
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'UpdateExternalKycListsRequest',
+        updateExternalKycListsRequest,
+      );
 
-    function _checkIssuable() private view {
-        if (!_isIssuable()) revert IssuanceIsClosed();
-    }
-}
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UpdateExternalKycListsCommand(
+          updateExternalKycListsRequest.securityId,
+          updateExternalKycListsRequest.externalKycListsAddresses,
+          updateExternalKycListsRequest.actives,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      updateExternalKycListsRequest = new UpdateExternalKycListsRequest({
+        ...UpdateExternalKycListsRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.updateExternalKycLists(
+          updateExternalKycListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalKycListsAddresses array is invalid', async () => {
+      updateExternalKycListsRequest = new UpdateExternalKycListsRequest({
+        ...UpdateExternalKycListsRequestFixture.create({
+          externalKycListsAddresses: ['invalid'],
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.updateExternalKycLists(
+          updateExternalKycListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalKycListsAddresses and active array are different', async () => {
+      updateExternalKycListsRequest = new UpdateExternalKycListsRequest({
+        ...UpdateExternalKycListsRequestFixture.create({
+          actives: [true, false],
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.updateExternalKycLists(
+          updateExternalKycListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+});

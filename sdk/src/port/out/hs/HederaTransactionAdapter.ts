@@ -242,6 +242,7 @@ import {
   ExternalControlListManagement__factory,
   MockedBlacklist__factory,
   MockedWhitelist__factory,
+  ExternalKycListManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -325,6 +326,7 @@ import {
   REMOVE_FROM_WHITE_LIST_MOCK_GAS,
   CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
   CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
+  UPDATE_EXTERNAL_KYC_LISTS_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -446,6 +448,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configVersion: number,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -489,11 +492,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        internalKycActivated: true,
         externalPauses:
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
           externalControlLists?.map((address) => address.toString()) ?? [],
-        externalKycLists: [],
+        externalKycLists:
+          externalKycLists?.map((address) => address.toString()) ?? [],
       };
 
       const equityDetails: EquityDetailsData = {
@@ -566,6 +571,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configVersion: number,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -609,11 +615,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        internalKycActivated: true,
         externalPauses:
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
           externalControlLists?.map((address) => address.toString()) ?? [],
-        externalKycLists: [],
+        externalKycLists:
+          externalKycLists?.map((address) => address.toString()) ?? [],
       };
 
       const bondDetails = new BondDetailsData(
@@ -3474,6 +3482,38 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setGas(CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS);
 
     return this.signAndSendTransaction(contractCreate);
+  }
+
+  async updateExternalKycLists(
+    security: EvmAddress,
+    externalKycListsAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateExternalKycLists';
+    LogService.logTrace(
+      `Updating External Kyc Lists for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalKycListManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalKycListsAddresses.map((address) => address.toString()), actives],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_EXTERNAL_KYC_LISTS_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
   }
 
   // * Definition of the abstract methods

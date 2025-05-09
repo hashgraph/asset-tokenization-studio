@@ -340,6 +340,7 @@ import RemoveFromBlackListMockRequest from './security/externalControlLists/mock
 import RemoveFromWhiteListMockRequest from './security/externalControlLists/mock/RemoveFromWhiteListMockRequest.js';
 import IsAuthorizedBlackListMockRequest from './security/externalControlLists/mock/IsAuthorizedBlackListMockRequest.js';
 import IsAuthorizedWhiteListMockRequest from './security/externalControlLists/mock/IsAuthorizedWhiteListMockRequest.js';
+import UpdateExternalKycListsRequest from './security/externalKycLists/UpdateExternalKycListsRequest.js';
 
 export {
   CreateEquityRequest,
@@ -478,4 +479,5 @@ export {
   RemoveFromWhiteListMockRequest,
   IsAuthorizedBlackListMockRequest,
   IsAuthorizedWhiteListMockRequest,
+  UpdateExternalKycListsRequest,
 };

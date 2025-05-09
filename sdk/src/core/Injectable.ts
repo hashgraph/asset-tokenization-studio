@@ -385,6 +385,7 @@ import { CreateExternalWhiteListMockCommandHandler } from '../app/usecase/comman
 import { CreateExternalBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/createExternalBlackListMock/CreateExternalBlackListMockCommandHandler.js';
 import { RemoveFromBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommandHandler.js';
 import { RemoveFromWhiteListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommandHandler.js';
+import { UpdateExternalKycListsCommandHandler } from '../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -716,6 +717,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: RemoveExternalControlListCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UpdateExternalKycListsCommandHandler,
   },
 ];
 

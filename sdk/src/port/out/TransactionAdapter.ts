@@ -250,6 +250,7 @@ interface ITransactionAdapter {
     configVersion: number,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -263,6 +264,7 @@ interface ITransactionAdapter {
     configVersion: number,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -881,6 +883,15 @@ interface IExternalControlListsMockAdapter {
   createExternalWhiteListMock(): Promise<string | TransactionResponse>;
 }
 
+interface IExternalKycListsAdapter {
+  updateExternalKycLists(
+    security: EvmAddress,
+    externalKycListsAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -894,7 +905,8 @@ export default abstract class TransactionAdapter
     IExternalPausesMockAdapter,
     IClearingAdapter,
     IExternalControlListsAdapter,
-    IExternalControlListsMockAdapter
+    IExternalControlListsMockAdapter,
+    IExternalKycListsAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -986,6 +998,7 @@ export default abstract class TransactionAdapter
     configVersion: number,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -1001,6 +1014,7 @@ export default abstract class TransactionAdapter
     configVersion: number,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -1711,6 +1725,14 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   createExternalWhiteListMock(): Promise<string | TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  updateExternalKycLists(
+    security: EvmAddress,
+    externalKycListsAddresses: EvmAddress[],
+    actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }
