@@ -271,6 +271,8 @@ export const BALANCE_ADJUSTMENT_TASK_TYPE =
     '0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d'
 export const SNAPSHOT_TASK_TYPE =
     '0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c'
+export const KYC_MANAGER_ROLE =
+    '0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449'
 
 // * Errors
 export const IS_PAUSED_ERROR_ID = '0x40'
