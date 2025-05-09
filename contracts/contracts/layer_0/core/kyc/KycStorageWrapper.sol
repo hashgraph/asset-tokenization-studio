@@ -214,9 +214,6 @@ import {
     ExternalKycListManagementStorageWrapper
 } from '../externalKycLists/ExternalKycListManagementStorageWrapper.sol';
 import {_KYC_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {
-    _KYC_MANAGEMENT_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
 import {LibCommon} from '../../common/libraries/LibCommon.sol';
 import {
     EnumerableSet
@@ -358,24 +355,10 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         address _account
     ) internal view virtual returns (bool) {
         KycStorage storage kycStorage = _kycStorage();
-        bool hasInternalKyc = kycStorage.internalKycActivated;
-        bool hasExternalKyc = _getExternalListsCount(
-            _KYC_MANAGEMENT_STORAGE_POSITION
-        ) > 0;
 
-        if (!hasInternalKyc && !hasExternalKyc) {
-            return true;
-        }
-        if (hasInternalKyc && !hasExternalKyc) {
-            return _getKycStatusFor(_account) == _kycStatus;
-        }
-        if (!hasInternalKyc && hasExternalKyc) {
-            return _isExternallyGranted(_account);
-        }
-        if (_getKycStatusFor(_account) != _kycStatus) {
-            return false;
-        }
-        return _isExternallyGranted(_account);
+        bool internalKycValid = !kycStorage.internalKycActivated ||
+            _getKycStatusFor(_account) == _kycStatus;
+        return internalKycValid && _isExternallyGranted(_account, _kycStatus);
     }
 
     function _checkValidKycStatus(

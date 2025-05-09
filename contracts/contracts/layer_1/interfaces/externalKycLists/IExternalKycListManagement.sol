@@ -206,6 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {IKyc} from '../kyc/IKyc.sol';
+
 interface IExternalKycListManagement {
     event ExternalKycListsUpdated(
         address indexed operator,
@@ -242,7 +244,10 @@ interface IExternalKycListManagement {
 
     function isExternalKycList(address _kycList) external view returns (bool);
 
-    function isExternallyGranted(address _account) external view returns (bool);
+    function isExternallyGranted(
+        address _account,
+        IKyc.KycStatus _kycStatus
+    ) external view returns (bool);
 
     function getExternalKycListsCount()
         external
