@@ -219,6 +219,7 @@ import {
 import {
     _KYC_MANAGEMENT_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ExternalKycListManagementStorageWrapper is
     ExternalListManagementStorageWrapper
@@ -227,7 +228,8 @@ abstract contract ExternalKycListManagementStorageWrapper is
     using EnumerableSet for EnumerableSet.AddressSet;
 
     function _isExternallyGranted(
-        address _account
+        address _account,
+        IKyc.KycStatus _kycStatus
     ) internal view returns (bool) {
         ExternalListDataStorage
             storage externalKycListStorage = _externalListStorage(
@@ -238,8 +240,8 @@ abstract contract ExternalKycListManagementStorageWrapper is
         );
         for (uint256 index; index < length; ) {
             if (
-                !IExternalKycList(externalKycListStorage.list.at(index))
-                    .isGranted(_account)
+                IExternalKycList(externalKycListStorage.list.at(index))
+                    .getKycStatus(_account) != _kycStatus
             ) return false;
             unchecked {
                 ++index;

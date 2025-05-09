@@ -81,6 +81,7 @@ describe('ExternalControlList Management Tests', () => {
             isControllable: true,
             arePartitionsProtected: false,
             clearingActive: false,
+            internalKycActivated: true,
             isMultiPartition: false,
             name: 'TEST_ExternalControlList',
             symbol: 'TECL',

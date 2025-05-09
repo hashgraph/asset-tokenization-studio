@@ -78,6 +78,7 @@ describe('ExternalPause Tests', () => {
             isControllable: true,
             arePartitionsProtected: false,
             clearingActive: false,
+            internalKycActivated: true,
             isMultiPartition: false,
             name: 'TEST_ExternalPause',
             symbol: 'TEP',
