@@ -422,7 +422,8 @@ describe('ExternalKycList Management Tests', () => {
             )
             expect(
                 await externalKycListManagement.isExternallyGranted(
-                    randomAddress
+                    randomAddress,
+                    1
                 )
             ).to.be.false
 
@@ -432,7 +433,8 @@ describe('ExternalKycList Management Tests', () => {
 
             expect(
                 await externalKycListManagement.isExternallyGranted(
-                    randomAddress
+                    randomAddress,
+                    1
                 )
             ).to.be.true
 
@@ -442,7 +444,8 @@ describe('ExternalKycList Management Tests', () => {
 
             expect(
                 await externalKycListManagement.isExternallyGranted(
-                    randomAddress
+                    randomAddress,
+                    1
                 )
             ).to.be.false
         })
