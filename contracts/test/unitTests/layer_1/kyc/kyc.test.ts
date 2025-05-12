@@ -219,6 +219,9 @@ import {
     MockedT3RevocationRegistry,
     MockedT3RevocationRegistry__factory,
     TimeTravel,
+    MockedExternalKycList,
+    MockedExternalKycList__factory,
+    ExternalKycListManagement,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -234,6 +237,8 @@ import {
     ADDRESS_ZERO,
     deployContractWithFactory,
     DeployContractWithFactoryCommand,
+    INTERNAL_KYC_MANAGER_ROLE,
+    KYC_MANAGER_ROLE,
 } from '@scripts'
 
 const _VALID_FROM = 0
@@ -257,7 +262,9 @@ describe('Kyc Tests', () => {
     let kycFacet: Kyc
     let pauseFacet: Pause
     let ssiManagementFacet: SsiManagement
+    let externalKycListManagement: ExternalKycListManagement
     let revocationList: MockedT3RevocationRegistry
+    let externalKycListMock: MockedExternalKycList
     let timeTravelFacet: TimeTravel
 
     let currentTimestamp = 0
@@ -293,11 +300,25 @@ describe('Kyc Tests', () => {
             })
         )
 
+        const externalKycListDeployed = await deployContractWithFactory(
+            new DeployContractWithFactoryCommand({
+                factory: new MockedExternalKycList__factory(),
+                signer: signer_A,
+            })
+        )
+
         revocationList = await ethers.getContractAt(
             'MockedT3RevocationRegistry',
             reovationListDeployed.address,
             signer_C
         )
+
+        externalKycListMock = await ethers.getContractAt(
+            'MockedExternalKycList',
+            externalKycListDeployed.address,
+            signer_C
+        )
+
         timeTravelFacet = await ethers.getContractAt(
             'TimeTravel',
             businessLogicResolver.address,
@@ -320,6 +341,14 @@ describe('Kyc Tests', () => {
             role: KYC_ROLE,
             members: [account_A],
         }
+        const rbacInternalKyc: Rbac = {
+            role: INTERNAL_KYC_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const rbacKycManager: Rbac = {
+            role: KYC_MANAGER_ROLE,
+            members: [account_A],
+        }
         const rbacPausable: Rbac = {
             role: PAUSER_ROLE,
             members: [account_A],
@@ -328,7 +357,13 @@ describe('Kyc Tests', () => {
             role: SSI_MANAGER_ROLE,
             members: [account_C],
         }
-        const init_rbacs: Rbac[] = [rbacKYC, rbacPausable, rbacSSIManager]
+        const init_rbacs: Rbac[] = [
+            rbacKYC,
+            rbacInternalKyc,
+            rbacKycManager,
+            rbacPausable,
+            rbacSSIManager,
+        ]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -364,6 +399,11 @@ describe('Kyc Tests', () => {
         })
 
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_A)
+        externalKycListManagement = await ethers.getContractAt(
+            'ExternalKycListManagement',
+            diamond.address,
+            signer_A
+        )
         pauseFacet = await ethers.getContractAt(
             'Pause',
             diamond.address,
@@ -384,6 +424,7 @@ describe('Kyc Tests', () => {
         await ssiManagementFacet.setRevocationRegistryAddress(
             revocationList.address
         )
+        await externalKycListMock.revokeKyc(account_B)
     })
 
     describe('Paused', () => {
@@ -430,6 +471,203 @@ describe('Kyc Tests', () => {
             await expect(
                 kycFacet.connect(signer_C).revokeKyc(account_B)
             ).to.be.rejectedWith('AccountHasNoRole')
+        })
+
+        it('GIVEN an account without INTERNAL_KYC_MANAGER_ROLE WHEN activating internal kyc THEN it reverts with AccountHasNoRole', async () => {
+            await expect(
+                kycFacet.connect(signer_C).activateInternalKyc()
+            ).to.be.rejectedWith('AccountHasNoRole')
+        })
+
+        it('GIVEN an account without INTERNAL_KYC_MANAGER_ROLE WHEN deactivating internal kyc THEN it reverts with AccountHasNoRole', async () => {
+            await expect(
+                kycFacet.connect(signer_C).deactivateInternalKyc()
+            ).to.be.rejectedWith('AccountHasNoRole')
+        })
+    })
+
+    describe('Kyc Valid Status Modifier Tests (onlyValidKycStatus)', () => {
+        it('GIVEN internal KYC is deactivated WHEN grantKyc is called THEN KYC status is updated successfully', async () => {
+            await kycFacet.deactivateInternalKyc()
+
+            const KycStatusFor_B_Before =
+                await kycFacet.getKycStatusFor(account_B)
+
+            await kycFacet.grantKyc(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            const KycStatusFor_B_After =
+                await kycFacet.getKycStatusFor(account_B)
+            expect(KycStatusFor_B_Before).to.equal(0)
+            expect(KycStatusFor_B_After).to.equal(1)
+        })
+
+        it('GIVEN internal KYC is active AND KYC is already granted WHEN grantKyc is called again THEN it reverts with InvalidKycStatus', async () => {
+            const KycStatusFor_B_Before =
+                await kycFacet.getKycStatusFor(account_B)
+
+            await kycFacet.grantKyc(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            const KycStatusFor_B_After =
+                await kycFacet.getKycStatusFor(account_B)
+            expect(KycStatusFor_B_Before).to.equal(0)
+            expect(KycStatusFor_B_After).to.equal(1)
+            await expect(
+                kycFacet.grantKyc(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
+        })
+
+        it('GIVEN internal KYC is deactivated AND external KYC has different status WHEN grantKyc is called THEN it reverts with InvalidKycStatus', async () => {
+            await kycFacet.deactivateInternalKyc()
+            await externalKycListManagement.addExternalKycList(
+                externalKycListMock.address
+            )
+            await externalKycListMock.grantKyc(account_B)
+            await expect(
+                kycFacet.grantKyc(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
+        })
+
+        it('GIVEN internal KYC is deactivated AND external KYC status matches WHEN grantKyc is called THEN KYC status is updated successfully', async () => {
+            await kycFacet.deactivateInternalKyc()
+            await externalKycListManagement.addExternalKycList(
+                externalKycListMock.address
+            )
+            const KycStatusFor_B_Before =
+                await kycFacet.getKycStatusFor(account_B)
+
+            await kycFacet.grantKyc(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            const KycStatusFor_B_After =
+                await kycFacet.getKycStatusFor(account_B)
+            expect(KycStatusFor_B_Before).to.equal(0)
+            expect(KycStatusFor_B_After).to.equal(1)
+        })
+
+        it('GIVEN internal KYC is active AND external KYC has different status WHEN grantKyc is called THEN it reverts with InvalidKycStatus', async () => {
+            await externalKycListManagement.addExternalKycList(
+                externalKycListMock.address
+            )
+            await externalKycListMock.grantKyc(account_B)
+            await expect(
+                kycFacet.grantKyc(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
+        })
+        it('GIVEN internal KYC is active AND external KYC status matches WHEN grantKyc is called THEN KYC status is updated successfully', async () => {
+            await externalKycListManagement.addExternalKycList(
+                externalKycListMock.address
+            )
+            const KycStatusFor_B_Before =
+                await kycFacet.getKycStatusFor(account_B)
+
+            await kycFacet.grantKyc(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            const KycStatusFor_B_After =
+                await kycFacet.getKycStatusFor(account_B)
+            expect(KycStatusFor_B_Before).to.equal(0)
+            expect(KycStatusFor_B_After).to.equal(1)
+        })
+        it('GIVEN internal KYC is active AND external KYC status matches WHEN grantKyc is called twice THEN second call reverts with InvalidKycStatus', async () => {
+            await externalKycListManagement.addExternalKycList(
+                externalKycListMock.address
+            )
+            const KycStatusFor_B_Before =
+                await kycFacet.getKycStatusFor(account_B)
+
+            await kycFacet.grantKyc(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            const KycStatusFor_B_After =
+                await kycFacet.getKycStatusFor(account_B)
+            expect(KycStatusFor_B_Before).to.equal(0)
+            expect(KycStatusFor_B_After).to.equal(1)
+            await expect(
+                kycFacet.grantKyc(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
+        })
+        it('GIVEN internal KYC is active AND external KYC is granted after internal grant WHEN grantKyc is called again THEN it reverts with InvalidKycStatus', async () => {
+            await externalKycListManagement.addExternalKycList(
+                externalKycListMock.address
+            )
+            const KycStatusFor_B_Before =
+                await kycFacet.getKycStatusFor(account_B)
+
+            await kycFacet.grantKyc(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            const KycStatusFor_B_After =
+                await kycFacet.getKycStatusFor(account_B)
+            expect(KycStatusFor_B_Before).to.equal(0)
+            expect(KycStatusFor_B_After).to.equal(1)
+
+            await externalKycListMock.grantKyc(account_B)
+
+            await expect(
+                kycFacet.grantKyc(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
         })
     })
 
@@ -608,6 +846,23 @@ describe('Kyc Tests', () => {
 
             expect(KYCStatusFor_B_After_Grant).to.equal(1)
             expect(KYCFor_B_After_Revoking_VC).to.equal(0)
+        })
+
+        it('GIVEN kyc WHEN deactivateInternalKyc is called THEN it returns deactivate the internal kyc', async () => {
+            await expect(kycFacet.deactivateInternalKyc())
+                .to.emit(kycFacet, 'InternalKycStatusUpdated')
+                .withArgs(account_A, false)
+            expect(await kycFacet.isInternalKycActivated()).to.be.false
+        })
+
+        it('GIVEN kyc WHEN activateInternalKyc is called THEN it returns activate the internal kyc', async () => {
+            await kycFacet.deactivateInternalKyc()
+            expect(await kycFacet.isInternalKycActivated()).to.be.false
+
+            await expect(kycFacet.activateInternalKyc())
+                .to.emit(kycFacet, 'InternalKycStatusUpdated')
+                .withArgs(account_A, true)
+            expect(await kycFacet.isInternalKycActivated()).to.be.true
         })
     })
 })
