@@ -392,6 +392,9 @@ import { GetExternalKycListsCountQueryHandler } from '../app/usecase/query/secur
 import { GetExternalKycListsMembersQueryHandler } from '../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQueryHandler.js';
 import { IsExternalKycListQueryHandler } from '../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQueryHandler.js';
 import { IsExternallyGrantedQueryHandler } from '../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQueryHandler.js';
+import { ActivateInternalKycCommandHandler } from '../app/usecase/command/security/kyc/activateInternalKyc/ActivateInternalKycCommandHandler.js';
+import { DeactivateInternalKycCommandHandler } from '../app/usecase/command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommandHandler.js';
+import { IsInternalKycActivatedQueryHandler } from '../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -736,6 +739,14 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: RemoveExternalKycListCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ActivateInternalKycCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: DeactivateInternalKycCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [
@@ -1067,6 +1078,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsExternallyGrantedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsInternalKycActivatedQueryHandler,
   },
 ];
 

@@ -347,6 +347,9 @@ import GetExternalKycListsCountRequest from './security/externalKycLists/GetExte
 import GetExternalKycListsMembersRequest from './security/externalKycLists/GetExternalKycListsMembersRequest.js';
 import IsExternalKycListRequest from './security/externalKycLists/IsExternalKycListRequest.js';
 import IsExternallyGrantedRequest from './security/externalKycLists/IsExternallyGrantedRequest.js';
+import ActivateInternalKycRequest from './security/kyc/ActivateInternalKycRequest.js';
+import DeactivateInternalKycRequest from './security/kyc/DeactivateInternalKycRequest.js';
+import IsInternalKycActivatedRequest from './security/kyc/IsInternalKycActivatedRequest.js';
 
 export {
   CreateEquityRequest,
@@ -492,4 +495,7 @@ export {
   GetExternalKycListsMembersRequest,
   IsExternalKycListRequest,
   IsExternallyGrantedRequest,
+  ActivateInternalKycRequest,
+  DeactivateInternalKycRequest,
+  IsInternalKycActivatedRequest,
 };
