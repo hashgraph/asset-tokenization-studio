@@ -209,13 +209,11 @@ import {
   AddExternalKycListRequest,
   RemoveExternalKycListRequest,
   UpdateExternalKycListsRequest,
-    GetExternalKycListsCountRequest,
-    GetExternalKycListsMembersRequest,
-    IsExternalKycListRequest,
-    IsExternallyGrantedRequest,
-    UpdateExternalKycListsRequest,
+  GetExternalKycListsCountRequest,
+  GetExternalKycListsMembersRequest,
+  IsExternalKycListRequest,
+  IsExternallyGrantedRequest,
 } from '../request';
-import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
@@ -228,11 +226,10 @@ import {
   AddExternalKycListsRequestFixture,
   RemoveExternalKycListsRequestFixture,
   UpdateExternalKycListsRequestFixture,
-    GetExternalKycListsCountRequestFixture,
-    GetExternalKycListsMembersRequestFixture,
-    IsExternalKycListRequestFixture,
-    IsExternallyGrantedRequestFixture,
-    UpdateExternalKycListsRequestFixture,
+  GetExternalKycListsCountRequestFixture,
+  GetExternalKycListsMembersRequestFixture,
+  IsExternalKycListRequestFixture,
+  IsExternallyGrantedRequestFixture,
 } from '../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture';
 import ExternalKycListsManagement from './ExternalKycListsManagement';
 import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';

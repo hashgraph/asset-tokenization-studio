@@ -211,11 +211,10 @@ import {
   AddExternalKycListRequest,
   RemoveExternalKycListRequest,
   UpdateExternalKycListsRequest,
-    GetExternalKycListsCountRequest,
-    GetExternalKycListsMembersRequest,
-    IsExternalKycListRequest,
-    IsExternallyGrantedRequest,
-    UpdateExternalKycListsRequest,
+  GetExternalKycListsCountRequest,
+  GetExternalKycListsMembersRequest,
+  IsExternalKycListRequest,
+  IsExternallyGrantedRequest,
 } from '../request/index.js';
 import { QueryBus } from '../../../core/query/QueryBus.js';
 import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
