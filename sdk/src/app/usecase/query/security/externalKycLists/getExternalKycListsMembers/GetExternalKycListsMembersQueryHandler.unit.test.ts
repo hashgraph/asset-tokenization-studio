@@ -203,153 +203,91 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import Injectable from '../../../core/Injectable.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
+import { createMock } from '@golevelup/ts-jest';
 import {
-  AddExternalKycListRequest,
-  RemoveExternalKycListRequest,
-  UpdateExternalKycListsRequest,
-  GetExternalKycListsCountRequest,
-  GetExternalKycListsMembersRequest,
-  IsExternalKycListRequest,
-  IsExternallyGrantedRequest,
-} from '../request/index.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
-import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand.js';
-import { AddExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand.js';
-import { RemoveExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand.js';
-import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery.js';
-import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery.js';
-import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery.js';
-import { GetExternalKycListsMembersQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery.js';
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { GetExternalKycListsMembersQueryHandler } from './GetExternalKycListsMembersQueryHandler.js';
+import {
+  GetExternalKycListsMembersQuery,
+  GetExternalKycListsMembersQueryResponse,
+} from './GetExternalKycListsMembersQuery.js';
+import AccountService from '../../../../../service/AccountService.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { GetExternalKycListsMembersQueryFixture } from '../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
 
-interface IExternalKycListsInPort {
-  updateExternalKycLists(
-    request: UpdateExternalKycListsRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  addExternalKycList(
-    request: AddExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  removeExternalKycList(
-    request: RemoveExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  isExternallyGranted(request: IsExternallyGrantedRequest): Promise<boolean>;
-  isExternalKycList(request: IsExternalKycListRequest): Promise<boolean>;
-  getExternalKycListsCount(
-    request: GetExternalKycListsCountRequest,
-  ): Promise<number>;
-  getExternalKycListsMembers(
-    request: GetExternalKycListsMembersRequest,
-  ): Promise<string[]>;
-}
+describe('GetExternalKycListsMembersQueryHandler', () => {
+  let handler: GetExternalKycListsMembersQueryHandler;
+  let query: GetExternalKycListsMembersQuery;
 
-class ExternalKycListsInPort implements IExternalKycListsInPort {
-  constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-  ) {}
+  const securityServiceMock = createMock<SecurityService>();
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
-  @LogError
-  async updateExternalKycLists(
-    request: UpdateExternalKycListsRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalKycListsAddresses, actives } = request;
-    ValidatedRequest.handleValidation('UpdateExternalKycListsRequest', request);
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const security = new Security(SecurityPropsFixture.create());
 
-    return await this.commandBus.execute(
-      new UpdateExternalKycListsCommand(
-        securityId,
-        externalKycListsAddresses,
-        actives,
-      ),
+  beforeEach(() => {
+    handler = new GetExternalKycListsMembersQueryHandler(
+      securityServiceMock,
+      accountServiceMock,
+      contractServiceMock,
+      queryAdapterServiceMock,
     );
-  }
+    query = GetExternalKycListsMembersQueryFixture.create();
+  });
 
-  @LogError
-  async addExternalKycList(
-    request: AddExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalKycListAddress } = request;
-    ValidatedRequest.handleValidation('AddExternalKycListRequest', request);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    return await this.commandBus.execute(
-      new AddExternalKycListCommand(securityId, externalKycListAddress),
-    );
-  }
+  describe('execute', () => {
+    it('should successfully get external kyc lists members', async () => {
+      securityServiceMock.get.mockResolvedValueOnce(security);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      queryAdapterServiceMock.getExternalKycListsMembers.mockResolvedValue([
+        evmAddress.toString(),
+      ]);
+      accountServiceMock.getAccountInfo.mockResolvedValueOnce(account);
 
-  @LogError
-  async removeExternalKycList(
-    request: RemoveExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalKycListAddress } = request;
-    ValidatedRequest.handleValidation('RemoveExternalKycListRequest', request);
+      const result = await handler.execute(query);
 
-    return await this.commandBus.execute(
-      new RemoveExternalKycListCommand(securityId, externalKycListAddress),
-    );
-  }
+      expect(result).toBeInstanceOf(GetExternalKycListsMembersQueryResponse);
+      expect(result.payload).toStrictEqual([account.id.toString()]);
 
-  @LogError
-  async isExternallyGranted(
-    request: IsExternallyGrantedRequest,
-  ): Promise<boolean> {
-    const { securityId, kycStatus, targetId } = request;
-    ValidatedRequest.handleValidation('IsExternallyGrantedRequest', request);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledTimes(1);
+      expect(
+        queryAdapterServiceMock.getExternalKycListsMembers,
+      ).toHaveBeenCalledTimes(1);
 
-    return (
-      await this.queryBus.execute(
-        new IsExternallyGrantedQuery(securityId, kycStatus, targetId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async isExternalKycList(request: IsExternalKycListRequest): Promise<boolean> {
-    const { securityId, externalKycListAddress } = request;
-    ValidatedRequest.handleValidation('IsExternalKycListRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new IsExternalKycListQuery(securityId, externalKycListAddress),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getExternalKycListsCount(
-    request: GetExternalKycListsCountRequest,
-  ): Promise<number> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation(
-      'GetExternalKycListsCountRequest',
-      request,
-    );
-
-    return (
-      await this.queryBus.execute(new GetExternalKycListsCountQuery(securityId))
-    ).payload;
-  }
-
-  @LogError
-  async getExternalKycListsMembers(
-    request: GetExternalKycListsMembersRequest,
-  ): Promise<string[]> {
-    const { securityId, start, end } = request;
-    ValidatedRequest.handleValidation(
-      'GetExternalKycListsMembersRequest',
-      request,
-    );
-
-    return (
-      await this.queryBus.execute(
-        new GetExternalKycListsMembersQuery(securityId, start, end),
-      )
-    ).payload;
-  }
-}
-
-const ExternalKycListsManagement = new ExternalKycListsInPort();
-export default ExternalKycListsManagement;
+      expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+      expect(
+        queryAdapterServiceMock.getExternalKycListsMembers,
+      ).toHaveBeenCalledWith(evmAddress, query.start, query.end);
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(
+        evmAddress.toString(),
+      );
+    });
+  });
+});

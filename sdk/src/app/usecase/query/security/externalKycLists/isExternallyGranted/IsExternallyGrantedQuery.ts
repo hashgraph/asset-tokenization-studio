@@ -203,153 +203,19 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import Injectable from '../../../core/Injectable.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import {
-  AddExternalKycListRequest,
-  RemoveExternalKycListRequest,
-  UpdateExternalKycListsRequest,
-  GetExternalKycListsCountRequest,
-  GetExternalKycListsMembersRequest,
-  IsExternalKycListRequest,
-  IsExternallyGrantedRequest,
-} from '../request/index.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
-import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand.js';
-import { AddExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand.js';
-import { RemoveExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand.js';
-import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery.js';
-import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery.js';
-import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery.js';
-import { GetExternalKycListsMembersQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery.js';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 
-interface IExternalKycListsInPort {
-  updateExternalKycLists(
-    request: UpdateExternalKycListsRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  addExternalKycList(
-    request: AddExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  removeExternalKycList(
-    request: RemoveExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  isExternallyGranted(request: IsExternallyGrantedRequest): Promise<boolean>;
-  isExternalKycList(request: IsExternalKycListRequest): Promise<boolean>;
-  getExternalKycListsCount(
-    request: GetExternalKycListsCountRequest,
-  ): Promise<number>;
-  getExternalKycListsMembers(
-    request: GetExternalKycListsMembersRequest,
-  ): Promise<string[]>;
+export class IsExternallyGrantedQueryResponse implements QueryResponse {
+  constructor(public readonly payload: boolean) {}
 }
 
-class ExternalKycListsInPort implements IExternalKycListsInPort {
+export class IsExternallyGrantedQuery extends Query<IsExternallyGrantedQueryResponse> {
   constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-  ) {}
-
-  @LogError
-  async updateExternalKycLists(
-    request: UpdateExternalKycListsRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalKycListsAddresses, actives } = request;
-    ValidatedRequest.handleValidation('UpdateExternalKycListsRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateExternalKycListsCommand(
-        securityId,
-        externalKycListsAddresses,
-        actives,
-      ),
-    );
-  }
-
-  @LogError
-  async addExternalKycList(
-    request: AddExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalKycListAddress } = request;
-    ValidatedRequest.handleValidation('AddExternalKycListRequest', request);
-
-    return await this.commandBus.execute(
-      new AddExternalKycListCommand(securityId, externalKycListAddress),
-    );
-  }
-
-  @LogError
-  async removeExternalKycList(
-    request: RemoveExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalKycListAddress } = request;
-    ValidatedRequest.handleValidation('RemoveExternalKycListRequest', request);
-
-    return await this.commandBus.execute(
-      new RemoveExternalKycListCommand(securityId, externalKycListAddress),
-    );
-  }
-
-  @LogError
-  async isExternallyGranted(
-    request: IsExternallyGrantedRequest,
-  ): Promise<boolean> {
-    const { securityId, kycStatus, targetId } = request;
-    ValidatedRequest.handleValidation('IsExternallyGrantedRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new IsExternallyGrantedQuery(securityId, kycStatus, targetId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async isExternalKycList(request: IsExternalKycListRequest): Promise<boolean> {
-    const { securityId, externalKycListAddress } = request;
-    ValidatedRequest.handleValidation('IsExternalKycListRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new IsExternalKycListQuery(securityId, externalKycListAddress),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getExternalKycListsCount(
-    request: GetExternalKycListsCountRequest,
-  ): Promise<number> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation(
-      'GetExternalKycListsCountRequest',
-      request,
-    );
-
-    return (
-      await this.queryBus.execute(new GetExternalKycListsCountQuery(securityId))
-    ).payload;
-  }
-
-  @LogError
-  async getExternalKycListsMembers(
-    request: GetExternalKycListsMembersRequest,
-  ): Promise<string[]> {
-    const { securityId, start, end } = request;
-    ValidatedRequest.handleValidation(
-      'GetExternalKycListsMembersRequest',
-      request,
-    );
-
-    return (
-      await this.queryBus.execute(
-        new GetExternalKycListsMembersQuery(securityId, start, end),
-      )
-    ).payload;
+    public readonly securityId: string,
+    public readonly kycStatus: number,
+    public readonly targetId: string,
+  ) {
+    super();
   }
 }
-
-const ExternalKycListsManagement = new ExternalKycListsInPort();
-export default ExternalKycListsManagement;

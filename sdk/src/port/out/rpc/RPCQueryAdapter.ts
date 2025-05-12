@@ -254,6 +254,7 @@ import {
   ExternalControlListManagement__factory,
   MockedWhitelist__factory,
   MockedBlacklist__factory,
+  ExternalKycListManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1748,5 +1749,62 @@ export class RPCQueryAdapter {
       MockedWhitelist__factory,
       address.toString(),
     ).isAuthorized(targetId.toString());
+  }
+
+  async isExternalKycList(
+    address: EvmAddress,
+    externalKycListAddress: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the address ${externalKycListAddress.toString()} is a external kyc list for the security: ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ExternalKycListManagement__factory,
+      address.toString(),
+    ).isExternalKycList(externalKycListAddress.toString());
+  }
+
+  async getExternalKycListsCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(
+      `Getting External Kyc Lists Count for ${address.toString()}`,
+    );
+
+    const getExternalKycListsCount = await this.connect(
+      ExternalKycListManagement__factory,
+      address.toString(),
+    ).getExternalKycListsCount();
+
+    return getExternalKycListsCount.toNumber();
+  }
+
+  async getExternalKycListsMembers(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting External Kyc Lists Members For security ${address.toString()} from ${start} to ${end}`,
+    );
+
+    return await this.connect(
+      ExternalKycListManagement__factory,
+      address.toString(),
+    ).getExternalKycListsMembers(start, end);
+  }
+
+  async isExternallyGranted(
+    address: EvmAddress,
+    kycStatus: number,
+    targetId: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the address ${targetId.toString()} has the status '${kycStatus}' for the contract: ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ExternalKycListManagement__factory,
+      address.toString(),
+    ).isExternallyGranted(targetId.toString(), kycStatus);
   }
 }

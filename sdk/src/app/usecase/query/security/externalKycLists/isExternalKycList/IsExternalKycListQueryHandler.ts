@@ -203,153 +203,47 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import Injectable from '../../../core/Injectable.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import {
-  AddExternalKycListRequest,
-  RemoveExternalKycListRequest,
-  UpdateExternalKycListsRequest,
-  GetExternalKycListsCountRequest,
-  GetExternalKycListsMembersRequest,
-  IsExternalKycListRequest,
-  IsExternallyGrantedRequest,
-} from '../request/index.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
-import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand.js';
-import { AddExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand.js';
-import { RemoveExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand.js';
-import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery.js';
-import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery.js';
-import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery.js';
-import { GetExternalKycListsMembersQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery.js';
+  IsExternalKycListQuery,
+  IsExternalKycListQueryResponse,
+} from './IsExternalKycListQuery.js';
+import ContractService from '../../../../../service/ContractService.js';
 
-interface IExternalKycListsInPort {
-  updateExternalKycLists(
-    request: UpdateExternalKycListsRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  addExternalKycList(
-    request: AddExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  removeExternalKycList(
-    request: RemoveExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  isExternallyGranted(request: IsExternallyGrantedRequest): Promise<boolean>;
-  isExternalKycList(request: IsExternalKycListRequest): Promise<boolean>;
-  getExternalKycListsCount(
-    request: GetExternalKycListsCountRequest,
-  ): Promise<number>;
-  getExternalKycListsMembers(
-    request: GetExternalKycListsMembersRequest,
-  ): Promise<string[]>;
-}
-
-class ExternalKycListsInPort implements IExternalKycListsInPort {
+@QueryHandler(IsExternalKycListQuery)
+export class IsExternalKycListQueryHandler
+  implements IQueryHandler<IsExternalKycListQuery>
+{
   constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+    @lazyInject(SecurityService)
+    private readonly securityService: SecurityService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(RPCQueryAdapter)
+    private readonly queryAdapter: RPCQueryAdapter,
   ) {}
 
-  @LogError
-  async updateExternalKycLists(
-    request: UpdateExternalKycListsRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalKycListsAddresses, actives } = request;
-    ValidatedRequest.handleValidation('UpdateExternalKycListsRequest', request);
+  async execute(
+    query: IsExternalKycListQuery,
+  ): Promise<IsExternalKycListQueryResponse> {
+    const { securityId, externalKycListAddress } = query;
+    await this.securityService.get(securityId);
 
-    return await this.commandBus.execute(
-      new UpdateExternalKycListsCommand(
-        securityId,
-        externalKycListsAddresses,
-        actives,
-      ),
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
+
+    const externalKycListEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(externalKycListAddress);
+
+    const res = await this.queryAdapter.isExternalKycList(
+      securityEvmAddress,
+      externalKycListEvmAddress,
     );
-  }
-
-  @LogError
-  async addExternalKycList(
-    request: AddExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalKycListAddress } = request;
-    ValidatedRequest.handleValidation('AddExternalKycListRequest', request);
-
-    return await this.commandBus.execute(
-      new AddExternalKycListCommand(securityId, externalKycListAddress),
-    );
-  }
-
-  @LogError
-  async removeExternalKycList(
-    request: RemoveExternalKycListRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, externalKycListAddress } = request;
-    ValidatedRequest.handleValidation('RemoveExternalKycListRequest', request);
-
-    return await this.commandBus.execute(
-      new RemoveExternalKycListCommand(securityId, externalKycListAddress),
-    );
-  }
-
-  @LogError
-  async isExternallyGranted(
-    request: IsExternallyGrantedRequest,
-  ): Promise<boolean> {
-    const { securityId, kycStatus, targetId } = request;
-    ValidatedRequest.handleValidation('IsExternallyGrantedRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new IsExternallyGrantedQuery(securityId, kycStatus, targetId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async isExternalKycList(request: IsExternalKycListRequest): Promise<boolean> {
-    const { securityId, externalKycListAddress } = request;
-    ValidatedRequest.handleValidation('IsExternalKycListRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new IsExternalKycListQuery(securityId, externalKycListAddress),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getExternalKycListsCount(
-    request: GetExternalKycListsCountRequest,
-  ): Promise<number> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation(
-      'GetExternalKycListsCountRequest',
-      request,
-    );
-
-    return (
-      await this.queryBus.execute(new GetExternalKycListsCountQuery(securityId))
-    ).payload;
-  }
-
-  @LogError
-  async getExternalKycListsMembers(
-    request: GetExternalKycListsMembersRequest,
-  ): Promise<string[]> {
-    const { securityId, start, end } = request;
-    ValidatedRequest.handleValidation(
-      'GetExternalKycListsMembersRequest',
-      request,
-    );
-
-    return (
-      await this.queryBus.execute(
-        new GetExternalKycListsMembersQuery(securityId, start, end),
-      )
-    ).payload;
+    return new IsExternalKycListQueryResponse(res);
   }
 }
-
-const ExternalKycListsManagement = new ExternalKycListsInPort();
-export default ExternalKycListsManagement;

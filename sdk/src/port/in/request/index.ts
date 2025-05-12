@@ -343,6 +343,10 @@ import IsAuthorizedWhiteListMockRequest from './security/externalControlLists/mo
 import UpdateExternalKycListsRequest from './security/externalKycLists/UpdateExternalKycListsRequest.js';
 import AddExternalKycListRequest from './security/externalKycLists/AddExternalKycListRequest.js';
 import RemoveExternalKycListRequest from './security/externalKycLists/RemoveExternalKycListRequest.js';
+import GetExternalKycListsCountRequest from './security/externalKycLists/GetExternalKycListsCountRequest.js';
+import GetExternalKycListsMembersRequest from './security/externalKycLists/GetExternalKycListsMembersRequest.js';
+import IsExternalKycListRequest from './security/externalKycLists/IsExternalKycListRequest.js';
+import IsExternallyGrantedRequest from './security/externalKycLists/IsExternallyGrantedRequest.js';
 
 export {
   CreateEquityRequest,
@@ -484,4 +488,8 @@ export {
   UpdateExternalKycListsRequest,
   AddExternalKycListRequest,
   RemoveExternalKycListRequest,
+  GetExternalKycListsCountRequest,
+  GetExternalKycListsMembersRequest,
+  IsExternalKycListRequest,
+  IsExternallyGrantedRequest,
 };

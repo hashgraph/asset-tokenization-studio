@@ -209,8 +209,15 @@ import {
   AddExternalKycListRequest,
   RemoveExternalKycListRequest,
   UpdateExternalKycListsRequest,
+  GetExternalKycListsCountRequest,
+  GetExternalKycListsMembersRequest,
+  IsExternalKycListRequest,
+  IsExternallyGrantedRequest,
 } from '../request';
-import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
+import {
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '../../../../__tests__/fixtures/shared/DataFixture';
 import LogService from '../../../app/service/LogService';
 import { QueryBus } from '../../../core/query/QueryBus';
 import ValidatedRequest from '../../../core/validation/ValidatedArgs';
@@ -219,18 +226,29 @@ import {
   AddExternalKycListsRequestFixture,
   RemoveExternalKycListsRequestFixture,
   UpdateExternalKycListsRequestFixture,
+  GetExternalKycListsCountRequestFixture,
+  GetExternalKycListsMembersRequestFixture,
+  IsExternalKycListRequestFixture,
+  IsExternallyGrantedRequestFixture,
 } from '../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture';
 import ExternalKycListsManagement from './ExternalKycListsManagement';
 import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
 import { AddExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand';
 import { RemoveExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand';
-
+import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
+import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
+import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
+import { GetExternalKycListsMembersQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery';
 describe('ExternalKycListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
   let updateExternalKycListsRequest: UpdateExternalKycListsRequest;
   let addExternalKycListsRequest: AddExternalKycListRequest;
   let removeExternalKycListsRequest: RemoveExternalKycListRequest;
+  let isExternallyGrantedRequest: IsExternallyGrantedRequest;
+  let isExternalKycListRequest: IsExternalKycListRequest;
+  let getExternalKycListsCountRequest: GetExternalKycListsCountRequest;
+  let getExternalKycListsMembersRequest: GetExternalKycListsMembersRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -498,6 +516,348 @@ describe('ExternalKycListsManagement', () => {
       await expect(
         ExternalKycListsManagement.removeExternalKycList(
           removeExternalKycListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('isExternallyGranted', () => {
+    isExternallyGrantedRequest = new IsExternallyGrantedRequest(
+      IsExternallyGrantedRequestFixture.create(),
+    );
+    const expectedQueryResponse = {
+      payload: true,
+    };
+
+    it('should check if address is externally granted successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result = await ExternalKycListsManagement.isExternallyGranted(
+        isExternallyGrantedRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsExternallyGrantedRequest',
+        isExternallyGrantedRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsExternallyGrantedQuery(
+          isExternallyGrantedRequest.securityId,
+          isExternallyGrantedRequest.kycStatus,
+          isExternallyGrantedRequest.targetId,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalKycListsManagement.isExternallyGranted(
+          isExternallyGrantedRequest,
+        ),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsExternallyGrantedRequest',
+        isExternallyGrantedRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsExternallyGrantedQuery(
+          isExternallyGrantedRequest.securityId,
+          isExternallyGrantedRequest.kycStatus,
+          isExternallyGrantedRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      isExternallyGrantedRequest = new IsExternallyGrantedRequest({
+        ...IsExternallyGrantedRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.isExternallyGranted(
+          isExternallyGrantedRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      isExternallyGrantedRequest = new IsExternallyGrantedRequest({
+        ...IsExternallyGrantedRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.isExternallyGranted(
+          isExternallyGrantedRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if kycStatus is invalid', async () => {
+      isExternallyGrantedRequest = new IsExternallyGrantedRequest({
+        ...IsExternallyGrantedRequestFixture.create({
+          kycStatus: -1,
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.isExternallyGranted(
+          isExternallyGrantedRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('isExternalKycList', () => {
+    isExternalKycListRequest = new IsExternalKycListRequest(
+      IsExternalKycListRequestFixture.create(),
+    );
+    const expectedQueryResponse = {
+      payload: true,
+    };
+
+    it('should check if is external kyc list successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result = await ExternalKycListsManagement.isExternalKycList(
+        isExternalKycListRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsExternalKycListRequest',
+        isExternalKycListRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsExternalKycListQuery(
+          isExternalKycListRequest.securityId,
+          isExternalKycListRequest.externalKycListAddress,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalKycListsManagement.isExternalKycList(isExternalKycListRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsExternalKycListRequest',
+        isExternalKycListRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsExternalKycListQuery(
+          isExternalKycListRequest.securityId,
+          isExternalKycListRequest.externalKycListAddress,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      isExternalKycListRequest = new IsExternalKycListRequest({
+        ...IsExternalKycListRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.isExternalKycList(isExternalKycListRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalKycListAddress is invalid', async () => {
+      isExternalKycListRequest = new IsExternalKycListRequest({
+        ...IsExternalKycListRequestFixture.create({
+          externalKycListAddress: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.isExternalKycList(isExternalKycListRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getExternalKycListsCount', () => {
+    getExternalKycListsCountRequest = new GetExternalKycListsCountRequest(
+      GetExternalKycListsCountRequestFixture.create(),
+    );
+    const expectedQueryResponse = {
+      payload: 1,
+    };
+
+    it('should get external kyc lists count successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result = await ExternalKycListsManagement.getExternalKycListsCount(
+        getExternalKycListsCountRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetExternalKycListsCountRequest',
+        getExternalKycListsCountRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetExternalKycListsCountQuery(
+          getExternalKycListsCountRequest.securityId,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalKycListsManagement.getExternalKycListsCount(
+          getExternalKycListsCountRequest,
+        ),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetExternalKycListsCountRequest',
+        getExternalKycListsCountRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetExternalKycListsCountQuery(
+          getExternalKycListsCountRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getExternalKycListsCountRequest = new GetExternalKycListsCountRequest({
+        ...GetExternalKycListsCountRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.getExternalKycListsCount(
+          getExternalKycListsCountRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getExternalKycListsMembers', () => {
+    getExternalKycListsMembersRequest = new GetExternalKycListsMembersRequest(
+      GetExternalKycListsMembersRequestFixture.create(),
+    );
+    const expectedQueryResponse = {
+      payload: [HederaIdPropsFixture.create().value],
+    };
+
+    it('should get external kyc lists members successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result =
+        await ExternalKycListsManagement.getExternalKycListsMembers(
+          getExternalKycListsMembersRequest,
+        );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetExternalKycListsMembersRequest',
+        getExternalKycListsMembersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetExternalKycListsMembersQuery(
+          getExternalKycListsMembersRequest.securityId,
+          getExternalKycListsMembersRequest.start,
+          getExternalKycListsMembersRequest.end,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalKycListsManagement.getExternalKycListsMembers(
+          getExternalKycListsMembersRequest,
+        ),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetExternalKycListsMembersRequest',
+        getExternalKycListsMembersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetExternalKycListsMembersQuery(
+          getExternalKycListsMembersRequest.securityId,
+          getExternalKycListsMembersRequest.start,
+          getExternalKycListsMembersRequest.end,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getExternalKycListsMembersRequest = new GetExternalKycListsMembersRequest(
+        {
+          ...GetExternalKycListsMembersRequestFixture.create({
+            securityId: 'invalid',
+          }),
+        },
+      );
+
+      await expect(
+        ExternalKycListsManagement.getExternalKycListsMembers(
+          getExternalKycListsMembersRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if start is negative', async () => {
+      getExternalKycListsMembersRequest = new GetExternalKycListsMembersRequest(
+        {
+          ...GetExternalKycListsMembersRequestFixture.create({
+            start: -1,
+          }),
+        },
+      );
+
+      await expect(
+        ExternalKycListsManagement.getExternalKycListsMembers(
+          getExternalKycListsMembersRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if end is negative', async () => {
+      getExternalKycListsMembersRequest = new GetExternalKycListsMembersRequest(
+        {
+          ...GetExternalKycListsMembersRequestFixture.create({
+            end: -1,
+          }),
+        },
+      );
+
+      await expect(
+        ExternalKycListsManagement.getExternalKycListsMembers(
+          getExternalKycListsMembersRequest,
         ),
       ).rejects.toThrow(ValidationError);
     });

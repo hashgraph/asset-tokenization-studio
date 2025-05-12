@@ -211,6 +211,14 @@ import { AddExternalKycListCommand } from '../../../src/app/usecase/command/secu
 import { RemoveExternalKycListCommand } from '../../../src/app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand';
 import AddExternalKycListRequest from '../../../src/port/in/request/security/externalKycLists/AddExternalKycListRequest';
 import RemoveExternalKycListRequest from '../../../src/port/in/request/security/externalKycLists/RemoveExternalKycListRequest';
+import { GetExternalKycListsCountQuery } from '../../../src/app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
+import { GetExternalKycListsMembersQuery } from '../../../src/app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery';
+import { IsExternalKycListQuery } from '../../../src/app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
+import { IsExternallyGrantedQuery } from '../../../src/app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
+import IsExternallyGrantedRequest from '../../../src/port/in/request/security/externalKycLists/IsExternallyGrantedRequest';
+import IsExternalKycListRequest from '../../../src/port/in/request/security/externalKycLists/IsExternalKycListRequest';
+import GetExternalKycListsMembersRequest from '../../../src/port/in/request/security/externalKycLists/GetExternalKycListsMembersRequest';
+import GetExternalKycListsCountRequest from '../../../src/port/in/request/security/externalKycLists/GetExternalKycListsCountRequest';
 
 export const UpdateExternalKycListsCommandFixture =
   createFixture<UpdateExternalKycListsCommand>((command) => {
@@ -237,6 +245,31 @@ export const RemoveExternalKycListCommandFixture =
     );
   });
 
+export const GetExternalKycListsCountQueryFixture =
+  createFixture<GetExternalKycListsCountQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetExternalKycListsMembersQueryFixture =
+  createFixture<GetExternalKycListsMembersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const IsExternalKycListQueryFixture =
+  createFixture<IsExternalKycListQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.externalKycListAddress.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const IsExternallyGrantedQueryFixture =
+  createFixture<IsExternallyGrantedQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.kycStatus.faker((faker) => faker.number.int({ min: 0, max: 1 }));
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
 export const UpdateExternalKycListsRequestFixture =
   createFixture<UpdateExternalKycListsRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -260,4 +293,31 @@ export const RemoveExternalKycListsRequestFixture =
     request.externalKycListAddress.as(
       () => HederaIdPropsFixture.create().value,
     );
+  });
+
+export const IsExternallyGrantedRequestFixture =
+  createFixture<IsExternallyGrantedRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.kycStatus.faker((faker) => faker.number.int({ min: 0, max: 1 }));
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const IsExternalKycListRequestFixture =
+  createFixture<IsExternalKycListRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.externalKycListAddress.as(
+      () => HederaIdPropsFixture.create().value,
+    );
+  });
+
+export const GetExternalKycListsMembersRequestFixture =
+  createFixture<GetExternalKycListsMembersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetExternalKycListsCountRequestFixture =
+  createFixture<GetExternalKycListsCountRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
   });
