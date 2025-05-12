@@ -327,6 +327,8 @@ import {
   CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
   CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
   UPDATE_EXTERNAL_KYC_LISTS_GAS,
+  REMOVE_EXTERNAL_KYC_LIST_GAS,
+  ADD_EXTERNAL_KYC_LIST_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -3511,6 +3513,68 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(UPDATE_EXTERNAL_KYC_LISTS_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async addExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'addExternalKycList';
+    LogService.logTrace(
+      `Adding External kyc Lists for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalKycListManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalKycListAddress.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(ADD_EXTERNAL_KYC_LIST_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async removeExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'removeExternalKycList';
+    LogService.logTrace(
+      `Removing External kyc Lists for security ${security.toString()}`,
+    );
+
+    const factoryInstance = new ExternalKycListManagement__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [externalKycListAddress.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(REMOVE_EXTERNAL_KYC_LIST_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

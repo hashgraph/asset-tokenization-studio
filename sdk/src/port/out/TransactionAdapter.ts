@@ -890,6 +890,16 @@ interface IExternalKycListsAdapter {
     actives: boolean[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  addExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 export default abstract class TransactionAdapter
@@ -1731,6 +1741,20 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     externalKycListsAddresses: EvmAddress[],
     actives: boolean[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
