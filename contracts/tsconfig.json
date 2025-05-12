@@ -17,7 +17,7 @@
             "@typechain": ["./typechain-types/*", "./typechain-types/index.ts"],
             "@scripts": ["./scripts/index"],
             "@tasks": ["./tasks/index.ts"],
-            "@test": ["./test/index.ts"]
+            "@test": ["./test/index.ts"] 
         }
     }
 }
