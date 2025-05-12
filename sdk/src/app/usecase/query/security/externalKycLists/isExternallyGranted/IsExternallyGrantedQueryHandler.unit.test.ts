@@ -203,83 +203,90 @@
 
 */
 
-import UpdateExternalKycListsRequest from '../../../src/port/in/request/security/externalKycLists/UpdateExternalKycListsRequest';
-import { UpdateExternalKycListsCommand } from '../../../src/app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetExternalKycListsCountQuery } from '../../../src/app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
-import { GetExternalKycListsMembersQuery } from '../../../src/app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery';
-import { IsExternalKycListQuery } from '../../../src/app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
-import { IsExternallyGrantedQuery } from '../../../src/app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
-import IsExternallyGrantedRequest from '../../../src/port/in/request/security/externalKycLists/IsExternallyGrantedRequest';
-import IsExternalKycListRequest from '../../../src/port/in/request/security/externalKycLists/IsExternalKycListRequest';
-import GetExternalKycListsMembersRequest from '../../../src/port/in/request/security/externalKycLists/GetExternalKycListsMembersRequest';
-import GetExternalKycListsCountRequest from '../../../src/port/in/request/security/externalKycLists/GetExternalKycListsCountRequest';
+import { createMock } from '@golevelup/ts-jest';
+import { EvmAddressPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { IsExternallyGrantedQueryHandler } from './IsExternallyGrantedQueryHandler.js';
+import {
+  IsExternallyGrantedQuery,
+  IsExternallyGrantedQueryResponse,
+} from './IsExternallyGrantedQuery.js';
+import AccountService from 'app/service/AccountService.js';
+import { IsExternallyGrantedQueryFixture } from '../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
 
-export const UpdateExternalKycListsCommandFixture =
-  createFixture<UpdateExternalKycListsCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.externalKycListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    command.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
+describe('IsExternallyGrantedQueryHandler', () => {
+  let handler: IsExternallyGrantedQueryHandler;
+  let query: IsExternallyGrantedQuery;
 
-export const GetExternalKycListsCountQueryFixture =
-  createFixture<GetExternalKycListsCountQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
+  const securityServiceMock = createMock<SecurityService>();
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
-export const GetExternalKycListsMembersQueryFixture =
-  createFixture<GetExternalKycListsMembersQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    query.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const targetEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
 
-export const IsExternalKycListQueryFixture =
-  createFixture<IsExternalKycListQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.externalKycListAddress.as(() => HederaIdPropsFixture.create().value);
-  });
+  const security = new Security(SecurityPropsFixture.create());
 
-export const IsExternallyGrantedQueryFixture =
-  createFixture<IsExternallyGrantedQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const UpdateExternalKycListsRequestFixture =
-  createFixture<UpdateExternalKycListsRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalKycListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    request.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
-
-export const IsExternallyGrantedRequestFixture =
-  createFixture<IsExternallyGrantedRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const IsExternalKycListRequestFixture =
-  createFixture<IsExternalKycListRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalKycListAddress.as(
-      () => HederaIdPropsFixture.create().value,
+  beforeEach(() => {
+    handler = new IsExternallyGrantedQueryHandler(
+      securityServiceMock,
+      contractServiceMock,
+      accountServiceMock,
+      queryAdapterServiceMock,
     );
+    query = IsExternallyGrantedQueryFixture.create();
   });
 
-export const GetExternalKycListsMembersRequestFixture =
-  createFixture<GetExternalKycListsMembersRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    request.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
-export const GetExternalKycListsCountRequestFixture =
-  createFixture<GetExternalKycListsCountRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  describe('execute', () => {
+    it('should successfully validate if is externally granted', async () => {
+      securityServiceMock.get.mockResolvedValueOnce(security);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        targetEvmAddress,
+      );
+
+      queryAdapterServiceMock.isExternallyGranted.mockResolvedValue(true);
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(IsExternallyGrantedQueryResponse);
+      expect(result.payload).toBe(true);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+      expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
+      expect(queryAdapterServiceMock.isExternallyGranted).toHaveBeenCalledTimes(
+        1,
+      );
+
+      expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+        query.targetId,
+      );
+
+      expect(queryAdapterServiceMock.isExternallyGranted).toHaveBeenCalledWith(
+        evmAddress,
+        targetEvmAddress,
+      );
+    });
   });
+});

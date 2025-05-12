@@ -207,18 +207,38 @@
 import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
 import Injectable from '../../../core/Injectable.js';
 import { CommandBus } from '../../../core/command/CommandBus.js';
-import { UpdateExternalKycListsRequest } from '../request/index.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import {
+  GetExternalKycListsCountRequest,
+  GetExternalKycListsMembersRequest,
+  IsExternalKycListRequest,
+  IsExternallyGrantedRequest,
+  UpdateExternalKycListsRequest,
+} from '../request/index.js';
 import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand.js';
+import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery.js';
+import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery.js';
+import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery.js';
+import { GetExternalKycListsMembersQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery.js';
 
 interface IExternalKycListsInPort {
   updateExternalKycLists(
     request: UpdateExternalKycListsRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  isExternallyGranted(request: IsExternallyGrantedRequest): Promise<boolean>;
+  isExternalKycList(request: IsExternalKycListRequest): Promise<boolean>;
+  getExternalKycListsCount(
+    request: GetExternalKycListsCountRequest,
+  ): Promise<number>;
+  getExternalKycListsMembers(
+    request: GetExternalKycListsMembersRequest,
+  ): Promise<string[]>;
 }
 
 class ExternalKycListsInPort implements IExternalKycListsInPort {
   constructor(
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
     private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
   ) {}
 
@@ -236,6 +256,64 @@ class ExternalKycListsInPort implements IExternalKycListsInPort {
         actives,
       ),
     );
+  }
+
+  @LogError
+  async isExternallyGranted(
+    request: IsExternallyGrantedRequest,
+  ): Promise<boolean> {
+    const { securityId, targetId } = request;
+    ValidatedRequest.handleValidation('IsExternallyGrantedRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new IsExternallyGrantedQuery(securityId, targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async isExternalKycList(request: IsExternalKycListRequest): Promise<boolean> {
+    const { securityId, externalKycListAddress } = request;
+    ValidatedRequest.handleValidation('IsExternalKycListRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new IsExternalKycListQuery(securityId, externalKycListAddress),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getExternalKycListsCount(
+    request: GetExternalKycListsCountRequest,
+  ): Promise<number> {
+    const { securityId } = request;
+    ValidatedRequest.handleValidation(
+      'GetExternalKycListsCountRequest',
+      request,
+    );
+
+    return (
+      await this.queryBus.execute(new GetExternalKycListsCountQuery(securityId))
+    ).payload;
+  }
+
+  @LogError
+  async getExternalKycListsMembers(
+    request: GetExternalKycListsMembersRequest,
+  ): Promise<string[]> {
+    const { securityId, start, end } = request;
+    ValidatedRequest.handleValidation(
+      'GetExternalKycListsMembersRequest',
+      request,
+    );
+
+    return (
+      await this.queryBus.execute(
+        new GetExternalKycListsMembersQuery(securityId, start, end),
+      )
+    ).payload;
   }
 }
 

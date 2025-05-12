@@ -203,83 +203,50 @@
 
 */
 
-import UpdateExternalKycListsRequest from '../../../src/port/in/request/security/externalKycLists/UpdateExternalKycListsRequest';
-import { UpdateExternalKycListsCommand } from '../../../src/app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetExternalKycListsCountQuery } from '../../../src/app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
-import { GetExternalKycListsMembersQuery } from '../../../src/app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery';
-import { IsExternalKycListQuery } from '../../../src/app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
-import { IsExternallyGrantedQuery } from '../../../src/app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
-import IsExternallyGrantedRequest from '../../../src/port/in/request/security/externalKycLists/IsExternallyGrantedRequest';
-import IsExternalKycListRequest from '../../../src/port/in/request/security/externalKycLists/IsExternalKycListRequest';
-import GetExternalKycListsMembersRequest from '../../../src/port/in/request/security/externalKycLists/GetExternalKycListsMembersRequest';
-import GetExternalKycListsCountRequest from '../../../src/port/in/request/security/externalKycLists/GetExternalKycListsCountRequest';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import {
+  IsExternallyGrantedQuery,
+  IsExternallyGrantedQueryResponse,
+} from './IsExternallyGrantedQuery.js';
+import ContractService from '../../../../../service/ContractService.js';
+import AccountService from '../../../../../service/AccountService.js';
 
-export const UpdateExternalKycListsCommandFixture =
-  createFixture<UpdateExternalKycListsCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.externalKycListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    command.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
+@QueryHandler(IsExternallyGrantedQuery)
+export class IsExternallyGrantedQueryHandler
+  implements IQueryHandler<IsExternallyGrantedQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
 
-export const GetExternalKycListsCountQueryFixture =
-  createFixture<GetExternalKycListsCountQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
+  async execute(
+    query: IsExternallyGrantedQuery,
+  ): Promise<IsExternallyGrantedQueryResponse> {
+    const { securityId, targetId } = query;
+    await this.securityService.get(securityId);
 
-export const GetExternalKycListsMembersQueryFixture =
-  createFixture<GetExternalKycListsMembersQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    query.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
+    const securityEvmAddress: EvmAddress =
+      await this.contractService.getContractEvmAddress(securityId);
 
-export const IsExternalKycListQueryFixture =
-  createFixture<IsExternalKycListQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.externalKycListAddress.as(() => HederaIdPropsFixture.create().value);
-  });
+    const targetEvmAddress: EvmAddress =
+      await this.accountService.getAccountEvmAddress(targetId);
 
-export const IsExternallyGrantedQueryFixture =
-  createFixture<IsExternallyGrantedQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const UpdateExternalKycListsRequestFixture =
-  createFixture<UpdateExternalKycListsRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalKycListsAddresses.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    request.actives.faker((faker) => [faker.datatype.boolean()]);
-  });
-
-export const IsExternallyGrantedRequestFixture =
-  createFixture<IsExternallyGrantedRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const IsExternalKycListRequestFixture =
-  createFixture<IsExternalKycListRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.externalKycListAddress.as(
-      () => HederaIdPropsFixture.create().value,
+    const res = await this.queryAdapter.isExternallyGranted(
+      securityEvmAddress,
+      targetEvmAddress,
     );
-  });
-
-export const GetExternalKycListsMembersRequestFixture =
-  createFixture<GetExternalKycListsMembersRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    request.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
-
-export const GetExternalKycListsCountRequestFixture =
-  createFixture<GetExternalKycListsCountRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
+    return new IsExternallyGrantedQueryResponse(res);
+  }
+}

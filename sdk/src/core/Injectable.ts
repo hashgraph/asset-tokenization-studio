@@ -386,6 +386,10 @@ import { CreateExternalBlackListMockCommandHandler } from '../app/usecase/comman
 import { RemoveFromBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommandHandler.js';
 import { RemoveFromWhiteListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommandHandler.js';
 import { UpdateExternalKycListsCommandHandler } from '../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommandHandler.js';
+import { GetExternalKycListsCountQueryHandler } from '../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQueryHandler.js';
+import { GetExternalKycListsMembersQueryHandler } from '../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQueryHandler.js';
+import { IsExternalKycListQueryHandler } from '../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQueryHandler.js';
+import { IsExternallyGrantedQueryHandler } from '../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -1037,6 +1041,22 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetExternalControlListsMembersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalKycListsCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalKycListsMembersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsExternalKycListQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsExternallyGrantedQueryHandler,
   },
 ];
 
