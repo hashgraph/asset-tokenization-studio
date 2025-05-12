@@ -207,16 +207,21 @@
 import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
 import Injectable from '../../../core/Injectable.js';
 import { CommandBus } from '../../../core/command/CommandBus.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
 import {
-  GetExternalKycListsCountRequest,
-  GetExternalKycListsMembersRequest,
-  IsExternalKycListRequest,
-  IsExternallyGrantedRequest,
+  AddExternalKycListRequest,
+  RemoveExternalKycListRequest,
   UpdateExternalKycListsRequest,
+    GetExternalKycListsCountRequest,
+    GetExternalKycListsMembersRequest,
+    IsExternalKycListRequest,
+    IsExternallyGrantedRequest,
+    UpdateExternalKycListsRequest,
 } from '../request/index.js';
+import { QueryBus } from '../../../core/query/QueryBus.js';
 import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand.js';
+import { AddExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand.js';
+import { RemoveExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand.js';
 import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery.js';
 import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery.js';
 import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery.js';
@@ -225,6 +230,12 @@ import { GetExternalKycListsMembersQuery } from '../../../app/usecase/query/secu
 interface IExternalKycListsInPort {
   updateExternalKycLists(
     request: UpdateExternalKycListsRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  addExternalKycList(
+    request: AddExternalKycListRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeExternalKycList(
+    request: RemoveExternalKycListRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   isExternallyGranted(request: IsExternallyGrantedRequest): Promise<boolean>;
   isExternalKycList(request: IsExternalKycListRequest): Promise<boolean>;
@@ -255,6 +266,30 @@ class ExternalKycListsInPort implements IExternalKycListsInPort {
         externalKycListsAddresses,
         actives,
       ),
+    );
+  }
+
+  @LogError
+  async addExternalKycList(
+    request: AddExternalKycListRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, externalKycListAddress } = request;
+    ValidatedRequest.handleValidation('AddExternalKycListRequest', request);
+
+    return await this.commandBus.execute(
+      new AddExternalKycListCommand(securityId, externalKycListAddress),
+    );
+  }
+
+  @LogError
+  async removeExternalKycList(
+    request: RemoveExternalKycListRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, externalKycListAddress } = request;
+    ValidatedRequest.handleValidation('RemoveExternalKycListRequest', request);
+
+    return await this.commandBus.execute(
+      new RemoveExternalKycListCommand(securityId, externalKycListAddress),
     );
   }
 

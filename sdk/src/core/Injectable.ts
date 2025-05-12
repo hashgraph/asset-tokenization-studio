@@ -386,6 +386,8 @@ import { CreateExternalBlackListMockCommandHandler } from '../app/usecase/comman
 import { RemoveFromBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommandHandler.js';
 import { RemoveFromWhiteListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommandHandler.js';
 import { UpdateExternalKycListsCommandHandler } from '../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommandHandler.js';
+import { AddExternalKycListCommandHandler } from '../app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommandHandler.js';
+import { RemoveExternalKycListCommandHandler } from '../app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommandHandler.js';
 import { GetExternalKycListsCountQueryHandler } from '../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQueryHandler.js';
 import { GetExternalKycListsMembersQueryHandler } from '../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQueryHandler.js';
 import { IsExternalKycListQueryHandler } from '../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQueryHandler.js';
@@ -725,6 +727,14 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: UpdateExternalKycListsCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddExternalKycListCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveExternalKycListCommandHandler,
   },
 ];
 

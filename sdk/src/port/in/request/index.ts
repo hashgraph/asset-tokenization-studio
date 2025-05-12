@@ -341,6 +341,8 @@ import RemoveFromWhiteListMockRequest from './security/externalControlLists/mock
 import IsAuthorizedBlackListMockRequest from './security/externalControlLists/mock/IsAuthorizedBlackListMockRequest.js';
 import IsAuthorizedWhiteListMockRequest from './security/externalControlLists/mock/IsAuthorizedWhiteListMockRequest.js';
 import UpdateExternalKycListsRequest from './security/externalKycLists/UpdateExternalKycListsRequest.js';
+import AddExternalKycListRequest from './security/externalKycLists/AddExternalKycListRequest.js';
+import RemoveExternalKycListRequest from './security/externalKycLists/RemoveExternalKycListRequest.js';
 import GetExternalKycListsCountRequest from './security/externalKycLists/GetExternalKycListsCountRequest.js';
 import GetExternalKycListsMembersRequest from './security/externalKycLists/GetExternalKycListsMembersRequest.js';
 import IsExternalKycListRequest from './security/externalKycLists/IsExternalKycListRequest.js';
@@ -484,6 +486,8 @@ export {
   IsAuthorizedBlackListMockRequest,
   IsAuthorizedWhiteListMockRequest,
   UpdateExternalKycListsRequest,
+  AddExternalKycListRequest,
+  RemoveExternalKycListRequest,
   GetExternalKycListsCountRequest,
   GetExternalKycListsMembersRequest,
   IsExternalKycListRequest,

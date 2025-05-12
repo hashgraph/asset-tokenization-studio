@@ -340,6 +340,8 @@ import {
   CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
   CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
   UPDATE_EXTERNAL_KYC_LISTS_GAS,
+  ADD_EXTERNAL_KYC_LIST_GAS,
+  REMOVE_EXTERNAL_KYC_LIST_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -516,6 +518,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        internalKycActivated: true,
         externalPauses:
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
@@ -635,6 +638,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        internalKycActivated: true,
         externalPauses:
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
@@ -3108,6 +3112,44 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: UPDATE_EXTERNAL_KYC_LISTS_GAS,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async addExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding External kyc List for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalKycListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addExternalKycList(externalKycListAddress.toString(), {
+        gasLimit: ADD_EXTERNAL_KYC_LIST_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing External kyc List for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalKycListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeExternalKycList(externalKycListAddress.toString(), {
+        gasLimit: REMOVE_EXTERNAL_KYC_LIST_GAS,
+      }),
       this.networkService.environment,
     );
   }

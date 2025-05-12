@@ -218,6 +218,7 @@ import {_KYC_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     _KYC_MANAGEMENT_STORAGE_POSITION
 } from '../../layer_0/constants/storagePositions.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 contract ExternalKycListManagement is
     IExternalKycListManagement,
@@ -318,9 +319,10 @@ contract ExternalKycListManagement is
     }
 
     function isExternallyGranted(
-        address _account
+        address _account,
+        IKyc.KycStatus _kycStatus
     ) external view override returns (bool) {
-        return _isExternallyGranted(_account);
+        return _isExternallyGranted(_account, _kycStatus);
     }
 
     function getExternalKycListsCount()

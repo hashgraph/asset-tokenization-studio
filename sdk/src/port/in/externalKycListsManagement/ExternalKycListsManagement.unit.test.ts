@@ -206,12 +206,16 @@
 import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '../../../core/command/CommandBus';
 import {
-  GetExternalKycListsCountRequest,
-  GetExternalKycListsMembersRequest,
-  IsExternalKycListRequest,
-  IsExternallyGrantedRequest,
+  AddExternalKycListRequest,
+  RemoveExternalKycListRequest,
   UpdateExternalKycListsRequest,
+    GetExternalKycListsCountRequest,
+    GetExternalKycListsMembersRequest,
+    IsExternalKycListRequest,
+    IsExternallyGrantedRequest,
+    UpdateExternalKycListsRequest,
 } from '../request';
+import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
@@ -221,14 +225,19 @@ import { QueryBus } from '../../../core/query/QueryBus';
 import ValidatedRequest from '../../../core/validation/ValidatedArgs';
 import { ValidationError } from '../../../core/validation/ValidationError';
 import {
-  GetExternalKycListsCountRequestFixture,
-  GetExternalKycListsMembersRequestFixture,
-  IsExternalKycListRequestFixture,
-  IsExternallyGrantedRequestFixture,
+  AddExternalKycListsRequestFixture,
+  RemoveExternalKycListsRequestFixture,
   UpdateExternalKycListsRequestFixture,
+    GetExternalKycListsCountRequestFixture,
+    GetExternalKycListsMembersRequestFixture,
+    IsExternalKycListRequestFixture,
+    IsExternallyGrantedRequestFixture,
+    UpdateExternalKycListsRequestFixture,
 } from '../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture';
 import ExternalKycListsManagement from './ExternalKycListsManagement';
 import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
+import { AddExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand';
+import { RemoveExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand';
 import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
 import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
 import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
@@ -237,6 +246,8 @@ describe('ExternalKycListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
   let updateExternalKycListsRequest: UpdateExternalKycListsRequest;
+  let addExternalKycListsRequest: AddExternalKycListRequest;
+  let removeExternalKycListsRequest: RemoveExternalKycListRequest;
   let isExternallyGrantedRequest: IsExternallyGrantedRequest;
   let isExternalKycListRequest: IsExternalKycListRequest;
   let getExternalKycListsCountRequest: GetExternalKycListsCountRequest;
@@ -354,6 +365,160 @@ describe('ExternalKycListsManagement', () => {
       await expect(
         ExternalKycListsManagement.updateExternalKycLists(
           updateExternalKycListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+  describe('addExternalKycList', () => {
+    addExternalKycListsRequest = new AddExternalKycListRequest(
+      AddExternalKycListsRequestFixture.create(),
+    );
+    it('should add external kyc list successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await ExternalKycListsManagement.addExternalKycList(
+        addExternalKycListsRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'AddExternalKycListRequest',
+        addExternalKycListsRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new AddExternalKycListCommand(
+          addExternalKycListsRequest.securityId,
+          addExternalKycListsRequest.externalKycListAddress,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalKycListsManagement.addExternalKycList(
+          addExternalKycListsRequest,
+        ),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'AddExternalKycListRequest',
+        addExternalKycListsRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new AddExternalKycListCommand(
+          addExternalKycListsRequest.securityId,
+          addExternalKycListsRequest.externalKycListAddress,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      addExternalKycListsRequest = new AddExternalKycListRequest({
+        ...AddExternalKycListsRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.addExternalKycList(
+          addExternalKycListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalKycListAddress is invalid', async () => {
+      addExternalKycListsRequest = new AddExternalKycListRequest({
+        ...AddExternalKycListsRequestFixture.create({
+          externalKycListAddress: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.addExternalKycList(
+          addExternalKycListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+  describe('removeExternalKycList', () => {
+    removeExternalKycListsRequest = new RemoveExternalKycListRequest(
+      RemoveExternalKycListsRequestFixture.create(),
+    );
+    it('should remove external kyc list successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await ExternalKycListsManagement.removeExternalKycList(
+        removeExternalKycListsRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RemoveExternalKycListRequest',
+        removeExternalKycListsRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RemoveExternalKycListCommand(
+          removeExternalKycListsRequest.securityId,
+          removeExternalKycListsRequest.externalKycListAddress,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalKycListsManagement.removeExternalKycList(
+          removeExternalKycListsRequest,
+        ),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RemoveExternalKycListRequest',
+        removeExternalKycListsRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RemoveExternalKycListCommand(
+          removeExternalKycListsRequest.securityId,
+          removeExternalKycListsRequest.externalKycListAddress,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      removeExternalKycListsRequest = new RemoveExternalKycListRequest({
+        ...RemoveExternalKycListsRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.removeExternalKycList(
+          removeExternalKycListsRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalKycListAddress is invalid', async () => {
+      removeExternalKycListsRequest = new RemoveExternalKycListRequest({
+        ...RemoveExternalKycListsRequestFixture.create({
+          externalKycListAddress: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.removeExternalKycList(
+          removeExternalKycListsRequest,
         ),
       ).rejects.toThrow(ValidationError);
     });
