@@ -47,6 +47,7 @@ npm run install:all
 ```
 
 This will install the dependencies in all projects and sets up the links between them.
+Now there is an error downloadin a dependency, doesn't matter.
 
 You can now start developing in any of the modules.
 
