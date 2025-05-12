@@ -285,6 +285,7 @@ describe('IsExternallyGrantedQueryHandler', () => {
 
       expect(queryAdapterServiceMock.isExternallyGranted).toHaveBeenCalledWith(
         evmAddress,
+        query.kycStatus,
         targetEvmAddress,
       );
     });

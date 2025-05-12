@@ -266,6 +266,7 @@ export const IsExternalKycListQueryFixture =
 export const IsExternallyGrantedQueryFixture =
   createFixture<IsExternallyGrantedQuery>((query) => {
     query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.kycStatus.faker((faker) => faker.number.int({ min: 0, max: 1 }));
     query.targetId.as(() => HederaIdPropsFixture.create().value);
   });
 
@@ -297,6 +298,7 @@ export const RemoveExternalKycListsRequestFixture =
 export const IsExternallyGrantedRequestFixture =
   createFixture<IsExternallyGrantedRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.kycStatus.faker((faker) => faker.number.int({ min: 0, max: 1 }));
     request.targetId.as(() => HederaIdPropsFixture.create().value);
   });
 

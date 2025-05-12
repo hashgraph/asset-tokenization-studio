@@ -296,12 +296,12 @@ class ExternalKycListsInPort implements IExternalKycListsInPort {
   async isExternallyGranted(
     request: IsExternallyGrantedRequest,
   ): Promise<boolean> {
-    const { securityId, targetId } = request;
+    const { securityId, kycStatus, targetId } = request;
     ValidatedRequest.handleValidation('IsExternallyGrantedRequest', request);
 
     return (
       await this.queryBus.execute(
-        new IsExternallyGrantedQuery(securityId, targetId),
+        new IsExternallyGrantedQuery(securityId, kycStatus, targetId),
       )
     ).payload;
   }

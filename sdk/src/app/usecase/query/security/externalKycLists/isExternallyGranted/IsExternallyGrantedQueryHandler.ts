@@ -234,7 +234,7 @@ export class IsExternallyGrantedQueryHandler
   async execute(
     query: IsExternallyGrantedQuery,
   ): Promise<IsExternallyGrantedQueryResponse> {
-    const { securityId, targetId } = query;
+    const { securityId, kycStatus, targetId } = query;
     await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
@@ -245,6 +245,7 @@ export class IsExternallyGrantedQueryHandler
 
     const res = await this.queryAdapter.isExternallyGranted(
       securityEvmAddress,
+      kycStatus,
       targetEvmAddress,
     );
     return new IsExternallyGrantedQueryResponse(res);

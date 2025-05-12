@@ -544,6 +544,7 @@ describe('ExternalKycListsManagement', () => {
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new IsExternallyGrantedQuery(
           isExternallyGrantedRequest.securityId,
+          isExternallyGrantedRequest.kycStatus,
           isExternallyGrantedRequest.targetId,
         ),
       );
@@ -569,6 +570,7 @@ describe('ExternalKycListsManagement', () => {
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new IsExternallyGrantedQuery(
           isExternallyGrantedRequest.securityId,
+          isExternallyGrantedRequest.kycStatus,
           isExternallyGrantedRequest.targetId,
         ),
       );
@@ -592,6 +594,19 @@ describe('ExternalKycListsManagement', () => {
       isExternallyGrantedRequest = new IsExternallyGrantedRequest({
         ...IsExternallyGrantedRequestFixture.create({
           targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.isExternallyGranted(
+          isExternallyGrantedRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if kycStatus is invalid', async () => {
+      isExternallyGrantedRequest = new IsExternallyGrantedRequest({
+        ...IsExternallyGrantedRequestFixture.create({
+          kycStatus: -1,
         }),
       });
 

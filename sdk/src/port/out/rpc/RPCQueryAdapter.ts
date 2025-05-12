@@ -1795,15 +1795,16 @@ export class RPCQueryAdapter {
 
   async isExternallyGranted(
     address: EvmAddress,
+    kycStatus: number,
     targetId: EvmAddress,
   ): Promise<boolean> {
     LogService.logTrace(
-      `Checking if the address ${targetId.toString()} is externally granted for the security: ${address.toString()}`,
+      `Checking if the address ${targetId.toString()} has the status '${kycStatus}' for the contract: ${address.toString()}`,
     );
 
     return await this.connect(
       ExternalKycListManagement__factory,
       address.toString(),
-    ).isExternallyGranted(targetId.toString());
+    ).isExternallyGranted(targetId.toString(), kycStatus);
   }
 }

@@ -213,6 +213,7 @@ export class IsExternallyGrantedQueryResponse implements QueryResponse {
 export class IsExternallyGrantedQuery extends Query<IsExternallyGrantedQueryResponse> {
   constructor(
     public readonly securityId: string,
+    public readonly kycStatus: number,
     public readonly targetId: string,
   ) {
     super();
