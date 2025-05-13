@@ -825,4 +825,35 @@ describe('DiamondCutManager', () => {
             )
         ).to.be.rejectedWith('DuplicatedFacetInConfiguration')
     })
+
+    it('GIVEN a resolver WHEN a selector is blacklisted THEN transaction fails with SelectorBlacklisted', async () => {
+        const blackListedSelectors = ['0x8456cb59'] // pause() selector
+
+        await businessLogicResolver.addSelectorsToBlacklist(
+            EQUITY_CONFIG_ID,
+            blackListedSelectors
+        )
+
+        diamondCutManager = diamondCutManager.connect(signer_A)
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            []
+        equityFacetIdList.forEach((id, index) =>
+            facetConfigurations.push({
+                id,
+                version: equityFacetVersionList[index],
+            })
+        )
+
+        await expect(
+            diamondCutManager.createConfiguration(
+                EQUITY_CONFIG_ID,
+                facetConfigurations
+            )
+        )
+            .to.be.revertedWithCustomError(
+                diamondCutManager,
+                'SelectorBlacklisted'
+            )
+            .withArgs(blackListedSelectors[0])
+    })
 })
