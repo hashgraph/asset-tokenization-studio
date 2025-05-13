@@ -345,6 +345,8 @@ import {
   GRANT_KYC_MOCK_GAS,
   REVOKE_KYC_MOCK_GAS,
   CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
+  ACTIVATE_INTERNAL_KYC_GAS,
+  DEACTIVATE_INTERNAL_KYC_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -3209,5 +3211,41 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     await contract.deployed();
 
     return contract.address;
+  }
+
+  async activateInternalKyc(
+    security: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Activating Internal Kyc to address ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Kyc__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).activateInternalKyc({
+        gasLimit: ACTIVATE_INTERNAL_KYC_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async deactivateInternalKyc(
+    security: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Deactivate Internal Kyc to address ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Kyc__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).deactivateInternalKyc({
+        gasLimit: DEACTIVATE_INTERNAL_KYC_GAS,
+      }),
+      this.networkService.environment,
+    );
   }
 }

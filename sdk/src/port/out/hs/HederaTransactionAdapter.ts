@@ -333,6 +333,8 @@ import {
   GRANT_KYC_MOCK_GAS,
   REVOKE_KYC_MOCK_GAS,
   CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
+  ACTIVATE_INTERNAL_KYC_GAS,
+  DEACTIVATE_INTERNAL_KYC_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -3659,6 +3661,44 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setGas(CREATE_EXTERNAL_KYC_LIST_MOCK_GAS);
 
     return this.signAndSendTransaction(contractCreate);
+  }
+
+  async activateInternalKyc(
+    security: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'activateInternalKyc';
+    LogService.logTrace(
+      `Activate Internal Kyc to address ${security.toString()}`,
+    );
+
+    const functionParameters = new ContractFunctionParameters();
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(ACTIVATE_INTERNAL_KYC_GAS)
+      .setFunction(FUNCTION_NAME, functionParameters);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async deactivateInternalKyc(
+    security: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'deactivateInternalKyc';
+    LogService.logTrace(
+      `Deactivate Internal Kyc to address ${security.toString()}`,
+    );
+
+    const functionParameters = new ContractFunctionParameters();
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(DEACTIVATE_INTERNAL_KYC_GAS)
+      .setFunction(FUNCTION_NAME, functionParameters);
+
+    return this.signAndSendTransaction(transaction);
   }
 
   // * Definition of the abstract methods
