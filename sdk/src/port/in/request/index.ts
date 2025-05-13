@@ -350,6 +350,9 @@ import IsExternallyGrantedRequest from './security/externalKycLists/IsExternally
 import ActivateInternalKycRequest from './security/kyc/ActivateInternalKycRequest.js';
 import DeactivateInternalKycRequest from './security/kyc/DeactivateInternalKycRequest.js';
 import IsInternalKycActivatedRequest from './security/kyc/IsInternalKycActivatedRequest.js';
+import GrantKycMockRequest from './security/externalKycLists/mock/GrantKycMockRequest.js';
+import RevokeKycMockRequest from './security/externalKycLists/mock/RevokeKycMockRequest.js';
+import GetKycStatusMockRequest from './security/externalKycLists/mock/GetKycStatusMockRequest.js';
 
 export {
   CreateEquityRequest,
@@ -498,4 +501,7 @@ export {
   ActivateInternalKycRequest,
   DeactivateInternalKycRequest,
   IsInternalKycActivatedRequest,
+  GrantKycMockRequest,
+  RevokeKycMockRequest,
+  GetKycStatusMockRequest,
 };

@@ -243,6 +243,7 @@ import {
   MockedBlacklist__factory,
   MockedWhitelist__factory,
   ExternalKycListManagement__factory,
+  MockedExternalKycList__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -329,6 +330,9 @@ import {
   UPDATE_EXTERNAL_KYC_LISTS_GAS,
   REMOVE_EXTERNAL_KYC_LIST_GAS,
   ADD_EXTERNAL_KYC_LIST_GAS,
+  GRANT_KYC_MOCK_GAS,
+  REVOKE_KYC_MOCK_GAS,
+  CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -3578,6 +3582,83 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
+  }
+
+  async grantKycMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'grantKyc';
+    LogService.logTrace(
+      `Grant kyc address ${targetId.toString()} to external kyc mock ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedExternalKycList__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(GRANT_KYC_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async revokeKycMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+    contractId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'revokeKyc';
+    LogService.logTrace(
+      `Revoke kyc address ${targetId.toString()} to external kyc mock ${contract.toString()}`,
+    );
+
+    const factoryInstance = new MockedExternalKycList__factory().attach(
+      contract.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(REVOKE_KYC_MOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async createExternalKycListMock(): Promise<TransactionResponse> {
+    LogService.logTrace(`Deploying External Kyc List List Mock contract`);
+
+    const bytecodeHex = MockedExternalKycList__factory.bytecode.startsWith('0x')
+      ? MockedExternalKycList__factory.bytecode.slice(2)
+      : MockedExternalKycList__factory.bytecode;
+    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, 'hex'));
+
+    const contractCreate = new ContractCreateTransaction()
+      .setBytecode(bytecode)
+      .setGas(CREATE_EXTERNAL_KYC_LIST_MOCK_GAS);
+
+    return this.signAndSendTransaction(contractCreate);
   }
 
   // * Definition of the abstract methods

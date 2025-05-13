@@ -342,6 +342,9 @@ import {
   UPDATE_EXTERNAL_KYC_LISTS_GAS,
   ADD_EXTERNAL_KYC_LIST_GAS,
   REMOVE_EXTERNAL_KYC_LIST_GAS,
+  GRANT_KYC_MOCK_GAS,
+  REVOKE_KYC_MOCK_GAS,
+  CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -384,6 +387,7 @@ import {
   MockedBlacklist__factory,
   MockedWhitelist__factory,
   ExternalKycListManagement__factory,
+  MockedExternalKycList__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -3152,5 +3156,58 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       }),
       this.networkService.environment,
     );
+  }
+
+  async grantKycMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Grant kyc address ${targetId.toString()} to external kyc mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedExternalKycList__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).grantKyc(targetId.toString(), {
+        gasLimit: GRANT_KYC_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async revokeKycMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Revoke kyc address ${targetId.toString()} to external kyc mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedExternalKycList__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).revokeKyc(targetId.toString(), {
+        gasLimit: REVOKE_KYC_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async createExternalKycListMock(): Promise<string> {
+    LogService.logTrace(`Deploying External Kyc List Mock contract`);
+
+    const factory = new MockedExternalKycList__factory(
+      this.signerOrProvider as Signer,
+    );
+
+    const contract = await factory.deploy({
+      gasLimit: CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
+    });
+    await contract.deployed();
+
+    return contract.address;
   }
 }

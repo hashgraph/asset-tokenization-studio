@@ -219,6 +219,12 @@ import IsExternallyGrantedRequest from '../../../src/port/in/request/security/ex
 import IsExternalKycListRequest from '../../../src/port/in/request/security/externalKycLists/IsExternalKycListRequest';
 import GetExternalKycListsMembersRequest from '../../../src/port/in/request/security/externalKycLists/GetExternalKycListsMembersRequest';
 import GetExternalKycListsCountRequest from '../../../src/port/in/request/security/externalKycLists/GetExternalKycListsCountRequest';
+import { GrantKycMockCommand } from '../../../src/app/usecase/command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommand';
+import { RevokeKycMockCommand } from '../../../src/app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommand';
+import { GetKycStatusMockQuery } from '../../../src/app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQuery';
+import GrantKycMockRequest from '../../../src/port/in/request/security/externalKycLists/mock/GrantKycMockRequest';
+import RevokeKycMockRequest from '../../../src/port/in/request/security/externalKycLists/mock/RevokeKycMockRequest';
+import GetKycStatusMockRequest from '../../../src/port/in/request/security/externalKycLists/mock/GetKycStatusMockRequest';
 
 export const UpdateExternalKycListsCommandFixture =
   createFixture<UpdateExternalKycListsCommand>((command) => {
@@ -243,6 +249,26 @@ export const RemoveExternalKycListCommandFixture =
     command.externalKycListAddress.as(
       () => HederaIdPropsFixture.create().value,
     );
+  });
+
+export const GrantKycMockCommandFixture = createFixture<GrantKycMockCommand>(
+  (command) => {
+    command.contractId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const RevokeKycMockCommandFixture = createFixture<RevokeKycMockCommand>(
+  (command) => {
+    command.contractId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const GetKycStatusMockQueryFixture =
+  createFixture<GetKycStatusMockQuery>((query) => {
+    query.contractId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
   });
 
 export const GetExternalKycListsCountQueryFixture =
@@ -320,4 +346,24 @@ export const GetExternalKycListsMembersRequestFixture =
 export const GetExternalKycListsCountRequestFixture =
   createFixture<GetExternalKycListsCountRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GrantKycMockRequestFixture = createFixture<GrantKycMockRequest>(
+  (request) => {
+    request.contractId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const RevokeKycMockRequestFixture = createFixture<RevokeKycMockRequest>(
+  (request) => {
+    request.contractId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const GetKycStatusMockRequestFixture =
+  createFixture<GetKycStatusMockRequest>((request) => {
+    request.contractId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
   });

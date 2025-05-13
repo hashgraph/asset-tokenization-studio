@@ -908,6 +908,20 @@ interface IExternalKycListsAdapter {
     externalKycListAddress: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  createExternalKycListMock(): Promise<string | TransactionResponse>;
+}
+
+interface IExternalKycListsMockAdapter {
+  grantKycMock(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  revokeKycMock(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 export default abstract class TransactionAdapter
@@ -924,7 +938,8 @@ export default abstract class TransactionAdapter
     IClearingAdapter,
     IExternalControlListsAdapter,
     IExternalControlListsMockAdapter,
-    IExternalKycListsAdapter
+    IExternalKycListsAdapter,
+    IExternalKycListsMockAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1777,6 +1792,23 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  grantKycMock(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  revokeKycMock(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createExternalKycListMock(): Promise<string | TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }
