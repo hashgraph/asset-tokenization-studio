@@ -1807,4 +1807,15 @@ export class RPCQueryAdapter {
       address.toString(),
     ).isExternallyGranted(targetId.toString(), kycStatus);
   }
+
+  async isInternalKycActivated(address: EvmAddress): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the internal kyc is activated for the security: ${address.toString()}`,
+    );
+
+    return await this.connect(
+      Kyc__factory,
+      address.toString(),
+    ).isInternalKycActivated();
+  }
 }

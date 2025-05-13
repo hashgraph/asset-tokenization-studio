@@ -656,6 +656,14 @@ interface IKycTransactionAdapter {
     targetId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  activateInternalKyc(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  deactivateInternalKyc(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 interface IClearingAdapter {
@@ -1755,6 +1763,18 @@ export default abstract class TransactionAdapter
   removeExternalKycList(
     security: EvmAddress,
     externalKycListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  activateInternalKyc(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  deactivateInternalKyc(
+    security: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

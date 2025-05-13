@@ -203,79 +203,227 @@
 
 */
 
-import { ethers } from 'ethers';
-import { keccak256 } from 'js-sha3';
+import { createMock } from '@golevelup/ts-jest';
+import { CommandBus } from '../../../core/command/CommandBus';
+import {
+  ActivateInternalKycRequest,
+  DeactivateInternalKycRequest,
+  IsInternalKycActivatedRequest,
+} from '../request';
+import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
+import LogService from '../../../app/service/LogService';
+import { QueryBus } from '../../../core/query/QueryBus';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs';
+import { ValidationError } from '../../../core/validation/ValidationError';
+import {
+  ActivateInternalKycRequestFixture,
+  DeactivateInternalKycRequestFixture,
+  IsInternalKycActivatedQueryFixture,
+} from '../../../../__tests__/fixtures/kyc/KycFixture';
+import Kyc from './Kyc';
+import { ActivateInternalKycCommand } from '../../../app/usecase/command/security/kyc/activateInternalKyc/ActivateInternalKycCommand';
+import { DeactivateInternalKycCommand } from '../../../app/usecase/command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommand';
+import { IsInternalKycActivatedQuery } from '../../../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
+describe('Kyc', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
 
-export enum SecurityRole {
-  _DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000',
-  _ISSUER_ROLE = '0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842',
-  _CONTROLLER_ROLE = '0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f',
-  _PAUSER_ROLE = '0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb',
-  _CONTROLLIST_ROLE = '0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3',
-  _CORPORATEACTIONS_ROLE = '0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6',
-  _DOCUMENTER_ROLE = '0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41',
-  _SNAPSHOT_ROLE = '0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da',
-  _LOCKER_ROLE = '0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88',
-  _CAP_ROLE = '0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571',
-  _BOND_MANAGER_ROLE = '0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d',
-  _ADJUSTMENT_BALANCE_ROLE = '0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9',
-  _PROTECTED_PARTITION_ROLE = '0x8e359333991af626d1f6087d9bc57221ef1207a053860aaa78b7609c2c8f96b6',
-  _PROTECTED_PARTITIONS_PARTICIPANT_ROLE = '0xdaba153046c65d49da6a7597abc24374aa681e3eee7004426ca6185b3927a3f5',
-  _WILD_CARD_ROLE = '0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46',
-  _SSI_MANAGER_ROLE = '0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0',
-  _KYC_ROLE = '0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d',
-  _CLEARING_ROLE = '0x2292383e7bb988fb281e5195ab88da11e62fec74cf43e8685cff613d6b906450',
-  _CLEARING_VALIDATOR_ROLE = '0x7b688898673e16c47810f5da9ce1262a3d7d022dfe27c8ff9305371cd435c619',
-  _PAUSE_MANAGER_ROLE = '0xbc36fbd776e95c4811506a63b650c876b4159cb152d827a5f717968b67c69b84',
-  _CONTROL_LIST_MANAGER_ROLE = '0x0e625647b832ec7d4146c12550c31c065b71e0a698095568fd8320dd2aa72e75',
-  _KYC_MANAGER_ROLE = '0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449',
-  _INTERNAL_KYC_MANAGER_ROLE = '0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e',
-}
+  let activateInternalKycRequest: ActivateInternalKycRequest;
+  let deactivateInternalKycRequest: DeactivateInternalKycRequest;
+  let isInternalKycActivatedRequest: IsInternalKycActivatedRequest;
 
-export function getProtectedPartitionRole(partitionId: string): string {
-  let partitionBytes32: string;
+  let handleValidationSpy: jest.SpyInstance;
 
-  if (ethers.utils.isHexString(partitionId) && partitionId.length === 66) {
-    partitionBytes32 = partitionId;
-  } else {
-    partitionBytes32 = ethers.utils.formatBytes32String(partitionId);
-  }
+  const transactionId = TransactionIdFixture.create().id;
 
-  const encodedValue = ethers.utils.defaultAbiCoder.encode(
-    ['bytes32', 'bytes32'],
-    [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
-  );
-  const hash = keccak256(encodedValue);
-  return '0x' + hash;
-}
+  const expectedResponse = {
+    payload: true,
+    transactionId: transactionId,
+  };
 
-export const MAX_ACCOUNTS_ROLES = 10;
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Kyc as any).commandBus = commandBusMock;
+    (Kyc as any).queryBus = queryBusMock;
+  });
 
-export const SecurityRoleLabel = new Map<SecurityRole, string>([
-  [SecurityRole._DEFAULT_ADMIN_ROLE, 'Owner'],
-  [SecurityRole._ISSUER_ROLE, 'Issuer'],
-  [SecurityRole._CONTROLLER_ROLE, 'Controller'],
-  [SecurityRole._PAUSER_ROLE, 'Pause'],
-  [SecurityRole._CONTROLLIST_ROLE, 'Control List'],
-  [SecurityRole._CORPORATEACTIONS_ROLE, 'Corporate Actions'],
-  [SecurityRole._DOCUMENTER_ROLE, 'Documenter'],
-  [SecurityRole._SNAPSHOT_ROLE, 'Snapshot'],
-  [SecurityRole._LOCKER_ROLE, 'Locker'],
-  [SecurityRole._CAP_ROLE, 'Cap'],
-  [SecurityRole._BOND_MANAGER_ROLE, 'Bond Manager'],
-  [SecurityRole._ADJUSTMENT_BALANCE_ROLE, 'Adjustment Balance'],
-  [SecurityRole._PROTECTED_PARTITION_ROLE, 'Protected Partition'],
-  [
-    SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
-    'Protected Partitions Participant',
-  ],
-  [SecurityRole._WILD_CARD_ROLE, 'Wild Card'],
-  [SecurityRole._SSI_MANAGER_ROLE, 'SSI Manager'],
-  [SecurityRole._KYC_ROLE, 'KYC'],
-  [SecurityRole._CLEARING_ROLE, 'Clearing'],
-  [SecurityRole._CLEARING_VALIDATOR_ROLE, 'Clearing Validator'],
-  [SecurityRole._PAUSE_MANAGER_ROLE, 'Pause Manager'],
-  [SecurityRole._CONTROL_LIST_MANAGER_ROLE, 'Control List Manager'],
-  [SecurityRole._KYC_MANAGER_ROLE, 'Kyc List Manager'],
-  [SecurityRole._INTERNAL_KYC_MANAGER_ROLE, 'Internal Kyc Manager'],
-]);
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('activateInternalKyc', () => {
+    activateInternalKycRequest = new ActivateInternalKycRequest(
+      ActivateInternalKycRequestFixture.create(),
+    );
+    it('should update activate internal kyc successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Kyc.activateInternalKyc(activateInternalKycRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'ActivateInternalKycRequest',
+        activateInternalKycRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new ActivateInternalKycCommand(activateInternalKycRequest.securityId),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Kyc.activateInternalKyc(activateInternalKycRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'ActivateInternalKycRequest',
+        activateInternalKycRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new ActivateInternalKycCommand(activateInternalKycRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      activateInternalKycRequest = new ActivateInternalKycRequest({
+        ...ActivateInternalKycRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Kyc.activateInternalKyc(activateInternalKycRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('deactivateInternalKyc', () => {
+    deactivateInternalKycRequest = new DeactivateInternalKycRequest(
+      DeactivateInternalKycRequestFixture.create(),
+    );
+    it('should update deactivate internal kyc successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Kyc.deactivateInternalKyc(
+        deactivateInternalKycRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'DeactivateInternalKycRequest',
+        deactivateInternalKycRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new DeactivateInternalKycCommand(
+          deactivateInternalKycRequest.securityId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Kyc.deactivateInternalKyc(deactivateInternalKycRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'DeactivateInternalKycRequest',
+        deactivateInternalKycRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new DeactivateInternalKycCommand(
+          deactivateInternalKycRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      deactivateInternalKycRequest = new DeactivateInternalKycRequest({
+        ...DeactivateInternalKycRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Kyc.activateInternalKyc(activateInternalKycRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('isInternalKycActivated', () => {
+    isInternalKycActivatedRequest = new IsInternalKycActivatedRequest(
+      IsInternalKycActivatedQueryFixture.create(),
+    );
+    const expectedQueryResponse = {
+      payload: true,
+    };
+
+    it('should check if internal kyc is activated', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result = await Kyc.isInternalKycActivated(
+        isInternalKycActivatedRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsInternalKycActivatedRequest',
+        isInternalKycActivatedRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsInternalKycActivatedQuery(
+          isInternalKycActivatedRequest.securityId,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Kyc.isInternalKycActivated(isInternalKycActivatedRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsInternalKycActivatedRequest',
+        isInternalKycActivatedRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsInternalKycActivatedQuery(
+          isInternalKycActivatedRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      isInternalKycActivatedRequest = new IsInternalKycActivatedRequest({
+        ...IsInternalKycActivatedQueryFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Kyc.isInternalKycActivated(isInternalKycActivatedRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+});
