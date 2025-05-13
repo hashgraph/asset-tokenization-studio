@@ -395,6 +395,10 @@ import { IsExternallyGrantedQueryHandler } from '../app/usecase/query/security/e
 import { ActivateInternalKycCommandHandler } from '../app/usecase/command/security/kyc/activateInternalKyc/ActivateInternalKycCommandHandler.js';
 import { DeactivateInternalKycCommandHandler } from '../app/usecase/command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommandHandler.js';
 import { IsInternalKycActivatedQueryHandler } from '../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQueryHandler.js';
+import { GrantKycMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommandHandler.js';
+import { RevokeKycMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommandHandler.js';
+import { GetKycStatusMockQueryHandler } from '../app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQueryHandler.js';
+import { CreateExternalKycListMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -439,6 +443,18 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: RemoveFromWhiteListMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: GrantKycMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RevokeKycMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateExternalKycListMockCommandHandler,
   },
   // Security Creation
   {
@@ -765,6 +781,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsAuthorizedWhiteListMockQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKycStatusMockQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,

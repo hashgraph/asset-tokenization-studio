@@ -215,6 +215,9 @@ import {
   GetExternalKycListsMembersRequest,
   IsExternalKycListRequest,
   IsExternallyGrantedRequest,
+  GrantKycMockRequest,
+  RevokeKycMockRequest,
+  GetKycStatusMockRequest,
 } from '../request/index.js';
 import { QueryBus } from '../../../core/query/QueryBus.js';
 import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
@@ -225,6 +228,10 @@ import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/ex
 import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery.js';
 import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery.js';
 import { GetExternalKycListsMembersQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery.js';
+import { GrantKycMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommand.js';
+import { RevokeKycMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommand.js';
+import { GetKycStatusMockQuery } from '../../../app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQuery.js';
+import { CreateExternalKycListMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommand.js';
 
 interface IExternalKycListsInPort {
   updateExternalKycLists(
@@ -246,7 +253,20 @@ interface IExternalKycListsInPort {
   ): Promise<string[]>;
 }
 
-class ExternalKycListsInPort implements IExternalKycListsInPort {
+interface IExternalKycListsMocksInPort {
+  grantKycMock(
+    request: GrantKycMockRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  revokeKycMock(
+    request: RevokeKycMockRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  getKycStatusMock(request: GetKycStatusMockRequest): Promise<number>;
+  createExternalKycMock(): Promise<string>;
+}
+
+class ExternalKycListsInPort
+  implements IExternalKycListsInPort, IExternalKycListsMocksInPort
+{
   constructor(
     private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
     private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
@@ -347,6 +367,49 @@ class ExternalKycListsInPort implements IExternalKycListsInPort {
       await this.queryBus.execute(
         new GetExternalKycListsMembersQuery(securityId, start, end),
       )
+    ).payload;
+  }
+
+  @LogError
+  async grantKycMock(
+    request: GrantKycMockRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { contractId, targetId } = request;
+    ValidatedRequest.handleValidation('GrantKycMockRequest', request);
+
+    return await this.commandBus.execute(
+      new GrantKycMockCommand(contractId, targetId),
+    );
+  }
+
+  @LogError
+  async revokeKycMock(
+    request: RevokeKycMockRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { contractId, targetId } = request;
+    ValidatedRequest.handleValidation('RevokeKycMockRequest', request);
+
+    return await this.commandBus.execute(
+      new RevokeKycMockCommand(contractId, targetId),
+    );
+  }
+
+  @LogError
+  async getKycStatusMock(request: GetKycStatusMockRequest): Promise<number> {
+    const { contractId, targetId } = request;
+    ValidatedRequest.handleValidation('GetKycStatusMockRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetKycStatusMockQuery(contractId, targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async createExternalKycMock(): Promise<string> {
+    return (
+      await this.commandBus.execute(new CreateExternalKycListMockCommand())
     ).payload;
   }
 }

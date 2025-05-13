@@ -213,6 +213,9 @@ import {
   GetExternalKycListsMembersRequest,
   IsExternalKycListRequest,
   IsExternallyGrantedRequest,
+  GrantKycMockRequest,
+  RevokeKycMockRequest,
+  GetKycStatusMockRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
@@ -230,6 +233,9 @@ import {
   GetExternalKycListsMembersRequestFixture,
   IsExternalKycListRequestFixture,
   IsExternallyGrantedRequestFixture,
+  GrantKycMockRequestFixture,
+  RevokeKycMockRequestFixture,
+  GetKycStatusMockRequestFixture,
 } from '../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture';
 import ExternalKycListsManagement from './ExternalKycListsManagement';
 import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
@@ -239,6 +245,10 @@ import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/ex
 import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
 import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
 import { GetExternalKycListsMembersQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery';
+import { GrantKycMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommand';
+import { RevokeKycMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommand';
+import { GetKycStatusMockQuery } from '../../../app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQuery';
+import { CreateExternalKycListMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommand';
 describe('ExternalKycListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
@@ -249,10 +259,14 @@ describe('ExternalKycListsManagement', () => {
   let isExternalKycListRequest: IsExternalKycListRequest;
   let getExternalKycListsCountRequest: GetExternalKycListsCountRequest;
   let getExternalKycListsMembersRequest: GetExternalKycListsMembersRequest;
+  let grantKycMockRequest: GrantKycMockRequest;
+  let revokeKycMockRequest: RevokeKycMockRequest;
+  let getKycStatusMockRequest: GetKycStatusMockRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
   const transactionId = TransactionIdFixture.create().id;
+  const hederaId = HederaIdPropsFixture.create().value;
 
   const expectedResponse = {
     payload: true,
@@ -860,6 +874,254 @@ describe('ExternalKycListsManagement', () => {
           getExternalKycListsMembersRequest,
         ),
       ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('grantKycMockRequest', () => {
+    grantKycMockRequest = new GrantKycMockRequest(
+      GrantKycMockRequestFixture.create(),
+    );
+    it('should grant kyc mock successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result =
+        await ExternalKycListsManagement.grantKycMock(grantKycMockRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GrantKycMockRequest',
+        grantKycMockRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new GrantKycMockCommand(
+          grantKycMockRequest.contractId,
+          grantKycMockRequest.targetId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalKycListsManagement.grantKycMock(grantKycMockRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GrantKycMockRequest',
+        grantKycMockRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new GrantKycMockCommand(
+          grantKycMockRequest.contractId,
+          grantKycMockRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      grantKycMockRequest = new GrantKycMockRequest({
+        ...GrantKycMockRequestFixture.create({
+          contractId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.grantKycMock(grantKycMockRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      grantKycMockRequest = new GrantKycMockRequest({
+        ...GrantKycMockRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.grantKycMock(grantKycMockRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('revokeKycMock', () => {
+    revokeKycMockRequest = new RevokeKycMockRequest(
+      RevokeKycMockRequestFixture.create(),
+    );
+    it('should revoke kyc mock successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result =
+        await ExternalKycListsManagement.revokeKycMock(revokeKycMockRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RevokeKycMockRequest',
+        revokeKycMockRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RevokeKycMockCommand(
+          revokeKycMockRequest.contractId,
+          revokeKycMockRequest.targetId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalKycListsManagement.revokeKycMock(revokeKycMockRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RevokeKycMockRequest',
+        revokeKycMockRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RevokeKycMockCommand(
+          revokeKycMockRequest.contractId,
+          revokeKycMockRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      revokeKycMockRequest = new RevokeKycMockRequest({
+        ...RevokeKycMockRequestFixture.create({
+          contractId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.revokeKycMock(revokeKycMockRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      grantKycMockRequest = new GrantKycMockRequest({
+        ...GrantKycMockRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.grantKycMock(grantKycMockRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getKycStatusMock', () => {
+    getKycStatusMockRequest = new GetKycStatusMockRequest(
+      GetKycStatusMockRequestFixture.create(),
+    );
+    const expectedQueryResponse = {
+      payload: true,
+    };
+    it('should get kyc status mock successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result = await ExternalKycListsManagement.getKycStatusMock(
+        getKycStatusMockRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetKycStatusMockRequest',
+        getKycStatusMockRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetKycStatusMockQuery(
+          getKycStatusMockRequest.contractId,
+          getKycStatusMockRequest.targetId,
+        ),
+      );
+
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalKycListsManagement.getKycStatusMock(getKycStatusMockRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetKycStatusMockRequest',
+        getKycStatusMockRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetKycStatusMockQuery(
+          getKycStatusMockRequest.contractId,
+          getKycStatusMockRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getKycStatusMockRequest = new GetKycStatusMockRequest({
+        ...GetKycStatusMockRequestFixture.create({
+          contractId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.getKycStatusMock(getKycStatusMockRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      getKycStatusMockRequest = new GetKycStatusMockRequest({
+        ...GetKycStatusMockRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+        ExternalKycListsManagement.getKycStatusMock(getKycStatusMockRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('createExternalKycMock', () => {
+    const expectedCommandResponse = {
+      payload: hederaId,
+    };
+
+    it('should create external kyc list successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedCommandResponse);
+
+      const result = await ExternalKycListsManagement.createExternalKycMock();
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CreateExternalKycListMockCommand(),
+      );
+
+      expect(result).toEqual(expectedCommandResponse.payload);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        ExternalKycListsManagement.createExternalKycMock(),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CreateExternalKycListMockCommand(),
+      );
     });
   });
 });

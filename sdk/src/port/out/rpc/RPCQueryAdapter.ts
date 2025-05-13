@@ -255,6 +255,7 @@ import {
   MockedWhitelist__factory,
   MockedBlacklist__factory,
   ExternalKycListManagement__factory,
+  MockedExternalKycList__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1817,5 +1818,21 @@ export class RPCQueryAdapter {
       Kyc__factory,
       address.toString(),
     ).isInternalKycActivated();
+  }
+
+  async getKycStatusMock(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting Kyc status for account ${targetId}} for the mock contract ${address.toString()}`,
+    );
+
+    const kycStatus = await this.connect(
+      MockedExternalKycList__factory,
+      address.toString(),
+    ).getKycStatus(targetId.toString());
+
+    return kycStatus;
   }
 }
