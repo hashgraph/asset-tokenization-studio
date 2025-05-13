@@ -207,6 +207,7 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import SDKService from "../../services/SDKService";
 import {
   GetKycAccountsDataRequest,
+  IsInternalKycActivatedRequest,
   IsIssuerRequest,
   KycAccountDataViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
@@ -218,6 +219,9 @@ export interface KycAccountDataViewModelResponse
 
 export const GET_KYC_LIST = (securityId: string) =>
   `GET_KYC_LIST_${securityId}`;
+
+export const IS_INTERNAL_KYC_ACTIVATED = (securityId: string) =>
+  `IS_INTERNAL_KYC_ACTIVATED_${securityId}`;
 
 export const useGetKYCList = (
   request: GetKycAccountsDataRequest,
@@ -257,6 +261,27 @@ export const useGetKYCList = (
         return kycAccountsWithIssuerStatus;
       } catch (error) {
         console.error("Error fetching KYC Accounts", error);
+        throw error;
+      }
+    },
+    options,
+  );
+};
+
+export const useGetIsInternalKycActivated = (
+  request: IsInternalKycActivatedRequest,
+  options?: UseQueryOptions<boolean, unknown, boolean, string[]>,
+) => {
+  return useQuery(
+    [IS_INTERNAL_KYC_ACTIVATED(request.securityId)],
+    async () => {
+      try {
+        const isClearingActivated =
+          await SDKService.isInternalKycActivated(request);
+
+        return isClearingActivated;
+      } catch (error) {
+        console.error("Error fetching is internal kyc activated query", error);
         throw error;
       }
     },

@@ -203,76 +203,88 @@
 
 */
 
-import { Stack } from "@chakra-ui/react";
-import { Sidebar as BaseSidebar, SidebarItem } from "io-bricks-ui";
-import { House, Pause, HandPalm, Key } from "@phosphor-icons/react";
-import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
-import { RouteName } from "../../router/RouteName";
-import { RoutePath } from "../../router/RoutePath";
-import { RouterManager } from "../../router/RouterManager";
-import { useUserStore } from "../../store/userStore";
-import { getLayoutBg } from "./helper";
+import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import SDKService from "../../services/SDKService";
+import {
+  GetExternalKycListsCountRequest,
+  GetExternalKycListsMembersRequest,
+  GetKycStatusMockRequest,
+} from "@hashgraph/asset-tokenization-sdk";
 
-export const Sidebar = () => {
-  const { t } = useTranslation("routes");
-  const location = useLocation();
-  const { type: userType } = useUserStore();
+export const GET_EXTERNAL_KYC_STATUS = (securityId: string) =>
+  `GET_EXTERNAL_KYC_COUNT_${securityId}`;
 
-  const routes = [
-    {
-      label: t(RouteName.Dashboard),
-      icon: House,
-      isActive: location.pathname === RoutePath.DASHBOARD,
-      to: RouteName.Dashboard,
-    },
-    {
-      label: t(RouteName.ExternalPauseList),
-      icon: Pause,
-      isActive: location.pathname.includes(RoutePath.EXTERNAL_PAUSE_LIST),
-      to: RouteName.ExternalPauseList,
-    },
-    {
-      label: t(RouteName.ExternalControlList),
-      icon: HandPalm,
-      isActive: location.pathname.includes(RoutePath.EXTERNAL_CONTROL_LIST),
-      to: RouteName.ExternalControlList,
-    },
-    {
-      label: t(RouteName.ExternalKYCList),
-      icon: Key,
-      isActive: location.pathname.includes(RoutePath.EXTERNAL_KYC_LIST),
-      to: RouteName.ExternalKYCList,
-    },
-  ];
+export const GET_EXTERNAL_KYC_COUNT = (securityId: string) =>
+  `GET_EXTERNAL_KYC_COUNT_${securityId}`;
 
-  return (
-    <BaseSidebar
-      data-testid="sidebar-layout"
-      topContent={
-        <Stack spacing={6}>
-          {routes.map((props, index) => (
-            <SidebarItem
-              {...props}
-              key={index}
-              icon={props.icon}
-              onClick={() => RouterManager.to(props.to)}
-              textAlign={"center"}
-            />
-          ))}
-        </Stack>
-      }
-      // seems to be that Sidebar does not accept variants
-      sx={{
-        bg: getLayoutBg[userType],
-        position: "relative",
-        apply: "textStyles.ElementsRegularXS",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        pt: 16,
-        pb: 10,
-        w: "104px",
-      }}
-    />
+export const GET_EXTERNAL_KYC_MEMBERS = (
+  securityId: string,
+  start: number,
+  end: number,
+) => `GET_EXTERNAL_KYC_MEMBERS_${securityId}_${start}_${end}`;
+
+export const useGetKycStatusMock = <TError, TData = number>(
+  request: GetKycStatusMockRequest,
+  options?: UseQueryOptions<number, TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_EXTERNAL_KYC_COUNT(request.contractId)],
+    () => SDKService.getKycStatusMock(request),
+    options,
   );
+};
+
+export const useGetExternalKycListsCount = <TError, TData = number>(
+  request: GetExternalKycListsCountRequest,
+  options?: UseQueryOptions<number, TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_EXTERNAL_KYC_COUNT(request.securityId)],
+    () => SDKService.getExternalKycListsCount(request),
+    options,
+  );
+};
+
+export const useGetExternalKycListsMembers = <TError, TData = string[]>(
+  params: GetExternalKycListsMembersRequest,
+  options?: UseQueryOptions<string[], TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_EXTERNAL_KYC_MEMBERS(params.securityId, params.start, params.end)],
+    () => SDKService.getExternalKycListsMembers(params),
+    options,
+  );
+};
+
+export const useGetExternalKyc = (securityId: string, start: number = 0) => {
+  const countQuery = useGetExternalKycListsCount(
+    new GetExternalKycListsCountRequest({ securityId }),
+    {
+      retry: false,
+    },
+  );
+
+  const membersQuery = useGetExternalKycListsMembers(
+    new GetExternalKycListsMembersRequest({
+      securityId,
+      start,
+      end: countQuery.data ?? 0,
+    }),
+    { retry: false },
+  );
+
+  const isLoading = membersQuery.isLoading;
+  const isError = membersQuery.isError;
+
+  const data = (membersQuery.data ?? []).map((memberId) => ({
+    address: memberId,
+    isError,
+    isLoading,
+  }));
+
+  return {
+    isLoading,
+    isError,
+    data,
+  };
 };

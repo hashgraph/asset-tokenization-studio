@@ -347,6 +347,20 @@ import {
   IsAuthorizedWhiteListMockRequest,
   RemoveFromBlackListMockRequest,
   RemoveFromWhiteListMockRequest,
+  ExternalKycListsManagement,
+  GetExternalKycListsCountRequest,
+  GetExternalKycListsMembersRequest,
+  IsExternalKycListRequest,
+  IsExternallyGrantedRequest,
+  UpdateExternalKycListsRequest,
+  RemoveExternalKycListRequest,
+  AddExternalKycListRequest,
+  RevokeKycMockRequest,
+  GrantKycMockRequest,
+  GetKycStatusMockRequest,
+  IsInternalKycActivatedRequest,
+  ActivateInternalKycRequest,
+  DeactivateInternalKycRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -933,6 +947,27 @@ export class SDKService {
     return response.payload;
   }
 
+  public static async isInternalKycActivated(
+    req: IsInternalKycActivatedRequest,
+  ): Promise<boolean> {
+    const response = await Kyc.isInternalKycActivated(req);
+    return response;
+  }
+
+  public static async activateInternalKyc(
+    req: ActivateInternalKycRequest,
+  ): Promise<boolean> {
+    const response = await Kyc.activateInternalKyc(req);
+    return response.payload;
+  }
+
+  public static async deactivateInternalKyc(
+    req: DeactivateInternalKycRequest,
+  ): Promise<boolean> {
+    const response = await Kyc.deactivateInternalKyc(req);
+    return response.payload;
+  }
+
   // CLEARING OPERATIONS ////////////////////////////////////////////
   public static async getClearingsIdForByPartition(
     request: GetClearingsIdForByPartitionRequest,
@@ -1201,6 +1236,84 @@ export class SDKService {
   ): Promise<boolean> {
     const response =
       await ExternalControlListsManagement.isAuthorizedWhiteListMock(req);
+    return response;
+  }
+
+  // External KYC
+  public static async createExternalKycMock(): Promise<string> {
+    const response = await ExternalKycListsManagement.createExternalKycMock();
+    return response;
+  }
+
+  public static async addExternalKycList(
+    req: AddExternalKycListRequest,
+  ): Promise<boolean> {
+    const response = await ExternalKycListsManagement.addExternalKycList(req);
+    return response.payload;
+  }
+
+  public static async grantKycMock(req: GrantKycMockRequest): Promise<boolean> {
+    const response = await ExternalKycListsManagement.grantKycMock(req);
+    return response.payload;
+  }
+
+  public static async revokeKycMock(
+    req: RevokeKycMockRequest,
+  ): Promise<boolean> {
+    const response = await ExternalKycListsManagement.revokeKycMock(req);
+    return response.payload;
+  }
+
+  public static async removeExternalKycList(
+    req: RemoveExternalKycListRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalKycListsManagement.removeExternalKycList(req);
+    return response.payload;
+  }
+
+  public static async updateExternalKycLists(
+    req: UpdateExternalKycListsRequest,
+  ): Promise<boolean> {
+    const response =
+      await ExternalKycListsManagement.updateExternalKycLists(req);
+    return response.payload;
+  }
+
+  public static async getExternalKycListsCount(
+    req: GetExternalKycListsCountRequest,
+  ): Promise<number> {
+    const response =
+      await ExternalKycListsManagement.getExternalKycListsCount(req);
+    return response;
+  }
+
+  public static async getExternalKycListsMembers(
+    req: GetExternalKycListsMembersRequest,
+  ): Promise<string[]> {
+    const response =
+      await ExternalKycListsManagement.getExternalKycListsMembers(req);
+    return response;
+  }
+
+  public static async getKycStatusMock(
+    req: GetKycStatusMockRequest,
+  ): Promise<number> {
+    const response = await ExternalKycListsManagement.getKycStatusMock(req);
+    return response;
+  }
+
+  public static async isExternalKycList(
+    req: IsExternalKycListRequest,
+  ): Promise<boolean> {
+    const response = await ExternalKycListsManagement.isExternalKycList(req);
+    return response;
+  }
+
+  public static async isExternallyKycGranted(
+    req: IsExternallyGrantedRequest,
+  ): Promise<boolean> {
+    const response = await ExternalKycListsManagement.isExternallyGranted(req);
     return response;
   }
 }

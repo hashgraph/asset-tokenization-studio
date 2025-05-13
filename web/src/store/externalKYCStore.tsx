@@ -14,9 +14,9 @@
       the copyright owner that is granting the License.
 
       "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
+      other entities that KYC, are KYCled by, or are under common
+      KYC with that entity. For the purposes of this definition,
+      "KYC" means (i) the power, direct or indirect, to cause the
       direction or management of such entity, whether by contract or
       otherwise, or (ii) ownership of fifty percent (50%) or more of the
       outstanding shares, or (iii) beneficial ownership of such entity.
@@ -54,7 +54,7 @@
       the copyright owner. For the purposes of this definition, "submitted"
       means any form of electronic, verbal, or written communication sent
       to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
+      communication on electronic mailing lists, source code KYC systems,
       and issue tracking systems that are managed by, or on behalf of, the
       Licensor for the purpose of discussing and improving the Work, but
       excluding communication that is conspicuously marked or otherwise
@@ -203,76 +203,46 @@
 
 */
 
-import { Stack } from "@chakra-ui/react";
-import { Sidebar as BaseSidebar, SidebarItem } from "io-bricks-ui";
-import { House, Pause, HandPalm, Key } from "@phosphor-icons/react";
-import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
-import { RouteName } from "../../router/RouteName";
-import { RoutePath } from "../../router/RoutePath";
-import { RouterManager } from "../../router/RouterManager";
-import { useUserStore } from "../../store/userStore";
-import { getLayoutBg } from "./helper";
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
 
-export const Sidebar = () => {
-  const { t } = useTranslation("routes");
-  const location = useLocation();
-  const { type: userType } = useUserStore();
+export interface ExternalKYCStore {
+  address: string;
+}
 
-  const routes = [
-    {
-      label: t(RouteName.Dashboard),
-      icon: House,
-      isActive: location.pathname === RoutePath.DASHBOARD,
-      to: RouteName.Dashboard,
-    },
-    {
-      label: t(RouteName.ExternalPauseList),
-      icon: Pause,
-      isActive: location.pathname.includes(RoutePath.EXTERNAL_PAUSE_LIST),
-      to: RouteName.ExternalPauseList,
-    },
-    {
-      label: t(RouteName.ExternalControlList),
-      icon: HandPalm,
-      isActive: location.pathname.includes(RoutePath.EXTERNAL_CONTROL_LIST),
-      to: RouteName.ExternalControlList,
-    },
-    {
-      label: t(RouteName.ExternalKYCList),
-      icon: Key,
-      isActive: location.pathname.includes(RoutePath.EXTERNAL_KYC_LIST),
-      to: RouteName.ExternalKYCList,
-    },
-  ];
+interface ExternalKYCStoreProps {
+  externalKYCs: ExternalKYCStore[];
+  addExternalKYC: (externalKYC: ExternalKYCStore) => void;
+  removeExternalKYC: (externalKYCAddress: string) => void;
+  reset: () => void;
+}
 
-  return (
-    <BaseSidebar
-      data-testid="sidebar-layout"
-      topContent={
-        <Stack spacing={6}>
-          {routes.map((props, index) => (
-            <SidebarItem
-              {...props}
-              key={index}
-              icon={props.icon}
-              onClick={() => RouterManager.to(props.to)}
-              textAlign={"center"}
-            />
-          ))}
-        </Stack>
-      }
-      // seems to be that Sidebar does not accept variants
-      sx={{
-        bg: getLayoutBg[userType],
-        position: "relative",
-        apply: "textStyles.ElementsRegularXS",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        pt: 16,
-        pb: 10,
-        w: "104px",
-      }}
-    />
-  );
-};
+const EXTERNAL_KYC_STORE_KEY = "EXTERNAL_KYC_STORE_KEY";
+
+export const useExternalKYCStore = create<ExternalKYCStoreProps>()(
+  persist(
+    devtools((set) => ({
+      externalKYCs: [],
+      addExternalKYC: (externalKYC) =>
+        set((state) => ({
+          externalKYCs: [...state.externalKYCs, externalKYC],
+        })),
+      removeExternalKYC: (externalKYCAddress) =>
+        set((state) => ({
+          externalKYCs: [
+            ...state.externalKYCs.filter(
+              (KYC) => KYC.address !== externalKYCAddress,
+            ),
+          ],
+        })),
+      reset: () =>
+        set((state) => ({
+          ...state,
+          externalKYCs: [],
+        })),
+    })),
+    {
+      name: EXTERNAL_KYC_STORE_KEY,
+    },
+  ),
+);
