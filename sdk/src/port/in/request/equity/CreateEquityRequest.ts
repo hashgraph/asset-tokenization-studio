@@ -227,6 +227,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   arePartitionsProtected: boolean;
   isMultiPartition: boolean;
   clearingActive: boolean;
+  internalKycActivated: boolean;
 
   @OptionalField()
   externalPauses?: string[];
@@ -269,6 +270,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     arePartitionsProtected,
     isMultiPartition,
     clearingActive,
+    internalKycActivated,
     externalPauses,
     externalControlLists,
     externalKycLists,
@@ -300,6 +302,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     isControllable: boolean;
     arePartitionsProtected: boolean;
     clearingActive: boolean;
+    internalKycActivated: boolean;
     isMultiPartition: boolean;
     externalPauses?: string[];
     externalControlLists?: string[];
@@ -384,6 +387,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
     this.clearingActive = clearingActive;
+    this.internalKycActivated = internalKycActivated;
     this.externalPauses = externalPauses;
     this.diamondOwnerAccount = diamondOwnerAccount;
     this.externalControlLists = externalControlLists;

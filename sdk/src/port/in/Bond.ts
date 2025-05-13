@@ -293,6 +293,7 @@ class BondInPort implements IBondInPort {
       isControllable: req.isControllable,
       arePartitionsProtected: req.arePartitionsProtected,
       clearingActive: req.clearingActive,
+      internalKycActivated: req.internalKycActivated,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfUnits),
       regulationType: CastRegulationType.fromNumber(req.regulationType),

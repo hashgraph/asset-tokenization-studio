@@ -217,6 +217,7 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ProtectedTransferFromByPartitionCommand)
 export class ProtectedTransferFromByPartitionCommandHandler
@@ -273,10 +274,11 @@ export class ProtectedTransferFromByPartitionCommandHandler
 
     await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [sourceId, targetId],
+      KycStatus.GRANTED,
+    );
 
     await this.validationService.checkControlList(
       securityId,

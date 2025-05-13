@@ -227,6 +227,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   arePartitionsProtected: boolean;
   isMultiPartition: boolean;
   clearingActive: boolean;
+  internalKycActivated: boolean;
 
   @OptionalField()
   externalPauses?: string[];
@@ -266,6 +267,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     arePartitionsProtected,
     isMultiPartition,
     clearingActive,
+    internalKycActivated,
     externalPauses,
     externalControlLists,
     externalKycLists,
@@ -295,6 +297,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     arePartitionsProtected: boolean;
     isMultiPartition: boolean;
     clearingActive: boolean;
+    internalKycActivated: boolean;
     externalPauses?: string[];
     externalControlLists?: string[];
     externalKycLists?: string[];
@@ -397,6 +400,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
     this.clearingActive = clearingActive;
+    this.internalKycActivated = internalKycActivated;
     this.diamondOwnerAccount = diamondOwnerAccount;
     this.externalPauses = externalPauses;
     this.externalControlLists = externalControlLists;

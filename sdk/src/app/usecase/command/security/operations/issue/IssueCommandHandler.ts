@@ -215,6 +215,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import ValidationService from '../../../../../service/ValidationService.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(IssueCommand)
 export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
@@ -251,7 +252,11 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
 
     await this.validationService.checkControlList(securityId, targetId);
 
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [targetId],
+      KycStatus.GRANTED,
+    );
 
     await this.validationService.checkRole(
       SecurityRole._ISSUER_ROLE,
