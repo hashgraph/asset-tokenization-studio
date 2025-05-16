@@ -977,6 +977,14 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     return securityInfo.paused ?? false;
   });
 
+  singletonInstance.isInternalKycActivated = jest.fn(async (address: EvmAddress) => {
+    return true;
+  });
+
+  singletonInstance.isExternallyGranted = jest.fn(async (address: EvmAddress) => {
+    return true;
+  });
+
   singletonInstance.canTransferByPartition = jest.fn(
     async (
       address: EvmAddress,
