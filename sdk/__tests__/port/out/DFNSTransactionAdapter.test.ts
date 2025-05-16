@@ -301,6 +301,7 @@ describe('DFNS Transaction Adapter test', () => {
       isControllable: true,
       arePartitionsProtected: false,
       clearingActive: false,
+      internalKycActivated: true,
       isMultiPartition: false,
       diamondOwnerAccount: DFNS_SETTINGS.hederaAccountId,
       currency: currency,

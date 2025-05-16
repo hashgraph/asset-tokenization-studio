@@ -271,6 +271,9 @@ import { SignedCredential } from '@terminal3/vc_core';
 import EvmAddress from '../../domain/context/contract/EvmAddress';
 import { GetBondDetailsQuery } from '../../app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery';
 import { OperationNotAllowed } from '../../domain/context/security/error/operations/OperationNotAllowed';
+import { KycStatus } from '../../domain/context/kyc/Kyc';
+import { IsInternalKycActivatedQuery } from '../../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
+import { IsExternallyGrantedQuery } from '../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
 
 describe('ValidationService', () => {
   let service: ValidationService;
@@ -324,37 +327,79 @@ describe('ValidationService', () => {
   });
 
   describe('checkKycAddresses', () => {
-    it('should return void when all addresses are Kycd', async () => {
-      queryBusMock.execute.mockResolvedValue({ payload: 1 });
+    it('should return void when internal/external all addresses are Granted', async () => {
+      queryBusMock.execute
+        .mockResolvedValueOnce({ payload: true })
+        .mockResolvedValueOnce({ payload: 1 })
+        .mockResolvedValueOnce({ payload: true })
+        .mockResolvedValueOnce({ payload: 1 })
+        .mockResolvedValueOnce({ payload: true });
 
       await expect(
-        service.checkKycAddresses(securityId.value, [
-          firstAddress.value,
-          secondAddress.value,
-        ]),
+        service.checkKycAddresses(
+          securityId.value,
+          [firstAddress.value, secondAddress.value],
+          KycStatus.GRANTED,
+        ),
       ).resolves.toBeUndefined();
 
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(5);
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
         1,
-        new GetKycStatusForQuery(securityId.value, firstAddress.value),
+        new IsInternalKycActivatedQuery(securityId.value),
       );
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
         2,
+        new GetKycStatusForQuery(securityId.value, firstAddress.value),
+      );
+      expect(queryBusMock.execute).toHaveBeenNthCalledWith(
+        3,
+        new IsExternallyGrantedQuery(
+          securityId.value,
+          KycStatus.GRANTED,
+          firstAddress.value,
+        ),
+      );
+      expect(queryBusMock.execute).toHaveBeenNthCalledWith(
+        4,
         new GetKycStatusForQuery(securityId.value, secondAddress.value),
+      );
+      expect(queryBusMock.execute).toHaveBeenNthCalledWith(
+        5,
+        new IsExternallyGrantedQuery(
+          securityId.value,
+          KycStatus.GRANTED,
+          secondAddress.value,
+        ),
       );
     });
 
-    it('should throw AccountNotKycd when an address is not KYCd', async () => {
+    it('should throw AccountNotKycd when internal validation is false', async () => {
       queryBusMock.execute
-        .mockResolvedValueOnce({ payload: 1 })
+        .mockResolvedValueOnce({ payload: true })
         .mockResolvedValueOnce({ payload: 0 });
 
       await expect(
-        service.checkKycAddresses(securityId.value, [
-          firstAddress.value,
-          secondAddress.value,
-        ]),
+        service.checkKycAddresses(
+          securityId.value,
+          [firstAddress.value],
+          KycStatus.GRANTED,
+        ),
+      ).rejects.toThrow(AccountNotKycd);
+    });
+
+    it('should throw AccountNotKycd when external validation is false', async () => {
+      queryBusMock.execute
+        .mockResolvedValueOnce({ payload: true })
+        .mockResolvedValueOnce({ payload: 1 })
+        .mockResolvedValueOnce({ payload: false });
+
+      await expect(
+        service.checkKycAddresses(
+          securityId.value,
+          [firstAddress.value],
+          KycStatus.GRANTED,
+        ),
       ).rejects.toThrow(AccountNotKycd);
     });
   });

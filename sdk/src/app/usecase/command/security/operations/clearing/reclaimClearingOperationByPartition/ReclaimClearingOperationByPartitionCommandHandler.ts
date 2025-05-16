@@ -215,6 +215,7 @@ import {
 } from './ReclaimClearingOperationByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ReclaimClearingOperationByPartitionCommand)
 export class ReclaimClearingOperationByPartitionCommandHandler
@@ -251,7 +252,11 @@ export class ReclaimClearingOperationByPartitionCommandHandler
     await this.validationService.checkPause(securityId);
 
     await this.validationService.checkClearingActivated(securityId);
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [targetId],
+      KycStatus.GRANTED,
+    );
 
     const res = await handler.reclaimClearingOperationByPartition(
       securityEvmAddress,

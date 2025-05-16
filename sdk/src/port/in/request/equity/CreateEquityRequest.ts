@@ -227,12 +227,16 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   arePartitionsProtected: boolean;
   isMultiPartition: boolean;
   clearingActive: boolean;
+  internalKycActivated: boolean;
 
   @OptionalField()
   externalPauses?: string[];
 
   @OptionalField()
   externalControlLists?: string[];
+
+  @OptionalField()
+  externalKycLists?: string[];
 
   @OptionalField()
   diamondOwnerAccount?: string;
@@ -266,8 +270,10 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     arePartitionsProtected,
     isMultiPartition,
     clearingActive,
+    internalKycActivated,
     externalPauses,
     externalControlLists,
+    externalKycLists,
     diamondOwnerAccount,
     votingRight,
     informationRight,
@@ -296,9 +302,11 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     isControllable: boolean;
     arePartitionsProtected: boolean;
     clearingActive: boolean;
+    internalKycActivated: boolean;
     isMultiPartition: boolean;
     externalPauses?: string[];
     externalControlLists?: string[];
+    externalKycLists?: string[];
     diamondOwnerAccount?: string;
     votingRight: boolean;
     informationRight: boolean;
@@ -361,6 +369,13 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
           true,
         );
       },
+      externalKycLists: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalKycLists',
+          true,
+        );
+      },
     });
     this.name = name;
     this.symbol = symbol;
@@ -372,9 +387,11 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
     this.clearingActive = clearingActive;
+    this.internalKycActivated = internalKycActivated;
     this.externalPauses = externalPauses;
     this.diamondOwnerAccount = diamondOwnerAccount;
     this.externalControlLists = externalControlLists;
+    this.externalKycLists = externalKycLists;
     this.votingRight = votingRight;
     this.informationRight = informationRight;
     this.liquidationRight = liquidationRight;

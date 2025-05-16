@@ -300,6 +300,13 @@ export default {
     pauseListPlaceholder: "Choose external pause ...",
     externalPausesSelected: "External pauses selected:",
     externalControl: "External Control",
+    controlList: "Control list",
+    controlListPlaceholder: "Choose external control ...",
+    externalControlsSelected: "External controls selected:",
+    externalKYC: "External KYC",
+    kycList: "KYC list",
+    kycListPlaceholder: "Choose external KYC ...",
+    externalKYCsSelected: "External KYCs selected:",
   },
 
   stepReview: {

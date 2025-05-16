@@ -234,7 +234,13 @@ describe('CreateBondCommandHandler', () => {
   const contractServiceMock = createMock<ContractService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const externalEvmAddress = new EvmAddress(
+  const externalPauseEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalControlEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalKycEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
   );
   const transactionId = TransactionIdFixture.create().id;
@@ -308,8 +314,11 @@ describe('CreateBondCommandHandler', () => {
       it('should successfully create a bond with bondAddress in response', async () => {
         contractServiceMock.getContractEvmAddress
           .mockResolvedValueOnce(evmAddress)
-          .mockResolvedValueOnce(evmAddress)
-          .mockResolvedValueOnce(externalEvmAddress);
+          .mockResolvedValueOnce(evmAddress);
+        contractServiceMock.getEvmAddressesFromHederaIds
+          .mockResolvedValueOnce([externalPauseEvmAddress])
+          .mockResolvedValueOnce([externalControlEvmAddress])
+          .mockResolvedValueOnce([externalKycEvmAddress]);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
 
         transactionServiceMock.getHandler().createBond.mockResolvedValue({
@@ -331,8 +340,11 @@ describe('CreateBondCommandHandler', () => {
         expect(result.securityId.value).toBe(transactionId);
         expect(result.transactionId).toBe(transactionId);
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          3,
+          2,
         );
+        expect(
+          contractServiceMock.getEvmAddressesFromHederaIds,
+        ).toHaveBeenCalledTimes(3);
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
           1,
         );
@@ -364,8 +376,9 @@ describe('CreateBondCommandHandler', () => {
           evmAddress,
           command.configId,
           command.configVersion,
-          [],
-          [externalEvmAddress],
+          [externalPauseEvmAddress],
+          [externalControlEvmAddress],
+          [externalKycEvmAddress],
           evmAddress,
           command.factory?.toString(),
         );

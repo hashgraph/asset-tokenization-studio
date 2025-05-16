@@ -277,6 +277,8 @@ import {
     ExternalPauseManagementTimeTravel__factory,
     ExternalControlListManagement__factory,
     ExternalControlListManagementTimeTravel__factory,
+    ExternalKycListManagement__factory,
+    ExternalKycListManagementTimeTravel__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -792,6 +794,19 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        externalKycListManagement: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ExternalKycListManagement__factory(),
+                new ExternalKycListManagementTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ExternalKycListManagement.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
         timeTravel:
             timeTravelEnabled == true
                 ? new DeployContractWithFactoryCommand({
@@ -1017,6 +1032,14 @@ export async function deployAtsContracts({
             ).then((result) => {
                 console.log(
                     'ExternalControlListManagement has been deployed successfully'
+                )
+                return result
+            }),
+            externalKycListManagement: await deployContractWithFactory(
+                commands.externalKycListManagement
+            ).then((result) => {
+                console.log(
+                    'ExternalKycListManagement has been deployed successfully'
                 )
                 return result
             }),

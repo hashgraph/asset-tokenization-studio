@@ -215,6 +215,9 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_PAUSE_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {
+    _PAUSE_MANAGEMENT_STORAGE_POSITION
+} from '../../layer_0/constants/storagePositions.sol';
 
 contract ExternalPauseManagement is
     IExternalPauseManagement,
@@ -224,12 +227,23 @@ contract ExternalPauseManagement is
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalPauses(
         address[] calldata _pauses
-    ) external override onlyUninitialized(_externalPauseStorage().initialized) {
-        ExternalPauseDataStorage
-            storage externalPauseDataStorage = _externalPauseStorage();
+    )
+        external
+        override
+        onlyUninitialized(
+            _externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized
+        )
+    {
+        ExternalListDataStorage
+            storage externalPauseDataStorage = _externalListStorage(
+                _PAUSE_MANAGEMENT_STORAGE_POSITION
+            );
         uint256 length = _pauses.length;
-        for (uint256 index = 0; index < length; ) {
-            _addExternalPause(_pauses[index]);
+        for (uint256 index; index < length; ) {
+            _addExternalList(
+                _PAUSE_MANAGEMENT_STORAGE_POSITION,
+                _pauses[index]
+            );
             unchecked {
                 ++index;
             }
@@ -245,9 +259,14 @@ contract ExternalPauseManagement is
         override
         onlyRole(_PAUSE_MANAGER_ROLE)
         onlyUnpaused
+        onlyConsistentActivations(_pauses, _actives)
         returns (bool success_)
     {
-        success_ = _updateExternalPauses(_pauses, _actives);
+        success_ = _updateExternalLists(
+            _PAUSE_MANAGEMENT_STORAGE_POSITION,
+            _pauses,
+            _actives
+        );
         if (!success_) {
             revert ExternalPausesNotUpdated(_pauses, _actives);
         }
@@ -263,7 +282,7 @@ contract ExternalPauseManagement is
         onlyUnpaused
         returns (bool success_)
     {
-        success_ = _addExternalPause(_pause);
+        success_ = _addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert ListedPause(_pause);
         }
@@ -279,7 +298,10 @@ contract ExternalPauseManagement is
         onlyUnpaused
         returns (bool success_)
     {
-        success_ = _removeExternalPause(_pause);
+        success_ = _removeExternalList(
+            _PAUSE_MANAGEMENT_STORAGE_POSITION,
+            _pause
+        );
         if (!success_) {
             revert UnlistedPause(_pause);
         }
@@ -289,7 +311,7 @@ contract ExternalPauseManagement is
     function isExternalPause(
         address _pause
     ) external view override returns (bool) {
-        return _isExternalPause(_pause);
+        return _isExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
     }
 
     function getExternalPausesCount()
@@ -298,14 +320,19 @@ contract ExternalPauseManagement is
         override
         returns (uint256 externalPausesCount_)
     {
-        return _getExternalPausesCount();
+        return _getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
     }
 
     function getExternalPausesMembers(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        return _getExternalPausesMembers(_pageIndex, _pageLength);
+        return
+            _getExternalListsMembers(
+                _PAUSE_MANAGEMENT_STORAGE_POSITION,
+                _pageIndex,
+                _pageLength
+            );
     }
 
     function getStaticResolverKey()

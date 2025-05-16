@@ -8,6 +8,7 @@ import { SecurityViewModel } from "@hashgraph/asset-tokenization-sdk";
 import { useMemo } from "react";
 import { ExternalPause } from "../ExternalPause/ExternalPause";
 import { ExternalControl } from "../ExternalControl/ExternalControl";
+import { ExternalKYC } from "../ExternalKYC/ExternalKYC";
 
 interface ControlTabProps {
   details: SecurityViewModel;
@@ -45,6 +46,10 @@ export const ControlTab = ({ details, config }: ControlTabProps) => {
     tabs.push({
       content: <ExternalControl />,
       header: tTabs("externalControlList"),
+    });
+    tabs.push({
+      content: <ExternalKYC />,
+      header: tTabs("externalKYCList"),
     });
 
     return tabs;

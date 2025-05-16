@@ -225,12 +225,6 @@ interface IExternalControlListManagement {
 
     error UnlistedControlList(address controlList);
 
-    error UpdateExternalControlListsContradiction(
-        address[] controlLists,
-        bool[] actives,
-        address controlListContract
-    );
-
     error ExternalControlListsNotUpdated(
         address[] controlLista,
         bool[] actives

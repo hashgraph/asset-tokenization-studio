@@ -216,6 +216,7 @@ import { InvalidFromAccount } from '../InvalidFromAccount.js';
 import { InvalidDestinationAccount } from '../InvalidDestinationAccount.js';
 import { AccountNotInControlList } from '../AccountNotInControlList.js';
 import { SecurityPaused } from '../SecurityPaused.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 export class ContractsErrorMapper {
   static mapError(
@@ -243,8 +244,9 @@ export class ContractsErrorMapper {
       '0x48': () => new InvalidPartition(),
       '0x49': (sourceId, _2, operatorId) =>
         new InsufficientAllowance(sourceId!, operatorId!),
-      '0x50': (sourceId) => new AccountNotKycd(sourceId!),
-      '0x51': (_1, targetId) => new AccountNotKycd(targetId!),
+      '0x50': (sourceId) => new AccountNotKycd(sourceId!, KycStatus.GRANTED),
+      '0x51': (_1, targetId) =>
+        new AccountNotKycd(targetId!, KycStatus.GRANTED),
       '0x52': () => new ClearingActivated(),
     };
 

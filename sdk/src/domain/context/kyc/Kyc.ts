@@ -238,3 +238,8 @@ export class Kyc extends ValidatedDomain<Kyc> {
     ValidatedDomain.handleValidation(Kyc.name, this);
   }
 }
+
+export enum KycStatus {
+  NOT_GRANTED = 0,
+  GRANTED = 1,
+}
