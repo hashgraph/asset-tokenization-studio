@@ -304,4 +304,14 @@ export const rolesList: TRole[] = [
     value: SecurityRole._CONTROL_LIST_MANAGER_ROLE,
     allowedSecurities: ["BOND", "EQUITY"],
   },
+  {
+    label: "kycListManager",
+    value: SecurityRole._KYC_MANAGER_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
+  },
+  {
+    label: "internalKYCManager",
+    value: SecurityRole._INTERNAL_KYC_MANAGER_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
+  },
 ];

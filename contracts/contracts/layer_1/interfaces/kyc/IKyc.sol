@@ -230,6 +230,15 @@ interface IKyc {
     event KycGranted(address indexed account, address indexed issuer);
 
     /**
+     * @dev Emitted when Internal Kyc is updated
+     *
+     * @param operator The address for which the Kyc is updated
+     * @param activated The status of the internal Kyc
+     */
+
+    event InternalKycStatusUpdated(address indexed operator, bool activated);
+
+    /**
      * @dev Emitted when a Kyc is revoked
      *
      * @param account The address for which the Kyc is revoked
@@ -241,6 +250,26 @@ interface IKyc {
     error InvalidKycStatus();
     error KycIsNotGranted();
     error InvalidZeroAddress();
+
+    /**
+     * @dev Initialize Internal Kyc
+     */
+
+    function initializeInternalKyc(bool _activateInternalKyc) external;
+
+    /**
+     * @dev Activate Internal Kyc
+     * @return success_ true or false
+     */
+
+    function activateInternalKyc() external returns (bool success_);
+
+    /**
+     * @dev Deactivate Internal Kyc
+     * @return success_ true or false
+     */
+
+    function deactivateInternalKyc() external returns (bool success_);
 
     /**
      * @dev Grant kyc to an address
@@ -301,6 +330,14 @@ interface IKyc {
     function getKycAccountsCount(
         KycStatus _kycStatus
     ) external view returns (uint256 kycAccountsCount_);
+
+    /**
+     * @dev Get the internal kyc flag
+     *
+     * @return bool true if the internal kyc is activated
+     */
+
+    function isInternalKycActivated() external view returns (bool);
 
     /**
      * @dev Returns an array with the KYC data from accounts with a given KYC status

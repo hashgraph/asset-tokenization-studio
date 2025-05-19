@@ -405,7 +405,8 @@ export const DigitalSecurityDetails = () => {
       showRoleManagement: !isSecurityPaused,
       showDangerZone:
         hasRole(roles, SecurityRole._CLEARING_ROLE) ||
-        hasRole(roles, SecurityRole._PAUSER_ROLE),
+        hasRole(roles, SecurityRole._PAUSER_ROLE) ||
+        hasRole(roles, SecurityRole._INTERNAL_KYC_MANAGER_ROLE),
       showConfiguration: true,
     };
 

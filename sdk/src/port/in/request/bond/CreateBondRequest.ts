@@ -227,12 +227,16 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   arePartitionsProtected: boolean;
   isMultiPartition: boolean;
   clearingActive: boolean;
+  internalKycActivated: boolean;
 
   @OptionalField()
   externalPauses?: string[];
 
   @OptionalField()
   externalControlLists?: string[];
+
+  @OptionalField()
+  externalKycLists?: string[];
 
   @OptionalField()
   diamondOwnerAccount?: string;
@@ -263,8 +267,10 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     arePartitionsProtected,
     isMultiPartition,
     clearingActive,
+    internalKycActivated,
     externalPauses,
     externalControlLists,
+    externalKycLists,
     diamondOwnerAccount,
     currency,
     numberOfUnits,
@@ -291,8 +297,10 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     arePartitionsProtected: boolean;
     isMultiPartition: boolean;
     clearingActive: boolean;
+    internalKycActivated: boolean;
     externalPauses?: string[];
     externalControlLists?: string[];
+    externalKycLists?: string[];
     diamondOwnerAccount?: string;
     currency: string;
     numberOfUnits: string;
@@ -374,6 +382,13 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
           true,
         );
       },
+      externalKycLists: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalKycLists',
+          true,
+        );
+      },
     });
     this.name = name;
     this.symbol = symbol;
@@ -385,9 +400,11 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
     this.clearingActive = clearingActive;
+    this.internalKycActivated = internalKycActivated;
     this.diamondOwnerAccount = diamondOwnerAccount;
     this.externalPauses = externalPauses;
     this.externalControlLists = externalControlLists;
+    this.externalKycLists = externalKycLists;
     this.currency = currency;
     this.numberOfUnits = numberOfUnits;
     this.nominalValue = nominalValue;

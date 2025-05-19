@@ -212,6 +212,7 @@ import initialization from "./initialization";
 import externalControlList from "./externalControlList";
 import externalPause from "./externalPause";
 import externalControlDetails from "./externalControlDetails";
+import externalKYCList from "./externalKYCList";
 
 export default {
   globals: {
@@ -319,6 +320,8 @@ export default {
     clearingValidator: "Clearing Validator role",
     pauseManager: "Pause Manager role",
     controlListManager: "Control Manager role",
+    kycListManager: "KYC Manager role",
+    internalKYCManager: "Internal KYC Manager role",
   },
   landing,
   routes,
@@ -329,4 +332,5 @@ export default {
   initialization,
   externalControl: externalControlList,
   externalControlDetails,
+  externalKYC: externalKYCList,
 };

@@ -833,6 +833,53 @@ exports[`CreateBond render correctly 1`] = `
                     </svg>
                   </div>
                 </div>
+                <div
+                  class="chakra-stack css-1nqqhpy"
+                >
+                  <div
+                    class="chakra-form-control css-1kxonj9"
+                    role="group"
+                  >
+                    <div
+                      class="css-70qvj9"
+                    >
+                      <label
+                        class="chakra-switch css-ghot30"
+                        data-checked=""
+                        data-testid="internalKycActivated"
+                      >
+                        <input
+                          aria-disabled="false"
+                          aria-invalid="false"
+                          checked=""
+                          class="chakra-switch__input"
+                          id="internalKycActivated"
+                          name="internalKycActivated"
+                          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+                          type="checkbox"
+                          value="true"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="chakra-switch__track css-18ihtw3"
+                          data-checked=""
+                        >
+                          <span
+                            class="chakra-switch__thumb css-9hrcr1"
+                            data-checked=""
+                          />
+                        </span>
+                      </label>
+                      <label
+                        class="chakra-form__label css-1ii0m7i"
+                        for="internalKycActivated"
+                        id="field-:rq:-label"
+                      >
+                        createBond.stepTokenDetails.internalKycActivated
+                      </label>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div

@@ -417,7 +417,7 @@ abstract contract ERC1410StandardStorageWrapper is
         if (!_isAbleToAccess(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
         if (!_validPartition(_partition, _from)) {

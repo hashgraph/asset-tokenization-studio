@@ -217,6 +217,7 @@ import {
 } from './ClearingRedeemByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ClearingRedeemByPartitionCommand)
 export class ClearingRedeemByPartitionCommandHandler
@@ -251,9 +252,11 @@ export class ClearingRedeemByPartitionCommandHandler
 
     await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(securityId, [
-      account.id.toString(),
-    ]);
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [account.id.toString()],
+      KycStatus.GRANTED,
+    );
 
     await this.validationService.checkDecimals(security, amount);
 

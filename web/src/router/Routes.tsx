@@ -230,6 +230,8 @@ import { ExternalControlList } from "../views/ExternalControlList/ExternalContro
 import { CreateExternalControl } from "../views/CreateExternalControl/CreateExternalControl";
 import { AddExternalControl } from "../views/AddExternalControl/AddExternalControl";
 import { ExternalControlDetails } from "../views/ExternalControlDetails/ExternalControlDetails";
+import { ExternalKYCList } from "../views/ExternalKYCList/ExternalKYCList";
+import { AddExternalKYC } from "../views/AddExternalKYC/AddExternalKYC";
 
 const t = (key: RouteName) => i18n.t(`routes:${key}`);
 
@@ -312,6 +314,24 @@ export const routes = [
         element: (
           <PrivateRoute>
             <AddExternalControl />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: RoutePath.EXTERNAL_KYC_LIST,
+        breadcrumb: t(RouteName.ExternalKYCList),
+        element: (
+          <PrivateRoute>
+            <ExternalKYCList />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: RoutePath.ADD_EXTERNAL_KYC,
+        breadcrumb: t(RouteName.AddExternalKYC),
+        element: (
+          <PrivateRoute>
+            <AddExternalKYC />
           </PrivateRoute>
         ),
       },
