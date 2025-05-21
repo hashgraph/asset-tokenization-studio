@@ -212,7 +212,8 @@ import {
   GetDividendsQuery,
   GetDividendsQueryResponse,
 } from './GetDividendsQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetDividendsQueryError } from './error/GetDividendsQueryError.js';
 
 @QueryHandler(GetDividendsQuery)
 export class GetDividendsQueryHandler
@@ -220,21 +221,25 @@ export class GetDividendsQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetDividendsQuery): Promise<GetDividendsQueryResponse> {
-    const { securityId, dividendId } = query;
+    try {
+      const { securityId, dividendId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getDividends(
-      securityEvmAddress,
-      dividendId,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getDividends(
+        securityEvmAddress,
+        dividendId,
+      );
 
-    return Promise.resolve(new GetDividendsQueryResponse(res));
+      return Promise.resolve(new GetDividendsQueryResponse(res));
+    } catch (error) {
+      throw new GetDividendsQueryError(error as Error);
+    }
   }
 }

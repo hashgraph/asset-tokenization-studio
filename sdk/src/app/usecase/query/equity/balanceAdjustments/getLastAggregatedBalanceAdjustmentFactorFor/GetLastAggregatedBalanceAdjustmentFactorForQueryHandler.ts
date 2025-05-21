@@ -207,13 +207,14 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import {
   GetLastAggregatedBalanceAdjustmentFactorForQuery,
   GetLastAggregatedBalanceAdjustmentFactorForQueryResponse,
 } from './GetLastAggregatedBalanceAdjustmentFactorForQuery';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
+import { GetLastAggregatedBalanceAdjustmentFactorForQueryError } from './error/GetLastAggregatedBalanceAdjustmentFactorForQueryError';
 
 @QueryHandler(GetLastAggregatedBalanceAdjustmentFactorForQuery)
 export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler
@@ -221,29 +222,35 @@ export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetLastAggregatedBalanceAdjustmentFactorForQuery,
   ): Promise<GetLastAggregatedBalanceAdjustmentFactorForQueryResponse> {
-    const { securityId, targetId } = query;
+    try {
+      const { securityId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res =
-      await this.queryAdapter.getLastAggregatedBalanceAdjustmentFactorFor(
-        securityEvmAddress,
-        targetEvmAddress,
+      const res =
+        await this.queryAdapter.getLastAggregatedBalanceAdjustmentFactorFor(
+          securityEvmAddress,
+          targetEvmAddress,
+        );
+
+      return new GetLastAggregatedBalanceAdjustmentFactorForQueryResponse(res);
+    } catch (error) {
+      throw new GetLastAggregatedBalanceAdjustmentFactorForQueryError(
+        error as Error,
       );
-
-    return new GetLastAggregatedBalanceAdjustmentFactorForQueryResponse(res);
+    }
   }
 }

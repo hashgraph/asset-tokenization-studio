@@ -207,6 +207,7 @@ import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorato
 import Injectable from '../../../../../core/Injectable.js';
 import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { GetAccountInfoQueryError } from './error/GetAccountInfoQueryError.js';
 import {
   GetAccountInfoQuery,
   GetAccountInfoQueryResponse,
@@ -217,7 +218,7 @@ export class GetAccountInfoQueryHandler
   implements IQueryHandler<GetAccountInfoQuery>
 {
   constructor(
-    public readonly repo: MirrorNodeAdapter = Injectable.resolve(
+    private readonly repo: MirrorNodeAdapter = Injectable.resolve(
       MirrorNodeAdapter,
     ),
   ) {}
@@ -225,7 +226,11 @@ export class GetAccountInfoQueryHandler
   async execute(
     query: GetAccountInfoQuery,
   ): Promise<GetAccountInfoQueryResponse> {
-    const res = await this.repo.getAccountInfo(query.id);
-    return Promise.resolve(new GetAccountInfoQueryResponse(res));
+    try {
+      const res = await this.repo.getAccountInfo(query.id);
+      return Promise.resolve(new GetAccountInfoQueryResponse(res));
+    } catch (error) {
+      throw new GetAccountInfoQueryError(error as Error);
+    }
   }
 }

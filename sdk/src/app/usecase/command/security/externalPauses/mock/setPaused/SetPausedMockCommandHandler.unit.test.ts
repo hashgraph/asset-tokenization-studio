@@ -209,7 +209,7 @@ import {
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import {
   SetPausedMockCommand,

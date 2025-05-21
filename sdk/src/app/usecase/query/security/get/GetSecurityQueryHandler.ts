@@ -213,8 +213,9 @@ import {
   GetSecurityQueryResponse,
 } from './GetSecurityQuery.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../service/ContractService';
+import ContractService from '../../../../service/contract/ContractService';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { GetSecurityQueryError } from './error/GetSecurityQueryError.js';
 
 @QueryHandler(GetSecurityQuery)
 export class GetSecurityQueryHandler
@@ -222,30 +223,34 @@ export class GetSecurityQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetSecurityQuery): Promise<GetSecurityQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const security: Security =
-      await this.queryAdapter.getSecurity(securityEvmAddress);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const security: Security =
+        await this.queryAdapter.getSecurity(securityEvmAddress);
 
-    if (security.maxSupply)
-      security.maxSupply = BigDecimal.fromStringFixed(
-        security.maxSupply.toString(),
-        security.decimals,
-      );
-    if (security.totalSupply)
-      security.totalSupply = BigDecimal.fromStringFixed(
-        security.totalSupply.toString(),
-        security.decimals,
-      );
+      if (security.maxSupply)
+        security.maxSupply = BigDecimal.fromStringFixed(
+          security.maxSupply.toString(),
+          security.decimals,
+        );
+      if (security.totalSupply)
+        security.totalSupply = BigDecimal.fromStringFixed(
+          security.totalSupply.toString(),
+          security.decimals,
+        );
 
-    return Promise.resolve(new GetSecurityQueryResponse(security));
+      return Promise.resolve(new GetSecurityQueryResponse(security));
+    } catch (error) {
+      throw new GetSecurityQueryError(error as Error);
+    }
   }
 }

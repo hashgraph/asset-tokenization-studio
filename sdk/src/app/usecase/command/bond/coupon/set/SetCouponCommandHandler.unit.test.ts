@@ -214,11 +214,14 @@ import { createMock } from '@golevelup/ts-jest';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import {
   CouponIdFixture,
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { SetCouponCommandError } from './error/SetCouponCommandError.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 
 describe('SetCouponCommandHandler', () => {
   let handler: SetCouponCommandHandler;
@@ -229,6 +232,7 @@ describe('SetCouponCommandHandler', () => {
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const transactionId = TransactionIdFixture.create().id;
   const couponId = CouponIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new SetCouponCommandHandler(
@@ -243,6 +247,26 @@ describe('SetCouponCommandHandler', () => {
   });
 
   describe('execute', () => {
+    describe('error cases', () => {
+      it('throws SetCouponCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          SetCouponCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while setting the coupon: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
     describe('success cases', () => {
       it('successfully sets coupon', async () => {
         setupContractEvmAddressMock();

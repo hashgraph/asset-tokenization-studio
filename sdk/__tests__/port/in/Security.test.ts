@@ -274,7 +274,7 @@ import {
   RESOLVER_ADDRESS,
   CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT,
 } from '../../config.js';
-import NetworkService from '../../../src/app/service/NetworkService.js';
+import NetworkService from '../../../src/app/service/network/NetworkService.js';
 import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
 import { ethers, Wallet } from 'ethers';
 import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';

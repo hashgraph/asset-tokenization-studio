@@ -211,7 +211,7 @@ import {
 } from './SetPausedMockCommand';
 import TransactionService from '../../../../../../service/transaction/TransactionService';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import ContractService from '../../../../../../../app/service/ContractService';
+import ContractService from '../../../../../../../app/service/contract/ContractService';
 
 @CommandHandler(SetPausedMockCommand)
 export class SetPausedMockCommandHandler

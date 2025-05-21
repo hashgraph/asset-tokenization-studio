@@ -211,8 +211,8 @@ import { QueryHandler } from '../../../../../../../core/decorator/QueryHandlerDe
 import { IQueryHandler } from '../../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractService from '../../../../../../../app/service/ContractService.js';
-import AccountService from '../../../../../../../app/service/AccountService';
+import ContractService from '../../../../../../../app/service/contract/ContractService.js';
+import AccountService from '../../../../../../../app/service/account/AccountService';
 
 @QueryHandler(IsAuthorizedWhiteListMockQuery)
 export class IsAuthorizedWhiteListMockQueryHandler

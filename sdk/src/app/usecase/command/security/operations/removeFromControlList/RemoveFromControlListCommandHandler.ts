@@ -206,15 +206,16 @@
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import {
   RemoveFromControlListCommand,
   RemoveFromControlListCommandResponse,
 } from './RemoveFromControlListCommand.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { RemoveFromControlListCommandError } from './error/RemoveFromControlListCommandError.js';
 
 @CommandHandler(RemoveFromControlListCommand)
 export class RemoveFromControlListCommandHandler
@@ -222,45 +223,49 @@ export class RemoveFromControlListCommandHandler
 {
   constructor(
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: RemoveFromControlListCommand,
   ): Promise<RemoveFromControlListCommandResponse> {
-    const { targetId, securityId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { targetId, securityId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkAccountInControlList(
-      securityId,
-      targetId,
-      false,
-    );
+      await this.validationService.checkAccountInControlList(
+        securityId,
+        targetId,
+        false,
+      );
 
-    const res = await handler.removeFromControlList(
-      securityEvmAddress,
-      targetEvmAddress,
-      securityId,
-    );
-    // return Promise.resolve({ payload: res.response });
-    return Promise.resolve(
-      new RemoveFromControlListCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      const res = await handler.removeFromControlList(
+        securityEvmAddress,
+        targetEvmAddress,
+        securityId,
+      );
+      // return Promise.resolve({ payload: res.response });
+      return Promise.resolve(
+        new RemoveFromControlListCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new RemoveFromControlListCommandError(error as Error);
+    }
   }
 }

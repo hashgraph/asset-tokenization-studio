@@ -286,3 +286,7 @@ export const TransactionResponseFixture = createFixture<TransactionResponse>(
     res.response!.asConstant('1');
   },
 );
+
+export const ErrorMsgFixture = createFixture<{ msg: string }>((props) => {
+  props.msg.faker((faker) => faker.lorem.words());
+});
