@@ -3135,7 +3135,7 @@
   version "1.13.0"
   dependencies:
     "@ethersproject/contracts" "^5.7.0"
-    "@hashgraph/asset-tokenization-contracts" "file:../../../../.cache/yarn/v6/npm-@hashgraph-asset-tokenization-sdk-1.13.0-f86bfa24-990a-449c-bbd8-a81af9ea9a9f-1745400005929/node_modules/@hashgraph/contracts"
+    "@hashgraph/asset-tokenization-contracts" "file:../contracts"
     "@hashgraph/hedera-custodians-integration" "^1.4.1"
     "@hashgraph/hedera-wallet-connect" "1.3.1"
     "@hashgraph/sdk" "2.51.0"
@@ -13320,10 +13320,10 @@ vite-tsconfig-paths@^4.2.1:
     globrex "^0.1.2"
     tsconfck "^3.0.3"
 
-vite@4.5.5:
-  version "4.5.5"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-4.5.5.tgz#639b9feca5c0a3bfe3c60cb630ef28bf219d742e"
-  integrity sha512-ifW3Lb2sMdX+WU91s3R0FyQlAyLxOzCSCP37ujw0+r5POeHPwe6udWVIElKQq8gk3t7b8rkmvqC6IHBpCff4GQ==
+vite@4.5.13:
+  version "4.5.13"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-4.5.13.tgz#778534a947112c6c455e89737730fae5d458a294"
+  integrity sha512-Hgp8IF/yZDzKsN1hQWOuQZbrKiaFsbQud+07jJ8h9m9PaHWkpvZ5u55Xw5yYjWRXwRQ4jwFlJvY7T7FUJG9MCA==
   dependencies:
     esbuild "^0.18.10"
     postcss "^8.4.27"
