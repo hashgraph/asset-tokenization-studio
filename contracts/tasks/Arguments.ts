@@ -237,6 +237,7 @@ export interface DeployArgs extends WithSigner {
 
 export interface DeployAllArgs extends WithSigner {
     useDeployed: boolean
+    fileName: string
 }
 
 // * Transparent Upgradeable Proxy
