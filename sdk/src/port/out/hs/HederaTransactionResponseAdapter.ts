@@ -215,7 +215,6 @@ import { TransactionResponseError } from '../error/TransactionResponseError.js';
 import { TransactionType } from '../TransactionResponseEnums.js';
 import { TransactionResponseAdapter } from '../TransactionResponseAdapter.js';
 import LogService from '../../../app/service/LogService.js';
-import { ReceiptError } from './error/ReceiptError.js';
 
 export class HederaTransactionResponseAdapter extends TransactionResponseAdapter {
   public static async manageResponse(
@@ -318,7 +317,12 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
       );
       return Promise.race([receiptPromise, timeoutPromise]);
     } catch (error: any) {
-      throw new ReceiptError(error);
+      if (error.status) {
+        if (error.status.toString() === 'SUCCESS') {
+          return true;
+        }
+      }
+      throw error;
     }
   }
 
