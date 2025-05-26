@@ -307,14 +307,14 @@ export default class TransactionService extends Service {
     }
 
     if (
-      className.includes('CreateEquityCommandHandler') ||
-      className.includes('CreateBondCommandHandler')
+      ['CreateEquityCommandHandler', 'CreateBondCommandHandler'].some(
+        (handler) => className.includes(handler),
+      )
     ) {
       const data = results.map((result) =>
         result.substring(BYTES_32_LENGTH - ADDRESS_LENGTH + 2),
       );
-
-      return '0x' + data[position];
+      return `0x${data[position]}`;
     }
 
     return results[position];
