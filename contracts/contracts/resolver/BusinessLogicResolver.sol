@@ -214,6 +214,7 @@ import {_DEFAULT_ADMIN_ROLE} from '../layer_1/constants/roles.sol';
 
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     error Unimplemented();
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_BusinessLogicResolver()
         external
@@ -239,6 +240,20 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         uint256 latestVersion = _registerBusinessLogics(_businessLogics);
 
         emit BusinessLogicsRegistered(_businessLogics, latestVersion);
+    }
+
+    function addSelectorsToBlacklist(
+        bytes32 _configurationId,
+        bytes4[] calldata _selectors
+    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _addSelectorsToBlacklist(_configurationId, _selectors);
+    }
+
+    function removeSelectorsFromBlacklist(
+        bytes32 _configurationId,
+        bytes4[] calldata _selectors
+    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _removeSelectorsFromBlacklist(_configurationId, _selectors);
     }
 
     function getVersionStatus(
@@ -298,5 +313,14 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         uint256 _pageLength
     ) external view override returns (bytes32[] memory businessLogicKeys_) {
         businessLogicKeys_ = _getBusinessLogicKeys(_pageIndex, _pageLength);
+    }
+
+    function getSelectorsBlacklist(
+        bytes32 _configurationId,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (bytes4[] memory selectors_) {
+        return
+            _getSelectorsBlacklist(_configurationId, _pageIndex, _pageLength);
     }
 }
