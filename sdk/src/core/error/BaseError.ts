@@ -297,6 +297,7 @@ export enum ErrorCode {
   ErrorDecodingVc = '30021',
   EmptyResponse = '30022',
   WalletNotSupported = '30023',
+  ReceiptError = '30024',
 
   // Error codes for Provider Errors (Prefix: 4XXXX)
   DeploymentError = '40006', // Fixed typo here
