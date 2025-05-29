@@ -214,8 +214,9 @@ import Factory from './Factory.js';
 import Management from './Management.js';
 import SsiManagement from './SsiManagement.js';
 import ExternalPausesManagement from './externalPausesManagement/ExternalPausesManagement.js';
-import Kyc from './Kyc.js';
+import Kyc from './kyc/Kyc.js';
 import ExternalControlListsManagement from './externalControlListsManagement/ExternalControlListsManagement.js';
+import ExternalKycListsManagement from './externalKycListsManagement/ExternalKycListsManagement.js';
 
 export {
   Security,
@@ -231,6 +232,7 @@ export {
   Kyc,
   ExternalPausesManagement,
   ExternalControlListsManagement,
+  ExternalKycListsManagement,
 };
 
 export * from './request';
@@ -246,7 +248,8 @@ export * from './Common.js';
 export * from './Network.js';
 export * from './Factory.js';
 export * from './Management.js';
-export * from './Kyc.js';
+export * from './kyc/Kyc.js';
 export * from './SsiManagement.js';
 export * from './externalPausesManagement/ExternalPausesManagement.js';
 export * from './externalControlListsManagement/ExternalControlListsManagement.js';
+export * from './externalKycListsManagement/ExternalKycListsManagement.js';

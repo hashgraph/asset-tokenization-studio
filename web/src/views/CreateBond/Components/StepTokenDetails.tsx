@@ -409,6 +409,13 @@ export const StepTokenDetails = () => {
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
+          <HStack justifySelf="flex-start">
+            <ToggleController
+              control={control}
+              id="internalKycActivated"
+              label={t("stepTokenDetails.internalKycActivated")}
+            />
+          </HStack>
         </FormControl>
       </VStack>
       <HStack

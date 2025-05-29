@@ -219,12 +219,6 @@ interface IExternalPauseManagement {
 
     error UnlistedPause(address pause);
 
-    error UpdateExternalPausesContradiction(
-        address[] pauses,
-        bool[] actives,
-        address pauseContract
-    );
-
     error ExternalPausesNotUpdated(address[] pauses, bool[] actives);
 
     // solhint-disable-next-line func-name-mixedcase

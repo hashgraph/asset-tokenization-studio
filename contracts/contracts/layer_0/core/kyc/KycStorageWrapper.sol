@@ -208,8 +208,11 @@ pragma solidity 0.8.18;
 
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
-    SsiManagementStorageWrapper
-} from '../ssi/SsiManagementStorageWrapper.sol';
+    ExternalKycListManagementStorageWrapper
+} from '../externalKycLists/ExternalKycListManagementStorageWrapper.sol';
+import {
+    ExternalKycListManagementStorageWrapper
+} from '../externalKycLists/ExternalKycListManagementStorageWrapper.sol';
 import {_KYC_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {LibCommon} from '../../common/libraries/LibCommon.sol';
 import {
@@ -219,13 +222,15 @@ import {
     IRevocationList
 } from '../../../layer_1/interfaces/kyc/IRevocationList.sol';
 
-abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
+abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
     struct KycStorage {
         mapping(address => IKyc.KycData) kyc;
         mapping(IKyc.KycStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
+        bool initialized;
+        bool internalKycActivated;
     }
 
     modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
@@ -236,6 +241,11 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
     modifier onlyValidKycStatus(IKyc.KycStatus _kycStatus, address _account) {
         _checkValidKycStatus(_kycStatus, _account);
         _;
+    }
+
+    function _setInternalKyc(bool _activated) internal returns (bool success_) {
+        _kycStorage().internalKycActivated = _activated;
+        success_ = true;
     }
 
     function _grantKyc(
@@ -340,19 +350,27 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
         }
     }
 
-    function _hasSameKycStatus(
+    function _verifyKycStatus(
         IKyc.KycStatus _kycStatus,
         address _account
     ) internal view virtual returns (bool) {
-        return _getKycStatusFor(_account) == _kycStatus;
+        KycStorage storage kycStorage = _kycStorage();
+
+        bool internalKycValid = !kycStorage.internalKycActivated ||
+            _getKycStatusFor(_account) == _kycStatus;
+        return internalKycValid && _isExternallyGranted(_account, _kycStatus);
     }
 
     function _checkValidKycStatus(
         IKyc.KycStatus _kycStatus,
         address _account
     ) internal view {
-        if (!_hasSameKycStatus(_kycStatus, _account))
+        if (!_verifyKycStatus(_kycStatus, _account))
             revert IKyc.InvalidKycStatus();
+    }
+
+    function _isInternalKycActivated() internal view returns (bool) {
+        return _kycStorage().internalKycActivated;
     }
 
     function _kycStorage() internal pure returns (KycStorage storage kyc_) {

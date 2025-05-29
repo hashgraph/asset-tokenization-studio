@@ -290,6 +290,7 @@ task(
             clearingReadFacet,
             externalPauseManagement,
             externalControlListManagement,
+            externalKycListManagement,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -340,6 +341,8 @@ task(
             'External Pause Management Facet': externalPauseManagement.address,
             'External Control List Management Facet':
                 externalControlListManagement.address,
+            'External Kyc List Management Facet':
+                externalKycListManagement.address,
         }
 
         console.log('\n 🟢 Deployed ATS Contract List:')

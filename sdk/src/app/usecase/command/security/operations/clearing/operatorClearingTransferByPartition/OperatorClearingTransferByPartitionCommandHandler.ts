@@ -218,6 +218,7 @@ import {
 } from './OperatorClearingTransferByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(OperatorClearingTransferByPartitionCommand)
 export class OperatorClearingTransferByPartitionCommandHandler
@@ -273,10 +274,11 @@ export class OperatorClearingTransferByPartitionCommandHandler
     );
     await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [sourceId, targetId],
+      KycStatus.GRANTED,
+    );
 
     await this.validationService.checkControlList(
       securityId,
