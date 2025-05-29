@@ -282,6 +282,7 @@ describe('Adjust Balances Tests', () => {
             isControllable: true,
             arePartitionsProtected: false,
             clearingActive: false,
+            internalKycActivated: true,
             isMultiPartition: true,
             name: 'TEST_AccessControl',
             symbol: 'TAC',

@@ -534,7 +534,7 @@ describe('ExternalControlListsManagement', () => {
 
       await expect(
         ExternalControlListsManagement.removeExternalControlList(
-          addExternalControlListsRequest,
+          removeExternalControlListsRequest,
         ),
       ).rejects.toThrow(ValidationError);
     });
@@ -548,7 +548,7 @@ describe('ExternalControlListsManagement', () => {
 
       await expect(
         ExternalControlListsManagement.removeExternalControlList(
-          addExternalControlListsRequest,
+          removeExternalControlListsRequest,
         ),
       ).rejects.toThrow(ValidationError);
     });

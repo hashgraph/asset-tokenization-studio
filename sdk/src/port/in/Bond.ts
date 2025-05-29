@@ -274,7 +274,12 @@ class BondInPort implements IBondInPort {
     req: CreateBondRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }> {
     ValidatedRequest.handleValidation('CreateBondRequest', req);
-    const { diamondOwnerAccount, externalPauses, externalControlLists } = req;
+    const {
+      diamondOwnerAccount,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+    } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
     const resolver = this.networkService.configuration.resolverAddress;
@@ -288,6 +293,7 @@ class BondInPort implements IBondInPort {
       isControllable: req.isControllable,
       arePartitionsProtected: req.arePartitionsProtected,
       clearingActive: req.clearingActive,
+      internalKycActivated: req.internalKycActivated,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfUnits),
       regulationType: CastRegulationType.fromNumber(req.regulationType),
@@ -316,6 +322,7 @@ class BondInPort implements IBondInPort {
         diamondOwnerAccount,
         externalPauses,
         externalControlLists,
+        externalKycLists,
       ),
     );
 

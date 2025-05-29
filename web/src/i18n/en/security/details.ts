@@ -218,6 +218,7 @@ import ssiManager from "./ssiManager";
 import clearingOperations from "./clearingOperations";
 import externalPause from "./externalPause";
 import externalControl from "./externalControl";
+import externalKYC from "./externalKYC";
 
 export default {
   header: {
@@ -246,6 +247,7 @@ export default {
     corporateActions: "Corporate Actions",
     externalControlList: "External Control",
     externalPause: "External Pause",
+    externalKYCList: "External KYC",
   },
   actions: {
     redeem: "Redeem",
@@ -265,6 +267,9 @@ export default {
         "Restrict token interactions to clearing operations only. While enabled, other types of transactions will be blocked",
       activate: "Activate",
       deactivate: "Deactivate",
+      internalKYCManagerTitle: "Internal KYC",
+      internalKYCManagerDescription:
+        "While activated, internal KYC will be enable",
     },
   },
   dividends,
@@ -300,6 +305,7 @@ export default {
   clearingOperations,
   externalPause,
   externalControl,
+  externalKYC,
   benefits: {
     dividends: "Dividends",
     balanceAdjustments: "Balance Adjustments",

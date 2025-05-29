@@ -9,8 +9,11 @@ import { useGetIsClearingActivated } from "../../../hooks/queries/useClearingOpe
 import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";
 import {
   ActivateClearingRequest,
+  ActivateInternalKycRequest,
   DeactivateClearingRequest,
+  DeactivateInternalKycRequest,
   IsClearingActivatedRequest,
+  IsInternalKycActivatedRequest,
   PauseRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { usePauseSecurity } from "../../../hooks/queries/usePauseSecurity";
@@ -20,6 +23,11 @@ import {
   useDeactivateClearing,
 } from "../../../hooks/mutations/useClearingOperations";
 import { useTranslation } from "react-i18next";
+import { useGetIsInternalKycActivated } from "../../../hooks/queries/useKYC";
+import {
+  useActivateInternalKyc,
+  useDeactivateInternalKyc,
+} from "../../../hooks/mutations/useKYC";
 
 export const DangerZone = () => {
   const { t: tButtons } = useTranslation("security", {
@@ -40,6 +48,11 @@ export const DangerZone = () => {
     [accountRoles],
   );
 
+  const hasInternalKYCManagerRole = useMemo(
+    () => hasRole(accountRoles, SecurityRole._INTERNAL_KYC_MANAGER_ROLE),
+    [accountRoles],
+  );
+
   const { data: isPaused, refetch } = useGetIsPaused(
     new PauseRequest({ securityId: id }),
   );
@@ -48,6 +61,13 @@ export const DangerZone = () => {
     useGetIsClearingActivated(
       new IsClearingActivatedRequest({ securityId: id }),
     );
+
+  const {
+    data: isInternalKycActivated,
+    refetch: refetchIsInternalKycActivated,
+  } = useGetIsInternalKycActivated(
+    new IsInternalKycActivatedRequest({ securityId: id }),
+  );
 
   const { mutate: pauseSecurity, isLoading: isPauseLoading } = usePauseSecurity(
     { onSettled: () => refetch() },
@@ -61,6 +81,20 @@ export const DangerZone = () => {
 
   const { mutate: deactivateClearing, isLoading: isDeactivateClearingLoading } =
     useDeactivateClearing({ onSettled: () => refetchIsClearingActivated() });
+
+  const {
+    mutate: activateInternalKyc,
+    isLoading: isActivateInternalKycLoading,
+  } = useActivateInternalKyc({
+    onSettled: () => refetchIsInternalKycActivated(),
+  });
+
+  const {
+    mutate: deactivateInternalKyc,
+    isLoading: isDeactivateInternalKycLoading,
+  } = useDeactivateInternalKyc({
+    onSettled: () => refetchIsInternalKycActivated(),
+  });
 
   const handlePauseToggle = async () => {
     const pauseRequest = new PauseRequest({ securityId: id });
@@ -82,6 +116,20 @@ export const DangerZone = () => {
         securityId: id,
       });
       activateClearing(activateClearingRequest);
+    }
+  };
+
+  const handleInternalKYCManagerToggle = async () => {
+    if (isInternalKycActivated) {
+      const deactivateInternalKycRequest = new DeactivateInternalKycRequest({
+        securityId: id,
+      });
+      deactivateInternalKyc(deactivateInternalKycRequest);
+    } else {
+      const activateInternalKycRequest = new ActivateInternalKycRequest({
+        securityId: id,
+      });
+      activateInternalKyc(activateInternalKycRequest);
     }
   };
 
@@ -125,6 +173,32 @@ export const DangerZone = () => {
             isDisabled={
               isActivateClearingLoading ||
               isDeactivateClearingLoading ||
+              isPaused
+            }
+          />
+        </HStack>
+      )}
+      {(hasClearingRole || hasPauserRole) && hasInternalKYCManagerRole && (
+        <Divider bgColor={"neutral.500"} />
+      )}
+      {hasInternalKYCManagerRole && (
+        <HStack w={"full"} justifyContent={"space-between"}>
+          <VStack align="start">
+            <Text textStyle="ElementsSemiboldLG">
+              {tButtons("dangerZone.internalKYCManagerTitle")}
+            </Text>
+            <Text textStyle="BodyRegularSM">
+              {tButtons("dangerZone.internalKYCManagerDescription")}
+            </Text>
+          </VStack>
+          <Toggle
+            data-testid="internal-kyc-manager-button"
+            size={"lg"}
+            defaultChecked={isInternalKycActivated}
+            onChange={handleInternalKYCManagerToggle}
+            isDisabled={
+              isActivateInternalKycLoading ||
+              isDeactivateInternalKycLoading ||
               isPaused
             }
           />

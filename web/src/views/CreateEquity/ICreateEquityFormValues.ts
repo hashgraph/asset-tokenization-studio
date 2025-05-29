@@ -230,4 +230,6 @@ export interface ICreateEquityFormValues {
   countriesList: string[];
   externalPausesList?: string[];
   externalControlList?: string[];
+  externalKYCList?: string[];
+  internalKycActivated: boolean;
 }

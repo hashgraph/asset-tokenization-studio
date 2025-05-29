@@ -218,6 +218,8 @@ export class SecurityData {
   public maxSupply: string;
   public erc20MetadataInfo: ERC20MetadataInfo;
   public clearingActive: boolean;
+  public internalKycActivated: boolean;
   public externalPauses: string[];
   public externalControlLists: string[];
+  public externalKycLists: string[];
 }

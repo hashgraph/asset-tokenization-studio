@@ -66,6 +66,7 @@
     "test:protectedPartitions": "NETWORK=hardhat npx hardhat test test/unitTests/layer_1/protectedPartitions/protectedPartitions.test.ts",
     "test:timeTravel": "NETWORK=hardhat npx hardhat test test/unitTests/timeTravel/timeTravel.test.ts",
     "test:kyc": "NETWORK=hardhat npx hardhat test test/unitTests/layer_1/kyc/kyc.test.ts",
+    "test:externalKycList": "npx hardhat test test/unitTests/layer_1/externalKycLists/externalKycList.test.ts",
     "test:ssi": "npx hardhat test test/unitTests/layer_1/ssi/ssi.test.ts",
     "test:clearing": "npx hardhat test test/unitTests/layer_1/clearing/clearing.test.ts",
     "build": "npx -y rimraf build && npm run compile && npx tsc -p tsconfig.json",

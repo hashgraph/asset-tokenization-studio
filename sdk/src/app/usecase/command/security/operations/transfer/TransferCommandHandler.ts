@@ -214,6 +214,7 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/ValidationService.js';
 import ContractService from '../../../../../service/ContractService.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(TransferCommand)
 export class TransferCommandHandler
@@ -236,7 +237,11 @@ export class TransferCommandHandler
     const { securityId, targetId, amount } = command;
 
     await this.validationService.checkClearingDeactivated(securityId);
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [targetId],
+      KycStatus.GRANTED,
+    );
 
     const handler = this.transactionService.getHandler();
 

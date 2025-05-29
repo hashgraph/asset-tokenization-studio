@@ -239,4 +239,15 @@ export default class ContractService extends Service {
 
     return evmAddress;
   }
+
+  async getEvmAddressesFromHederaIds(
+    addresses?: string[],
+  ): Promise<EvmAddress[]> {
+    if (!addresses) return [];
+    return Promise.all(
+      addresses.map((address) =>
+        this.getContractEvmAddress(address.toString()),
+      ),
+    );
+  }
 }

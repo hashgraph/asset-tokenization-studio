@@ -263,6 +263,7 @@ describe('Scheduled Snapshots Tests', () => {
             isControllable: true,
             arePartitionsProtected: false,
             clearingActive: false,
+            internalKycActivated: true,
             isMultiPartition: false,
             name: 'TestScheduledSnapshots',
             symbol: 'TAC',

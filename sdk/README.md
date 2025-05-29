@@ -752,6 +752,28 @@ Revoke KYC from a target account.
   - `securityId`: Identifier of the security token.
   - `targetId`: Identifier of the target account.
 - **Response**:
+
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Activate Internal KYC
+
+Activate internal KYC of a security.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+- **Response**:
+
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Deactivate KYC
+
+Deactivate internal KYC of a security.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+- **Response**:
   - `payload`: `true` (success) or `false` (failed).
   - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
 
@@ -922,6 +944,51 @@ Updates the active status of multiple external control list addresses for a spec
   - securityId: Hedera id of the diamond contract representing the asset
   - externalControlListsAddresses: List of external control list addresses.
   - actives: list of boolean indicating whether the correspond externalControlList (from the above mentioned external control list) should be added or removed.
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId:
+    Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+## External Kyc Lists Management
+
+### addExternalKycList
+
+Adds a new external kyc list address to a specific asset.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - externalKycListAddress: address of the external kyc list to be added.
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId:
+    Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### removeExternalKycList
+
+Removes an existing external kyc list address from a specific asset.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - externalKycListAddress: address of the external kyc list to be removed.
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId:
+    Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### updateExternalKycLists
+
+Updates the active status of multiple external kyc list addresses for a specific asset.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - externalKycListsAddresses: List of external kyc list addresses.
+  - actives: list of boolean indicating whether the correspond externalKycList (from the above mentioned external kyc list) should be added or removed.
 
 - Response
   - Payload: True (success), false (failed)
