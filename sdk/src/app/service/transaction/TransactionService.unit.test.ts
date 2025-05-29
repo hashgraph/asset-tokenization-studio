@@ -213,6 +213,9 @@ import { EmptyResponse } from './error/EmptyResponse';
 import { TransactionResponseFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
 import { InvalidResponse } from '../../../core/error/InvalidResponse';
 import { faker } from '@faker-js/faker/.';
+import { CreateEquityCommandHandler } from '../../usecase/command/equity/create/CreateEquityCommandHandler';
+import { CreateBondCommandHandler } from '../../usecase/command/bond/create/CreateBondCommandHandler';
+import { ADDRESS_LENGTH, BYTES_32_LENGTH } from '../../../core/Constants';
 
 describe('TransactioNService', () => {
   let service: TransactionService;
@@ -283,6 +286,55 @@ describe('TransactioNService', () => {
             numberOfResultsItems,
           }),
         ).resolves.toBe(results[position]);
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
+          transactionResponse.id,
+          numberOfResultsItems,
+        );
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledTimes(
+          1,
+        );
+      });
+      it('should retrieve transaction result for CreateEquityCommandHandler with formatted address', async () => {
+        const rawResult =
+          '0'.repeat(BYTES_32_LENGTH - ADDRESS_LENGTH + 2) + '1234567890abcdef';
+        const expectedResult = '0x1234567890abcdef';
+        const results = ['1', rawResult];
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue(results);
+
+        await expect(
+          service.getTransactionResult({
+            res: transactionResponse,
+            className: CreateEquityCommandHandler.name,
+            position,
+            numberOfResultsItems,
+          }),
+        ).resolves.toBe(expectedResult);
+
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
+          transactionResponse.id,
+          numberOfResultsItems,
+        );
+        expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledTimes(
+          1,
+        );
+      });
+
+      it('should retrieve transaction result for CreateBondCommandHandler with formatted address', async () => {
+        const rawResult =
+          '0'.repeat(BYTES_32_LENGTH - ADDRESS_LENGTH + 2) + 'abcdef1234567890';
+        const expectedResult = '0xabcdef1234567890';
+        const results = ['1', rawResult];
+        mirrorNodeAdapterMock.getContractResults.mockResolvedValue(results);
+
+        await expect(
+          service.getTransactionResult({
+            res: transactionResponse,
+            className: CreateBondCommandHandler.name,
+            position,
+            numberOfResultsItems,
+          }),
+        ).resolves.toBe(expectedResult);
+
         expect(mirrorNodeAdapterMock.getContractResults).toHaveBeenCalledWith(
           transactionResponse.id,
           numberOfResultsItems,
