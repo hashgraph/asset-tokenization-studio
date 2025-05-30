@@ -216,6 +216,7 @@ import {
 import ValidationService from '../../../../../../service/ValidationService.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import SecurityService from '../../../../../../service/security/SecurityService.js';
 
 @CommandHandler(CancelClearingOperationByPartitionCommand)
 export class CancelClearingOperationByPartitionCommandHandler
@@ -223,13 +224,15 @@ export class CancelClearingOperationByPartitionCommandHandler
 {
   constructor(
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
+    @lazyInject(SecurityService)
+    private readonly securityService: SecurityService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -244,6 +247,7 @@ export class CancelClearingOperationByPartitionCommandHandler
     } = command;
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
+    const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
       await this.contractService.getContractEvmAddress(securityId);
@@ -254,13 +258,13 @@ export class CancelClearingOperationByPartitionCommandHandler
 
     await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
-
     await this.validationService.checkRole(
       SecurityRole._CLEARING_VALIDATOR_ROLE,
       account.id.toString(),
       securityId,
     );
+
+    await this.validationService.checkMultiPartition(security, partitionId);
 
     const res = await handler.cancelClearingOperationByPartition(
       securityEvmAddress,

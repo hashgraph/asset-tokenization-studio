@@ -203,90 +203,112 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import { createFixture } from '../config';
+import { ConnectCommand } from '../../../src/app/usecase/command/network/connect/ConnectCommand';
+import { SupportedWallets } from '../../../src/domain/context/network/Wallet';
+import DfnsSettings from '../../../src/core/settings/custodialWalletSettings/DfnsSettings';
+import FireblocksSettings from '../../../src/core/settings/custodialWalletSettings/FireblocksSettings';
+import AWSKMSSettings from '../../../src/core/settings/custodialWalletSettings/AWSKMSSettings';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
+import HWCSettings from '../../../src/core/settings/walletConnect/HWCSettings';
+import { SetConfigurationCommand } from 'app/usecase/command/network/setConfiguration/SetConfigurationCommand';
+import { SetNetworkCommand } from 'app/usecase/command/network/setNetwork/SetNetworkCommand';
+import { MirrorNode } from 'domain/context/network/MirrorNode';
+import { JsonRpcRelay } from 'domain/context/network/JsonRpcRelay';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
-
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkClearingActivated(securityId);
-
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
-
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
+export const DfnsSettingsFixture = createFixture<DfnsSettings>((settings) => {
+  settings.serviceAccountSecretKey.faker((faker) => faker.string.uuid()),
+    settings.serviceAccountCredentialId.faker((faker) => faker.string.uuid()),
+    settings.serviceAccountAuthToken.faker((faker) => faker.string.uuid()),
+    settings.appOrigin.faker((faker) => faker.internet.url()),
+    settings.appId.faker((faker) => faker.string.uuid()),
+    settings.baseUrl.faker((faker) => faker.internet.url()),
+    settings.walletId.faker((faker) => faker.string.uuid()),
+    settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value),
+    settings.publicKey.faker((faker) =>
+      faker.string.hexadecimal({ length: 40, casing: 'lower', prefix: '0x' }),
     );
+});
 
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
-    );
+export const FireblocksSettingsFixture = createFixture<FireblocksSettings>(
+  (settings) => {
+    settings.apiKey.faker((faker) => faker.string.uuid()),
+      settings.apiSecretKey.faker((faker) => faker.string.alphanumeric(32)),
+      settings.baseUrl.faker((faker) => faker.internet.url()),
+      settings.assetId.faker((faker) => faker.string.alphanumeric(8)),
+      settings.vaultAccountId.faker((faker) => faker.string.numeric(6)),
+      settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
 
-    await this.validationService.checkMultiPartition(security, partitionId);
-
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
-
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
+export const AWSKMSSettingsFixture = createFixture<AWSKMSSettings>(
+  (settings) => {
+    settings.awsAccessKeyId.faker((faker) => faker.string.alphanumeric(20)),
+      settings.awsSecretAccessKey.faker((faker) =>
+        faker.string.alphanumeric(40),
       ),
-    );
-  }
-}
+      settings.awsRegion.faker((faker) =>
+        faker.helpers.arrayElement(['us-east-1', 'us-west-2', 'eu-west-1']),
+      ),
+      settings.awsKmsKeyId.faker((faker) => faker.string.uuid()),
+      settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const HWCSettingsFixture = createFixture<HWCSettings>((settings) => {
+  settings.projectId.faker((faker) => faker.string.uuid()),
+    settings.dappName.faker((faker) => faker.company.name()),
+    settings.dappDescription.faker((faker) => faker.lorem.sentence()),
+    settings.dappURL.faker((faker) => faker.internet.url()),
+    settings.dappIcons.faker((faker) => [faker.image.url(), faker.image.url()]);
+});
+
+export const ConnectCommandFixture = createFixture<ConnectCommand>(
+  (command) => {
+    command.environment.faker((faker) =>
+      faker.helpers.arrayElement(['testnet', 'previewnet', 'mainnet', 'local']),
+    ),
+      command.wallet.faker((faker) =>
+        faker.helpers.arrayElement(Object.values(SupportedWallets)),
+      ),
+      command.HWCSettings?.as(() => HWCSettingsFixture.create()),
+      command.custodialSettings?.faker((faker) =>
+        faker.helpers.arrayElement([
+          DfnsSettingsFixture.create(),
+          FireblocksSettingsFixture.create(),
+          AWSKMSSettingsFixture.create(),
+        ]),
+      );
+  },
+);
+
+export const SetConfigurationCommandFixture =
+  createFixture<SetConfigurationCommand>((command) => {
+    command.factoryAddress.as(() => HederaIdPropsFixture.create().value),
+      command.resolverAddress.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const MirrorNodeFixture = createFixture<MirrorNode>((node) => {
+  node.baseUrl.faker((faker) => faker.internet.url()),
+    node.name?.faker((faker) => faker.company.name()),
+    node.apiKey?.faker((faker) => faker.string.alphanumeric(32)),
+    node.headerName?.faker((faker) => faker.string.alpha({ length: 10 }));
+});
+
+export const JsonRpcRelayFixture = createFixture<JsonRpcRelay>((relay) => {
+  relay.baseUrl.faker((faker) => faker.internet.url()),
+    relay.name?.faker((faker) => faker.company.name()),
+    relay.apiKey?.faker((faker) => faker.string.alphanumeric(32)),
+    relay.headerName?.faker((faker) => faker.string.alpha({ length: 10 }));
+});
+
+export const SetNetworkCommandFixture = createFixture<SetNetworkCommand>(
+  (command) => {
+    command.environment.faker((faker) =>
+      faker.helpers.arrayElement(['testnet', 'previewnet', 'mainnet', 'local']),
+    ),
+      command.mirrorNode.as(() => MirrorNodeFixture.create()),
+      command.rpcNode.as(() => JsonRpcRelayFixture.create()),
+      command.consensusNodes?.faker((faker) => faker.internet.url());
+  },
+);

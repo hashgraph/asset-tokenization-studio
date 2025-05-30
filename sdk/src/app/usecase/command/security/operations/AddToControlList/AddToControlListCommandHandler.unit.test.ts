@@ -203,90 +203,88 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/AccountService.js';
 import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import { AddToControlListCommandHandler } from './AddToControlListCommandHandler.js';
+import {
+  AddToControlListCommand,
+  AddToControlListCommandResponse,
+} from './AddToControlListCommand.js';
+import { AddToControlListCommandFixture } from '../../../../../../../__tests__/fixtures/security/OperationsFixture.js';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+describe('AddToControlListCommandHandler', () => {
+  let handler: AddToControlListCommandHandler;
+  let command: AddToControlListCommand;
 
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
 
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkClearingActivated(securityId);
-
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
-
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
+  beforeEach(() => {
+    handler = new AddToControlListCommandHandler(
+      accountServiceMock,
+      contractServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
     );
+    command = AddToControlListCommandFixture.create();
+  });
 
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
-    );
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+  describe('execute', () => {
+    it('should successfully add to control list', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+      transactionServiceMock.getHandler().addToControlList.mockResolvedValue({
+        id: transactionId,
+      });
 
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
+      const result = await handler.execute(command);
 
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
-  }
-}
+      expect(result).toBeInstanceOf(AddToControlListCommandResponse);
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().addToControlList,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(
+        validationServiceMock.checkAccountInControlList,
+      ).toHaveBeenCalledWith(command.securityId, command.targetId, true);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        1,
+        command.securityId,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+        command.targetId,
+      );
+
+      expect(
+        transactionServiceMock.getHandler().addToControlList,
+      ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
+    });
+  });
+});

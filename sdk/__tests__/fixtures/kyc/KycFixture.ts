@@ -203,90 +203,37 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { createFixture } from '../config';
+import { GrantKycCommand } from '../../../src/app/usecase/command/security/kyc/grantKyc/GrantKycCommand';
+import { SignedCredential } from '@terminal3/vc_core';
+import { RevokeKycCommand } from '../../../src/app/usecase/command/security/kyc/revokeKyc/RevokeKycCommand';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+export const GrantKycCommandFixture = createFixture<GrantKycCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.vcBase64.faker((faker) => faker.string.alphanumeric);
+  },
+);
 
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkClearingActivated(securityId);
-
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
-
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
+export const SignedCredentialFixture = createFixture<SignedCredential>(
+  (credential) => {
+    credential.id.faker((faker) => faker.string.uuid());
+    let validFrom: Date;
+    credential.validFrom?.faker((faker) => {
+      validFrom = faker.date.future();
+      return validFrom.getTime().toString();
+    });
+    credential.validUntil?.faker((faker) =>
+      faker.date.future({ refDate: validFrom }).getTime().toString(),
     );
+  },
+);
 
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
-    );
-
-    await this.validationService.checkMultiPartition(security, partitionId);
-
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
-
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
-  }
-}
+export const RevokeKycCommandFixture = createFixture<RevokeKycCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+  },
+);

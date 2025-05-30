@@ -203,90 +203,77 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import { createMock } from '@golevelup/ts-jest';
+import TransactionService from '../../../../service/transaction/TransactionService.js';
+import { ConnectCommandHandler } from './ConnectCommandHandler.js';
+import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand.js';
+import { ConnectCommandFixture } from '../../../../../../__tests__/fixtures/network/NetworkFixture.js';
+import TransactionAdapter from '../../../../../../src/port/out/TransactionAdapter.js';
+import Account from '../../../../../../src/domain/context/account/Account.js';
+import { AccountPropsFixture } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+describe('ConnectCommandHandler', () => {
+  let handler: ConnectCommandHandler;
+  let command: ConnectCommand;
 
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+  const transactionAdapterMock = createMock<TransactionAdapter>();
+  const account = new Account(AccountPropsFixture.create());
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+  beforeEach(() => {
+    handler = new ConnectCommandHandler();
+    command = ConnectCommandFixture.create();
 
-    await this.validationService.checkPause(securityId);
+    transactionAdapterMock.register.mockResolvedValue({ account });
+    jest
+      .spyOn(TransactionService, 'getHandlerClass')
+      .mockReturnValue(transactionAdapterMock);
+  });
 
-    await this.validationService.checkClearingActivated(securityId);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
+  describe('execute', () => {
+    it('should successfully connect with custodial settings', async () => {
+      command = ConnectCommandFixture.omit('HWCSettings').create();
+      const result = await handler.execute(command);
 
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      expect(result).toBeInstanceOf(ConnectCommandResponse);
+      expect(transactionAdapterMock.register).toHaveBeenCalledTimes(1);
+      expect(transactionAdapterMock.register).toHaveBeenCalledWith(
+        command.custodialSettings,
+        false,
+      );
+      expect(result.walletType).toEqual(command.wallet);
+      expect(result.payload).toEqual({ account });
+    });
+    it('should successfully connect with HWC settings', async () => {
+      command = ConnectCommandFixture.omit('custodialSettings').create();
+      const result = await handler.execute(command);
 
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
-    );
+      expect(result).toBeInstanceOf(ConnectCommandResponse);
+      expect(transactionAdapterMock.register).toHaveBeenCalledTimes(1);
+      expect(transactionAdapterMock.register).toHaveBeenCalledWith(
+        command.HWCSettings,
+        false,
+      );
+      expect(result.walletType).toEqual(command.wallet);
+      expect(result.payload).toEqual({ account });
+    });
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+    it('should successfully connect without custodial settings and HWC', async () => {
+      command = ConnectCommandFixture.omit('HWCSettings').create();
+      command = { ...command, custodialSettings: undefined };
+      const result = await handler.execute(command);
 
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
-
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
-  }
-}
+      expect(result).toBeInstanceOf(ConnectCommandResponse);
+      expect(transactionAdapterMock.register).toHaveBeenCalledTimes(1);
+      expect(transactionAdapterMock.register).toHaveBeenCalledWith(
+        command.account,
+        false,
+      );
+      expect(result.walletType).toEqual(command.wallet);
+      expect(result.payload).toEqual({ account });
+    });
+  });
+});

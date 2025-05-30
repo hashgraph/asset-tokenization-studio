@@ -203,90 +203,92 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { createFixture } from '../config';
+import ContractId from '../../../src/domain/context/contract/ContractId';
 import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+  ContractIdPropFixture,
+  HederaIdPropsFixture,
+} from '../shared/DataFixture';
+import { SecurityPropsFixture } from '../shared/SecurityFixture';
+import { CreateEquityCommand } from 'app/usecase/command/equity/create/CreateEquityCommand';
+import { SetScheduledBalanceAdjustmentCommand } from 'app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
+import { SetDividendsCommand } from 'app/usecase/command/equity/dividends/set/SetDividendsCommand';
+import { SetVotingRightsCommand } from 'app/usecase/command/equity/votingRights/set/SetVotingRightsCommand';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
-
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkClearingActivated(securityId);
-
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
-
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
+export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
+  (command) => {
+    command.security.fromFixture(SecurityPropsFixture);
+    command.currency.faker((faker) => faker.finance.currencyCode());
+    command.nominalValue.faker((faker) =>
+      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
-
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
+    command.votingRight.faker((faker) => faker.datatype.boolean());
+    command.informationRight.faker((faker) => faker.datatype.boolean());
+    command.liquidationRight.faker((faker) => faker.datatype.boolean());
+    command.subscriptionRight.faker((faker) => faker.datatype.boolean());
+    command.conversionRight.faker((faker) => faker.datatype.boolean());
+    command.redemptionRight.faker((faker) => faker.datatype.boolean());
+    command.putRight.faker((faker) => faker.datatype.boolean());
+    command.dividendRight.faker((faker) => faker.datatype.boolean());
+    command.currency.faker((faker) =>
+      faker.string.hexadecimal({ length: 6, casing: 'lower', prefix: '0x' }),
     );
-
-    await this.validationService.checkMultiPartition(security, partitionId);
-
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
+    command.factory?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
     );
-
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
+    command.resolver?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
     );
-  }
-}
+    command.configId?.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, casing: 'lower', prefix: '0x' }),
+    );
+    command.configVersion?.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
+    command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
+    command.externalControlLists?.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+  },
+);
+
+export const SetScheduledBalanceAdjustmentCommandFixture =
+  createFixture<SetScheduledBalanceAdjustmentCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.executionDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.factor.faker((faker) => faker.number.int().toString());
+    command.decimals.faker((faker) => faker.number.int().toString());
+  });
+
+export const SetDividendsCommandFixture = createFixture<SetDividendsCommand>(
+  (command) => {
+    command.address.as(() => HederaIdPropsFixture.create().value);
+    let recordDate: Date;
+    command.recordDate.faker((faker) => {
+      recordDate = faker.date.future();
+      return recordDate.getTime().toString();
+    });
+    command.executionDate.faker((faker) => {
+      return faker.date.future({ refDate: recordDate }).getTime().toString();
+    });
+    command.amount.faker((faker) => faker.number.int().toString());
+  },
+);
+
+export const SetVotingRightsCommandFixture =
+  createFixture<SetVotingRightsCommand>((command) => {
+    command.address.as(() => HederaIdPropsFixture.create().value);
+    command.recordDate.faker((faker) => {
+      faker.date.future().getTime().toString();
+    });
+    command.data.faker((faker) => {
+      return faker.string.hexadecimal({
+        length: 64,
+        casing: 'lower',
+        prefix: '0x',
+      });
+    });
+  });

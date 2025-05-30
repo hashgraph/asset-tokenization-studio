@@ -224,15 +224,15 @@ export class ClearingRedeemByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -263,11 +263,13 @@ export class ClearingRedeemByPartitionCommandHandler
       amountBd,
     );
 
+    await this.validationService.checkMultiPartition(security, partitionId);
+
     const res = await handler.clearingRedeemByPartition(
       securityEvmAddress,
       partitionId,
       amountBd,
-      BigDecimal.fromString(expirationDate),
+      BigDecimal.fromString(expirationDate.substring(0, 10)),
       securityId,
     );
 

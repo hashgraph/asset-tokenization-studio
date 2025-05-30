@@ -218,6 +218,6 @@ export class DisconnectCommandHandler
   async execute(): Promise<DisconnectCommandResponse> {
     const handler = Injectable.resolveTransactionHandler();
     const res = await handler.stop();
-    return Promise.resolve({ payload: res });
+    return new DisconnectCommandResponse(res);
   }
 }

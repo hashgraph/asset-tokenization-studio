@@ -293,7 +293,7 @@ export default class TransactionService extends Service {
   }): Promise<string> {
     if (!res.id) throw new EmptyResponse(className);
 
-    if (res.response && result) {
+    if (result) {
       return result;
     }
     const results = await this.mirrorNodeAdapter.getContractResults(

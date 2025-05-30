@@ -203,90 +203,72 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { createMock } from '@golevelup/ts-jest';
+import TransactionService from '../../../../service/transaction/TransactionService.js';
+import ContractService from '../../../../service/ContractService.js';
 import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import { UpdateConfigCommandFixture } from '../../../../../../__tests__/fixtures/management/ManagementFixture.js';
+import {
+  UpdateConfigVersionCommand,
+  UpdateConfigVersionCommandResponse,
+} from './updateConfigVersionCommand.js';
+import { UpdateConfigVersionCommandHandler } from './updateConfigVersionCommandHandler.js';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+describe('UpdateConfigVersionCommandHandler', () => {
+  let handler: UpdateConfigVersionCommandHandler;
+  let command: UpdateConfigVersionCommand;
+  const transactionServiceMock = createMock<TransactionService>();
+  const contractServiceMock = createMock<ContractService>();
 
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+  const transactionId = TransactionIdFixture.create().id;
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkClearingActivated(securityId);
-
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
-
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
+  beforeEach(() => {
+    handler = new UpdateConfigVersionCommandHandler(
+      transactionServiceMock,
+      contractServiceMock,
     );
+    command = UpdateConfigCommandFixture.create();
+  });
 
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
-    );
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+  describe('execute', () => {
+    it('should successfully update configuration version', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
 
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
+      transactionServiceMock
+        .getHandler()
+        .updateConfigVersion.mockResolvedValue({
+          id: transactionId,
+        });
 
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
-  }
-}
+      const result = await handler.execute(command);
+
+      expect(result).toBeInstanceOf(UpdateConfigVersionCommandResponse);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(
+        transactionServiceMock.getHandler().updateConfigVersion,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().updateConfigVersion,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        command.configVersion,
+        command.securityId,
+      );
+      expect(result.transactionId).toBe(transactionId);
+    });
+  });
+});

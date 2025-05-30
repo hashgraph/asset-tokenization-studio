@@ -203,90 +203,114 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { createMock } from '@golevelup/ts-jest';
+import { SetScheduledBalanceAdjustmentCommandHandler } from './SetScheduledBalanceAdjustmentCommandHandler.js';
 import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+  SetScheduledBalanceAdjustmentCommand,
+  SetScheduledBalanceAdjustmentCommandResponse,
+} from './SetScheduledBalanceAdjustmentCommand.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import ContractService from '../../../../../service/ContractService.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import {
+  AccountPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import AccountService from '../../../../../service/AccountService.js';
+import { SetScheduledBalanceAdjustmentCommandFixture } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { faker } from '@faker-js/faker/.';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+describe('SetScheduledBalanceAdjustmentCommandHandler', () => {
+  let handler: SetScheduledBalanceAdjustmentCommandHandler;
+  let command: SetScheduledBalanceAdjustmentCommand;
+  const transactionServiceMock = createMock<TransactionService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+  const validationServiceMock = createMock<ValidationService>();
 
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+  const transactionId = TransactionIdFixture.create().id;
+  const account = new Account(AccountPropsFixture.create());
+  const evmAddress = new EvmAddress(account.evmAddress!);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+  const balanceAdjustmentId = '0x' + faker.number.hex(32);
 
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkClearingActivated(securityId);
-
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
-
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
+  beforeEach(() => {
+    handler = new SetScheduledBalanceAdjustmentCommandHandler(
+      transactionServiceMock,
+      accountServiceMock,
+      validationServiceMock,
+      contractServiceMock,
     );
+    command = SetScheduledBalanceAdjustmentCommandFixture.create();
+  });
 
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
-    );
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+  describe('execute', () => {
+    it('should successfully set scheduled balance adjustment', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+      validationServiceMock.checkMaturityDate.mockResolvedValue(undefined);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
 
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
+      transactionServiceMock
+        .getHandler()
+        .setScheduledBalanceAdjustment.mockResolvedValue({
+          id: transactionId,
+        });
 
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
-  }
-}
+      transactionServiceMock.getTransactionResult.mockResolvedValue(
+        balanceAdjustmentId,
+      );
+
+      const result = await handler.execute(command);
+
+      expect(result).toBeInstanceOf(
+        SetScheduledBalanceAdjustmentCommandResponse,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+      expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+        SecurityRole._CORPORATEACTIONS_ROLE,
+        evmAddress.toString(),
+        command.securityId,
+      );
+      expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith(
+        expect.objectContaining({
+          res: { id: transactionId },
+          className: SetScheduledBalanceAdjustmentCommandHandler.name,
+          position: 1,
+          numberOfResultsItems: 2,
+        }),
+      );
+      expect(
+        transactionServiceMock.getHandler().setScheduledBalanceAdjustment,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().setScheduledBalanceAdjustment,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        BigDecimal.fromString(command.executionDate),
+        BigDecimal.fromString(command.factor),
+        BigDecimal.fromString(command.decimals),
+        command.securityId,
+      );
+      expect(result.payload).toBe(parseInt(balanceAdjustmentId, 16));
+      expect(result.transactionId).toBe(transactionId);
+    });
+  });
+});

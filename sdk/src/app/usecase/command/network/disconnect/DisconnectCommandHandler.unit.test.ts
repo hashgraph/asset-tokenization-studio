@@ -203,90 +203,37 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import { createMock } from '@golevelup/ts-jest';
+import TransactionAdapter from '../../../../../port/out/TransactionAdapter.js';
+import { DisconnectCommandHandler } from './DisconnectCommandHandler.js';
+import { DisconnectCommandResponse } from './DisconnectCommand.js';
+import Injectable from '../../../../../core/Injectable.js';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+describe('DisconnectCommandHandler', () => {
+  let handler: DisconnectCommandHandler;
 
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+  const transactionAdapterMock = createMock<TransactionAdapter>();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+  beforeEach(() => {
+    handler = new DisconnectCommandHandler();
 
-    await this.validationService.checkPause(securityId);
+    transactionAdapterMock.stop.mockResolvedValue(true);
+    jest
+      .spyOn(Injectable, 'resolveTransactionHandler')
+      .mockReturnValue(transactionAdapterMock);
+  });
 
-    await this.validationService.checkClearingActivated(securityId);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
+  describe('execute', () => {
+    it('should successfully disconnect', async () => {
+      const result = await handler.execute();
 
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
-    );
-
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
-    );
-
-    await this.validationService.checkMultiPartition(security, partitionId);
-
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
-
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
-  }
-}
+      expect(result).toBeInstanceOf(DisconnectCommandResponse);
+      expect(transactionAdapterMock.stop).toHaveBeenCalledTimes(1);
+      expect(result.payload).toEqual(true);
+    });
+  });
+});

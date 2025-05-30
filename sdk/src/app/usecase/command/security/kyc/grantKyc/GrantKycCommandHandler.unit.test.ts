@@ -203,90 +203,125 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/AccountService.js';
 import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+  AccountPropsFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../service/ValidationService.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import { GrantKycCommandHandler } from './GrantKycCommandHandler.js';
+import { GrantKycCommand, GrantKycCommandResponse } from './GrantKycCommand.js';
+import {
+  GrantKycCommandFixture,
+  SignedCredentialFixture,
+} from '../../../../../../../__tests__/fixtures/kyc/KycFixture.js';
+import { Terminal3Vc } from '../../../../../../domain/context/kyc/Terminal3.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+const { setVerificationValid } = require('@terminal3/verify_vc');
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+describe('GrantKycCommandHandler', () => {
+  let handler: GrantKycCommandHandler;
+  let command: GrantKycCommand;
 
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const account = new Account(AccountPropsFixture.create());
+  const transactionId = TransactionIdFixture.create().id;
+  const signedCredential = SignedCredentialFixture.create();
 
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkClearingActivated(securityId);
-
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
-
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
+  beforeEach(() => {
+    handler = new GrantKycCommandHandler(
+      accountServiceMock,
+      contractServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
     );
+    command = GrantKycCommandFixture.create();
+    jest.spyOn(Terminal3Vc, 'vcFromBase64').mockReturnValue(signedCredential);
+  });
 
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
-    );
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('should fail with InvalidVc', async () => {
+        setVerificationValid(false);
+        await expect(handler.execute(command)).rejects.toThrow(
+          'The provided VC is not valid',
+        );
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully grant kyc', async () => {
+        setVerificationValid(true);
 
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        validationServiceMock.checkValidVc.mockResolvedValue([
+          evmAddress.toString(),
+          signedCredential,
+        ]);
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        transactionServiceMock.getHandler().grantKyc.mockResolvedValue({
+          id: transactionId,
+        });
 
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
-  }
-}
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(GrantKycCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(
+          transactionServiceMock.getHandler().grantKyc,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._KYC_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(1, command.securityId);
+
+        expect(
+          transactionServiceMock.getHandler().grantKyc,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          evmAddress,
+          signedCredential.id,
+          BigDecimal.fromString(
+            (signedCredential.validFrom as string).substring(0, 10),
+          ),
+          BigDecimal.fromString(
+            (signedCredential.validUntil as string).substring(0, 10),
+          ),
+          evmAddress,
+        );
+      });
+    });
+  });
+});

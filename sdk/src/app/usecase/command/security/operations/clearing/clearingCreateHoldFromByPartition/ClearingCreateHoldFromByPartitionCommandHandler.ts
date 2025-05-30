@@ -224,15 +224,15 @@ export class ClearingCreateHoldFromByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -271,6 +271,8 @@ export class ClearingCreateHoldFromByPartitionCommandHandler
 
     await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
+    await this.validationService.checkMultiPartition(security, partitionId);
+
     const res = await handler.clearingCreateHoldFromByPartition(
       securityEvmAddress,
       partitionId,
@@ -278,8 +280,8 @@ export class ClearingCreateHoldFromByPartitionCommandHandler
       amountBd,
       sourceEvmAddress,
       targetEvmAddress,
-      BigDecimal.fromString(clearingExpirationDate),
-      BigDecimal.fromString(holdExpirationDate),
+      BigDecimal.fromString(clearingExpirationDate.substring(0, 10)),
+      BigDecimal.fromString(holdExpirationDate.substring(0, 10)),
       securityId,
     );
 

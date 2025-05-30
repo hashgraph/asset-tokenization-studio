@@ -203,90 +203,221 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { createMock } from '@golevelup/ts-jest';
+import { CreateEquityCommandHandler } from './CreateEquityCommandHandler.js';
 import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+  CreateEquityCommand,
+  CreateEquityCommandResponse,
+} from './CreateEquityCommand.js';
+import TransactionService from '../../../../service/transaction/TransactionService.js';
+import ContractService from '../../../../service/ContractService.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import {
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  HederaIdZeroAddressFixture,
+  TransactionIdFixture,
+} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import AccountService from '../../../../service/AccountService.js';
+import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import NetworkService from '../../../../service/NetworkService.js';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { CreateEquityCommandFixture } from '../../../../../../__tests__/fixtures/equity/EquityFixture.js';
+import { InvalidRequest } from '../../error/InvalidRequest.js';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+describe('CreateEquityCommandHandler', () => {
+  let handler: CreateEquityCommandHandler;
+  let command: CreateEquityCommand;
 
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+  const transactionServiceMock = createMock<TransactionService>();
+  const networkServiceMock = createMock<NetworkService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalPauseEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalControlEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalKycEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const transactionId = TransactionIdFixture.create().id;
+  const hederaId = HederaIdPropsFixture.create().value;
+  const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
 
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkClearingActivated(securityId);
-
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
-
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
+  beforeEach(() => {
+    handler = new CreateEquityCommandHandler(
+      transactionServiceMock,
+      networkServiceMock,
+      mirrorNodeAdapterMock,
+      contractServiceMock,
+      accountServiceMock,
     );
+    command = CreateEquityCommandFixture.create();
+  });
 
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
-    );
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('should throw InvalidRequest if factory is not provided', async () => {
+        const commandWithNotFactory = {
+          ...command,
+          factory: undefined,
+        };
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+        await expect(handler.execute(commandWithNotFactory)).rejects.toThrow(
+          new InvalidRequest('Factory not found in request'),
+        );
+      });
 
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
+      it('should throw InvalidRequest if resolver is not provided', async () => {
+        const commandWithNotResolver = {
+          ...command,
+          resolver: undefined,
+        };
 
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
-  }
-}
+        await expect(handler.execute(commandWithNotResolver)).rejects.toThrow(
+          new InvalidRequest('Resolver not found in request'),
+        );
+      });
+
+      it('should throw InvalidRequest if configId is not provided', async () => {
+        const commandWithNotConfigId = {
+          ...command,
+          configId: undefined,
+        };
+
+        await expect(handler.execute(commandWithNotConfigId)).rejects.toThrow(
+          new InvalidRequest('Config Id not found in request'),
+        );
+      });
+
+      it('should throw InvalidRequest if configVersion is not provided', async () => {
+        const commandWithNotConfigVersion = {
+          ...command,
+          configVersion: undefined,
+        };
+
+        await expect(
+          handler.execute(commandWithNotConfigVersion),
+        ).rejects.toThrow(
+          new InvalidRequest('Config Version not found in request'),
+        );
+      });
+    });
+
+    describe('success cases', () => {
+      it('should successfully create an equity with equityAddress in response', async () => {
+        contractServiceMock.getContractEvmAddress
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress);
+        contractServiceMock.getEvmAddressesFromHederaIds
+          .mockResolvedValueOnce([externalPauseEvmAddress])
+          .mockResolvedValueOnce([externalControlEvmAddress])
+          .mockResolvedValueOnce([externalKycEvmAddress]);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+
+        transactionServiceMock.getHandler().createEquity.mockResolvedValue({
+          id: transactionId,
+          response: { equityAddress: evmAddress.value },
+        });
+
+        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(
+          hederaId,
+        );
+
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          evmAddress.value,
+        );
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateEquityCommandResponse);
+        expect(result.securityId.value).toBe(hederaId);
+        expect(result.transactionId).toBe(transactionId);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(
+          contractServiceMock.getEvmAddressesFromHederaIds,
+        ).toHaveBeenCalledTimes(3);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          transactionServiceMock.getHandler().createEquity,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mirrorNodeAdapterMock.getHederaIdfromContractAddress,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createEquity,
+        ).toHaveBeenCalledWith(
+          expect.objectContaining(command.security),
+          expect.objectContaining({
+            votingRight: command.votingRight,
+            informationRight: command.informationRight,
+            liquidationRight: command.liquidationRight,
+            subscriptionRight: command.subscriptionRight,
+            conversionRight: command.conversionRight,
+            redemptionRight: command.redemptionRight,
+            putRight: command.putRight,
+            dividendRight: command.dividendRight,
+            currency: command.currency,
+            nominalValue: BigDecimal.fromString(command.nominalValue),
+          }),
+          evmAddress,
+          evmAddress,
+          command.configId,
+          command.configVersion,
+          [externalPauseEvmAddress],
+          [externalControlEvmAddress],
+          [externalKycEvmAddress],
+          evmAddress,
+          command.factory?.toString(),
+        );
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            res: {
+              id: transactionId,
+              response: { equityAddress: evmAddress.value },
+            },
+            result: evmAddress.value,
+            className: CreateEquityCommandHandler.name,
+            position: 0,
+            numberOfResultsItems: 1,
+          }),
+        );
+      });
+
+      it('should handle error and return fallback response if response code is 1', async () => {
+        mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
+          id: hederaId,
+          evmAddress: evmAddress.value,
+        });
+
+        transactionServiceMock.getHandler().createEquity.mockResolvedValue({
+          id: transactionId,
+          response: 1,
+        });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateEquityCommandResponse);
+        expect(result.securityId.toString()).toBe(hederaIdZeroAddress);
+        expect(result.transactionId.toString()).toBe(transactionId);
+      });
+    });
+  });
+});

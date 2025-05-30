@@ -203,90 +203,89 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+  HederaIdPropsFixture,
+  PartitionIdFixture,
+} from '../shared/DataFixture';
+import { createFixture } from '../config';
+import { AddToControlListCommand } from '../../../src/app/usecase/command/security/operations/AddToControlList/AddToControlListCommand';
+import { SetMaxSupplyCommand } from '../../../src/app/usecase/command/security/operations/cap/SetMaxSupplyCommand';
+import { ActivateClearingCommand } from '../../../src/app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommand';
+import { ApproveClearingOperationByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
+import { ClearingOperationType } from '../../../src/domain/context/security/Clearing';
+import { ClearingCreateHoldFromByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand';
+import { ClearingRedeemByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+export const AddToControlListCommandFixture =
+  createFixture<AddToControlListCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
 
-  async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
-
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-
-    await this.validationService.checkPause(securityId);
-
-    await this.validationService.checkClearingActivated(securityId);
-
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
-
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
+export const SetMaxSupplyCommandFixture = createFixture<SetMaxSupplyCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.maxSupply.faker((faker) =>
+      faker.number.int({ min: 1, max: 1000000 }).toString(),
     );
+  },
+);
 
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
+export const ActivateClearingCommandFixture =
+  createFixture<ActivateClearingCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const ApproveClearingOperationByPartitionCommandFixture =
+  createFixture<ApproveClearingOperationByPartitionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.clearingId.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }),
     );
+    command.clearingOperationType.faker((faker) => {
+      const values = Object.values(ClearingOperationType).filter(
+        (v) => typeof v === 'number',
+      ) as number[];
+      return faker.helpers.arrayElement(values);
+    });
+  });
 
-    await this.validationService.checkMultiPartition(security, partitionId);
-
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
+export const ClearingCreateHoldByPartitionCommandFixture =
+  createFixture<ClearingCreateHoldFromByPartitionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.escrow.as(() => HederaIdPropsFixture.create().value);
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
     );
-
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
+    let clearingExpirationDate: Date;
+    command.clearingExpirationDate.faker((faker) => {
+      clearingExpirationDate = faker.date.future();
+      return clearingExpirationDate.getTime().toString();
+    });
+    command.holdExpirationDate.faker((faker) =>
+      faker.date
+        .future({ refDate: clearingExpirationDate })
+        .getTime()
+        .toString(),
     );
-  }
-}
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const ClearingRedeemByPartitionCommandHandlerFixture =
+  createFixture<ClearingRedeemByPartitionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.expirationDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+  });
