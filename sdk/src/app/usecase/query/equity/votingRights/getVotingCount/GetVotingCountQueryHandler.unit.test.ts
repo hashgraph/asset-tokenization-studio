@@ -212,10 +212,11 @@ import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
+import { GetVotingCountQueryFixture } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
 import {
-  GetVotingCountQueryFixture,
-} from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
-import { GetVotingCountQuery, GetVotingCountQueryResponse } from './GetVotingCountQuery.js';
+  GetVotingCountQuery,
+  GetVotingCountQueryResponse,
+} from './GetVotingCountQuery.js';
 import { GetVotingCountQueryHandler } from './GetVotingCountQueryHandler.js';
 import { GetVotingCountQueryError } from './error/GetVotingCountQueryError.js';
 

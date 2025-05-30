@@ -212,7 +212,10 @@ import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import { GetKycAccountsCountQuery, GetKycAccountsCountQueryResponse } from './GetKycAccountsCountQuery.js';
+import {
+  GetKycAccountsCountQuery,
+  GetKycAccountsCountQueryResponse,
+} from './GetKycAccountsCountQuery.js';
 import { GetKycAccountsCountQueryHandler } from './GetKycAccountsCountQueryHandler.js';
 import { GetKycAccountsCountQueryFixture } from '../../../../../../../__tests__/fixtures/kyc/KycFixture.js';
 import { GetKycAccountsCountQueryError } from './error/GetKycAccountsCountQueryError.js';
@@ -263,9 +266,7 @@ describe('GetKycAccountsCountQueryHandler', () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,
       );
-      queryAdapterServiceMock.getKycAccountsCount.mockResolvedValueOnce(
-        1,
-      );
+      queryAdapterServiceMock.getKycAccountsCount.mockResolvedValueOnce(1);
 
       const result = await handler.execute(query);
 
@@ -277,9 +278,10 @@ describe('GetKycAccountsCountQueryHandler', () => {
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.securityId,
       );
-      expect(
-        queryAdapterServiceMock.getKycAccountsCount,
-      ).toHaveBeenCalledWith(evmAddress, query.kycStatus);
+      expect(queryAdapterServiceMock.getKycAccountsCount).toHaveBeenCalledWith(
+        evmAddress,
+        query.kycStatus,
+      );
     });
   });
 });

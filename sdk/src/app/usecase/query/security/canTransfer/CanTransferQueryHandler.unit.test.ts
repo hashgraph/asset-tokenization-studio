@@ -214,9 +214,7 @@ import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../app/service/contract/ContractService.js';
 import AccountService from '../../../../../app/service/account/AccountService.js';
 import SecurityService from '../../../../../app/service/security/SecurityService.js';
-import {
-  CanTransferQueryFixture,
-} from '../../../../../../__tests__/fixtures/erc1400/ERC1400Fixture.js';
+import { CanTransferQueryFixture } from '../../../../../../__tests__/fixtures/erc1400/ERC1400Fixture.js';
 import { SecurityPropsFixture } from '../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';

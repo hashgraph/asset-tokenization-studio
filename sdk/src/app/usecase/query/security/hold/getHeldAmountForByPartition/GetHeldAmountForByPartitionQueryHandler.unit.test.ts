@@ -213,7 +213,10 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetHeldAmountForByPartitionQuery, GetHeldAmountForByPartitionQueryResponse } from './GetHeldAmountForByPartitionQuery.js';
+import {
+  GetHeldAmountForByPartitionQuery,
+  GetHeldAmountForByPartitionQueryResponse,
+} from './GetHeldAmountForByPartitionQuery.js';
 import { GetHeldAmountForByPartitionQueryHandler } from './GetHeldAmountForByPartitionQueryHandler.js';
 import { GetHeldAmountForByPartitionQueryFixture } from '../../../../../../../__tests__/fixtures/hold/HoldFixture.js';
 import { GetHeldAmountForByPartitionQueryError } from './error/GetHeldAmountForByPartitionQueryError.js';
@@ -278,9 +281,7 @@ describe('GetHeldAmountForByPartitionQueryHandler', () => {
 
       const result = await handler.execute(query);
 
-      expect(result).toBeInstanceOf(
-        GetHeldAmountForByPartitionQueryResponse,
-      );
+      expect(result).toBeInstanceOf(GetHeldAmountForByPartitionQueryResponse);
       expect(result.payload).toBe(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
         1,

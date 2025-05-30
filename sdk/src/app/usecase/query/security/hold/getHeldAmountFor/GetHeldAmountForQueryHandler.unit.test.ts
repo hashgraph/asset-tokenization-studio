@@ -213,7 +213,10 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetHeldAmountForQuery, GetHeldAmountForQueryResponse } from './GetHeldAmountForQuery.js';
+import {
+  GetHeldAmountForQuery,
+  GetHeldAmountForQueryResponse,
+} from './GetHeldAmountForQuery.js';
 import { GetHeldAmountForQueryHandler } from './GetHeldAmountForQueryHandler.js';
 import { GetHeldAmountForQueryError } from './error/GetHeldAmountForQueryError.js';
 import { GetHeldAmountForQueryFixture } from '../../../../../../../__tests__/fixtures/hold/HoldFixture.js';

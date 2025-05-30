@@ -213,7 +213,6 @@ import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js'
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../app/service/contract/ContractService.js';
 
-
 import { IsPausedQuery, IsPausedQueryResponse } from './IsPausedQuery.js';
 import { IsPausedQueryHandler } from './IsPausedQueryHandler.js';
 import { IsPausedQueryFixture } from '../../../../../../__tests__/fixtures/pause/PauseFixture.js';
@@ -275,9 +274,7 @@ describe('IsPausedQueryHandler', () => {
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.securityId,
       );
-      expect(queryAdapterServiceMock.isPaused).toHaveBeenCalledWith(
-        evmAddress,
-      );
+      expect(queryAdapterServiceMock.isPaused).toHaveBeenCalledWith(evmAddress);
     });
   });
 });

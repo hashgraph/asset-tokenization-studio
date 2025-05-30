@@ -213,11 +213,12 @@ import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js'
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../app/service/contract/ContractService.js';
 import AccountService from '../../../../../app/service/account/AccountService.js';
-import {
-  LockedBalanceOfQueryFixture,
-} from '../../../../../../__tests__/fixtures/lock/LockFixture.js';
+import { LockedBalanceOfQueryFixture } from '../../../../../../__tests__/fixtures/lock/LockFixture.js';
 import { LockedBalanceOfQueryHandler } from './LockedBalanceOfQueryHandler.js';
-import { LockedBalanceOfQuery, LockedBalanceOfQueryResponse } from './LockedBalanceOfQuery.js';
+import {
+  LockedBalanceOfQuery,
+  LockedBalanceOfQueryResponse,
+} from './LockedBalanceOfQuery.js';
 import SecurityService from '../../../../../app/service/security/SecurityService.js';
 import { LockedBalanceOfQueryError } from './error/LockedBalanceOfQueryError.js';
 import { Security } from '../../../../../domain/context/security/Security.js';

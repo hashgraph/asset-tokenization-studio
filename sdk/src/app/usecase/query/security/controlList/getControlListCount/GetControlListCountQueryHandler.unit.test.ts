@@ -278,9 +278,9 @@ describe('GetControlListCountQueryHandler', () => {
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.securityId,
       );
-      expect(
-        queryAdapterServiceMock.getControlListCount,
-      ).toHaveBeenCalledWith(evmAddress);
+      expect(queryAdapterServiceMock.getControlListCount).toHaveBeenCalledWith(
+        evmAddress,
+      );
     });
   });
 });

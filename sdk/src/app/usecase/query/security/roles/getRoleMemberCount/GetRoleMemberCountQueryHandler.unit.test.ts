@@ -215,7 +215,10 @@ import ContractService from '../../../../../../app/service/contract/ContractServ
 import { GetRoleMemberCountQueryFixture } from '../../../../../../../__tests__/fixtures/role/RoleFixture.js';
 import { GetRoleMemberCountQueryError } from './error/GetRoleMemberCountQueryError.js';
 import { GetRoleMemberCountQueryHandler } from './GetRoleMemberCountQueryHandler.js';
-import { GetRoleMemberCountQuery, GetRoleMemberCountQueryResponse } from './GetRoleMemberCountQuery.js';
+import {
+  GetRoleMemberCountQuery,
+  GetRoleMemberCountQueryResponse,
+} from './GetRoleMemberCountQuery.js';
 
 describe('GetRoleMemberCountQueryHandler', () => {
   let handler: GetRoleMemberCountQueryHandler;

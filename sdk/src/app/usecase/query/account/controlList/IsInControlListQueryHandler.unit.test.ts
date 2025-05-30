@@ -205,9 +205,7 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import AccountService from '../../../../../app/service/account/AccountService.js';
-import {
-  IsInControlListQueryFixture,
-} from '../../../../../../__tests__/fixtures/account/AccountFixture.js';
+import { IsInControlListQueryFixture } from '../../../../../../__tests__/fixtures/account/AccountFixture.js';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,

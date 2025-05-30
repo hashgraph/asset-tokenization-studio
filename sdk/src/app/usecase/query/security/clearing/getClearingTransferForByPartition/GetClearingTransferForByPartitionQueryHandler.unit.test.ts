@@ -222,11 +222,12 @@ import { Security } from '../../../../../../domain/context/security/Security.js'
 import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/account/AccountFixture.js';
-import {
-  ClearingTransfer,
-} from '../../../../../../domain/context/security/Clearing.js';
+import { ClearingTransfer } from '../../../../../../domain/context/security/Clearing.js';
 import { GetClearingTransferForByPartitionQueryError } from './error/GetClearingTransferForByPartitionQueryError.js';
-import { GetClearingTransferForByPartitionQuery, GetClearingTransferForByPartitionQueryResponse } from './GetClearingTransferForByPartitionQuery.js';
+import {
+  GetClearingTransferForByPartitionQuery,
+  GetClearingTransferForByPartitionQueryResponse,
+} from './GetClearingTransferForByPartitionQuery.js';
 import { GetClearingTransferForByPartitionQueryHandler } from './GetClearingTransferForByPartitionQueryHandler.js';
 
 describe('GetClearingTransferForByPartitionQueryHandler', () => {

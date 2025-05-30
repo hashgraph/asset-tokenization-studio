@@ -213,9 +213,7 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
-import {
-  GetClearedAmountForByPartitionQueryFixture,
-} from '../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
+import { GetClearedAmountForByPartitionQueryFixture } from '../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
 import { GetClearedAmountForByPartitionQueryHandler } from './GetClearedAmountForByPartitionQueryHandler.js';
 import {
   GetClearedAmountForByPartitionQuery,
@@ -277,7 +275,9 @@ describe('GetClearedAmountForByPartitionQueryHandler', () => {
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
         targetEvmAddress,
       );
-      queryAdapterServiceMock.getClearedAmountForByPartition.mockResolvedValueOnce(1);
+      queryAdapterServiceMock.getClearedAmountForByPartition.mockResolvedValueOnce(
+        1,
+      );
 
       const result = await handler.execute(query);
 
@@ -295,11 +295,9 @@ describe('GetClearedAmountForByPartitionQueryHandler', () => {
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
         query.targetId,
       );
-      expect(queryAdapterServiceMock.getClearedAmountForByPartition).toHaveBeenCalledWith(
-        evmAddress,
-        query.partitionId,
-        targetEvmAddress,
-      );
+      expect(
+        queryAdapterServiceMock.getClearedAmountForByPartition,
+      ).toHaveBeenCalledWith(evmAddress, query.partitionId, targetEvmAddress);
     });
   });
 });

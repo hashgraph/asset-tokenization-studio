@@ -212,15 +212,16 @@ import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import {
-  GetCouponForQueryFixture,
-} from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
+import { GetCouponForQueryFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
 import { GetCouponForQueryError } from './error/GetCouponForQueryError.js';
 import { GetCouponForQueryHandler } from './GetCouponForQueryHandler.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
 import { BigNumber } from 'ethers';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { GetCouponForQuery, GetCouponForQueryResponse } from './GetCouponForQuery.js';
+import {
+  GetCouponForQuery,
+  GetCouponForQueryResponse,
+} from './GetCouponForQuery.js';
 
 describe('GetCouponForQueryHandler', () => {
   let handler: GetCouponForQueryHandler;

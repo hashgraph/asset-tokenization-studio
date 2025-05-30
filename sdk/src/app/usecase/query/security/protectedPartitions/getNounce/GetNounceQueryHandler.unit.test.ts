@@ -291,7 +291,7 @@ describe('GetNounceQueryHandler', () => {
       );
       expect(queryAdapterServiceMock.getNounceFor).toHaveBeenCalledWith(
         evmAddress,
-        targetEvmAddress
+        targetEvmAddress,
       );
     });
   });

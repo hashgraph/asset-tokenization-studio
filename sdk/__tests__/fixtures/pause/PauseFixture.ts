@@ -204,9 +204,7 @@
 */
 
 import { createFixture } from '../config';
-import {
-  HederaIdPropsFixture,
-} from '../shared/DataFixture';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { IsPausedQuery } from '../../../src/app/usecase/query/security/isPaused/IsPausedQuery';
 
 export const IsPausedQueryFixture = createFixture<IsPausedQuery>((query) => {

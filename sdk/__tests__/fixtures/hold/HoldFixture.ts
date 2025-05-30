@@ -209,7 +209,6 @@ import {
   PartitionIdFixture,
 } from '../shared/DataFixture';
 
-
 import { BigNumber } from 'ethers';
 import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
 import { GetHeldAmountForQuery } from '../../../src/app/usecase/query/security/hold/getHeldAmountFor/GetHeldAmountForQuery';

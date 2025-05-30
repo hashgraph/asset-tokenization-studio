@@ -213,9 +213,7 @@ import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js'
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../app/service/contract/ContractService.js';
 import AccountService from '../../../../../app/service/account/AccountService.js';
-import {
-  LocksIdQueryFixture,
-} from '../../../../../../__tests__/fixtures/lock/LockFixture.js';
+import { LocksIdQueryFixture } from '../../../../../../__tests__/fixtures/lock/LockFixture.js';
 import { LocksIdQueryHandler } from './LocksIdQueryHandler.js';
 import { LocksIdQuery, LocksIdQueryResponse } from './LocksIdQuery.js';
 import { LocksIdQueryError } from './error/LocksIdQueryError.js';

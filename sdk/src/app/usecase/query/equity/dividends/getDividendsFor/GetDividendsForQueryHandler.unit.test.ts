@@ -217,7 +217,10 @@ import {
   GetDividendsForQueryFixture,
 } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
 import { GetDividendsForQueryHandler } from './GetDividendsForQueryHandler.js';
-import { GetDividendsForQuery, GetDividendsForQueryResponse } from './GetDividendsForQuery.js';
+import {
+  GetDividendsForQuery,
+  GetDividendsForQueryResponse,
+} from './GetDividendsForQuery.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
 import { GetDividendsForQueryError } from './error/GetDividendsForQueryError.js';
 

@@ -212,9 +212,7 @@ import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import {
-  GetRoleMembersQueryFixture,
-} from '../../../../../../../__tests__/fixtures/role/RoleFixture.js';
+import { GetRoleMembersQueryFixture } from '../../../../../../../__tests__/fixtures/role/RoleFixture.js';
 import {
   GetRoleMembersQuery,
   GetRoleMembersQueryResponse,

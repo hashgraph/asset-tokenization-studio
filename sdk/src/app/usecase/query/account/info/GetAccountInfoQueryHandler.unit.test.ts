@@ -208,9 +208,7 @@ import {
   AccountPropsFixture,
   GetAccountInfoQueryFixture,
 } from '../../../../../../__tests__/fixtures/account/AccountFixture.js';
-import {
-  ErrorMsgFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { ErrorMsgFixture } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import { ErrorCode } from '../../../../../core/error/BaseError.js';
 import { GetAccountInfoQueryHandler } from './GetAccountInfoQueryHandler.js';
 import {

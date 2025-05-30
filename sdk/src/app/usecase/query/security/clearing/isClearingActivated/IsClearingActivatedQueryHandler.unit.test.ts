@@ -212,9 +212,7 @@ import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import {
-  IsClearingActivatedQueryFixture,
-} from '../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
+import { IsClearingActivatedQueryFixture } from '../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
 import { IsClearingActivatedQueryHandler } from './IsClearingActivatedQueryHandler.js';
 import {
   IsClearingActivatedQuery,
@@ -280,9 +278,7 @@ describe('IsClearingActivatedQueryHandler', () => {
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.securityId,
       );
-      expect(
-        queryAdapterServiceMock.isClearingActivated,
-      ).toHaveBeenCalledWith(
+      expect(queryAdapterServiceMock.isClearingActivated).toHaveBeenCalledWith(
         evmAddress,
       );
     });

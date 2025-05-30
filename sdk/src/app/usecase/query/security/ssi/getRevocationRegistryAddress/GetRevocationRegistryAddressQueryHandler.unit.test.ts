@@ -213,9 +213,7 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
-import {
-  GetRevocationRegistryAddressQueryFixture,
-} from '../../../../../../../__tests__/fixtures/ssi/Ssi.js';
+import { GetRevocationRegistryAddressQueryFixture } from '../../../../../../../__tests__/fixtures/ssi/Ssi.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/account/AccountFixture.js';
 import {
@@ -293,10 +291,12 @@ describe('GetRevocationRegistryAddressQueryHandler', () => {
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.securityId,
       );
-      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(revocation);
-      expect(queryAdapterServiceMock.getRevocationRegistryAddress).toHaveBeenCalledWith(
-        evmAddress,
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(
+        revocation,
       );
+      expect(
+        queryAdapterServiceMock.getRevocationRegistryAddress,
+      ).toHaveBeenCalledWith(evmAddress);
     });
   });
 });

@@ -214,7 +214,10 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
 import { IsOperatorForPartitionQueryFixture } from '../../../../../../../__tests__/fixtures/erc1400/ERC1400Fixture.js';
-import { IsOperatorForPartitionQuery, IsOperatorForPartitionQueryResponse } from './IsOperatorForPartitionQuery.js';
+import {
+  IsOperatorForPartitionQuery,
+  IsOperatorForPartitionQueryResponse,
+} from './IsOperatorForPartitionQuery.js';
 import { IsOperatorForPartitionQueryHandler } from './IsOperatorForPartitionQueryHandler.js';
 import { IsOperatorForPartitionQueryError } from './error/IsOperatorForPartitionQuery.js';
 
@@ -256,7 +259,9 @@ describe('IsOperatorForPartitionQueryHandler', () => {
 
       const resultPromise = handler.execute(query);
 
-      await expect(resultPromise).rejects.toBeInstanceOf(IsOperatorForPartitionQueryError);
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        IsOperatorForPartitionQueryError,
+      );
 
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
@@ -273,7 +278,9 @@ describe('IsOperatorForPartitionQueryHandler', () => {
       accountServiceMock.getAccountEvmAddress
         .mockResolvedValueOnce(operatorEvmAddress)
         .mockResolvedValueOnce(targetEvmAddress);
-      queryAdapterServiceMock.isOperatorForPartition.mockResolvedValueOnce(true);
+      queryAdapterServiceMock.isOperatorForPartition.mockResolvedValueOnce(
+        true,
+      );
 
       const result = await handler.execute(query);
 
@@ -294,7 +301,9 @@ describe('IsOperatorForPartitionQueryHandler', () => {
         2,
         query.targetId,
       );
-      expect(queryAdapterServiceMock.isOperatorForPartition).toHaveBeenCalledWith(
+      expect(
+        queryAdapterServiceMock.isOperatorForPartition,
+      ).toHaveBeenCalledWith(
         evmAddress,
         query.partitionId,
         operatorEvmAddress,

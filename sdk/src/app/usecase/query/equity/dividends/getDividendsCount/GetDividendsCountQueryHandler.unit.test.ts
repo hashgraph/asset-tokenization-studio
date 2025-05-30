@@ -212,12 +212,13 @@ import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import {
-  GetDividendsCountQueryFixture,
-} from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
+import { GetDividendsCountQueryFixture } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
 import { GetDividendsCountQueryHandler } from './GetDividendsCountQueryHandler.js';
 import { GetDividendsCountQueryError } from './error/GetDividendsCountQueryError.js';
-import { GetDividendsCountQuery, GetDividendsCountQueryResponse } from './GetDividendsCountQuery.js';
+import {
+  GetDividendsCountQuery,
+  GetDividendsCountQueryResponse,
+} from './GetDividendsCountQuery.js';
 
 describe('GetDividendsCountQueryHandler', () => {
   let handler: GetDividendsCountQueryHandler;

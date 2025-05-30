@@ -212,10 +212,11 @@ import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
+import { GetControlListTypeQueryFixture } from '../../../../../../../__tests__/fixtures/controlList/ControlListFixture.js';
 import {
-  GetControlListTypeQueryFixture,
-} from '../../../../../../../__tests__/fixtures/controlList/ControlListFixture.js';
-import { GetControlListTypeQuery, GetControlListTypeQueryResponse } from './GetControlListTypeQuery.js';
+  GetControlListTypeQuery,
+  GetControlListTypeQueryResponse,
+} from './GetControlListTypeQuery.js';
 import { GetControlListTypeQueryHandler } from './GetControlListTypeQueryHandler.js';
 import { GetControlListTypeQueryError } from './error/GetControlListTypeQueryError.js';
 import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';

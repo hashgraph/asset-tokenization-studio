@@ -267,9 +267,7 @@ describe('GetBondDetailsQueryHandler', () => {
       });
     });
     it('should successfully get bond details', async () => {
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(evmAddress);
       queryAdapterServiceMock.getBondDetails.mockResolvedValue(bondDetails);
 
       const result = await handler.execute(query);

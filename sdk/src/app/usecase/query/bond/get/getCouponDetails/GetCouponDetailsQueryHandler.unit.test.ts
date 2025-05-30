@@ -217,7 +217,10 @@ import {
 } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
 import { GetCouponDetailsQueryHandler } from './GetCouponDetailsQueryHandler.js';
-import { GetCouponDetailsQuery, GetCouponDetailsQueryResponse } from './GetCouponDetailsQuery.js';
+import {
+  GetCouponDetailsQuery,
+  GetCouponDetailsQueryResponse,
+} from './GetCouponDetailsQuery.js';
 import { GetCouponDetailsQueryError } from './error/GetCouponDetailsQueryError.js';
 
 describe('GetCouponDetailsQueryHandler', () => {

@@ -212,11 +212,12 @@ import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import {
-  GetCouponCountQueryFixture,
-} from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
+import { GetCouponCountQueryFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
 import { GetCouponCountQueryHandler } from './GetCouponCountQueryHandler.js';
-import { GetCouponCountQuery, GetCouponCountQueryResponse } from './GetCouponCountQuery.js';
+import {
+  GetCouponCountQuery,
+  GetCouponCountQueryResponse,
+} from './GetCouponCountQuery.js';
 import { GetCouponCountQueryError } from './error/GetCouponCountQueryError.js';
 
 describe('GetCouponCountQueryHandler', () => {
