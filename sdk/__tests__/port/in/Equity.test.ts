@@ -238,7 +238,7 @@ import { Wallet, ethers } from 'ethers';
 import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
 import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter.js';
-import NetworkService from '../../../src/app/service/NetworkService.js';
+import NetworkService from '../../../src/app/service/network/NetworkService.js';
 import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
 import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';

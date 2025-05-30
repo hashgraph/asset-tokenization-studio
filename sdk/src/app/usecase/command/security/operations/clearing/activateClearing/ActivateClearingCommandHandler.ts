@@ -212,10 +212,11 @@ import {
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ActivateClearingCommandError } from './error/ActivateClearingCommandError.js';
 
 @CommandHandler(ActivateClearingCommand)
 export class ActivateClearingCommandHandler
@@ -223,35 +224,39 @@ export class ActivateClearingCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: ActivateClearingCommand,
   ): Promise<ActivateClearingCommandResponse> {
-    const { securityId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkPause(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._CLEARING_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const res = await handler.activateClearing(securityEvmAddress);
-    return Promise.resolve(
-      new ActivateClearingCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.activateClearing(securityEvmAddress);
+      return Promise.resolve(
+        new ActivateClearingCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new ActivateClearingCommandError(error as Error);
+    }
   }
 }

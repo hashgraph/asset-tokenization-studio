@@ -212,7 +212,7 @@ import { REGEX_TRANSACTION } from '../error/TransactionResponseError.js';
 import TransactionResultViewModel from '../../in/response/TransactionResultViewModel.js';
 import ContractViewModel from '../../in/response/ContractViewModel.js';
 import { BYTES_32_LENGTH } from '../../../core/Constants.js';
-import LogService from '../../../app/service/LogService.js';
+import LogService from '../../../app/service/log/LogService.js';
 import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
 import PublicKey from '../../../domain/context/account/PublicKey.js';
 import { HederaId } from '../../../domain/context/shared/HederaId.js';

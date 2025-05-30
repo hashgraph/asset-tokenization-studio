@@ -213,7 +213,7 @@ import {
   GetExternalControlListsCountQuery,
   GetExternalControlListsCountQueryResponse,
 } from './GetExternalControlListsCountQuery.js';
-import ContractService from '../../../../../../app/service/ContractService.js';
+import ContractService from '../../../../../../app/service/contract/ContractService.js';
 
 @QueryHandler(GetExternalControlListsCountQuery)
 export class GetExternalControlListsCountQueryHandler

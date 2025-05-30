@@ -213,7 +213,7 @@ import {
   GetExternalPausesCountQuery,
   GetExternalPausesCountQueryResponse,
 } from './GetExternalPausesCountQuery.js';
-import ContractService from '../../../../../../app/service/ContractService.js';
+import ContractService from '../../../../../../app/service/contract/ContractService.js';
 
 @QueryHandler(GetExternalPausesCountQuery)
 export class GetExternalPausesCountQueryHandler

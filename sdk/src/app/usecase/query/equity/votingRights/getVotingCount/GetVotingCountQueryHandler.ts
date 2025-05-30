@@ -211,8 +211,9 @@ import {
   GetVotingCountQueryResponse,
 } from './GetVotingCountQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { GetVotingCountQueryError } from './error/GetVotingCountQueryError.js';
 
 @QueryHandler(GetVotingCountQuery)
 export class GetVotingCountQueryHandler
@@ -220,20 +221,24 @@ export class GetVotingCountQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetVotingCountQuery,
   ): Promise<GetVotingCountQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getVotingsCount(securityEvmAddress);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getVotingsCount(securityEvmAddress);
 
-    return new GetVotingCountQueryResponse(res);
+      return new GetVotingCountQueryResponse(res);
+    } catch (error) {
+      throw new GetVotingCountQueryError(error as Error);
+    }
   }
 }

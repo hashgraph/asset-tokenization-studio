@@ -233,7 +233,7 @@ import {
   RESOLVER_ADDRESS,
 } from '../../config.js';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole.js';
-import NetworkService from '../../../src/app/service/NetworkService.js';
+import NetworkService from '../../../src/app/service/network/NetworkService.js';
 import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
 import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
 import {

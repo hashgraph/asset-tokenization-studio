@@ -213,8 +213,9 @@ import {
   GetRegulationDetailsQueryResponse,
 } from './GetRegulationDetailsQuery.js';
 import { Regulation } from '../../../../../domain/context/factory/Regulation.js';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import { InvalidRequest } from '../../error/InvalidRequest.js';
+import { GetRegulationDetailsQueryError } from './error/GetRegulationDetailsQueryError.js';
 
 @QueryHandler(GetRegulationDetailsQuery)
 export class GetRegulationDetailsQueryHandler
@@ -222,29 +223,34 @@ export class GetRegulationDetailsQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(
     query: GetRegulationDetailsQuery,
   ): Promise<GetRegulationDetailsQueryResponse> {
-    const { type, subType, factory } = query;
+    try {
+      const { type, subType, factory } = query;
 
-    if (!factory) {
-      throw new InvalidRequest('Factory not found in request');
+      if (!factory) {
+        throw new InvalidRequest('Factory not found in request');
+      }
+
+      const factoryEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(factory.toString());
+
+      const regulation: Regulation =
+        await this.queryAdapter.getRegulationDetails(
+          type,
+          subType,
+          factoryEvmAddress,
+        );
+
+      return Promise.resolve(new GetRegulationDetailsQueryResponse(regulation));
+    } catch (error) {
+      throw new GetRegulationDetailsQueryError(error as Error);
     }
-
-    const factoryEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(factory.toString());
-
-    const regulation: Regulation = await this.queryAdapter.getRegulationDetails(
-      type,
-      subType,
-      factoryEvmAddress,
-    );
-
-    return Promise.resolve(new GetRegulationDetailsQueryResponse(regulation));
   }
 }
