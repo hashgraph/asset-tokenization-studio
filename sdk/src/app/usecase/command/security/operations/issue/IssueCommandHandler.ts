@@ -258,11 +258,11 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
 
       await this.validationService.checkControlList(securityId, targetId);
 
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [targetId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.GRANTED,
+      );
 
       await this.validationService.checkRole(
         SecurityRole._ISSUER_ROLE,

@@ -267,16 +267,16 @@ export class GrantKycCommandHandler
 
       await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._KYC_ROLE,
-      account.id.toString(),
-      securityId,
-    );
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [targetId],
-      KycStatus.NOT_GRANTED,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._KYC_ROLE,
+        account.id.toString(),
+        securityId,
+      );
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.NOT_GRANTED,
+      );
 
       const res = await handler.grantKyc(
         securityEvmAddress,

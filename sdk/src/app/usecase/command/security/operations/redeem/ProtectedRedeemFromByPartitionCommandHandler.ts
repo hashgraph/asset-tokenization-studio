@@ -251,12 +251,12 @@ export class ProtectedRedeemFromByPartitionCommandHandler
         signature,
       } = command;
 
-    await this.validationService.checkClearingDeactivated(securityId);
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [sourceId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [sourceId],
+        KycStatus.GRANTED,
+      );
 
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();

@@ -278,11 +278,11 @@ export class OperatorClearingRedeemByPartitionCommandHandler
 
       await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [account.id.toString(), sourceId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [account.id.toString(), sourceId],
+        KycStatus.GRANTED,
+      );
 
       const res = await handler.operatorClearingRedeemByPartition(
         securityEvmAddress,

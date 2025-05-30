@@ -288,15 +288,15 @@ export class CreateBondCommandHandler
       const resolverEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(resolver.toString());
 
-    const [
-      externalPausesEvmAddresses,
-      externalControlListsEvmAddresses,
-      externalKycListsEvmAddresses,
-    ] = await Promise.all([
-      this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-      this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-      this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
-    ]);
+      const [
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
+        externalKycListsEvmAddresses,
+      ] = await Promise.all([
+        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
+        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
+        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
+      ]);
 
       const handler = this.transactionService.getHandler();
 

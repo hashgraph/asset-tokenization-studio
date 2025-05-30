@@ -264,12 +264,12 @@ export class ClearingTransferFromByPartitionCommandHandler
 
       await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [sourceId, targetId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [sourceId, targetId],
+        KycStatus.GRANTED,
+      );
 
       await this.validationService.checkControlList(
         securityId,

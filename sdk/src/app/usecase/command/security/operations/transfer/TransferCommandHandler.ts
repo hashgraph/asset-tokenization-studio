@@ -238,12 +238,12 @@ export class TransferCommandHandler
     try {
       const { securityId, targetId, amount } = command;
 
-    await this.validationService.checkClearingDeactivated(securityId);
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [targetId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.GRANTED,
+      );
 
       const handler = this.transactionService.getHandler();
 

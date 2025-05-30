@@ -255,11 +255,11 @@ export class ClearingRedeemByPartitionCommandHandler
 
       await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [account.id.toString()],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [account.id.toString()],
+        KycStatus.GRANTED,
+      );
 
       await this.validationService.checkDecimals(security, amount);
 

@@ -257,11 +257,11 @@ export class CancelClearingOperationByPartitionCommandHandler
 
       await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [targetId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.GRANTED,
+      );
 
       await this.validationService.checkRole(
         SecurityRole._CLEARING_VALIDATOR_ROLE,

@@ -259,11 +259,11 @@ export class ClearingRedeemFromByPartitionCommandHandler
 
       await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [account.id.toString(), sourceId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [account.id.toString(), sourceId],
+        KycStatus.GRANTED,
+      );
 
       await this.validationService.checkControlList(
         securityId,

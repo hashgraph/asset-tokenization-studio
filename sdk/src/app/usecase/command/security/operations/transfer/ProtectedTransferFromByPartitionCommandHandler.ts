@@ -276,11 +276,11 @@ export class ProtectedTransferFromByPartitionCommandHandler
 
       await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [sourceId, targetId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [sourceId, targetId],
+        KycStatus.GRANTED,
+      );
 
       await this.validationService.checkControlList(
         securityId,

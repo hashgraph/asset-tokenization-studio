@@ -253,12 +253,12 @@ export class ReclaimClearingOperationByPartitionCommandHandler
 
       await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [targetId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.GRANTED,
+      );
 
       const res = await handler.reclaimClearingOperationByPartition(
         securityEvmAddress,
