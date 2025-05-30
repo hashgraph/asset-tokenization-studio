@@ -298,9 +298,6 @@ import { UpdateMaturityDateCommandHandler } from '../app/usecase/command/bond/up
 import { SetScheduledBalanceAdjustmentCommandHandler } from '../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommandHandler.js';
 import { GetScheduledBalanceAdjustmentQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQueryHandler.js';
 import { GetScheduledBalanceAdjustmentCountQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQueryHandler';
-import { GetLastAggregatedBalanceAdjustmentFactorForQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQueryHandler.js';
-import { GetAggregatedBalanceAdjustmentFactorQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQueryHandler';
-import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler.js';
 import { DFNSTransactionAdapter } from '../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
 import { FireblocksTransactionAdapter } from '../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
 import { AWSKMSTransactionAdapter } from '../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
@@ -385,6 +382,7 @@ import { CreateExternalWhiteListMockCommandHandler } from '../app/usecase/comman
 import { CreateExternalBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/createExternalBlackListMock/CreateExternalBlackListMockCommandHandler.js';
 import { RemoveFromBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommandHandler.js';
 import { RemoveFromWhiteListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommandHandler.js';
+import { GetTotalSupplyByPartitionQueryHandler } from '../app/usecase/query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -878,6 +876,10 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
+    useClass: GetTotalSupplyByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
     useClass: GetConfigInfoQueryHandler,
   },
   {
@@ -891,19 +893,6 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetScheduledBalanceAdjustmentCountQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetLastAggregatedBalanceAdjustmentFactorForQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetAggregatedBalanceAdjustmentFactorQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass:
-      GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,

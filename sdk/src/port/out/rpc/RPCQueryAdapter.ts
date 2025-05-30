@@ -1205,37 +1205,6 @@ export class RPCQueryAdapter {
     return scheduledBalanceAdjustmentCount.toNumber();
   }
 
-  async getLastAggregatedBalanceAdjustmentFactorFor(
-    address: EvmAddress,
-    target: EvmAddress,
-  ): Promise<number> {
-    LogService.logTrace(
-      `Getting last aggregated balance adjustment factor for the account ${target.toString()}`,
-    );
-    //TODO implement factory to call the method
-    return 1;
-  }
-
-  async getAggregatedBalanceAdjustmentFactor(
-    address: EvmAddress,
-  ): Promise<number> {
-    LogService.logTrace(`Getting last aggregated balance adjustment factor}`);
-    //TODO implement factory to call the method
-    return 1;
-  }
-
-  async getLastAggregatedBalanceAdjustmentFactorForByPartition(
-    address: EvmAddress,
-    target: EvmAddress,
-    partitionId: string,
-  ): Promise<number> {
-    LogService.logTrace(
-      `Getting last aggregated balance adjustment factor for the account ${target.toString()} and partition ${partitionId}`,
-    );
-    //TODO implement factory to call the method
-    return 1;
-  }
-
   async getHeldAmountFor(
     address: EvmAddress,
     targetId: EvmAddress,
