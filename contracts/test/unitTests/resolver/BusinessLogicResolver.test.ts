@@ -207,7 +207,7 @@
 import { ethers } from 'hardhat'
 import { expect } from 'chai'
 import { AccessControl, Pause, BusinessLogicResolver } from '@typechain'
-import { PAUSER_ROLE } from '@scripts'
+import { EQUITY_CONFIG_ID, PAUSER_ROLE } from '@scripts'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 
 describe('BusinessLogicResolver', () => {
@@ -507,6 +507,35 @@ describe('BusinessLogicResolver', () => {
                     (businessLogic) => businessLogic.businessLogicKey
                 )
             )
+        })
+
+        it('GIVEN a configuration add a selector to the blacklist THEN queries respond with correct values', async () => {
+            const blackListedSelectors = ['0x8456cb59'] // pause() selector
+
+            await businessLogicResolver.addSelectorsToBlacklist(
+                EQUITY_CONFIG_ID,
+                blackListedSelectors
+            )
+
+            expect(
+                await businessLogicResolver.getSelectorsBlacklist(
+                    EQUITY_CONFIG_ID,
+                    0,
+                    100
+                )
+            ).to.deep.equal(blackListedSelectors)
+
+            await businessLogicResolver.removeSelectorsFromBlacklist(
+                EQUITY_CONFIG_ID,
+                blackListedSelectors
+            )
+            expect(
+                await businessLogicResolver.getSelectorsBlacklist(
+                    EQUITY_CONFIG_ID,
+                    0,
+                    100
+                )
+            ).to.deep.equal([])
         })
     })
 })

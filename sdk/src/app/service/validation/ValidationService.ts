@@ -265,6 +265,8 @@ import { SecurityUnPaused } from '../../../domain/context/security/error/operati
 import { PartitionsProtected } from '../../../domain/context/security/error/operations/PartitionsProtected.js';
 import { GetBondDetailsQuery } from '../../usecase/query/bond/get/getBondDetails/GetBondDetailsQuery.js';
 import { OperationNotAllowed } from '../../../domain/context/security/error/operations/OperationNotAllowed.js';
+import { IsInternalKycActivatedQuery } from '../../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery.js';
+import { IsExternallyGrantedQuery } from '../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery.js';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -284,15 +286,24 @@ export default class ValidationService extends Service {
   async checkKycAddresses(
     securityId: string,
     addresses: string[],
+    kycStatus: number,
   ): Promise<void> {
-    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    let res;
+    const queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const isInternalKycActivated = await queryBus.execute(
+      new IsInternalKycActivatedQuery(securityId),
+    );
+
     for (const address of addresses) {
-      res = await this.queryBus.execute(
-        new GetKycStatusForQuery(securityId, address),
+      const isKycValid = await this.validateAddressKyc(
+        queryBus,
+        securityId,
+        address,
+        kycStatus,
+        isInternalKycActivated.payload,
       );
-      if (res.payload != 1) {
-        throw new AccountNotKycd(address);
+
+      if (!isKycValid) {
+        throw new AccountNotKycd(address, kycStatus);
       }
     }
   }
@@ -699,5 +710,46 @@ export default class ValidationService extends Service {
     totalSupply: BigNumber,
   ): boolean {
     return maxSupply.lt(totalSupply.add(amount));
+  }
+
+  private async validateAddressKyc(
+    queryBus: QueryBus,
+    securityId: string,
+    address: string,
+    kycStatus: number,
+    isInternalKycActivated: boolean,
+  ): Promise<boolean> {
+    const internalKycValid = await this.checkInternalKyc(
+      queryBus,
+      securityId,
+      address,
+      kycStatus,
+      isInternalKycActivated,
+    );
+
+    if (!internalKycValid) {
+      return false;
+    }
+    return (
+      await queryBus.execute(
+        new IsExternallyGrantedQuery(securityId, kycStatus, address),
+      )
+    ).payload;
+  }
+
+  private async checkInternalKyc(
+    queryBus: QueryBus,
+    securityId: string,
+    address: string,
+    kycStatus: number,
+    isInternalKycActivated: boolean,
+  ): Promise<boolean> {
+    if (!isInternalKycActivated) {
+      return true;
+    }
+    const kycResult = await queryBus.execute(
+      new GetKycStatusForQuery(securityId, address),
+    );
+    return kycResult.payload === kycStatus;
   }
 }

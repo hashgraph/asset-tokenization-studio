@@ -215,6 +215,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import { TransferCommandError } from './error/TransferCommandError.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(TransferCommand)
 export class TransferCommandHandler
@@ -237,8 +238,12 @@ export class TransferCommandHandler
     try {
       const { securityId, targetId, amount } = command;
 
-      await this.validationService.checkClearingDeactivated(securityId);
-      await this.validationService.checkKycAddresses(securityId, [targetId]);
+    await this.validationService.checkClearingDeactivated(securityId);
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [targetId],
+      KycStatus.GRANTED,
+    );
 
       const handler = this.transactionService.getHandler();
 

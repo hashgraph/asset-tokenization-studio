@@ -264,6 +264,22 @@ interface IBusinessLogicResolver is IDiamondCutManager {
         BusinessLogicRegistryData[] calldata _businessLogics
     ) external;
 
+    /// @notice Adds a list of selectors to the blacklist
+    /// @param _configurationId the configuration key to be checked.
+    /// @param _selectors list of selectors to be added to the blacklist
+    function addSelectorsToBlacklist(
+        bytes32 _configurationId,
+        bytes4[] calldata _selectors
+    ) external;
+
+    /// @notice Removes a list of selectors from the blacklist
+    /// @param _configurationId the configuration key to be checked.
+    /// @param _selectors list of selectors to be removed from the blacklist
+    function removeSelectorsFromBlacklist(
+        bytes32 _configurationId,
+        bytes4[] calldata _selectors
+    ) external;
+
     /// @notice Returns the current status of a given version
     function getVersionStatus(
         uint256 _version
@@ -300,4 +316,15 @@ interface IBusinessLogicResolver is IDiamondCutManager {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (bytes32[] memory businessLogicKeys_);
+
+    /// @notice Returns the list of selectors in the blacklist
+    /// @param _configurationId the configuration key to be checked.
+    /// @param _pageIndex members to skip : _pageIndex * _pageLength
+    /// @param _pageLength number of members to return
+    /// @return selectors_ List of the selectors in the blacklist
+    function getSelectorsBlacklist(
+        bytes32 _configurationId,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (bytes4[] memory selectors_);
 }

@@ -239,6 +239,8 @@ export const CreateBond = () => {
       countriesList: [] as string[],
       externalPausesList: [],
       externalControlList: [],
+      externalKYCList: [],
+      internalKycActivated: true,
     },
   });
 

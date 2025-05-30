@@ -219,6 +219,7 @@ import { SignedCredential } from '@terminal3/vc_core';
 import { InvalidVc } from '../../../../../../domain/context/security/error/operations/InvalidVc';
 import ContractService from '../../../../../service/contract/ContractService';
 import { GrantKycCommandError } from './error/GrantKycCommandError';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc';
 
 @CommandHandler(GrantKycCommand)
 export class GrantKycCommandHandler
@@ -266,11 +267,16 @@ export class GrantKycCommandHandler
 
       await this.validationService.checkPause(securityId);
 
-      await this.validationService.checkRole(
-        SecurityRole._KYC_ROLE,
-        account.id.toString(),
-        securityId,
-      );
+    await this.validationService.checkRole(
+      SecurityRole._KYC_ROLE,
+      account.id.toString(),
+      securityId,
+    );
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [targetId],
+      KycStatus.NOT_GRANTED,
+    );
 
       const res = await handler.grantKyc(
         securityEvmAddress,

@@ -245,6 +245,8 @@ export const CreateEquity = () => {
       countriesList: [] as string[],
       externalPausesList: [],
       externalControlList: [],
+      externalKYCList: [],
+      internalKycActivated: true,
     },
   });
 

@@ -207,6 +207,9 @@ pragma solidity 0.8.18;
 
 import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
 import {
+    EnumerableSetBytes4
+} from '../../layer_0/common/libraries/EnumerableSetBytes4.sol';
+import {
     IDiamondCutManager
 } from '../../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol';
 import {
@@ -765,6 +768,7 @@ abstract contract DiamondCutManagerWrapper is
     ) private {
         address selectorAddress = address(_static);
         bytes4[] memory selectors = _static.getStaticFunctionSelectors();
+        _checkSelectorsBlacklist(_configurationId, selectors);
         _dcms.selectors[_configVersionFacetHash] = selectors;
         uint256 length = selectors.length;
         for (uint256 index; index < length; ) {
@@ -811,6 +815,26 @@ abstract contract DiamondCutManagerWrapper is
         version_ = _version > 0
             ? _version
             : _dcms.latestVersion[_configurationId];
+    }
+
+    function _checkSelectorsBlacklist(
+        bytes32 _configurationId,
+        bytes4[] memory _selectors
+    ) private view {
+        EnumerableSetBytes4.Bytes4Set
+            storage selectorBlacklist = _businessLogicResolverStorage()
+                .selectorBlacklist[_configurationId];
+
+        uint256 length = _selectors.length;
+        for (uint256 index; index < length; ) {
+            bytes4 selector = _selectors[index];
+            if (EnumerableSetBytes4.contains(selectorBlacklist, selector)) {
+                revert SelectorBlacklisted(selector);
+            }
+            unchecked {
+                ++index;
+            }
+        }
     }
 
     // TODO: Move to a separate file.

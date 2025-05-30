@@ -218,6 +218,7 @@ import {
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
 import { ProtectedClearingTransferByPartitionCommandError } from './error/ProtectedClearingTransferByPartitionCommandError.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ProtectedClearingTransferByPartitionCommand)
 export class ProtectedClearingTransferByPartitionCommandHandler
@@ -267,11 +268,12 @@ export class ProtectedClearingTransferByPartitionCommandHandler
 
       await this.validationService.checkPause(securityId);
 
-      await this.validationService.checkClearingActivated(securityId);
-      await this.validationService.checkKycAddresses(securityId, [
-        sourceId,
-        targetId,
-      ]);
+    await this.validationService.checkClearingActivated(securityId);
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [sourceId, targetId],
+      KycStatus.GRANTED,
+    );
 
       await this.validationService.checkProtectedPartitions(security);
 

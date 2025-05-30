@@ -207,9 +207,9 @@
 import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
 import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
-import { QueryBus } from '../../../core/query/QueryBus';
-import Injectable from '../../../core/Injectable';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { QueryBus } from '../../../core/query/QueryBus.js';
+import Injectable from '../../../core/Injectable.js';
+import { CommandBus } from '../../../core/command/CommandBus.js';
 import GrantKycRequest from '../request/security/kyc/GrantKycRequest.js';
 import RevokeKycRequest from '../request/security/kyc/RevokeKycRequest.js';
 import GetKycAccountsCountRequest from '../request/security/kyc/GetKycAccountsCountRequest.js';
@@ -224,6 +224,14 @@ import KycAccountDataViewModel from '../response/KycAccountDataViewModel.js';
 import GetKycAccountsDataRequest from '../request/security/kyc/GetKycAccountsDataRequest.js';
 import GetKycStatusForRequest from '../request/security/kyc/GetKycStatusForRequest.js';
 import { GetKycStatusForQuery } from '../../../app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery.js';
+import {
+  ActivateInternalKycRequest,
+  DeactivateInternalKycRequest,
+  IsInternalKycActivatedRequest,
+} from '../request/index.js';
+import { ActivateInternalKycCommand } from '../../../app/usecase/command/security/kyc/activateInternalKyc/ActivateInternalKycCommand.js';
+import { DeactivateInternalKycCommand } from '../../../app/usecase/command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommand.js';
+import { IsInternalKycActivatedQuery } from '../../../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery.js';
 
 interface IKycInPort {
   grantKyc(
@@ -232,12 +240,21 @@ interface IKycInPort {
   revokeKyc(
     request: RevokeKycRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  activateInternalKyc(
+    request: ActivateInternalKycRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  deactivateInternalKyc(
+    request: DeactivateInternalKycRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
   getKycAccountsCount(request: GetKycAccountsCountRequest): Promise<number>;
   getKycFor(request: GetKycForRequest): Promise<KycViewModel>;
   getKycAccountsData(
     request: GetKycAccountsDataRequest,
   ): Promise<KycViewModel[]>;
   getKycStatusFor(request: GetKycStatusForRequest): Promise<number>;
+  isInternalKycActivated(
+    request: IsInternalKycActivatedRequest,
+  ): Promise<boolean>;
 }
 
 class KycInPort implements IKycInPort {
@@ -348,6 +365,41 @@ class KycInPort implements IKycInPort {
     ).payload;
 
     return res;
+  }
+
+  @LogError
+  async activateInternalKyc(
+    request: ActivateInternalKycRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('ActivateInternalKycRequest', request);
+
+    return await this.commandBus.execute(
+      new ActivateInternalKycCommand(request.securityId),
+    );
+  }
+
+  @LogError
+  async deactivateInternalKyc(
+    request: DeactivateInternalKycRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('DeactivateInternalKycRequest', request);
+
+    return await this.commandBus.execute(
+      new DeactivateInternalKycCommand(request.securityId),
+    );
+  }
+
+  @LogError
+  async isInternalKycActivated(
+    request: IsInternalKycActivatedRequest,
+  ): Promise<boolean> {
+    ValidatedRequest.handleValidation('IsInternalKycActivatedRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new IsInternalKycActivatedQuery(request.securityId),
+      )
+    ).payload;
   }
 }
 
