@@ -218,7 +218,6 @@ import {
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
 import { ClearingRedeemFromByPartitionCommandError } from './error/ClearingRedeemFromByPartitionCommandError.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
 import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ClearingRedeemFromByPartitionCommand)

@@ -271,9 +271,9 @@ import { SignedCredential } from '@terminal3/vc_core';
 import EvmAddress from '../../../domain/context/contract/EvmAddress';
 import { GetBondDetailsQuery } from '../../usecase/query/bond/get/getBondDetails/GetBondDetailsQuery';
 import { OperationNotAllowed } from '../../../domain/context/security/error/operations/OperationNotAllowed';
-import { KycStatus } from '../../domain/context/kyc/Kyc';
-import { IsInternalKycActivatedQuery } from '../../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
-import { IsExternallyGrantedQuery } from '../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
+import { KycStatus } from '../../../domain/context/kyc/Kyc';
+import { IsInternalKycActivatedQuery } from '../../../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
+import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
 
 describe('ValidationService', () => {
   let service: ValidationService;

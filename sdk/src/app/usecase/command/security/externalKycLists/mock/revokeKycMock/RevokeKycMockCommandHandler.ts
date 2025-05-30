@@ -211,8 +211,8 @@ import {
 } from './RevokeKycMockCommand';
 import TransactionService from '../../../../../../service/transaction/TransactionService';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import ContractService from '../../../../../../service/ContractService';
-import AccountService from '../../../../../../service/AccountService';
+import ContractService from '../../../../../../service/contract/ContractService';
+import AccountService from '../../../../../../service/account/AccountService';
 
 @CommandHandler(RevokeKycMockCommand)
 export class RevokeKycMockCommandHandler

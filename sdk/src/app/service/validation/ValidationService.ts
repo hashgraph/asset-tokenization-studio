@@ -265,8 +265,8 @@ import { SecurityUnPaused } from '../../../domain/context/security/error/operati
 import { PartitionsProtected } from '../../../domain/context/security/error/operations/PartitionsProtected.js';
 import { GetBondDetailsQuery } from '../../usecase/query/bond/get/getBondDetails/GetBondDetailsQuery.js';
 import { OperationNotAllowed } from '../../../domain/context/security/error/operations/OperationNotAllowed.js';
-import { IsInternalKycActivatedQuery } from '../../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery.js';
-import { IsExternallyGrantedQuery } from '../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery.js';
+import { IsInternalKycActivatedQuery } from '../../../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery.js';
+import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery.js';
 
 @singleton()
 export default class ValidationService extends Service {
