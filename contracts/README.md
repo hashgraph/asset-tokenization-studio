@@ -11,6 +11,7 @@
 - **[Description](#description)**<br>
 - **[Installation](#installation)**<br>
 - **[Build](#build)**<br>
+- **[Tasks](#tasks)**<br>
 - **[Test](#test)**<br>
 
 # Description
@@ -31,6 +32,39 @@ Run the command :
 
 ```
 npm run compile:force
+```
+
+# Tasks
+
+### deployAll
+
+Deploys the full infrastructure (factory, resolver, facets, and initialized contracts) in a single execution.
+
+Parameters:
+
+- `account` (optional): Hedera account in 0.0.XXXX format.
+- `useDeployed` (optional, default: true): Reuses already deployed contracts.
+- `privateKey` (optional): Private key in raw hexadecimal format.
+- `signerAddress` (optional): Signer address from the Hardhat signers array.
+- `signerPosition` (optional): Index of the signer in the Hardhat signers array.
+
+```bash
+npx hardhat deployAll --useDeployed false
+```
+
+### deploy
+
+Deploys a specific contract.
+
+Parameters:
+
+- `contractName` (required): Name of the contract to deploy (e.g., ERC20, Bond).
+- `privateKey` (optional): Private key in raw hexadecimal format.
+- `signerAddress` (optional): Signer address from the Hardhat signers array.
+- `signerPosition` (optional): Index of the signer in the Hardhat signers array.
+
+```bash
+npx hardhat deploy --contractName ERC20
 ```
 
 # Test
