@@ -232,6 +232,7 @@ export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
   security.isControllable.faker((faker) => faker.datatype.boolean());
   security.arePartitionsProtected.faker((faker) => faker.datatype.boolean());
   security.clearingActive.faker((faker) => faker.datatype.boolean());
+  security.internalKycActivated.faker((faker) => faker.datatype.boolean());
   security.isMultiPartition.faker((faker) => faker.datatype.boolean());
   security.isIssuable?.faker((faker) => faker.datatype.boolean());
   security.totalSupply?.faker((faker) =>

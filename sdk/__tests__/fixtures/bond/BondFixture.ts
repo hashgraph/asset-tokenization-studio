@@ -274,6 +274,7 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
     command.externalControlLists?.as(() => [
       HederaIdPropsFixture.create().value,
     ]);
+    command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
   },
 );
 

@@ -266,6 +266,7 @@ export interface DeployedBusinessLogics {
     Hold: IStaticFunctionSelectors
     externalPauseManagement: IStaticFunctionSelectors
     externalControlListManagement: IStaticFunctionSelectors
+    externalKycListManagement: IStaticFunctionSelectors
 }
 
 export let businessLogicResolver: IBusinessLogicResolver

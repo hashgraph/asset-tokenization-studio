@@ -339,6 +339,7 @@ describe('🧪 Kyc tests', () => {
         isControllable: true,
         arePartitionsProtected: false,
         clearingActive: false,
+        internalKycActivated: true,
         isMultiPartition: false,
         diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
         votingRight,

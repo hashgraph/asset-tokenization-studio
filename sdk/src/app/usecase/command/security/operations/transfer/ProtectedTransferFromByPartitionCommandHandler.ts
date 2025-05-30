@@ -215,6 +215,7 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import { ProtectedTransferFromByPartitionCommandError } from './error/ProtectedTransferFromByPartitionCommandError.js';
@@ -275,10 +276,11 @@ export class ProtectedTransferFromByPartitionCommandHandler
 
       await this.validationService.checkDecimals(security, amount);
 
-      await this.validationService.checkKycAddresses(securityId, [
-        sourceId,
-        targetId,
-      ]);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [sourceId, targetId],
+        KycStatus.GRANTED,
+      );
 
       await this.validationService.checkControlList(
         securityId,

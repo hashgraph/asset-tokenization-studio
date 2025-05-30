@@ -216,6 +216,7 @@ import ValidationService from '../../../../../service/validation/ValidationServi
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import { IssueCommandError } from './error/IssueCommandError.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(IssueCommand)
 export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
@@ -257,7 +258,11 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
 
       await this.validationService.checkControlList(securityId, targetId);
 
-      await this.validationService.checkKycAddresses(securityId, [targetId]);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.GRANTED,
+      );
 
       await this.validationService.checkRole(
         SecurityRole._ISSUER_ROLE,

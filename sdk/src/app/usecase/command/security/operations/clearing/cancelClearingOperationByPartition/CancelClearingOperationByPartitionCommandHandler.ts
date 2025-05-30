@@ -217,6 +217,7 @@ import ValidationService from '../../../../../../service/validation/ValidationSe
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
 import { CancelClearingOperationByPartitionCommandError } from './error/CancelClearingOperationByPartitionCommandError.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(CancelClearingOperationByPartitionCommand)
 export class CancelClearingOperationByPartitionCommandHandler
@@ -256,7 +257,11 @@ export class CancelClearingOperationByPartitionCommandHandler
 
       await this.validationService.checkClearingActivated(securityId);
 
-      await this.validationService.checkKycAddresses(securityId, [targetId]);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.GRANTED,
+      );
 
       await this.validationService.checkRole(
         SecurityRole._CLEARING_VALIDATOR_ROLE,

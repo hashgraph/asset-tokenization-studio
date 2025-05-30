@@ -218,6 +218,7 @@ import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapt
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import AccountService from '../../../../../../service/account/AccountService.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ExecuteHoldByPartitionCommand)
 export class ExecuteHoldByPartitionCommandHandler
@@ -268,10 +269,11 @@ export class ExecuteHoldByPartitionCommandHandler
       amountBd,
     );
 
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [sourceId, targetId],
+      KycStatus.GRANTED,
+    );
 
     const res = await handler.executeHoldByPartition(
       securityEvmAddress,

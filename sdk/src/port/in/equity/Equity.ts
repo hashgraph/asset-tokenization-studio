@@ -312,7 +312,12 @@ class EquityInPort implements IEquityInPort {
     req: CreateEquityRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }> {
     ValidatedRequest.handleValidation('CreateEquityRequest', req);
-    const { diamondOwnerAccount, externalPauses, externalControlLists } = req;
+    const {
+      diamondOwnerAccount,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+    } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
     const resolver = this.networkService.configuration.resolverAddress;
@@ -326,6 +331,7 @@ class EquityInPort implements IEquityInPort {
       isControllable: req.isControllable,
       arePartitionsProtected: req.arePartitionsProtected,
       clearingActive: req.clearingActive,
+      internalKycActivated: req.internalKycActivated,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfShares),
       regulationType: CastRegulationType.fromNumber(req.regulationType),
@@ -357,6 +363,7 @@ class EquityInPort implements IEquityInPort {
         diamondOwnerAccount,
         externalPauses,
         externalControlLists,
+        externalKycLists,
       ),
     );
 

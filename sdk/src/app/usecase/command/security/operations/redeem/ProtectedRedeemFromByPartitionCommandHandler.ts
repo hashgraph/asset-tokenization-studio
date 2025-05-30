@@ -218,6 +218,7 @@ import {
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import { ProtectedRedeemFromByPartitionCommandError } from './error/ProtectedRedeemFromByPartitionCommandError.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ProtectedRedeemFromByPartitionCommand)
 export class ProtectedRedeemFromByPartitionCommandHandler
@@ -227,7 +228,7 @@ export class ProtectedRedeemFromByPartitionCommandHandler
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+    public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
@@ -251,7 +252,11 @@ export class ProtectedRedeemFromByPartitionCommandHandler
       } = command;
 
       await this.validationService.checkClearingDeactivated(securityId);
-      await this.validationService.checkKycAddresses(securityId, [sourceId]);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [sourceId],
+        KycStatus.GRANTED,
+      );
 
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();

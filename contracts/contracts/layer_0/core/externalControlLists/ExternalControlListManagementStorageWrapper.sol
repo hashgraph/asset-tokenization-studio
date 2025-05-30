@@ -214,11 +214,11 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {
     IExternalControlList
 } from '../../../layer_1/interfaces/externalControlLists/IExternalControlList.sol';
+import {
+    _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
 
 abstract contract ExternalControlListManagementStorageWrapper is
     ProtectedPartitionsStorageWrapper
@@ -226,105 +226,25 @@ abstract contract ExternalControlListManagementStorageWrapper is
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    struct ExternalControlListDataStorage {
-        bool initialized;
-        EnumerableSet.AddressSet controlLists;
-    }
-
-    function _updateExternalControlLists(
-        address[] calldata _controlLists,
-        bool[] calldata _actives
-    ) internal returns (bool success_) {
-        uint256 length = _controlLists.length;
-        for (uint256 index; index < length; ) {
-            if (_actives[index]) {
-                if (!_isExternalControlList(_controlLists[index]))
-                    _addExternalControlList(_controlLists[index]);
-                unchecked {
-                    ++index;
-                }
-                continue;
-            }
-            if (_isExternalControlList(_controlLists[index]))
-                _removeExternalControlList(_controlLists[index]);
-            unchecked {
-                ++index;
-            }
-        }
-        success_ = true;
-    }
-
-    function _addExternalControlList(
-        address _controlList
-    ) internal returns (bool success_) {
-        success_ = _externalControlListStorage().controlLists.add(_controlList);
-    }
-
-    function _removeExternalControlList(
-        address _controlList
-    ) internal returns (bool success_) {
-        success_ = _externalControlListStorage().controlLists.remove(
-            _controlList
-        );
-    }
-
-    function _isExternalControlList(
-        address _controlList
-    ) internal view returns (bool) {
-        return
-            _externalControlListStorage().controlLists.contains(_controlList);
-    }
-
-    function _getExternalControlListsCount()
-        internal
-        view
-        returns (uint256 externalControlListsCount_)
-    {
-        externalControlListsCount_ = _externalControlListStorage()
-            .controlLists
-            .length();
-    }
-
-    function _getExternalControlListsMembers(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
-        return
-            _externalControlListStorage().controlLists.getFromSet(
-                _pageIndex,
-                _pageLength
-            );
-    }
-
     function _isExternallyAuthorized(
         address _account
     ) internal view returns (bool) {
-        ExternalControlListDataStorage
-            storage externalControlListStorage = _externalControlListStorage();
-        uint256 length = _getExternalControlListsCount();
+        ExternalListDataStorage
+            storage externalControlListStorage = _externalListStorage(
+                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+            );
+        uint256 length = _getExternalListsCount(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+        );
         for (uint256 index; index < length; ) {
             if (
-                !IExternalControlList(
-                    externalControlListStorage.controlLists.at(index)
-                ).isAuthorized(_account)
+                !IExternalControlList(externalControlListStorage.list.at(index))
+                    .isAuthorized(_account)
             ) return false;
             unchecked {
                 ++index;
             }
         }
         return true;
-    }
-
-    function _externalControlListStorage()
-        internal
-        pure
-        virtual
-        returns (ExternalControlListDataStorage storage externalControlList_)
-    {
-        bytes32 position = _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            externalControlList_.slot := position
-        }
     }
 }
