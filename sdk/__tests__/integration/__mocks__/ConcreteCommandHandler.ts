@@ -231,7 +231,7 @@ export class ConcreteCommandHandler
   implements ICommandHandler<ConcreteCommand>
 {
   constructor(
-    public readonly repo: ConcreteCommandRepository = new ConcreteCommandRepository(),
+    private readonly repo: ConcreteCommandRepository = new ConcreteCommandRepository(),
   ) {}
 
   execute(command: ConcreteCommand): Promise<ConcreteCommandResponse> {

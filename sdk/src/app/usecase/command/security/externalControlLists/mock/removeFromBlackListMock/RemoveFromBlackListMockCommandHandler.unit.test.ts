@@ -209,7 +209,7 @@ import {
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { RemoveFromBlackListMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
 import {
@@ -217,7 +217,7 @@ import {
   RemoveFromBlackListMockCommandResponse,
 } from './RemoveFromBlackListMockCommand.js';
 import { RemoveFromBlackListMockCommandHandler } from './RemoveFromBlackListMockCommandHandler.js';
-import AccountService from '../../../../../../../app/service/AccountService.js';
+import AccountService from '../../../../../../../app/service/account/AccountService.js';
 
 describe('RemoveFromBlackListMockCommandHandler', () => {
   let handler: RemoveFromBlackListMockCommandHandler;

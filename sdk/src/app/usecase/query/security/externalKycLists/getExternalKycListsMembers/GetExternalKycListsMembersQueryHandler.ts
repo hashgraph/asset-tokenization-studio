@@ -213,8 +213,8 @@ import {
   GetExternalKycListsMembersQuery,
   GetExternalKycListsMembersQueryResponse,
 } from './GetExternalKycListsMembersQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
-import AccountService from '../../../../../service/AccountService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 
 @QueryHandler(GetExternalKycListsMembersQuery)
 export class GetExternalKycListsMembersQueryHandler

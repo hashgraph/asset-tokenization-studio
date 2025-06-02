@@ -212,7 +212,8 @@ import {
 } from './GetCouponCountQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetCouponCountQueryError } from './error/GetCouponCountQueryError.js';
 
 @QueryHandler(GetCouponCountQuery)
 export class GetCouponCountQueryHandler
@@ -220,20 +221,24 @@ export class GetCouponCountQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetCouponCountQuery,
   ): Promise<GetCouponCountQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getCouponCount(securityEvmAddress);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getCouponCount(securityEvmAddress);
 
-    return new GetCouponCountQueryResponse(res);
+      return new GetCouponCountQueryResponse(res);
+    } catch (error) {
+      throw new GetCouponCountQueryError(error as Error);
+    }
   }
 }

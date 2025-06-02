@@ -218,9 +218,9 @@ import { InitializationData } from '../../../TransactionAdapter';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
 import EventService from '../../../../../app/service/event/EventService';
 import { MirrorNodeAdapter } from '../../../mirror/MirrorNodeAdapter';
-import NetworkService from '../../../../../app/service/NetworkService';
+import NetworkService from '../../../../../app/service/network/NetworkService';
 import { Environment } from '../../../../../domain/context/network/Environment';
-import LogService from '../../../../../app/service/LogService';
+import LogService from '../../../../../app/service/log/LogService';
 import { SigningError } from '../../../error/SigningError.js';
 import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
 import {
@@ -246,11 +246,11 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
   protected network: Environment;
 
   constructor(
-    @lazyInject(EventService) public readonly eventService: EventService,
+    @lazyInject(EventService) protected readonly eventService: EventService,
     @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
+    protected readonly networkService: NetworkService,
   ) {
     super(mirrorNodeAdapter, networkService);
   }

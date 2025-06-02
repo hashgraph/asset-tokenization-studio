@@ -208,7 +208,7 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
@@ -219,7 +219,7 @@ import {
   GetExternalKycListsMembersQuery,
   GetExternalKycListsMembersQueryResponse,
 } from './GetExternalKycListsMembersQuery.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 import { GetExternalKycListsMembersQueryFixture } from '../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
 

@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/AccountService';
+import AccountService from '../../../../../service/account/AccountService';
 import {
   UpdateExternalPausesCommand,
   UpdateExternalPausesCommandResponse,
@@ -214,8 +214,8 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import ValidationService from '../../../../../service/ValidationService';
-import ContractService from '../../../../../service/ContractService';
+import ValidationService from '../../../../../service/validation/ValidationService';
+import ContractService from '../../../../../service/contract/ContractService';
 
 @CommandHandler(UpdateExternalPausesCommand)
 export class UpdateExternalPausesCommandHandler

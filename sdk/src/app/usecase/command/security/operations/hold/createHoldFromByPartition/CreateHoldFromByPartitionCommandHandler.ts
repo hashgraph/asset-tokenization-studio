@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
@@ -216,8 +216,9 @@ import {
   CreateHoldFromByPartitionCommand,
   CreateHoldFromByPartitionCommandResponse,
 } from './CreateHoldFromByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { CreateHoldFromByPartitionCommandError } from './error/CreateHoldFromByPartitionCommandError.js';
 
 @CommandHandler(CreateHoldFromByPartitionCommand)
 export class CreateHoldFromByPartitionCommandHandler
@@ -225,78 +226,82 @@ export class CreateHoldFromByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: CreateHoldFromByPartitionCommand,
   ): Promise<CreateHoldFromByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      sourceId,
-      targetId,
-      expirationDate,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const escrowEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(escrow);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const escrowEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(escrow);
 
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddressOrNull(targetId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkClearingDeactivated(securityId);
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    const res = await handler.createHoldFromByPartition(
-      securityEvmAddress,
-      partitionId,
-      escrowEvmAddress,
-      amountBd,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      securityId,
-    );
+      const res = await handler.createHoldFromByPartition(
+        securityEvmAddress,
+        partitionId,
+        escrowEvmAddress,
+        amountBd,
+        sourceEvmAddress,
+        targetEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        securityId,
+      );
 
-    const holdId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.holdId,
-      className: CreateHoldFromByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const holdId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.holdId,
+        className: CreateHoldFromByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new CreateHoldFromByPartitionCommandResponse(
-        parseInt(holdId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new CreateHoldFromByPartitionCommandResponse(
+          parseInt(holdId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new CreateHoldFromByPartitionCommandError(error as Error);
+    }
   }
 }

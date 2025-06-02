@@ -211,8 +211,8 @@ import { QueryHandler } from '../../../../../../../core/decorator/QueryHandlerDe
 import { IQueryHandler } from '../../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractService from '../../../../../../service/ContractService.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 
 @QueryHandler(GetKycStatusMockQuery)
 export class GetKycStatusMockQueryHandler

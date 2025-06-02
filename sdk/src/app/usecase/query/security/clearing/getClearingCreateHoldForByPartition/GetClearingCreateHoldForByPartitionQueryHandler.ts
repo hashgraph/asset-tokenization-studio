@@ -213,9 +213,10 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetClearingCreateHoldForByPartitionQueryError } from './error/GetClearingCreateHoldForByPartitionQueryError.js';
 
 @QueryHandler(GetClearingCreateHoldForByPartitionQuery)
 export class GetClearingCreateHoldForByPartitionQueryHandler
@@ -223,47 +224,51 @@ export class GetClearingCreateHoldForByPartitionQueryHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetClearingCreateHoldForByPartitionQuery,
   ): Promise<GetClearingCreateHoldForByPartitionQueryResponse> {
-    const { securityId, partitionId, targetId, clearingId } = query;
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, partitionId, targetId, clearingId } = query;
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const clearing =
-      await this.queryAdapter.getClearingCreateHoldForByPartition(
-        securityEvmAddress,
-        partitionId,
-        targetEvmAddress,
-        clearingId,
+      const clearing =
+        await this.queryAdapter.getClearingCreateHoldForByPartition(
+          securityEvmAddress,
+          partitionId,
+          targetEvmAddress,
+          clearingId,
+        );
+
+      clearing.amount = BigDecimal.fromStringFixed(
+        clearing.amount.toString(),
+        security.decimals,
       );
 
-    clearing.amount = BigDecimal.fromStringFixed(
-      clearing.amount.toString(),
-      security.decimals,
-    );
+      clearing.holdEscrow = (
+        await this.accountService.getAccountInfo(clearing.holdEscrow)
+      ).id.toString();
 
-    clearing.holdEscrow = (
-      await this.accountService.getAccountInfo(clearing.holdEscrow)
-    ).id.toString();
+      clearing.holdTo = (
+        await this.accountService.getAccountInfo(clearing.holdTo)
+      ).id.toString();
 
-    clearing.holdTo = (
-      await this.accountService.getAccountInfo(clearing.holdTo)
-    ).id.toString();
-
-    return new GetClearingCreateHoldForByPartitionQueryResponse(clearing);
+      return new GetClearingCreateHoldForByPartitionQueryResponse(clearing);
+    } catch (error) {
+      throw new GetClearingCreateHoldForByPartitionQueryError(error as Error);
+    }
   }
 }

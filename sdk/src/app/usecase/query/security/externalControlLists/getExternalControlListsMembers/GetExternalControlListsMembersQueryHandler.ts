@@ -213,8 +213,8 @@ import {
   GetExternalControlListsMembersQuery,
   GetExternalControlListsMembersQueryResponse,
 } from './GetExternalControlListsMembersQuery.js';
-import ContractService from '../../../../../../app/service/ContractService.js';
-import AccountService from '../../../../../../app/service/AccountService.js';
+import ContractService from '../../../../../../app/service/contract/ContractService.js';
+import AccountService from '../../../../../../app/service/account/AccountService.js';
 
 @QueryHandler(GetExternalControlListsMembersQuery)
 export class GetExternalControlListsMembersQueryHandler

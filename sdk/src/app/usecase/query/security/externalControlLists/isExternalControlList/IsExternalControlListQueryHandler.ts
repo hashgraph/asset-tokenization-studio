@@ -213,7 +213,7 @@ import {
   IsExternalControlListQuery,
   IsExternalControlListQueryResponse,
 } from './IsExternalControlListQuery.js';
-import ContractService from '../../../../../../app/service/ContractService.js';
+import ContractService from '../../../../../../app/service/contract/ContractService.js';
 
 @QueryHandler(IsExternalControlListQuery)
 export class IsExternalControlListQueryHandler

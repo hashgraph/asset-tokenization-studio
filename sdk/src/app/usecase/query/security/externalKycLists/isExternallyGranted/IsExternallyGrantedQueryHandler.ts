@@ -213,8 +213,8 @@ import {
   IsExternallyGrantedQuery,
   IsExternallyGrantedQueryResponse,
 } from './IsExternallyGrantedQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
-import AccountService from '../../../../../service/AccountService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 
 @QueryHandler(IsExternallyGrantedQuery)
 export class IsExternallyGrantedQueryHandler

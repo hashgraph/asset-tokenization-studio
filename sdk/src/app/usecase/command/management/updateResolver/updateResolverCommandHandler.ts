@@ -179,7 +179,8 @@ import {
   UpdateResolverCommand,
   UpdateResolverCommandResponse,
 } from './updateResolverCommand';
-import ContractService from '../../../../service/ContractService';
+import ContractService from '../../../../service/contract/ContractService';
+import { UpdateResolverCommandError } from './error/UpdateResolverCommandError';
 
 @CommandHandler(UpdateResolverCommand)
 export class UpdateResolverCommandHandler
@@ -187,7 +188,7 @@ export class UpdateResolverCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
   ) {}
@@ -195,24 +196,28 @@ export class UpdateResolverCommandHandler
   async execute(
     command: UpdateResolverCommand,
   ): Promise<UpdateResolverCommandResponse> {
-    const { configVersion, securityId, resolver, configId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { configVersion, securityId, resolver, configId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const resolverEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(resolver.toString());
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const resolverEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(resolver.toString());
 
-    const res = await handler.updateResolver(
-      securityEvmAddress,
-      resolverEvmAddress,
-      configVersion,
-      configId,
-      securityId,
-    );
+      const res = await handler.updateResolver(
+        securityEvmAddress,
+        resolverEvmAddress,
+        configVersion,
+        configId,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new UpdateResolverCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new UpdateResolverCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new UpdateResolverCommandError(error as Error);
+    }
   }
 }

@@ -208,11 +208,12 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import {
   GetScheduledBalanceAdjustmentQuery,
   GetScheduledBalanceAdjustmentQueryResponse,
 } from './GetScheduledBalanceAdjustmentQuery.js';
+import { GetScheduledBalanceAdjustmentQueryError } from './error/GetScheduledBalanceAdjustmentQueryError.js';
 
 @QueryHandler(GetScheduledBalanceAdjustmentQuery)
 export class GetScheduledBalanceAdjustmentQueryHandler
@@ -220,24 +221,30 @@ export class GetScheduledBalanceAdjustmentQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetScheduledBalanceAdjustmentQuery,
   ): Promise<GetScheduledBalanceAdjustmentQueryResponse> {
-    const { securityId, balanceAdjustmentId } = query;
+    try {
+      const { securityId, balanceAdjustmentId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    const res = await this.queryAdapter.getScheduledBalanceAdjustment(
-      securityEvmAddress,
-      balanceAdjustmentId,
-    );
+      const res = await this.queryAdapter.getScheduledBalanceAdjustment(
+        securityEvmAddress,
+        balanceAdjustmentId,
+      );
 
-    return Promise.resolve(new GetScheduledBalanceAdjustmentQueryResponse(res));
+      return Promise.resolve(
+        new GetScheduledBalanceAdjustmentQueryResponse(res),
+      );
+    } catch (error) {
+      throw new GetScheduledBalanceAdjustmentQueryError(error as Error);
+    }
   }
 }

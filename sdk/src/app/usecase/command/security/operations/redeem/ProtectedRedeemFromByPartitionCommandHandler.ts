@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
@@ -215,8 +215,9 @@ import {
   ProtectedRedeemFromByPartitionCommand,
   ProtectedRedeemFromByPartitionCommandResponse,
 } from './ProtectedRedeemFromByPartitionCommand';
-import ValidationService from '../../../../../service/ValidationService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { ProtectedRedeemFromByPartitionCommandError } from './error/ProtectedRedeemFromByPartitionCommandError.js';
 import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ProtectedRedeemFromByPartitionCommand)
@@ -225,82 +226,90 @@ export class ProtectedRedeemFromByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: ProtectedRedeemFromByPartitionCommand,
   ): Promise<ProtectedRedeemFromByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      sourceId,
-      amount,
-      deadline,
-      nounce,
-      signature,
-    } = command;
+    try {
+      const {
+        securityId,
+        partitionId,
+        sourceId,
+        amount,
+        deadline,
+        nounce,
+        signature,
+      } = command;
 
-    await this.validationService.checkClearingDeactivated(securityId);
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [sourceId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [sourceId],
+        KycStatus.GRANTED,
+      );
 
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkProtectedPartitions(security);
+      await this.validationService.checkProtectedPartitions(security);
 
-    await this.validationService.checkProtectedPartitionRole(
-      partitionId,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkProtectedPartitionRole(
+        partitionId,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkCanRedeem(
-      securityId,
-      sourceId,
-      amount,
-      partitionId,
-      account.id.toString(),
-    );
+      await this.validationService.checkCanRedeem(
+        securityId,
+        sourceId,
+        amount,
+        partitionId,
+        account.id.toString(),
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkValidNounce(securityId, sourceId, nounce);
+      await this.validationService.checkValidNounce(
+        securityId,
+        sourceId,
+        nounce,
+      );
 
-    const res = await handler.protectedRedeemFromByPartition(
-      securityEvmAddress,
-      partitionId,
-      sourceEvmAddress,
-      amountBd,
-      BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nounce.toString()),
-      signature,
-    );
-    return Promise.resolve(
-      new ProtectedRedeemFromByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      const res = await handler.protectedRedeemFromByPartition(
+        securityEvmAddress,
+        partitionId,
+        sourceEvmAddress,
+        amountBd,
+        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(nounce.toString()),
+        signature,
+      );
+      return Promise.resolve(
+        new ProtectedRedeemFromByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ProtectedRedeemFromByPartitionCommandError(error as Error);
+    }
   }
 }

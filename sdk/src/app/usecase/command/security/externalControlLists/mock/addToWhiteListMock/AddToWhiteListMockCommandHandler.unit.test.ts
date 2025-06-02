@@ -209,7 +209,7 @@ import {
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { AddToWhiteListMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
 import {
@@ -217,7 +217,7 @@ import {
   AddToWhiteListMockCommandResponse,
 } from './AddToWhiteListMockCommand.js';
 import { AddToWhiteListMockCommandHandler } from './AddToWhiteListMockCommandHandler.js';
-import AccountService from '../../../../../../../app/service/AccountService.js';
+import AccountService from '../../../../../../../app/service/account/AccountService.js';
 
 describe('AddToWhiteListMockCommandHandler', () => {
   let handler: AddToWhiteListMockCommandHandler;

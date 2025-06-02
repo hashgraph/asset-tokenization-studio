@@ -212,9 +212,10 @@ import {
   ApplyRolesCommand,
   ApplyRolesCommandResponse,
 } from './ApplyRolesCommand.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import AccountService from '../../../../../service/AccountService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { ApplyRolesCommandError } from './error/ApplyRolesCommandError.js';
 
 @CommandHandler(ApplyRolesCommand)
 export class ApplyRolesCommandHandler
@@ -222,7 +223,7 @@ export class ApplyRolesCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(AccountService)
@@ -234,26 +235,30 @@ export class ApplyRolesCommandHandler
   async execute(
     command: ApplyRolesCommand,
   ): Promise<ApplyRolesCommandResponse> {
-    const { roles, actives, targetId, securityId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { roles, actives, targetId, securityId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    const res = await handler.applyRoles(
-      securityEvmAddress,
-      targetEvmAddress,
-      roles,
-      actives,
-      securityId,
-    );
+      const res = await handler.applyRoles(
+        securityEvmAddress,
+        targetEvmAddress,
+        roles,
+        actives,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ApplyRolesCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new ApplyRolesCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new ApplyRolesCommandError(error as Error);
+    }
   }
 }
