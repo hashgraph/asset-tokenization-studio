@@ -214,7 +214,7 @@ import BaseError from '../../../core/error/BaseError.js';
 import CheckStrings from '../../../core/checks/strings/CheckStrings.js';
 import { InvalidContractId } from './error/InvalidContractId.js';
 import { HederaId } from '../shared/HederaId.js';
-import LogService from '../../../app/service/LogService.js';
+import LogService from '../../../app/service/log/LogService.js';
 
 export default class ContractId extends HederaId {
   public readonly value: string;

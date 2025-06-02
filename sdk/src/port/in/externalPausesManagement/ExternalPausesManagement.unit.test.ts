@@ -209,7 +209,7 @@ import {
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/LogService';
+import LogService from '../../../app/service/log/LogService';
 import { QueryBus } from '../../../core/query/QueryBus';
 import ExternalPausesManagement from './ExternalPausesManagement';
 import {

@@ -211,9 +211,10 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetClearedAmountForByPartitionQueryError } from './error/GetClearedAmountForByPartitionQueryError.js';
 
 @QueryHandler(GetClearedAmountForByPartitionQuery)
 export class GetClearedAmountForByPartitionQueryHandler
@@ -221,29 +222,33 @@ export class GetClearedAmountForByPartitionQueryHandler
 {
   constructor(
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(
     query: GetClearedAmountForByPartitionQuery,
   ): Promise<GetClearedAmountForByPartitionQueryResponse> {
-    const { securityId, partitionId, targetId } = query;
+    try {
+      const { securityId, partitionId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getClearedAmountForByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-    );
+      const res = await this.queryAdapter.getClearedAmountForByPartition(
+        securityEvmAddress,
+        partitionId,
+        targetEvmAddress,
+      );
 
-    return new GetClearedAmountForByPartitionQueryResponse(res);
+      return new GetClearedAmountForByPartitionQueryResponse(res);
+    } catch (error) {
+      throw new GetClearedAmountForByPartitionQueryError(error as Error);
+    }
   }
 }

@@ -212,8 +212,9 @@ import {
 } from './GetControlListTypeQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
+import { GetControlListTypeQueryError } from './error/GetControlListTypeQueryError.js';
 
 @QueryHandler(GetControlListTypeQuery)
 export class GetControlListTypeQueryHandler
@@ -221,24 +222,29 @@ export class GetControlListTypeQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetControlListTypeQuery,
   ): Promise<GetControlListTypeQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getControlListType(securityEvmAddress);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res =
+        await this.queryAdapter.getControlListType(securityEvmAddress);
 
-    return new GetControlListTypeQueryResponse(
-      res
-        ? SecurityControlListType.WHITELIST
-        : SecurityControlListType.BLACKLIST,
-    );
+      return new GetControlListTypeQueryResponse(
+        res
+          ? SecurityControlListType.WHITELIST
+          : SecurityControlListType.BLACKLIST,
+      );
+    } catch (error) {
+      throw new GetControlListTypeQueryError(error as Error);
+    }
   }
 }

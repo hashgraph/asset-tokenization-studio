@@ -209,7 +209,7 @@ import {
 } from '@hashgraph/hedera-custodians-integration';
 import { singleton } from 'tsyringe';
 import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
-import LogService from '../../../../../app/service/LogService';
+import LogService from '../../../../../app/service/log/LogService';
 import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
 import FireblocksSettings from '../../../../../core/settings/custodialWalletSettings/FireblocksSettings';
 

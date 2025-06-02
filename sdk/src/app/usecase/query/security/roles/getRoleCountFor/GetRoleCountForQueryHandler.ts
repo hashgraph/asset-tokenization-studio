@@ -212,8 +212,9 @@ import {
 } from './GetRoleCountForQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService';
-import ContractService from '../../../../../service/ContractService.js';
+import AccountService from '../../../../../service/account/AccountService';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetRoleCountForQueryError } from './error/GetRoleCountForQueryError.js';
 
 @QueryHandler(GetRoleCountForQuery)
 export class GetRoleCountForQueryHandler
@@ -221,28 +222,32 @@ export class GetRoleCountForQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetRoleCountForQuery,
   ): Promise<GetRoleCountForQueryResponse> {
-    const { targetId, securityId } = query;
+    try {
+      const { targetId, securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getRoleCountFor(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
+      const res = await this.queryAdapter.getRoleCountFor(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
 
-    return new GetRoleCountForQueryResponse(res);
+      return new GetRoleCountForQueryResponse(res);
+    } catch (error) {
+      throw new GetRoleCountForQueryError(error as Error);
+    }
   }
 }

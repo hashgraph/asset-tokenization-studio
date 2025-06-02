@@ -211,8 +211,9 @@ import {
   GetRoleMemberCountQueryResponse,
 } from './GetRoleMemberCountQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { GetRoleMemberCountQueryError } from './error/GetRoleMemberCountQueryError.js';
 
 @QueryHandler(GetRoleMemberCountQuery)
 export class GetRoleMemberCountQueryHandler
@@ -220,23 +221,27 @@ export class GetRoleMemberCountQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetRoleMemberCountQuery,
   ): Promise<GetRoleMemberCountQueryResponse> {
-    const { role, securityId } = query;
+    try {
+      const { role, securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getRoleMemberCount(
-      securityEvmAddress,
-      role,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getRoleMemberCount(
+        securityEvmAddress,
+        role,
+      );
 
-    return new GetRoleMemberCountQueryResponse(res);
+      return new GetRoleMemberCountQueryResponse(res);
+    } catch (error) {
+      throw new GetRoleMemberCountQueryError(error as Error);
+    }
   }
 }

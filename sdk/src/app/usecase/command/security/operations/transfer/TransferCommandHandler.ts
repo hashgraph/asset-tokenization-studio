@@ -205,15 +205,16 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import { TransferCommand, TransferCommandResponse } from './TransferCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { TransferCommandError } from './error/TransferCommandError.js';
 import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(TransferCommand)
@@ -222,52 +223,60 @@ export class TransferCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(command: TransferCommand): Promise<TransferCommandResponse> {
-    const { securityId, targetId, amount } = command;
+    try {
+      const { securityId, targetId, amount } = command;
 
-    await this.validationService.checkClearingDeactivated(securityId);
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [targetId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkClearingDeactivated(securityId);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.GRANTED,
+      );
 
-    const handler = this.transactionService.getHandler();
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const security = await this.securityService.get(securityId);
-    await this.validationService.checkDecimals(security, amount);
+      const security = await this.securityService.get(securityId);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkCanTransfer(securityId, targetId, amount);
+      await this.validationService.checkCanTransfer(
+        securityId,
+        targetId,
+        amount,
+      );
 
-    const amountBd: BigDecimal = BigDecimal.fromString(
-      amount,
-      security.decimals,
-    );
+      const amountBd: BigDecimal = BigDecimal.fromString(
+        amount,
+        security.decimals,
+      );
 
-    const res = await handler.transfer(
-      securityEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      securityId,
-    );
-    return Promise.resolve(
-      new TransferCommandResponse(res.error === undefined, res.id!),
-    );
+      const res = await handler.transfer(
+        securityEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        securityId,
+      );
+      return Promise.resolve(
+        new TransferCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new TransferCommandError(error as Error);
+    }
   }
 }

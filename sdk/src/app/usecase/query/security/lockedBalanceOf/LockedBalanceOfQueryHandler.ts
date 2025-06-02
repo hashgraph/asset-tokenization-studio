@@ -214,8 +214,9 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import SecurityService from '../../../../service/security/SecurityService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../service/AccountService';
-import ContractService from '../../../../service/ContractService.js';
+import AccountService from '../../../../service/account/AccountService';
+import ContractService from '../../../../service/contract/ContractService.js';
+import { LockedBalanceOfQueryError } from './error/LockedBalanceOfQueryError.js';
 
 @QueryHandler(LockedBalanceOfQuery)
 export class LockedBalanceOfQueryHandler
@@ -223,34 +224,38 @@ export class LockedBalanceOfQueryHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: LockedBalanceOfQuery,
   ): Promise<LockedBalanceOfQueryResponse> {
-    const { targetId, securityId } = query;
-    const security = await this.securityService.get(securityId);
+    try {
+      const { targetId, securityId } = query;
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getLockedBalanceOf(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
-    const amount = BigDecimal.fromStringFixed(
-      res.toString(),
-      security.decimals,
-    );
-    return new LockedBalanceOfQueryResponse(amount);
+      const res = await this.queryAdapter.getLockedBalanceOf(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
+      const amount = BigDecimal.fromStringFixed(
+        res.toString(),
+        security.decimals,
+      );
+      return new LockedBalanceOfQueryResponse(amount);
+    } catch (error) {
+      throw new LockedBalanceOfQueryError(error as Error);
+    }
   }
 }

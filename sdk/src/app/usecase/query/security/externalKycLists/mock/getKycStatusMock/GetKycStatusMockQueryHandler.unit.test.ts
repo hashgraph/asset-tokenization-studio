@@ -205,7 +205,7 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import { EvmAddressPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { GetKycStatusMockQueryHandler } from './GetKycStatusMockQueryHandler.js';
 import {
@@ -213,7 +213,7 @@ import {
   GetKycStatusMockQueryResponse,
 } from './GetKycStatusMockQuery.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import { GetKycStatusMockQueryFixture } from '../../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
 
 describe('GetKycStatusMockQueryHandler', () => {
