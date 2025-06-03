@@ -215,7 +215,7 @@ import ContractService from '../../../../../../app/service/contract/ContractServ
 import { GetNounceQuery, GetNounceQueryResponse } from './GetNounceQuery.js';
 import { GetNounceQueryHandler } from './GetNounceQueryHandler.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetNounceQueryFixture } from '../../../../../../../__tests__/fixtures/protectedPartitions/ProtectedPartitions.js';
+import { GetNounceQueryFixture } from '../../../../../../../__tests__/fixtures/protectedPartitions/ProtectedPartitionsFixture.js';
 import { GetNounceQueryError } from './error/GetNounceQueryError.js';
 import { BigNumber } from 'ethers';
 
