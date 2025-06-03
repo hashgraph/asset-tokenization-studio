@@ -218,7 +218,7 @@ import {
 } from './GetIssuerListMembersQuery.js';
 import { GetIssuerListMembersQueryHandler } from './GetIssuerListMembersQueryHandler.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetIssuerListMembersQueryFixture } from '../../../../../../../__tests__/fixtures/ssi/Ssi.js';
+import { GetIssuerListMembersQueryFixture } from '../../../../../../../__tests__/fixtures/ssi/SsiFixture.js';
 import { GetIssuerListMembersQueryError } from './error/GetIssuerListMembersQueryError.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/account/AccountFixture.js';

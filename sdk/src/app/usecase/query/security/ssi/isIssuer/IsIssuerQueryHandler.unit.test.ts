@@ -213,7 +213,7 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ContractService from '../../../../../../app/service/contract/ContractService.js';
 import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { IsIssuerQueryFixture } from '../../../../../../../__tests__/fixtures/ssi/Ssi.js';
+import { IsIssuerQueryFixture } from '../../../../../../../__tests__/fixtures/ssi/SsiFixture.js';
 import { IsIssuerQuery, IsIssuerQueryResponse } from './IsIssuerQuery.js';
 import { IsIssuerQueryHandler } from './IsIssuerQueryHandler.js';
 import { IsIssuerQueryError } from './error/IsIssuerQueryError.js';
