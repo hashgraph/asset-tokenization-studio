@@ -213,6 +213,7 @@ import {
   GetIssuerListCountQuery,
   GetIssuerListCountQueryResponse,
 } from './GetIssuerListCountQuery';
+import { GetIssuerListCountQueryError } from './error/GetIssuerListCountQueryError';
 
 @QueryHandler(GetIssuerListCountQuery)
 export class GetIssuerListCountQueryHandler
@@ -228,12 +229,17 @@ export class GetIssuerListCountQueryHandler
   async execute(
     query: GetIssuerListCountQuery,
   ): Promise<GetIssuerListCountQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getIssuerListCount(securityEvmAddress);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res =
+        await this.queryAdapter.getIssuerListCount(securityEvmAddress);
 
-    return new GetIssuerListCountQueryResponse(res);
+      return new GetIssuerListCountQueryResponse(res);
+    } catch (error) {
+      throw new GetIssuerListCountQueryError(error as Error);
+    }
   }
 }
