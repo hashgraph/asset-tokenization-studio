@@ -218,17 +218,22 @@ import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
 import { EVM_ZERO_ADDRESS } from '../../../core/Constants.js';
 import Injectable from '../../../core/Injectable.js';
 import { createMock } from '@golevelup/ts-jest';
-import { EvmAddressPropsFixture, HederaIdPropsFixture } from '../../../../__tests__/fixtures/shared/DataFixture.js';
+import {
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+} from '../../../../__tests__/fixtures/shared/DataFixture.js';
 
 describe('AccountService', () => {
   let service: AccountService;
-  
+
   const queryBusMock = createMock<QueryBus>();
   const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
   const transactionServiceMock = createMock<TransactionService>();
   const networkServiceMock = createMock<NetworkService>();
 
-  const account = new Account({id: new HederaId(HederaIdPropsFixture.create().value).toString()});
+  const account = new Account({
+    id: new HederaId(HederaIdPropsFixture.create().value).toString(),
+  });
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const accountId = account.id.toString();
 
