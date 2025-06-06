@@ -324,13 +324,14 @@ contract TransferAndLock is
         onlyProtectedPartitions
         returns (bool success_, uint256 lockId_)
     {
-        _protectedTransferAndLockByPartition(
-            _partition,
-            _transferAndLockData,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        return
+            _protectedTransferAndLockByPartition(
+                _partition,
+                _transferAndLockData,
+                _deadline,
+                _nounce,
+                _signature
+            );
     }
 
     function protectedTransferAndLock(
@@ -351,12 +352,13 @@ contract TransferAndLock is
         onlyProtectedPartitions
         returns (bool success_, uint256 lockId_)
     {
-        _protectedTransferAndLock(
-            _transferAndLockData,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        return
+            _protectedTransferAndLock(
+                _transferAndLockData,
+                _deadline,
+                _nounce,
+                _signature
+            );
     }
 
     function getStaticResolverKey()

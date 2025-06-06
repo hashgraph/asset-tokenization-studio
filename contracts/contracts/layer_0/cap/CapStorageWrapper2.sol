@@ -211,7 +211,6 @@ import {
 import {LockStorageWrapper2} from '../lock/LockStorageWrapper2.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable no-unused-vars, custom-errors
 abstract contract CapStorageWrapper2 is
     ICapStorageWrapper,
     LockStorageWrapper2
@@ -324,4 +323,3 @@ abstract contract CapStorageWrapper2 is
         }
     }
 }
-// solhint-enable no-unused-vars, custom-errors

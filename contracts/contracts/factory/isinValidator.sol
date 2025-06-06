@@ -230,7 +230,7 @@ function checkLength(string calldata _isin) pure {
     }
 }
 
-// solhint-disable-next-line
+// solhint-disable-next-line max-line-length
 // https://fastercapital.com/questions/how-to-check-if-an-isin-code-is-valid-and-compliant-with-the-iso-6166-standard.html
 function checkChecksum(string calldata _isin) pure {
     bytes memory isin = bytes(_isin);

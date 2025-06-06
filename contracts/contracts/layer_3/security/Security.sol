@@ -217,7 +217,7 @@ import {Common} from '../../layer_1/common/Common.sol';
 abstract contract Security is ISecurity, SecurityStorageWrapper, Common {
     function getSecurityRegulationData()
         external
-        view
+        pure
         override
         returns (SecurityRegulationData memory securityRegulationData_)
     {

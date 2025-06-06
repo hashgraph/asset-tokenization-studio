@@ -227,7 +227,6 @@ import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 
-// solhint-disable no-unused-vars, custom-errors
 abstract contract ClearingStorageWrapper2 is
     IClearingStorageWrapper,
     HoldStorageWrapper2
@@ -1329,4 +1328,3 @@ abstract contract ClearingStorageWrapper2 is
             );
     }
 }
-// solhint-enable no-unused-vars, custom-errors
