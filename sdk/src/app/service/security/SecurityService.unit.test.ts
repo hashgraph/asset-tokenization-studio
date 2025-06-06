@@ -204,7 +204,7 @@
 */
 
 import { container } from 'tsyringe';
-import SecurityService from './SecurityService'; // Adjust path as needed
+import SecurityService from './SecurityService';
 import { QueryBus } from '../../../core/query/QueryBus';
 import Injectable from '../../../core/Injectable';
 import { GetSecurityQuery } from '../../usecase/query/security/get/GetSecurityQuery';
