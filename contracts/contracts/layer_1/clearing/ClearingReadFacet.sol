@@ -213,7 +213,6 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_READ_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
-// solhint-disable no-unused-vars, custom-errors
 contract ClearingReadFacet is IStaticFunctionSelectors, IClearingRead, Common {
     function getClearedAmountFor(
         address _tokenHolder
@@ -318,4 +317,3 @@ contract ClearingReadFacet is IStaticFunctionSelectors, IClearingRead, Common {
         staticInterfaceIds_[selectorsIndex++] = type(IClearingRead).interfaceId;
     }
 }
-// solhint-enable no-unused-vars, custom-errors

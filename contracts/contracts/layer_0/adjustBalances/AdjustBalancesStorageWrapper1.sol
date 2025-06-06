@@ -243,7 +243,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         // Clearings
         mapping(address => uint256) labafClearedAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) labafClearedAmountByAccountAndPartition;
-        // solhint-disable-next-line
+        // solhint-disable max-line-length
         mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => mapping(uint256 => uint256)))) labafClearedAmountByAccountPartitionTypeAndId;
     }
 
