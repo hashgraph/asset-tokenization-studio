@@ -209,24 +209,32 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { GetCouponQuery, GetCouponQueryResponse } from './GetCouponQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetCouponQueryError } from './error/GetCouponQueryError.js';
 
 @QueryHandler(GetCouponQuery)
 export class GetCouponQueryHandler implements IQueryHandler<GetCouponQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetCouponQuery): Promise<GetCouponQueryResponse> {
-    const { securityId, couponId } = query;
+    try {
+      const { securityId, couponId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getCoupon(securityEvmAddress, couponId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getCoupon(
+        securityEvmAddress,
+        couponId,
+      );
 
-    return Promise.resolve(new GetCouponQueryResponse(res));
+      return Promise.resolve(new GetCouponQueryResponse(res));
+    } catch (error) {
+      throw new GetCouponQueryError(error as Error);
+    }
   }
 }

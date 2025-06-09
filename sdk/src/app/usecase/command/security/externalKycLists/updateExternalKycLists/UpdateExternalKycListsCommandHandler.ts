@@ -205,8 +205,8 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/AccountService';
-import ValidationService from '../../../../../service/ValidationService';
+import AccountService from '../../../../../service/account/AccountService';
+import ValidationService from '../../../../../service/validation/ValidationService';
 import {
   UpdateExternalKycListsCommand,
   UpdateExternalKycListsCommandResponse,
@@ -215,7 +215,7 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
 
 @CommandHandler(UpdateExternalKycListsCommand)
 export class UpdateExternalKycListsCommandHandler
@@ -223,13 +223,13 @@ export class UpdateExternalKycListsCommandHandler
 {
   constructor(
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
   ) {}
 
   async execute(

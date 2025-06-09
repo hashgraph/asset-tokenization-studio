@@ -214,9 +214,10 @@ import TransactionService from '../../../../../../service/transaction/Transactio
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ReleaseHoldByPartitionCommandError } from './error/ReleaseHoldByPartitionCommandError.js';
 
 @CommandHandler(ReleaseHoldByPartitionCommand)
 export class ReleaseHoldByPartitionCommandHandler
@@ -224,57 +225,61 @@ export class ReleaseHoldByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: ReleaseHoldByPartitionCommand,
   ): Promise<ReleaseHoldByPartitionCommandResponse> {
-    const { securityId, partitionId, amount, holdId, targetId } = command;
-    const handler = this.transactionService.getHandler();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, partitionId, amount, holdId, targetId } = command;
+      const handler = this.transactionService.getHandler();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkHoldBalance(
-      securityId,
-      partitionId,
-      targetId,
-      holdId,
-      amountBd,
-    );
+      await this.validationService.checkHoldBalance(
+        securityId,
+        partitionId,
+        targetId,
+        holdId,
+        amountBd,
+      );
 
-    const res = await handler.releaseHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      holdId,
-      targetEvmAddress,
-      amountBd,
-      securityId,
-    );
+      const res = await handler.releaseHoldByPartition(
+        securityEvmAddress,
+        partitionId,
+        holdId,
+        targetEvmAddress,
+        amountBd,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ReleaseHoldByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ReleaseHoldByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ReleaseHoldByPartitionCommandError(error as Error);
+    }
   }
 }

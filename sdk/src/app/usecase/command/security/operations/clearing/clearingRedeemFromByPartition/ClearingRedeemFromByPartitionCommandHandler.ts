@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
@@ -215,8 +215,10 @@ import {
   ClearingRedeemFromByPartitionCommand,
   ClearingRedeemFromByPartitionCommandResponse,
 } from './ClearingRedeemFromByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ClearingRedeemFromByPartitionCommandError } from './error/ClearingRedeemFromByPartitionCommandError.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ClearingRedeemFromByPartitionCommand)
 export class ClearingRedeemFromByPartitionCommandHandler
@@ -238,50 +240,65 @@ export class ClearingRedeemFromByPartitionCommandHandler
   async execute(
     command: ClearingRedeemFromByPartitionCommand,
   ): Promise<ClearingRedeemFromByPartitionCommandResponse> {
-    const { securityId, partitionId, amount, sourceId, expirationDate } =
-      command;
-    const handler = this.transactionService.getHandler();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, partitionId, amount, sourceId, expirationDate } =
+        command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [account.id.toString(), sourceId],
+        KycStatus.GRANTED,
+      );
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkControlList(
+        securityId,
+        account.evmAddress,
+        sourceEvmAddress.toString(),
+      );
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+      await this.validationService.checkDecimals(security, amount);
 
-    const res = await handler.clearingRedeemFromByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      sourceEvmAddress,
-      BigDecimal.fromString(expirationDate.substring(0, 10)),
-      securityId,
-    );
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: ClearingRedeemFromByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const res = await handler.clearingRedeemFromByPartition(
+        securityEvmAddress,
+        partitionId,
+        amountBd,
+        sourceEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ClearingRedeemFromByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
+      const clearingId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.clearingId,
+        className: ClearingRedeemFromByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
+
+      return Promise.resolve(
+        new ClearingRedeemFromByPartitionCommandResponse(
+          parseInt(clearingId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ClearingRedeemFromByPartitionCommandError(error as Error);
+    }
   }
 }

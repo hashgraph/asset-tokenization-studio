@@ -212,7 +212,7 @@ import {
   IsExternalPauseQuery,
   IsExternalPauseQueryResponse,
 } from './IsExternalPauseQuery.js';
-import ContractService from '../../../../../../app/service/ContractService.js';
+import ContractService from '../../../../../../app/service/contract/ContractService.js';
 
 @QueryHandler(IsExternalPauseQuery)
 export class IsExternalPauseQueryHandler

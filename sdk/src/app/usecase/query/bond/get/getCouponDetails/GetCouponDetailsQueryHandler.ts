@@ -211,9 +211,10 @@ import {
   GetCouponDetailsQuery,
   GetCouponDetailsQueryResponse,
 } from './GetCouponDetailsQuery.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { CouponDetails } from '../../../../../../domain/context/bond/CouponDetails.js';
+import { GetCouponDetailsQueryError } from './error/GetCouponDetailsQueryError.js';
 
 @QueryHandler(GetCouponDetailsQuery)
 export class GetCouponDetailsQueryHandler
@@ -221,22 +222,26 @@ export class GetCouponDetailsQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(
     query: GetCouponDetailsQuery,
   ): Promise<GetCouponDetailsQueryResponse> {
-    const { bondId } = query;
+    try {
+      const { bondId } = query;
 
-    const bondEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(bondId);
+      const bondEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(bondId);
 
-    const coupon: CouponDetails =
-      await this.queryAdapter.getCouponDetails(bondEvmAddress);
+      const coupon: CouponDetails =
+        await this.queryAdapter.getCouponDetails(bondEvmAddress);
 
-    return Promise.resolve(new GetCouponDetailsQueryResponse(coupon));
+      return Promise.resolve(new GetCouponDetailsQueryResponse(coupon));
+    } catch (error) {
+      throw new GetCouponDetailsQueryError(error as Error);
+    }
   }
 }

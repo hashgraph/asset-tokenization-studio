@@ -228,7 +228,7 @@ import {
 import ConnectRequest from '../../../src/port/in/request/network/ConnectRequest.js';
 import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
-import NetworkService from '../../../src/app/service/NetworkService.js';
+import NetworkService from '../../../src/app/service/network/NetworkService.js';
 import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
 import Injectable from '../../../src/core/Injectable.js';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole.js';
@@ -337,6 +337,7 @@ describe('🧪 Bond test', () => {
       isControllable: true,
       arePartitionsProtected: false,
       clearingActive: false,
+      internalKycActivated: true,
       isMultiPartition: false,
       diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
       currency: currency,

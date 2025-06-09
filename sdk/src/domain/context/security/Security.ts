@@ -245,6 +245,7 @@ export interface SecurityProps {
   isControllable: boolean;
   arePartitionsProtected: boolean;
   clearingActive: boolean;
+  internalKycActivated: boolean;
   isMultiPartition: boolean;
   isIssuable?: boolean;
   totalSupply?: BigDecimal;
@@ -274,6 +275,7 @@ export class Security
   isMultiPartition: boolean;
   arePartitionsProtected: boolean;
   clearingActive: boolean;
+  internalKycActivated: boolean;
   isIssuable?: boolean;
   @OptionalField()
   totalSupply?: BigDecimal;
@@ -316,6 +318,7 @@ export class Security
       isControllable,
       arePartitionsProtected,
       clearingActive,
+      internalKycActivated,
       isMultiPartition,
       isIssuable,
       totalSupply,
@@ -339,6 +342,7 @@ export class Security
     this.isControllable = isControllable;
     this.arePartitionsProtected = arePartitionsProtected;
     this.clearingActive = clearingActive;
+    this.internalKycActivated = internalKycActivated;
     this.isMultiPartition = isMultiPartition;
     this.isIssuable = isIssuable ?? true;
     this.totalSupply = totalSupply ?? BigDecimal.ZERO;

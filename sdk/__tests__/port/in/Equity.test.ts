@@ -225,8 +225,6 @@ import {
   Security,
   GetScheduledBalanceAdjustmentRequest,
   GetScheduledBalanceAdjustmentCountRequest,
-  GetLastAggregatedBalanceAdjustmentFactorForRequest,
-  GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
 } from '../../../src/index.js';
 import {
   CLIENT_ACCOUNT_ECDSA,
@@ -238,7 +236,7 @@ import { Wallet, ethers } from 'ethers';
 import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
 import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter.js';
-import NetworkService from '../../../src/app/service/NetworkService.js';
+import NetworkService from '../../../src/app/service/network/NetworkService.js';
 import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
 import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
@@ -251,7 +249,6 @@ import {
   RegulationType,
 } from '../../../src/domain/context/factory/RegulationType.js';
 import { GetAllScheduledBalanceAdjustmentsRequest } from '../../../src';
-import GetAggregatedBalanceAdjustmentFactorRequest from '../../../src/port/in/request/account/GetAggregatedBalanceAdjustmentFactorRequest.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -349,6 +346,7 @@ describe('🧪 Equity test', () => {
       isControllable: true,
       arePartitionsProtected: false,
       clearingActive: false,
+      internalKycActivated: true,
       isMultiPartition: false,
       diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
       votingRight: votingRight,
@@ -659,42 +657,5 @@ describe('🧪 Equity test', () => {
         role: SecurityRole._CORPORATEACTIONS_ROLE,
       }),
     );
-  }, 60_000);
-
-  it('Should return last aggregated balance adjustment factor for correctly', async () => {
-    const count = await Equity.getLastAggregatedBalanceAdjustmentFactorFor(
-      new GetLastAggregatedBalanceAdjustmentFactorForRequest({
-        securityId: equity.evmDiamondAddress!.toString(),
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-      }),
-    );
-
-    expect(count).toBeDefined();
-    expect(typeof count).toBe('number');
-  }, 60_000);
-
-  it('Should return aggregated balance adjustment factor correctly', async () => {
-    const count = await Equity.getAggregatedBalanceAdjustmentFactor(
-      new GetAggregatedBalanceAdjustmentFactorRequest({
-        securityId: equity.evmDiamondAddress!.toString(),
-      }),
-    );
-
-    expect(count).toBeDefined();
-    expect(typeof count).toBe('number');
-  }, 60_000);
-
-  it('Should return last aggregated balance adjustment factor for by partition correctly', async () => {
-    const labaf =
-      await Equity.getLastAggregatedBalanceAdjustmentFactorForByPartition(
-        new GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest({
-          securityId: equity.evmDiamondAddress!.toString(),
-          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-          partitionId: configId,
-        }),
-      );
-
-    expect(labaf).toBeDefined();
-    expect(typeof labaf).toBe('number');
   }, 60_000);
 });

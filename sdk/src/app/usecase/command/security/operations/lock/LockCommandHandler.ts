@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import { LockCommand, LockCommandResponse } from './LockCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
@@ -213,56 +213,61 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { LockCommandError } from './error/LockCommandError.js';
 
 @CommandHandler(LockCommand)
 export class LockCommandHandler implements ICommandHandler<LockCommand> {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(command: LockCommand): Promise<LockCommandResponse> {
-    const { securityId, amount, sourceId, expirationDate } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, amount, sourceId, expirationDate } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._LOCKER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._LOCKER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const res = await handler.lock(
-      securityEvmAddress,
-      sourceEvmAddress,
-      amountBd,
-      BigDecimal.fromString(expirationDate),
-    );
+      const res = await handler.lock(
+        securityEvmAddress,
+        sourceEvmAddress,
+        amountBd,
+        BigDecimal.fromString(expirationDate),
+      );
 
-    return Promise.resolve(
-      new LockCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new LockCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new LockCommandError(error as Error);
+    }
   }
 }

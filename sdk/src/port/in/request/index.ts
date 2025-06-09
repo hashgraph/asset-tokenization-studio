@@ -341,6 +341,18 @@ import RemoveFromWhiteListMockRequest from './security/externalControlLists/mock
 import IsAuthorizedBlackListMockRequest from './security/externalControlLists/mock/IsAuthorizedBlackListMockRequest.js';
 import IsAuthorizedWhiteListMockRequest from './security/externalControlLists/mock/IsAuthorizedWhiteListMockRequest.js';
 import UpdateExternalKycListsRequest from './security/externalKycLists/UpdateExternalKycListsRequest.js';
+import AddExternalKycListRequest from './security/externalKycLists/AddExternalKycListRequest.js';
+import RemoveExternalKycListRequest from './security/externalKycLists/RemoveExternalKycListRequest.js';
+import GetExternalKycListsCountRequest from './security/externalKycLists/GetExternalKycListsCountRequest.js';
+import GetExternalKycListsMembersRequest from './security/externalKycLists/GetExternalKycListsMembersRequest.js';
+import IsExternalKycListRequest from './security/externalKycLists/IsExternalKycListRequest.js';
+import IsExternallyGrantedRequest from './security/externalKycLists/IsExternallyGrantedRequest.js';
+import ActivateInternalKycRequest from './security/kyc/ActivateInternalKycRequest.js';
+import DeactivateInternalKycRequest from './security/kyc/DeactivateInternalKycRequest.js';
+import IsInternalKycActivatedRequest from './security/kyc/IsInternalKycActivatedRequest.js';
+import GrantKycMockRequest from './security/externalKycLists/mock/GrantKycMockRequest.js';
+import RevokeKycMockRequest from './security/externalKycLists/mock/RevokeKycMockRequest.js';
+import GetKycStatusMockRequest from './security/externalKycLists/mock/GetKycStatusMockRequest.js';
 
 export {
   CreateEquityRequest,
@@ -480,4 +492,16 @@ export {
   IsAuthorizedBlackListMockRequest,
   IsAuthorizedWhiteListMockRequest,
   UpdateExternalKycListsRequest,
+  AddExternalKycListRequest,
+  RemoveExternalKycListRequest,
+  GetExternalKycListsCountRequest,
+  GetExternalKycListsMembersRequest,
+  IsExternalKycListRequest,
+  IsExternallyGrantedRequest,
+  ActivateInternalKycRequest,
+  DeactivateInternalKycRequest,
+  IsInternalKycActivatedRequest,
+  GrantKycMockRequest,
+  RevokeKycMockRequest,
+  GetKycStatusMockRequest,
 };

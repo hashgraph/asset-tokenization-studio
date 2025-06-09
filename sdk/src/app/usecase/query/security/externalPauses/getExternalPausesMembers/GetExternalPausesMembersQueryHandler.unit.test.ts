@@ -208,13 +208,13 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { Security } from '../../../../../../domain/context/security/Security.js';
 import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 import { GetExternalPausesMembersQueryHandler } from './GetExternalPausesMembersQueryHandler.js';
 import {

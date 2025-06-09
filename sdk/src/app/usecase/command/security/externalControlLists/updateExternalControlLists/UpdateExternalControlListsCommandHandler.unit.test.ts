@@ -205,20 +205,20 @@
 
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { UpdateExternalControlListsCommandHandler } from './UpdateExternalControlListsCommandHandler.js';
 import {
   UpdateExternalControlListsCommand,
   UpdateExternalControlListsCommandResponse,
 } from './UpdateExternalControlListsCommand.js';
-import ValidationService from '../../../../../../app/service/ValidationService.js';
+import ValidationService from '../../../../../../app/service/validation/ValidationService.js';
 import { UpdateExternalControlListsCommandFixture } from '../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';

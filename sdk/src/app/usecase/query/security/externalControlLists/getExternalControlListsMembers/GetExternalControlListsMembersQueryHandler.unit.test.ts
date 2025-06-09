@@ -208,7 +208,7 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import { GetExternalControlListsMembersQueryFixture } from '../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
@@ -220,7 +220,7 @@ import {
   GetExternalControlListsMembersQuery,
   GetExternalControlListsMembersQueryResponse,
 } from './GetExternalControlListsMembersQuery.js';
-import AccountService from '../../../../../../app/service/AccountService.js';
+import AccountService from '../../../../../../app/service/account/AccountService.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 
 describe('GetExternalControlListsMembersQueryHandler', () => {

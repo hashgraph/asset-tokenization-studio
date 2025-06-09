@@ -257,7 +257,7 @@ describe('ClearingTransferByPartitionCommandHandler', () => {
     );
     const commandRaw =
       ClearingTransferByPartitionCommandFixture.omit('sourceId').create();
-      /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     const { deadline, nonce, signature, ...commandFiltered } = commandRaw;
     command = commandFiltered;
   });

@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
@@ -215,8 +215,9 @@ import {
   ClearingCreateHoldFromByPartitionCommand,
   ClearingCreateHoldFromByPartitionCommandResponse,
 } from './ClearingCreateHoldFromByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ClearingCreateHoldFromByPartitionCommandError } from './error/ClearingCreateHoldFromByPartitionCommandError.js';
 
 @CommandHandler(ClearingCreateHoldFromByPartitionCommand)
 export class ClearingCreateHoldFromByPartitionCommandHandler
@@ -238,66 +239,68 @@ export class ClearingCreateHoldFromByPartitionCommandHandler
   async execute(
     command: ClearingCreateHoldFromByPartitionCommand,
   ): Promise<ClearingCreateHoldFromByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      sourceId,
-      targetId,
-      clearingExpirationDate,
-      holdExpirationDate,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        clearingExpirationDate,
+        holdExpirationDate,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const escrowEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(escrow);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const escrowEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(escrow);
 
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddressOrNull(targetId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+      const res = await handler.clearingCreateHoldFromByPartition(
+        securityEvmAddress,
+        partitionId,
+        escrowEvmAddress,
+        amountBd,
+        sourceEvmAddress,
+        targetEvmAddress,
+        BigDecimal.fromString(clearingExpirationDate),
+        BigDecimal.fromString(holdExpirationDate),
+        securityId,
+      );
 
-    const res = await handler.clearingCreateHoldFromByPartition(
-      securityEvmAddress,
-      partitionId,
-      escrowEvmAddress,
-      amountBd,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(clearingExpirationDate.substring(0, 10)),
-      BigDecimal.fromString(holdExpirationDate.substring(0, 10)),
-      securityId,
-    );
+      const clearingId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.clearingId,
+        className: ClearingCreateHoldFromByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: ClearingCreateHoldFromByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
-
-    return Promise.resolve(
-      new ClearingCreateHoldFromByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ClearingCreateHoldFromByPartitionCommandResponse(
+          parseInt(clearingId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ClearingCreateHoldFromByPartitionCommandError(error as Error);
+    }
   }
 }

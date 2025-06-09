@@ -211,7 +211,7 @@ import Account from '../../domain/context/account/Account.js';
 import { HederaId } from '../../domain/context/shared/HederaId.js';
 import { MirrorNodeAdapter } from './mirror/MirrorNodeAdapter.js';
 import { Environment } from '../../domain/context/network/Environment.js';
-import LogService from '../../app/service/LogService.js';
+import LogService from '../../app/service/log/LogService.js';
 import { Security } from '../../domain/context/security/Security.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../domain/context/bond/BondDetails.js';
@@ -656,6 +656,14 @@ interface IKycTransactionAdapter {
     targetId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  activateInternalKyc(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  deactivateInternalKyc(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 interface IClearingAdapter {
@@ -890,6 +898,30 @@ interface IExternalKycListsAdapter {
     actives: boolean[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  addExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  createExternalKycListMock(): Promise<string | TransactionResponse>;
+}
+
+interface IExternalKycListsMockAdapter {
+  grantKycMock(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  revokeKycMock(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 export default abstract class TransactionAdapter
@@ -906,7 +938,8 @@ export default abstract class TransactionAdapter
     IClearingAdapter,
     IExternalControlListsAdapter,
     IExternalControlListsMockAdapter,
-    IExternalKycListsAdapter
+    IExternalKycListsAdapter,
+    IExternalKycListsMockAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1733,6 +1766,49 @@ export default abstract class TransactionAdapter
     actives: boolean[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  activateInternalKyc(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  deactivateInternalKyc(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  grantKycMock(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  revokeKycMock(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createExternalKycListMock(): Promise<string | TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }

@@ -218,7 +218,7 @@ import { RuntimeError } from '../../../core/error/RuntimeError.js';
 import Account from '../../../domain/context/account/Account.js';
 import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
-import NetworkService from '../../../app/service/NetworkService.js';
+import NetworkService from '../../../app/service/network/NetworkService.js';
 import { MetaMaskInpageProvider } from '@metamask/providers';
 import { WalletConnectError } from '../../../domain/context/network/error/WalletConnectError.js';
 import EventService from '../../../app/service/event/EventService.js';
@@ -227,7 +227,7 @@ import {
   WalletEvents,
 } from '../../../app/service/event/WalletEvent.js';
 import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
-import LogService from '../../../app/service/LogService.js';
+import LogService from '../../../app/service/log/LogService.js';
 import { WalletConnectRejectedError } from '../../../domain/context/network/error/WalletConnectRejectedError.js';
 import {
   HederaNetworks,
@@ -340,6 +340,13 @@ import {
   CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
   CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
   UPDATE_EXTERNAL_KYC_LISTS_GAS,
+  ADD_EXTERNAL_KYC_LIST_GAS,
+  REMOVE_EXTERNAL_KYC_LIST_GAS,
+  GRANT_KYC_MOCK_GAS,
+  REVOKE_KYC_MOCK_GAS,
+  CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
+  ACTIVATE_INTERNAL_KYC_GAS,
+  DEACTIVATE_INTERNAL_KYC_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -382,6 +389,7 @@ import {
   MockedBlacklist__factory,
   MockedWhitelist__factory,
   ExternalKycListManagement__factory,
+  MockedExternalKycList__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -516,6 +524,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        internalKycActivated: securityInfo.internalKycActivated,
         externalPauses:
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
@@ -635,6 +644,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
+        internalKycActivated: securityInfo.internalKycActivated,
         externalPauses:
           externalPauses?.map((address) => address.toString()) ?? [],
         externalControlLists:
@@ -3108,6 +3118,133 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: UPDATE_EXTERNAL_KYC_LISTS_GAS,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async addExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding External kyc List for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalKycListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addExternalKycList(externalKycListAddress.toString(), {
+        gasLimit: ADD_EXTERNAL_KYC_LIST_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeExternalKycList(
+    security: EvmAddress,
+    externalKycListAddress: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing External kyc List for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ExternalKycListManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeExternalKycList(externalKycListAddress.toString(), {
+        gasLimit: REMOVE_EXTERNAL_KYC_LIST_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async grantKycMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Grant kyc address ${targetId.toString()} to external kyc mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedExternalKycList__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).grantKyc(targetId.toString(), {
+        gasLimit: GRANT_KYC_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async revokeKycMock(
+    contract: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Revoke kyc address ${targetId.toString()} to external kyc mock ${contract.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await MockedExternalKycList__factory.connect(
+        contract.toString(),
+        this.signerOrProvider,
+      ).revokeKyc(targetId.toString(), {
+        gasLimit: REVOKE_KYC_MOCK_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async createExternalKycListMock(): Promise<string> {
+    LogService.logTrace(`Deploying External Kyc List Mock contract`);
+
+    const factory = new MockedExternalKycList__factory(
+      this.signerOrProvider as Signer,
+    );
+
+    const contract = await factory.deploy({
+      gasLimit: CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
+    });
+    await contract.deployed();
+
+    return contract.address;
+  }
+
+  async activateInternalKyc(
+    security: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Activating Internal Kyc to address ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Kyc__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).activateInternalKyc({
+        gasLimit: ACTIVATE_INTERNAL_KYC_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async deactivateInternalKyc(
+    security: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Deactivate Internal Kyc to address ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Kyc__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).deactivateInternalKyc({
+        gasLimit: DEACTIVATE_INTERNAL_KYC_GAS,
+      }),
       this.networkService.environment,
     );
   }

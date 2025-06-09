@@ -209,24 +209,32 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { GetVotingQuery, GetVotingQueryResponse } from './GetVotingQuery.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetVotingQueryError } from './error/GetVotingQueryError.js';
 
 @QueryHandler(GetVotingQuery)
 export class GetVotingQueryHandler implements IQueryHandler<GetVotingQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: GetVotingQuery): Promise<GetVotingQueryResponse> {
-    const { securityId, votingId } = query;
+    try {
+      const { securityId, votingId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getVoting(securityEvmAddress, votingId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getVoting(
+        securityEvmAddress,
+        votingId,
+      );
 
-    return Promise.resolve(new GetVotingQueryResponse(res));
+      return Promise.resolve(new GetVotingQueryResponse(res));
+    } catch (error) {
+      throw new GetVotingQueryError(error as Error);
+    }
   }
 }

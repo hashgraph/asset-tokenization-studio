@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
@@ -215,8 +215,10 @@ import {
   ClearingTransferByPartitionCommand,
   ClearingTransferByPartitionCommandResponse,
 } from './ClearingTransferByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ClearingTransferByPartitionCommandError } from './error/ClearingTransferByPartitionCommandError.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ClearingTransferByPartitionCommand)
 export class ClearingTransferByPartitionCommandHandler
@@ -224,69 +226,81 @@ export class ClearingTransferByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: ClearingTransferByPartitionCommand,
   ): Promise<ClearingTransferByPartitionCommandResponse> {
-    const { securityId, partitionId, amount, targetId, expirationDate } =
-      command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, partitionId, amount, targetId, expirationDate } =
+        command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [account.id.toString(), targetId],
+        KycStatus.GRANTED,
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkControlList(
+        securityId,
+        account.evmAddress,
+        targetEvmAddress.toString(),
+      );
 
-    await this.validationService.checkBalance(
-      securityId,
-      account.id.toString(),
-      amountBd,
-    );
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+      await this.validationService.checkBalance(
+        securityId,
+        account.id.toString(),
+        amountBd,
+      );
+      const res = await handler.clearingTransferByPartition(
+        securityEvmAddress,
+        partitionId,
+        amountBd,
+        targetEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        securityId,
+      );
 
-    const res = await handler.clearingTransferByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate.substring(0, 10)),
-      securityId,
-    );
+      const clearingId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.clearingId,
+        className: ClearingTransferByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: ClearingTransferByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
-
-    return Promise.resolve(
-      new ClearingTransferByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ClearingTransferByPartitionCommandResponse(
+          parseInt(clearingId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ClearingTransferByPartitionCommandError(error as Error);
+    }
   }
 }

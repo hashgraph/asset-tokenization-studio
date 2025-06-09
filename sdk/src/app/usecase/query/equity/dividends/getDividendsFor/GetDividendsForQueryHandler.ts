@@ -211,9 +211,10 @@ import {
   GetDividendsForQueryResponse,
 } from './GetDividendsForQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetDividendsForQueryError } from './error/GetDividendsForQueryError.js';
 
 @QueryHandler(GetDividendsForQuery)
 export class GetDividendsForQueryHandler
@@ -221,29 +222,33 @@ export class GetDividendsForQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetDividendsForQuery,
   ): Promise<GetDividendsForQueryResponse> {
-    const { targetId, securityId, dividendId } = query;
+    try {
+      const { targetId, securityId, dividendId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.getDividendsFor(
-      securityEvmAddress,
-      targetEvmAddress,
-      dividendId,
-    );
+      const res = await this.queryAdapter.getDividendsFor(
+        securityEvmAddress,
+        targetEvmAddress,
+        dividendId,
+      );
 
-    return new GetDividendsForQueryResponse(res.tokenBalance, res.decimals);
+      return new GetDividendsForQueryResponse(res.tokenBalance, res.decimals);
+    } catch (error) {
+      throw new GetDividendsForQueryError(error as Error);
+    }
   }
 }

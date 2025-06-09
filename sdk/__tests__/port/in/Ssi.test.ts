@@ -227,7 +227,7 @@ import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';
 import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter';
 import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter';
-import NetworkService from '../../../src/app/service/NetworkService';
+import NetworkService from '../../../src/app/service/network/NetworkService';
 import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter';
 import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel';
 import {
@@ -239,7 +239,7 @@ import {
 import Injectable from '../../../src/core/Injectable';
 import Account from '../../../src/domain/context/account/Account';
 import { ethers, Wallet } from 'ethers';
-import SsiManagement from '../../../src/port/in/SsiManagement';
+import SsiManagement from '../../../src/port/in/ssiManagement/SsiManagement';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
@@ -332,6 +332,7 @@ describe('🧪 SSI Management tests', () => {
         isControllable: true,
         arePartitionsProtected: false,
         clearingActive: false,
+        internalKycActivated: true,
         isMultiPartition: false,
         diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
         votingRight,

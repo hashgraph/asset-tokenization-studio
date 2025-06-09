@@ -179,9 +179,10 @@ import {
   ReclaimHoldByPartitionCommand,
   ReclaimHoldByPartitionCommandResponse,
 } from './ReclaimHoldByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ReclaimHoldByPartitionCommandError } from './error/ReclaimHoldByPartitionCommandError.js';
 
 @CommandHandler(ReclaimHoldByPartitionCommand)
 export class ReclaimHoldByPartitionCommandHandler
@@ -189,7 +190,7 @@ export class ReclaimHoldByPartitionCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(AccountService)
@@ -201,29 +202,33 @@ export class ReclaimHoldByPartitionCommandHandler
   async execute(
     command: ReclaimHoldByPartitionCommand,
   ): Promise<ReclaimHoldByPartitionCommandResponse> {
-    const { securityId, partitionId, holdId, targetId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { securityId, partitionId, holdId, targetId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkPause(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkPause(securityId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await handler.reclaimHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      holdId,
-      targetEvmAddress,
-      securityId,
-    );
+      const res = await handler.reclaimHoldByPartition(
+        securityEvmAddress,
+        partitionId,
+        holdId,
+        targetEvmAddress,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ReclaimHoldByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ReclaimHoldByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ReclaimHoldByPartitionCommandError(error as Error);
+    }
   }
 }

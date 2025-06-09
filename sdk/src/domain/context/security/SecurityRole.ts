@@ -229,6 +229,7 @@ export enum SecurityRole {
   _PAUSE_MANAGER_ROLE = '0xbc36fbd776e95c4811506a63b650c876b4159cb152d827a5f717968b67c69b84',
   _CONTROL_LIST_MANAGER_ROLE = '0x0e625647b832ec7d4146c12550c31c065b71e0a698095568fd8320dd2aa72e75',
   _KYC_MANAGER_ROLE = '0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449',
+  _INTERNAL_KYC_MANAGER_ROLE = '0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e',
 }
 
 export function getProtectedPartitionRole(partitionId: string): string {
@@ -276,4 +277,5 @@ export const SecurityRoleLabel = new Map<SecurityRole, string>([
   [SecurityRole._PAUSE_MANAGER_ROLE, 'Pause Manager'],
   [SecurityRole._CONTROL_LIST_MANAGER_ROLE, 'Control List Manager'],
   [SecurityRole._KYC_MANAGER_ROLE, 'Kyc List Manager'],
+  [SecurityRole._INTERNAL_KYC_MANAGER_ROLE, 'Internal Kyc Manager'],
 ]);

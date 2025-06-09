@@ -337,10 +337,10 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (_balanceOfAdjusted(_msgSender()) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
-        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
             return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
 
@@ -389,10 +389,10 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (_balanceOfAdjusted(_from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
-        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
             return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
 

@@ -229,7 +229,7 @@ export class ConcreteQueryRepository {
 @QueryHandler(ConcreteQuery)
 export class ConcreteQueryHandler implements IQueryHandler<ConcreteQuery> {
   constructor(
-    public readonly repo: ConcreteQueryRepository = new ConcreteQueryRepository(),
+    private readonly repo: ConcreteQueryRepository = new ConcreteQueryRepository(),
   ) {}
 
   execute(query: ConcreteQuery): Promise<ConcreteQueryResponse> {

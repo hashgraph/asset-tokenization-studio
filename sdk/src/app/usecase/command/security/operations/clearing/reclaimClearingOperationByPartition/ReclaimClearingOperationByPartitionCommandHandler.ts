@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
@@ -213,8 +213,10 @@ import {
   ReclaimClearingOperationByPartitionCommand,
   ReclaimClearingOperationByPartitionCommandResponse,
 } from './ReclaimClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ReclaimClearingOperationByPartitionCommandError } from './error/ReclaimClearingOperationByPartitionCommandError.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ReclaimClearingOperationByPartitionCommand)
 export class ReclaimClearingOperationByPartitionCommandHandler
@@ -234,38 +236,47 @@ export class ReclaimClearingOperationByPartitionCommandHandler
   async execute(
     command: ReclaimClearingOperationByPartitionCommand,
   ): Promise<ReclaimClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const {
+        securityId,
+        partitionId,
+        targetId,
+        clearingId,
+        clearingOperationType,
+      } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.GRANTED,
+      );
 
-    const res = await handler.reclaimClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
+      const res = await handler.reclaimClearingOperationByPartition(
+        securityEvmAddress,
+        partitionId,
+        targetEvmAddress,
+        clearingId,
+        clearingOperationType,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ReclaimClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ReclaimClearingOperationByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ReclaimClearingOperationByPartitionCommandError(error as Error);
+    }
   }
 }

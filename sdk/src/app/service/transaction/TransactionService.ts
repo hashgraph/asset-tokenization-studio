@@ -210,7 +210,7 @@ import TransactionAdapter from '../../../port/out/TransactionAdapter.js';
 import Service from '../Service.js';
 import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
 import { InvalidWalletTypeError } from '../../../domain/context/network/error/InvalidWalletAccountTypeError.js';
-import LogService from '../LogService.js';
+import LogService from '../log/LogService.js';
 import { HederaWalletConnectTransactionAdapter } from '../../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.js';
 import { DFNSTransactionAdapter } from '../../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
 import { FireblocksTransactionAdapter } from '../../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
@@ -221,11 +221,12 @@ import { InvalidResponse } from '../../../core/error/InvalidResponse.js';
 import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter.js';
 import { EmptyResponse } from './error/EmptyResponse.js';
 import { Response } from '../../../domain/context/transaction/Response';
+import { ADDRESS_LENGTH, BYTES_32_LENGTH } from '../../../core/Constants.js';
 
 @singleton()
 export default class TransactionService extends Service {
   constructor(
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
       MirrorNodeAdapter,
     ),
   ) {
@@ -303,6 +304,17 @@ export default class TransactionService extends Service {
 
     if (!results || results.length !== numberOfResultsItems) {
       throw new InvalidResponse(results);
+    }
+
+    if (
+      ['CreateEquityCommandHandler', 'CreateBondCommandHandler'].some(
+        (handler) => className.includes(handler),
+      )
+    ) {
+      const data = results.map((result) =>
+        result.substring(BYTES_32_LENGTH - ADDRESS_LENGTH + 2),
+      );
+      return `0x${data[position]}`;
     }
 
     return results[position];

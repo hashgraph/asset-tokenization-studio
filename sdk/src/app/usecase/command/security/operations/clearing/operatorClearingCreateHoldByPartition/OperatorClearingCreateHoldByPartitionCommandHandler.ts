@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
@@ -215,8 +215,9 @@ import {
   OperatorClearingCreateHoldByPartitionCommand,
   OperatorClearingCreateHoldByPartitionCommandResponse,
 } from './OperatorClearingCreateHoldByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { OperatorClearingCreateHoldByPartitionCommandError } from './error/OperatorClearingCreateHoldByPartitionCommandError.js';
 
 @CommandHandler(OperatorClearingCreateHoldByPartitionCommand)
 export class OperatorClearingCreateHoldByPartitionCommandHandler
@@ -238,73 +239,77 @@ export class OperatorClearingCreateHoldByPartitionCommandHandler
   async execute(
     command: OperatorClearingCreateHoldByPartitionCommand,
   ): Promise<OperatorClearingCreateHoldByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      sourceId,
-      targetId,
-      clearingExpirationDate,
-      holdExpirationDate,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        clearingExpirationDate,
+        holdExpirationDate,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    await this.validationService.checkPause(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkOperator(
-      securityId,
-      partitionId,
-      account.id.toString(),
-      sourceId,
-    );
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkOperator(
+        securityId,
+        partitionId,
+        account.id.toString(),
+        sourceId,
+      );
+      await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    const escrowEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(escrow);
+      const escrowEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(escrow);
 
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddressOrNull(targetId);
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+      const res = await handler.operatorClearingCreateHoldByPartition(
+        securityEvmAddress,
+        partitionId,
+        escrowEvmAddress,
+        amountBd,
+        sourceEvmAddress,
+        targetEvmAddress,
+        BigDecimal.fromString(clearingExpirationDate),
+        BigDecimal.fromString(holdExpirationDate),
+        securityId,
+      );
 
-    const res = await handler.operatorClearingCreateHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      escrowEvmAddress,
-      amountBd,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(clearingExpirationDate.substring(0, 10)),
-      BigDecimal.fromString(holdExpirationDate.substring(0, 10)),
-      securityId,
-    );
+      const clearingId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.clearingId,
+        className: OperatorClearingCreateHoldByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: OperatorClearingCreateHoldByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
-
-    return Promise.resolve(
-      new OperatorClearingCreateHoldByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new OperatorClearingCreateHoldByPartitionCommandResponse(
+          parseInt(clearingId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new OperatorClearingCreateHoldByPartitionCommandError(
+        error as Error,
+      );
+    }
   }
 }

@@ -288,6 +288,8 @@ export const StepReview = () => {
   let countriesList: string[] = getValues("countriesList");
   const externalPausesList = getValues("externalPausesList");
   const externalControlList = getValues("externalControlList");
+  const externalKYCList = getValues("externalKYCList");
+  const internalKycActivated = getValues("internalKycActivated");
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
@@ -337,6 +339,11 @@ export const StepReview = () => {
         externalControlList.length > 0 && {
           externalControlLists: externalControlList,
         }),
+      ...(externalKYCList &&
+        externalKYCList.length > 0 && {
+          externalKycLists: externalKYCList,
+        }),
+      internalKycActivated,
     });
 
     createSecurity(request);
@@ -398,6 +405,12 @@ export const StepReview = () => {
       title: t("stepExternalManagement.externalControl"),
       value: externalControlList
         ? externalControlList?.map((control) => " " + control).toString()
+        : "-",
+    },
+    {
+      title: t("stepExternalManagement.externalKYC"),
+      value: externalKYCList
+        ? externalKYCList?.map((control) => " " + control).toString()
         : "-",
     },
   ];

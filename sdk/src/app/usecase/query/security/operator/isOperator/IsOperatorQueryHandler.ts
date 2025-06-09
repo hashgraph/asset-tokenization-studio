@@ -209,36 +209,41 @@ import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/AccountService';
-import ContractService from '../../../../../service/ContractService.js';
+import AccountService from '../../../../../service/account/AccountService';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { IsOperatorQueryError } from './error/IsOperatorQueryError.js';
 
 @QueryHandler(IsOperatorQuery)
 export class IsOperatorQueryHandler implements IQueryHandler<IsOperatorQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(query: IsOperatorQuery): Promise<IsOperatorQueryResponse> {
-    const { securityId, operatorId, targetId } = query;
+    try {
+      const { securityId, operatorId, targetId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const operatorEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(operatorId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const operatorEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(operatorId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await this.queryAdapter.isOperator(
-      securityEvmAddress,
-      operatorEvmAddress,
-      targetEvmAddress,
-    );
-    return new IsOperatorQueryResponse(res);
+      const res = await this.queryAdapter.isOperator(
+        securityEvmAddress,
+        operatorEvmAddress,
+        targetEvmAddress,
+      );
+      return new IsOperatorQueryResponse(res);
+    } catch (error) {
+      throw new IsOperatorQueryError(error as Error);
+    }
   }
 }

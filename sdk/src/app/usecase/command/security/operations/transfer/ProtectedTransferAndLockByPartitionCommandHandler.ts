@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import {
   ProtectedTransferAndLockByPartitionCommand,
@@ -215,8 +215,10 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { ProtectedTransferAndLockByPartitionCommandError } from './error/ProtectedTransferAndLockByPartitionCommandError.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ProtectedTransferAndLockByPartitionCommand)
 export class ProtectedTransferAndLockByPartitionCommandHandler
@@ -224,96 +226,105 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: ProtectedTransferAndLockByPartitionCommand,
   ): Promise<ProtectedTransferAndLockByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      amount,
-      sourceId,
-      targetId,
-      expirationDate,
-      deadline,
-      nounce,
-      signature,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+        deadline,
+        nounce,
+        signature,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
-    const amountBd: BigDecimal = BigDecimal.fromString(
-      amount,
-      security.decimals,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
+      const amountBd: BigDecimal = BigDecimal.fromString(
+        amount,
+        security.decimals,
+      );
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [sourceId, targetId],
+        KycStatus.GRANTED,
+      );
 
-    await this.validationService.checkControlList(
-      securityId,
-      sourceEvmAddress.toString(),
-      targetEvmAddress.toString(),
-    );
+      await this.validationService.checkControlList(
+        securityId,
+        sourceEvmAddress.toString(),
+        targetEvmAddress.toString(),
+      );
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    await this.validationService.checkValidNounce(securityId, sourceId, nounce);
+      await this.validationService.checkValidNounce(
+        securityId,
+        sourceId,
+        nounce,
+      );
 
-    await this.validationService.checkProtectedPartitionRole(
-      partitionId,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkProtectedPartitionRole(
+        partitionId,
+        account.id.toString(),
+        securityId,
+      );
 
-    const res = await handler.protectedTransferAndLockByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nounce.toString()),
-      signature,
-    );
+      const res = await handler.protectedTransferAndLockByPartition(
+        securityEvmAddress,
+        partitionId,
+        amountBd,
+        sourceEvmAddress,
+        targetEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(nounce.toString()),
+        signature,
+      );
 
-    const lockId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.lockId,
-      className: ProtectedTransferAndLockByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const lockId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.lockId,
+        className: ProtectedTransferAndLockByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new ProtectedTransferAndLockByPartitionCommandResponse(
-        parseInt(lockId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ProtectedTransferAndLockByPartitionCommandResponse(
+          parseInt(lockId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ProtectedTransferAndLockByPartitionCommandError(error as Error);
+    }
   }
 }
