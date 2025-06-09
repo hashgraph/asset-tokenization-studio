@@ -211,7 +211,6 @@ import TransactionService from '../../../../../../service/transaction/Transactio
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   ProtectedClearingRedeemByPartitionCommand,
   ProtectedClearingRedeemByPartitionCommandResponse,
@@ -225,17 +224,15 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -266,11 +263,6 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
 
     await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      account.id.toString(),
-    ]);
-
     await this.validationService.checkProtectedPartitions(security);
 
     await this.validationService.checkProtectedPartitionRole(
@@ -279,24 +271,21 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
       securityId,
     );
 
-    await this.validationService.checkControlList(
-      securityId,
-      sourceEvmAddress.toString(),
-    );
-
     await this.validationService.checkDecimals(security, amount);
 
     await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
     await this.validationService.checkValidNounce(securityId, sourceId, nonce);
 
+    await this.validationService.checkMultiPartition(security, partitionId);
+
     const res = await handler.protectedClearingRedeemByPartition(
       securityEvmAddress,
       partitionId,
       amountBd,
       sourceEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      BigDecimal.fromString(deadline),
+      BigDecimal.fromString(expirationDate.substring(0, 10)),
+      BigDecimal.fromString(deadline.substring(0, 10)),
       BigDecimal.fromString(nonce.toString()),
       signature,
       securityId,

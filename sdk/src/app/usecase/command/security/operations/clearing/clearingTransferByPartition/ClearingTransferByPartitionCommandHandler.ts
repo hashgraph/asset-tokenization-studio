@@ -211,7 +211,6 @@ import TransactionService from '../../../../../../service/transaction/Transactio
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import {
   ClearingTransferByPartitionCommand,
   ClearingTransferByPartitionCommandResponse,
@@ -230,8 +229,6 @@ export class ClearingTransferByPartitionCommandHandler
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ValidationService)
     public readonly validationService: ValidationService,
     @lazyInject(ContractService)
@@ -257,16 +254,6 @@ export class ClearingTransferByPartitionCommandHandler
     await this.validationService.checkPause(securityId);
 
     await this.validationService.checkClearingActivated(securityId);
-    await this.validationService.checkKycAddresses(securityId, [
-      account.id.toString(),
-      targetId,
-    ]);
-
-    await this.validationService.checkControlList(
-      securityId,
-      account.evmAddress,
-      targetEvmAddress.toString(),
-    );
 
     await this.validationService.checkDecimals(security, amount);
 
@@ -275,12 +262,15 @@ export class ClearingTransferByPartitionCommandHandler
       account.id.toString(),
       amountBd,
     );
+
+    await this.validationService.checkMultiPartition(security, partitionId);
+
     const res = await handler.clearingTransferByPartition(
       securityEvmAddress,
       partitionId,
       amountBd,
       targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
+      BigDecimal.fromString(expirationDate.substring(0, 10)),
       securityId,
     );
 

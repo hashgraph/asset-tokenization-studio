@@ -262,20 +262,12 @@ export class ClearingTransferFromByPartitionCommandHandler
     await this.validationService.checkPause(securityId);
 
     await this.validationService.checkClearingActivated(securityId);
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
-
-    await this.validationService.checkControlList(
-      securityId,
-      sourceEvmAddress.toString(),
-      targetEvmAddress.toString(),
-    );
 
     await this.validationService.checkDecimals(security, amount);
 
     await this.validationService.checkBalance(securityId, sourceId, amountBd);
+
+    await this.validationService.checkMultiPartition(security, partitionId);
 
     const res = await handler.clearingTransferFromByPartition(
       securityEvmAddress,
@@ -283,7 +275,7 @@ export class ClearingTransferFromByPartitionCommandHandler
       amountBd,
       sourceEvmAddress,
       targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
+      BigDecimal.fromString(expirationDate.substring(0, 10)),
       securityId,
     );
 

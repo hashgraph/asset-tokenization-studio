@@ -216,7 +216,7 @@ import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.
 import ValidationService from '../../../../../../service/ValidationService.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import { ApproveClearingOperationByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/security/OperationsFixture.js';
+import { HandleClearingOperationByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/security/OperationsFixture.js';
 import { ApproveClearingOperationByPartitionCommandHandler } from './ApproveClearingOperationByPartitionCommandHandler.js';
 import {
   ApproveClearingOperationByPartitionCommand,
@@ -249,7 +249,7 @@ describe('ApproveClearingOperationByPartitionCommandHandler', () => {
       validationServiceMock,
       contractServiceMock,
     );
-    command = ApproveClearingOperationByPartitionCommandFixture.create();
+    command = HandleClearingOperationByPartitionCommandFixture.create();
   });
 
   afterAll(() => {

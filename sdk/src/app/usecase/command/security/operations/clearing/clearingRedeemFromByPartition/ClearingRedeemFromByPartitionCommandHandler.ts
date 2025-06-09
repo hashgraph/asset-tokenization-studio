@@ -224,15 +224,15 @@ export class ClearingRedeemFromByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -241,7 +241,6 @@ export class ClearingRedeemFromByPartitionCommandHandler
     const { securityId, partitionId, amount, sourceId, expirationDate } =
       command;
     const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress =
@@ -255,27 +254,18 @@ export class ClearingRedeemFromByPartitionCommandHandler
 
     await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(securityId, [
-      account.id.toString(),
-      sourceId,
-    ]);
-
-    await this.validationService.checkControlList(
-      securityId,
-      account.evmAddress,
-      sourceEvmAddress.toString(),
-    );
-
     await this.validationService.checkDecimals(security, amount);
 
     await this.validationService.checkBalance(securityId, sourceId, amountBd);
+
+    await this.validationService.checkMultiPartition(security, partitionId);
 
     const res = await handler.clearingRedeemFromByPartition(
       securityEvmAddress,
       partitionId,
       amountBd,
       sourceEvmAddress,
-      BigDecimal.fromString(expirationDate),
+      BigDecimal.fromString(expirationDate.substring(0, 10)),
       securityId,
     );
 

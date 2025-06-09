@@ -213,8 +213,10 @@ import { SetMaxSupplyCommand } from '../../../src/app/usecase/command/security/o
 import { ActivateClearingCommand } from '../../../src/app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommand';
 import { ApproveClearingOperationByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
 import { ClearingOperationType } from '../../../src/domain/context/security/Clearing';
-import { ClearingCreateHoldFromByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand';
-import { ClearingRedeemByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand';
+import { DeactivateClearingCommand } from '../../../src/app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand';
+import { ProtectedClearingCreateHoldByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand';
+import { ProtectedClearingTransferByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
+import { ProtectedClearingRedeemByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand';
 
 export const AddToControlListCommandFixture =
   createFixture<AddToControlListCommand>((command) => {
@@ -231,12 +233,13 @@ export const SetMaxSupplyCommandFixture = createFixture<SetMaxSupplyCommand>(
   },
 );
 
-export const ActivateClearingCommandFixture =
-  createFixture<ActivateClearingCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
+export const ActivateClearingCommandFixture = createFixture<
+  ActivateClearingCommand | DeactivateClearingCommand
+>((command) => {
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
+});
 
-export const ApproveClearingOperationByPartitionCommandFixture =
+export const HandleClearingOperationByPartitionCommandFixture =
   createFixture<ApproveClearingOperationByPartitionCommand>((command) => {
     command.securityId.as(() => HederaIdPropsFixture.create().value);
     command.partitionId.as(() => PartitionIdFixture.create().value);
@@ -253,7 +256,7 @@ export const ApproveClearingOperationByPartitionCommandFixture =
   });
 
 export const ClearingCreateHoldByPartitionCommandFixture =
-  createFixture<ClearingCreateHoldFromByPartitionCommand>((command) => {
+  createFixture<ProtectedClearingCreateHoldByPartitionCommand>((command) => {
     command.securityId.as(() => HederaIdPropsFixture.create().value);
     command.partitionId.as(() => PartitionIdFixture.create().value);
     command.targetId.as(() => HederaIdPropsFixture.create().value);
@@ -267,16 +270,20 @@ export const ClearingCreateHoldByPartitionCommandFixture =
       return clearingExpirationDate.getTime().toString();
     });
     command.holdExpirationDate.faker((faker) =>
-      faker.date
-        .future({ refDate: clearingExpirationDate })
-        .getTime()
-        .toString(),
+      faker.date.future().getTime().toString(),
     );
     command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.deadline.faker((faker) => faker.date.future().getTime().toString());
+    command.nonce.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.signature.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
+    );
   });
 
-export const ClearingRedeemByPartitionCommandHandlerFixture =
-  createFixture<ClearingRedeemByPartitionCommand>((command) => {
+export const ClearingRedeemByPartitionCommandFixture =
+  createFixture<ProtectedClearingRedeemByPartitionCommand>((command) => {
     command.securityId.as(() => HederaIdPropsFixture.create().value);
     command.partitionId.as(() => PartitionIdFixture.create().value);
     command.amount.faker((faker) =>
@@ -287,5 +294,37 @@ export const ClearingRedeemByPartitionCommandHandlerFixture =
     );
     command.expirationDate.faker((faker) =>
       faker.date.future().getTime().toString(),
+    );
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.deadline.faker((faker) => faker.date.future().getTime().toString());
+    command.nonce.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.signature.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
+    );
+  });
+
+export const ClearingTransferByPartitionCommandFixture =
+  createFixture<ProtectedClearingTransferByPartitionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.expirationDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.deadline.faker((faker) => faker.date.future().getTime().toString());
+    command.nonce.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.signature.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
     );
   });

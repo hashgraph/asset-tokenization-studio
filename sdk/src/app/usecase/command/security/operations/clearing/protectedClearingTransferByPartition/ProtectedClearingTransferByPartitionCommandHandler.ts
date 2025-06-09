@@ -224,15 +224,15 @@ export class ProtectedClearingTransferByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -266,10 +266,6 @@ export class ProtectedClearingTransferByPartitionCommandHandler
     await this.validationService.checkPause(securityId);
 
     await this.validationService.checkClearingActivated(securityId);
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
 
     await this.validationService.checkProtectedPartitions(security);
 
@@ -279,17 +275,13 @@ export class ProtectedClearingTransferByPartitionCommandHandler
       securityId,
     );
 
-    await this.validationService.checkControlList(
-      securityId,
-      sourceEvmAddress.toString(),
-      targetEvmAddress.toString(),
-    );
-
     await this.validationService.checkDecimals(security, amount);
 
     await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
     await this.validationService.checkValidNounce(securityId, sourceId, nonce);
+
+    await this.validationService.checkMultiPartition(security, partitionId);
 
     const res = await handler.protectedClearingTransferByPartition(
       securityEvmAddress,
@@ -297,8 +289,8 @@ export class ProtectedClearingTransferByPartitionCommandHandler
       amountBd,
       sourceEvmAddress,
       targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      BigDecimal.fromString(deadline),
+      BigDecimal.fromString(expirationDate.substring(0, 10)),
+      BigDecimal.fromString(deadline.substring(0, 10)),
       BigDecimal.fromString(nonce.toString()),
       signature,
       securityId,

@@ -252,7 +252,10 @@ describe('ClearingCreateHoldByPartitionCommandHandler', () => {
       validationServiceMock,
       contractServiceMock,
     );
-    command = ClearingCreateHoldByPartitionCommandFixture.create();
+    const commandRaw = ClearingCreateHoldByPartitionCommandFixture.create();
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+    const { deadline, nonce, signature, ...commandFiltered } = commandRaw;
+    command = commandFiltered;
   });
 
   afterAll(() => {
@@ -307,12 +310,6 @@ describe('ClearingCreateHoldByPartitionCommandHandler', () => {
       );
       expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
       expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(
-        validationServiceMock.checkClearingActivated,
-      ).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkClearingActivated).toHaveBeenCalledWith(
         command.securityId,
       );
       expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledWith(

@@ -203,93 +203,101 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../../service/AccountService.js';
 import {
-  OperatorClearingRedeemByPartitionCommand,
-  OperatorClearingRedeemByPartitionCommandResponse,
-} from './OperatorClearingRedeemByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../../../service/ContractService.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
+import { HandleClearingOperationByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/security/OperationsFixture.js';
+import { ReclaimClearingOperationByPartitionCommandHandler } from './ReclaimClearingOperationByPartitionCommandHandler.js';
+import {
+  ReclaimClearingOperationByPartitionCommand,
+  ReclaimClearingOperationByPartitionCommandResponse,
+} from './ReclaimClearingOperationByPartitionCommand.js';
 
-@CommandHandler(OperatorClearingRedeemByPartitionCommand)
-export class OperatorClearingRedeemByPartitionCommandHandler
-  implements ICommandHandler<OperatorClearingRedeemByPartitionCommand>
-{
-  constructor(
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+describe('ReclaimClearingOperationByPartitionCommandHandler', () => {
+  let handler: ReclaimClearingOperationByPartitionCommandHandler;
+  let command: ReclaimClearingOperationByPartitionCommand;
 
-  async execute(
-    command: OperatorClearingRedeemByPartitionCommand,
-  ): Promise<OperatorClearingRedeemByPartitionCommandResponse> {
-    const { securityId, partitionId, amount, sourceId, expirationDate } =
-      command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
-
-    await this.validationService.checkDecimals(security, amount);
-
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
-
-    await this.validationService.checkOperator(
-      securityId,
-      partitionId,
-      account.id.toString(),
-      sourceId,
+  beforeEach(() => {
+    handler = new ReclaimClearingOperationByPartitionCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      contractServiceMock,
+      validationServiceMock,
     );
+    command = HandleClearingOperationByPartitionCommandFixture.create();
+  });
 
-    await this.validationService.checkPause(securityId);
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
 
-    await this.validationService.checkClearingActivated(securityId);
+  describe('execute', () => {
+    it('should successfully reclaim clearing', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+      transactionServiceMock
+        .getHandler()
+        .reclaimClearingOperationByPartition.mockResolvedValue({
+          id: transactionId,
+        });
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+      const result = await handler.execute(command);
 
-    const res = await handler.operatorClearingRedeemByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      sourceEvmAddress,
-      BigDecimal.fromString(expirationDate.substring(0, 10)),
-      securityId,
-    );
+      expect(result).toBeInstanceOf(
+        ReclaimClearingOperationByPartitionCommandResponse,
+      );
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: OperatorClearingRedeemByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+        command.targetId,
+      );
+      expect(
+        transactionServiceMock.getHandler().reclaimClearingOperationByPartition,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(
+        validationServiceMock.checkClearingActivated,
+      ).toHaveBeenCalledTimes(1);
+      expect(validationServiceMock.checkClearingActivated).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(
+        transactionServiceMock.getHandler().reclaimClearingOperationByPartition,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        command.partitionId,
+        evmAddress,
+        command.clearingId,
+        command.clearingOperationType,
+        command.securityId,
+      );
     });
-
-    return Promise.resolve(
-      new OperatorClearingRedeemByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
-  }
-}
+  });
+});
