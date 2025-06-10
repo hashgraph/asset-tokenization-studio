@@ -234,7 +234,7 @@ export default class DeployContractWithFactoryCommand<
         this.factory = factory
         this.signer = signer
         this.args = args
-        this.overrides = overrides
+        this.overrides = overrides ?? {}
         this.withProxy = withProxy
         this.deployedContract = deployedContract
     }
