@@ -205,15 +205,16 @@
 
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import {
   AccountPropsFixture,
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/ValidationService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import { RevokeKycCommandFixture } from '../../../../../../../__tests__/fixtures/kyc/KycFixture.js';
@@ -222,6 +223,8 @@ import {
   RevokeKycCommand,
   RevokeKycCommandResponse,
 } from './RevokeKycCommand.js';
+import { RevokeKycCommandError } from './error/RevokeKycCommandError.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 
 describe('RevokeKycCommandHandler', () => {
   let handler: RevokeKycCommandHandler;
@@ -235,6 +238,7 @@ describe('RevokeKycCommandHandler', () => {
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const account = new Account(AccountPropsFixture.create());
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new RevokeKycCommandHandler(
@@ -251,44 +255,67 @@ describe('RevokeKycCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully revoke kyc', async () => {
-      accountServiceMock.getCurrentAccount.mockReturnValue(account);
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-      accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
-      transactionServiceMock.getHandler().revokeKyc.mockResolvedValue({
-        id: transactionId,
+    describe('error cases', () => {
+      it('throws RevokeKycCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          RevokeKycCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while revoking KYC: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
       });
+    });
+    describe('success cases', () => {
+      it('should successfully revoke kyc', async () => {
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        transactionServiceMock.getHandler().revokeKyc.mockResolvedValue({
+          id: transactionId,
+        });
 
-      const result = await handler.execute(command);
+        const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(RevokeKycCommandResponse);
-      expect(result.payload).toBe(true);
-      expect(result.transactionId).toBe(transactionId);
+        expect(result).toBeInstanceOf(RevokeKycCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().revokeKyc,
-      ).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          transactionServiceMock.getHandler().revokeKyc,
+        ).toHaveBeenCalledTimes(1);
 
-      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._KYC_ROLE,
-        account.id.toString(),
-        command.securityId,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        1,
-        command.securityId,
-      );
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._KYC_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(1, command.securityId);
 
-      expect(
-        transactionServiceMock.getHandler().revokeKyc,
-      ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
+        expect(
+          transactionServiceMock.getHandler().revokeKyc,
+        ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
+      });
     });
   });
 });

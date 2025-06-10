@@ -204,7 +204,10 @@
 */
 
 import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
+import {
+  ContractIdPropFixture,
+  HederaIdPropsFixture,
+} from '../shared/DataFixture';
 import { HederaId } from '../../../src/domain/context/shared/HederaId';
 import { GetScheduledBalanceAdjustmentQuery } from '../../../src/app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
 import { ScheduledBalanceAdjustment } from '../../../src/domain/context/equity/ScheduledBalanceAdjustment';
@@ -222,8 +225,52 @@ import { GetVotingCountQuery } from '../../../src/app/usecase/query/equity/votin
 import { GetVotingForQuery } from '../../../src/app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery';
 import { VotingFor } from '../../../src/domain/context/equity/VotingFor';
 import { VotingRights } from '../../../src/domain/context/equity/VotingRights';
-import { GetRegulationDetailsQuery } from 'app/usecase/query/factory/get/GetRegulationDetailsQuery';
-import { GetConfigInfoQuery } from 'app/usecase/query/management/GetConfigInfoQuery';
+import { GetRegulationDetailsQuery } from '../../../src/app/usecase/query/factory/get/GetRegulationDetailsQuery';
+import { GetConfigInfoQuery } from '../../../src/app/usecase/query/management/GetConfigInfoQuery';
+import { SetScheduledBalanceAdjustmentCommand } from '../../../src/app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
+import { SetDividendsCommand } from '../../../src/app/usecase/command/equity/dividends/set/SetDividendsCommand';
+import { SetVotingRightsCommand } from '../../../src/app/usecase/command/equity/votingRights/set/SetVotingRightsCommand';
+import { CreateEquityCommand } from '../../../src/app/usecase/command/equity/create/CreateEquityCommand';
+import { SecurityPropsFixture } from '../shared/SecurityFixture';
+import ContractId from '../../../src/domain/context/contract/ContractId';
+
+export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
+  (command) => {
+    command.security.fromFixture(SecurityPropsFixture);
+    command.currency.faker((faker) => faker.finance.currencyCode());
+    command.nominalValue.faker((faker) =>
+      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    command.votingRight.faker((faker) => faker.datatype.boolean());
+    command.informationRight.faker((faker) => faker.datatype.boolean());
+    command.liquidationRight.faker((faker) => faker.datatype.boolean());
+    command.subscriptionRight.faker((faker) => faker.datatype.boolean());
+    command.conversionRight.faker((faker) => faker.datatype.boolean());
+    command.redemptionRight.faker((faker) => faker.datatype.boolean());
+    command.putRight.faker((faker) => faker.datatype.boolean());
+    command.dividendRight.faker((faker) => faker.datatype.boolean());
+    command.currency.faker((faker) =>
+      faker.string.hexadecimal({ length: 6, casing: 'lower', prefix: '0x' }),
+    );
+    command.factory?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
+    );
+    command.resolver?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
+    );
+    command.configId?.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, casing: 'lower', prefix: '0x' }),
+    );
+    command.configVersion?.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
+    command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
+    command.externalControlLists?.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+  },
+);
 
 export const GetScheduledBalanceAdjustmentQueryFixture =
   createFixture<GetScheduledBalanceAdjustmentQuery>((query) => {
@@ -357,3 +404,43 @@ export const VotingRightsFixture = createFixture<VotingRights>((props) => {
   props.recordTimeStamp.faker((faker) => faker.date.past());
   props.snapshotId?.faker((faker) => faker.number.int({ min: 1, max: 999 }));
 });
+
+export const SetScheduledBalanceAdjustmentCommandFixture =
+  createFixture<SetScheduledBalanceAdjustmentCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.executionDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.factor.faker((faker) => faker.number.int().toString());
+    command.decimals.faker((faker) => faker.number.int().toString());
+  });
+
+export const SetDividendsCommandFixture = createFixture<SetDividendsCommand>(
+  (command) => {
+    command.address.as(() => HederaIdPropsFixture.create().value);
+    let recordDate: Date;
+    command.recordDate.faker((faker) => {
+      recordDate = faker.date.future();
+      return recordDate.getTime().toString();
+    });
+    command.executionDate.faker((faker) => {
+      return faker.date.future({ refDate: recordDate }).getTime().toString();
+    });
+    command.amount.faker((faker) => faker.number.int().toString());
+  },
+);
+
+export const SetVotingRightsCommandFixture =
+  createFixture<SetVotingRightsCommand>((command) => {
+    command.address.as(() => HederaIdPropsFixture.create().value);
+    command.recordDate.faker((faker) => {
+      faker.date.future().getTime().toString();
+    });
+    command.data.faker((faker) => {
+      return faker.string.hexadecimal({
+        length: 64,
+        casing: 'lower',
+        prefix: '0x',
+      });
+    });
+  });

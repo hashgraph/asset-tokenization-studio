@@ -217,6 +217,9 @@ import { KycAccountData } from '../../../src/domain/context/kyc/KycAccountData';
 import { GetKycForQuery } from '../../../src/app/usecase/query/security/kyc/getKycFor/GetKycForQuery';
 import { Kyc } from '../../../src/domain/context/kyc/Kyc';
 import { GetKycStatusForQuery } from 'app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
+import { GrantKycCommand } from '../../../src/app/usecase/command/security/kyc/grantKyc/GrantKycCommand';
+import { SignedCredential } from '@terminal3/vc_core';
+import { RevokeKycCommand } from '../../../src/app/usecase/command/security/kyc/revokeKyc/RevokeKycCommand';
 
 export const ActivateInternalKycCommandFixture =
   createFixture<ActivateInternalKycCommand>((command) => {
@@ -290,3 +293,32 @@ export const KycFixture = createFixture<Kyc>((props) => {
   props.issuer.as(() => HederaIdPropsFixture.create().value);
   props.status.faker((faker) => faker.number.int({ min: 0, max: 1 }));
 });
+
+export const GrantKycCommandFixture = createFixture<GrantKycCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.vcBase64.faker((faker) => faker.string.alphanumeric);
+  },
+);
+
+export const SignedCredentialFixture = createFixture<SignedCredential>(
+  (credential) => {
+    credential.id.faker((faker) => faker.string.uuid());
+    let validFrom: Date;
+    credential.validFrom?.faker((faker) => {
+      validFrom = faker.date.future();
+      return validFrom.getTime().toString();
+    });
+    credential.validUntil?.faker((faker) =>
+      faker.date.future({ refDate: validFrom }).getTime().toString(),
+    );
+  },
+);
+
+export const RevokeKycCommandFixture = createFixture<RevokeKycCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+  },
+);

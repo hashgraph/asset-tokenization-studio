@@ -205,9 +205,10 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
@@ -219,6 +220,8 @@ import {
   SetVotingRightsCommand,
   SetVotingRightsCommandResponse,
 } from './SetVotingRightsCommand.js';
+import { SetVotingRightsCommandError } from './error/SetVotingRightsCommandError.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 
 describe('SetVotingRightsCommandHandler', () => {
   let handler: SetVotingRightsCommandHandler;
@@ -228,7 +231,7 @@ describe('SetVotingRightsCommandHandler', () => {
 
   const transactionId = TransactionIdFixture.create().id;
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-
+  const errorMsg = ErrorMsgFixture.create().msg;
   const voteId = faker.string.hexadecimal({ length: 64, prefix: '0x' });
 
   beforeEach(() => {
@@ -244,49 +247,73 @@ describe('SetVotingRightsCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully set voting rights', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+    describe('error cases', () => {
+      it('throws SetVotingRightsCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      transactionServiceMock.getHandler().setVotingRights.mockResolvedValue({
-        id: transactionId,
-        response: voteId,
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          SetVotingRightsCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while setting the voting rights: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
       });
+    });
+    describe('success cases', () => {
+      it('should successfully set voting rights', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
 
-      transactionServiceMock.getTransactionResult.mockResolvedValue(voteId);
+        transactionServiceMock.getHandler().setVotingRights.mockResolvedValue({
+          id: transactionId,
+          response: voteId,
+        });
 
-      const result = await handler.execute(command);
+        transactionServiceMock.getTransactionResult.mockResolvedValue(voteId);
 
-      expect(result).toBeInstanceOf(SetVotingRightsCommandResponse);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        command.address,
-      );
-      expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith(
-        expect.objectContaining({
-          res: { id: transactionId, response: voteId },
-          className: SetVotingRightsCommandHandler.name,
-          position: 1,
-          numberOfResultsItems: 2,
-        }),
-      );
-      expect(
-        transactionServiceMock.getHandler().setVotingRights,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().setVotingRights,
-      ).toHaveBeenCalledWith(
-        evmAddress,
-        BigDecimal.fromString(command.recordDate),
-        command.data,
-        command.address,
-      );
-      expect(result.payload).toBe(parseInt(voteId, 16));
-      expect(result.transactionId).toBe(transactionId);
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(SetVotingRightsCommandResponse);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.address,
+        );
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            res: { id: transactionId, response: voteId },
+            className: SetVotingRightsCommandHandler.name,
+            position: 1,
+            numberOfResultsItems: 2,
+          }),
+        );
+        expect(
+          transactionServiceMock.getHandler().setVotingRights,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().setVotingRights,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          BigDecimal.fromString(command.recordDate),
+          command.data,
+          command.address,
+        );
+        expect(result.payload).toBe(parseInt(voteId, 16));
+        expect(result.transactionId).toBe(transactionId);
+      });
     });
   });
 });

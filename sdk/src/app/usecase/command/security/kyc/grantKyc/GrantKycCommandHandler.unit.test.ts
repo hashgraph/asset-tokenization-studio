@@ -205,15 +205,16 @@
 
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import {
   AccountPropsFixture,
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/ValidationService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import { GrantKycCommandHandler } from './GrantKycCommandHandler.js';
@@ -224,6 +225,8 @@ import {
 } from '../../../../../../../__tests__/fixtures/kyc/KycFixture.js';
 import { Terminal3Vc } from '../../../../../../domain/context/kyc/Terminal3.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import { GrantKycCommandError } from './error/GrantKycCommandError.js';
 const { setVerificationValid } = require('@terminal3/verify_vc');
 
 describe('GrantKycCommandHandler', () => {
@@ -239,6 +242,7 @@ describe('GrantKycCommandHandler', () => {
   const account = new Account(AccountPropsFixture.create());
   const transactionId = TransactionIdFixture.create().id;
   const signedCredential = SignedCredentialFixture.create();
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new GrantKycCommandHandler(
@@ -263,11 +267,28 @@ describe('GrantKycCommandHandler', () => {
           'The provided VC is not valid',
         );
       });
+      it('throws GrantKycCommandError when command fails with uncaught error', async () => {
+        setVerificationValid(true);
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          GrantKycCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while granting KYC: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
     });
     describe('success cases', () => {
       it('should successfully grant kyc', async () => {
-        setVerificationValid(true);
-
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
         validationServiceMock.checkValidVc.mockResolvedValue([
           evmAddress.toString(),
@@ -286,8 +307,8 @@ describe('GrantKycCommandHandler', () => {
         expect(result.transactionId).toBe(transactionId);
 
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
+          2,
+        ); // mocks are not restored until the end due to the mcoked dependency
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
           2,
         );
@@ -305,7 +326,7 @@ describe('GrantKycCommandHandler', () => {
         );
         expect(
           contractServiceMock.getContractEvmAddress,
-        ).toHaveBeenNthCalledWith(1, command.securityId);
+        ).toHaveBeenNthCalledWith(2, command.securityId);
 
         expect(
           transactionServiceMock.getHandler().grantKyc,

@@ -203,128 +203,124 @@
 
 */
 
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/account/AccountService.js';
 import {
-  HederaIdPropsFixture,
-  PartitionIdFixture,
-} from '../shared/DataFixture';
-import { createFixture } from '../config';
-import { AddToControlListCommand } from '../../../src/app/usecase/command/security/operations/AddToControlList/AddToControlListCommand';
-import { SetMaxSupplyCommand } from '../../../src/app/usecase/command/security/operations/cap/SetMaxSupplyCommand';
-import { ActivateClearingCommand } from '../../../src/app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommand';
-import { ApproveClearingOperationByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
-import { ClearingOperationType } from '../../../src/domain/context/security/Clearing';
-import { DeactivateClearingCommand } from '../../../src/app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand';
-import { ProtectedClearingCreateHoldByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand';
-import { ProtectedClearingTransferByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
-import { ProtectedClearingRedeemByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand';
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { LockCommandFixture } from '../../../../../../../__tests__/fixtures/lock/LockFixture.js';
+import { faker } from '@faker-js/faker/.';
+import { PauseCommandHandler } from './PauseCommandHandler.js';
+import { PauseCommand, PauseCommandResponse } from './PauseCommand.js';
+import { PauseCommandError } from './error/PauseCommandError.js';
 
-export const AddToControlListCommandFixture =
-  createFixture<AddToControlListCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
+describe('PauseCommandHandler', () => {
+  let handler: PauseCommandHandler;
+  let command: PauseCommand;
+
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+  const securityServiceMock = createMock<SecurityService>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const security = new Security(SecurityPropsFixture.create());
+  const account = new Account(AccountPropsFixture.create());
+  const lockId = faker.string.hexadecimal({
+    length: 64,
+    prefix: '0x',
   });
 
-export const SetMaxSupplyCommandFixture = createFixture<SetMaxSupplyCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.maxSupply.faker((faker) =>
-      faker.number.int({ min: 1, max: 1000000 }).toString(),
+  beforeEach(() => {
+    handler = new PauseCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+      contractServiceMock,
     );
-  },
-);
+    command = LockCommandFixture.create();
+  });
 
-export const ActivateClearingCommandFixture = createFixture<
-  ActivateClearingCommand | DeactivateClearingCommand
->((command) => {
-  command.securityId.as(() => HederaIdPropsFixture.create().value);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws PauseCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(PauseCommandError);
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while pausing security: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully pause security', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        securityServiceMock.get.mockResolvedValue(security);
+
+        transactionServiceMock.getHandler().pause.mockResolvedValue({
+          id: transactionId,
+        });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(PauseCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(transactionServiceMock.getHandler().pause).toHaveBeenCalledTimes(
+          1,
+        );
+
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._PAUSER_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(transactionServiceMock.getHandler().pause).toHaveBeenCalledWith(
+          evmAddress,
+          command.securityId,
+        );
+      });
+    });
+  });
 });
-
-export const HandleClearingOperationByPartitionCommandFixture =
-  createFixture<ApproveClearingOperationByPartitionCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.partitionId.as(() => PartitionIdFixture.create().value);
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-    command.clearingId.faker((faker) =>
-      faker.number.int({ min: 0, max: 1000 }),
-    );
-    command.clearingOperationType.faker((faker) => {
-      const values = Object.values(ClearingOperationType).filter(
-        (v) => typeof v === 'number',
-      ) as number[];
-      return faker.helpers.arrayElement(values);
-    });
-  });
-
-export const ClearingCreateHoldByPartitionCommandFixture =
-  createFixture<ProtectedClearingCreateHoldByPartitionCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.partitionId.as(() => PartitionIdFixture.create().value);
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-    command.escrow.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 0, max: 1000 }).toString(),
-    );
-    let clearingExpirationDate: Date;
-    command.clearingExpirationDate.faker((faker) => {
-      clearingExpirationDate = faker.date.future();
-      return clearingExpirationDate.getTime().toString();
-    });
-    command.holdExpirationDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-    command.sourceId.as(() => HederaIdPropsFixture.create().value);
-    command.deadline.faker((faker) => faker.date.future().getTime().toString());
-    command.nonce.faker((faker) =>
-      faker.number.int({ min: 0, max: 1000 }).toString(),
-    );
-    command.signature.faker((faker) =>
-      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
-    );
-  });
-
-export const ClearingRedeemByPartitionCommandFixture =
-  createFixture<ProtectedClearingRedeemByPartitionCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.partitionId.as(() => PartitionIdFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 0, max: 1000 }).toString(),
-    );
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 0, max: 1000 }).toString(),
-    );
-    command.expirationDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-    command.sourceId.as(() => HederaIdPropsFixture.create().value);
-    command.deadline.faker((faker) => faker.date.future().getTime().toString());
-    command.nonce.faker((faker) =>
-      faker.number.int({ min: 0, max: 1000 }).toString(),
-    );
-    command.signature.faker((faker) =>
-      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
-    );
-  });
-
-export const ClearingTransferByPartitionCommandFixture =
-  createFixture<ProtectedClearingTransferByPartitionCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.partitionId.as(() => PartitionIdFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 0, max: 1000 }).toString(),
-    );
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 0, max: 1000 }).toString(),
-    );
-    command.expirationDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-    command.sourceId.as(() => HederaIdPropsFixture.create().value);
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-    command.deadline.faker((faker) => faker.date.future().getTime().toString());
-    command.nonce.faker((faker) =>
-      faker.number.int({ min: 0, max: 1000 }).toString(),
-    );
-    command.signature.faker((faker) =>
-      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
-    );
-  });

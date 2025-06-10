@@ -216,7 +216,10 @@ import { GetHeldAmountForByPartitionQuery } from '../../../src/app/usecase/query
 import { GetHoldCountForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQuery';
 import { GetHoldForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery';
 import { HoldDetails } from '../../../src/domain/context/security/Hold';
-import { GetHoldsIdForByPartitionQuery } from 'app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery';
+import { GetHoldsIdForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery';
+import { CreateHoldFromByPartitionCommand } from '../../../src/app/usecase/command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommand';
+import { ExecuteHoldByPartitionCommand } from '../../../src/app/usecase/command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommand';
+import { ProtectedCreateHoldByPartitionCommand } from 'app/usecase/command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommand';
 
 export const GetHeldAmountForQueryFixture =
   createFixture<GetHeldAmountForQuery>((query) => {
@@ -267,3 +270,43 @@ export const HoldDetailsFixture = createFixture<HoldDetails>((props) => {
   props.data.faker((faker) => faker.lorem.words());
   props.operatorData.faker((faker) => faker.lorem.words());
 });
+
+export const CreateHoldCommandFixture =
+  createFixture<ProtectedCreateHoldByPartitionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+    command.escrow.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.amount.faker(
+      (faker) =>
+        new BigDecimal(
+          BigNumber.from(faker.number.int({ max: 999 })).toString(),
+        ),
+    );
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.expirationDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.deadline.faker((faker) => faker.date.future().getTime().toString());
+    command.nonce.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.signature.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
+    );
+  });
+
+export const HandleHoldCommandFixture =
+  createFixture<ExecuteHoldByPartitionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.holdId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    command.amount.faker(
+      (faker) =>
+        new BigDecimal(
+          BigNumber.from(faker.number.int({ max: 999 })).toString(),
+        ),
+    );
+  });

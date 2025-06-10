@@ -209,8 +209,7 @@ import {
   SetConfigurationCommand,
   SetConfigurationCommandResponse,
 } from './SetConfigurationCommand.js';
-import NetworkService from '../../../../../app/service/NetworkService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import NetworkService from '../../../../../app/service/network/NetworkService.js';
 import { SetConfigurationCommandFixture } from '../../../../../../__tests__/fixtures/network/NetworkFixture.js';
 
 describe('SetConfigurationCommandHandler', () => {
@@ -218,13 +217,9 @@ describe('SetConfigurationCommandHandler', () => {
   let command: SetConfigurationCommand;
 
   const networkServiceMock = createMock<NetworkService>();
-  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
 
   beforeEach(() => {
-    handler = new SetConfigurationCommandHandler(
-      networkServiceMock,
-      mirrorNodeAdapterMock,
-    );
+    handler = new SetConfigurationCommandHandler(networkServiceMock);
     command = SetConfigurationCommandFixture.create();
   });
 

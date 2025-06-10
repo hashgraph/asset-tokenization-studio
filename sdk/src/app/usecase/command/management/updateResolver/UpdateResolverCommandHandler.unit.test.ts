@@ -205,8 +205,9 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import TransactionService from '../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
@@ -217,6 +218,8 @@ import {
   UpdateResolverCommandResponse,
 } from './updateResolverCommand.js';
 import { UpdateResolverCommandHandler } from './updateResolverCommandHandler.js';
+import { UpdateResolverCommandError } from './error/UpdateResolverCommandError.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 describe('UpdateResolverCommandHandler', () => {
   let handler: UpdateResolverCommandHandler;
@@ -226,6 +229,7 @@ describe('UpdateResolverCommandHandler', () => {
 
   const transactionId = TransactionIdFixture.create().id;
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new UpdateResolverCommandHandler(
@@ -240,35 +244,57 @@ describe('UpdateResolverCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully update resolver', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+    describe('error cases', () => {
+      it('throws UpdateResolverCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      transactionServiceMock.getHandler().updateResolver.mockResolvedValue({
-        id: transactionId,
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          UpdateResolverCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while updating the resolver: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
       });
+    });
+    describe('success cases', () => {
+      it('should successfully update resolver', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
 
-      const result = await handler.execute(command);
+        transactionServiceMock.getHandler().updateResolver.mockResolvedValue({
+          id: transactionId,
+        });
 
-      expect(result).toBeInstanceOf(UpdateResolverCommandResponse);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        2,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(
-        transactionServiceMock.getHandler().updateResolver,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().updateResolver,
-      ).toHaveBeenCalledWith(
-        evmAddress,
-        evmAddress,
-        command.configVersion,
-        command.configId,
-        command.securityId,
-      );
-      expect(result.transactionId).toBe(transactionId);
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(UpdateResolverCommandResponse);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(
+          transactionServiceMock.getHandler().updateResolver,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().updateResolver,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          evmAddress,
+          command.configVersion,
+          command.configId,
+          command.securityId,
+        );
+        expect(result.transactionId).toBe(transactionId);
+      });
     });
   });
 });

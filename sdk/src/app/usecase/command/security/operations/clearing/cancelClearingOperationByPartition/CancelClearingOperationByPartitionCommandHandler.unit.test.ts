@@ -205,19 +205,19 @@
 
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import {
   AccountPropsFixture,
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import { HandleClearingOperationByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/security/OperationsFixture.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
+import { HandleClearingOperationByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
 import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
 import { Security } from '../../../../../../../domain/context/security/Security.js';
 import { CancelClearingOperationByPartitionCommandHandler } from './CancelClearingOperationByPartitionCommandHandler.js';
@@ -225,6 +225,8 @@ import {
   CancelClearingOperationByPartitionCommand,
   CancelClearingOperationByPartitionCommandResponse,
 } from './CancelClearingOperationByPartitionCommand.js';
+import { CancelClearingOperationByPartitionCommandError } from './error/CancelClearingOperationByPartitionCommandError.js';
+import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
 
 describe('CancelClearingOperationByPartitionCommandHandler', () => {
   let handler: CancelClearingOperationByPartitionCommandHandler;
@@ -234,18 +236,17 @@ describe('CancelClearingOperationByPartitionCommandHandler', () => {
   const validationServiceMock = createMock<ValidationService>();
   const accountServiceMock = createMock<AccountService>();
   const contractServiceMock = createMock<ContractService>();
-  const securityServiceMock = createMock<SecurityService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const transactionId = TransactionIdFixture.create().id;
   const account = new Account(AccountPropsFixture.create());
   const security = new Security(SecurityPropsFixture.create());
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new CancelClearingOperationByPartitionCommandHandler(
       accountServiceMock,
       transactionServiceMock,
-      securityServiceMock,
       validationServiceMock,
       contractServiceMock,
     );
@@ -257,71 +258,93 @@ describe('CancelClearingOperationByPartitionCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully cancel clearing', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-      accountServiceMock.getCurrentAccount.mockReturnValue(account);
-      accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
-      securityServiceMock.get.mockResolvedValue(security);
-      transactionServiceMock
-        .getHandler()
-        .cancelClearingOperationByPartition.mockResolvedValue({
-          id: transactionId,
+    describe('error cases', () => {
+      it('throws CancelClearingOperationByPartitionCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          CancelClearingOperationByPartitionCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while cancelling clearing operation: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
         });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully cancel clearing', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        transactionServiceMock
+          .getHandler()
+          .cancelClearingOperationByPartition.mockResolvedValue({
+            id: transactionId,
+          });
 
-      const result = await handler.execute(command);
+        const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(
-        CancelClearingOperationByPartitionCommandResponse,
-      );
-      expect(result.payload).toBe(true);
-      expect(result.transactionId).toBe(transactionId);
+        expect(result).toBeInstanceOf(
+          CancelClearingOperationByPartitionCommandResponse,
+        );
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().cancelClearingOperationByPartition,
-      ).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler()
+            .cancelClearingOperationByPartition,
+        ).toHaveBeenCalledTimes(1);
 
-      expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(
-        validationServiceMock.checkClearingActivated,
-      ).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkClearingActivated).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._CLEARING_VALIDATOR_ROLE,
-        account.id.toString(),
-        command.securityId,
-      );
-      expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledWith(
-        security,
-        command.partitionId,
-      );
-      expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        1,
-        command.securityId,
-      );
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(
+          validationServiceMock.checkClearingActivated,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          validationServiceMock.checkClearingActivated,
+        ).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._CLEARING_VALIDATOR_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledWith(
+          security,
+          command.partitionId,
+        );
+        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(1, command.securityId);
 
-      expect(
-        transactionServiceMock.getHandler().cancelClearingOperationByPartition,
-      ).toHaveBeenCalledWith(
-        evmAddress,
-        command.partitionId,
-        evmAddress,
-        command.clearingId,
-        command.clearingOperationType,
-        command.securityId,
-      );
+        expect(
+          transactionServiceMock.getHandler()
+            .cancelClearingOperationByPartition,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          command.partitionId,
+          evmAddress,
+          command.clearingId,
+          command.clearingOperationType,
+          command.securityId,
+        );
+      });
     });
   });
 });

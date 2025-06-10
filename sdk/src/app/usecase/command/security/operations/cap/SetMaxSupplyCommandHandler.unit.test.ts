@@ -205,16 +205,17 @@
 
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import {
   AccountPropsFixture,
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import { SetMaxSupplyCommandFixture } from '../../../../../../../__tests__/fixtures/security/OperationsFixture.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { SetMaxSupplyCommandFixture } from '../../../../../../../__tests__/fixtures/cap/CapFixture.js';
 import { SetMaxSupplyCommandHandler } from './SetMaxSupplyCommandHandler.js';
 import {
   SetMaxSupplyCommand,
@@ -226,6 +227,8 @@ import { Security } from '../../../../../../domain/context/security/Security.js'
 import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { SetMaxSupplyCommandError } from './error/SetMaxSupplyCommandError.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 
 describe('SetMaxSupplyCommandHandler', () => {
   let handler: SetMaxSupplyCommandHandler;
@@ -241,6 +244,7 @@ describe('SetMaxSupplyCommandHandler', () => {
   const transactionId = TransactionIdFixture.create().id;
   const account = new Account(AccountPropsFixture.create());
   const security = new Security(SecurityPropsFixture.create());
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new SetMaxSupplyCommandHandler(
@@ -258,48 +262,71 @@ describe('SetMaxSupplyCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully set max supply', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-      accountServiceMock.getCurrentAccount.mockReturnValue(account);
-      securityServiceMock.get.mockResolvedValue(security);
-      transactionServiceMock.getHandler().setMaxSupply.mockResolvedValue({
-        id: transactionId,
+    describe('error cases', () => {
+      it('throws SetMaxSupplyCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          SetMaxSupplyCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while setting max supply: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
       });
+    });
+    describe('success cases', () => {
+      it('should successfully set max supply', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        securityServiceMock.get.mockResolvedValue(security);
+        transactionServiceMock.getHandler().setMaxSupply.mockResolvedValue({
+          id: transactionId,
+        });
 
-      const result = await handler.execute(command);
+        const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(SetMaxSupplyCommandResponse);
-      expect(result.payload).toBe(true);
-      expect(result.transactionId).toBe(transactionId);
+        expect(result).toBeInstanceOf(SetMaxSupplyCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
-      expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().setMaxSupply,
-      ).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
+        expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().setMaxSupply,
+        ).toHaveBeenCalledTimes(1);
 
-      expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._CAP_ROLE,
-        account.id.toString(),
-        command.securityId,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        1,
-        command.securityId,
-      );
-      expect(securityServiceMock.get).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._CAP_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(1, command.securityId);
+        expect(securityServiceMock.get).toHaveBeenCalledWith(
+          command.securityId,
+        );
 
-      expect(
-        transactionServiceMock.getHandler().setMaxSupply,
-      ).toHaveBeenCalledWith(
-        evmAddress,
-        BigDecimal.fromString(command.maxSupply, security.decimals),
-      );
+        expect(
+          transactionServiceMock.getHandler().setMaxSupply,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          BigDecimal.fromString(command.maxSupply, security.decimals),
+        );
+      });
     });
   });
 });

@@ -209,6 +209,8 @@ import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/Ge
 import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
 import { LockedBalanceOfQuery } from 'app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
 import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
+import { LockCommand } from 'app/usecase/command/security/operations/lock/LockCommand';
+import { faker } from '@faker-js/faker/.';
 
 export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
   query.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -233,4 +235,15 @@ export const LocksIdQueryFixture = createFixture<LocksIdQuery>((query) => {
   query.targetId.as(() => HederaIdPropsFixture.create().value);
   query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
+export const LockCommandFixture = createFixture<LockCommand>((command) => {
+  command.amount.faker((faker) =>
+    faker.number.int({ min: 1, max: 1000 }).toString(),
+  );
+  command.sourceId.as(() => HederaIdPropsFixture.create().value);
+  command.expirationDate.faker((faker) =>
+    faker.date.future().getTime().toString(),
+  );
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
 });

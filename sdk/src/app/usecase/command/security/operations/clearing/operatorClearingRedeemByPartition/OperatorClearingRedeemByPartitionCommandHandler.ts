@@ -231,8 +231,6 @@ export class OperatorClearingRedeemByPartitionCommandHandler
     private readonly accountService: AccountService,
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(ContractService)

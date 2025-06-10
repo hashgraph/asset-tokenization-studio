@@ -210,7 +210,12 @@ import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand.js';
 import { ConnectCommandFixture } from '../../../../../../__tests__/fixtures/network/NetworkFixture.js';
 import TransactionAdapter from '../../../../../../src/port/out/TransactionAdapter.js';
 import Account from '../../../../../../src/domain/context/account/Account.js';
-import { AccountPropsFixture } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import {
+  AccountPropsFixture,
+  ErrorMsgFixture,
+} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { ConnectCommandError } from './error/ConnectCommandError.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 describe('ConnectCommandHandler', () => {
   let handler: ConnectCommandHandler;
@@ -218,6 +223,7 @@ describe('ConnectCommandHandler', () => {
 
   const transactionAdapterMock = createMock<TransactionAdapter>();
   const account = new Account(AccountPropsFixture.create());
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new ConnectCommandHandler();
@@ -234,46 +240,66 @@ describe('ConnectCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully connect with custodial settings', async () => {
-      command = ConnectCommandFixture.omit('HWCSettings').create();
-      const result = await handler.execute(command);
+    describe('error cases', () => {
+      it('throws ConnectCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      expect(result).toBeInstanceOf(ConnectCommandResponse);
-      expect(transactionAdapterMock.register).toHaveBeenCalledTimes(1);
-      expect(transactionAdapterMock.register).toHaveBeenCalledWith(
-        command.custodialSettings,
-        false,
-      );
-      expect(result.walletType).toEqual(command.wallet);
-      expect(result.payload).toEqual({ account });
+        transactionAdapterMock.register.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(ConnectCommandError);
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while connecting to network: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
     });
-    it('should successfully connect with HWC settings', async () => {
-      command = ConnectCommandFixture.omit('custodialSettings').create();
-      const result = await handler.execute(command);
+    describe('success cases', () => {
+      it('should successfully connect with custodial settings', async () => {
+        command = ConnectCommandFixture.omit('HWCSettings').create();
+        const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(ConnectCommandResponse);
-      expect(transactionAdapterMock.register).toHaveBeenCalledTimes(1);
-      expect(transactionAdapterMock.register).toHaveBeenCalledWith(
-        command.HWCSettings,
-        false,
-      );
-      expect(result.walletType).toEqual(command.wallet);
-      expect(result.payload).toEqual({ account });
-    });
+        expect(result).toBeInstanceOf(ConnectCommandResponse);
+        expect(transactionAdapterMock.register).toHaveBeenCalledTimes(1);
+        expect(transactionAdapterMock.register).toHaveBeenCalledWith(
+          command.custodialSettings,
+          false,
+        );
+        expect(result.walletType).toEqual(command.wallet);
+        expect(result.payload).toEqual({ account });
+      });
+      it('should successfully connect with HWC settings', async () => {
+        command = ConnectCommandFixture.omit('custodialSettings').create();
+        const result = await handler.execute(command);
 
-    it('should successfully connect without custodial settings and HWC', async () => {
-      command = ConnectCommandFixture.omit('HWCSettings').create();
-      command = { ...command, custodialSettings: undefined };
-      const result = await handler.execute(command);
+        expect(result).toBeInstanceOf(ConnectCommandResponse);
+        expect(transactionAdapterMock.register).toHaveBeenCalledTimes(1);
+        expect(transactionAdapterMock.register).toHaveBeenCalledWith(
+          command.HWCSettings,
+          false,
+        );
+        expect(result.walletType).toEqual(command.wallet);
+        expect(result.payload).toEqual({ account });
+      });
 
-      expect(result).toBeInstanceOf(ConnectCommandResponse);
-      expect(transactionAdapterMock.register).toHaveBeenCalledTimes(1);
-      expect(transactionAdapterMock.register).toHaveBeenCalledWith(
-        command.account,
-        false,
-      );
-      expect(result.walletType).toEqual(command.wallet);
-      expect(result.payload).toEqual({ account });
+      it('should successfully connect without custodial settings and HWC', async () => {
+        command = ConnectCommandFixture.omit('HWCSettings').create();
+        command = { ...command, custodialSettings: undefined };
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(ConnectCommandResponse);
+        expect(transactionAdapterMock.register).toHaveBeenCalledTimes(1);
+        expect(transactionAdapterMock.register).toHaveBeenCalledWith(
+          command.account,
+          false,
+        );
+        expect(result.walletType).toEqual(command.wallet);
+        expect(result.payload).toEqual({ account });
+      });
     });
   });
 });

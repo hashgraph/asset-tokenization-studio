@@ -208,6 +208,7 @@ import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { GetControlListCountQuery } from '../../../src/app/usecase/query/security/controlList/getControlListCount/GetControlListCountQuery';
 import { GetControlListMembersQuery } from 'app/usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery';
 import { GetControlListTypeQuery } from 'app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery';
+import { AddToControlListCommand } from '../../../src/app/usecase/command/security/operations/addToControlList/AddToControlListCommand';
 
 export const GetControlListCountQueryFixture =
   createFixture<GetControlListCountQuery>((query) => {
@@ -224,4 +225,10 @@ export const GetControlListMembersQueryFixture =
 export const GetControlListTypeQueryFixture =
   createFixture<GetControlListTypeQuery>((query) => {
     query.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const AddToControlListCommandFixture =
+  createFixture<AddToControlListCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
   });

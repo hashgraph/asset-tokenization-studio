@@ -210,20 +210,23 @@ import {
   CreateEquityCommandResponse,
 } from './CreateEquityCommand.js';
 import TransactionService from '../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   HederaIdZeroAddressFixture,
   TransactionIdFixture,
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import NetworkService from '../../../../service/NetworkService.js';
+import NetworkService from '../../../../service/network/NetworkService.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { CreateEquityCommandFixture } from '../../../../../../__tests__/fixtures/equity/EquityFixture.js';
 import { InvalidRequest } from '../../error/InvalidRequest.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
+import { CreateEquityCommandError } from './error/CreateEquityCommandError.js';
 
 describe('CreateEquityCommandHandler', () => {
   let handler: CreateEquityCommandHandler;
@@ -248,6 +251,7 @@ describe('CreateEquityCommandHandler', () => {
   const transactionId = TransactionIdFixture.create().id;
   const hederaId = HederaIdPropsFixture.create().value;
   const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new CreateEquityCommandHandler(
@@ -309,6 +313,25 @@ describe('CreateEquityCommandHandler', () => {
         ).rejects.toThrow(
           new InvalidRequest('Config Version not found in request'),
         );
+      });
+    });
+
+    it('throws CreateEquityCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        CreateEquityCommandError,
+      );
+
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while creating the equity: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
       });
     });
 

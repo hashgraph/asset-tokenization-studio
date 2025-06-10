@@ -203,49 +203,56 @@
 
 */
 
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import { UpdateConfigCommandHandler } from './updateConfigCommandHandler.js';
-import {
-  UpdateConfigCommand,
-  UpdateConfigCommandResponse,
-} from './updateConfigCommand.js';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../service/contract/ContractService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { UpdateConfigCommandFixture } from '../../../../../../__tests__/fixtures/management/ManagementFixture.js';
-import { UpdateConfigCommandError } from './error/UpdateConfigCommandError.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { AddToControlListCommandHandler } from './AddToControlListCommandHandler.js';
+import {
+  AddToControlListCommand,
+  AddToControlListCommandResponse,
+} from './AddToControlListCommand.js';
+import { AddToControlListCommandFixture } from '../../../../../../../__tests__/fixtures/controlList/ControlListFixture.js';
+import { AddToControlListCommandError } from './error/AddToControlListCommandError.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 
-describe('UpdateConfigCommandHandler', () => {
-  let handler: UpdateConfigCommandHandler;
-  let command: UpdateConfigCommand;
+describe('AddToControlListCommandHandler', () => {
+  let handler: AddToControlListCommandHandler;
+  let command: AddToControlListCommand;
+
   const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
   const contractServiceMock = createMock<ContractService>();
 
-  const transactionId = TransactionIdFixture.create().id;
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new UpdateConfigCommandHandler(
-      transactionServiceMock,
+    handler = new AddToControlListCommandHandler(
+      accountServiceMock,
       contractServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
     );
-    command = UpdateConfigCommandFixture.create();
+    command = AddToControlListCommandFixture.create();
   });
 
-  afterEach(() => {
+  afterAll(() => {
     jest.resetAllMocks();
   });
 
   describe('execute', () => {
     describe('error cases', () => {
-      it('throws UpdateConfigCommandError when command fails with uncaught error', async () => {
+      it('throws AddToControlListCommandError when command fails with uncaught error', async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
@@ -253,46 +260,57 @@ describe('UpdateConfigCommandHandler', () => {
         const resultPromise = handler.execute(command);
 
         await expect(resultPromise).rejects.toBeInstanceOf(
-          UpdateConfigCommandError,
+          AddToControlListCommandError,
         );
 
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `An error occurred while updating the config: ${errorMsg}`,
+            `An error occurred while adding to control list: ${errorMsg}`,
           ),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
     describe('success cases', () => {
-      it('should successfully update configuration', async () => {
+      it('should successfully add to control list', async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-
-        transactionServiceMock.getHandler().updateConfig.mockResolvedValue({
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        transactionServiceMock.getHandler().addToControlList.mockResolvedValue({
           id: transactionId,
         });
 
         const result = await handler.execute(command);
 
-        expect(result).toBeInstanceOf(UpdateConfigCommandResponse);
+        expect(result).toBeInstanceOf(AddToControlListCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
           1,
         );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.securityId,
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          1,
         );
         expect(
-          transactionServiceMock.getHandler().updateConfig,
+          transactionServiceMock.getHandler().addToControlList,
         ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().updateConfig,
-        ).toHaveBeenCalledWith(
-          evmAddress,
-          command.configId,
-          command.configVersion,
+
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
           command.securityId,
         );
-        expect(result.transactionId).toBe(transactionId);
+        expect(
+          validationServiceMock.checkAccountInControlList,
+        ).toHaveBeenCalledWith(command.securityId, command.targetId, true);
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(1, command.securityId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+          command.targetId,
+        );
+
+        expect(
+          transactionServiceMock.getHandler().addToControlList,
+        ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
       });
     });
   });

@@ -208,11 +208,15 @@ import TransactionAdapter from '../../../../../port/out/TransactionAdapter.js';
 import { DisconnectCommandHandler } from './DisconnectCommandHandler.js';
 import { DisconnectCommandResponse } from './DisconnectCommand.js';
 import Injectable from '../../../../../core/Injectable.js';
+import { ErrorMsgFixture } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { DisconnectCommandError } from './error/DisconnectCommandError.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 describe('DisconnectCommandHandler', () => {
   let handler: DisconnectCommandHandler;
 
   const transactionAdapterMock = createMock<TransactionAdapter>();
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new DisconnectCommandHandler();
@@ -228,12 +232,34 @@ describe('DisconnectCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully disconnect', async () => {
-      const result = await handler.execute();
+    describe('error cases', () => {
+      it('throws DisconnectCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      expect(result).toBeInstanceOf(DisconnectCommandResponse);
-      expect(transactionAdapterMock.stop).toHaveBeenCalledTimes(1);
-      expect(result.payload).toEqual(true);
+        transactionAdapterMock.stop.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute();
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          DisconnectCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while disconnecting from network: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully disconnect', async () => {
+        const result = await handler.execute();
+
+        expect(result).toBeInstanceOf(DisconnectCommandResponse);
+        expect(transactionAdapterMock.stop).toHaveBeenCalledTimes(1);
+        expect(result.payload).toEqual(true);
+      });
     });
   });
 });

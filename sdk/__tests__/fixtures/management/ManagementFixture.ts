@@ -206,7 +206,7 @@
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { UpdateConfigCommand } from '../../../src/app/usecase/command/management/updateConfig/updateConfigCommand';
 import { createFixture } from '../config';
-import { UpdateConfigVersionCommand } from 'app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
+import { UpdateConfigVersionCommand } from '../../../src/app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
 import { UpdateResolverCommand } from '../../../src/app/usecase/command/management/updateResolver/updateResolverCommand';
 import ContractId from '../../../src/domain/context/contract/ContractId.js';
 

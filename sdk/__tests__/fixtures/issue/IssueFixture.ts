@@ -203,88 +203,14 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/AccountService.js';
-import {
-  EvmAddressPropsFixture,
-  TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/ValidationService.js';
-import { AddToControlListCommandHandler } from './AddToControlListCommandHandler.js';
-import {
-  AddToControlListCommand,
-  AddToControlListCommandResponse,
-} from './AddToControlListCommand.js';
-import { AddToControlListCommandFixture } from '../../../../../../../__tests__/fixtures/security/OperationsFixture.js';
+import { createFixture } from '../config';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { IssueCommand } from 'app/usecase/command/security/operations/issue/IssueCommand';
 
-describe('AddToControlListCommandHandler', () => {
-  let handler: AddToControlListCommandHandler;
-  let command: AddToControlListCommand;
-
-  const transactionServiceMock = createMock<TransactionService>();
-  const validationServiceMock = createMock<ValidationService>();
-  const accountServiceMock = createMock<AccountService>();
-  const contractServiceMock = createMock<ContractService>();
-
-  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const transactionId = TransactionIdFixture.create().id;
-
-  beforeEach(() => {
-    handler = new AddToControlListCommandHandler(
-      accountServiceMock,
-      contractServiceMock,
-      transactionServiceMock,
-      validationServiceMock,
-    );
-    command = AddToControlListCommandFixture.create();
-  });
-
-  afterAll(() => {
-    jest.resetAllMocks();
-  });
-
-  describe('execute', () => {
-    it('should successfully add to control list', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-      accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
-      transactionServiceMock.getHandler().addToControlList.mockResolvedValue({
-        id: transactionId,
-      });
-
-      const result = await handler.execute(command);
-
-      expect(result).toBeInstanceOf(AddToControlListCommandResponse);
-      expect(result.payload).toBe(true);
-      expect(result.transactionId).toBe(transactionId);
-
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().addToControlList,
-      ).toHaveBeenCalledTimes(1);
-
-      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(
-        validationServiceMock.checkAccountInControlList,
-      ).toHaveBeenCalledWith(command.securityId, command.targetId, true);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        1,
-        command.securityId,
-      );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
-        command.targetId,
-      );
-
-      expect(
-        transactionServiceMock.getHandler().addToControlList,
-      ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
-    });
-  });
+export const IssueCommandFixture = createFixture<IssueCommand>((command) => {
+  command.amount.faker((faker) =>
+    faker.number.int({ min: 1, max: 1000 }).toString(),
+  );
+  command.targetId.as(() => HederaIdPropsFixture.create().value);
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
 });

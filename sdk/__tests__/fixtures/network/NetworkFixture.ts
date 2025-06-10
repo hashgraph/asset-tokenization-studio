@@ -211,10 +211,10 @@ import FireblocksSettings from '../../../src/core/settings/custodialWalletSettin
 import AWSKMSSettings from '../../../src/core/settings/custodialWalletSettings/AWSKMSSettings';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import HWCSettings from '../../../src/core/settings/walletConnect/HWCSettings';
-import { SetConfigurationCommand } from 'app/usecase/command/network/setConfiguration/SetConfigurationCommand';
-import { SetNetworkCommand } from 'app/usecase/command/network/setNetwork/SetNetworkCommand';
-import { MirrorNode } from 'domain/context/network/MirrorNode';
-import { JsonRpcRelay } from 'domain/context/network/JsonRpcRelay';
+import { SetConfigurationCommand } from '../../../src/app/usecase/command/network/setConfiguration/SetConfigurationCommand';
+import { SetNetworkCommand } from '../../../src/app/usecase/command/network/setNetwork/SetNetworkCommand';
+import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';
 
 export const DfnsSettingsFixture = createFixture<DfnsSettings>((settings) => {
   settings.serviceAccountSecretKey.faker((faker) => faker.string.uuid()),

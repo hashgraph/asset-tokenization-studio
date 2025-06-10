@@ -205,8 +205,9 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import TransactionService from '../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
@@ -217,6 +218,8 @@ import {
   UpdateConfigVersionCommandResponse,
 } from './updateConfigVersionCommand.js';
 import { UpdateConfigVersionCommandHandler } from './updateConfigVersionCommandHandler.js';
+import { UpdateConfigVersionCommandError } from './error/UpdateConfigVersionCommandError.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 describe('UpdateConfigVersionCommandHandler', () => {
   let handler: UpdateConfigVersionCommandHandler;
@@ -226,6 +229,7 @@ describe('UpdateConfigVersionCommandHandler', () => {
 
   const transactionId = TransactionIdFixture.create().id;
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new UpdateConfigVersionCommandHandler(
@@ -240,35 +244,57 @@ describe('UpdateConfigVersionCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully update configuration version', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+    describe('error cases', () => {
+      it('throws UpdateConfigVersionCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      transactionServiceMock
-        .getHandler()
-        .updateConfigVersion.mockResolvedValue({
-          id: transactionId,
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          UpdateConfigVersionCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while updating the config version: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
         });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully update configuration version', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
 
-      const result = await handler.execute(command);
+        transactionServiceMock
+          .getHandler()
+          .updateConfigVersion.mockResolvedValue({
+            id: transactionId,
+          });
 
-      expect(result).toBeInstanceOf(UpdateConfigVersionCommandResponse);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(
-        transactionServiceMock.getHandler().updateConfigVersion,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().updateConfigVersion,
-      ).toHaveBeenCalledWith(
-        evmAddress,
-        command.configVersion,
-        command.securityId,
-      );
-      expect(result.transactionId).toBe(transactionId);
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(UpdateConfigVersionCommandResponse);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(
+          transactionServiceMock.getHandler().updateConfigVersion,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().updateConfigVersion,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          command.configVersion,
+          command.securityId,
+        );
+        expect(result.transactionId).toBe(transactionId);
+      });
     });
   });
 });

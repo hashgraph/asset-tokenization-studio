@@ -203,40 +203,56 @@
 
 */
 
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import { UpdateConfigCommandHandler } from './updateConfigCommandHandler.js';
-import {
-  UpdateConfigCommand,
-  UpdateConfigCommandResponse,
-} from './updateConfigCommand.js';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../service/contract/ContractService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { UpdateConfigCommandFixture } from '../../../../../../__tests__/fixtures/management/ManagementFixture.js';
-import { UpdateConfigCommandError } from './error/UpdateConfigCommandError.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import { IssueCommandHandler } from './IssueCommandHandler.js';
+import { IssueCommand, IssueCommandResponse } from './IssueCommand.js';
+import { IssueCommandError } from './error/IssueCommandError.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import { IssueCommandFixture } from '../../../../../../../__tests__/fixtures/issue/IssueFixture.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 
-describe('UpdateConfigCommandHandler', () => {
-  let handler: UpdateConfigCommandHandler;
-  let command: UpdateConfigCommand;
+describe('IssueCommandHandler', () => {
+  let handler: IssueCommandHandler;
+  let command: IssueCommand;
+
   const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
   const contractServiceMock = createMock<ContractService>();
+  const securityServiceMock = createMock<SecurityService>();
 
-  const transactionId = TransactionIdFixture.create().id;
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
   const errorMsg = ErrorMsgFixture.create().msg;
+  const security = new Security(SecurityPropsFixture.create());
+  const account = new Account(AccountPropsFixture.create());
 
   beforeEach(() => {
-    handler = new UpdateConfigCommandHandler(
+    handler = new IssueCommandHandler(
+      securityServiceMock,
+      accountServiceMock,
       transactionServiceMock,
+      validationServiceMock,
       contractServiceMock,
     );
-    command = UpdateConfigCommandFixture.create();
+    command = IssueCommandFixture.create();
   });
 
   afterEach(() => {
@@ -245,54 +261,107 @@ describe('UpdateConfigCommandHandler', () => {
 
   describe('execute', () => {
     describe('error cases', () => {
-      it('throws UpdateConfigCommandError when command fails with uncaught error', async () => {
+      it('throws IssueCommandError when command fails with uncaught error', async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          UpdateConfigCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(IssueCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `An error occurred while updating the config: ${errorMsg}`,
+            `An error occurred while issuing tokens: ${errorMsg}`,
           ),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
     describe('success cases', () => {
-      it('should successfully update configuration', async () => {
+      it('should successfully issue tokens', async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        securityServiceMock.get.mockResolvedValue(security);
 
-        transactionServiceMock.getHandler().updateConfig.mockResolvedValue({
+        transactionServiceMock.getHandler().issue.mockResolvedValue({
           id: transactionId,
         });
 
         const result = await handler.execute(command);
 
-        expect(result).toBeInstanceOf(UpdateConfigCommandResponse);
+        expect(result).toBeInstanceOf(IssueCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
           1,
         );
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
           command.securityId,
         );
-        expect(
-          transactionServiceMock.getHandler().updateConfig,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().updateConfig,
-        ).toHaveBeenCalledWith(
-          evmAddress,
-          command.configId,
-          command.configVersion,
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+          1,
+          command.targetId,
+        );
+        expect(transactionServiceMock.getHandler().issue).toHaveBeenCalledTimes(
+          1,
+        );
+
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
           command.securityId,
         );
-        expect(result.transactionId).toBe(transactionId);
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
+          security,
+          command.amount,
+        );
+        expect(validationServiceMock.checkMaxSupply).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkMaxSupply).toHaveBeenCalledWith(
+          command.securityId,
+          BigDecimal.fromString(command.amount, security.decimals),
+          security,
+        );
+        expect(validationServiceMock.checkControlList).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkControlList).toHaveBeenCalledWith(
+          command.securityId,
+          command.targetId,
+        );
+        expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledWith(
+          command.securityId,
+          [command.targetId],
+          KycStatus.GRANTED,
+        );
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._ISSUER_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledWith(
+          security,
+        );
+        expect(validationServiceMock.checkIssuable).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkIssuable).toHaveBeenCalledWith(
+          security,
+        );
+        expect(transactionServiceMock.getHandler().issue).toHaveBeenCalledWith(
+          evmAddress,
+          evmAddress,
+          BigDecimal.fromString(command.amount, security.decimals),
+          command.securityId,
+        );
       });
     });
   });

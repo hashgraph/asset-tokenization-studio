@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import NetworkService from '../../../../service/NetworkService.js';
+import NetworkService from '../../../../service/network/NetworkService.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { SetNetworkCommandFixture } from '../../../../../../__tests__/fixtures/network/NetworkFixture.js';
 import { SetNetworkCommandHandler } from './SetNetworkCommandHandler.js';
@@ -214,6 +214,9 @@ import {
 } from './SetNetworkCommand.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import Injectable from '../../../../../core/Injectable.js';
+import { ErrorMsgFixture } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { SetNetworkCommandError } from './error/SetNetworkCommandError.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 describe('SetNetworkCommandHandler', () => {
   let handler: SetNetworkCommandHandler;
@@ -222,6 +225,7 @@ describe('SetNetworkCommandHandler', () => {
   const networkServiceMock = createMock<NetworkService>();
   const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
   const queryAdapterMock = createMock<RPCQueryAdapter>();
+  const errorMsg = ErrorMsgFixture.create().msg;
   jest.spyOn(Injectable, 'resolve').mockReturnValue(queryAdapterMock);
 
   beforeEach(() => {
@@ -237,14 +241,38 @@ describe('SetNetworkCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully set network', async () => {
-      const result = await handler.execute(command);
+    describe('error cases', () => {
+      it('throws SetNetworkCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      expect(result).toBeInstanceOf(SetNetworkCommandResponse);
-      expect(result.environment).toEqual(command.environment);
-      expect(result.mirrorNode).toEqual(command.mirrorNode);
-      expect(result.rpcNode).toEqual(command.rpcNode);
-      expect(result.consensusNodes).toEqual(command.consensusNodes);
+        jest.spyOn(mirrorNodeAdapterMock, 'set').mockImplementation(() => {
+          throw fakeError;
+        });
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          SetNetworkCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while setting network: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully set network', async () => {
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(SetNetworkCommandResponse);
+        expect(result.environment).toEqual(command.environment);
+        expect(result.mirrorNode).toEqual(command.mirrorNode);
+        expect(result.rpcNode).toEqual(command.rpcNode);
+        expect(result.consensusNodes).toEqual(command.consensusNodes);
+      });
     });
   });
 });

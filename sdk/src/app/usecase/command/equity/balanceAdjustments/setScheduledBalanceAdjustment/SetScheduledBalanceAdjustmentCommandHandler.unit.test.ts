@@ -210,19 +210,22 @@ import {
   SetScheduledBalanceAdjustmentCommandResponse,
 } from './SetScheduledBalanceAdjustmentCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../../service/ContractService.js';
-import ValidationService from '../../../../../service/ValidationService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import {
   AccountPropsFixture,
+  ErrorMsgFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import { SetScheduledBalanceAdjustmentCommandFixture } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 import { faker } from '@faker-js/faker/.';
+import { SetScheduledBalanceAdjustmentCommandError } from './error/SetScheduledBalanceAdjustmentCommandError.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 
 describe('SetScheduledBalanceAdjustmentCommandHandler', () => {
   let handler: SetScheduledBalanceAdjustmentCommandHandler;
@@ -235,7 +238,7 @@ describe('SetScheduledBalanceAdjustmentCommandHandler', () => {
   const transactionId = TransactionIdFixture.create().id;
   const account = new Account(AccountPropsFixture.create());
   const evmAddress = new EvmAddress(account.evmAddress!);
-
+  const errorMsg = ErrorMsgFixture.create().msg;
   const balanceAdjustmentId = '0x' + faker.number.hex(32);
 
   beforeEach(() => {
@@ -253,64 +256,88 @@ describe('SetScheduledBalanceAdjustmentCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully set scheduled balance adjustment', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-      validationServiceMock.checkMaturityDate.mockResolvedValue(undefined);
-      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+    describe('error cases', () => {
+      it('throws SetScheduledBalanceAdjustmentCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      transactionServiceMock
-        .getHandler()
-        .setScheduledBalanceAdjustment.mockResolvedValue({
-          id: transactionId,
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          SetScheduledBalanceAdjustmentCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while setting the scheduled balance adjustment: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
         });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully set scheduled balance adjustment', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        validationServiceMock.checkMaturityDate.mockResolvedValue(undefined);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
 
-      transactionServiceMock.getTransactionResult.mockResolvedValue(
-        balanceAdjustmentId,
-      );
+        transactionServiceMock
+          .getHandler()
+          .setScheduledBalanceAdjustment.mockResolvedValue({
+            id: transactionId,
+          });
 
-      const result = await handler.execute(command);
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          balanceAdjustmentId,
+        );
 
-      expect(result).toBeInstanceOf(
-        SetScheduledBalanceAdjustmentCommandResponse,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._CORPORATEACTIONS_ROLE,
-        evmAddress.toString(),
-        command.securityId,
-      );
-      expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith(
-        expect.objectContaining({
-          res: { id: transactionId },
-          className: SetScheduledBalanceAdjustmentCommandHandler.name,
-          position: 1,
-          numberOfResultsItems: 2,
-        }),
-      );
-      expect(
-        transactionServiceMock.getHandler().setScheduledBalanceAdjustment,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().setScheduledBalanceAdjustment,
-      ).toHaveBeenCalledWith(
-        evmAddress,
-        BigDecimal.fromString(command.executionDate),
-        BigDecimal.fromString(command.factor),
-        BigDecimal.fromString(command.decimals),
-        command.securityId,
-      );
-      expect(result.payload).toBe(parseInt(balanceAdjustmentId, 16));
-      expect(result.transactionId).toBe(transactionId);
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(
+          SetScheduledBalanceAdjustmentCommandResponse,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._CORPORATEACTIONS_ROLE,
+          evmAddress.toString(),
+          command.securityId,
+        );
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            res: { id: transactionId },
+            className: SetScheduledBalanceAdjustmentCommandHandler.name,
+            position: 1,
+            numberOfResultsItems: 2,
+          }),
+        );
+        expect(
+          transactionServiceMock.getHandler().setScheduledBalanceAdjustment,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().setScheduledBalanceAdjustment,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          BigDecimal.fromString(command.executionDate),
+          BigDecimal.fromString(command.factor),
+          BigDecimal.fromString(command.decimals),
+          command.securityId,
+        );
+        expect(result.payload).toBe(parseInt(balanceAdjustmentId, 16));
+        expect(result.transactionId).toBe(transactionId);
+      });
     });
   });
 });

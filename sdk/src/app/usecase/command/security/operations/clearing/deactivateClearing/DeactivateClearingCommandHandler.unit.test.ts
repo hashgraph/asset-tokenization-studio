@@ -205,16 +205,17 @@
 
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import {
   AccountPropsFixture,
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import { ActivateClearingCommandFixture } from '../../../../../../../../__tests__/fixtures/security/OperationsFixture.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import { SwitchClearingModeCommandFixture } from '../../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
 import { DeactivateClearingCommandHandler } from './DeactivateClearingCommandHandler.js';
 import {
   DeactivateClearingCommand,
@@ -222,6 +223,8 @@ import {
 } from './DeactivateClearingCommand.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+import { DeactivateClearingCommandError } from './error/DeactivateClearingCommandError.js';
+import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
 
 describe('DeactivateClearingCommandHandler', () => {
   let handler: DeactivateClearingCommandHandler;
@@ -235,6 +238,7 @@ describe('DeactivateClearingCommandHandler', () => {
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const transactionId = TransactionIdFixture.create().id;
   const account = new Account(AccountPropsFixture.create());
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new DeactivateClearingCommandHandler(
@@ -243,7 +247,7 @@ describe('DeactivateClearingCommandHandler', () => {
       validationServiceMock,
       contractServiceMock,
     );
-    command = ActivateClearingCommandFixture.create();
+    command = SwitchClearingModeCommandFixture.create();
   });
 
   afterAll(() => {
@@ -251,39 +255,62 @@ describe('DeactivateClearingCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully deactivate clearing', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-      accountServiceMock.getCurrentAccount.mockReturnValue(account);
-      transactionServiceMock.getHandler().deactivateClearing.mockResolvedValue({
-        id: transactionId,
+    describe('error cases', () => {
+      it('throws DeactivateClearingCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          DeactivateClearingCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while deactivating clearing mode: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
       });
+    });
+    describe('success cases', () => {
+      it('should successfully deactivate clearing', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        transactionServiceMock
+          .getHandler()
+          .deactivateClearing.mockResolvedValue({
+            id: transactionId,
+          });
 
-      const result = await handler.execute(command);
+        const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(DeactivateClearingCommandResponse);
-      expect(result.transactionId).toBe(transactionId);
+        expect(result).toBeInstanceOf(DeactivateClearingCommandResponse);
+        expect(result.transactionId).toBe(transactionId);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        1,
-        command.securityId,
-      );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(1, command.securityId);
 
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._CLEARING_ROLE,
-        account.id.toString(),
-        command.securityId,
-      );
-      expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._CLEARING_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
 
-      expect(
-        transactionServiceMock.getHandler().deactivateClearing,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().deactivateClearing,
-      ).toHaveBeenCalledWith(evmAddress);
+        expect(
+          transactionServiceMock.getHandler().deactivateClearing,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().deactivateClearing,
+        ).toHaveBeenCalledWith(evmAddress);
+      });
     });
   });
 });

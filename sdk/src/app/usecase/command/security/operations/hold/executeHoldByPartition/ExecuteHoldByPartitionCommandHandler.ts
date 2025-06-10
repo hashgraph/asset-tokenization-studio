@@ -214,11 +214,11 @@ import TransactionService from '../../../../../../service/transaction/Transactio
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import AccountService from '../../../../../../service/account/AccountService.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
 import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
+import { ExecuteHoldByPartitionCommandError } from './error/ExecuteHoldByPartitionCommandError.js';
 
 @CommandHandler(ExecuteHoldByPartitionCommand)
 export class ExecuteHoldByPartitionCommandHandler
@@ -229,8 +229,6 @@ export class ExecuteHoldByPartitionCommandHandler
     private readonly securityService: SecurityService,
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
     @lazyInject(ContractService)
@@ -242,54 +240,58 @@ export class ExecuteHoldByPartitionCommandHandler
   async execute(
     command: ExecuteHoldByPartitionCommand,
   ): Promise<ExecuteHoldByPartitionCommandResponse> {
-    const { securityId, sourceId, amount, holdId, targetId, partitionId } =
-      command;
+    try {
+      const { securityId, sourceId, amount, holdId, targetId, partitionId } =
+        command;
 
-    const handler = this.transactionService.getHandler();
-    const security = await this.securityService.get(securityId);
+      const handler = this.transactionService.getHandler();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddressOrNull(targetId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkHoldBalance(
-      securityId,
-      partitionId,
-      sourceId,
-      holdId,
-      amountBd,
-    );
+      await this.validationService.checkHoldBalance(
+        securityId,
+        partitionId,
+        sourceId,
+        holdId,
+        amountBd,
+      );
 
-    await this.validationService.checkKycAddresses(
-      securityId,
-      [sourceId, targetId],
-      KycStatus.GRANTED,
-    );
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [sourceId, targetId],
+        KycStatus.GRANTED,
+      );
 
-    const res = await handler.executeHoldByPartition(
-      securityEvmAddress,
-      sourceEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      partitionId,
-      holdId,
-      securityId,
-    );
+      const res = await handler.executeHoldByPartition(
+        securityEvmAddress,
+        sourceEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        partitionId,
+        holdId,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ExecuteHoldByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ExecuteHoldByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ExecuteHoldByPartitionCommandError(error as Error);
+    }
   }
 }

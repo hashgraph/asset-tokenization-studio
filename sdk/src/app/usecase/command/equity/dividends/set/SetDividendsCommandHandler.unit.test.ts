@@ -210,15 +210,18 @@ import {
   SetDividendsCommandResponse,
 } from './SetDividendsCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { faker } from '@faker-js/faker/.';
 import { SetDividendsCommandFixture } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
+import { SetDividendsCommandError } from './error/SetDividendsCommandError.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 
 describe('SetDividendsCommandHandler', () => {
   let handler: SetDividendsCommandHandler;
@@ -230,8 +233,7 @@ describe('SetDividendsCommandHandler', () => {
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
 
   const dividendId = faker.string.hexadecimal({ length: 64, prefix: '0x' });
-
-  console.log('DIVEND ID:' + dividendId);
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new SetDividendsCommandHandler(
@@ -246,50 +248,76 @@ describe('SetDividendsCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully set dividends', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+    describe('error cases', () => {
+      it('throws SetDividendsCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      transactionServiceMock.getHandler().setDividends.mockResolvedValue({
-        id: transactionId,
-        response: dividendId,
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          SetDividendsCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while setting the dividends: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
       });
+    });
+    describe('success cases', () => {
+      it('should successfully set dividends', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
 
-      transactionServiceMock.getTransactionResult.mockResolvedValue(dividendId);
+        transactionServiceMock.getHandler().setDividends.mockResolvedValue({
+          id: transactionId,
+          response: dividendId,
+        });
 
-      const result = await handler.execute(command);
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          dividendId,
+        );
 
-      expect(result).toBeInstanceOf(SetDividendsCommandResponse);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        command.address,
-      );
-      expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith(
-        expect.objectContaining({
-          res: { id: transactionId, response: dividendId },
-          className: SetDividendsCommandHandler.name,
-          position: 1,
-          numberOfResultsItems: 2,
-        }),
-      );
-      expect(
-        transactionServiceMock.getHandler().setDividends,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().setDividends,
-      ).toHaveBeenCalledWith(
-        evmAddress,
-        BigDecimal.fromString(command.recordDate),
-        BigDecimal.fromString(command.executionDate),
-        BigDecimal.fromString(command.amount),
-        command.address,
-      );
-      expect(result.payload).toBe(parseInt(dividendId, 16));
-      expect(result.transactionId).toBe(transactionId);
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(SetDividendsCommandResponse);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.address,
+        );
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            res: { id: transactionId, response: dividendId },
+            className: SetDividendsCommandHandler.name,
+            position: 1,
+            numberOfResultsItems: 2,
+          }),
+        );
+        expect(
+          transactionServiceMock.getHandler().setDividends,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().setDividends,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          BigDecimal.fromString(command.recordDate),
+          BigDecimal.fromString(command.executionDate),
+          BigDecimal.fromString(command.amount),
+          command.address,
+        );
+        expect(result.payload).toBe(parseInt(dividendId, 16));
+        expect(result.transactionId).toBe(transactionId);
+      });
     });
   });
 });

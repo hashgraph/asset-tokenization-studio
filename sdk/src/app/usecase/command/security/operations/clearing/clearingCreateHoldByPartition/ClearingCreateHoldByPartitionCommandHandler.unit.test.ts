@@ -205,17 +205,18 @@
 
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import {
   AccountPropsFixture,
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
-import { ClearingCreateHoldByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/security/OperationsFixture.js';
+import { ClearingCreateHoldByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
 import { Security } from '../../../../../../../domain/context/security/Security.js';
@@ -226,6 +227,8 @@ import {
 } from './ClearingCreateHoldByPartitionCommand.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import { faker } from '@faker-js/faker/.';
+import { ClearingCreateHoldByPartitionCommandError } from './error/ClearingCreateHoldByPartitionCommandError.js';
+import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
 
 describe('ClearingCreateHoldByPartitionCommandHandler', () => {
   let handler: ClearingCreateHoldByPartitionCommandHandler;
@@ -236,6 +239,7 @@ describe('ClearingCreateHoldByPartitionCommandHandler', () => {
   const accountServiceMock = createMock<AccountService>();
   const contractServiceMock = createMock<ContractService>();
   const securityServiceMock = createMock<SecurityService>();
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const transactionId = TransactionIdFixture.create().id;
@@ -267,80 +271,105 @@ describe('ClearingCreateHoldByPartitionCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully create clearing hold', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-      accountServiceMock.getCurrentAccount.mockReturnValue(account);
-      accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
-      accountServiceMock.getAccountEvmAddressOrNull.mockResolvedValue(
-        evmAddress,
-      );
-      securityServiceMock.get.mockResolvedValue(security);
-      transactionServiceMock
-        .getHandler()
-        .clearingCreateHoldByPartition.mockResolvedValue({
-          id: transactionId,
+    describe('error cases', () => {
+      it('throws ClearingCreateHoldByPartitionCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          ClearingCreateHoldByPartitionCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while executing clearing create hold operation: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
         });
-      transactionServiceMock.getTransactionResult.mockResolvedValue(clearingId);
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully create clearing hold', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getAccountEvmAddressOrNull.mockResolvedValue(
+          evmAddress,
+        );
+        securityServiceMock.get.mockResolvedValue(security);
+        transactionServiceMock
+          .getHandler()
+          .clearingCreateHoldByPartition.mockResolvedValue({
+            id: transactionId,
+          });
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          clearingId,
+        );
 
-      const result = await handler.execute(command);
+        const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(
-        ClearingCreateHoldByPartitionCommandResponse,
-      );
-      expect(result.payload).toBe(parseInt(clearingId));
-      expect(result.transactionId).toBe(transactionId);
+        expect(result).toBeInstanceOf(
+          ClearingCreateHoldByPartitionCommandResponse,
+        );
+        expect(result.payload).toBe(parseInt(clearingId));
+        expect(result.transactionId).toBe(transactionId);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().clearingCreateHoldByPartition,
-      ).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkBalance).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkBalance).toHaveBeenCalledWith(
-        command.securityId,
-        account.id.toString(),
-        BigDecimal.fromString(command.amount, security.decimals),
-      );
-      expect(
-        validationServiceMock.checkClearingActivated,
-      ).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkClearingActivated).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
-        security,
-        command.amount,
-      );
-      expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledWith(
-        security,
-        command.partitionId,
-      );
-      expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        1,
-        command.securityId,
-      );
-      expect(
-        transactionServiceMock.getHandler().clearingCreateHoldByPartition,
-      ).toHaveBeenCalledWith(
-        evmAddress,
-        command.partitionId,
-        evmAddress,
-        BigDecimal.fromString(command.amount, security.decimals),
-        evmAddress,
-        BigDecimal.fromString(command.clearingExpirationDate.substring(0, 10)),
-        BigDecimal.fromString(command.holdExpirationDate.substring(0, 10)),
-        command.securityId,
-      );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().clearingCreateHoldByPartition,
+        ).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkBalance).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkBalance).toHaveBeenCalledWith(
+          command.securityId,
+          account.id.toString(),
+          BigDecimal.fromString(command.amount, security.decimals),
+        );
+        expect(
+          validationServiceMock.checkClearingActivated,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          validationServiceMock.checkClearingActivated,
+        ).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
+          security,
+          command.amount,
+        );
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledWith(
+          security,
+          command.partitionId,
+        );
+        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(1, command.securityId);
+        expect(
+          transactionServiceMock.getHandler().clearingCreateHoldByPartition,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          command.partitionId,
+          evmAddress,
+          BigDecimal.fromString(command.amount, security.decimals),
+          evmAddress,
+          BigDecimal.fromString(
+            command.clearingExpirationDate.substring(0, 10),
+          ),
+          BigDecimal.fromString(command.holdExpirationDate.substring(0, 10)),
+          command.securityId,
+        );
+      });
     });
   });
 });
