@@ -226,7 +226,6 @@ import { LockCommandError } from './error/LockCommandError.js';
 import { LockCommandHandler } from './LockCommandHandler.js';
 import { LockCommand, LockCommandResponse } from './LockCommand.js';
 import { LockCommandFixture } from '../../../../../../../__tests__/fixtures/lock/LockFixture.js';
-import { faker } from '@faker-js/faker/.';
 
 describe('IssueCommandHandler', () => {
   let handler: LockCommandHandler;
@@ -243,10 +242,6 @@ describe('IssueCommandHandler', () => {
   const errorMsg = ErrorMsgFixture.create().msg;
   const security = new Security(SecurityPropsFixture.create());
   const account = new Account(AccountPropsFixture.create());
-  const lockId = faker.string.hexadecimal({
-    length: 64,
-    prefix: '0x',
-  });
 
   beforeEach(() => {
     handler = new LockCommandHandler(
