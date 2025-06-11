@@ -203,6 +203,7 @@
 
 */
 
+import { ProtectPartitionsCommand } from '../../../src/app/usecase/command/security/operations/protectPartitions/ProtectPartitionsCommand';
 import { GetNounceQuery } from '../../../src/app/usecase/query/security/protectedPartitions/getNounce/GetNounceQuery';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
@@ -211,3 +212,8 @@ export const GetNounceQueryFixture = createFixture<GetNounceQuery>((query) => {
   query.securityId.as(() => HederaIdPropsFixture.create().value);
   query.targetId.as(() => HederaIdPropsFixture.create().value);
 });
+
+export const ProtectPartitionsCommandFixture =
+  createFixture<ProtectPartitionsCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+  });

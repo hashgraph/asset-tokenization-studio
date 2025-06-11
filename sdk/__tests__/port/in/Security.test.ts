@@ -260,6 +260,7 @@ import {
   GetClearingCreateHoldForByPartitionRequest,
   GetClearingTransferForByPartitionRequest,
   SetMaxSupplyRequest,
+  ProtectedClearingCreateHoldByPartitionRequest,
 } from '../../../src/index.js';
 import TransferRequest from '../../../src/port/in/request/security/operations/transfer/TransferRequest.js';
 import RedeemRequest from '../../../src/port/in/request/security/operations/redeem/RedeemRequest.js';
@@ -2273,13 +2274,14 @@ describe('🧪 Security tests', () => {
 
       expect(
         (
-          await Security.protectedCreateHoldByPartition(
-            new ProtectedCreateHoldByPartitionRequest({
+          await Security.protectedClearingCreateHoldByPartition(
+            new ProtectedClearingCreateHoldByPartitionRequest({
               securityId: equity.evmDiamondAddress!,
               partitionId: partitionBytes32,
               sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
               targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-              expirationDate: '9999999999',
+              holdExpirationDate: '9999999999',
+              clearingExpirationDate: '9999999999',
               amount: protectedClearingAmount.toString(),
               deadline: '9999999999',
               nonce: 3,
@@ -2547,7 +2549,7 @@ describe('🧪 Security tests', () => {
             new CancelClearingOperationByPartitionRequest({
               securityId: equity.evmDiamondAddress!,
               partitionId: _PARTITION_ID_1,
-              targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+              targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
               clearingId: 1,
               clearingOperationType: ClearingOperationType.Redeem,
             }),
@@ -2559,7 +2561,7 @@ describe('🧪 Security tests', () => {
         await Security.getClearedAmountFor(
           new GetClearedAmountForRequest({
             securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
           }),
         ),
       ).toEqual(0);

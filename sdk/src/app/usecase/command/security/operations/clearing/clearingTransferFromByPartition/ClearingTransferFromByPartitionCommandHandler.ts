@@ -287,7 +287,7 @@ export class ClearingTransferFromByPartitionCommandHandler
         amountBd,
         sourceEvmAddress,
         targetEvmAddress,
-        BigDecimal.fromString(expirationDate),
+        BigDecimal.fromString(expirationDate.substring(0, 10)),
         securityId,
       );
 

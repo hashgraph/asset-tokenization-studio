@@ -215,6 +215,7 @@ import {
 } from './AddToControlListCommand.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
+import { AddToControlListCommandError } from './error/AddToControlListCommandError.js';
 
 @CommandHandler(AddToControlListCommand)
 export class AddToControlListCommandHandler
@@ -234,30 +235,34 @@ export class AddToControlListCommandHandler
   async execute(
     command: AddToControlListCommand,
   ): Promise<AddToControlListCommandResponse> {
-    const { targetId, securityId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { targetId, securityId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkAccountInControlList(
-      securityId,
-      targetId,
-      true,
-    );
+      await this.validationService.checkAccountInControlList(
+        securityId,
+        targetId,
+        true,
+      );
 
-    const res = await handler.addToControlList(
-      securityEvmAddress,
-      targetEvmAddress,
-      securityId,
-    );
+      const res = await handler.addToControlList(
+        securityEvmAddress,
+        targetEvmAddress,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new AddToControlListCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new AddToControlListCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new AddToControlListCommandError(error as Error);
+    }
   }
 }

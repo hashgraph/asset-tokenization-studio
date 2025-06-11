@@ -215,11 +215,10 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
-import { ControllerTransferCommandError } from './error/ControllerTransferCommandError copy.js';
+import { ControllerTransferCommandError } from './error/ControllerTransferCommandError.js';
 
 @CommandHandler(ControllerTransferCommand)
 export class ControllerTransferCommandHandler
@@ -263,14 +262,6 @@ export class ControllerTransferCommandHandler
         _PARTITION_ID_1,
         account.id.toString(),
       );
-
-      await this.validationService.checkRole(
-        SecurityRole._CONTROLLER_ROLE,
-        account.id.toString(),
-        securityId,
-      );
-
-      await this.validationService.checkDecimals(security, amount);
 
       const amountBd = BigDecimal.fromString(amount, security.decimals);
 

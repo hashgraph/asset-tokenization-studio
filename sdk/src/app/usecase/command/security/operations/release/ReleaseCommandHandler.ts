@@ -246,6 +246,7 @@ export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
         securityEvmAddress,
         sourceEvmAddress,
         lockIdBd,
+        command.securityId,
       );
       return Promise.resolve(
         new ReleaseCommandResponse(res.error === undefined, res.id!),
