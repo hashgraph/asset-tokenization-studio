@@ -206,8 +206,8 @@
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { GetControlListCountQuery } from '../../../src/app/usecase/query/security/controlList/getControlListCount/GetControlListCountQuery';
-import { GetControlListMembersQuery } from 'app/usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery';
-import { GetControlListTypeQuery } from 'app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery';
+import { GetControlListMembersQuery } from '../../../src/app/usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery';
+import { GetControlListTypeQuery } from '../../../src/app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery';
 import { AddToControlListCommand } from '../../../src/app/usecase/command/security/operations/addToControlList/AddToControlListCommand';
 
 export const GetControlListCountQueryFixture =

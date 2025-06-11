@@ -210,6 +210,8 @@ import { GetRoleMemberCountQuery } from '../../../src/app/usecase/query/security
 import { GetRoleMembersQuery } from '../../../src/app/usecase/query/security/roles/getRoleMembers/GetRoleMembersQuery';
 import { GetRolesForQuery } from '../../../src/app/usecase/query/security/roles/getRolesFor/GetRolesForQuery';
 import { HasRoleQuery } from '../../../src/app/usecase/query/security/roles/hasRole/HasRoleQuery';
+import { ApplyRolesCommand } from '../../../src/app/usecase/command/security/roles/applyRoles/ApplyRolesCommand';
+import { GrantRoleCommand } from '../../../src/app/usecase/command/security/roles/grantRole/GrantRoleCommand';
 
 export const GetRoleCountForQueryFixture = createFixture<GetRoleCountForQuery>(
   (query) => {
@@ -247,3 +249,28 @@ export const HasRoleQueryFixture = createFixture<HasRoleQuery>((query) => {
   query.targetId.as(() => HederaIdPropsFixture.create().value);
   query.role.faker((faker) => faker.lorem.words());
 });
+
+export const ApplyRolesCommandFixture = createFixture<ApplyRolesCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.roles.faker((faker) =>
+      Array.from({ length: 3 }, () =>
+        faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' }),
+      ),
+    );
+    command.actives.faker((faker) =>
+      Array.from({ length: 3 }, () => faker.datatype.boolean()),
+    );
+  },
+);
+
+export const GrantRoleCommandFixture = createFixture<GrantRoleCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.role.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' }),
+    );
+  },
+);

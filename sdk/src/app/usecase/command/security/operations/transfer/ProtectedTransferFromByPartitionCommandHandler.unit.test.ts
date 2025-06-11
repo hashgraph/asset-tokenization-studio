@@ -203,69 +203,195 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { RedeemCommand, RedeemCommandResponse } from './RedeemCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/account/AccountService.js';
+import {
+  AccountPropsFixture,
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { RedeemCommandError } from './error/RedeemCommandError.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import { TransferCommandFixture } from '../../../../../../../__tests__/fixtures/transfer/TransferFixture.js';
+import SecurityService from 'app/service/security/SecurityService.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { ProtectedTransferFromByPartitionCommandHandler } from './ProtectedTransferFromByPartitionCommandHandler.js';
+import {
+  ProtectedTransferFromByPartitionCommand,
+  ProtectedTransferFromByPartitionCommandResponse,
+} from './ProtectedTransferFromByPartitionCommand.js';
+import { ProtectedTransferFromByPartitionCommandError } from './error/ProtectedTransferFromByPartitionCommandError.js';
 
-@CommandHandler(RedeemCommand)
-export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
-  constructor(
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+describe('ProtectedTransferFromByPartitionCommandHandler', () => {
+  let handler: ProtectedTransferFromByPartitionCommandHandler;
+  let command: ProtectedTransferFromByPartitionCommand;
 
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+  const securityServiceMock = createMock<SecurityService>();
 
-  async execute(command: RedeemCommand): Promise<RedeemCommandResponse> {
-    try {
-      const { securityId, amount } = command;
-      const handler = this.transactionService.getHandler();
-      const account = this.accountService.getCurrentAccount();
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const account = new Account(AccountPropsFixture.create());
+  const security = new Security(SecurityPropsFixture.create());
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      await this.validationService.checkCanRedeem(
-        securityId,
-        account.id.toString(),
-        amount,
-        _PARTITION_ID_1,
-      );
+  beforeEach(() => {
+    handler = new ProtectedTransferFromByPartitionCommandHandler(
+      securityServiceMock,
+      accountServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+      contractServiceMock,
+    );
+    command = TransferCommandFixture.create();
+  });
 
-      const security = await this.securityService.get(securityId);
-      await this.validationService.checkDecimals(security, amount);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const amountBd: BigDecimal = BigDecimal.fromString(
-        amount,
-        security.decimals,
-      );
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws ProtectedTransferFromByPartitionCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      const res = await handler.redeem(
-        securityEvmAddress,
-        amountBd,
-        securityId,
-      );
-      return Promise.resolve(
-        new RedeemCommandResponse(res.error === undefined, res.id!),
-      );
-    } catch (error) {
-      throw new RedeemCommandError(error as Error);
-    }
-  }
-}
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          ProtectedTransferFromByPartitionCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while protected transferring from tokens: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully protected protected transfer from', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        securityServiceMock.get.mockResolvedValue(security);
+
+        transactionServiceMock
+          .getHandler()
+          .protectedTransferFromByPartition.mockResolvedValue({
+            id: transactionId,
+          });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(
+          ProtectedTransferFromByPartitionCommandResponse,
+        );
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+          1,
+          command.sourceId,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+          2,
+          command.targetId,
+        );
+
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(
+          validationServiceMock.checkProtectedPartitions,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          validationServiceMock.checkProtectedPartitions,
+        ).toHaveBeenCalledWith(security);
+        expect(
+          validationServiceMock.checkProtectedPartitionRole,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          validationServiceMock.checkProtectedPartitionRole,
+        ).toHaveBeenCalledWith(
+          command.partitionId,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
+          security,
+          command.amount,
+        );
+        expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledWith(
+          command.securityId,
+          [command.sourceId, command.targetId],
+          KycStatus.GRANTED,
+        );
+        expect(validationServiceMock.checkControlList).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkControlList).toHaveBeenCalledWith(
+          command.securityId,
+          evmAddress.toString(),
+          evmAddress.toString(),
+        );
+
+        expect(validationServiceMock.checkBalance).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkBalance).toHaveBeenCalledWith(
+          command.securityId,
+          command.sourceId,
+          BigDecimal.fromString(command.amount, security.decimals),
+        );
+
+        expect(validationServiceMock.checkValidNounce).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkValidNounce).toHaveBeenCalledWith(
+          command.securityId,
+          command.sourceId,
+          command.nounce,
+        );
+
+        expect(
+          transactionServiceMock.getHandler().protectedTransferFromByPartition,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(
+          transactionServiceMock.getHandler().protectedTransferFromByPartition,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          command.partitionId,
+          evmAddress,
+          evmAddress,
+          BigDecimal.fromString(command.amount, security.decimals),
+          BigDecimal.fromString(command.deadline.substring(0, 10)),
+          BigDecimal.fromString(command.nounce.toString()),
+          command.signature,
+        );
+      });
+    });
+  });
+});

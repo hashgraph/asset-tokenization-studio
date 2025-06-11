@@ -203,69 +203,125 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { RedeemCommand, RedeemCommandResponse } from './RedeemCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/account/AccountService.js';
+import {
+  AccountPropsFixture,
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { RedeemCommandError } from './error/RedeemCommandError.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import { SetRevocationRegistryAddressCommandFixture } from '../../../../../../../__tests__/fixtures/ssi/SsiFixture.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import { SetRevocationRegistryAddressCommandHandler } from './SetRevocationRegistryAddressCommandHandler.js';
+import {
+  SetRevocationRegistryAddressCommand,
+  SetRevocationRegistryAddressCommandResponse,
+} from './SetRevocationRegistryAddressCommand.js';
+import { SetRevocationRegistryAddressCommandError } from './error/SetRevocationRegistryAddressCommandError.js';
 
-@CommandHandler(RedeemCommand)
-export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
-  constructor(
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+describe('RemoveIssuerCommandHandler', () => {
+  let handler: SetRevocationRegistryAddressCommandHandler;
+  let command: SetRevocationRegistryAddressCommand;
 
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-  async execute(command: RedeemCommand): Promise<RedeemCommandResponse> {
-    try {
-      const { securityId, amount } = command;
-      const handler = this.transactionService.getHandler();
-      const account = this.accountService.getCurrentAccount();
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const account = new Account(AccountPropsFixture.create());
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      await this.validationService.checkCanRedeem(
-        securityId,
-        account.id.toString(),
-        amount,
-        _PARTITION_ID_1,
-      );
+  beforeEach(() => {
+    handler = new SetRevocationRegistryAddressCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      contractServiceMock,
+      validationServiceMock,
+    );
+    command = SetRevocationRegistryAddressCommandFixture.create();
+  });
 
-      const security = await this.securityService.get(securityId);
-      await this.validationService.checkDecimals(security, amount);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const amountBd: BigDecimal = BigDecimal.fromString(
-        amount,
-        security.decimals,
-      );
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws SetRevocationRegistryAddressCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      const res = await handler.redeem(
-        securityEvmAddress,
-        amountBd,
-        securityId,
-      );
-      return Promise.resolve(
-        new RedeemCommandResponse(res.error === undefined, res.id!),
-      );
-    } catch (error) {
-      throw new RedeemCommandError(error as Error);
-    }
-  }
-}
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          SetRevocationRegistryAddressCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while setting revokation registry: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully set revokation registry', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+
+        transactionServiceMock
+          .getHandler()
+          .setRevocationRegistryAddress.mockResolvedValue({
+            id: transactionId,
+          });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(
+          SetRevocationRegistryAddressCommandResponse,
+        );
+        expect(result.transactionId).toBe(transactionId);
+
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(1, command.securityId);
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(2, command.revocationRegistryId);
+
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._SSI_MANAGER_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(
+          transactionServiceMock.getHandler().setRevocationRegistryAddress,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(
+          transactionServiceMock.getHandler().setRevocationRegistryAddress,
+        ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
+      });
+    });
+  });
+});

@@ -210,7 +210,7 @@ export class ProtectedClearingRedeemByPartitionCommandResponse
   implements CommandResponse
 {
   constructor(
-    public readonly payload: number,
+    public readonly payload: boolean,
     public readonly transactionId: string,
   ) {}
 }

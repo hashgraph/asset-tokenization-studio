@@ -203,69 +203,131 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { RedeemCommand, RedeemCommandResponse } from './RedeemCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/account/AccountService.js';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { RedeemCommandFixture } from '../../../../../../../__tests__/fixtures/redeem/RedeemFixture.js';
+import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
+import { RedeemCommandHandler } from './RedeemCommandHandler.js';
+import { RedeemCommand, RedeemCommandResponse } from './RedeemCommand.js';
 import { RedeemCommandError } from './error/RedeemCommandError.js';
 
-@CommandHandler(RedeemCommand)
-export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
-  constructor(
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+/* eslint-disable @typescript-eslint/no-unused-vars */
+describe('RedeemCommandHandler', () => {
+  let handler: RedeemCommandHandler;
+  let command: RedeemCommand;
 
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+  const securityServiceMock = createMock<SecurityService>();
 
-  async execute(command: RedeemCommand): Promise<RedeemCommandResponse> {
-    try {
-      const { securityId, amount } = command;
-      const handler = this.transactionService.getHandler();
-      const account = this.accountService.getCurrentAccount();
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const security = new Security(SecurityPropsFixture.create());
+  const account = new Account(AccountPropsFixture.create());
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      await this.validationService.checkCanRedeem(
-        securityId,
-        account.id.toString(),
-        amount,
-        _PARTITION_ID_1,
-      );
+  beforeEach(() => {
+    handler = new RedeemCommandHandler(
+      securityServiceMock,
+      transactionServiceMock,
+      accountServiceMock,
+      validationServiceMock,
+      contractServiceMock,
+    );
+    const commandRaw = RedeemCommandFixture.create();
+    const {
+      deadline,
+      nounce,
+      signature,
+      partitionId,
+      sourceId,
+      ...commandFiltered
+    } = commandRaw;
+    command = commandFiltered;
+  });
 
-      const security = await this.securityService.get(securityId);
-      await this.validationService.checkDecimals(security, amount);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const amountBd: BigDecimal = BigDecimal.fromString(
-        amount,
-        security.decimals,
-      );
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws RedeemCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      const res = await handler.redeem(
-        securityEvmAddress,
-        amountBd,
-        securityId,
-      );
-      return Promise.resolve(
-        new RedeemCommandResponse(res.error === undefined, res.id!),
-      );
-    } catch (error) {
-      throw new RedeemCommandError(error as Error);
-    }
-  }
-}
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(RedeemCommandError);
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while redeeming tokens: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully redeem tokens', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        securityServiceMock.get.mockResolvedValue(security);
+
+        transactionServiceMock.getHandler().redeem.mockResolvedValue({
+          id: transactionId,
+        });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(RedeemCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+
+        expect(
+          transactionServiceMock.getHandler().redeem,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(validationServiceMock.checkCanRedeem).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkCanRedeem).toHaveBeenCalledWith(
+          command.securityId,
+          account.id.toString(),
+          command.amount,
+          _PARTITION_ID_1,
+        );
+
+        expect(transactionServiceMock.getHandler().redeem).toHaveBeenCalledWith(
+          evmAddress,
+          BigDecimal.fromString(command.amount, security.decimals),
+          command.securityId,
+        );
+      });
+    });
+  });
+});

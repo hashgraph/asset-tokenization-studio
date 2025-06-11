@@ -302,10 +302,11 @@ export class ProtectedTransferFromByPartitionCommandHandler
         sourceEvmAddress,
         targetEvmAddress,
         amountBd,
-        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(deadline.substring(0, 10)),
         BigDecimal.fromString(nounce.toString()),
         signature,
       );
+
       return Promise.resolve(
         new ProtectedTransferFromByPartitionCommandResponse(
           res.error === undefined,

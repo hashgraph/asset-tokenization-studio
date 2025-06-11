@@ -205,7 +205,7 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { IssueCommand } from 'app/usecase/command/security/operations/issue/IssueCommand';
+import { IssueCommand } from '../../../src/app/usecase/command/security/operations/issue/IssueCommand';
 
 export const IssueCommandFixture = createFixture<IssueCommand>((command) => {
   command.amount.faker((faker) =>

@@ -203,69 +203,133 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { RedeemCommand, RedeemCommandResponse } from './RedeemCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/account/AccountService.js';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
-import { RedeemCommandError } from './error/RedeemCommandError.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { UnprotectPartitionsCommandError } from './error/UnprotectPartitionsCommandError.js';
+import { ProtectPartitionsCommandFixture } from '../../../../../../../__tests__/fixtures/protectedPartitions/ProtectedPartitionsFixture.js';
+import { UnprotectPartitionsCommandHandler } from './UnprotectPartitionsCommandHandler.js';
+import {
+  UnprotectPartitionsCommand,
+  UnprotectPartitionsCommandResponse,
+} from './UnprotectPartitionsCommand.js';
 
-@CommandHandler(RedeemCommand)
-export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
-  constructor(
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+describe('UnprotectPartitionsCommandHandler', () => {
+  let handler: UnprotectPartitionsCommandHandler;
+  let command: UnprotectPartitionsCommand;
 
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+  const securityServiceMock = createMock<SecurityService>();
 
-  async execute(command: RedeemCommand): Promise<RedeemCommandResponse> {
-    try {
-      const { securityId, amount } = command;
-      const handler = this.transactionService.getHandler();
-      const account = this.accountService.getCurrentAccount();
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const security = new Security(SecurityPropsFixture.create());
+  const account = new Account(AccountPropsFixture.create());
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      await this.validationService.checkCanRedeem(
-        securityId,
-        account.id.toString(),
-        amount,
-        _PARTITION_ID_1,
-      );
+  beforeEach(() => {
+    handler = new UnprotectPartitionsCommandHandler(
+      securityServiceMock,
+      accountServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+      contractServiceMock,
+    );
+    command = ProtectPartitionsCommandFixture.create();
+  });
 
-      const security = await this.securityService.get(securityId);
-      await this.validationService.checkDecimals(security, amount);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const amountBd: BigDecimal = BigDecimal.fromString(
-        amount,
-        security.decimals,
-      );
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws UnprotectPartitionsCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      const res = await handler.redeem(
-        securityEvmAddress,
-        amountBd,
-        securityId,
-      );
-      return Promise.resolve(
-        new RedeemCommandResponse(res.error === undefined, res.id!),
-      );
-    } catch (error) {
-      throw new RedeemCommandError(error as Error);
-    }
-  }
-}
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          UnprotectPartitionsCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while unprotecting partitions: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully unprotect partitions', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        securityServiceMock.get.mockResolvedValue(security);
+
+        transactionServiceMock
+          .getHandler()
+          .unprotectPartitions.mockResolvedValue({
+            id: transactionId,
+          });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(UnprotectPartitionsCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(
+          transactionServiceMock.getHandler().unprotectPartitions,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._PROTECTED_PARTITION_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(
+          validationServiceMock.checkProtectedPartitions,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          validationServiceMock.checkProtectedPartitions,
+        ).toHaveBeenCalledWith(security);
+
+        expect(
+          transactionServiceMock.getHandler().unprotectPartitions,
+        ).toHaveBeenCalledWith(evmAddress, command.securityId);
+      });
+    });
+  });
+});

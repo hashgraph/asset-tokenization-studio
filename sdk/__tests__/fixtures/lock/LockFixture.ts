@@ -207,10 +207,10 @@ import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/GetLockQuery';
 import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
-import { LockedBalanceOfQuery } from 'app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
-import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
-import { LockCommand } from 'app/usecase/command/security/operations/lock/LockCommand';
-import { faker } from '@faker-js/faker/.';
+import { LockedBalanceOfQuery } from '../../../src/app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
+import { LocksIdQuery } from '../../../src/app/usecase/query/security/locksId/LocksIdQuery';
+import { LockCommand } from '../../../src/app/usecase/command/security/operations/lock/LockCommand';
+import { ReleaseCommand } from '../../../src/app/usecase/command/security/operations/release/ReleaseCommand';
 
 export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
   query.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -247,3 +247,11 @@ export const LockCommandFixture = createFixture<LockCommand>((command) => {
   );
   command.securityId.as(() => HederaIdPropsFixture.create().value);
 });
+
+export const ReleaseCommandFixture = createFixture<ReleaseCommand>(
+  (command) => {
+    command.lockId.faker((faker) => faker.number.int({ min: 1, max: 1000 }));
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+  },
+);

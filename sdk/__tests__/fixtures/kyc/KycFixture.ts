@@ -216,7 +216,7 @@ import { GetKycAccountsDataQuery } from '../../../src/app/usecase/query/security
 import { KycAccountData } from '../../../src/domain/context/kyc/KycAccountData';
 import { GetKycForQuery } from '../../../src/app/usecase/query/security/kyc/getKycFor/GetKycForQuery';
 import { Kyc } from '../../../src/domain/context/kyc/Kyc';
-import { GetKycStatusForQuery } from 'app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
+import { GetKycStatusForQuery } from '../../../src/app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
 import { GrantKycCommand } from '../../../src/app/usecase/command/security/kyc/grantKyc/GrantKycCommand';
 import { SignedCredential } from '@terminal3/vc_core';
 import { RevokeKycCommand } from '../../../src/app/usecase/command/security/kyc/revokeKyc/RevokeKycCommand';

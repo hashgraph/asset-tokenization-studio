@@ -214,18 +214,14 @@ import {
 import ContractService from '../../../../../service/contract/ContractService.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
 import Account from '../../../../../../domain/context/account/Account.js';
 import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { LockCommandFixture } from '../../../../../../../__tests__/fixtures/lock/LockFixture.js';
-import { faker } from '@faker-js/faker/.';
 import { PauseCommandHandler } from './PauseCommandHandler.js';
 import { PauseCommand, PauseCommandResponse } from './PauseCommand.js';
 import { PauseCommandError } from './error/PauseCommandError.js';
+import { PauseCommandFixture } from '../../../../../../../__tests__/fixtures/pause/PauseFixture.js';
 
 describe('PauseCommandHandler', () => {
   let handler: PauseCommandHandler;
@@ -235,17 +231,11 @@ describe('PauseCommandHandler', () => {
   const validationServiceMock = createMock<ValidationService>();
   const accountServiceMock = createMock<AccountService>();
   const contractServiceMock = createMock<ContractService>();
-  const securityServiceMock = createMock<SecurityService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const transactionId = TransactionIdFixture.create().id;
   const errorMsg = ErrorMsgFixture.create().msg;
-  const security = new Security(SecurityPropsFixture.create());
   const account = new Account(AccountPropsFixture.create());
-  const lockId = faker.string.hexadecimal({
-    length: 64,
-    prefix: '0x',
-  });
 
   beforeEach(() => {
     handler = new PauseCommandHandler(
@@ -254,7 +244,7 @@ describe('PauseCommandHandler', () => {
       validationServiceMock,
       contractServiceMock,
     );
-    command = LockCommandFixture.create();
+    command = PauseCommandFixture.create();
   });
 
   afterEach(() => {
@@ -284,7 +274,6 @@ describe('PauseCommandHandler', () => {
       it('should successfully pause security', async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
-        securityServiceMock.get.mockResolvedValue(security);
 
         transactionServiceMock.getHandler().pause.mockResolvedValue({
           id: transactionId,
