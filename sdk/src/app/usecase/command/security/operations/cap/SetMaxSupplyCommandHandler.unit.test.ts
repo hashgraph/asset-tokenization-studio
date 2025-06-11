@@ -257,7 +257,7 @@ describe('SetMaxSupplyCommandHandler', () => {
     command = SetMaxSupplyCommandFixture.create();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 

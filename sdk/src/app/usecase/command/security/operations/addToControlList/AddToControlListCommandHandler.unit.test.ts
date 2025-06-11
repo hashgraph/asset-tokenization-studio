@@ -246,7 +246,7 @@ describe('AddToControlListCommandHandler', () => {
     command = AddToControlListCommandFixture.create();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 

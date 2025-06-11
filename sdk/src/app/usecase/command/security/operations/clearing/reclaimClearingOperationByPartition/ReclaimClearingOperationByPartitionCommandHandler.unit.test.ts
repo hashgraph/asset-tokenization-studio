@@ -246,7 +246,7 @@ describe('ReclaimClearingOperationByPartitionCommandHandler', () => {
     command = HandleClearingOperationByPartitionCommandFixture.create();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 

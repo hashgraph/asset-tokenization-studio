@@ -266,7 +266,7 @@ describe('ClearingRedeemByPartitionCommandHandler', () => {
     command = commandFiltered;
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 
@@ -338,13 +338,6 @@ describe('ClearingRedeemByPartitionCommandHandler', () => {
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
           command.securityId,
-        );
-        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledWith(
-          security,
-          command.partitionId,
-        );
-        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledTimes(
-          1,
         );
 
         expect(

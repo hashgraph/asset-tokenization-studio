@@ -234,44 +234,6 @@ import { CreateEquityCommand } from '../../../src/app/usecase/command/equity/cre
 import { SecurityPropsFixture } from '../shared/SecurityFixture';
 import ContractId from '../../../src/domain/context/contract/ContractId';
 
-export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
-  (command) => {
-    command.security.fromFixture(SecurityPropsFixture);
-    command.currency.faker((faker) => faker.finance.currencyCode());
-    command.nominalValue.faker((faker) =>
-      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
-    );
-    command.votingRight.faker((faker) => faker.datatype.boolean());
-    command.informationRight.faker((faker) => faker.datatype.boolean());
-    command.liquidationRight.faker((faker) => faker.datatype.boolean());
-    command.subscriptionRight.faker((faker) => faker.datatype.boolean());
-    command.conversionRight.faker((faker) => faker.datatype.boolean());
-    command.redemptionRight.faker((faker) => faker.datatype.boolean());
-    command.putRight.faker((faker) => faker.datatype.boolean());
-    command.dividendRight.faker((faker) => faker.datatype.boolean());
-    command.currency.faker((faker) =>
-      faker.string.hexadecimal({ length: 6, casing: 'lower', prefix: '0x' }),
-    );
-    command.factory?.as(
-      () => new ContractId(ContractIdPropFixture.create().value),
-    );
-    command.resolver?.as(
-      () => new ContractId(ContractIdPropFixture.create().value),
-    );
-    command.configId?.faker((faker) =>
-      faker.string.hexadecimal({ length: 64, casing: 'lower', prefix: '0x' }),
-    );
-    command.configVersion?.faker((faker) =>
-      faker.number.int({ min: 1, max: 5 }),
-    );
-    command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlLists?.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
-  },
-);
-
 export const GetScheduledBalanceAdjustmentQueryFixture =
   createFixture<GetScheduledBalanceAdjustmentQuery>((query) => {
     query.securityId.as(
@@ -358,6 +320,44 @@ export const GetConfigInfoQueryFixture = createFixture<GetConfigInfoQuery>(
   },
 );
 
+export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
+  (command) => {
+    command.security.fromFixture(SecurityPropsFixture);
+    command.currency.faker((faker) => faker.finance.currencyCode());
+    command.nominalValue.faker((faker) =>
+      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    command.votingRight.faker((faker) => faker.datatype.boolean());
+    command.informationRight.faker((faker) => faker.datatype.boolean());
+    command.liquidationRight.faker((faker) => faker.datatype.boolean());
+    command.subscriptionRight.faker((faker) => faker.datatype.boolean());
+    command.conversionRight.faker((faker) => faker.datatype.boolean());
+    command.redemptionRight.faker((faker) => faker.datatype.boolean());
+    command.putRight.faker((faker) => faker.datatype.boolean());
+    command.dividendRight.faker((faker) => faker.datatype.boolean());
+    command.currency.faker((faker) =>
+      faker.string.hexadecimal({ length: 6, casing: 'lower', prefix: '0x' }),
+    );
+    command.factory?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
+    );
+    command.resolver?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
+    );
+    command.configId?.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, casing: 'lower', prefix: '0x' }),
+    );
+    command.configVersion?.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
+    command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
+    command.externalControlLists?.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+  },
+);
+
 export const ScheduledBalanceAdjustmentFixture =
   createFixture<ScheduledBalanceAdjustment>((props) => {
     props.executionTimeStamp.faker((faker) => faker.date.future());
@@ -433,9 +433,9 @@ export const SetDividendsCommandFixture = createFixture<SetDividendsCommand>(
 export const SetVotingRightsCommandFixture =
   createFixture<SetVotingRightsCommand>((command) => {
     command.address.as(() => HederaIdPropsFixture.create().value);
-    command.recordDate.faker((faker) => {
-      faker.date.future().getTime().toString();
-    });
+    command.recordDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
     command.data.faker((faker) => {
       return faker.string.hexadecimal({
         length: 64,

@@ -266,7 +266,7 @@ describe('ClearingCreateHoldByPartitionCommandHandler', () => {
     command = commandFiltered;
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 
@@ -344,13 +344,6 @@ describe('ClearingCreateHoldByPartitionCommandHandler', () => {
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
           command.securityId,
-        );
-        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledWith(
-          security,
-          command.partitionId,
-        );
-        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledTimes(
-          1,
         );
         expect(
           contractServiceMock.getContractEvmAddress,

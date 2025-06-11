@@ -307,7 +307,7 @@ describe('SetVotingRightsCommandHandler', () => {
           transactionServiceMock.getHandler().setVotingRights,
         ).toHaveBeenCalledWith(
           evmAddress,
-          BigDecimal.fromString(command.recordDate),
+          BigDecimal.fromString(command.recordDate.substring(0, 10)),
           command.data,
           command.address,
         );

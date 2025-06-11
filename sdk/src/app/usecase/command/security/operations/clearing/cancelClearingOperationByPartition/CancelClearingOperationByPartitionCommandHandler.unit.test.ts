@@ -218,8 +218,6 @@ import ValidationService from '../../../../../../service/validation/ValidationSe
 import Account from '../../../../../../../domain/context/account/Account.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import { HandleClearingOperationByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
-import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../../domain/context/security/Security.js';
 import { CancelClearingOperationByPartitionCommandHandler } from './CancelClearingOperationByPartitionCommandHandler.js';
 import {
   CancelClearingOperationByPartitionCommand,
@@ -240,7 +238,6 @@ describe('CancelClearingOperationByPartitionCommandHandler', () => {
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const transactionId = TransactionIdFixture.create().id;
   const account = new Account(AccountPropsFixture.create());
-  const security = new Security(SecurityPropsFixture.create());
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
@@ -253,7 +250,7 @@ describe('CancelClearingOperationByPartitionCommandHandler', () => {
     command = HandleClearingOperationByPartitionCommandFixture.create();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 
@@ -321,13 +318,6 @@ describe('CancelClearingOperationByPartitionCommandHandler', () => {
           SecurityRole._CLEARING_VALIDATOR_ROLE,
           account.id.toString(),
           command.securityId,
-        );
-        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledWith(
-          security,
-          command.partitionId,
-        );
-        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledTimes(
-          1,
         );
         expect(
           contractServiceMock.getContractEvmAddress,

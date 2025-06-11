@@ -224,7 +224,6 @@ import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import NetworkService from '../../../../service/network/NetworkService.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { CreateEquityCommandFixture } from '../../../../../../__tests__/fixtures/equity/EquityFixture.js';
-import { InvalidRequest } from '../../error/InvalidRequest.js';
 import { ErrorCode } from '../../../../../core/error/BaseError.js';
 import { CreateEquityCommandError } from './error/CreateEquityCommandError.js';
 
@@ -275,9 +274,14 @@ describe('CreateEquityCommandHandler', () => {
           factory: undefined,
         };
 
-        await expect(handler.execute(commandWithNotFactory)).rejects.toThrow(
-          new InvalidRequest('Factory not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotFactory);
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the equity: Factory not found in request`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
 
       it('should throw InvalidRequest if resolver is not provided', async () => {
@@ -286,9 +290,14 @@ describe('CreateEquityCommandHandler', () => {
           resolver: undefined,
         };
 
-        await expect(handler.execute(commandWithNotResolver)).rejects.toThrow(
-          new InvalidRequest('Resolver not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotResolver);
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the equity: Resolver not found in request`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
 
       it('should throw InvalidRequest if configId is not provided', async () => {
@@ -297,9 +306,14 @@ describe('CreateEquityCommandHandler', () => {
           configId: undefined,
         };
 
-        await expect(handler.execute(commandWithNotConfigId)).rejects.toThrow(
-          new InvalidRequest('Config Id not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotConfigId);
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the equity: Config Id not found in request`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
 
       it('should throw InvalidRequest if configVersion is not provided', async () => {
@@ -308,30 +322,32 @@ describe('CreateEquityCommandHandler', () => {
           configVersion: undefined,
         };
 
-        await expect(
-          handler.execute(commandWithNotConfigVersion),
-        ).rejects.toThrow(
-          new InvalidRequest('Config Version not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotConfigVersion);
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the equity: Config Version not found in request`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
-    });
+      it('throws CreateEquityCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-    it('throws CreateEquityCommandError when command fails with uncaught error', async () => {
-      const fakeError = new Error(errorMsg);
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
-      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+        const resultPromise = handler.execute(command);
 
-      const resultPromise = handler.execute(command);
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          CreateEquityCommandError,
+        );
 
-      await expect(resultPromise).rejects.toBeInstanceOf(
-        CreateEquityCommandError,
-      );
-
-      await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(
-          `An error occurred while creating the equity: ${errorMsg}`,
-        ),
-        errorCode: ErrorCode.UncaughtCommandError,
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the equity: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
       });
     });
 

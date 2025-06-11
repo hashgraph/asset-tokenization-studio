@@ -226,7 +226,6 @@ describe('SetNetworkCommandHandler', () => {
   const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
   const queryAdapterMock = createMock<RPCQueryAdapter>();
   const errorMsg = ErrorMsgFixture.create().msg;
-  jest.spyOn(Injectable, 'resolve').mockReturnValue(queryAdapterMock);
 
   beforeEach(() => {
     handler = new SetNetworkCommandHandler(
@@ -234,6 +233,7 @@ describe('SetNetworkCommandHandler', () => {
       mirrorNodeAdapterMock,
     );
     command = SetNetworkCommandFixture.create();
+    jest.spyOn(Injectable, 'resolve').mockReturnValue(queryAdapterMock);
   });
 
   afterEach(() => {

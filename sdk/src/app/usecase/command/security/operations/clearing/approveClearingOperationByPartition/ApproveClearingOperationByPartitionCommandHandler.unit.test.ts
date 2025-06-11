@@ -228,6 +228,7 @@ import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures
 import { Security } from '../../../../../../../domain/context/security/Security.js';
 import { ApproveClearingOperationByPartitionCommandError } from './error/ApproveClearingOperationByPartitionCommandError.js';
 import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 describe('ApproveClearingOperationByPartitionCommandHandler', () => {
   let handler: ApproveClearingOperationByPartitionCommandHandler;
@@ -256,7 +257,7 @@ describe('ApproveClearingOperationByPartitionCommandHandler', () => {
     command = HandleClearingOperationByPartitionCommandFixture.create();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 
@@ -323,6 +324,7 @@ describe('ApproveClearingOperationByPartitionCommandHandler', () => {
         expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledWith(
           command.securityId,
           [command.targetId],
+          KycStatus.GRANTED,
         );
         expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledTimes(
           1,

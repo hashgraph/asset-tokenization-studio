@@ -250,7 +250,7 @@ describe('RevokeKycCommandHandler', () => {
     command = RevokeKycCommandFixture.create();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 

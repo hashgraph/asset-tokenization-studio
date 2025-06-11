@@ -250,7 +250,7 @@ describe('DeactivateClearingCommandHandler', () => {
     command = SwitchClearingModeCommandFixture.create();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 

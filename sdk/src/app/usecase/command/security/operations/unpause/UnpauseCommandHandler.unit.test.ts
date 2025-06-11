@@ -275,7 +275,7 @@ describe('UnpauseCommandHandler', () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
 
-        transactionServiceMock.getHandler().pause.mockResolvedValue({
+        transactionServiceMock.getHandler().unpause.mockResolvedValue({
           id: transactionId,
         });
 
@@ -291,12 +291,12 @@ describe('UnpauseCommandHandler', () => {
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
           command.securityId,
         );
-        expect(transactionServiceMock.getHandler().pause).toHaveBeenCalledTimes(
-          1,
-        );
+        expect(
+          transactionServiceMock.getHandler().unpause,
+        ).toHaveBeenCalledTimes(1);
 
-        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        expect(validationServiceMock.checkUnpause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkUnpause).toHaveBeenCalledWith(
           command.securityId,
         );
         expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
@@ -305,10 +305,9 @@ describe('UnpauseCommandHandler', () => {
           account.id.toString(),
           command.securityId,
         );
-        expect(transactionServiceMock.getHandler().pause).toHaveBeenCalledWith(
-          evmAddress,
-          command.securityId,
-        );
+        expect(
+          transactionServiceMock.getHandler().unpause,
+        ).toHaveBeenCalledWith(evmAddress, command.securityId);
       });
     });
   });

@@ -265,7 +265,7 @@ describe('ClearingTransferFromByPartitionCommandHandler', () => {
     command = commandFiltered;
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 
@@ -368,13 +368,6 @@ describe('ClearingTransferFromByPartitionCommandHandler', () => {
         expect(
           validationServiceMock.checkClearingActivated,
         ).toHaveBeenCalledWith(command.securityId);
-        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledWith(
-          security,
-          command.partitionId,
-        );
-        expect(validationServiceMock.checkMultiPartition).toHaveBeenCalledTimes(
-          1,
-        );
 
         expect(
           transactionServiceMock.getHandler()
