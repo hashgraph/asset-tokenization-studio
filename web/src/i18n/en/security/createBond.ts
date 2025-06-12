@@ -244,6 +244,7 @@ export default {
     configuration: "Bond configuration",
     isClearing: "Clearing mode enabled",
     isClearingTooltip: "Enable or disable clearing mode",
+    internalKycActivated: "Internal Kyc Activated",
   },
 
   stepConfiguration: {
