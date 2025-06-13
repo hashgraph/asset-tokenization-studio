@@ -214,6 +214,7 @@ import {
   GetRevocationRegistryAddressQueryResponse,
 } from './GetRevocationRegistryAddressQuery';
 import ContractService from '../../../../../service/contract/ContractService';
+import { GetRevocationRegistryAddressQueryError } from './error/GetRevocationRegistryAddressQueryError';
 
 @QueryHandler(GetRevocationRegistryAddressQuery)
 export class GetRevocationRegistryAddressQueryHandler
@@ -231,17 +232,23 @@ export class GetRevocationRegistryAddressQueryHandler
   async execute(
     query: GetRevocationRegistryAddressQuery,
   ): Promise<GetRevocationRegistryAddressQueryResponse> {
-    const { securityId } = query;
+    try {
+      const { securityId } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res =
-      await this.queryAdapter.getRevocationRegistryAddress(securityEvmAddress);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res =
+        await this.queryAdapter.getRevocationRegistryAddress(
+          securityEvmAddress,
+        );
 
-    const hederaId = (
-      await this.accountService.getAccountInfo(res)
-    ).id.toString();
+      const hederaId = (
+        await this.accountService.getAccountInfo(res)
+      ).id.toString();
 
-    return new GetRevocationRegistryAddressQueryResponse(hederaId);
+      return new GetRevocationRegistryAddressQueryResponse(hederaId);
+    } catch (error) {
+      throw new GetRevocationRegistryAddressQueryError(error as Error);
+    }
   }
 }

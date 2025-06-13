@@ -253,16 +253,7 @@ import ScheduledBalanceAdjustmentViewModel from '../response/ScheduledBalanceAdj
 import { GetScheduledBalanceAdjustmentQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
 import GetScheduledBalanceAdjustmentCountRequest from '../request/equity/GetScheduledBalanceAdjustmentsCountRequest.js';
 import { GetScheduledBalanceAdjustmentCountQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery.js';
-import {
-  GetAggregatedBalanceAdjustmentFactorRequest,
-  GetAllScheduledBalanceAdjustmentsRequest,
-} from '../request/index.js';
-import GetLastAggregatedBalanceAdjustmentFactorForRequest from '../request/equity/GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
-import { GetLastAggregatedBalanceAdjustmentFactorForQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQuery.js';
-import { GetAggregatedBalanceAdjustmentFactorQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQuery.js';
-import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from '../request/equity/GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
-import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery.js';
-
+import { GetAllScheduledBalanceAdjustmentsRequest } from '../request/index.js';
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
     security: SecurityViewModel;
@@ -305,15 +296,6 @@ interface IEquityInPort {
   getAllScheduledBalanceAdjustments(
     request: GetAllScheduledBalanceAdjustmentsRequest,
   ): Promise<ScheduledBalanceAdjustmentViewModel[]>;
-  getLastAggregatedBalanceAdjustmentFactorFor(
-    request: GetLastAggregatedBalanceAdjustmentFactorForRequest,
-  ): Promise<number>;
-  getAggregatedBalanceAdjustmentFactor(
-    request: GetAggregatedBalanceAdjustmentFactorRequest,
-  ): Promise<number>;
-  getLastAggregatedBalanceAdjustmentFactorForByPartition(
-    request: GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
-  ): Promise<number>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -715,64 +697,6 @@ class EquityInPort implements IEquityInPort {
     }
 
     return scheduledBalanceAdjustments;
-  }
-
-  @LogError
-  async getLastAggregatedBalanceAdjustmentFactorFor(
-    request: GetLastAggregatedBalanceAdjustmentFactorForRequest,
-  ): Promise<number> {
-    ValidatedRequest.handleValidation(
-      'GetLastAggregatedBalanceAdjustmentFactorForRequest',
-      request,
-    );
-
-    const getLastAggregatedBalanceAdjustmentFactorForQueryResponse =
-      await this.queryBus.execute(
-        new GetLastAggregatedBalanceAdjustmentFactorForQuery(
-          request.securityId,
-          request.targetId,
-        ),
-      );
-
-    return getLastAggregatedBalanceAdjustmentFactorForQueryResponse.payload;
-  }
-
-  @LogError
-  async getAggregatedBalanceAdjustmentFactor(
-    request: GetAggregatedBalanceAdjustmentFactorRequest,
-  ): Promise<number> {
-    ValidatedRequest.handleValidation(
-      'GetAggregatedBalanceAdjustmentFactorRequest',
-      request,
-    );
-
-    const getAggregatedBalanceAdjustmentFactorQueryResponse =
-      await this.queryBus.execute(
-        new GetAggregatedBalanceAdjustmentFactorQuery(request.securityId),
-      );
-
-    return getAggregatedBalanceAdjustmentFactorQueryResponse.payload;
-  }
-
-  @LogError
-  async getLastAggregatedBalanceAdjustmentFactorForByPartition(
-    request: GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
-  ): Promise<number> {
-    ValidatedRequest.handleValidation(
-      'GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest',
-      request,
-    );
-
-    const getLastAggregatedBalanceAdjustmentFactorForByPartitionQueryResponse =
-      await this.queryBus.execute(
-        new GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery(
-          request.securityId,
-          request.targetId,
-          request.partitionId,
-        ),
-      );
-
-    return getLastAggregatedBalanceAdjustmentFactorForByPartitionQueryResponse.payload;
   }
 }
 
