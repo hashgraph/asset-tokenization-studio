@@ -214,6 +214,14 @@ import {
 import { SecurityPropsFixture } from '../shared/SecurityFixture';
 import { UpdateMaturityDateCommand } from '../../../src/app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand';
 import { BondDetails } from '../../../src/domain/context/bond/BondDetails';
+import { Coupon } from '../../../src/domain/context/bond/Coupon';
+import { GetCouponQuery } from '../../../src/app/usecase/query/bond/coupons/getCoupon/GetCouponQuery';
+import { GetCouponCountQuery } from '../../../src/app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQuery';
+import { GetCouponForQuery } from '../../../src/app/usecase/query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { CouponDetails } from '../../../src/domain/context/bond/CouponDetails';
+import { GetCouponDetailsQuery } from '../../../src/app/usecase/query/bond/get/getCouponDetails/GetCouponDetailsQuery';
+import { GetBondDetailsQuery } from '../../../src/app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery';
+import { HederaId } from '../../../src/domain/context/shared/HederaId';
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {
@@ -286,3 +294,48 @@ export const BondDetailsFixture = createFixture<BondDetails>((props) => {
   props.startingDate.faker((faker) => faker.date.past());
   props.maturityDate.faker((faker) => faker.date.recent());
 });
+
+export const CouponFixture = createFixture<Coupon>((props) => {
+  props.recordTimeStamp.faker((faker) => faker.date.future());
+  props.executionTimeStamp.faker((faker) => faker.date.future());
+  props.rate.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  props.snapshotId?.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
+export const GetCouponQueryFixture = createFixture<GetCouponQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
+export const GetCouponCountQueryFixture = createFixture<GetCouponCountQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const GetCouponForQueryFixture = createFixture<GetCouponForQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  },
+);
+
+export const CouponDetailsFixture = createFixture<CouponDetails>((props) => {
+  props.couponFrequency.faker((faker) =>
+    faker.number.int({ min: 1, max: 999 }),
+  );
+  props.couponRate.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  props.firstCouponDate.faker((faker) => faker.date.future());
+});
+
+export const GetBondDetailsQueryFixture = createFixture<GetBondDetailsQuery>(
+  (query) => {
+    query.bondId.as(() => new HederaId(HederaIdPropsFixture.create().value));
+  },
+);
+
+export const GetCouponDetailsQueryFixture =
+  createFixture<GetCouponDetailsQuery>((query) => {
+    query.bondId.as(() => new HederaId(HederaIdPropsFixture.create().value));
+  });

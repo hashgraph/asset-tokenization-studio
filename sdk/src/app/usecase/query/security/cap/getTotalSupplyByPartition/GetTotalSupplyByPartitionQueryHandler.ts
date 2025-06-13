@@ -214,11 +214,11 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/account/AccountService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import { GetTotalSupplyByPartitionQueryError } from './error/GetTotalSupplyByPartitionQueryError.js';
 
 @QueryHandler(GetTotalSupplyByPartitionQuery)
-export class GetMaxSupplyByPartitionQueryHandler
+export class GetTotalSupplyByPartitionQueryHandler
   implements IQueryHandler<GetTotalSupplyByPartitionQuery>
 {
   constructor(
@@ -226,8 +226,8 @@ export class GetMaxSupplyByPartitionQueryHandler
     private readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
@@ -238,7 +238,7 @@ export class GetMaxSupplyByPartitionQueryHandler
       const security = await this.securityService.get(securityId);
 
       const securityEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(securityId);
+        await this.contractService.getContractEvmAddress(securityId);
 
       const res = await this.queryAdapter.getTotalSupplyByPartition(
         securityEvmAddress,
