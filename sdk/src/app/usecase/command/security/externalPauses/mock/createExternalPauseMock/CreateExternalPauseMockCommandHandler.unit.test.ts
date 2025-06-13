@@ -206,15 +206,16 @@
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
-import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
+import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
 import { CreateExternalPauseMockCommandHandler } from './CreateExternalPauseMockCommandHandler.js';
+import { CreateExternalPauseMockCommandError } from './error/CreateExternalPauseMockCommandError.js';
 import { CreateExternalPauseMockCommandResponse } from './CreateExternalPauseMockCommand.js';
 
 describe('CreateExternalPauseMockCommandHandler', () => {
@@ -228,6 +229,7 @@ describe('CreateExternalPauseMockCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new CreateExternalPauseMockCommandHandler(
@@ -241,78 +243,95 @@ describe('CreateExternalPauseMockCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully create external pause mock if return an Id', async () => {
-      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+    describe('error cases', () => {
+      it('throws CreateExternalPauseMockCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      transactionServiceMock
-        .getHandler()
-        .createExternalPauseMock.mockResolvedValue(transactionId);
+        transactionServiceMock
+          .getHandler()
+          .createExternalPauseMock.mockRejectedValue(fakeError);
 
-      const result = await handler.execute();
+        const resultPromise = handler.execute();
 
-      expect(result).toBeInstanceOf(CreateExternalPauseMockCommandResponse);
-      expect(result.payload).toBe(account.id.toString());
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          CreateExternalPauseMockCommandError,
+        );
 
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().createExternalPauseMock,
-      ).toHaveBeenCalledTimes(1);
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
-        transactionId,
-      );
-      expect(
-        transactionServiceMock.getHandler().createExternalPauseMock,
-      ).toHaveBeenCalledWith();
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating external pause: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
     });
+    describe('success cases', () => {
+      it('should successfully create external pause mock if return an Id', async () => {
+        mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
 
-    it('should successfully create external pause mock if return an address', async () => {
-      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+        transactionServiceMock
+          .getHandler()
+          .createExternalPauseMock.mockResolvedValue({
+            id: transactionId,
+          });
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          account.evmAddress!,
+        );
 
-      transactionServiceMock
-        .getHandler()
-        .createExternalPauseMock.mockResolvedValue(transactionId);
+        const result = await handler.execute();
 
-      const result = await handler.execute();
+        expect(result).toBeInstanceOf(CreateExternalPauseMockCommandResponse);
+        expect(result.payload).toBe(account.id.toString());
 
-      expect(result).toBeInstanceOf(CreateExternalPauseMockCommandResponse);
-      expect(result.payload).toBe(account.id.toString());
-
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().createExternalPauseMock,
-      ).toHaveBeenCalledTimes(1);
-
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
-        transactionId,
-      );
-
-      expect(
-        transactionServiceMock.getHandler().createExternalPauseMock,
-      ).toHaveBeenCalledWith();
-    });
-
-    it('throws error when transaction response id is missing', async () => {
-      transactionServiceMock
-        .getHandler()
-        .createExternalPauseMock.mockResolvedValue({ id: undefined });
-
-      await expect(handler.execute()).rejects.toThrow(EmptyResponse);
-    });
-
-    it('throws error when result length is different', async () => {
-      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
-      mirrorNodeAdapterMock.getContractResults.mockResolvedValueOnce([
-        account.id.toString(),
-        account.id.toString(),
-      ]);
-
-      transactionServiceMock
-        .getHandler()
-        .createExternalPauseMock.mockResolvedValue({
-          id: transactionId,
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith({
+          res: { id: transactionId },
+          className: CreateExternalPauseMockCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
         });
 
-      await expect(handler.execute()).rejects.toThrow(InvalidResponse);
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createExternalPauseMock,
+        ).toHaveBeenCalledTimes(1);
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
+          account.evmAddress,
+        );
+        expect(
+          transactionServiceMock.getHandler().createExternalPauseMock,
+        ).toHaveBeenCalledWith();
+      });
+
+      it('should successfully create external pause mock if return an address', async () => {
+        mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+
+        transactionServiceMock
+          .getHandler()
+          .createExternalPauseMock.mockResolvedValue(account.evmAddress!);
+
+        const result = await handler.execute();
+
+        expect(result).toBeInstanceOf(CreateExternalPauseMockCommandResponse);
+        expect(result.payload).toBe(account.id.toString());
+
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createExternalPauseMock,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
+          account.evmAddress,
+        );
+
+        expect(
+          transactionServiceMock.getHandler().createExternalPauseMock,
+        ).toHaveBeenCalledWith();
+      });
     });
   });
 });
