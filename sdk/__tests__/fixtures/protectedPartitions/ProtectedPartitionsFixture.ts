@@ -203,6 +203,7 @@
 
 */
 
+import { GetNounceQuery } from '../../../src/app/usecase/query/security/protectedPartitions/getNounce/GetNounceQuery';
 import {
   HederaIdPropsFixture,
   PartitionIdFixture,
@@ -254,6 +255,10 @@ export const PartitionsProtectedRequestFixture =
     request.securityId.as(() => HederaIdPropsFixture.create().value);
   });
 
+export const GetNounceQueryFixture = createFixture<GetNounceQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.targetId.as(() => HederaIdPropsFixture.create().value);
+});
 export const GetNounceRequestFixture = createFixture<GetNounceRequest>(
   (request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);

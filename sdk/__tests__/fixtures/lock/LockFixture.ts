@@ -206,6 +206,10 @@
 import { createFixture } from '../config';
 import { HederaId } from '../../../src/domain/context/shared/HederaId';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/GetLockQuery';
+import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
+import { LockedBalanceOfQuery } from 'app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
+import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
 import LockRequest from '../../../src/port/in/request/security/operations/lock/LockRequest';
 import ReleaseRequest from '../../../src/port/in/request/security/operations/release/ReleaseRequest';
 import GetLockedBalanceRequest from '../../../src/port/in/request/security/operations/lock/GetLockedBalanceRequest';
@@ -215,6 +219,31 @@ import GetLockRequest from '../../../src/port/in/request/security/operations/loc
 import { Lock } from '../../../src/domain/context/security/Lock';
 import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
+
+export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.targetId.as(() => HederaIdPropsFixture.create().value);
+  query.id.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
+export const LockCountQueryFixture = createFixture<LockCountQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.targetId.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const LockedBalanceOfQueryFixture = createFixture<LockedBalanceOfQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const LocksIdQueryFixture = createFixture<LocksIdQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.targetId.as(() => HederaIdPropsFixture.create().value);
+  query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
 
 export const LockRequestFixture = createFixture<LockRequest>((request) => {
   request.securityId.as(

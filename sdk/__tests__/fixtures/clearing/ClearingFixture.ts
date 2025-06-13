@@ -208,6 +208,9 @@ import {
   HederaIdPropsFixture,
   PartitionIdFixture,
 } from '../shared/DataFixture';
+import { GetClearedAmountForQuery } from '../../../src/app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery';
+import { GetClearedAmountForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery';
+import { GetClearingCountForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery';
 import ActivateClearingRequest from '../../../src/port/in/request/security/operations/clearing/ActivateClearingRequest';
 import DeactivateClearingRequest from '../../../src/port/in/request/security/operations/clearing/DeactivateClearingRequest';
 import ClearingTransferByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ClearingTransferByPartitionRequest';
@@ -220,6 +223,7 @@ import {
   ClearingRedeem,
   ClearingTransfer,
 } from '../../../src/domain/context/security/Clearing';
+import { GetClearingCreateHoldForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery';
 import CancelClearingOperationByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/CancelClearingOperationByPartitionRequest';
 import ReclaimClearingOperationByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ReclaimClearingOperationByPartitionRequest';
 import ClearingRedeemByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ClearingRedeemByPartitionRequest';
@@ -239,8 +243,12 @@ import IsClearingActivatedRequest from '../../../src/port/in/request/security/op
 import OperatorClearingCreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/OperatorClearingCreateHoldByPartitionRequest';
 import OperatorClearingRedeemByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/OperatorClearingRedeemByPartitionRequest';
 import OperatorClearingTransferByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/OperatorClearingTransferByPartitionRequest';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
+import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
+import { GetClearingRedeemForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery';
+import { GetClearingsIdForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery';
+import { GetClearingTransferForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery';
+import { IsClearingActivatedQuery } from '../../../src/app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
 
 export const ActivateClearingRequestFixture =
   createFixture<ActivateClearingRequest>((request) => {
@@ -555,6 +563,70 @@ export const OperatorClearingTransferByPartitionRequestFixture =
     request.expirationDate.faker((faker) =>
       faker.date.future().getTime().toString(),
     );
+  });
+
+export const GetClearedAmountForQueryFixture =
+  createFixture<GetClearedAmountForQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetClearedAmountForByPartitionQueryFixture =
+  createFixture<GetClearedAmountForByPartitionQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.partitionId.as(() => PartitionIdFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetClearingCountForByPartitionQueryFixture =
+  createFixture<GetClearingCountForByPartitionQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.partitionId.as(() => PartitionIdFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.clearingOperationType.faker((faker) =>
+      faker.helpers.arrayElement(Object.values(ClearingOperationType)),
+    );
+  });
+
+export const IsClearingActivatedQueryFixture =
+  createFixture<IsClearingActivatedQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetClearingCreateHoldForByPartitionQueryFixture =
+  createFixture<GetClearingCreateHoldForByPartitionQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.partitionId.as(() => PartitionIdFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.clearingId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetClearingTransferForByPartitionQueryFixture =
+  createFixture<GetClearingTransferForByPartitionQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.partitionId.as(() => PartitionIdFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.clearingId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetClearingRedeemForByPartitionQueryFixture =
+  createFixture<GetClearingRedeemForByPartitionQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.partitionId.as(() => PartitionIdFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.clearingId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetClearingsIdForByPartitionQueryFixture =
+  createFixture<GetClearingsIdForByPartitionQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.partitionId.as(() => PartitionIdFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.clearingOperationType.faker((faker) =>
+      faker.helpers.arrayElement(Object.values(ClearingOperationType)),
+    );
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   });
 
 export const ClearingHoldCreationFixture = createFixture<ClearingHoldCreation>(

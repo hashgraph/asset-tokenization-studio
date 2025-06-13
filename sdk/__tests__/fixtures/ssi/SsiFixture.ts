@@ -205,6 +205,10 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { GetIssuerListCountQuery } from '../../../src/app/usecase/query/security/ssi/getIssuerListCount/GetIssuerListCountQuery';
+import { GetIssuerListMembersQuery } from '../../../src/app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery';
+import { GetRevocationRegistryAddressQuery } from '../../../src/app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery';
+import { IsIssuerQuery } from '../../../src/app/usecase/query/security/ssi/isIssuer/IsIssuerQuery';
 import AddIssuerRequest from '../../../src/port/in/request/security/ssi/AddIssuerRequest';
 import SetRevocationRegistryAddressRequest from '../../../src/port/in/request/security/ssi/SetRevocationRegistryAddressRequest';
 import RemoveIssuerRequest from '../../../src/port/in/request/security/operations/issue/RemoveIssuerRequest';
@@ -219,6 +223,28 @@ export const AddIssuerRequestFixture = createFixture<AddIssuerRequest>(
     request.issuerId.as(() => HederaIdPropsFixture.create().value);
   },
 );
+
+export const GetIssuerListCountQueryFixture =
+  createFixture<GetIssuerListCountQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetIssuerListMembersQueryFixture =
+  createFixture<GetIssuerListMembersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetRevocationRegistryAddressQueryFixture =
+  createFixture<GetRevocationRegistryAddressQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const IsIssuerQueryFixture = createFixture<IsIssuerQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.issuerId.as(() => HederaIdPropsFixture.create().value);
+});
 
 export const SetRevocationRegistryAddressRequestFixture =
   createFixture<SetRevocationRegistryAddressRequest>((request) => {

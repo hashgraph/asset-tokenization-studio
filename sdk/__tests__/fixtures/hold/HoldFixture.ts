@@ -208,6 +208,7 @@ import {
   HederaIdPropsFixture,
   PartitionIdFixture,
 } from '../shared/DataFixture';
+
 import CreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/CreateHoldByPartition';
 import CreateHoldFromByPartitionRequest from '../../../src/port/in/request/security/operations/hold/CreateHoldFromByPartition';
 import ControllerCreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ControllerCreateHoldFromByPartition';
@@ -220,9 +221,14 @@ import GetHoldForByPartitionRequest from '../../../src/port/in/request/security/
 import ReleaseHoldByPartitionRequest from '../../../src/port/in/request/security/operations/release/ReleaseHoldByPartitionRequest';
 import ReclaimHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ReclaimHoldByPartitionRequest';
 import ExecuteHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ExecuteHoldByPartitionRequest';
-import { HoldDetails } from '../../../src/domain/context/security/Hold';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
+import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
+import { GetHeldAmountForQuery } from '../../../src/app/usecase/query/security/hold/getHeldAmountFor/GetHeldAmountForQuery';
+import { GetHeldAmountForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQuery';
+import { GetHoldCountForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQuery';
+import { GetHoldForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery';
+import { HoldDetails } from '../../../src/domain/context/security/Hold';
+import { GetHoldsIdForByPartitionQuery } from 'app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery';
 
 export const CreateHoldByPartitionRequestFixture =
   createFixture<CreateHoldByPartitionRequest>((request) => {
@@ -370,3 +376,40 @@ export const HoldDetailsFixture = createFixture<HoldDetails>((props) => {
   props.data.faker((faker) => faker.lorem.words());
   props.operatorData.faker((faker) => faker.lorem.words());
 });
+
+export const GetHeldAmountForQueryFixture =
+  createFixture<GetHeldAmountForQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetHeldAmountForByPartitionQueryFixture =
+  createFixture<GetHeldAmountForByPartitionQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.partitionId.as(() => PartitionIdFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetHoldCountForByPartitionQueryFixture =
+  createFixture<GetHoldCountForByPartitionQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.partitionId.as(() => PartitionIdFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetHoldForByPartitionQueryFixture =
+  createFixture<GetHoldForByPartitionQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.partitionId.as(() => PartitionIdFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.holdId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetHoldsIdForByPartitionQueryFixture =
+  createFixture<GetHoldsIdForByPartitionQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.partitionId.as(() => PartitionIdFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });

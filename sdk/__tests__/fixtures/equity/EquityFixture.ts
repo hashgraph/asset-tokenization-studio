@@ -212,6 +212,8 @@ import {
   RegulationType,
 } from '../../../src/domain/context/factory/RegulationType';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { HederaId } from '../../../src/domain/context/shared/HederaId';
+import { GetScheduledBalanceAdjustmentQuery } from '../../../src/app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
 import { faker } from '@faker-js/faker/.';
 import GetEquityDetailsRequest from '../../../src/port/in/request/equity/GetEquityDetailsRequest';
 import SetDividendsRequest from '../../../src/port/in/request/equity/SetDividendsRequest';
@@ -227,15 +229,25 @@ import GetScheduledBalanceAdjustmentCountRequest from '../../../src/port/in/requ
 import GetScheduledBalanceAdjustmentRequest from '../../../src/port/in/request/equity/GetScheduledBalanceAdjustmentRequest';
 import GetAllScheduledBalanceAdjustmentsRequest from '../../../src/port/in/request/equity/GetAllScheduledBalanceAdjustmentst';
 import { ScheduledBalanceAdjustment } from '../../../src/domain/context/equity/ScheduledBalanceAdjustment';
+import { GetScheduledBalanceAdjustmentCountQuery } from '../../../src/app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
 import { Dividend } from '../../../src/domain/context/equity/Dividend';
+import { GetDividendsCountQuery } from '../../../src/app/usecase/query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
+import { GetDividendsQuery } from '../../../src/app/usecase/query/equity/dividends/getDividends/GetDividendsQuery';
+import { GetDividendsForQuery } from '../../../src/app/usecase/query/equity/dividends/getDividendsFor/GetDividendsForQuery';
 import { DividendFor } from '../../../src/domain/context/equity/DividendFor';
+import { GetEquityDetailsQuery } from '../../../src/app/usecase/query/equity/get/getEquityDetails/GetEquityDetailsQuery';
 import { EquityDetails } from '../../../src/domain/context/equity/EquityDetails';
+import { GetVotingQuery } from '../../../src/app/usecase/query/equity/votingRights/getVoting/GetVotingQuery';
+import { GetVotingCountQuery } from '../../../src/app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery';
+import { GetVotingForQuery } from '../../../src/app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery';
 import {
   CastDividendType,
   DividendType,
 } from '../../../src/domain/context/equity/DividendType';
 import { VotingFor } from '../../../src/domain/context/equity/VotingFor';
 import { VotingRights } from '../../../src/domain/context/equity/VotingRights';
+import { GetRegulationDetailsQuery } from 'app/usecase/query/factory/get/GetRegulationDetailsQuery';
+import { GetConfigInfoQuery } from 'app/usecase/query/management/GetConfigInfoQuery';
 
 export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
   (request) => {
@@ -416,6 +428,92 @@ export const GetAllScheduledBalanceAdjustmentsRequestFixture =
   createFixture<GetAllScheduledBalanceAdjustmentsRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
   });
+
+export const GetScheduledBalanceAdjustmentQueryFixture =
+  createFixture<GetScheduledBalanceAdjustmentQuery>((query) => {
+    query.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+    query.balanceAdjustmentId.faker((faker) =>
+      faker.number.int({ min: 1, max: 999 }),
+    );
+  });
+
+export const GetScheduledBalanceAdjustmentCountQueryFixture =
+  createFixture<GetScheduledBalanceAdjustmentCountQuery>((query) => {
+    query.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+  });
+
+export const GetDividendsCountQueryFixture =
+  createFixture<GetDividendsCountQuery>((query) => {
+    query.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+  });
+
+export const GetDividendsForQueryFixture = createFixture<GetDividendsForQuery>(
+  (query) => {
+    query.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+    query.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
+    query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  },
+);
+
+export const GetDividendsQueryFixture = createFixture<GetDividendsQuery>(
+  (query) => {
+    query.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+    query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  },
+);
+
+export const GetVotingQueryFixture = createFixture<GetVotingQuery>((query) => {
+  query.securityId.as(() => new HederaId(HederaIdPropsFixture.create().value));
+  query.votingId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
+export const GetVotingCountQueryFixture = createFixture<GetVotingCountQuery>(
+  (query) => {
+    query.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+  },
+);
+
+export const GetVotingForQueryFixture = createFixture<GetVotingForQuery>(
+  (query) => {
+    query.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+    query.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
+    query.votingId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  },
+);
+
+export const GetEquityDetailsQueryFixture =
+  createFixture<GetEquityDetailsQuery>((query) => {
+    query.equityId.as(() => new HederaId(HederaIdPropsFixture.create().value));
+  });
+
+export const GetRegulationDetailsQueryFixture =
+  createFixture<GetRegulationDetailsQuery>((query) => {
+    query.type.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.subType.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.factory?.as(() => new HederaId(HederaIdPropsFixture.create().value));
+  });
+
+export const GetConfigInfoQueryFixture = createFixture<GetConfigInfoQuery>(
+  (query) => {
+    query.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+  },
+);
 
 export const ScheduledBalanceAdjustmentFixture =
   createFixture<ScheduledBalanceAdjustment>((props) => {

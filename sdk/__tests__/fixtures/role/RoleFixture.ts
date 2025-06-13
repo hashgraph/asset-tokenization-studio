@@ -203,15 +203,57 @@
 
 */
 
+import { GetRoleCountForQuery } from '../../../src/app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery';
 import RoleRequest from '../../../src/port/in/request/security/roles/RoleRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { GetRoleMemberCountQuery } from '../../../src/app/usecase/query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery';
+import { GetRoleMembersQuery } from '../../../src/app/usecase/query/security/roles/getRoleMembers/GetRoleMembersQuery';
+import { GetRolesForQuery } from '../../../src/app/usecase/query/security/roles/getRolesFor/GetRolesForQuery';
+import { HasRoleQuery } from '../../../src/app/usecase/query/security/roles/hasRole/HasRoleQuery';
 import GetRoleCountForRequest from '../../../src/port/in/request/security/roles/GetRoleCountForRequest';
 import GetRolesForRequest from '../../../src/port/in/request/security/roles/GetRolesForRequest';
 import GetRoleMemberCountRequest from '../../../src/port/in/request/security/roles/GetRoleMemberCountRequest';
 import GetRoleMembersRequest from '../../../src/port/in/request/security/roles/GetRoleMembersRequest';
 import ApplyRolesRequest from '../../../src/port/in/request/security/roles/ApplyRolesRequest';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
+
+export const GetRoleCountForQueryFixture = createFixture<GetRoleCountForQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const GetRoleMemberCountQueryFixture =
+  createFixture<GetRoleMemberCountQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.role.faker((faker) => faker.lorem.words());
+  });
+
+export const GetRoleMembersQueryFixture = createFixture<GetRoleMembersQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.role.faker((faker) => faker.lorem.words());
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  },
+);
+
+export const GetRolesForQueryFixture = createFixture<GetRolesForQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  },
+);
+
+export const HasRoleQueryFixture = createFixture<HasRoleQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.targetId.as(() => HederaIdPropsFixture.create().value);
+  query.role.faker((faker) => faker.lorem.words());
+});
 
 export const RoleRequestFixture = createFixture<RoleRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);

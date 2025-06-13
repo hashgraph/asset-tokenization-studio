@@ -203,18 +203,22 @@
 
 */
 
-import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { ActivateInternalKycCommand } from '../../../src/app/usecase/command/security/kyc/activateInternalKyc/ActivateInternalKycCommand';
 import { DeactivateInternalKycCommand } from '../../../src/app/usecase/command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommand';
 import { IsInternalKycActivatedQuery } from '../../../src/app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
 import ActivateInternalKycRequest from '../../../src/port/in/request/security/kyc/ActivateInternalKycRequest';
 import DeactivateInternalKycRequest from '../../../src/port/in/request/security/kyc/DeactivateInternalKycRequest';
 import IsInternalKycActivatedRequest from '../../../src/port/in/request/security/kyc/IsInternalKycActivatedRequest';
+import { GetKycAccountsCountQuery } from '../../../src/app/usecase/query/security/kyc/getKycAccountsCount/GetKycAccountsCountQuery';
+import { GetKycAccountsDataQuery } from '../../../src/app/usecase/query/security/kyc/getKycAccountsData/GetKycAccountsDataQuery';
+import { GetKycForQuery } from '../../../src/app/usecase/query/security/kyc/getKycFor/GetKycForQuery';
+import { Kyc } from '../../../src/domain/context/kyc/Kyc';
+import { GetKycStatusForQuery } from 'app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
 import GrantKycRequest from '../../../src/port/in/request/security/kyc/GrantKycRequest';
 import RevokeKycRequest from '../../../src/port/in/request/security/kyc/RevokeKycRequest';
 import GetKycForRequest from '../../../src/port/in/request/security/kyc/GetKycForRequest';
-import { Kyc } from '../../../src/domain/context/kyc/Kyc';
 import GetKycAccountsCountRequest from '../../../src/port/in/request/security/kyc/GetKycAccountsCountRequest';
 import GetKycAccountsDataRequest from '../../../src/port/in/request/security/kyc/GetKycAccountsDataRequest';
 import { KycAccountData } from '../../../src/domain/context/kyc/KycAccountData';
@@ -225,15 +229,34 @@ export const ActivateInternalKycCommandFixture =
     command.securityId.as(() => HederaIdPropsFixture.create().value);
   });
 
+export const GetKycAccountsCountQueryFixture =
+  createFixture<GetKycAccountsCountQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.kycStatus.faker((faker) => faker.number.int({ min: 0, max: 1 }));
+  });
+
 export const DeactivateInternalKycCommandFixture =
   createFixture<DeactivateInternalKycCommand>((command) => {
     command.securityId.as(() => HederaIdPropsFixture.create().value);
   });
 
-export const IsInternalKycActivatedQueryFixture =
-  createFixture<IsInternalKycActivatedQuery>((query) => {
+export const GetKycAccountsDataQueryFixture =
+  createFixture<GetKycAccountsDataQuery>((query) => {
     query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.kycStatus.faker((faker) => faker.number.int({ min: 0, max: 1 }));
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   });
+
+export const IsInternalKycActivatedQueryFixture =
+  createFixture<IsInternalKycActivatedQuery>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetKycForQueryFixture = createFixture<GetKycForQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.targetId.as(() => HederaIdPropsFixture.create().value);
+});
 
 export const GrantKycRequestFixture = createFixture<GrantKycRequest>(
   (request) => {
@@ -284,6 +307,22 @@ export const ActivateInternalKycRequestFixture =
     request.securityId.as(() => HederaIdPropsFixture.create().value);
   });
 
+export const GetKycStatusForQueryFixture = createFixture<GetKycStatusForQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const KycAccountDataFixture = createFixture<KycAccountData>((props) => {
+  props.account.as(() => HederaIdPropsFixture.create().value);
+  props.validFrom.faker((faker) => faker.date.past());
+  props.validTo.faker((faker) => faker.date.future());
+  props.vcId.as(() => HederaIdPropsFixture.create().value);
+  props.issuer.as(() => HederaIdPropsFixture.create().value);
+  props.status.faker((faker) => faker.number.int({ min: 0, max: 1 }));
+});
+
 export const DeactivateInternalKycRequestFixture =
   createFixture<DeactivateInternalKycRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -298,15 +337,6 @@ export const KycFixture = createFixture<Kyc>((props) => {
   props.validFrom.faker((faker) => faker.date.past().getTime().toString());
   props.validTo.faker((faker) => faker.date.future().getTime().toString());
   props.vcId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-  props.issuer.as(() => HederaIdPropsFixture.create().value);
-  props.status.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-});
-
-export const KycAccountDataFixture = createFixture<KycAccountData>((props) => {
-  props.account.as(() => HederaIdPropsFixture.create().value);
-  props.validFrom.faker((faker) => faker.date.past());
-  props.validTo.faker((faker) => faker.date.future());
-  props.vcId.as(() => HederaIdPropsFixture.create().value);
   props.issuer.as(() => HederaIdPropsFixture.create().value);
   props.status.faker((faker) => faker.number.int({ min: 0, max: 1 }));
 });
