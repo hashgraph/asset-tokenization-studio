@@ -203,284 +203,154 @@
 
 */
 
-import { GetBondDetailsQuery } from '../../../app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery.js';
-import { GetCouponDetailsQuery } from '../../../app/usecase/query/bond/get/getCouponDetails/GetCouponDetailsQuery.js';
-import Injectable from '../../../core/Injectable.js';
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
-
-import GetBondDetailsRequest from '../request/bond/GetBondDetailsRequest.js';
-import GetCouponDetailsRequest from '../request/bond/GetCouponDetailsRequest.js';
-import BondDetailsViewModel from '../response/BondDetailsViewModel.js';
-import CouponDetailsViewModel from '../response/CouponDetailsViewModel.js';
-import CouponViewModel from '../response/CouponViewModel.js';
-import CouponForViewModel from '../response/CouponForViewModel.js';
-import GetAllCouponsRequest from '../request/bond/GetAllCouponsRequest.js';
-import GetCouponForRequest from '../request/bond/GetCouponForRequest.js';
-import GetCouponRequest from '../request/bond/GetCouponRequest.js';
-import { GetCouponForQuery } from '../../../app/usecase/query/bond/coupons/getCouponFor/GetCouponForQuery.js';
-import { GetCouponQuery } from '../../../app/usecase/query/bond/coupons/getCoupon/GetCouponQuery.js';
-import { GetCouponCountQuery } from '../../../app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQuery.js';
-import { ONE_THOUSAND } from '../../../domain/context/shared/SecurityDate.js';
-import CreateBondRequest from '../request/bond/CreateBondRequest.js';
-import { SecurityViewModel } from '../security/Security.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
-import { SecurityProps } from '../../../domain/context/security/Security.js';
-import { CreateBondCommand } from '../../../app/usecase/command/bond/create/CreateBondCommand.js';
-import ContractId from '../../../domain/context/contract/ContractId.js';
-import { GetSecurityQuery } from '../../../app/usecase/query/security/get/GetSecurityQuery.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import SetCouponRequest from '../request/bond/SetCouponRequest.js';
-import { SetCouponCommand } from '../../../app/usecase/command/bond/coupon/set/SetCouponCommand.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountIntPort from './Account';
+import { QueryBus } from '../../../core/query/QueryBus';
+import { GetAccountBalanceRequest, GetAccountInfoRequest } from '../request';
+import LogService from '../../../app/service/log/LogService';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs';
 import {
-  CastRegulationSubType,
-  CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest.js';
-import { UpdateMaturityDateCommand } from '../../../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand.js';
+  AccountPropsFixture,
+  GetAccountBalanceRequestFixture,
+  GetAccountInfoRequestFixture,
+} from '../../../../__tests__/fixtures/account/AccountFixture';
+import { GetAccountInfoQuery } from '../../../app/usecase/query/account/info/GetAccountInfoQuery';
+import { HederaId } from '../../../domain/context/shared/HederaId';
+import { GetAccountBalanceQuery } from '../../../app/usecase/query/account/balance/GetAccountBalanceQuery';
+import { ValidationError } from '../../../core/validation/ValidationError';
+import Account from '../../../domain/context/account/Account';
 
-interface IBondInPort {
-  create(
-    request: CreateBondRequest,
-  ): Promise<{ security: SecurityViewModel; transactionId: string }>;
-  getBondDetails(request: GetBondDetailsRequest): Promise<BondDetailsViewModel>;
-  setCoupon(
-    request: SetCouponRequest,
-  ): Promise<{ payload: number; transactionId: string }>;
-  getCouponDetails(
-    request: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel>;
-  getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
-  getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
-  getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
-  updateMaturityDate(
-    request: UpdateMaturityDateRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-}
+describe('Account', () => {
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let getAccountInfoRequest: GetAccountInfoRequest;
+  let getAccountBalanceRequest: GetAccountBalanceRequest;
 
-class BondInPort implements IBondInPort {
-  constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly networkService: NetworkService = Injectable.resolve(
-      NetworkService,
-    ),
-  ) {}
+  let handleValidationSpy: jest.SpyInstance;
 
-  @LogError
-  async create(
-    req: CreateBondRequest,
-  ): Promise<{ security: SecurityViewModel; transactionId: string }> {
-    ValidatedRequest.handleValidation('CreateBondRequest', req);
-    const {
-      diamondOwnerAccount,
-      externalPauses,
-      externalControlLists,
-      externalKycLists,
-    } = req;
+  beforeEach(() => {
+    queryBusMock = createMock<QueryBus>();
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (AccountIntPort as any).queryBus = queryBusMock;
+  });
 
-    const securityFactory = this.networkService.configuration.factoryAddress;
-    const resolver = this.networkService.configuration.resolverAddress;
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
 
-    const newSecurity: SecurityProps = {
-      name: req.name,
-      symbol: req.symbol,
-      isin: req.isin,
-      decimals: req.decimals,
-      isWhiteList: req.isWhiteList,
-      isControllable: req.isControllable,
-      arePartitionsProtected: req.arePartitionsProtected,
-      clearingActive: req.clearingActive,
-      internalKycActivated: req.internalKycActivated,
-      isMultiPartition: req.isMultiPartition,
-      maxSupply: BigDecimal.fromString(req.numberOfUnits),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(
-        req.regulationSubType,
-      ),
-      isCountryControlListWhiteList: req.isCountryControlListWhiteList,
-      countries: req.countries,
-      info: req.info,
+  describe('getInfo', () => {
+    getAccountInfoRequest = new GetAccountInfoRequest(
+      GetAccountInfoRequestFixture.create(),
+    );
+
+    const expectedQueryResponse = {
+      account: new Account(AccountPropsFixture.create()),
     };
 
-    const createResponse = await this.commandBus.execute(
-      new CreateBondCommand(
-        newSecurity,
-        req.currency,
-        req.nominalValue,
-        req.startingDate,
-        req.maturityDate,
-        req.couponFrequency,
-        req.couponRate,
-        req.firstCouponDate,
-        securityFactory ? new ContractId(securityFactory) : undefined,
-        resolver ? new ContractId(resolver) : undefined,
-        req.configId,
-        req.configVersion,
-        diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-      ),
+    it('should return AccountViewModel when getInfo is called with valid request', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result = await AccountIntPort.getInfo(getAccountInfoRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetAccountInfoRequest',
+        getAccountInfoRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetAccountInfoQuery(
+          HederaId.from(getAccountInfoRequest.account.accountId),
+        ),
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: expectedQueryResponse.account.id.toString(),
+        }),
+      );
+    });
+
+    it('should throw error when query execution fails', async () => {
+      const queryError = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(queryError);
+
+      await expect(
+        AccountIntPort.getInfo(getAccountInfoRequest),
+      ).rejects.toThrow(queryError);
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetAccountInfoRequest',
+        getAccountInfoRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetAccountInfoQuery(
+          HederaId.from(getAccountInfoRequest.account.accountId),
+        ),
+      );
+    });
+  });
+
+  describe('getBalance', () => {
+    getAccountBalanceRequest = new GetAccountBalanceRequest(
+      GetAccountBalanceRequestFixture.create(),
     );
 
-    const securityCreated =
-      createResponse.securityId.toString() !== ContractId.NULL.toString();
-
-    const res = securityCreated
-      ? (
-          await this.queryBus.execute(
-            new GetSecurityQuery(createResponse.securityId.toString()),
-          )
-        ).security
-      : {};
-
-    return {
-      security: securityCreated
-        ? {
-            ...res,
-          }
-        : {},
-      transactionId: createResponse.transactionId,
-    };
-  }
-
-  @LogError
-  async getBondDetails(
-    request: GetBondDetailsRequest,
-  ): Promise<BondDetailsViewModel> {
-    ValidatedRequest.handleValidation('GetBondDetailsRequest', request);
-
-    const res = await this.queryBus.execute(
-      new GetBondDetailsQuery(request.bondId),
-    );
-
-    const bondDetails: BondDetailsViewModel = {
-      currency: res.bond.currency,
-      nominalValue: res.bond.nominalValue.toString(),
-      startingDate: new Date(res.bond.startingDate * ONE_THOUSAND),
-      maturityDate: new Date(res.bond.maturityDate * ONE_THOUSAND),
+    const expectedQueryResponse = {
+      payload: 1,
     };
 
-    return bondDetails;
-  }
+    it('should return BigDecimal when getBalance is called with valid request', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
 
-  @LogError
-  async setCoupon(
-    request: SetCouponRequest,
-  ): Promise<{ payload: number; transactionId: string }> {
-    const { rate, recordTimestamp, executionTimestamp, securityId } = request;
-    ValidatedRequest.handleValidation('SetCouponRequest', request);
+      const result = await AccountIntPort.getBalance(getAccountBalanceRequest);
 
-    return await this.commandBus.execute(
-      new SetCouponCommand(
-        securityId,
-        recordTimestamp,
-        executionTimestamp,
-        rate,
-      ),
-    );
-  }
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetAccountBalanceRequest',
+        getAccountBalanceRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetAccountBalanceQuery(
+          getAccountBalanceRequest.securityId,
+          getAccountBalanceRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
 
-  @LogError
-  async getCouponDetails(
-    request: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel> {
-    ValidatedRequest.handleValidation('GetCouponDetailsRequest', request);
+    it('should throw error when QueryBus execution fails', async () => {
+      const queryError = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(queryError);
 
-    const res = await this.queryBus.execute(
-      new GetCouponDetailsQuery(request.bondId),
-    );
+      await expect(
+        AccountIntPort.getBalance(getAccountBalanceRequest),
+      ).rejects.toThrow(queryError);
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetAccountBalanceRequest',
+        getAccountBalanceRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalled();
+    });
 
-    const couponDetails: CouponDetailsViewModel = {
-      couponFrequency: res.coupon.couponFrequency,
-      couponRate: res.coupon.couponRate.toString(),
-      firstCouponDate: new Date(res.coupon.firstCouponDate * ONE_THOUSAND),
-    };
-    return couponDetails;
-  }
-
-  @LogError
-  async getCouponFor(
-    request: GetCouponForRequest,
-  ): Promise<CouponForViewModel> {
-    ValidatedRequest.handleValidation('GetCouponForRequest', request);
-
-    const res = await this.queryBus.execute(
-      new GetCouponForQuery(
-        request.targetId,
-        request.securityId,
-        request.couponId,
-      ),
-    );
-
-    const couponFor: CouponForViewModel = {
-      value: res.payload.toString(),
-    };
-
-    return couponFor;
-  }
-
-  @LogError
-  async getCoupon(request: GetCouponRequest): Promise<CouponViewModel> {
-    ValidatedRequest.handleValidation('GetCouponRequest', request);
-
-    const res = await this.queryBus.execute(
-      new GetCouponQuery(request.securityId, request.couponId),
-    );
-
-    const coupon: CouponViewModel = {
-      couponId: request.couponId,
-      recordDate: new Date(res.coupon.recordTimeStamp * ONE_THOUSAND),
-      executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
-      rate: res.coupon.rate.toString(),
-    };
-
-    return coupon;
-  }
-
-  @LogError
-  async getAllCoupons(
-    request: GetAllCouponsRequest,
-  ): Promise<CouponViewModel[]> {
-    ValidatedRequest.handleValidation('GetAllCouponsRequest', request);
-
-    const count = await this.queryBus.execute(
-      new GetCouponCountQuery(request.securityId),
-    );
-
-    if (count.payload == 0) return [];
-
-    const coupons: CouponViewModel[] = [];
-
-    for (let i = 1; i <= count.payload; i++) {
-      const couponRequest = new GetCouponRequest({
-        securityId: request.securityId,
-        couponId: i,
+    it('should throw error if securityId is invalid', async () => {
+      getAccountBalanceRequest = new GetAccountBalanceRequest({
+        ...GetAccountBalanceRequestFixture.create({
+          securityId: 'invalid',
+        }),
       });
 
-      const coupon = await this.getCoupon(couponRequest);
+      await expect(
+        AccountIntPort.getBalance(getAccountBalanceRequest),
+      ).rejects.toThrow(ValidationError);
+    });
 
-      coupons.push(coupon);
-    }
+    it('should throw error if targetId is invalid', async () => {
+      getAccountBalanceRequest = new GetAccountBalanceRequest({
+        ...GetAccountBalanceRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
 
-    return coupons;
-  }
-
-  @LogError
-  async updateMaturityDate(
-    request: UpdateMaturityDateRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { maturityDate, securityId } = request;
-    ValidatedRequest.handleValidation('UpdateMaturityDateRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateMaturityDateCommand(maturityDate, securityId),
-    );
-  }
-}
-
-const BondToken = new BondInPort();
-export default BondToken;
+      await expect(
+        AccountIntPort.getBalance(getAccountBalanceRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+});

@@ -203,284 +203,170 @@
 
 */
 
-import { GetBondDetailsQuery } from '../../../app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery.js';
-import { GetCouponDetailsQuery } from '../../../app/usecase/query/bond/get/getCouponDetails/GetCouponDetailsQuery.js';
-import Injectable from '../../../core/Injectable.js';
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
-
-import GetBondDetailsRequest from '../request/bond/GetBondDetailsRequest.js';
-import GetCouponDetailsRequest from '../request/bond/GetCouponDetailsRequest.js';
-import BondDetailsViewModel from '../response/BondDetailsViewModel.js';
-import CouponDetailsViewModel from '../response/CouponDetailsViewModel.js';
-import CouponViewModel from '../response/CouponViewModel.js';
-import CouponForViewModel from '../response/CouponForViewModel.js';
-import GetAllCouponsRequest from '../request/bond/GetAllCouponsRequest.js';
-import GetCouponForRequest from '../request/bond/GetCouponForRequest.js';
-import GetCouponRequest from '../request/bond/GetCouponRequest.js';
-import { GetCouponForQuery } from '../../../app/usecase/query/bond/coupons/getCouponFor/GetCouponForQuery.js';
-import { GetCouponQuery } from '../../../app/usecase/query/bond/coupons/getCoupon/GetCouponQuery.js';
-import { GetCouponCountQuery } from '../../../app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQuery.js';
-import { ONE_THOUSAND } from '../../../domain/context/shared/SecurityDate.js';
-import CreateBondRequest from '../request/bond/CreateBondRequest.js';
-import { SecurityViewModel } from '../security/Security.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
-import { SecurityProps } from '../../../domain/context/security/Security.js';
-import { CreateBondCommand } from '../../../app/usecase/command/bond/create/CreateBondCommand.js';
-import ContractId from '../../../domain/context/contract/ContractId.js';
-import { GetSecurityQuery } from '../../../app/usecase/query/security/get/GetSecurityQuery.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import SetCouponRequest from '../request/bond/SetCouponRequest.js';
-import { SetCouponCommand } from '../../../app/usecase/command/bond/coupon/set/SetCouponCommand.js';
+import { createFixture } from '../config';
 import {
-  CastRegulationSubType,
-  CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest.js';
-import { UpdateMaturityDateCommand } from '../../../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand.js';
+  HederaIdPropsFixture,
+  PartitionIdFixture,
+} from '../shared/DataFixture';
+import CreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/CreateHoldByPartition';
+import CreateHoldFromByPartitionRequest from '../../../src/port/in/request/security/operations/hold/CreateHoldFromByPartition';
+import ControllerCreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ControllerCreateHoldFromByPartition';
+import ProtectedCreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ProtectedCreateHoldFromByPartition';
+import GetHeldAmountForRequest from '../../../src/port/in/request/security/operations/hold/GetHeldAmountForRequest';
+import GetHeldAmountForByPartitionRequest from '../../../src/port/in/request/security/operations/hold/GetHeldAmountForByPartitionRequest';
+import GetHoldCountForByPartitionRequest from '../../../src/port/in/request/security/operations/hold/GetHoldCountForByPartitionRequest';
+import GetHoldsIdForByPartitionRequest from '../../../src/port/in/request/security/operations/hold/GetHoldsIdForByPartitionRequest';
+import GetHoldForByPartitionRequest from '../../../src/port/in/request/security/operations/hold/GetHoldForByPartitionRequest';
+import ReleaseHoldByPartitionRequest from '../../../src/port/in/request/security/operations/release/ReleaseHoldByPartitionRequest';
+import ReclaimHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ReclaimHoldByPartitionRequest';
+import ExecuteHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ExecuteHoldByPartitionRequest';
+import { HoldDetails } from '../../../src/domain/context/security/Hold';
+import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
+import { BigNumber } from 'ethers';
 
-interface IBondInPort {
-  create(
-    request: CreateBondRequest,
-  ): Promise<{ security: SecurityViewModel; transactionId: string }>;
-  getBondDetails(request: GetBondDetailsRequest): Promise<BondDetailsViewModel>;
-  setCoupon(
-    request: SetCouponRequest,
-  ): Promise<{ payload: number; transactionId: string }>;
-  getCouponDetails(
-    request: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel>;
-  getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
-  getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
-  getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
-  updateMaturityDate(
-    request: UpdateMaturityDateRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-}
-
-class BondInPort implements IBondInPort {
-  constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly networkService: NetworkService = Injectable.resolve(
-      NetworkService,
-    ),
-  ) {}
-
-  @LogError
-  async create(
-    req: CreateBondRequest,
-  ): Promise<{ security: SecurityViewModel; transactionId: string }> {
-    ValidatedRequest.handleValidation('CreateBondRequest', req);
-    const {
-      diamondOwnerAccount,
-      externalPauses,
-      externalControlLists,
-      externalKycLists,
-    } = req;
-
-    const securityFactory = this.networkService.configuration.factoryAddress;
-    const resolver = this.networkService.configuration.resolverAddress;
-
-    const newSecurity: SecurityProps = {
-      name: req.name,
-      symbol: req.symbol,
-      isin: req.isin,
-      decimals: req.decimals,
-      isWhiteList: req.isWhiteList,
-      isControllable: req.isControllable,
-      arePartitionsProtected: req.arePartitionsProtected,
-      clearingActive: req.clearingActive,
-      internalKycActivated: req.internalKycActivated,
-      isMultiPartition: req.isMultiPartition,
-      maxSupply: BigDecimal.fromString(req.numberOfUnits),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(
-        req.regulationSubType,
-      ),
-      isCountryControlListWhiteList: req.isCountryControlListWhiteList,
-      countries: req.countries,
-      info: req.info,
-    };
-
-    const createResponse = await this.commandBus.execute(
-      new CreateBondCommand(
-        newSecurity,
-        req.currency,
-        req.nominalValue,
-        req.startingDate,
-        req.maturityDate,
-        req.couponFrequency,
-        req.couponRate,
-        req.firstCouponDate,
-        securityFactory ? new ContractId(securityFactory) : undefined,
-        resolver ? new ContractId(resolver) : undefined,
-        req.configId,
-        req.configVersion,
-        diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-      ),
+export const CreateHoldByPartitionRequestFixture =
+  createFixture<CreateHoldByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.escrow.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
     );
-
-    const securityCreated =
-      createResponse.securityId.toString() !== ContractId.NULL.toString();
-
-    const res = securityCreated
-      ? (
-          await this.queryBus.execute(
-            new GetSecurityQuery(createResponse.securityId.toString()),
-          )
-        ).security
-      : {};
-
-    return {
-      security: securityCreated
-        ? {
-            ...res,
-          }
-        : {},
-      transactionId: createResponse.transactionId,
-    };
-  }
-
-  @LogError
-  async getBondDetails(
-    request: GetBondDetailsRequest,
-  ): Promise<BondDetailsViewModel> {
-    ValidatedRequest.handleValidation('GetBondDetailsRequest', request);
-
-    const res = await this.queryBus.execute(
-      new GetBondDetailsQuery(request.bondId),
+    request.expirationDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
     );
+  });
 
-    const bondDetails: BondDetailsViewModel = {
-      currency: res.bond.currency,
-      nominalValue: res.bond.nominalValue.toString(),
-      startingDate: new Date(res.bond.startingDate * ONE_THOUSAND),
-      maturityDate: new Date(res.bond.maturityDate * ONE_THOUSAND),
-    };
-
-    return bondDetails;
-  }
-
-  @LogError
-  async setCoupon(
-    request: SetCouponRequest,
-  ): Promise<{ payload: number; transactionId: string }> {
-    const { rate, recordTimestamp, executionTimestamp, securityId } = request;
-    ValidatedRequest.handleValidation('SetCouponRequest', request);
-
-    return await this.commandBus.execute(
-      new SetCouponCommand(
-        securityId,
-        recordTimestamp,
-        executionTimestamp,
-        rate,
-      ),
+export const CreateHoldFromByPartitionRequestFixture =
+  createFixture<CreateHoldFromByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.escrow.as(() => HederaIdPropsFixture.create().value);
+    request.sourceId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
     );
-  }
-
-  @LogError
-  async getCouponDetails(
-    request: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel> {
-    ValidatedRequest.handleValidation('GetCouponDetailsRequest', request);
-
-    const res = await this.queryBus.execute(
-      new GetCouponDetailsQuery(request.bondId),
+    request.expirationDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
     );
+  });
 
-    const couponDetails: CouponDetailsViewModel = {
-      couponFrequency: res.coupon.couponFrequency,
-      couponRate: res.coupon.couponRate.toString(),
-      firstCouponDate: new Date(res.coupon.firstCouponDate * ONE_THOUSAND),
-    };
-    return couponDetails;
-  }
-
-  @LogError
-  async getCouponFor(
-    request: GetCouponForRequest,
-  ): Promise<CouponForViewModel> {
-    ValidatedRequest.handleValidation('GetCouponForRequest', request);
-
-    const res = await this.queryBus.execute(
-      new GetCouponForQuery(
-        request.targetId,
-        request.securityId,
-        request.couponId,
-      ),
+export const ControllerCreateHoldByPartitionRequestFixture =
+  createFixture<ControllerCreateHoldByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.escrow.as(() => HederaIdPropsFixture.create().value);
+    request.sourceId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
     );
-
-    const couponFor: CouponForViewModel = {
-      value: res.payload.toString(),
-    };
-
-    return couponFor;
-  }
-
-  @LogError
-  async getCoupon(request: GetCouponRequest): Promise<CouponViewModel> {
-    ValidatedRequest.handleValidation('GetCouponRequest', request);
-
-    const res = await this.queryBus.execute(
-      new GetCouponQuery(request.securityId, request.couponId),
+    request.expirationDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
     );
+  });
 
-    const coupon: CouponViewModel = {
-      couponId: request.couponId,
-      recordDate: new Date(res.coupon.recordTimeStamp * ONE_THOUSAND),
-      executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
-      rate: res.coupon.rate.toString(),
-    };
-
-    return coupon;
-  }
-
-  @LogError
-  async getAllCoupons(
-    request: GetAllCouponsRequest,
-  ): Promise<CouponViewModel[]> {
-    ValidatedRequest.handleValidation('GetAllCouponsRequest', request);
-
-    const count = await this.queryBus.execute(
-      new GetCouponCountQuery(request.securityId),
+export const ProtectedCreateHoldByPartitionRequestFixture =
+  createFixture<ProtectedCreateHoldByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.escrow.as(() => HederaIdPropsFixture.create().value);
+    request.sourceId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
     );
-
-    if (count.payload == 0) return [];
-
-    const coupons: CouponViewModel[] = [];
-
-    for (let i = 1; i <= count.payload; i++) {
-      const couponRequest = new GetCouponRequest({
-        securityId: request.securityId,
-        couponId: i,
-      });
-
-      const coupon = await this.getCoupon(couponRequest);
-
-      coupons.push(coupon);
-    }
-
-    return coupons;
-  }
-
-  @LogError
-  async updateMaturityDate(
-    request: UpdateMaturityDateRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { maturityDate, securityId } = request;
-    ValidatedRequest.handleValidation('UpdateMaturityDateRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateMaturityDateCommand(maturityDate, securityId),
+    request.expirationDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
     );
-  }
-}
+    request.deadline.faker((faker) => faker.date.future().getTime().toString());
+    request.nonce.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    request.signature.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
+    );
+  });
 
-const BondToken = new BondInPort();
-export default BondToken;
+export const GetHeldAmountForRequestFixture =
+  createFixture<GetHeldAmountForRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetHeldAmountForByPartitionRequestFixture =
+  createFixture<GetHeldAmountForByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetHoldCountForByPartitionRequestFixture =
+  createFixture<GetHoldCountForByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetHoldsIdForByPartitionRequestFixture =
+  createFixture<GetHoldsIdForByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.start.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.end.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetHoldForByPartitionRequestFixture =
+  createFixture<GetHoldForByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.holdId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const ReleaseHoldByPartitionRequestFixture =
+  createFixture<ReleaseHoldByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.holdId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
+    );
+  });
+
+export const ReclaimHoldByPartitionRequestFixture =
+  createFixture<ReclaimHoldByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.holdId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const ExecuteHoldByPartitionRequestFixture =
+  createFixture<ExecuteHoldByPartitionRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.sourceId.as(() => HederaIdPropsFixture.create().value);
+    request.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
+    );
+    request.partitionId.as(() => PartitionIdFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.holdId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const HoldDetailsFixture = createFixture<HoldDetails>((props) => {
+  props.amount.faker(
+    (faker) =>
+      new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()),
+  );
+  props.expirationTimeStamp.faker((faker) => faker.date.future());
+  props.escrowAddress.as(() => HederaIdPropsFixture.create().value);
+  props.tokenHolderAddress.as(() => HederaIdPropsFixture.create().value);
+  props.destinationAddress.as(() => HederaIdPropsFixture.create().value);
+  props.data.faker((faker) => faker.lorem.words());
+  props.operatorData.faker((faker) => faker.lorem.words());
+});

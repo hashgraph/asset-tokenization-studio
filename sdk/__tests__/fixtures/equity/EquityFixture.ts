@@ -203,132 +203,41 @@
 
 */
 
-import { CreateBondCommand } from '../../../src/app/usecase/command/bond/create/CreateBondCommand';
-import { SetCouponCommand } from '../../../src/app/usecase/command/bond/coupon/set/SetCouponCommand';
+import CreateEquityRequest from '../../../src/port/in/request/equity/CreateEquityRequest';
 import { createFixture } from '../config';
-import ContractId from '../../../src/domain/context/contract/ContractId';
-import {
-  ContractIdPropFixture,
-  HederaIdPropsFixture,
-} from '../shared/DataFixture';
-import { SecurityPropsFixture } from '../shared/SecurityFixture';
-import { UpdateMaturityDateCommand } from '../../../src/app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand';
-import { BondDetails } from '../../../src/domain/context/bond/BondDetails';
-import CreateBondRequest from '../../../src/port/in/request/bond/CreateBondRequest';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
 } from '../../../src/domain/context/factory/RegulationType';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { faker } from '@faker-js/faker/.';
-import GetBondDetailsRequest from '../../../src/port/in/request/bond/GetBondDetailsRequest';
-import SetCouponRequest from '../../../src/port/in/request/bond/SetCouponRequest';
-import GetCouponDetailsRequest from '../../../src/port/in/request/bond/GetCouponDetailsRequest';
-import GetCouponForRequest from '../../../src/port/in/request/bond/GetCouponForRequest';
-import GetCouponRequest from '../../../src/port/in/request/bond/GetCouponRequest';
-import GetAllCouponsRequest from '../../../src/port/in/request/bond/GetAllCouponsRequest';
-import UpdateMaturityDateRequest from '../../../src/port/in/request/bond/UpdateMaturityDateRequest';
-import { CouponDetails } from '../../../src/domain/context/bond/CouponDetails';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
-import { BigNumber } from 'ethers';
-import { Coupon } from '../../../src/domain/context/bond/Coupon';
+import GetEquityDetailsRequest from '../../../src/port/in/request/equity/GetEquityDetailsRequest';
+import SetDividendsRequest from '../../../src/port/in/request/equity/SetDividendsRequest';
+import GetDividendsForRequest from '../../../src/port/in/request/equity/GetDividendsForRequest';
+import GetDividendsRequest from '../../../src/port/in/request/equity/GetDividendsRequest';
+import GetAllDividendsRequest from '../../../src/port/in/request/equity/GetAllDividendsRequest';
+import SetVotingRightsRequest from '../../../src/port/in/request/equity/SetVotingRightsRequest';
+import GetVotingRightsForRequest from '../../../src/port/in/request/equity/GetVotingRightsForRequest';
+import GetVotingRightsRequest from '../../../src/port/in/request/equity/GetVotingRightsRequest';
+import GetAllVotingRightsRequest from '../../../src/port/in/request/equity/GetAllVotingRightsRequest';
+import SetScheduledBalanceAdjustmentRequest from '../../../src/port/in/request/equity/SetScheduledBalanceAdjustmentRequest';
+import GetScheduledBalanceAdjustmentCountRequest from '../../../src/port/in/request/equity/GetScheduledBalanceAdjustmentsCountRequest';
+import GetScheduledBalanceAdjustmentRequest from '../../../src/port/in/request/equity/GetScheduledBalanceAdjustmentRequest';
+import GetAllScheduledBalanceAdjustmentsRequest from '../../../src/port/in/request/equity/GetAllScheduledBalanceAdjustmentst';
+import { ScheduledBalanceAdjustment } from '../../../src/domain/context/equity/ScheduledBalanceAdjustment';
+import { Dividend } from '../../../src/domain/context/equity/Dividend';
+import { DividendFor } from '../../../src/domain/context/equity/DividendFor';
+import { EquityDetails } from '../../../src/domain/context/equity/EquityDetails';
+import {
+  CastDividendType,
+  DividendType,
+} from '../../../src/domain/context/equity/DividendType';
+import { VotingFor } from '../../../src/domain/context/equity/VotingFor';
+import { VotingRights } from '../../../src/domain/context/equity/VotingRights';
 
-export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
-  (command) => {
-    command.address.as(() => HederaIdPropsFixture.create().value);
-    command.recordDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-    command.executionDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-    command.rate.faker((faker) =>
-      faker.number.int({ min: 100, max: 999 }).toString(),
-    );
-  },
-);
-
-export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
-  (command) => {
-    command.security.fromFixture(SecurityPropsFixture);
-    command.currency.faker((faker) => faker.finance.currencyCode());
-    command.nominalValue.faker((faker) =>
-      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
-    );
-    command.startingDate.faker((faker) =>
-      faker.date.recent().getTime().toString(),
-    );
-    command.maturityDate.faker((faker) =>
-      faker.date.future({ years: 2 }).getTime().toString(),
-    );
-    command.couponFrequency.faker((faker) =>
-      faker.number.int({ min: 1, max: 12 }).toString(),
-    );
-    command.couponRate.faker((faker) =>
-      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
-    );
-    command.firstCouponDate.faker((faker) =>
-      faker.date.soon({ days: 30 }).getTime().toString(),
-    );
-    command.factory?.as(
-      () => new ContractId(ContractIdPropFixture.create().value),
-    );
-    command.resolver?.as(
-      () => new ContractId(ContractIdPropFixture.create().value),
-    );
-    command.configId?.as(() => HederaIdPropsFixture.create().value);
-    command.configVersion?.faker((faker) =>
-      faker.number.int({ min: 1, max: 5 }),
-    );
-    command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlLists?.as(() => [
-      HederaIdPropsFixture.create().value,
-    ]);
-    command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
-  },
-);
-
-export const UpdateMaturityDateCommandFixture =
-  createFixture<UpdateMaturityDateCommand>((command) => {
-    command.maturityDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const BondDetailsFixture = createFixture<BondDetails>((props) => {
-  props.currency.faker((faker) => faker.finance.currencyCode());
-  props.nominalValue.faker((faker) =>
-    faker.finance.amount({ min: 1, max: 10, dec: 2 }),
-  );
-  props.startingDate.faker((faker) => faker.date.past());
-  props.maturityDate.faker((faker) => faker.date.recent());
-});
-
-export const CouponDetailsFixture = createFixture<CouponDetails>((props) => {
-  props.couponFrequency.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-  props.couponRate.faker(
-    (faker) =>
-      new BigDecimal(BigNumber.from(faker.number.int({ min: 1, max: 5 }))),
-  );
-  props.firstCouponDate.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-});
-
-export const CouponFixture = createFixture<Coupon>((props) => {
-  props.recordTimeStamp.faker((faker) =>
-    faker.date.past().getTime().toString(),
-  );
-  props.executionTimeStamp.faker((faker) =>
-    faker.date.past().getTime().toString(),
-  );
-  props.rate.faker(
-    (faker) =>
-      new BigDecimal(BigNumber.from(faker.number.int({ min: 1, max: 5 }))),
-  );
-});
-
-export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
+export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
   (request) => {
     request.name.faker((faker) => faker.company.name());
     request.symbol.faker((faker) =>
@@ -342,7 +251,6 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
     request.clearingActive.faker((faker) => faker.datatype.boolean());
     request.internalKycActivated.faker((faker) => faker.datatype.boolean());
     request.isMultiPartition.faker((faker) => faker.datatype.boolean());
-    request.numberOfUnits?.as(() => '0');
     const regulationType = CastRegulationType.toNumber(
       faker.helpers.arrayElement(
         Object.values(RegulationType).filter(
@@ -365,6 +273,9 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
     request.isCountryControlListWhiteList.faker((faker) =>
       faker.datatype.boolean(),
     );
+    request.numberOfShares.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
+    );
     request.countries?.faker((faker) =>
       faker.helpers
         .arrayElements(
@@ -380,24 +291,20 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
       (faker) =>
         `0x${Buffer.from(faker.finance.currencyCode()).toString('hex')}`,
     );
+    request.dividendRight.faker((faker) =>
+      CastDividendType.toNumber(
+        faker.helpers.arrayElement(Object.values(DividendType)),
+      ),
+    );
     request.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
-    request.startingDate.faker((faker) =>
-      faker.date.recent().getTime().toString(),
-    );
-    request.maturityDate.faker((faker) =>
-      faker.date.future({ years: 2 }).getTime().toString(),
-    );
-    request.couponFrequency.faker((faker) =>
-      faker.number.int({ min: 1, max: 12 }).toString(),
-    );
-    request.couponRate.faker((faker) =>
-      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
-    );
-    request.firstCouponDate.faker((faker) =>
-      faker.date.soon({ days: 30 }).getTime().toString(),
-    );
+    request.votingRight.faker((faker) => faker.datatype.boolean());
+    request.liquidationRight.faker((faker) => faker.datatype.boolean());
+    request.subscriptionRight.faker((faker) => faker.datatype.boolean());
+    request.conversionRight.faker((faker) => faker.datatype.boolean());
+    request.redemptionRight.faker((faker) => faker.datatype.boolean());
+    request.putRight.faker((faker) => faker.datatype.boolean());
     request.configId.faker(
       (faker) =>
         `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 1, max: 9 })}`,
@@ -412,15 +319,15 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
   },
 );
 
-export const GetBondDetailsRequestFixture =
-  createFixture<GetBondDetailsRequest>((request) => {
-    request.bondId.as(() => HederaIdPropsFixture.create().value);
+export const GetEquityDetailsRequestFixture =
+  createFixture<GetEquityDetailsRequest>((request) => {
+    request.equityId.as(() => HederaIdPropsFixture.create().value);
   });
 
-export const SetCouponRequestFixture = createFixture<SetCouponRequest>(
+export const SetDividendsRequestFixture = createFixture<SetDividendsRequest>(
   (request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.rate.faker((faker) =>
+    request.amountPerUnitOfSecurity.faker((faker) =>
       faker.number.int({ min: 1, max: 12 }).toString(),
     );
     request.recordTimestamp.faker((faker) =>
@@ -432,36 +339,127 @@ export const SetCouponRequestFixture = createFixture<SetCouponRequest>(
   },
 );
 
-export const GetCouponDetailsRequestFixture =
-  createFixture<GetCouponDetailsRequest>((request) => {
-    request.bondId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const GetCouponForRequestFixture = createFixture<GetCouponForRequest>(
-  (request) => {
+export const GetDividendsForRequestFixture =
+  createFixture<GetDividendsForRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
     request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  },
-);
+    request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
 
-export const GetCouponRequestFixture = createFixture<GetCouponRequest>(
+export const GetDividendsRequestFixture = createFixture<GetDividendsRequest>(
   (request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
   },
 );
 
-export const GetAllCouponsRequestFixture = createFixture<GetAllCouponsRequest>(
-  (request) => {
+export const GetAllDividendsRequestFixture =
+  createFixture<GetAllDividendsRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  });
 
-export const UpdateMaturityDateRequestFixture =
-  createFixture<UpdateMaturityDateRequest>((request) => {
+export const SetVotingRightsRequestFixture =
+  createFixture<SetVotingRightsRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.maturityDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
+    request.recordTimestamp.faker((faker) =>
+      faker.date.past().getTime().toString(),
+    );
+    request.data.as(() => '0x');
+  });
+
+export const GetVotingRightsForRequestFixture =
+  createFixture<GetVotingRightsForRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.votingId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetVotingRightsRequestFixture =
+  createFixture<GetVotingRightsRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.votingId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetAllVotingRightsRequestFixture =
+  createFixture<GetAllVotingRightsRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const SetScheduledBalanceAdjustmentRequestFixture =
+  createFixture<SetScheduledBalanceAdjustmentRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.executionDate.faker((faker) =>
+      faker.date.past().getTime().toString(),
+    );
+    request.factor.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
+    );
+    request.decimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
     );
   });
+
+export const GetScheduledBalanceAdjustmentCountRequestFixture =
+  createFixture<GetScheduledBalanceAdjustmentCountRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetScheduledBalanceAdjustmentRequestFixture =
+  createFixture<GetScheduledBalanceAdjustmentRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.balanceAdjustmentId.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }),
+    );
+  });
+
+export const GetAllScheduledBalanceAdjustmentsRequestFixture =
+  createFixture<GetAllScheduledBalanceAdjustmentsRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const ScheduledBalanceAdjustmentFixture =
+  createFixture<ScheduledBalanceAdjustment>((props) => {
+    props.executionTimeStamp.faker((faker) => faker.date.future());
+    props.factor.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    props.decimals.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const DividendFixture = createFixture<Dividend>((props) => {
+  props.amountPerUnitOfSecurity.faker((faker) =>
+    faker.number.int({ min: 1, max: 999 }),
+  );
+  props.recordTimeStamp.faker((faker) => faker.date.past());
+  props.executionTimeStamp.faker((faker) => faker.date.future());
+  props.snapshotId?.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
+export const DividendForFixture = createFixture<DividendFor>((props) => {
+  props.tokenBalance.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  props.decimals.faker((faker) => faker.date.past());
+});
+
+export const EquityDetailsFixture = createFixture<EquityDetails>((props) => {
+  props.votingRight.faker((faker) => faker.datatype.boolean());
+  props.informationRight.faker((faker) => faker.datatype.boolean());
+  props.liquidationRight.faker((faker) => faker.datatype.boolean());
+  props.subscriptionRight.faker((faker) => faker.datatype.boolean());
+  props.conversionRight.faker((faker) => faker.datatype.boolean());
+  props.redemptionRight.faker((faker) => faker.datatype.boolean());
+  props.putRight.faker((faker) => faker.datatype.boolean());
+  props.dividendRight.faker((faker) =>
+    faker.helpers.arrayElement(Object.values(DividendType)),
+  );
+  props.currency.faker((faker) => faker.finance.currencyCode());
+  props.nominalValue.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
+export const VotingForFixture = createFixture<VotingFor>((props) => {
+  props.tokenBalance.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  props.decimals.faker((faker) => faker.date.past());
+});
+
+export const VotingRightsFixture = createFixture<VotingRights>((props) => {
+  props.data.faker((faker) => faker.lorem.words());
+  props.recordTimeStamp.faker((faker) => faker.date.past());
+  props.snapshotId?.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});

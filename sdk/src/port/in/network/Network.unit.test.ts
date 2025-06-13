@@ -203,284 +203,178 @@
 
 */
 
-import { GetBondDetailsQuery } from '../../../app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery.js';
-import { GetCouponDetailsQuery } from '../../../app/usecase/query/bond/get/getCouponDetails/GetCouponDetailsQuery.js';
-import Injectable from '../../../core/Injectable.js';
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
+import NetworkService from '../../../app/service/network/NetworkService';
+import TransactionService from '../../../app/service/transaction/TransactionService';
+import { CommandBus } from '../../../core/command/CommandBus';
+import SetNetworkRequest from '../request/network/SetNetworkRequest';
+import SetConfigurationRequest from '../request/management/SetConfigurationRequest';
+import { createMock } from '@golevelup/ts-jest';
+import LogService from '../../../app/service/log/LogService';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs';
+import Network, { ConfigResponse, NetworkResponse } from './Network';
+import { SetConfigurationCommand } from '../../../app/usecase/command/network/setConfiguration/SetConfigurationCommand';
+import Configuration from '../../../domain/context/network/Configuration';
+import { SetNetworkCommand } from '../../../app/usecase/command/network/setNetwork/SetNetworkCommand';
+import { MirrorNode } from '../../../domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay';
+import { HederaIdPropsFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
 
-import GetBondDetailsRequest from '../request/bond/GetBondDetailsRequest.js';
-import GetCouponDetailsRequest from '../request/bond/GetCouponDetailsRequest.js';
-import BondDetailsViewModel from '../response/BondDetailsViewModel.js';
-import CouponDetailsViewModel from '../response/CouponDetailsViewModel.js';
-import CouponViewModel from '../response/CouponViewModel.js';
-import CouponForViewModel from '../response/CouponForViewModel.js';
-import GetAllCouponsRequest from '../request/bond/GetAllCouponsRequest.js';
-import GetCouponForRequest from '../request/bond/GetCouponForRequest.js';
-import GetCouponRequest from '../request/bond/GetCouponRequest.js';
-import { GetCouponForQuery } from '../../../app/usecase/query/bond/coupons/getCouponFor/GetCouponForQuery.js';
-import { GetCouponQuery } from '../../../app/usecase/query/bond/coupons/getCoupon/GetCouponQuery.js';
-import { GetCouponCountQuery } from '../../../app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQuery.js';
-import { ONE_THOUSAND } from '../../../domain/context/shared/SecurityDate.js';
-import CreateBondRequest from '../request/bond/CreateBondRequest.js';
-import { SecurityViewModel } from '../security/Security.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
-import { SecurityProps } from '../../../domain/context/security/Security.js';
-import { CreateBondCommand } from '../../../app/usecase/command/bond/create/CreateBondCommand.js';
-import ContractId from '../../../domain/context/contract/ContractId.js';
-import { GetSecurityQuery } from '../../../app/usecase/query/security/get/GetSecurityQuery.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import SetCouponRequest from '../request/bond/SetCouponRequest.js';
-import { SetCouponCommand } from '../../../app/usecase/command/bond/coupon/set/SetCouponCommand.js';
-import {
-  CastRegulationSubType,
-  CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest.js';
-import { UpdateMaturityDateCommand } from '../../../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand.js';
+describe('Network', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let transactionServiceMock: jest.Mocked<TransactionService>;
+  let networkServiceMock: jest.Mocked<NetworkService>;
 
-interface IBondInPort {
-  create(
-    request: CreateBondRequest,
-  ): Promise<{ security: SecurityViewModel; transactionId: string }>;
-  getBondDetails(request: GetBondDetailsRequest): Promise<BondDetailsViewModel>;
-  setCoupon(
-    request: SetCouponRequest,
-  ): Promise<{ payload: number; transactionId: string }>;
-  getCouponDetails(
-    request: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel>;
-  getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
-  getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
-  getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
-  updateMaturityDate(
-    request: UpdateMaturityDateRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-}
+  let setNetworkRequest: SetNetworkRequest;
+  let setConfigurationRequest: SetConfigurationRequest;
 
-class BondInPort implements IBondInPort {
-  constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly networkService: NetworkService = Injectable.resolve(
-      NetworkService,
-    ),
-  ) {}
+  let handleValidationSpy: jest.SpyInstance;
 
-  @LogError
-  async create(
-    req: CreateBondRequest,
-  ): Promise<{ security: SecurityViewModel; transactionId: string }> {
-    ValidatedRequest.handleValidation('CreateBondRequest', req);
-    const {
-      diamondOwnerAccount,
-      externalPauses,
-      externalControlLists,
-      externalKycLists,
-    } = req;
+  const mockFactoryAddress = HederaIdPropsFixture.create().value;
+  const mockResolverAddress = HederaIdPropsFixture.create().value;
+  const mockEnvironment = 'testnet';
+  const mockMirrorNode = 'mirror.node';
+  const mockRpcNode = 'rpc.node';
+  const mockConsensusNodes = 'consensus.nodes';
 
-    const securityFactory = this.networkService.configuration.factoryAddress;
-    const resolver = this.networkService.configuration.resolverAddress;
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    transactionServiceMock = createMock<TransactionService>();
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    networkServiceMock = createMock<NetworkService>({
+      configuration: {
+        factoryAddress: mockFactoryAddress,
+        resolverAddress: mockResolverAddress,
+      },
+      environment: mockEnvironment,
+    });
 
-    const newSecurity: SecurityProps = {
-      name: req.name,
-      symbol: req.symbol,
-      isin: req.isin,
-      decimals: req.decimals,
-      isWhiteList: req.isWhiteList,
-      isControllable: req.isControllable,
-      arePartitionsProtected: req.arePartitionsProtected,
-      clearingActive: req.clearingActive,
-      internalKycActivated: req.internalKycActivated,
-      isMultiPartition: req.isMultiPartition,
-      maxSupply: BigDecimal.fromString(req.numberOfUnits),
-      regulationType: CastRegulationType.fromNumber(req.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(
-        req.regulationSubType,
-      ),
-      isCountryControlListWhiteList: req.isCountryControlListWhiteList,
-      countries: req.countries,
-      info: req.info,
-    };
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
 
-    const createResponse = await this.commandBus.execute(
-      new CreateBondCommand(
-        newSecurity,
-        req.currency,
-        req.nominalValue,
-        req.startingDate,
-        req.maturityDate,
-        req.couponFrequency,
-        req.couponRate,
-        req.firstCouponDate,
-        securityFactory ? new ContractId(securityFactory) : undefined,
-        resolver ? new ContractId(resolver) : undefined,
-        req.configId,
-        req.configVersion,
-        diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-      ),
-    );
+    setNetworkRequest = new SetNetworkRequest({
+      environment: mockEnvironment,
+      mirrorNode: mockMirrorNode as unknown as MirrorNode,
+      rpcNode: mockRpcNode as unknown as JsonRpcRelay,
+      consensusNodes: mockConsensusNodes,
+    });
 
-    const securityCreated =
-      createResponse.securityId.toString() !== ContractId.NULL.toString();
+    setConfigurationRequest = new SetConfigurationRequest({
+      factoryAddress: mockFactoryAddress,
+      resolverAddress: mockResolverAddress,
+    });
 
-    const res = securityCreated
-      ? (
-          await this.queryBus.execute(
-            new GetSecurityQuery(createResponse.securityId.toString()),
-          )
-        ).security
-      : {};
+    (Network as any).commandBus = commandBusMock;
+    (Network as any).transactionService = transactionServiceMock;
+    (Network as any).networkService = networkServiceMock;
+  });
 
-    return {
-      security: securityCreated
-        ? {
-            ...res,
-          }
-        : {},
-      transactionId: createResponse.transactionId,
-    };
-  }
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
 
-  @LogError
-  async getBondDetails(
-    request: GetBondDetailsRequest,
-  ): Promise<BondDetailsViewModel> {
-    ValidatedRequest.handleValidation('GetBondDetailsRequest', request);
+  describe('setConfig', () => {
+    it('should validate request and execute SetConfigurationCommand', async () => {
+      const expectedResponse: ConfigResponse = {
+        factoryAddress: mockFactoryAddress,
+        resolverAddress: mockResolverAddress,
+      };
 
-    const res = await this.queryBus.execute(
-      new GetBondDetailsQuery(request.bondId),
-    );
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-    const bondDetails: BondDetailsViewModel = {
-      currency: res.bond.currency,
-      nominalValue: res.bond.nominalValue.toString(),
-      startingDate: new Date(res.bond.startingDate * ONE_THOUSAND),
-      maturityDate: new Date(res.bond.maturityDate * ONE_THOUSAND),
-    };
+      const result = await Network.setConfig(setConfigurationRequest);
 
-    return bondDetails;
-  }
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetConfigurationRequest',
+        setConfigurationRequest,
+      );
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetConfigurationCommand(mockFactoryAddress, mockResolverAddress),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+  });
 
-  @LogError
-  async setCoupon(
-    request: SetCouponRequest,
-  ): Promise<{ payload: number; transactionId: string }> {
-    const { rate, recordTimestamp, executionTimestamp, securityId } = request;
-    ValidatedRequest.handleValidation('SetCouponRequest', request);
+  describe('getFactoryAddress', () => {
+    it('should return factory address from networkService', async () => {
+      const result = await Network.getFactoryAddress();
 
-    return await this.commandBus.execute(
-      new SetCouponCommand(
-        securityId,
-        recordTimestamp,
-        executionTimestamp,
-        rate,
-      ),
-    );
-  }
+      expect(result).toBe(mockFactoryAddress);
+    });
 
-  @LogError
-  async getCouponDetails(
-    request: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel> {
-    ValidatedRequest.handleValidation('GetCouponDetailsRequest', request);
+    it('should return empty string if configuration is undefined', async () => {
+      networkServiceMock.configuration = undefined as unknown as Configuration;
 
-    const res = await this.queryBus.execute(
-      new GetCouponDetailsQuery(request.bondId),
-    );
+      const result = await Network.getFactoryAddress();
 
-    const couponDetails: CouponDetailsViewModel = {
-      couponFrequency: res.coupon.couponFrequency,
-      couponRate: res.coupon.couponRate.toString(),
-      firstCouponDate: new Date(res.coupon.firstCouponDate * ONE_THOUSAND),
-    };
-    return couponDetails;
-  }
+      expect(result).toBe('');
+    });
+  });
 
-  @LogError
-  async getCouponFor(
-    request: GetCouponForRequest,
-  ): Promise<CouponForViewModel> {
-    ValidatedRequest.handleValidation('GetCouponForRequest', request);
+  describe('getResolverAddress', () => {
+    it('should return resolver address from networkService', async () => {
+      const result = await Network.getResolverAddress();
 
-    const res = await this.queryBus.execute(
-      new GetCouponForQuery(
-        request.targetId,
-        request.securityId,
-        request.couponId,
-      ),
-    );
+      expect(result).toBe(mockResolverAddress);
+    });
 
-    const couponFor: CouponForViewModel = {
-      value: res.payload.toString(),
-    };
+    it('should return empty string if configuration is undefined', async () => {
+      networkServiceMock.configuration = undefined as unknown as Configuration;
 
-    return couponFor;
-  }
+      const result = await Network.getResolverAddress();
 
-  @LogError
-  async getCoupon(request: GetCouponRequest): Promise<CouponViewModel> {
-    ValidatedRequest.handleValidation('GetCouponRequest', request);
+      expect(result).toBe('');
+    });
+  });
 
-    const res = await this.queryBus.execute(
-      new GetCouponQuery(request.securityId, request.couponId),
-    );
+  describe('getNetwork', () => {
+    it('should return environment from networkService', async () => {
+      const result = await Network.getNetwork();
 
-    const coupon: CouponViewModel = {
-      couponId: request.couponId,
-      recordDate: new Date(res.coupon.recordTimeStamp * ONE_THOUSAND),
-      executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
-      rate: res.coupon.rate.toString(),
-    };
+      expect(result).toBe(mockEnvironment);
+    });
+  });
 
-    return coupon;
-  }
+  describe('isNetworkRecognized', () => {
+    it('should return true if environment is recognized', async () => {
+      const result = await Network.isNetworkRecognized();
 
-  @LogError
-  async getAllCoupons(
-    request: GetAllCouponsRequest,
-  ): Promise<CouponViewModel[]> {
-    ValidatedRequest.handleValidation('GetAllCouponsRequest', request);
+      expect(result).toBe(true);
+    });
 
-    const count = await this.queryBus.execute(
-      new GetCouponCountQuery(request.securityId),
-    );
+    it('should return false if environment is unrecognized', async () => {
+      networkServiceMock.environment = 'unrecognized';
 
-    if (count.payload == 0) return [];
+      const result = await Network.isNetworkRecognized();
 
-    const coupons: CouponViewModel[] = [];
+      expect(result).toBe(false);
+    });
+  });
 
-    for (let i = 1; i <= count.payload; i++) {
-      const couponRequest = new GetCouponRequest({
-        securityId: request.securityId,
-        couponId: i,
-      });
+  describe('setNetwork', () => {
+    it('should validate request and execute SetNetworkCommand', async () => {
+      const expectedResponse: NetworkResponse = {
+        environment: mockEnvironment,
+        mirrorNode: mockMirrorNode as unknown as MirrorNode,
+        rpcNode: mockRpcNode as unknown as JsonRpcRelay,
+        consensusNodes: mockConsensusNodes,
+      };
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const coupon = await this.getCoupon(couponRequest);
+      const result = await Network.setNetwork(setNetworkRequest);
 
-      coupons.push(coupon);
-    }
-
-    return coupons;
-  }
-
-  @LogError
-  async updateMaturityDate(
-    request: UpdateMaturityDateRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { maturityDate, securityId } = request;
-    ValidatedRequest.handleValidation('UpdateMaturityDateRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateMaturityDateCommand(maturityDate, securityId),
-    );
-  }
-}
-
-const BondToken = new BondInPort();
-export default BondToken;
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetNetworkRequest',
+        setNetworkRequest,
+      );
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetNetworkCommand(
+          mockEnvironment,
+          mockMirrorNode as unknown as MirrorNode,
+          mockRpcNode as unknown as JsonRpcRelay,
+          mockConsensusNodes,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+  });
+});
