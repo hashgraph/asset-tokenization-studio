@@ -225,7 +225,6 @@ import {
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 
-// solhint-disable no-unused-vars, custom-errors
 abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
@@ -568,4 +567,3 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             });
     }
 }
-// solhint-enable no-unused-vars, custom-errors

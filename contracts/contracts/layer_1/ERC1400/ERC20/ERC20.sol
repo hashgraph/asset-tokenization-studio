@@ -229,7 +229,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         erc20Storage.initialized = true;
     }
 
-    // solhint-disable no-unused-vars
     function approve(
         address spender,
         uint256 value
@@ -345,9 +344,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     function decimalsAt(uint256 _timestamp) external view returns (uint8) {
         return _decimalsAdjustedAt(_timestamp);
     }
-
-    // solhint-enable no-empty-blocks
-    // solhint-enable no-unused-vars
 
     function getERC20Metadata() external view returns (ERC20Metadata memory) {
         return _getERC20MetadataAdjusted();

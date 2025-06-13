@@ -228,9 +228,6 @@ abstract contract Equity is
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    // solhint-disable func-name-mixedcase
-    // solhint-disable-next-line private-vars-leading-underscore
-
     function setDividends(
         Dividend calldata _newDividend
     )
@@ -420,6 +417,7 @@ abstract contract Equity is
         return _getScheduledBalanceAdjustmentsCount();
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initializeEquity(
         EquityDetailsData calldata _equityDetailsData
     ) internal {

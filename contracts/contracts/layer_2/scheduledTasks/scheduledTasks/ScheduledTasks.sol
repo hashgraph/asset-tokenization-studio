@@ -222,14 +222,13 @@ import {
 contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    // solhint-disable no-unused-vars
     function onScheduledTaskTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
+        uint256 /*_pos*/,
+        uint256 /*_scheduledTasksLength*/,
         bytes memory _data
     ) external override onlyAutoCalling(_scheduledTaskStorage().autoCalling) {
         _onScheduledTaskTriggered(_data);
-    } // solhint-enable no-unused-vars
+    }
 
     function triggerPendingScheduledTasks()
         external

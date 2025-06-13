@@ -216,6 +216,6 @@ export default abstract class BaseBlockchainQuery {
 
     constructor({ provider, overrides }: BaseBlockchainQueryParams) {
         this.provider = provider
-        this.overrides = overrides
+        this.overrides = overrides ?? {}
     }
 }

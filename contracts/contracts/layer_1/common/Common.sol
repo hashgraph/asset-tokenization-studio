@@ -210,7 +210,6 @@ import {CapStorageWrapper2} from '../../layer_0/cap/CapStorageWrapper2.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
 
-// solhint-disable no-empty-blocks
 abstract contract Common is CapStorageWrapper2 {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();

@@ -219,7 +219,6 @@ import {
 } from '../constants/resolverKeys.sol';
 import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
-// solhint-disable no-unused-vars, custom-errors
 contract ClearingHoldCreationFacet is
     IStaticFunctionSelectors,
     IClearingHoldCreation,
@@ -417,4 +416,3 @@ contract ClearingHoldCreationFacet is
             .interfaceId;
     }
 }
-// solhint-enable no-unused-vars, custom-errors

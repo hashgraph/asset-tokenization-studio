@@ -294,7 +294,6 @@ abstract contract ExternalListManagementStorageWrapper is
     ) internal pure returns (ExternalListDataStorage storage externalList_) {
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            // solhint-disable-next-line no-inline-assembly
             externalList_.slot := _position
         }
     }

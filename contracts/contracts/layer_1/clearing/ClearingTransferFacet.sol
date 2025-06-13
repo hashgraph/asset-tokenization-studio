@@ -214,7 +214,6 @@ import {
 import {_CLEARING_TRANSFER_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
-// solhint-disable no-unused-vars, custom-errors
 contract ClearingTransferFacet is
     IStaticFunctionSelectors,
     IClearingTransfer,
@@ -416,4 +415,3 @@ contract ClearingTransferFacet is
             .interfaceId;
     }
 }
-// solhint-enable no-unused-vars, custom-errors
