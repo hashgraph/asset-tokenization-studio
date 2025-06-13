@@ -203,126 +203,154 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/GetLockQuery';
-import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
-import { LockedBalanceOfQuery } from 'app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
-import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
-import LockRequest from '../../../src/port/in/request/security/operations/lock/LockRequest';
-import ReleaseRequest from '../../../src/port/in/request/security/operations/release/ReleaseRequest';
-import GetLockedBalanceRequest from '../../../src/port/in/request/security/operations/lock/GetLockedBalanceRequest';
-import GetLockCountRequest from '../../../src/port/in/request/security/operations/lock/GetLockCountRequest';
-import GetLocksIdRequest from '../../../src/port/in/request/security/operations/lock/GetLocksIdRequest';
-import GetLockRequest from '../../../src/port/in/request/security/operations/lock/GetLockRequest';
-import { Lock } from '../../../src/domain/context/security/Lock';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
-import { BigNumber } from 'ethers';
+import { createMock } from '@golevelup/ts-jest';
+import AccountIntPort from './Account';
+import { QueryBus } from '../../../core/query/QueryBus';
+import { GetAccountBalanceRequest, GetAccountInfoRequest } from '../request';
+import LogService from '../../../app/service/log/LogService';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs';
+import {
+  AccountPropsFixture,
+  GetAccountBalanceRequestFixture,
+  GetAccountInfoRequestFixture,
+} from '../../../../__tests__/fixtures/account/AccountFixture';
+import { GetAccountInfoQuery } from '../../../app/usecase/query/account/info/GetAccountInfoQuery';
+import { HederaId } from '../../../domain/context/shared/HederaId';
+import { GetAccountBalanceQuery } from '../../../app/usecase/query/account/balance/GetAccountBalanceQuery';
+import { ValidationError } from '../../../core/validation/ValidationError';
+import Account from '../../../domain/context/account/Account';
 
-export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-  query.id.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
+describe('Account', () => {
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let getAccountInfoRequest: GetAccountInfoRequest;
+  let getAccountBalanceRequest: GetAccountBalanceRequest;
 
-export const LockCountQueryFixture = createFixture<LockCountQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-});
+  let handleValidationSpy: jest.SpyInstance;
 
-export const LockedBalanceOfQueryFixture = createFixture<LockedBalanceOfQuery>(
-  (query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const LocksIdQueryFixture = createFixture<LocksIdQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-  query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-  query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
-
-export const LockRequestFixture = createFixture<LockRequest>((request) => {
-  request.securityId.as(
-    () => new HederaId(HederaIdPropsFixture.create().value),
-  );
-  request.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  request.amount.faker((faker) =>
-    faker.number.int({ min: 1, max: 10 }).toString(),
-  );
-  request.expirationTimestamp.faker((faker) =>
-    faker.date.future().getTime().toString(),
-  );
-});
-
-export const ReleaseRequestFixture = createFixture<ReleaseRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.lockId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  },
-);
-
-export const GetLockedBalanceRequestFixture =
-  createFixture<GetLockedBalanceRequest>((request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
+  beforeEach(() => {
+    queryBusMock = createMock<QueryBus>();
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (AccountIntPort as any).queryBus = queryBusMock;
   });
 
-export const GetLockCountRequestFixture = createFixture<GetLockCountRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-  },
-);
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
 
-export const GetLocksIdRequestFixture = createFixture<GetLocksIdRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
+  describe('getInfo', () => {
+    getAccountInfoRequest = new GetAccountInfoRequest(
+      GetAccountInfoRequestFixture.create(),
     );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.start.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-    request.end.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-  },
-);
 
-export const GetLockRequestFixture = createFixture<GetLockRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.id.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-  },
-);
+    const expectedQueryResponse = {
+      account: new Account(AccountPropsFixture.create()),
+    };
 
-export const LockFixture = createFixture<Lock>((props) => {
-  props.id.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  props.amount.faker(
-    (faker) =>
-      new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()),
-  );
-  props.expiredTimestamp.faker((faker) =>
-    BigNumber.from(faker.date.future().getTime()).toString(),
-  );
+    it('should return AccountViewModel when getInfo is called with valid request', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result = await AccountIntPort.getInfo(getAccountInfoRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetAccountInfoRequest',
+        getAccountInfoRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetAccountInfoQuery(
+          HederaId.from(getAccountInfoRequest.account.accountId),
+        ),
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: expectedQueryResponse.account.id.toString(),
+        }),
+      );
+    });
+
+    it('should throw error when query execution fails', async () => {
+      const queryError = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(queryError);
+
+      await expect(
+        AccountIntPort.getInfo(getAccountInfoRequest),
+      ).rejects.toThrow(queryError);
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetAccountInfoRequest',
+        getAccountInfoRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetAccountInfoQuery(
+          HederaId.from(getAccountInfoRequest.account.accountId),
+        ),
+      );
+    });
+  });
+
+  describe('getBalance', () => {
+    getAccountBalanceRequest = new GetAccountBalanceRequest(
+      GetAccountBalanceRequestFixture.create(),
+    );
+
+    const expectedQueryResponse = {
+      payload: 1,
+    };
+
+    it('should return BigDecimal when getBalance is called with valid request', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedQueryResponse);
+
+      const result = await AccountIntPort.getBalance(getAccountBalanceRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetAccountBalanceRequest',
+        getAccountBalanceRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetAccountBalanceQuery(
+          getAccountBalanceRequest.securityId,
+          getAccountBalanceRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(expectedQueryResponse.payload);
+    });
+
+    it('should throw error when QueryBus execution fails', async () => {
+      const queryError = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(queryError);
+
+      await expect(
+        AccountIntPort.getBalance(getAccountBalanceRequest),
+      ).rejects.toThrow(queryError);
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetAccountBalanceRequest',
+        getAccountBalanceRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalled();
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getAccountBalanceRequest = new GetAccountBalanceRequest({
+        ...GetAccountBalanceRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        AccountIntPort.getBalance(getAccountBalanceRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      getAccountBalanceRequest = new GetAccountBalanceRequest({
+        ...GetAccountBalanceRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+        AccountIntPort.getBalance(getAccountBalanceRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
 });
