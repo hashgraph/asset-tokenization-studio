@@ -295,6 +295,7 @@ describe('CreateExternalBlackListMockCommandHandler', () => {
           className: CreateExternalBlackListMockCommandHandler.name,
           position: 0,
           numberOfResultsItems: 1,
+          isContractCreation: true,
         });
 
         expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);

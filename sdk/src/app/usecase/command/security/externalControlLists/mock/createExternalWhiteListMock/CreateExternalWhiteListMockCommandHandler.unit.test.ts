@@ -217,6 +217,7 @@ import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
 import { CreateExternalWhiteListMockCommandHandler } from './CreateExternalWhiteListMockCommandHandler.js';
 import { CreateExternalWhiteListMockCommandError } from './error/CreateExternalWhiteListMockCommandError.js';
 import { CreateExternalWhiteListMockCommandResponse } from './CreateExternalWhiteListMockCommand.js';
+import { isConstructible } from 'core/Cast.js';
 
 describe('CreateExternalWhiteListMockCommandHandler', () => {
   let handler: CreateExternalWhiteListMockCommandHandler;
@@ -295,6 +296,7 @@ describe('CreateExternalWhiteListMockCommandHandler', () => {
           className: CreateExternalWhiteListMockCommandHandler.name,
           position: 0,
           numberOfResultsItems: 1,
+          isContractCreation: true,
         });
 
         expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
