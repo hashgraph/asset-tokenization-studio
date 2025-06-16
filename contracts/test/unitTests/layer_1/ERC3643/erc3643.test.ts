@@ -231,6 +231,7 @@ describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
+    let signer_C: SignerWithAddress
 
     let account_A: string
     let account_B: string
@@ -250,109 +251,136 @@ describe('ERC3643 Tests', () => {
     const version = '1'
     const isin = isinGenerator()
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
+    describe('single partition', () => {
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
+            ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+            account_A = signer_A.address
+            account_B = signer_B.address
 
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: true,
-                timeTravelEnabled: true,
-            })
-        )
+            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
-
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: true,
-            isMultiPartition: true,
-            name,
-            symbol,
-            decimals,
-            isin,
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_S,
-            regulationSubType: RegulationSubType.NONE,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
         })
 
-        erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
-        erc3643Facet = await ethers.getContractAt('ERC3643', diamond.address)
-        pauseFacet = await ethers.getContractAt(
-            'Pause',
-            diamond.address,
-            signer_B
-        )
-    })
+        beforeEach(async () => {
+            const rbacPause: Rbac = {
+                role: PAUSER_ROLE,
+                members: [account_B],
+            }
+            const init_rbacs: Rbac[] = [rbacPause]
 
-    it('GIVEN an initialized token WHEN updating the name THEN setName emits UpdatedTokenInformation with updated name and current metadata', async () => {
-        const retrieved_name = await erc20Facet.name()
-        expect(retrieved_name).to.equal(name)
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                clearingActive: false,
+                internalKycActivated: true,
+                isMultiPartition: true,
+                name,
+                symbol,
+                decimals,
+                isin,
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_S,
+                regulationSubType: RegulationSubType.NONE,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
-        //Update name
-        expect(await erc3643Facet.setName(newName))
-            .to.emit(erc3643Facet, 'UpdatedTokenInformation')
-            .withArgs(newName, symbol, decimals, version, ADDRESS_ZERO)
+            erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
+            erc3643Facet = await ethers.getContractAt(
+                'ERC3643',
+                diamond.address
+            )
+            pauseFacet = await ethers.getContractAt(
+                'Pause',
+                diamond.address,
+                signer_B
+            )
+        })
 
-        const retrieved_newName = await erc20Facet.name()
-        expect(retrieved_newName).to.equal(newName)
-    })
+        it('GIVEN an initialized token WHEN updating the name THEN setName emits UpdatedTokenInformation with updated name and current metadata', async () => {
+            const retrieved_name = await erc20Facet.name()
+            expect(retrieved_name).to.equal(name)
 
-    it('GIVEN an initialized token WHEN updating the symbol THEN setSymbol emits UpdatedTokenInformation with updated symbol and current metadata', async () => {
-        const retrieved_symbol = await erc20Facet.symbol()
-        expect(retrieved_symbol).to.equal(symbol)
+            //Update name
+            expect(await erc3643Facet.setName(newName))
+                .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+                .withArgs(newName, symbol, decimals, version, ADDRESS_ZERO)
 
-        //Update symbol
-        expect(await erc3643Facet.setSymbol(newSymbol))
-            .to.emit(erc3643Facet, 'UpdatedTokenInformation')
-            .withArgs(name, newSymbol, decimals, version, ADDRESS_ZERO)
+            const retrieved_newName = await erc20Facet.name()
+            expect(retrieved_newName).to.equal(newName)
+        })
 
-        const retrieved_newSymbol = await erc20Facet.symbol()
-        expect(retrieved_newSymbol).to.equal(newSymbol)
-    })
+        it('GIVEN an initialized token WHEN updating the symbol THEN setSymbol emits UpdatedTokenInformation with updated symbol and current metadata', async () => {
+            const retrieved_symbol = await erc20Facet.symbol()
+            expect(retrieved_symbol).to.equal(symbol)
 
-    it('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
-        await pauseFacet.pause()
+            //Update symbol
+            expect(await erc3643Facet.setSymbol(newSymbol))
+                .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+                .withArgs(name, newSymbol, decimals, version, ADDRESS_ZERO)
 
-        await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
-            'TokenIsPaused'
-        )
-        await expect(erc3643Facet.setName(newSymbol)).to.be.rejectedWith(
-            'TokenIsPaused'
-        )
+            const retrieved_newSymbol = await erc20Facet.symbol()
+            expect(retrieved_newSymbol).to.equal(newSymbol)
+        })
+
+        it('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
+            await pauseFacet.pause()
+
+            await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
+                'TokenIsPaused'
+            )
+            await expect(erc3643Facet.setName(newSymbol)).to.be.rejectedWith(
+                'TokenIsPaused'
+            )
+        })
+
+        describe('AccessControl', () => {
+            it('GIVEN an account without admin role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // set name fails
+                await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
+                    'AccountHasNoRole'
+                )
+            })
+            it('GIVEN an account without admin role WHEN setSymbol THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // set symbol fails
+                await expect(
+                    erc3643Facet.setSymbol(newSymbol)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+        })
     })
 })

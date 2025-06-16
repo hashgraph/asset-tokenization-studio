@@ -212,13 +212,18 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_DEFAULT_ADMIN_ROLE} from '../constants/roles.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
-    function setName(string calldata _name) external override onlyUnpaused {
+    function setName(
+        string calldata _name
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
         _setName(_name);
     }
 
-    function setSymbol(string calldata _symbol) external override onlyUnpaused {
+    function setSymbol(
+        string calldata _symbol
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
         _setSymbol(_symbol);
     }
 
