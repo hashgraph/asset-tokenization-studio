@@ -215,12 +215,20 @@ import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../constants/roles.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
+    /**
+     * @notice Sets the name of the token.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
     function setName(
         string calldata _name
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
         _setName(_name);
     }
 
+    /**
+     * @notice Sets the symbol of the token.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
     function setSymbol(
         string calldata _symbol
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
