@@ -247,7 +247,7 @@ describe('ERC3643 Tests', () => {
     const newName = 'TEST_ERC3643'
     const newSymbol = 'TAC_ERC3643'
     const decimals = 6
-    const version = '1.0'
+    const version = '1'
     const isin = isinGenerator()
 
     before(async () => {

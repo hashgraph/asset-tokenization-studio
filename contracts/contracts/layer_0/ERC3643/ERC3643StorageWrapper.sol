@@ -215,7 +215,7 @@ abstract contract ERC3643StorageWrapper is
     IERC3643StorageWrapper,
     ERC20StorageWrapper2
 {
-    string private constant _VERSION = '1.0';
+    string private constant _VERSION = '1';
     address private constant _ONCHAIN_ID = address(0);
 
     function _setName(string calldata _name) internal {
@@ -227,22 +227,24 @@ abstract contract ERC3643StorageWrapper is
     }
 
     function _updateTokenName(string calldata _name) internal {
-        ERC20Storage storage store = _erc20Storage();
-        store.name = _name;
-        _emitTokenInfoUpdated(store);
+        ERC20Storage storage erc20Storage = _erc20Storage();
+        erc20Storage.name = _name;
+        _emitTokenInfoUpdated(erc20Storage);
     }
 
     function _updateTokenSymbol(string calldata _symbol) internal {
-        ERC20Storage storage store = _erc20Storage();
-        store.symbol = _symbol;
-        _emitTokenInfoUpdated(store);
+        ERC20Storage storage erc20Storage = _erc20Storage();
+        erc20Storage.symbol = _symbol;
+        _emitTokenInfoUpdated(erc20Storage);
     }
 
-    function _emitTokenInfoUpdated(ERC20Storage storage store) internal {
+    function _emitTokenInfoUpdated(
+        ERC20Storage storage _erc20Storage
+    ) internal {
         emit UpdatedTokenInformation(
-            store.name,
-            store.symbol,
-            store.decimals,
+            _erc20Storage.name,
+            _erc20Storage.symbol,
+            _erc20Storage.decimals,
             _VERSION,
             _ONCHAIN_ID
         );
