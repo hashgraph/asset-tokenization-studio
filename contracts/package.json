@@ -86,7 +86,8 @@
     "slither": "npm run slither:summary && npm run slither:storageLayout && npm run slither:inheritance && npm run slither:analysis",
     "prettierCheck": "prettier --check",
     "prepack": "npm run compile:force",
-    "doc": "npx hardhat dodoc"
+    "doc": "npx hardhat dodoc",
+    "extract-methods": "ts-node scripts/extract-methods.ts"
   },
   "keywords": [],
   "author": "",
