@@ -140,7 +140,7 @@ exports[`Landing should render correctly: disconnected 1`] = `
                     Import the Private Key in Metamask (
                     <a
                       class="chakra-link css-1j7tat"
-                      href="https://support.metamask.io/hc/en-us/articles/360015489331-How-to-import-an-account"
+                      href="https://support.metamask.io/start/how-to-import-an-account/"
                       rel="noopener"
                       target="_blank"
                     >
@@ -154,7 +154,7 @@ exports[`Landing should render correctly: disconnected 1`] = `
                     Switch to that new account in Metamask (
                     <a
                       class="chakra-link css-1j7tat"
-                      href="https://support.metamask.io/hc/en-us/articles/360061346311-Switching-accounts-in-MetaMask"
+                      href="https://support.metamask.io/configure/accounts/switching-accounts-in-metamask"
                       rel="noopener"
                       target="_blank"
                     >

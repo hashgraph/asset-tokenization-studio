@@ -875,7 +875,7 @@ exports[`CreateBond render correctly 1`] = `
                         for="internalKycActivated"
                         id="field-:rq:-label"
                       >
-                        createBond.stepTokenDetails.internalKycActivated
+                        Internal Kyc Activated
                       </label>
                     </div>
                   </div>
