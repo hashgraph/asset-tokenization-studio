@@ -238,13 +238,11 @@ abstract contract ERC3643StorageWrapper is
         _emitTokenInfoUpdated(erc20Storage);
     }
 
-    function _emitTokenInfoUpdated(
-        ERC20Storage storage _erc20Storage
-    ) internal {
+    function _emitTokenInfoUpdated(ERC20Storage storage _storage) internal {
         emit UpdatedTokenInformation(
-            _erc20Storage.name,
-            _erc20Storage.symbol,
-            _erc20Storage.decimals,
+            _storage.name,
+            _storage.symbol,
+            _storage.decimals,
             _VERSION,
             _ONCHAIN_ID
         );
