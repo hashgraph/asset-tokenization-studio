@@ -358,6 +358,46 @@ export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
   },
 );
 
+export const SetScheduledBalanceAdjustmentCommandFixture =
+  createFixture<SetScheduledBalanceAdjustmentCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.executionDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.factor.faker((faker) => faker.number.int().toString());
+    command.decimals.faker((faker) => faker.number.int().toString());
+  });
+
+export const SetDividendsCommandFixture = createFixture<SetDividendsCommand>(
+  (command) => {
+    command.address.as(() => HederaIdPropsFixture.create().value);
+    let recordDate: Date;
+    command.recordDate.faker((faker) => {
+      recordDate = faker.date.future();
+      return recordDate.getTime().toString();
+    });
+    command.executionDate.faker((faker) => {
+      return faker.date.future({ refDate: recordDate }).getTime().toString();
+    });
+    command.amount.faker((faker) => faker.number.int().toString());
+  },
+);
+
+export const SetVotingRightsCommandFixture =
+  createFixture<SetVotingRightsCommand>((command) => {
+    command.address.as(() => HederaIdPropsFixture.create().value);
+    command.recordDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.data.faker((faker) => {
+      return faker.string.hexadecimal({
+        length: 64,
+        casing: 'lower',
+        prefix: '0x',
+      });
+    });
+  });
+
 export const ScheduledBalanceAdjustmentFixture =
   createFixture<ScheduledBalanceAdjustment>((props) => {
     props.executionTimeStamp.faker((faker) => faker.date.future());
@@ -404,43 +444,3 @@ export const VotingRightsFixture = createFixture<VotingRights>((props) => {
   props.recordTimeStamp.faker((faker) => faker.date.past());
   props.snapshotId?.faker((faker) => faker.number.int({ min: 1, max: 999 }));
 });
-
-export const SetScheduledBalanceAdjustmentCommandFixture =
-  createFixture<SetScheduledBalanceAdjustmentCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.executionDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-    command.factor.faker((faker) => faker.number.int().toString());
-    command.decimals.faker((faker) => faker.number.int().toString());
-  });
-
-export const SetDividendsCommandFixture = createFixture<SetDividendsCommand>(
-  (command) => {
-    command.address.as(() => HederaIdPropsFixture.create().value);
-    let recordDate: Date;
-    command.recordDate.faker((faker) => {
-      recordDate = faker.date.future();
-      return recordDate.getTime().toString();
-    });
-    command.executionDate.faker((faker) => {
-      return faker.date.future({ refDate: recordDate }).getTime().toString();
-    });
-    command.amount.faker((faker) => faker.number.int().toString());
-  },
-);
-
-export const SetVotingRightsCommandFixture =
-  createFixture<SetVotingRightsCommand>((command) => {
-    command.address.as(() => HederaIdPropsFixture.create().value);
-    command.recordDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-    command.data.faker((faker) => {
-      return faker.string.hexadecimal({
-        length: 64,
-        casing: 'lower',
-        prefix: '0x',
-      });
-    });
-  });

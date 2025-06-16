@@ -295,49 +295,6 @@ export const GetClearingsIdForByPartitionQueryFixture =
     query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   });
 
-export const ClearingHoldCreationFixture = createFixture<ClearingHoldCreation>(
-  (props) => {
-    props.amount.faker(
-      (faker) =>
-        new BigDecimal(
-          BigNumber.from(faker.number.int({ max: 999 })).toString(),
-        ),
-    );
-    props.expirationTimestamp.faker((faker) => faker.date.future());
-    props.data.faker((faker) => faker.lorem.words());
-    props.operatorData.faker((faker) => faker.lorem.words());
-    props.holdEscrow.as(() => HederaIdPropsFixture.create().value);
-    props.holdExpirationTimestamp.faker((faker) => faker.date.future());
-    props.holdTo.as(() => HederaIdPropsFixture.create().value);
-    props.holdData.faker((faker) => faker.lorem.words());
-  },
-);
-
-export const ClearingRedeemFixture = createFixture<ClearingRedeem>((props) => {
-  props.amount.faker(
-    (faker) =>
-      new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()),
-  );
-  props.expirationTimestamp.faker((faker) => faker.date.future());
-  props.data.faker((faker) => faker.lorem.words());
-  props.operatorData.faker((faker) => faker.lorem.words());
-});
-
-export const ClearingTransferFixture = createFixture<ClearingTransfer>(
-  (props) => {
-    props.amount.faker(
-      (faker) =>
-        new BigDecimal(
-          BigNumber.from(faker.number.int({ max: 999 })).toString(),
-        ),
-    );
-    props.expirationTimestamp.faker((faker) => faker.date.future());
-    props.data.faker((faker) => faker.lorem.words());
-    props.operatorData.faker((faker) => faker.lorem.words());
-    props.destination.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
 export const SwitchClearingModeCommandFixture = createFixture<
   ActivateClearingCommand | DeactivateClearingCommand
 >((command) => {
@@ -433,3 +390,46 @@ export const ClearingTransferByPartitionCommandFixture =
       faker.string.hexadecimal({ length: 64, prefix: '0x' }),
     );
   });
+
+export const ClearingHoldCreationFixture = createFixture<ClearingHoldCreation>(
+  (props) => {
+    props.amount.faker(
+      (faker) =>
+        new BigDecimal(
+          BigNumber.from(faker.number.int({ max: 999 })).toString(),
+        ),
+    );
+    props.expirationTimestamp.faker((faker) => faker.date.future());
+    props.data.faker((faker) => faker.lorem.words());
+    props.operatorData.faker((faker) => faker.lorem.words());
+    props.holdEscrow.as(() => HederaIdPropsFixture.create().value);
+    props.holdExpirationTimestamp.faker((faker) => faker.date.future());
+    props.holdTo.as(() => HederaIdPropsFixture.create().value);
+    props.holdData.faker((faker) => faker.lorem.words());
+  },
+);
+
+export const ClearingRedeemFixture = createFixture<ClearingRedeem>((props) => {
+  props.amount.faker(
+    (faker) =>
+      new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()),
+  );
+  props.expirationTimestamp.faker((faker) => faker.date.future());
+  props.data.faker((faker) => faker.lorem.words());
+  props.operatorData.faker((faker) => faker.lorem.words());
+});
+
+export const ClearingTransferFixture = createFixture<ClearingTransfer>(
+  (props) => {
+    props.amount.faker(
+      (faker) =>
+        new BigDecimal(
+          BigNumber.from(faker.number.int({ max: 999 })).toString(),
+        ),
+    );
+    props.expirationTimestamp.faker((faker) => faker.date.future());
+    props.data.faker((faker) => faker.lorem.words());
+    props.operatorData.faker((faker) => faker.lorem.words());
+    props.destination.as(() => HederaIdPropsFixture.create().value);
+  },
+);
