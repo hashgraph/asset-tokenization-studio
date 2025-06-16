@@ -301,6 +301,7 @@ function buildEmptyEnvironment(): Environment {
             externalPauseManagement: {} as IStaticFunctionSelectors,
             externalControlListManagement: {} as IStaticFunctionSelectors,
             externalKycListManagement: {} as IStaticFunctionSelectors,
+            ERC3643: {} as IStaticFunctionSelectors,
         },
         facetIdsEquities: [],
         facetVersionsEquities: [],

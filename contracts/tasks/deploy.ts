@@ -298,6 +298,7 @@ task(
             externalPauseManagement,
             externalControlListManagement,
             externalKycListManagement,
+            erc3643,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -350,6 +351,7 @@ task(
                 externalControlListManagement.address,
             'External Kyc List Management Facet':
                 externalKycListManagement.address,
+            ERC3643: erc3643.address,
         }
 
         const contractAddress = []

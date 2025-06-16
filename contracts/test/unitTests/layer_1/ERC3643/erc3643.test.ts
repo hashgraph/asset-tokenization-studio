@@ -203,197 +203,156 @@
 
 */
 
-import { Signer } from 'ethers'
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
+    type ResolverProxy,
+    type ERC20,
+    type Pause,
     BusinessLogicResolver,
-    AccessControlFacet,
-    AdjustBalances,
-    BondUSA,
-    Cap,
-    ControlList,
-    CorporateActions,
-    DiamondFacet,
-    EquityUSA,
-    ERC1410ScheduledTasks,
-    ERC1594,
-    ERC1643,
-    ERC1644,
-    ERC20,
-    PauseFacet,
-    ScheduledBalanceAdjustments,
-    ScheduledSnapshots,
-    ScheduledTasks,
-    Snapshots,
-    TransferAndLock,
-    Lock,
-    Hold,
-    ProtectedPartitions,
-    Kyc,
-    SsiManagement,
-    ClearingTransferFacet,
-    ClearingRedeemFacet,
-    ClearingHoldCreationFacet,
-    ClearingReadFacet,
-    ClearingActionsFacet,
-    ExternalPauseManagement,
-    ExternalControlListManagement,
-    TimeTravel,
-    ExternalKycListManagement,
+    IFactory,
     ERC3643,
 } from '@typechain'
-import { DeployContractWithFactoryResult } from '../index'
+import {
+    PAUSER_ROLE,
+    MAX_UINT256,
+    deployEquityFromFactory,
+    Rbac,
+    RegulationSubType,
+    RegulationType,
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    ADDRESS_ZERO,
+} from '@scripts'
 
-export interface DeployAtsContractsResultParams {
-    businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    accessControl: DeployContractWithFactoryResult<AccessControlFacet>
-    cap: DeployContractWithFactoryResult<Cap>
-    controlList: DeployContractWithFactoryResult<ControlList>
-    kyc: DeployContractWithFactoryResult<Kyc>
-    ssiManagement: DeployContractWithFactoryResult<SsiManagement>
-    pause: DeployContractWithFactoryResult<PauseFacet>
-    erc20: DeployContractWithFactoryResult<ERC20>
-    erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
-    erc1594: DeployContractWithFactoryResult<ERC1594>
-    erc1643: DeployContractWithFactoryResult<ERC1643>
-    erc1644: DeployContractWithFactoryResult<ERC1644>
-    diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
-    equityUsa: DeployContractWithFactoryResult<EquityUSA>
-    bondUsa: DeployContractWithFactoryResult<BondUSA>
-    scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
-    scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
-    scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
-    snapshots: DeployContractWithFactoryResult<Snapshots>
-    corporateActions: DeployContractWithFactoryResult<CorporateActions>
-    transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
-    lock: DeployContractWithFactoryResult<Lock>
-    hold: DeployContractWithFactoryResult<Hold>
-    adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
-    protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
-    clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>
-    clearingRedeemFacet: DeployContractWithFactoryResult<ClearingRedeemFacet>
-    clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
-    clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
-    clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
-    externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
-    externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
-    externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    erc3643: DeployContractWithFactoryResult<ERC3643>
-    timeTravel?: DeployContractWithFactoryResult<TimeTravel>
-    deployer?: Signer
-}
+describe('ERC3643 Tests', () => {
+    let diamond: ResolverProxy
+    let signer_A: SignerWithAddress
+    let signer_B: SignerWithAddress
 
-export default class DeployAtsContractsResult {
-    public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    public readonly accessControl: DeployContractWithFactoryResult<AccessControlFacet>
-    public readonly cap: DeployContractWithFactoryResult<Cap>
-    public readonly controlList: DeployContractWithFactoryResult<ControlList>
-    public readonly kyc: DeployContractWithFactoryResult<Kyc>
-    public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>
-    public readonly pause: DeployContractWithFactoryResult<PauseFacet>
-    public readonly erc20: DeployContractWithFactoryResult<ERC20>
-    public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
-    public readonly erc1594: DeployContractWithFactoryResult<ERC1594>
-    public readonly erc1643: DeployContractWithFactoryResult<ERC1643>
-    public readonly erc1644: DeployContractWithFactoryResult<ERC1644>
-    public readonly diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
-    public readonly equityUsa: DeployContractWithFactoryResult<EquityUSA>
-    public readonly bondUsa: DeployContractWithFactoryResult<BondUSA>
-    public readonly scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
-    public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
-    public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
-    public readonly snapshots: DeployContractWithFactoryResult<Snapshots>
-    public readonly corporateActions: DeployContractWithFactoryResult<CorporateActions>
-    public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
-    public readonly lock: DeployContractWithFactoryResult<Lock>
-    public readonly hold: DeployContractWithFactoryResult<Hold>
-    public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
-    public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
-    public readonly clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>
-    public readonly clearingRedeemFacet: DeployContractWithFactoryResult<ClearingRedeemFacet>
-    public readonly clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
-    public readonly clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
-    public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
-    public readonly externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
-    public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
-    public readonly externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    public readonly erc3643: DeployContractWithFactoryResult<ERC3643>
-    public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
-    public readonly deployer?: Signer
+    let account_A: string
+    let account_B: string
 
-    constructor({
-        businessLogicResolver,
-        accessControl,
-        cap,
-        controlList,
-        kyc,
-        ssiManagement,
-        pause,
-        erc20,
-        erc1410ScheduledTasks,
-        erc1594,
-        erc1643,
-        erc1644,
-        diamondFacet,
-        equityUsa,
-        bondUsa,
-        scheduledSnapshots,
-        scheduledBalanceAdjustments,
-        scheduledTasks,
-        snapshots,
-        corporateActions,
-        transferAndLock,
-        lock,
-        hold,
-        adjustBalances,
-        protectedPartitions,
-        clearingTransferFacet,
-        clearingRedeemFacet,
-        clearingHoldCreationFacet,
-        clearingReadFacet,
-        clearingActionsFacet,
-        externalPauseManagement,
-        externalControlListManagement,
-        externalKycListManagement,
-        erc3643,
-        timeTravel,
-        deployer,
-    }: DeployAtsContractsResultParams) {
-        this.businessLogicResolver = businessLogicResolver
-        this.accessControl = accessControl
-        this.cap = cap
-        this.controlList = controlList
-        this.kyc = kyc
-        this.ssiManagement = ssiManagement
-        this.pause = pause
-        this.erc20 = erc20
-        this.erc1410ScheduledTasks = erc1410ScheduledTasks
-        this.erc1594 = erc1594
-        this.erc1643 = erc1643
-        this.erc1644 = erc1644
-        this.diamondFacet = diamondFacet
-        this.equityUsa = equityUsa
-        this.bondUsa = bondUsa
-        this.scheduledSnapshots = scheduledSnapshots
-        this.scheduledBalanceAdjustments = scheduledBalanceAdjustments
-        this.scheduledTasks = scheduledTasks
-        this.snapshots = snapshots
-        this.corporateActions = corporateActions
-        this.transferAndLock = transferAndLock
-        this.lock = lock
-        this.hold = hold
-        this.adjustBalances = adjustBalances
-        this.protectedPartitions = protectedPartitions
-        this.clearingTransferFacet = clearingTransferFacet
-        this.clearingRedeemFacet = clearingRedeemFacet
-        this.clearingHoldCreationFacet = clearingHoldCreationFacet
-        this.clearingReadFacet = clearingReadFacet
-        this.clearingActionsFacet = clearingActionsFacet
-        this.externalPauseManagement = externalPauseManagement
-        this.externalControlListManagement = externalControlListManagement
-        this.externalKycListManagement = externalKycListManagement
-        this.erc3643 = erc3643
-        this.timeTravel = timeTravel
-        // Deployer
-        this.deployer = deployer
-    }
-}
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
+    let erc20Facet: ERC20
+    let erc3643Facet: ERC3643
+
+    let pauseFacet: Pause
+
+    const name = 'TEST'
+    const symbol = 'TAC'
+    const newName = 'TEST_ERC3643'
+    const newSymbol = 'TAC_ERC3643'
+    const decimals = 6
+    const version = '1.0'
+    const isin = isinGenerator()
+
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        ;[signer_A, signer_B] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+                timeTravelEnabled: true,
+            })
+        )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
+        const rbacPause: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_B],
+        }
+        const init_rbacs: Rbac[] = [rbacPause]
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            internalKycActivated: true,
+            isMultiPartition: true,
+            name,
+            symbol,
+            decimals,
+            isin,
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_S,
+            regulationSubType: RegulationSubType.NONE,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
+        erc3643Facet = await ethers.getContractAt('ERC3643', diamond.address)
+        pauseFacet = await ethers.getContractAt(
+            'Pause',
+            diamond.address,
+            signer_B
+        )
+    })
+
+    it('GIVEN an initialized token WHEN updating the name THEN setName emits UpdatedTokenInformation with updated name and current metadata', async () => {
+        const retrieved_name = await erc20Facet.name()
+        expect(retrieved_name).to.equal(name)
+
+        //Update name
+        expect(await erc3643Facet.setName(newName))
+            .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+            .withArgs(newName, symbol, decimals, version, ADDRESS_ZERO)
+
+        const retrieved_newName = await erc20Facet.name()
+        expect(retrieved_newName).to.equal(newName)
+    })
+
+    it('GIVEN an initialized token WHEN updating the symbol THEN setSymbol emits UpdatedTokenInformation with updated symbol and current metadata', async () => {
+        const retrieved_symbol = await erc20Facet.symbol()
+        expect(retrieved_symbol).to.equal(symbol)
+
+        //Update symbol
+        expect(await erc3643Facet.setSymbol(newSymbol))
+            .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+            .withArgs(name, newSymbol, decimals, version, ADDRESS_ZERO)
+
+        const retrieved_newSymbol = await erc20Facet.symbol()
+        expect(retrieved_newSymbol).to.equal(newSymbol)
+    })
+
+    it('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
+        await pauseFacet.pause()
+
+        await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
+            'TokenIsPaused'
+        )
+        await expect(erc3643Facet.setName(newSymbol)).to.be.rejectedWith(
+            'TokenIsPaused'
+        )
+    })
+})
