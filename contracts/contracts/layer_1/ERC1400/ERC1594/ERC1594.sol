@@ -211,7 +211,7 @@ import {
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
-import {_ISSUER_ROLE} from '../../constants/roles.sol';
+import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
@@ -316,6 +316,12 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         onlyIssuable
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
+        {
+            bytes32[] memory roles;
+            roles[0] = _ISSUER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkRoles(roles, _msgSender());
+        }
         _issue(_tokenHolder, _value, _data);
     }
 

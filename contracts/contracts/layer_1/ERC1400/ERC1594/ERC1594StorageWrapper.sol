@@ -225,6 +225,7 @@ import {
 } from '../../constants/values.sol';
 import {Common} from '../../common/Common.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 
 abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
     struct ERC1594Storage {
@@ -383,8 +384,13 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (!_isAbleToAccess(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
-            return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
+        bytes32[] memory roles;
+        roles[0] = _CONTROLLER_ROLE;
+        roles[1] = _AGENT_ROLE;
+        if (_from != _msgSender() && !_hasRoles(roles, _msgSender())) {
+            if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+                return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
+            }
         }
         if (_balanceOfAdjusted(_from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));

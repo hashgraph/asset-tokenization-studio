@@ -214,6 +214,7 @@ import {
 import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../constants/roles.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import {_AGENT_ROLE} from '../../layer_0/constants/roles.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     using Strings for uint256;
@@ -256,6 +257,36 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         );
     }
 
+    /**
+     * @notice Gives an account the agent role
+     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
+     * @dev Can only be called by the role admin
+     */
+    function addAgent(
+        address _agent
+    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+        _addAgent(_agent);
+        emit AgentAdded(_agent);
+    }
+
+    /**
+     * @notice Revokes an account the agent role
+     * @dev Can only be called by the role admin
+     */
+    function removeAgent(
+        address _agent
+    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+        _removeAgent(_agent);
+        emit AgentRemoved(_agent);
+    }
+
+    /**
+     * @dev Checks if an account has the agent role
+     */
+    function isAgent(address _agent) external view returns (bool) {
+        return _hasRole(_AGENT_ROLE, _agent);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -271,10 +302,13 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_ = new bytes4[](5);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
     }
 
     function getStaticInterfaceIds()
