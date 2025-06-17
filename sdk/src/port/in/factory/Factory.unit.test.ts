@@ -203,126 +203,122 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/GetLockQuery';
-import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
-import { LockedBalanceOfQuery } from 'app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
-import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
-import LockRequest from '../../../src/port/in/request/security/operations/lock/LockRequest';
-import ReleaseRequest from '../../../src/port/in/request/security/operations/release/ReleaseRequest';
-import GetLockedBalanceRequest from '../../../src/port/in/request/security/operations/lock/GetLockedBalanceRequest';
-import GetLockCountRequest from '../../../src/port/in/request/security/operations/lock/GetLockCountRequest';
-import GetLocksIdRequest from '../../../src/port/in/request/security/operations/lock/GetLocksIdRequest';
-import GetLockRequest from '../../../src/port/in/request/security/operations/lock/GetLockRequest';
-import { Lock } from '../../../src/domain/context/security/Lock';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
-import { BigNumber } from 'ethers';
+import { createMock } from '@golevelup/ts-jest';
+import { GetRegulationDetailsRequest } from '../request';
+import { HederaIdPropsFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
+import LogService from '../../../app/service/log/LogService';
+import { QueryBus } from '../../../core/query/QueryBus';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs';
+import { ValidationError } from '../../../core/validation/ValidationError';
+import NetworkService from '../../../app/service/network/NetworkService';
+import ContractId from '../../../domain/context/contract/ContractId';
+import Factory from './Factory';
+import { GetRegulationDetailsRequestFixture } from '../../../../__tests__/fixtures/factory/FactoryFixture';
+import { RegulationFixture } from '../../../../__tests__/fixtures/shared/RegulationFixture';
+import { GetRegulationDetailsQuery } from '../../../app/usecase/query/factory/get/GetRegulationDetailsQuery';
 
-export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-  query.id.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
+describe('Factory', () => {
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let networkServiceMock: jest.Mocked<NetworkService>;
 
-export const LockCountQueryFixture = createFixture<LockCountQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-});
+  let getRegulationDetailsRequest: GetRegulationDetailsRequest;
 
-export const LockedBalanceOfQueryFixture = createFixture<LockedBalanceOfQuery>(
-  (query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  let handleValidationSpy: jest.SpyInstance;
 
-export const LocksIdQueryFixture = createFixture<LocksIdQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-  query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-  query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
+  const factoryAddress = HederaIdPropsFixture.create().value;
 
-export const LockRequestFixture = createFixture<LockRequest>((request) => {
-  request.securityId.as(
-    () => new HederaId(HederaIdPropsFixture.create().value),
-  );
-  request.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  request.amount.faker((faker) =>
-    faker.number.int({ min: 1, max: 10 }).toString(),
-  );
-  request.expirationTimestamp.faker((faker) =>
-    faker.date.future().getTime().toString(),
-  );
-});
-
-export const ReleaseRequestFixture = createFixture<ReleaseRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.lockId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  },
-);
-
-export const GetLockedBalanceRequestFixture =
-  createFixture<GetLockedBalanceRequest>((request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
+  beforeEach(() => {
+    queryBusMock = createMock<QueryBus>();
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    networkServiceMock = createMock<NetworkService>({
+      configuration: {
+        factoryAddress: factoryAddress,
+      },
+    });
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Factory as any).queryBus = queryBusMock;
+    (Factory as any).networkService = networkServiceMock;
   });
 
-export const GetLockCountRequestFixture = createFixture<GetLockCountRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-  },
-);
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
 
-export const GetLocksIdRequestFixture = createFixture<GetLocksIdRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
+  describe('getRegulationDetails', () => {
+    getRegulationDetailsRequest = new GetRegulationDetailsRequest(
+      GetRegulationDetailsRequestFixture.create(),
     );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.start.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-    request.end.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-  },
-);
+    it('should get regulation details successfully', async () => {
+      const expectedResponse = {
+        regulation: RegulationFixture.create(),
+      };
 
-export const GetLockRequestFixture = createFixture<GetLockRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.id.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-  },
-);
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-export const LockFixture = createFixture<Lock>((props) => {
-  props.id.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  props.amount.faker(
-    (faker) =>
-      new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()),
-  );
-  props.expiredTimestamp.faker((faker) =>
-    BigNumber.from(faker.date.future().getTime()).toString(),
-  );
+      const result = await Factory.getRegulationDetails(
+        getRegulationDetailsRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetRegulationDetailsRequest',
+        getRegulationDetailsRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetRegulationDetailsQuery(
+          getRegulationDetailsRequest.regulationType,
+          getRegulationDetailsRequest.regulationSubType,
+          new ContractId(factoryAddress),
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse.regulation);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Factory.getRegulationDetails(getRegulationDetailsRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetRegulationDetailsRequest',
+        getRegulationDetailsRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetRegulationDetailsQuery(
+          getRegulationDetailsRequest.regulationType,
+          getRegulationDetailsRequest.regulationSubType,
+          new ContractId(factoryAddress),
+        ),
+      );
+    });
+
+    it('should throw error if regulationType is invalid', async () => {
+      getRegulationDetailsRequest = new GetRegulationDetailsRequest({
+        ...GetRegulationDetailsRequestFixture.create(),
+        regulationType: 100,
+      });
+
+      await expect(
+        Factory.getRegulationDetails(getRegulationDetailsRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if regulationSubType is invalid', async () => {
+      getRegulationDetailsRequest = new GetRegulationDetailsRequest({
+        ...GetRegulationDetailsRequestFixture.create(),
+        regulationSubType: 100,
+      });
+
+      await expect(
+        Factory.getRegulationDetails(getRegulationDetailsRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
 });

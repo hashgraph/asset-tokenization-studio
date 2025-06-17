@@ -203,126 +203,178 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/GetLockQuery';
-import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
-import { LockedBalanceOfQuery } from 'app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
-import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
-import LockRequest from '../../../src/port/in/request/security/operations/lock/LockRequest';
-import ReleaseRequest from '../../../src/port/in/request/security/operations/release/ReleaseRequest';
-import GetLockedBalanceRequest from '../../../src/port/in/request/security/operations/lock/GetLockedBalanceRequest';
-import GetLockCountRequest from '../../../src/port/in/request/security/operations/lock/GetLockCountRequest';
-import GetLocksIdRequest from '../../../src/port/in/request/security/operations/lock/GetLocksIdRequest';
-import GetLockRequest from '../../../src/port/in/request/security/operations/lock/GetLockRequest';
-import { Lock } from '../../../src/domain/context/security/Lock';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
-import { BigNumber } from 'ethers';
+import NetworkService from '../../../app/service/network/NetworkService';
+import TransactionService from '../../../app/service/transaction/TransactionService';
+import { CommandBus } from '../../../core/command/CommandBus';
+import SetNetworkRequest from '../request/network/SetNetworkRequest';
+import SetConfigurationRequest from '../request/management/SetConfigurationRequest';
+import { createMock } from '@golevelup/ts-jest';
+import LogService from '../../../app/service/log/LogService';
+import ValidatedRequest from '../../../core/validation/ValidatedArgs';
+import Network, { ConfigResponse, NetworkResponse } from './Network';
+import { SetConfigurationCommand } from '../../../app/usecase/command/network/setConfiguration/SetConfigurationCommand';
+import Configuration from '../../../domain/context/network/Configuration';
+import { SetNetworkCommand } from '../../../app/usecase/command/network/setNetwork/SetNetworkCommand';
+import { MirrorNode } from '../../../domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay';
+import { HederaIdPropsFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
 
-export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-  query.id.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
+describe('Network', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let transactionServiceMock: jest.Mocked<TransactionService>;
+  let networkServiceMock: jest.Mocked<NetworkService>;
 
-export const LockCountQueryFixture = createFixture<LockCountQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-});
+  let setNetworkRequest: SetNetworkRequest;
+  let setConfigurationRequest: SetConfigurationRequest;
 
-export const LockedBalanceOfQueryFixture = createFixture<LockedBalanceOfQuery>(
-  (query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  let handleValidationSpy: jest.SpyInstance;
 
-export const LocksIdQueryFixture = createFixture<LocksIdQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-  query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-  query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
+  const mockFactoryAddress = HederaIdPropsFixture.create().value;
+  const mockResolverAddress = HederaIdPropsFixture.create().value;
+  const mockEnvironment = 'testnet';
+  const mockMirrorNode = 'mirror.node';
+  const mockRpcNode = 'rpc.node';
+  const mockConsensusNodes = 'consensus.nodes';
 
-export const LockRequestFixture = createFixture<LockRequest>((request) => {
-  request.securityId.as(
-    () => new HederaId(HederaIdPropsFixture.create().value),
-  );
-  request.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  request.amount.faker((faker) =>
-    faker.number.int({ min: 1, max: 10 }).toString(),
-  );
-  request.expirationTimestamp.faker((faker) =>
-    faker.date.future().getTime().toString(),
-  );
-});
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    transactionServiceMock = createMock<TransactionService>();
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    networkServiceMock = createMock<NetworkService>({
+      configuration: {
+        factoryAddress: mockFactoryAddress,
+        resolverAddress: mockResolverAddress,
+      },
+      environment: mockEnvironment,
+    });
 
-export const ReleaseRequestFixture = createFixture<ReleaseRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.lockId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  },
-);
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
 
-export const GetLockedBalanceRequestFixture =
-  createFixture<GetLockedBalanceRequest>((request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
+    setNetworkRequest = new SetNetworkRequest({
+      environment: mockEnvironment,
+      mirrorNode: mockMirrorNode as unknown as MirrorNode,
+      rpcNode: mockRpcNode as unknown as JsonRpcRelay,
+      consensusNodes: mockConsensusNodes,
+    });
+
+    setConfigurationRequest = new SetConfigurationRequest({
+      factoryAddress: mockFactoryAddress,
+      resolverAddress: mockResolverAddress,
+    });
+
+    (Network as any).commandBus = commandBusMock;
+    (Network as any).transactionService = transactionServiceMock;
+    (Network as any).networkService = networkServiceMock;
   });
 
-export const GetLockCountRequestFixture = createFixture<GetLockCountRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-  },
-);
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
 
-export const GetLocksIdRequestFixture = createFixture<GetLocksIdRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.start.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-    request.end.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-  },
-);
+  describe('setConfig', () => {
+    it('should validate request and execute SetConfigurationCommand', async () => {
+      const expectedResponse: ConfigResponse = {
+        factoryAddress: mockFactoryAddress,
+        resolverAddress: mockResolverAddress,
+      };
 
-export const GetLockRequestFixture = createFixture<GetLockRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.id.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-  },
-);
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-export const LockFixture = createFixture<Lock>((props) => {
-  props.id.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  props.amount.faker(
-    (faker) =>
-      new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()),
-  );
-  props.expiredTimestamp.faker((faker) =>
-    BigNumber.from(faker.date.future().getTime()).toString(),
-  );
+      const result = await Network.setConfig(setConfigurationRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetConfigurationRequest',
+        setConfigurationRequest,
+      );
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetConfigurationCommand(mockFactoryAddress, mockResolverAddress),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+  });
+
+  describe('getFactoryAddress', () => {
+    it('should return factory address from networkService', async () => {
+      const result = await Network.getFactoryAddress();
+
+      expect(result).toBe(mockFactoryAddress);
+    });
+
+    it('should return empty string if configuration is undefined', async () => {
+      networkServiceMock.configuration = undefined as unknown as Configuration;
+
+      const result = await Network.getFactoryAddress();
+
+      expect(result).toBe('');
+    });
+  });
+
+  describe('getResolverAddress', () => {
+    it('should return resolver address from networkService', async () => {
+      const result = await Network.getResolverAddress();
+
+      expect(result).toBe(mockResolverAddress);
+    });
+
+    it('should return empty string if configuration is undefined', async () => {
+      networkServiceMock.configuration = undefined as unknown as Configuration;
+
+      const result = await Network.getResolverAddress();
+
+      expect(result).toBe('');
+    });
+  });
+
+  describe('getNetwork', () => {
+    it('should return environment from networkService', async () => {
+      const result = await Network.getNetwork();
+
+      expect(result).toBe(mockEnvironment);
+    });
+  });
+
+  describe('isNetworkRecognized', () => {
+    it('should return true if environment is recognized', async () => {
+      const result = await Network.isNetworkRecognized();
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false if environment is unrecognized', async () => {
+      networkServiceMock.environment = 'unrecognized';
+
+      const result = await Network.isNetworkRecognized();
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('setNetwork', () => {
+    it('should validate request and execute SetNetworkCommand', async () => {
+      const expectedResponse: NetworkResponse = {
+        environment: mockEnvironment,
+        mirrorNode: mockMirrorNode as unknown as MirrorNode,
+        rpcNode: mockRpcNode as unknown as JsonRpcRelay,
+        consensusNodes: mockConsensusNodes,
+      };
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Network.setNetwork(setNetworkRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetNetworkRequest',
+        setNetworkRequest,
+      );
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetNetworkCommand(
+          mockEnvironment,
+          mockMirrorNode as unknown as MirrorNode,
+          mockRpcNode as unknown as JsonRpcRelay,
+          mockConsensusNodes,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+  });
 });

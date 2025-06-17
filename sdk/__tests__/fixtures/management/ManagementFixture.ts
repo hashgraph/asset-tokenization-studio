@@ -203,126 +203,49 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/GetLockQuery';
-import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
-import { LockedBalanceOfQuery } from 'app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
-import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
-import LockRequest from '../../../src/port/in/request/security/operations/lock/LockRequest';
-import ReleaseRequest from '../../../src/port/in/request/security/operations/release/ReleaseRequest';
-import GetLockedBalanceRequest from '../../../src/port/in/request/security/operations/lock/GetLockedBalanceRequest';
-import GetLockCountRequest from '../../../src/port/in/request/security/operations/lock/GetLockCountRequest';
-import GetLocksIdRequest from '../../../src/port/in/request/security/operations/lock/GetLocksIdRequest';
-import GetLockRequest from '../../../src/port/in/request/security/operations/lock/GetLockRequest';
-import { Lock } from '../../../src/domain/context/security/Lock';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
-import { BigNumber } from 'ethers';
+import { createFixture } from '../config';
+import UpdateConfigVersionRequest from '../../../src/port/in/request/management/UpdateConfigVersionRequest';
+import UpdateConfigRequest from '../../../src/port/in/request/management/UpdateConfigRequest';
+import UpdateResolverRequest from '../../../src/port/in/request/management/UpdateResolverRequest';
+import GetConfigInfoRequest from '../../../src/port/in/request/management/GetConfigInfoRequest';
 
-export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-  query.id.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
-
-export const LockCountQueryFixture = createFixture<LockCountQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-});
-
-export const LockedBalanceOfQueryFixture = createFixture<LockedBalanceOfQuery>(
-  (query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const LocksIdQueryFixture = createFixture<LocksIdQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-  query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-  query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
-
-export const LockRequestFixture = createFixture<LockRequest>((request) => {
-  request.securityId.as(
-    () => new HederaId(HederaIdPropsFixture.create().value),
-  );
-  request.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  request.amount.faker((faker) =>
-    faker.number.int({ min: 1, max: 10 }).toString(),
-  );
-  request.expirationTimestamp.faker((faker) =>
-    faker.date.future().getTime().toString(),
-  );
-});
-
-export const ReleaseRequestFixture = createFixture<ReleaseRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
+export const UpdateConfigVersionRequestFixture =
+  createFixture<UpdateConfigVersionRequest>((request) => {
+    request.configVersion.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }),
     );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.lockId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  },
-);
-
-export const GetLockedBalanceRequestFixture =
-  createFixture<GetLockedBalanceRequest>((request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
   });
 
-export const GetLockCountRequestFixture = createFixture<GetLockCountRequest>(
+export const UpdateConfigRequestFixture = createFixture<UpdateConfigRequest>(
   (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
+    request.configVersion.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }),
     );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
+    request.configId.faker(
+      (faker) =>
+        `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 1, max: 9 })}`,
     );
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
   },
 );
 
-export const GetLocksIdRequestFixture = createFixture<GetLocksIdRequest>(
+export const UpdateResolverRequestFixture =
+  createFixture<UpdateResolverRequest>((request) => {
+    request.configVersion.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }),
+    );
+    request.configId.faker(
+      (faker) =>
+        `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 1, max: 9 })}`,
+    );
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.resolver.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetConfigInfoRequestFixture = createFixture<GetConfigInfoRequest>(
   (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.start.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-    request.end.faker((faker) => faker.number.int({ min: 0, max: 1 }));
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
   },
 );
-
-export const GetLockRequestFixture = createFixture<GetLockRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.id.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-  },
-);
-
-export const LockFixture = createFixture<Lock>((props) => {
-  props.id.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  props.amount.faker(
-    (faker) =>
-      new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()),
-  );
-  props.expiredTimestamp.faker((faker) =>
-    BigNumber.from(faker.date.future().getTime()).toString(),
-  );
-});
