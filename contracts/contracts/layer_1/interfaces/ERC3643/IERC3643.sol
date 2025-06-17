@@ -207,6 +207,14 @@
 pragma solidity 0.8.18;
 
 interface IERC3643 {
+    event UpdatedTokenInformation(
+        string indexed newName,
+        string indexed newSymbol,
+        uint8 newDecimals,
+        string newVersion,
+        address indexed newOnchainID
+    );
+
     /**
      * @dev Sets the name of the token to `_name`.
      *

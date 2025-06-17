@@ -207,44 +207,19 @@
 pragma solidity 0.8.18;
 
 import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
-import {
-    IERC3643StorageWrapper
-} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
 
-abstract contract ERC3643StorageWrapper is
-    IERC3643StorageWrapper,
-    ERC20StorageWrapper2
-{
-    string private constant _VERSION = '1';
-    address private constant _ONCHAIN_ID = address(0);
-
-    function _setName(string calldata _name) internal {
-        _updateTokenName(_name);
+abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
+    function _setName(
+        string calldata _name
+    ) internal returns (ERC20Storage storage erc20Storage_) {
+        erc20Storage_ = _erc20Storage();
+        erc20Storage_.name = _name;
     }
 
-    function _setSymbol(string calldata _symbol) internal {
-        _updateTokenSymbol(_symbol);
-    }
-
-    function _updateTokenName(string calldata _name) internal {
-        ERC20Storage storage erc20Storage = _erc20Storage();
-        erc20Storage.name = _name;
-        _emitTokenInfoUpdated(erc20Storage);
-    }
-
-    function _updateTokenSymbol(string calldata _symbol) internal {
-        ERC20Storage storage erc20Storage = _erc20Storage();
-        erc20Storage.symbol = _symbol;
-        _emitTokenInfoUpdated(erc20Storage);
-    }
-
-    function _emitTokenInfoUpdated(ERC20Storage storage _storage) internal {
-        emit UpdatedTokenInformation(
-            _storage.name,
-            _storage.symbol,
-            _storage.decimals,
-            _VERSION,
-            _ONCHAIN_ID
-        );
+    function _setSymbol(
+        string calldata _symbol
+    ) internal returns (ERC20Storage storage erc20Storage_) {
+        erc20Storage_ = _erc20Storage();
+        erc20Storage_.symbol = _symbol;
     }
 }
