@@ -206,23 +206,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ERC1594StorageWrapper} from "../ERC1400/ERC1594/ERC1594StorageWrapper.sol";
+import {
+    ERC1594StorageWrapper
+} from '../ERC1400/ERC1594/ERC1594StorageWrapper.sol';
 import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
 import {
-IStaticFunctionSelectors
+    IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../constants/roles.sol';
-import '@openzeppelin/contracts/utils/Strings.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 
 contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     using Strings for uint256;
 
     address private constant _ONCHAIN_ID = address(0);
-
-    function version() external view returns (string memory) {
-        return _getLatestVersion().toString();
-    }
 
     /**
      * @notice Sets the name of the token.
@@ -260,11 +258,22 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         );
     }
 
-    function forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool) {
-        return this._forcedTransfer(_from, _to, _amount, bytes(""), bytes(""));
+    function forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external returns (bool) {
+        return
+            this.forcedTransferInternal(
+                _from,
+                _to,
+                _amount,
+                bytes(''),
+                bytes('')
+            );
     }
 
-    function _forcedTransfer(
+    function forcedTransferInternal(
         address _from,
         address _to,
         uint256 _amount,
@@ -276,10 +285,10 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     }
 
     function mint(address _to, uint256 _amount) external {
-        this._mint(_to, _amount, "");
+        this.mintInternal(_to, _amount, '');
     }
 
-    function _mint(
+    function mintInternal(
         address _to,
         uint256 _amount,
         bytes calldata _data
@@ -289,10 +298,10 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     }
 
     function burn(address _userAddress, uint256 _amount) external {
-        this._burn(_userAddress, _amount, "");
+        this.burnInternal(_userAddress, _amount, '');
     }
 
-    function _burn(
+    function burnInternal(
         address _userAddress,
         uint256 _amount,
         bytes calldata _data
@@ -301,36 +310,42 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return true;
     }
 
+    function version() external view returns (string memory) {
+        return toString(_getLatestVersion());
+    }
+
     function getStaticResolverKey()
-    external
-    pure
-    override
-    returns (bytes32 staticResolverKey_)
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
     {
         staticResolverKey_ = _ERC3643_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
-    external
-    pure
-    override
-    returns (bytes4[] memory staticFunctionSelectors_)
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
     {
         staticFunctionSelectors_ = new bytes4[](6);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forcedTransfer.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .forcedTransfer
+            .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
     }
 
     function getStaticInterfaceIds()
-    external
-    pure
-    override
-    returns (bytes4[] memory staticInterfaceIds_)
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;

@@ -232,12 +232,6 @@ interface IERC3643 {
     function setSymbol(string calldata _symbol) external;
 
     /**
-     * @dev Returns the version of the contract as a string.
-     *
-     */
-    function version() external view returns (string memory);
-
-    /**
      * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
      *
      * This function should only be callable by an authorized entities
@@ -245,7 +239,11 @@ interface IERC3643 {
      * Returns `true` if the transfer was successful.
      *
      */
-    function forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool);
+    function forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external returns (bool);
 
     /**
      * @dev Mints `_amount` tokens to the address `_to`.
@@ -260,4 +258,10 @@ interface IERC3643 {
      *
      */
     function burn(address _userAddress, uint256 _amount) external;
+
+    /**
+     * @dev Returns the version of the contract as a string.
+     *
+     */
+    function version() external view returns (string memory);
 }
