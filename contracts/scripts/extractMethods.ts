@@ -1,9 +1,6 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import { join, extname } from 'path'
-
-const CONTRACTS_DIR = 'contracts'
-const OUTPUT_FILE = 'extracted_methods.txt'
-const REGEX_SELECTOR = /function\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)/g
+import { CONTRACTS_DIR, OUTPUT_FILE, REGEX_SELECTOR } from '@scripts'
 
 function getSolidityFiles(dir: string): string[] {
     const entries = readdirSync(dir)
@@ -77,7 +74,7 @@ function extractFunctions(content: string) {
     return { normalFns, viewFns, pureFns }
 }
 
-function main() {
+export function main() {
     const files = getSolidityFiles(CONTRACTS_DIR)
 
     const normalSet = new Set<string>()

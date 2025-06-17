@@ -278,3 +278,6 @@ export * from './resolverDiamondCut'
 
 // * Factory
 export * from './factory'
+
+// * Extract methods
+export * from './extractMethods'
