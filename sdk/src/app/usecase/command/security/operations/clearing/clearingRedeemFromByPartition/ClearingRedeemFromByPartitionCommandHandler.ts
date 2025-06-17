@@ -279,7 +279,7 @@ export class ClearingRedeemFromByPartitionCommandHandler
         partitionId,
         amountBd,
         sourceEvmAddress,
-        BigDecimal.fromString(expirationDate),
+        BigDecimal.fromString(expirationDate.substring(0, 10)),
         securityId,
       );
 

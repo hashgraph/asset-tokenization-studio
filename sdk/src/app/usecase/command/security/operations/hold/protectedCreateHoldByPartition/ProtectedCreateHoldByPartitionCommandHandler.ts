@@ -211,7 +211,6 @@ import TransactionService from '../../../../../../service/transaction/Transactio
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   ProtectedCreateHoldByPartitionCommand,
   ProtectedCreateHoldByPartitionCommandResponse,
@@ -233,8 +232,6 @@ export class ProtectedCreateHoldByPartitionCommandHandler
     private readonly contractService: ContractService,
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
   ) {}
@@ -276,6 +273,8 @@ export class ProtectedCreateHoldByPartitionCommandHandler
 
       await this.validationService.checkProtectedPartitions(security);
 
+      await this.validationService.checkClearingDeactivated(securityId);
+
       await this.validationService.checkProtectedPartitionRole(
         partitionId,
         account.id.toString(),
@@ -299,8 +298,8 @@ export class ProtectedCreateHoldByPartitionCommandHandler
         escrowEvmAddress,
         sourceEvmAddress,
         targetEvmAddress,
-        BigDecimal.fromString(expirationDate),
-        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(expirationDate.substring(0, 10)),
+        BigDecimal.fromString(deadline.substring(0, 10)),
         BigDecimal.fromString(nonce.toString()),
         signature,
         securityId,

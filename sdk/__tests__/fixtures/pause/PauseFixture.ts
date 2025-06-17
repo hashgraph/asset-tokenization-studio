@@ -206,7 +206,12 @@
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { IsPausedQuery } from '../../../src/app/usecase/query/security/isPaused/IsPausedQuery';
+import { PauseCommand } from '../../../src/app/usecase/command/security/operations/pause/PauseCommand';
 
 export const IsPausedQueryFixture = createFixture<IsPausedQuery>((query) => {
   query.securityId.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const PauseCommandFixture = createFixture<PauseCommand>((command) => {
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
 });

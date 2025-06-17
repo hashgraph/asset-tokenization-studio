@@ -252,7 +252,7 @@ export class SetRevocationRegistryAddressCommandHandler
       );
 
       const revocationRegistryEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(revocationRegistryId);
+        await this.contractService.getContractEvmAddress(revocationRegistryId);
 
       const res = await handler.setRevocationRegistryAddress(
         securityEvmAddress,
