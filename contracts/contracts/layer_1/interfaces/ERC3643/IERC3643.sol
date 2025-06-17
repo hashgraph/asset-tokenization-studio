@@ -206,7 +206,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {ICompliance} from './ICompliance.sol';
+import {IIdentityRegistry} from './IIdentityRegistry.sol';
+
 interface IERC3643 {
+    struct ERC3643Storage {
+        address onchainID;
+        address identityRegistry;
+        address compliance;
+    }
+
     event UpdatedTokenInformation(
         string indexed newName,
         string indexed newSymbol,
@@ -214,6 +223,9 @@ interface IERC3643 {
         string newVersion,
         address indexed newOnchainID
     );
+
+    event IdentityRegistryAdded(address indexed identityRegistry);
+    event ComplianceAdded(address indexed compliance);
 
     /**
      * @dev Sets the name of the token to `_name`.
@@ -228,4 +240,40 @@ interface IERC3643 {
      * Emits an UpdatedTokenInformation event.
      */
     function setSymbol(string calldata _symbol) external;
+
+    /**
+     * @dev Sets a new onchainID address for the token.
+     *
+     * Emits an UpdatedTokenInformation event.
+     */
+    function setOnchainID(address _newOnchainID) external;
+
+    /**
+     * @dev Sets a new identity registry contract address.
+     *
+     * Emits an IdentityRegistryAdded event.
+     */
+    function setIdentityRegistry(address _newIdentityRegistry) external;
+
+    /**
+     * @dev Sets a new compliance contract address.
+     *
+     * Emits a ComplianceAdded event.
+     */
+    function setCompliance(address _newCompliance) external;
+
+    /**
+     * @dev Returns the onchainID address associated with the token.
+     */
+    function onchainID() external view returns (address);
+
+    /**
+     * @dev Returns the address of the identity registry contract.
+     */
+    function identityRegistry() external view returns (IIdentityRegistry);
+
+    /**
+     * @dev Returns the address of the compliance contract.
+     */
+    function compliance() external view returns (ICompliance);
 }

@@ -208,6 +208,8 @@ pragma solidity 0.8.18;
 
 import {Common} from '../common/Common.sol';
 import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -217,8 +219,6 @@ import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     using Strings for uint256;
-
-    address private constant _ONCHAIN_ID = address(0);
 
     /**
      * @notice Sets the name of the token.
@@ -234,7 +234,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             erc20Storage.symbol,
             erc20Storage.decimals,
             _getLatestVersion().toString(),
-            _ONCHAIN_ID
+            _erc3643Storage().onchainID
         );
     }
 
@@ -252,8 +252,72 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             erc20Storage.symbol,
             erc20Storage.decimals,
             _getLatestVersion().toString(),
-            _ONCHAIN_ID
+            _erc3643Storage().onchainID
         );
+    }
+
+    /**
+     * @notice Sets a new onchainID address for the token.
+     */
+    function setOnchainID(
+        address _newOnchainID
+    ) external override onlyUnpaused {
+        ERC20Storage storage erc20Storage = _erc20Storage();
+        _erc3643Storage().onchainID = _newOnchainID;
+
+        emit UpdatedTokenInformation(
+            erc20Storage.name,
+            erc20Storage.symbol,
+            erc20Storage.decimals,
+            _getLatestVersion().toString(),
+            _newOnchainID
+        );
+    }
+
+    /**
+     * @notice Sets a new identity registry contract address.
+     */
+    function setIdentityRegistry(
+        address _newIdentityRegistry
+    ) external override onlyUnpaused {
+        _erc3643Storage().identityRegistry = _newIdentityRegistry;
+        emit IdentityRegistryAdded(_newIdentityRegistry);
+    }
+
+    /**
+     * @notice Sets a new compliance contract address.
+     */
+    function setCompliance(
+        address _newCompliance
+    ) external override onlyUnpaused {
+        _erc3643Storage().compliance = _newCompliance;
+        emit ComplianceAdded(_newCompliance);
+    }
+
+    /**
+     * @notice Retrieves the onchainID address associated with the token.
+     */
+    function onchainID() external view override returns (address) {
+        return _erc3643Storage().onchainID;
+    }
+
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
+    function identityRegistry()
+        external
+        view
+        override
+        returns (IIdentityRegistry)
+    {
+        return IIdentityRegistry(_erc3643Storage().identityRegistry);
+    }
+
+    /**
+     * @notice Retrieves the compliance contract address.
+     */
+    function compliance() external view override returns (ICompliance) {
+        return ICompliance(_erc3643Storage().compliance);
     }
 
     function getStaticResolverKey()
@@ -271,10 +335,22 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_ = new bytes4[](8);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .identityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setIdentityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setCompliance
+            .selector;
     }
 
     function getStaticInterfaceIds()

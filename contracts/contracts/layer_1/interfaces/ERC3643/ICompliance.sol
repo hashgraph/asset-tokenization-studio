@@ -206,34 +206,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
-import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import {_ERC3643_STORAGE_POSITION} from '../constants/storagePositions.sol';
+interface ICompliance {
+    function addComplianceRule(
+        bytes32 _ruleId,
+        bytes calldata _ruleData
+    ) external;
 
-abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
-    function _setName(
-        string calldata _name
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.name = _name;
-    }
+    function removeComplianceRule(bytes32 _ruleId) external;
 
-    function _setSymbol(
-        string calldata _symbol
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.symbol = _symbol;
-    }
+    function canTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external view returns (bool);
 
-    function _erc3643Storage()
-        internal
-        pure
-        returns (IERC3643.ERC3643Storage storage erc3643Storage_)
-    {
-        bytes32 position = _ERC3643_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc3643Storage_.slot := position
-        }
-    }
+    function checkCompliance(address _user) external view returns (bool);
+
+    function isTransferAllowed(
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes calldata _data
+    ) external view returns (bool);
+
+    function getComplianceRule(
+        bytes32 _ruleId
+    ) external view returns (bytes memory);
 }

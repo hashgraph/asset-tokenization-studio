@@ -206,34 +206,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
-import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import {_ERC3643_STORAGE_POSITION} from '../constants/storagePositions.sol';
+interface IIdentityRegistry {
+    function registerIdentity(
+        address _userAddress,
+        bytes32 _identity,
+        uint256 _country
+    ) external;
 
-abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
-    function _setName(
-        string calldata _name
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.name = _name;
-    }
+    function setVerificationStatus(
+        address _userAddress,
+        bool _isVerified
+    ) external;
 
-    function _setSymbol(
-        string calldata _symbol
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.symbol = _symbol;
-    }
+    function isVerified(address _userAddress) external view returns (bool);
 
-    function _erc3643Storage()
-        internal
-        pure
-        returns (IERC3643.ERC3643Storage storage erc3643Storage_)
-    {
-        bytes32 position = _ERC3643_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc3643Storage_.slot := position
-        }
-    }
+    function getIdentity(address _userAddress) external view returns (bytes32);
+
+    function getCountry(address _userAddress) external view returns (uint256);
+
+    function hasClaim(
+        address _userAddress,
+        bytes32 _claimType
+    ) external view returns (bool);
 }
