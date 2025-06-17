@@ -203,126 +203,65 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/GetLockQuery';
-import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
-import { LockedBalanceOfQuery } from 'app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
-import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
-import LockRequest from '../../../src/port/in/request/security/operations/lock/LockRequest';
-import ReleaseRequest from '../../../src/port/in/request/security/operations/release/ReleaseRequest';
-import GetLockedBalanceRequest from '../../../src/port/in/request/security/operations/lock/GetLockedBalanceRequest';
-import GetLockCountRequest from '../../../src/port/in/request/security/operations/lock/GetLockCountRequest';
-import GetLocksIdRequest from '../../../src/port/in/request/security/operations/lock/GetLocksIdRequest';
-import GetLockRequest from '../../../src/port/in/request/security/operations/lock/GetLockRequest';
-import { Lock } from '../../../src/domain/context/security/Lock';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
-import { BigNumber } from 'ethers';
+import { createMock } from '@golevelup/ts-jest';
+import EventInPort from './Event';
+import NetworkService from '../../../app/service/network/NetworkService';
+import WalletEvent, {
+  WalletEvents,
+} from '../../../app/service/event/WalletEvent';
+import LogService from '../../../app/service/log/LogService';
 
-export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-  query.id.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
+interface MockEventService {
+  on: <T extends keyof WalletEvent>(
+    event: T,
+    callback: WalletEvent[T],
+  ) => Promise<void>;
+}
 
-export const LockCountQueryFixture = createFixture<LockCountQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-});
+describe('Event', () => {
+  let networkServiceMock: jest.Mocked<NetworkService>;
+  let eventServiceMock: jest.Mocked<MockEventService>;
 
-export const LockedBalanceOfQueryFixture = createFixture<LockedBalanceOfQuery>(
-  (query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const LocksIdQueryFixture = createFixture<LocksIdQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.targetId.as(() => HederaIdPropsFixture.create().value);
-  query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-  query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-});
-
-export const LockRequestFixture = createFixture<LockRequest>((request) => {
-  request.securityId.as(
-    () => new HederaId(HederaIdPropsFixture.create().value),
-  );
-  request.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  request.amount.faker((faker) =>
-    faker.number.int({ min: 1, max: 10 }).toString(),
-  );
-  request.expirationTimestamp.faker((faker) =>
-    faker.date.future().getTime().toString(),
-  );
-});
-
-export const ReleaseRequestFixture = createFixture<ReleaseRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.lockId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  },
-);
-
-export const GetLockedBalanceRequestFixture =
-  createFixture<GetLockedBalanceRequest>((request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
+  beforeEach(() => {
+    networkServiceMock = createMock<NetworkService>();
+    eventServiceMock = createMock<MockEventService>({
+      on: jest.fn().mockResolvedValue(undefined),
+    });
+    (EventInPort as any).networkService = networkServiceMock;
+    (EventInPort as any).eventService = eventServiceMock;
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
   });
 
-export const GetLockCountRequestFixture = createFixture<GetLockCountRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-  },
-);
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
 
-export const GetLocksIdRequestFixture = createFixture<GetLocksIdRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.start.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-    request.end.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-  },
-);
+  describe('register', () => {
+    it('should register events with eventService', async () => {
+      const mockCallback = jest.fn();
+      const events: Partial<WalletEvent> = {
+        [WalletEvents.walletInit]: mockCallback,
+      };
 
-export const GetLockRequestFixture = createFixture<GetLockRequest>(
-  (request) => {
-    request.securityId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.targetId.as(
-      () => new HederaId(HederaIdPropsFixture.create().value),
-    );
-    request.id.faker((faker) => faker.number.int({ min: 0, max: 1 }));
-  },
-);
+      EventInPort.register(events);
 
-export const LockFixture = createFixture<Lock>((props) => {
-  props.id.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  props.amount.faker(
-    (faker) =>
-      new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()),
-  );
-  props.expiredTimestamp.faker((faker) =>
-    BigNumber.from(faker.date.future().getTime()).toString(),
-  );
+      expect(eventServiceMock.on).toHaveBeenCalledWith(
+        WalletEvents.walletInit,
+        mockCallback,
+      );
+      expect(eventServiceMock.on).toHaveBeenCalledTimes(1);
+    });
+
+    it('should ignore events not in WalletEvents', async () => {
+      const mockCallback = jest.fn();
+      const events = {
+        invalidEvent: mockCallback,
+      } as unknown as Partial<WalletEvent>;
+
+      EventInPort.register(events);
+
+      expect(eventServiceMock.on).not.toHaveBeenCalled();
+    });
+  });
 });

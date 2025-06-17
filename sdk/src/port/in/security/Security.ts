@@ -843,7 +843,7 @@ class SecurityInPort implements ISecurityInPort {
 
   @LogError
   async isPaused(request: PauseRequest): Promise<boolean> {
-    ValidatedRequest.handleValidation('IsPausedRequest', request);
+    ValidatedRequest.handleValidation('PauseRequest', request);
 
     return (await this.queryBus.execute(new IsPausedQuery(request.securityId)))
       .payload;
