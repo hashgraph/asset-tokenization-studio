@@ -240,5 +240,3 @@ uint256 constant _PARTITION_AMOUNT_OFFSET = 0;
 
 // ERC1410BasicStorageWrapperRead.Partition
 uint256 constant _PARTITION_SIZE = 2;
-
-// solhint-enable max-line-length

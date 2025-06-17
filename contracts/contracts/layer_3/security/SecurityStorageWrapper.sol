@@ -225,7 +225,7 @@ contract SecurityStorageWrapper {
 
     function _getSecurityRegulationData()
         internal
-        view
+        pure
         returns (
             ISecurity.SecurityRegulationData memory securityRegulationData_
         )

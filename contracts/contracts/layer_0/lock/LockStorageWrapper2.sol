@@ -327,6 +327,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
             );
         }
     }
+
     /**
      * @dev Updates the lock by its index for the specified partition and token holder.
      * LABAF (Locked Amount Before Adjustment Factor) for each lock is not updated
@@ -395,19 +396,18 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         _setTotalLockLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
-    // solhint-disable no-unused-vars
     function _updateLockedBalancesBeforeLock(
         bytes32 _partition,
-        uint256 _amount,
+        uint256 /*_amount*/,
         address _tokenHolder,
-        uint256 _expirationTimestamp
+        uint256 /*_expirationTimestamp*/
     ) internal {
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
 
     function _updateLockedBalancesBeforeRelease(
         bytes32 _partition,
-        uint256 _lockId,
+        uint256 /*_lockId*/,
         address _tokenHolder
     ) internal {
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);

@@ -211,7 +211,6 @@ import {
 } from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
 import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
 
-// solhint-disable no-unused-vars, custom-errors
 abstract contract SnapshotsStorageWrapper2 is
     ISnapshotsStorageWrapper,
     ERC20StorageWrapper2
@@ -593,4 +592,3 @@ abstract contract SnapshotsStorageWrapper2 is
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_);
 }
-// solhint-enable no-unused-vars, custom-errors

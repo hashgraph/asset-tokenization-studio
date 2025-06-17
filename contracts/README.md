@@ -40,10 +40,10 @@ npm run compile:force
 
 Deploys the full infrastructure (factory, resolver, facets, and initialized contracts) in a single execution.
 
-Parameters:
+**Parameters**:
 
-- `account` (optional): Hedera account in 0.0.XXXX format.
 - `useDeployed` (optional, default: true): Reuses already deployed contracts.
+- `file-name` (optional): The output file name.
 - `privateKey` (optional): Private key in raw hexadecimal format.
 - `signerAddress` (optional): Signer address from the Hardhat signers array.
 - `signerPosition` (optional): Index of the signer in the Hardhat signers array.
@@ -56,7 +56,7 @@ npx hardhat deployAll --useDeployed false
 
 Deploys a specific contract.
 
-Parameters:
+**Parameters**:
 
 - `contractName` (required): Name of the contract to deploy (e.g., ERC20, Bond).
 - `privateKey` (optional): Private key in raw hexadecimal format.
@@ -65,6 +65,93 @@ Parameters:
 
 ```bash
 npx hardhat deploy --contractName ERC20
+```
+
+### keccak256
+
+Calculates and prints the Keccak-256 hash of a given string.
+
+**Parameters:**
+
+-   `input` (required): The string to be hashed.
+
+```bash
+npx hardhat keccak256 "ADMIN_ROLE"
+```
+
+### getConfigurationInfo
+
+Fetches and displays detailed information about all facets (implementations) associated with a specific configuration ID from the BusinessLogicResolver.
+
+**Parameters:**
+
+-   `resolver` (required): The resolver proxy admin address.
+-   `configurationId` (required): The configuration ID.
+-   `network` (required): The network to use (e.g., local, previewnet, testnet, mainnet).
+
+```bash
+npx hardhat getConfigurationInfo  <resolverAddress> <configurationId> --network <network-name>
+```
+
+### getResolverBusinessLogics
+
+Retrieves and lists all registered business logic keys (contract identifiers) from a BusinessLogicResolver contract.
+
+**Parameters:**
+
+-   `resolver` (required): The resolver proxy admin address.
+-   `network` (required): The network to use (e.g., local, previewnet, testnet, mainnet).
+
+```bash
+npx hardhat getResolverBusinessLogics <resolverAddress> --network <network-name>
+```
+
+### updateBusinessLogicKeys
+
+Registers or updates the addresses of a list of business logic implementation contracts in a specified `BusinessLogicResolver`. 
+
+**Parameters:**
+-   `resolverAddress` (required): The address of the `BusinessLogicResolver` contract.
+-   `implementationAddressList` (required): A comma-separated list of contract addresses to be registered or updated in the resolver.At least all facets already registered must be included.
+-   `privateKey` (optional): The private key in raw hexadecimal format of the account that will sign the transaction.
+-   `signerAddress` (optional): The address of the signer to select from the Hardhat signers array.
+-   `signerPosition` (optional): The index of the signer to select from the Hardhat signers array.
+-   `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
+
+```bash
+npx hardhat updateBusinessLogicKeys <resolverAddress> <allFacetsAddressList> --network <network-name>
+```
+
+### updateProxyImplementation
+
+Upgrades the implementation address for a given transparent proxy contract. This task executes the upgrade by calling the `upgrade` function on the associated `ProxyAdmin` contract. The signer executing this task must be the owner of the `ProxyAdmin` contract.
+
+**Parameters:**
+
+*   `proxyAdminAddress` (required): The address of the `ProxyAdmin` contract that owns the proxy.
+*   `transparentProxyAddress` (required): The address of the transparent proxy contract to be upgraded.
+*   `newImplementationAddress` (required): The address of the new implementation contract.
+*   `privateKey` (optional): The private key in raw hexadecimal format of the account that will sign the transaction.
+*   `signerAddress` (optional): The address of the signer to select from the Hardhat signers array.
+*   `signerPosition` (optional): The index of the signer to select from the Hardhat signers array.
+*   `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
+
+```bash
+npx hardhat updateProxyImplementation <proxyAdminAddress> <transparentProxyAddress> <newImplementationAddress> --network <networkName>
+```
+
+### getProxyAdminConfig
+
+Retrieves key configuration details from a `ProxyAdmin` contract. It fetches the owner of the `ProxyAdmin` contract and the current implementation address for a specific proxy contract that it manages.
+
+**Parameters:**
+
+*   `proxyAdmin` (required): The address of the `ProxyAdmin` contract.
+*   `proxy` (required): The address of the proxy contract managed by the `ProxyAdmin`.
+*   `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
+
+```bash
+npx hardhat getProxyAdminConfig <proxyAdminAddress> <proxyAddress> --network <networkName>
 ```
 
 # Test
@@ -76,6 +163,20 @@ In order to execute all the tests run this command from the _contracts_ folder:
 ```
 npm run test
 ```
+
+### Adding a new facet
+
+When introducing a new facet to the project, make sure to follow these steps:
+
+1. **Register the contract name** <br>
+  Add the name of the new facet to the `CONTRACT_NAMES` array in the `Configuration.ts` file.
+
+2. **Update the deploy task listener** <br>
+  In the `deployAll` task, include the new facet so its contract address is properly tracked via the mirror node.
+
+3. **Deploy the facet** <br>
+   In `scripts/deploy.ts`, within the `deployAtsContracts` function, add the logic to deploy the new facet and ensure the script awaits its deployment.
+
 
 # Latest Deployed Smart Contracts
 

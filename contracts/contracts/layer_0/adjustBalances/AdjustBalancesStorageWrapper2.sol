@@ -216,7 +216,6 @@ abstract contract AdjustBalancesStorageWrapper2 is
     IAdjustBalancesStorageWrapper,
     ClearingStorageWrapper2
 {
-    // solhint-disable no-unused-vars
     function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
         _updateDecimalsSnapshot();
         _updateAbafSnapshot();
