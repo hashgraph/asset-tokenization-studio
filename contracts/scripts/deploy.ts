@@ -279,6 +279,8 @@ import {
     ExternalControlListManagementTimeTravel__factory,
     ExternalKycListManagement__factory,
     ExternalKycListManagementTimeTravel__factory,
+    ERC3643__factory,
+    ERC3643TimeTravel__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -807,6 +809,17 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        erc3643: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC3643__factory(),
+                new ERC3643TimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC3643.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
         timeTravel:
             timeTravelEnabled == true
                 ? new DeployContractWithFactoryCommand({
@@ -1043,6 +1056,12 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
+            erc3643: await deployContractWithFactory(commands.erc3643).then(
+                (result) => {
+                    console.log('ERC3643 has been deployed successfully')
+                    return result
+                }
+            ),
             timeTravel: commands.timeTravel
                 ? await deployContractWithFactory(commands.timeTravel).then(
                       (result) => {

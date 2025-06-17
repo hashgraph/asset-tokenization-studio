@@ -203,197 +203,88 @@
 
 */
 
-import { Signer } from 'ethers'
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
+
+import {Common} from '../common/Common.sol';
+import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
 import {
-    BusinessLogicResolver,
-    AccessControlFacet,
-    AdjustBalances,
-    BondUSA,
-    Cap,
-    ControlList,
-    CorporateActions,
-    DiamondFacet,
-    EquityUSA,
-    ERC1410ScheduledTasks,
-    ERC1594,
-    ERC1643,
-    ERC1644,
-    ERC20,
-    PauseFacet,
-    ScheduledBalanceAdjustments,
-    ScheduledSnapshots,
-    ScheduledTasks,
-    Snapshots,
-    TransferAndLock,
-    Lock,
-    Hold,
-    ProtectedPartitions,
-    Kyc,
-    SsiManagement,
-    ClearingTransferFacet,
-    ClearingRedeemFacet,
-    ClearingHoldCreationFacet,
-    ClearingReadFacet,
-    ClearingActionsFacet,
-    ExternalPauseManagement,
-    ExternalControlListManagement,
-    TimeTravel,
-    ExternalKycListManagement,
-    ERC3643,
-} from '@typechain'
-import { DeployContractWithFactoryResult } from '../index'
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_DEFAULT_ADMIN_ROLE} from '../constants/roles.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 
-export interface DeployAtsContractsResultParams {
-    businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    accessControl: DeployContractWithFactoryResult<AccessControlFacet>
-    cap: DeployContractWithFactoryResult<Cap>
-    controlList: DeployContractWithFactoryResult<ControlList>
-    kyc: DeployContractWithFactoryResult<Kyc>
-    ssiManagement: DeployContractWithFactoryResult<SsiManagement>
-    pause: DeployContractWithFactoryResult<PauseFacet>
-    erc20: DeployContractWithFactoryResult<ERC20>
-    erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
-    erc1594: DeployContractWithFactoryResult<ERC1594>
-    erc1643: DeployContractWithFactoryResult<ERC1643>
-    erc1644: DeployContractWithFactoryResult<ERC1644>
-    diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
-    equityUsa: DeployContractWithFactoryResult<EquityUSA>
-    bondUsa: DeployContractWithFactoryResult<BondUSA>
-    scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
-    scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
-    scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
-    snapshots: DeployContractWithFactoryResult<Snapshots>
-    corporateActions: DeployContractWithFactoryResult<CorporateActions>
-    transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
-    lock: DeployContractWithFactoryResult<Lock>
-    hold: DeployContractWithFactoryResult<Hold>
-    adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
-    protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
-    clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>
-    clearingRedeemFacet: DeployContractWithFactoryResult<ClearingRedeemFacet>
-    clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
-    clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
-    clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
-    externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
-    externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
-    externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    erc3643: DeployContractWithFactoryResult<ERC3643>
-    timeTravel?: DeployContractWithFactoryResult<TimeTravel>
-    deployer?: Signer
-}
+contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
+    using Strings for uint256;
 
-export default class DeployAtsContractsResult {
-    public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    public readonly accessControl: DeployContractWithFactoryResult<AccessControlFacet>
-    public readonly cap: DeployContractWithFactoryResult<Cap>
-    public readonly controlList: DeployContractWithFactoryResult<ControlList>
-    public readonly kyc: DeployContractWithFactoryResult<Kyc>
-    public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>
-    public readonly pause: DeployContractWithFactoryResult<PauseFacet>
-    public readonly erc20: DeployContractWithFactoryResult<ERC20>
-    public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
-    public readonly erc1594: DeployContractWithFactoryResult<ERC1594>
-    public readonly erc1643: DeployContractWithFactoryResult<ERC1643>
-    public readonly erc1644: DeployContractWithFactoryResult<ERC1644>
-    public readonly diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
-    public readonly equityUsa: DeployContractWithFactoryResult<EquityUSA>
-    public readonly bondUsa: DeployContractWithFactoryResult<BondUSA>
-    public readonly scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
-    public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
-    public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
-    public readonly snapshots: DeployContractWithFactoryResult<Snapshots>
-    public readonly corporateActions: DeployContractWithFactoryResult<CorporateActions>
-    public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
-    public readonly lock: DeployContractWithFactoryResult<Lock>
-    public readonly hold: DeployContractWithFactoryResult<Hold>
-    public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
-    public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
-    public readonly clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>
-    public readonly clearingRedeemFacet: DeployContractWithFactoryResult<ClearingRedeemFacet>
-    public readonly clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
-    public readonly clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
-    public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
-    public readonly externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
-    public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
-    public readonly externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    public readonly erc3643: DeployContractWithFactoryResult<ERC3643>
-    public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
-    public readonly deployer?: Signer
+    address private constant _ONCHAIN_ID = address(0);
 
-    constructor({
-        businessLogicResolver,
-        accessControl,
-        cap,
-        controlList,
-        kyc,
-        ssiManagement,
-        pause,
-        erc20,
-        erc1410ScheduledTasks,
-        erc1594,
-        erc1643,
-        erc1644,
-        diamondFacet,
-        equityUsa,
-        bondUsa,
-        scheduledSnapshots,
-        scheduledBalanceAdjustments,
-        scheduledTasks,
-        snapshots,
-        corporateActions,
-        transferAndLock,
-        lock,
-        hold,
-        adjustBalances,
-        protectedPartitions,
-        clearingTransferFacet,
-        clearingRedeemFacet,
-        clearingHoldCreationFacet,
-        clearingReadFacet,
-        clearingActionsFacet,
-        externalPauseManagement,
-        externalControlListManagement,
-        externalKycListManagement,
-        erc3643,
-        timeTravel,
-        deployer,
-    }: DeployAtsContractsResultParams) {
-        this.businessLogicResolver = businessLogicResolver
-        this.accessControl = accessControl
-        this.cap = cap
-        this.controlList = controlList
-        this.kyc = kyc
-        this.ssiManagement = ssiManagement
-        this.pause = pause
-        this.erc20 = erc20
-        this.erc1410ScheduledTasks = erc1410ScheduledTasks
-        this.erc1594 = erc1594
-        this.erc1643 = erc1643
-        this.erc1644 = erc1644
-        this.diamondFacet = diamondFacet
-        this.equityUsa = equityUsa
-        this.bondUsa = bondUsa
-        this.scheduledSnapshots = scheduledSnapshots
-        this.scheduledBalanceAdjustments = scheduledBalanceAdjustments
-        this.scheduledTasks = scheduledTasks
-        this.snapshots = snapshots
-        this.corporateActions = corporateActions
-        this.transferAndLock = transferAndLock
-        this.lock = lock
-        this.hold = hold
-        this.adjustBalances = adjustBalances
-        this.protectedPartitions = protectedPartitions
-        this.clearingTransferFacet = clearingTransferFacet
-        this.clearingRedeemFacet = clearingRedeemFacet
-        this.clearingHoldCreationFacet = clearingHoldCreationFacet
-        this.clearingReadFacet = clearingReadFacet
-        this.clearingActionsFacet = clearingActionsFacet
-        this.externalPauseManagement = externalPauseManagement
-        this.externalControlListManagement = externalControlListManagement
-        this.externalKycListManagement = externalKycListManagement
-        this.erc3643 = erc3643
-        this.timeTravel = timeTravel
-        // Deployer
-        this.deployer = deployer
+    /**
+     * @notice Sets the name of the token.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
+    function setName(
+        string calldata _name
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+        ERC20Storage storage erc20Storage = _setName(_name);
+
+        emit UpdatedTokenInformation(
+            erc20Storage.name,
+            erc20Storage.symbol,
+            erc20Storage.decimals,
+            _getLatestVersion().toString(),
+            _ONCHAIN_ID
+        );
+    }
+
+    /**
+     * @notice Sets the symbol of the token.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
+    function setSymbol(
+        string calldata _symbol
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+        ERC20Storage storage erc20Storage = _setSymbol(_symbol);
+
+        emit UpdatedTokenInformation(
+            erc20Storage.name,
+            erc20Storage.symbol,
+            erc20Storage.decimals,
+            _getLatestVersion().toString(),
+            _ONCHAIN_ID
+        );
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ERC3643_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](2);
+        uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;
     }
 }

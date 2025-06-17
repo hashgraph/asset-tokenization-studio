@@ -216,12 +216,16 @@ import {
 } from '../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol';
 import {LocalContext} from '../../context/LocalContext.sol';
 import {
+    BusinessLogicResolverWrapper
+} from '../../../resolver/BusinessLogicResolverWrapper.sol';
+import {
     _ACCESS_CONTROL_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 
 abstract contract AccessControlStorageWrapper is
     IAccessControlStorageWrapper,
-    LocalContext
+    LocalContext,
+    BusinessLogicResolverWrapper
 {
     // TODO: Check if it's possible to use only one dependency of AddressSet and Bytes32Set
     using LibCommon for EnumerableSet.AddressSet;
