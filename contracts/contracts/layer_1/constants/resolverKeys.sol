@@ -291,3 +291,6 @@ bytes32 constant _CONTROL_LIST_MANAGEMENT_RESOLVER_KEY = 0xb28d59e89fa116cebe06d
 
 // keccak256("security.token.standard.kyc.management.resolverKey")
 bytes32 constant _KYC_MANAGEMENT_RESOLVER_KEY = 0x8676785f4d841823214e8ee8c497b3336a210be7559f5571c590249f6203e821;
+
+// keccak256('security.token.standard.erc3643.resolverKey');
+bytes32 constant _ERC3643_RESOLVER_KEY = 0x9670cee833e6302b5aeea3ae5875f87bd0af95a1fc660ca37cf38b1aa887fecb;
