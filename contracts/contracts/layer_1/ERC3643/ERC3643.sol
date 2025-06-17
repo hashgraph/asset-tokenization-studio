@@ -206,19 +206,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
+import {ERC1594StorageWrapper} from "../ERC1400/ERC1594/ERC1594StorageWrapper.sol";
 import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
 import {
-    IStaticFunctionSelectors
+IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../constants/roles.sol';
-import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import '@openzeppelin/contracts/utils/Strings.sol';
 
-contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
+contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     using Strings for uint256;
 
     address private constant _ONCHAIN_ID = address(0);
+
+    function version() external view returns (string memory) {
+        return _getLatestVersion().toString();
+    }
 
     /**
      * @notice Sets the name of the token.
@@ -233,7 +237,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             erc20Storage.name,
             erc20Storage.symbol,
             erc20Storage.decimals,
-            _getLatestVersion().toString(),
+            this.version(),
             _ONCHAIN_ID
         );
     }
@@ -251,37 +255,82 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             erc20Storage.name,
             erc20Storage.symbol,
             erc20Storage.decimals,
-            _getLatestVersion().toString(),
+            this.version(),
             _ONCHAIN_ID
         );
     }
 
+    function forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool) {
+        return this._forcedTransfer(_from, _to, _amount, bytes(""), bytes(""));
+    }
+
+    function _forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) external returns (bool) {
+        _controllerTransfer(_from, _to, _amount, _data, _operatorData);
+        return true;
+    }
+
+    function mint(address _to, uint256 _amount) external {
+        this._mint(_to, _amount, "");
+    }
+
+    function _mint(
+        address _to,
+        uint256 _amount,
+        bytes calldata _data
+    ) external returns (bool) {
+        _issue(_to, _amount, _data);
+        return true;
+    }
+
+    function burn(address _userAddress, uint256 _amount) external {
+        this._burn(_userAddress, _amount, "");
+    }
+
+    function _burn(
+        address _userAddress,
+        uint256 _amount,
+        bytes calldata _data
+    ) external returns (bool) {
+        _redeemFrom(_userAddress, _amount, _data);
+        return true;
+    }
+
     function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
+    external
+    pure
+    override
+    returns (bytes32 staticResolverKey_)
     {
         staticResolverKey_ = _ERC3643_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
+    external
+    pure
+    override
+    returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_ = new bytes4[](6);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forcedTransfer.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
     }
 
     function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
+    external
+    pure
+    override
+    returns (bytes4[] memory staticInterfaceIds_)
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;

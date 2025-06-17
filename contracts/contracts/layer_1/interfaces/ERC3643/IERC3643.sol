@@ -204,6 +204,8 @@
 */
 
 // SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
 interface IERC3643 {
@@ -228,4 +230,34 @@ interface IERC3643 {
      * Emits an UpdatedTokenInformation event.
      */
     function setSymbol(string calldata _symbol) external;
+
+    /**
+     * @dev Returns the version of the contract as a string.
+     *
+     */
+    function version() external view returns (string memory);
+
+    /**
+     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     *
+     * This function should only be callable by an authorized entities
+     *
+     * Returns `true` if the transfer was successful.
+     *
+     */
+    function forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool);
+
+    /**
+     * @dev Mints `_amount` tokens to the address `_to`.
+     *
+     */
+    function mint(address _to, uint256 _amount) external;
+
+    /**
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     *
+     * Reduces total supply.
+     *
+     */
+    function burn(address _userAddress, uint256 _amount) external;
 }
