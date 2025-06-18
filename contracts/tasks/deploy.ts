@@ -294,7 +294,6 @@ task(
             externalKycListManagement,
             protectedPartitions,
             erc3643,
-            protectedPartitions,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -349,7 +348,6 @@ task(
                 externalKycListManagement.address,
             'Protected Partitions': protectedPartitions.address,
             ERC3643: erc3643.address,
-            'Protected Partitions': protectedPartitions.address,
         }
 
         const contractAddress = []

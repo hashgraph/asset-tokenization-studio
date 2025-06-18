@@ -203,23 +203,149 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
+import {_DEFAULT_PARTITION} from '../constants/values.sol';
+import {
+    SnapshotsStorageWrapper2
+} from '../snapshots/SnapshotsStorageWrapper2.sol';
 
-abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
-    function _setName(
-        string calldata _name
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.name = _name;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
+    function _freezeTokens(address _account, uint256 _amount) internal {
+        _freezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
+    }
+    function _unfreezeTokens(address _account, uint256 _amount) internal {
+        _unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
     }
 
-    function _setSymbol(
-        string calldata _symbol
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.symbol = _symbol;
+    function _freezeTokensByPartition(
+        bytes32 _partition,
+        address _account,
+        uint256 _amount
+    ) internal {
+        _triggerAndSyncAll(_partition, _account, address(0));
+
+        _updateTotalFreeze(_partition, _account);
+
+        _beforeFreeze(_partition, _account);
+        FreezeStorage storage fs = _getFreezeStorage();
+        fs._frozenTokens[_account] += _amount;
+        fs._frozenTokensByPartition[_account][_partition] += _amount;
+
+        _reduceBalanceByPartition(_account, _amount, _partition);
+    }
+    function _unfreezeTokensByPartition(
+        bytes32 _partition,
+        address _account,
+        uint256 _amount
+    ) internal {
+        _triggerAndSyncAll(_partition, _account, address(0));
+
+        _updateTotalFreeze(_partition, _account);
+
+        _beforeFreeze(_partition, _account);
+        FreezeStorage storage fs = _getFreezeStorage();
+        fs._frozenTokens[_account] -= _amount;
+        fs._frozenTokensByPartition[_account][_partition] -= _amount;
+        _transferFrozenBalance(_partition, _account, _amount);
+    }
+
+    function _updateTotalFreeze(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal returns (uint256 abaf_) {
+        abaf_ = _getAbaf();
+        uint256 labaf = _getTotalFrozenLabaf(_tokenHolder);
+        uint256 labafByPartition = _getTotalFrozenLabafByPartition(
+            _partition,
+            _tokenHolder
+        );
+
+        if (abaf_ != labaf) {
+            uint256 factor = _calculateFactor(abaf_, labaf);
+
+            _updateTotalFreezeAmountAndLabaf(_tokenHolder, factor, abaf_);
+        }
+
+        if (abaf_ != labafByPartition) {
+            uint256 factorByPartition = _calculateFactor(
+                abaf_,
+                labafByPartition
+            );
+
+            _updateTotalFreezeAmountAndLabafByPartition(
+                _partition,
+                _tokenHolder,
+                factorByPartition,
+                abaf_
+            );
+        }
+    }
+
+    function _beforeFreeze(bytes32 _partition, address _tokenHolder) internal {
+        _updateAccountSnapshot(_tokenHolder, _partition);
+        _updateAccountFrozenBalancesSnapshot(_tokenHolder, _partition);
+    }
+
+    function _updateTotalFreezeAmountAndLabaf(
+        address _tokenHolder,
+        uint256 _factor,
+        uint256 _abaf
+    ) internal {
+        if (_factor == 1) return;
+
+        _getFreezeStorage()._frozenTokens[_tokenHolder] *= _factor;
+        _setTotalHeldLabaf(_tokenHolder, _abaf);
+    }
+
+    function _updateTotalFreezeAmountAndLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _factor,
+        uint256 _abaf
+    ) internal {
+        if (_factor == 1) return;
+
+        _getFreezeStorage()._frozenTokensByPartition[_tokenHolder][
+            _partition
+        ] *= _factor;
+        _setTotalFreezeLabafByPartition(_partition, _tokenHolder, _abaf);
+    }
+
+    function _transferFrozenBalance(
+        bytes32 _partition,
+        address _to,
+        uint256 _amount
+    ) internal {
+        if (_validPartitionForReceiver(_partition, _to)) {
+            _increaseBalanceByPartition(_to, _amount, _partition);
+            return;
+        }
+        _addPartitionTo(_amount, _to, _partition);
+    }
+
+    function _getFrozenAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 amount_) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjusted(),
+            _getTotalFrozenLabaf(_tokenHolder)
+        );
+
+        return _getFrozenAmountFor(_tokenHolder) * factor;
+    }
+
+    function _getFrozenAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 amount_) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjusted(),
+            _getTotalFrozenLabafByPartition(_partition, _tokenHolder)
+        );
+        return
+            _getFrozenAmountForByPartition(_partition, _tokenHolder) * factor;
     }
 }

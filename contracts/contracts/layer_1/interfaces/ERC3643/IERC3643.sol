@@ -215,6 +215,25 @@ interface IERC3643 {
         address indexed newOnchainID
     );
 
+    event TokensFrozen(
+        address indexed account,
+        uint256 amount,
+        bytes32 partition
+    );
+
+    event TokensUnfrozen(
+        address indexed account,
+        uint256 amount,
+        bytes32 partition
+    );
+
+    error InsufficientFrozenBalance(
+        address user,
+        uint256 requestedUnfreeze,
+        uint256 availableFrozen,
+        bytes32 partition
+    );
+
     /**
      * @dev Sets the name of the token to `_name`.
      *
@@ -228,4 +247,37 @@ interface IERC3643 {
      * Emits an UpdatedTokenInformation event.
      */
     function setSymbol(string calldata _symbol) external;
+
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    ) external;
+
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    ) external;
+
+    function freezePartialTokensByPartition(
+        bytes32 _partition,
+        address _userAddress,
+        uint256 _amount
+    ) external;
+
+    function unfreezePartialTokensByPartition(
+        bytes32 _partition,
+        address _userAddress,
+        uint256 _amount
+    ) external;
+
+    function setAddressFrozen(address _userAddress) external;
+
+    function getFrozenTokens(
+        address _userAddress
+    ) external view returns (uint256);
+
+    function getFrozenTokensByPartition(
+        bytes32 _partition,
+        address _userAddress
+    ) external view returns (uint256);
 }

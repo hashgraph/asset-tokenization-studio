@@ -209,11 +209,11 @@ pragma solidity 0.8.18;
 import {
     ISnapshotsStorageWrapper
 } from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
-import {ERC3643StorageWrapper} from '../ERC3643/ERC3643StorageWrapper.sol';
+import {ERC3643StorageWrapper1} from '../ERC3643/ERC3643StorageWrapper1.sol';
 
 abstract contract SnapshotsStorageWrapper2 is
     ISnapshotsStorageWrapper,
-    ERC3643StorageWrapper
+    ERC3643StorageWrapper1
 {
     function _updateAbafSnapshot() internal {
         _updateSnapshot(_snapshotStorage().abafSnapshots, _getAbaf());
@@ -326,6 +326,22 @@ abstract contract SnapshotsStorageWrapper2 is
                 partition
             ],
             _getHeldAmountForByPartition(partition, account)
+        );
+    }
+
+    function _updateAccountFrozenBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal {
+        _updateSnapshot(
+            _snapshotStorage().accountFrozenBalanceSnapshots[account],
+            _getFrozenAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionFrozenBalanceSnapshots[account][
+                partition
+            ],
+            _getFrozenAmountForByPartition(partition, account)
         );
     }
 
@@ -511,6 +527,32 @@ abstract contract SnapshotsStorageWrapper2 is
             );
     }
 
+    function _frozenBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            _balanceOfAtAdjusted(
+                _snapshotID,
+                _snapshotStorage().accountFrozenBalanceSnapshots[_tokenHolder],
+                _getFrozenAmountForAdjusted(_tokenHolder)
+            );
+    }
+
+    function _frozenBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            _balanceOfAtAdjusted(
+                _snapshotID,
+                _snapshotStorage().accountPartitionFrozenBalanceSnapshots[
+                    _tokenHolder
+                ][_partition],
+                _getFrozenAmountForByPartitionAdjusted(_partition, _tokenHolder)
+            );
+    }
     function _clearedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
@@ -579,6 +621,15 @@ abstract contract SnapshotsStorageWrapper2 is
     ) internal view virtual returns (uint256 amount_);
 
     function _getHeldAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
+
+    function _getFrozenAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
+
+    function _getFrozenAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_);

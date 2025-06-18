@@ -213,12 +213,26 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../constants/roles.sol';
+import {_FREEZE_MANAGER_ROLE} from '../constants/roles.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     using Strings for uint256;
 
     address private constant _ONCHAIN_ID = address(0);
+
+    function setAddressFrozen(
+        address _userAddress
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
+    {
+        emit TokensFrozen(_userAddress, 0, _DEFAULT_PARTITION); //TODO amount TBD
+    }
 
     /**
      * @notice Sets the name of the token.
@@ -256,6 +270,83 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         );
     }
 
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
+    {
+        _freezeTokens(_userAddress, _amount);
+        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
+    {
+        _checkUnfreezeAmount(_DEFAULT_PARTITION, _userAddress, _amount);
+        _unfreezeTokens(_userAddress, _amount);
+        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function freezePartialTokensByPartition(
+        bytes32 _partition,
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyUnProtectedPartitionsOrWildCardRole
+    {
+        _freezeTokensByPartition(_partition, _userAddress, _amount);
+        emit TokensFrozen(_userAddress, _amount, _partition);
+    }
+
+    function unfreezePartialTokensByPartition(
+        bytes32 _partition,
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyUnProtectedPartitionsOrWildCardRole
+    {
+        _checkUnfreezeAmount(_partition, _userAddress, _amount);
+        _unfreezeTokensByPartition(_partition, _userAddress, _amount);
+        emit TokensUnfrozen(_userAddress, _amount, _partition);
+    }
+
+    function getFrozenTokensByPartition(
+        bytes32 _partition,
+        address _userAddress
+    ) external view override returns (uint256) {
+        return _getFrozenAmountForByPartition(_partition, _userAddress);
+    }
+
+    function getFrozenTokens(
+        address _userAddress
+    ) external view override returns (uint256) {
+        return _getFrozenAmountFor(_userAddress);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -271,10 +362,31 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_ = new bytes4[](9);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .freezePartialTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .unfreezePartialTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .getFrozenTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .freezePartialTokensByPartition
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .unfreezePartialTokensByPartition
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .getFrozenTokensByPartition
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setAddressFrozen
+            .selector;
     }
 
     function getStaticInterfaceIds()
@@ -286,5 +398,24 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;
+    }
+
+    function _checkUnfreezeAmount(
+        bytes32 _partition,
+        address _userAddress,
+        uint256 _amount
+    ) private view {
+        uint256 frozenAmount = _getFrozenAmountForByPartition(
+            _partition,
+            _userAddress
+        );
+        if (frozenAmount < _amount) {
+            revert InsufficientFrozenBalance(
+                _userAddress,
+                _amount,
+                frozenAmount,
+                _partition
+            );
+        }
     }
 }

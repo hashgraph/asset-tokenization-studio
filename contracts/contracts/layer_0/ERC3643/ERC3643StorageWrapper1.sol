@@ -206,93 +206,53 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {
-    IERC1644StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
-import {ERC3643StorageWrapper2} from '../../ERC3643/ERC3643StorageWrapper2.sol';
+import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
+import {_FREEZE_STORAGE_POSITION} from '../constants/storagePositions.sol';
 
-abstract contract ERC1644StorageWrapper is
-    IERC1644StorageWrapper,
-    ERC3643StorageWrapper2
-{
-    struct ERC1644Storage {
-        bool isControllable;
-        bool initialized;
+abstract contract ERC3643StorageWrapper1 is ERC20StorageWrapper2 {
+    struct FreezeStorage {
+        mapping(address => uint256) _frozenTokens;
+        mapping(address => mapping(bytes32 => uint256)) _frozenTokensByPartition;
     }
 
-    modifier onlyControllable() {
-        _checkControllable();
-        _;
+    function _setName(
+        string calldata _name
+    ) internal returns (ERC20Storage storage erc20Storage_) {
+        erc20Storage_ = _erc20Storage();
+        erc20Storage_.name = _name;
     }
 
-    function _controllerTransfer(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) internal {
-        _transfer(_from, _to, _value);
-        emit ControllerTransfer(
-            msg.sender,
-            _from,
-            _to,
-            _value,
-            _data,
-            _operatorData
-        );
+    function _setSymbol(
+        string calldata _symbol
+    ) internal returns (ERC20Storage storage erc20Storage_) {
+        erc20Storage_ = _erc20Storage();
+        erc20Storage_.symbol = _symbol;
     }
 
-    function _controllerRedeem(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) internal {
-        _burn(_tokenHolder, _value);
-        emit ControllerRedemption(
-            msg.sender,
-            _tokenHolder,
-            _value,
-            _data,
-            _operatorData
-        );
+    function _getFrozenAmountFor(
+        address _userAddress
+    ) internal view returns (uint256) {
+        FreezeStorage storage freeze_ = _getFreezeStorage();
+        return freeze_._frozenTokens[_userAddress];
     }
 
-    /**
-     * @notice It is used to end the controller feature from the token
-     * @dev It only be called by the `owner/issuer` of the token
-     */
-    function _finalizeControllable() internal {
-        if (!_erc1644Storage().isControllable) return;
-
-        _erc1644Storage().isControllable = false;
-        emit FinalizedControllerFeature(_msgSender());
+    function _getFrozenAmountForByPartition(
+        bytes32 _partition,
+        address _userAddress
+    ) internal view returns (uint256) {
+        FreezeStorage storage freeze_ = _getFreezeStorage();
+        return freeze_._frozenTokensByPartition[_userAddress][_partition];
     }
 
-    /**
-     * @notice Internal function to know whether the controller functionality
-     * allowed or not.
-     * @return bool `true` when controller address is non-zero otherwise return `false`.
-     */
-    function _isControllable() internal view returns (bool) {
-        return _erc1644Storage().isControllable;
-    }
-
-    function _erc1644Storage()
+    function _getFreezeStorage()
         internal
         pure
-        returns (ERC1644Storage storage erc1644Storage_)
+        returns (FreezeStorage storage freeze_)
     {
-        bytes32 position = _ERC1644_STORAGE_POSITION;
+        bytes32 position = _FREEZE_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            erc1644Storage_.slot := position
+            freeze_.slot := position
         }
-    }
-
-    function _checkControllable() private view {
-        if (!_isControllable()) revert TokenIsNotControllable();
     }
 }
