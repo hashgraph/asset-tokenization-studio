@@ -207,7 +207,7 @@ pragma solidity 0.8.18;
 
 import {LibCommon} from '../common/libraries/LibCommon.sol';
 import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {ERC3643StorageWrapper1} from '../ERC3643/ERC3643StorageWrapper1.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
     EnumerableSet
@@ -216,7 +216,7 @@ import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
+abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
