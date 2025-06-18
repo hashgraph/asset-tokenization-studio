@@ -430,7 +430,7 @@ abstract contract ERC1410StandardStorageWrapper is
         if (balance < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
-        bytes32[] memory roles;
+        bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
         if (_from != _msgSender() && !_hasRoles(roles, _msgSender())) {

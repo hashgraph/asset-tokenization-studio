@@ -268,7 +268,7 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
         // TODO: Better to check all in one boolean expression defined in a different pure function.
-        bytes32[] memory roles;
+        bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
         if (_from != _msgSender() && !_hasRoles(roles, _msgSender())) {

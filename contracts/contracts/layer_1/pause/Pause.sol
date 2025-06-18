@@ -213,7 +213,7 @@ import {Common} from '../common/Common.sol';
 abstract contract Pause is IPause, Common {
     function pause() external override onlyUnpaused returns (bool success_) {
         {
-            bytes32[] memory roles;
+            bytes32[] memory roles = new bytes32[](2);
             roles[0] = _PAUSER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkRoles(roles, _msgSender());
@@ -224,7 +224,7 @@ abstract contract Pause is IPause, Common {
 
     function unpause() external override onlyPaused returns (bool success_) {
         {
-            bytes32[] memory roles;
+            bytes32[] memory roles = new bytes32[](2);
             roles[0] = _PAUSER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkRoles(roles, _msgSender());

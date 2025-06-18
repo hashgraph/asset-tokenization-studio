@@ -227,11 +227,10 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyRole(_CONTROLLER_ROLE)
         onlyControllable
     {
         {
-            bytes32[] memory roles;
+            bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkRoles(roles, _msgSender());
@@ -257,11 +256,10 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyRole(_CONTROLLER_ROLE)
         onlyControllable
     {
         {
-            bytes32[] memory roles;
+            bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkRoles(roles, _msgSender());

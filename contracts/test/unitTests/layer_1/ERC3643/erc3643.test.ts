@@ -214,6 +214,7 @@ import {
     BusinessLogicResolver,
     IFactory,
     ERC3643,
+    AccessControl,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -225,6 +226,7 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     ADDRESS_ZERO,
+    AGENT_ROLE,
 } from '@scripts'
 
 describe('ERC3643 Tests', () => {
@@ -240,6 +242,7 @@ describe('ERC3643 Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let erc20Facet: ERC20
     let erc3643Facet: ERC3643
+    let accessControlFacet: AccessControl
 
     let pauseFacet: Pause
 
@@ -278,7 +281,11 @@ describe('ERC3643 Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacPause]
+            const rbacAgent: Rbac = {
+                role: AGENT_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [rbacPause, rbacAgent]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -323,6 +330,11 @@ describe('ERC3643 Tests', () => {
                 diamond.address,
                 signer_B
             )
+            accessControlFacet = await ethers.getContractAt(
+                'AccessControl',
+                diamond.address,
+                signer_B
+            )
         })
 
         it('GIVEN an initialized token WHEN updating the name THEN setName emits UpdatedTokenInformation with updated name and current metadata', async () => {
@@ -351,15 +363,36 @@ describe('ERC3643 Tests', () => {
             expect(retrieved_newSymbol).to.equal(newSymbol)
         })
 
-        it('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
-            await pauseFacet.pause()
+        it('GIVEN an initialized token WHEN adding agent THEN addAgente emits AgentAdded with agent address', async () => {
+            expect(await erc3643Facet.addAgent(account_B))
+                .to.emit(erc3643Facet, 'AgentAdded')
+                .withArgs(account_B)
 
-            await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
-                'TokenIsPaused'
+            const isAgent = await accessControlFacet.hasRole(
+                AGENT_ROLE,
+                account_B
             )
-            await expect(erc3643Facet.setName(newSymbol)).to.be.rejectedWith(
-                'TokenIsPaused'
-            )
+            expect(isAgent).to.equal(true)
+        })
+
+        describe('Paused', () => {
+            beforeEach(async () => {
+                await pauseFacet.pause()
+            })
+            it('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
+                await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
+                    'TokenIsPaused'
+                )
+                await expect(
+                    erc3643Facet.setName(newSymbol)
+                ).to.be.rejectedWith('TokenIsPaused')
+            })
+
+            it('GIVEN a paused token WHEN attempting to addAgent THEN transactions revert with TokenIsPaused error', async () => {
+                await expect(
+                    erc3643Facet.addAgent(account_A)
+                ).to.be.rejectedWith('TokenIsPaused')
+            })
         })
 
         describe('AccessControl', () => {
@@ -379,6 +412,15 @@ describe('ERC3643 Tests', () => {
                 // set symbol fails
                 await expect(
                     erc3643Facet.setSymbol(newSymbol)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+            it('GIVEN an account without admin role WHEN addAgent THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // add agent fails
+                await expect(
+                    erc3643Facet.addAgent(account_A)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
         })

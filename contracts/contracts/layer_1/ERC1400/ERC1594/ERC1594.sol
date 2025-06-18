@@ -310,14 +310,13 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyWithinMaxSupply(_value)
         onlyUnpaused
-        onlyRole(_ISSUER_ROLE)
         onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
         onlyIssuable
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
         {
-            bytes32[] memory roles;
+            bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkRoles(roles, _msgSender());

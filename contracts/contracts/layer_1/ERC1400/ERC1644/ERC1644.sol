@@ -250,13 +250,12 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyRole(_CONTROLLER_ROLE)
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyControllable
     {
         {
-            bytes32[] memory roles;
+            bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkRoles(roles, _msgSender());
@@ -284,13 +283,12 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyRole(_CONTROLLER_ROLE)
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyControllable
     {
         {
-            bytes32[] memory roles;
+            bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkRoles(roles, _msgSender());
