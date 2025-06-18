@@ -214,6 +214,8 @@ interface IERC3643 {
         address onchainID;
         address identityRegistry;
         address compliance;
+        mapping(address => uint256) frozenTokens;
+        mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
     }
 
     event UpdatedTokenInformation(
@@ -225,7 +227,27 @@ interface IERC3643 {
     );
 
     event IdentityRegistryAdded(address indexed identityRegistry);
+
     event ComplianceAdded(address indexed compliance);
+
+    event TokensFrozen(
+        address indexed account,
+        uint256 amount,
+        bytes32 partition
+    );
+
+    event TokensUnfrozen(
+        address indexed account,
+        uint256 amount,
+        bytes32 partition
+    );
+
+    error InsufficientFrozenBalance(
+        address user,
+        uint256 requestedUnfreeze,
+        uint256 availableFrozen,
+        bytes32 partition
+    );
 
     /**
      * @dev Sets the name of the token to `_name`.
@@ -276,4 +298,62 @@ interface IERC3643 {
      * @dev Returns the address of the compliance contract.
      */
     function compliance() external view returns (ICompliance);
+    /*
+     * @dev Freezes a partial amount of the user's tokens across all partitions.
+     * Emits a TokensFrozen event.
+     */
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    ) external;
+
+    /*
+     * @dev Unfreezes a partial amount of the user's previously frozen tokens across all partitions.
+     * Emits a TokensUnfrozen event.
+     */
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    ) external;
+
+    /*
+     * @dev Freezes a partial amount of the user's tokens within a specific partition.
+     * Emits a TokensFrozen event.
+     */
+    function freezePartialTokensByPartition(
+        bytes32 _partition,
+        address _userAddress,
+        uint256 _amount
+    ) external;
+
+    /*
+     * @dev Unfreezes a partial amount of the user's previously frozen tokens within a specific partition.
+     * Emits a TokensUnfrozen event.
+     */
+    function unfreezePartialTokensByPartition(
+        bytes32 _partition,
+        address _userAddress,
+        uint256 _amount
+    ) external;
+
+    /*
+     * @dev Freezes the user's address entirely, disabling all token operations.
+     * Emits a TokensFrozen event.
+     */
+    function setAddressFrozen(address _userAddress) external;
+
+    /*
+     * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.
+     */
+    function getFrozenTokens(
+        address _userAddress
+    ) external view returns (uint256);
+
+    /*
+     * @dev Returns the amount of tokens currently frozen for the given user in a specific partition.
+     */
+    function getFrozenTokensByPartition(
+        bytes32 _partition,
+        address _userAddress
+    ) external view returns (uint256);
 }
