@@ -434,6 +434,33 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setSymbol(newSymbol)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
+            it('GIVEN an account without admin role WHEN setOnchainID THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // set onchainID fails
+                await expect(
+                    erc3643Facet.setOnchainID(onchainId)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+            it('GIVEN an account without admin role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // set IdentityRegistry fails
+                await expect(
+                    erc3643Facet.setIdentityRegistry(identityRegistry)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+            it('GIVEN an account without admin role WHEN setCompliance THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // set compliance fails
+                await expect(
+                    erc3643Facet.setCompliance(compliance)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
         })
     })
 })

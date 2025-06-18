@@ -206,30 +206,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface ICompliance {
-    function addComplianceRule(
-        bytes32 _ruleId,
-        bytes calldata _ruleData
-    ) external;
-
-    function removeComplianceRule(bytes32 _ruleId) external;
-
-    function canTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external view returns (bool);
-
-    function checkCompliance(address _user) external view returns (bool);
-
-    function isTransferAllowed(
-        address _from,
-        address _to,
-        uint256 _amount,
-        bytes calldata _data
-    ) external view returns (bool);
-
-    function getComplianceRule(
-        bytes32 _ruleId
-    ) external view returns (bytes memory);
-}
+/* solhint-disable-next-line no-empty-blocks */
+interface ICompliance {}

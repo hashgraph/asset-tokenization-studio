@@ -242,25 +242,25 @@ interface IERC3643 {
     function setSymbol(string calldata _symbol) external;
 
     /**
-     * @dev Sets a new onchainID address for the token.
+     * @dev Sets the onchainID of the token to `_onchainID`.
      *
      * Emits an UpdatedTokenInformation event.
      */
-    function setOnchainID(address _newOnchainID) external;
+    function setOnchainID(address _onchainID) external;
 
     /**
-     * @dev Sets a new identity registry contract address.
+     * @dev Sets the identity registry contract address.
      *
      * Emits an IdentityRegistryAdded event.
      */
-    function setIdentityRegistry(address _newIdentityRegistry) external;
+    function setIdentityRegistry(address _identityRegistry) external;
 
     /**
-     * @dev Sets a new compliance contract address.
+     * @dev Sets the compliance contract address.
      *
      * Emits a ComplianceAdded event.
      */
-    function setCompliance(address _newCompliance) external;
+    function setCompliance(address _compliance) external;
 
     /**
      * @dev Returns the onchainID address associated with the token.

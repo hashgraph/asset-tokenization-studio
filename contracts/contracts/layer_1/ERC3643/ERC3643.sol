@@ -257,41 +257,44 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     }
 
     /**
-     * @notice Sets a new onchainID address for the token.
+     * @notice Sets the onchainID address for the token.
+     * @dev Can only be called by the token `owner/issuer`.
      */
     function setOnchainID(
-        address _newOnchainID
-    ) external override onlyUnpaused {
+        address _onchainID
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
         ERC20Storage storage erc20Storage = _erc20Storage();
-        _erc3643Storage().onchainID = _newOnchainID;
+        _erc3643Storage().onchainID = _onchainID;
 
         emit UpdatedTokenInformation(
             erc20Storage.name,
             erc20Storage.symbol,
             erc20Storage.decimals,
             _getLatestVersion().toString(),
-            _newOnchainID
+            _onchainID
         );
     }
 
     /**
-     * @notice Sets a new identity registry contract address.
+     * @notice Sets the identity registry contract address.
+     * @dev Can only be called by the token `owner/issuer`.
      */
     function setIdentityRegistry(
-        address _newIdentityRegistry
-    ) external override onlyUnpaused {
-        _erc3643Storage().identityRegistry = _newIdentityRegistry;
-        emit IdentityRegistryAdded(_newIdentityRegistry);
+        address _identityRegistry
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _erc3643Storage().identityRegistry = _identityRegistry;
+        emit IdentityRegistryAdded(_identityRegistry);
     }
 
     /**
-     * @notice Sets a new compliance contract address.
+     * @notice Sets the compliance contract address.
+     * @dev Can only be called by the token `owner/issuer`.
      */
     function setCompliance(
-        address _newCompliance
-    ) external override onlyUnpaused {
-        _erc3643Storage().compliance = _newCompliance;
-        emit ComplianceAdded(_newCompliance);
+        address _compliance
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _erc3643Storage().compliance = _compliance;
+        emit ComplianceAdded(_compliance);
     }
 
     /**

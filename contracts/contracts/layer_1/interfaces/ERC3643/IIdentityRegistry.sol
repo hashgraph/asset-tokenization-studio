@@ -206,26 +206,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IIdentityRegistry {
-    function registerIdentity(
-        address _userAddress,
-        bytes32 _identity,
-        uint256 _country
-    ) external;
-
-    function setVerificationStatus(
-        address _userAddress,
-        bool _isVerified
-    ) external;
-
-    function isVerified(address _userAddress) external view returns (bool);
-
-    function getIdentity(address _userAddress) external view returns (bytes32);
-
-    function getCountry(address _userAddress) external view returns (uint256);
-
-    function hasClaim(
-        address _userAddress,
-        bytes32 _claimType
-    ) external view returns (bool);
-}
+/* solhint-disable-next-line no-empty-blocks */
+interface IIdentityRegistry {}
