@@ -213,7 +213,6 @@ import {_MAX_UINT256} from '../constants/values.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable no-unused-vars, custom-errors
 abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
     struct CapDataStorage {
         uint256 maxSupply;
@@ -298,4 +297,3 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         }
     }
 }
-// solhint-enable no-unused-vars, custom-errors

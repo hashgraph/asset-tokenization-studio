@@ -300,7 +300,7 @@ library ScheduledTasksLib {
 
                 _scheduledTasks.autoCalling = true;
 
-                // solhint-disable-next-line
+                // solhint-disable-next-line avoid-low-level-calls
                 (bool success, bytes memory data) = address(this).delegatecall(
                     abi.encodeWithSelector(
                         onScheduledTaskTriggeredSelector,
@@ -311,13 +311,13 @@ library ScheduledTasksLib {
                 );
                 if (!success) {
                     if (data.length > 0) {
-                        // solhint-disable-next-line
+                        // solhint-disable-next-line no-inline-assembly
                         assembly {
                             let returndata_size := mload(data)
                             revert(add(32, data), returndata_size)
                         }
                     } else {
-                        // solhint-disable-next-line
+                        // solhint-disable-next-line custom-errors
                         revert(
                             'onScheduledTaskTriggered method failed without reason'
                         );

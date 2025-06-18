@@ -230,12 +230,11 @@ import {
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
 {
-    // solhint-disable no-unused-vars
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
         address to,
-        uint256 amount
+        uint256 /*amount*/
     ) internal override {
         _triggerAndSyncAll(partition, from, to);
 
@@ -253,7 +252,6 @@ abstract contract ERC1410StandardStorageWrapper is
         _updateAccountSnapshot(from, partition);
         _updateAccountSnapshot(to, partition);
     }
-    // solhint-enable no-unused-vars
 
     function _triggerAndSyncAll(
         bytes32 _partition,
@@ -399,8 +397,8 @@ abstract contract ERC1410StandardStorageWrapper is
         address _from,
         bytes32 _partition,
         uint256 _value,
-        bytes calldata _data, // solhint-disable-line no-unused-vars
-        bytes calldata _operatorData // solhint-disable-line no-unused-vars
+        bytes calldata /*_data*/,
+        bytes calldata /*_operatorData*/
     ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));

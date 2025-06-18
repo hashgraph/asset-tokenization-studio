@@ -212,8 +212,6 @@ import {
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-// TODO: Remove those errors of solhint
-// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract HoldTimeTravel is Hold, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
@@ -224,4 +222,3 @@ contract HoldTimeTravel is Hold, TimeTravelStorageWrapper {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 }
-// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
