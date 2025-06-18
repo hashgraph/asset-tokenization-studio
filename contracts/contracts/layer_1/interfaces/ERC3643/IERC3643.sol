@@ -216,6 +216,19 @@ interface IERC3643 {
     );
 
     /**
+     * @dev Emitted when the agent role is granted
+     *
+     * @param _agent Address of the agent that has been added
+     */
+    event AgentAdded(address indexed _agent);
+    /**
+     * @dev Emitted when the agent role is revoked
+     *
+     * @param _agent Address of the agent that has been removed
+     */
+    event AgentRemoved(address indexed _agent);
+
+    /**
      * @dev Sets the name of the token to `_name`.
      *
      * Emits an UpdatedTokenInformation event.
@@ -228,4 +241,10 @@ interface IERC3643 {
      * Emits an UpdatedTokenInformation event.
      */
     function setSymbol(string calldata _symbol) external;
+
+    function addAgent(address _agent) external;
+
+    function removeAgent(address _agent) external;
+
+    function isAgent(address _agent) external view returns (bool);
 }

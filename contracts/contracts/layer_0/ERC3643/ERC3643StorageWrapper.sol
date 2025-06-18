@@ -207,6 +207,10 @@
 pragma solidity 0.8.18;
 
 import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
+import {_AGENT_ROLE} from '../constants/roles.sol';
+import {
+    IAccessControl
+} from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
 
 abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
     function _setName(
@@ -221,5 +225,17 @@ abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
     ) internal returns (ERC20Storage storage erc20Storage_) {
         erc20Storage_ = _erc20Storage();
         erc20Storage_.symbol = _symbol;
+    }
+
+    function _addAgent(address _agent) internal {
+        if (!_grantRole(_AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
+        }
+    }
+
+    function _removeAgent(address _agent) internal {
+        if (!_revokeRole(_AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
+        }
     }
 }
