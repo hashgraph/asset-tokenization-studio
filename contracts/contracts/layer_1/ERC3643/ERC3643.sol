@@ -258,60 +258,25 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         );
     }
 
+    function burn(address _userAddress, uint256 _amount) external {
+        _redeemFrom(_userAddress, _amount, '');
+    }
+
+    function mint(address _to, uint256 _amount) external {
+        _issue(_to, _amount, '');
+    }
+
     function forcedTransfer(
         address _from,
         address _to,
         uint256 _amount
     ) external returns (bool) {
-        return
-            this.forcedTransferInternal(
-                _from,
-                _to,
-                _amount,
-                bytes(''),
-                bytes('')
-            );
-    }
-
-    function forcedTransferInternal(
-        address _from,
-        address _to,
-        uint256 _amount,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external returns (bool) {
-        _controllerTransfer(_from, _to, _amount, _data, _operatorData);
-        return true;
-    }
-
-    function mint(address _to, uint256 _amount) external {
-        this.mintInternal(_to, _amount, '');
-    }
-
-    function mintInternal(
-        address _to,
-        uint256 _amount,
-        bytes calldata _data
-    ) external returns (bool) {
-        _issue(_to, _amount, _data);
-        return true;
-    }
-
-    function burn(address _userAddress, uint256 _amount) external {
-        this.burnInternal(_userAddress, _amount, '');
-    }
-
-    function burnInternal(
-        address _userAddress,
-        uint256 _amount,
-        bytes calldata _data
-    ) external returns (bool) {
-        _redeemFrom(_userAddress, _amount, _data);
+        _controllerTransfer(_from, _to, _amount, '', '');
         return true;
     }
 
     function version() external view returns (string memory) {
-        return toString(_getLatestVersion());
+        return Strings.toString(_getLatestVersion());
     }
 
     function getStaticResolverKey()
