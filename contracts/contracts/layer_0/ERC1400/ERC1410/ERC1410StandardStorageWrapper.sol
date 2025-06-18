@@ -206,11 +206,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ERC1410OperatorStorageWrapper} from "./ERC1410OperatorStorageWrapper.sol";
-import {_IS_PAUSED_ERROR_ID, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, _FROM_ACCOUNT_NULL_ERROR_ID, _FROM_ACCOUNT_BLOCKED_ERROR_ID, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, _IS_NOT_OPERATOR_ERROR_ID, _WRONG_PARTITION_ERROR_ID, _SUCCESS, _FROM_ACCOUNT_KYC_ERROR_ID, _CLEARING_ACTIVE_ERROR_ID} from "../../constants/values.sol";
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
-import {IKyc} from "../../../layer_1/interfaces/kyc/IKyc.sol";
-import {IERC1410Standard} from "../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol";
+import {
+    ERC1410OperatorStorageWrapper
+} from './ERC1410OperatorStorageWrapper.sol';
+import {
+    _IS_PAUSED_ERROR_ID,
+    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_NULL_ERROR_ID,
+    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    _IS_NOT_OPERATOR_ERROR_ID,
+    _WRONG_PARTITION_ERROR_ID,
+    _SUCCESS,
+    _FROM_ACCOUNT_KYC_ERROR_ID,
+    _CLEARING_ACTIVE_ERROR_ID
+} from '../../constants/values.sol';
+import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {
+    IERC1410Standard
+} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
