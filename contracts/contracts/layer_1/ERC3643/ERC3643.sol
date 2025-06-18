@@ -214,8 +214,9 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../constants/roles.sol';
+import {_DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _ISSUER_ROLE} from '../constants/roles.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     using Strings for uint256;
@@ -258,11 +259,35 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         );
     }
 
-    function burn(address _userAddress, uint256 _amount) external {
+    function burn(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_userAddress)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
+    {
         _redeemFrom(_userAddress, _amount, '');
     }
 
-    function mint(address _to, uint256 _amount) external {
+    function mint(
+        address _to,
+        uint256 _amount
+    )
+        external
+        onlyWithinMaxSupply(_amount)
+        onlyUnpaused
+        onlyRole(_ISSUER_ROLE)
+        onlyListedAllowed(_to)
+        onlyWithoutMultiPartition
+        onlyIssuable
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+    {
         _issue(_to, _amount, '');
     }
 
@@ -270,7 +295,20 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         address _from,
         address _to,
         uint256 _amount
-    ) external returns (bool) {
+    )
+        external
+        onlyRole(_CONTROLLER_ROLE)
+        onlyWithoutMultiPartition
+        onlyControllable
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_from)
+        onlyListedAllowed(_to)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool)
+    {
         _controllerTransfer(_from, _to, _amount, '', '');
         return true;
     }
