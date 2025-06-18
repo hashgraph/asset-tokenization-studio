@@ -368,11 +368,13 @@ describe('ERC3643 Tests', () => {
                 .to.emit(erc3643Facet, 'AgentAdded')
                 .withArgs(account_B)
 
-            const isAgent = await accessControlFacet.hasRole(
+            const hasRole = await accessControlFacet.hasRole(
                 AGENT_ROLE,
                 account_B
             )
+            const isAgent = await erc3643Facet.isAgent(account_B)
             expect(isAgent).to.equal(true)
+            expect(hasRole).to.equal(true)
         })
 
         describe('Paused', () => {
