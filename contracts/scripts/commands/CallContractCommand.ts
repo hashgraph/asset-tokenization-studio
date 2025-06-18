@@ -225,6 +225,6 @@ export default class CallContractCommand {
         this.contract = contract
         this.method = method
         this.args = args
-        this.overrides = overrides
+        this.overrides = overrides ?? {}
     }
 }

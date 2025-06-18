@@ -206,36 +206,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC1410OperatorStorageWrapper
-} from './ERC1410OperatorStorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS,
-    _FROM_ACCOUNT_KYC_ERROR_ID,
-    _CLEARING_ACTIVE_ERROR_ID
-} from '../../constants/values.sol';
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
-import {
-    IERC1410Standard
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+import {ERC1410OperatorStorageWrapper} from "./ERC1410OperatorStorageWrapper.sol";
+import {_IS_PAUSED_ERROR_ID, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, _FROM_ACCOUNT_NULL_ERROR_ID, _FROM_ACCOUNT_BLOCKED_ERROR_ID, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, _IS_NOT_OPERATOR_ERROR_ID, _WRONG_PARTITION_ERROR_ID, _SUCCESS, _FROM_ACCOUNT_KYC_ERROR_ID, _CLEARING_ACTIVE_ERROR_ID} from "../../constants/values.sol";
+import {_CONTROLLER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
+import {IKyc} from "../../../layer_1/interfaces/kyc/IKyc.sol";
+import {IERC1410Standard} from "../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol";
 
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
 {
-    // solhint-disable no-unused-vars
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
         address to,
-        uint256 amount
+        uint256 /*amount*/
     ) internal override {
         _triggerAndSyncAll(partition, from, to);
 
@@ -253,8 +237,6 @@ abstract contract ERC1410StandardStorageWrapper is
         _updateAccountSnapshot(from, partition);
         _updateAccountSnapshot(to, partition);
     }
-
-    // solhint-enable no-unused-vars
 
     function _triggerAndSyncAll(
         bytes32 _partition,
@@ -400,8 +382,8 @@ abstract contract ERC1410StandardStorageWrapper is
         address _from,
         bytes32 _partition,
         uint256 _value,
-        bytes calldata _data, // solhint-disable-line no-unused-vars
-        bytes calldata _operatorData // solhint-disable-line no-unused-vars
+        bytes calldata /*_data*/,
+        bytes calldata /*_operatorData*/
     ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));

@@ -206,11 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
-import {_AGENT_ROLE} from '../constants/roles.sol';
-import {
-    IAccessControl
-} from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
+import {ERC20StorageWrapper2} from "../ERC1400/ERC20/ERC20StorageWrapper2.sol";
+import {_AGENT_ROLE} from "../constants/roles.sol";
+import {IAccessControl} from "../../layer_1/interfaces/accessControl/IAccessControl.sol";
 
 abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
     function _setName(

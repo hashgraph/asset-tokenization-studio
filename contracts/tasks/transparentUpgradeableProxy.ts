@@ -210,7 +210,7 @@ import {
     UpdateFactoryVersionArgs,
 } from '@tasks'
 
-task('updateFactoryVersion', 'Updates the factory version')
+task('updateProxyImplementation', 'Update the proxy implementation')
     .addPositionalParam('proxyAdminAddress', 'The proxy admin contract address')
     .addPositionalParam(
         'transparentProxyAddress',
@@ -273,13 +273,13 @@ task('updateFactoryVersion', 'Updates the factory version')
 task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
     .addPositionalParam(
         'proxyAdmin',
-        'The proxy admin contract ID. 0.0.XXXX format',
+        'The proxy admin contract address',
         undefined,
         types.string
     )
     .addPositionalParam(
         'proxy',
-        'The proxy contrac ID. 0.0.XXXX format',
+        'The proxy contract address',
         undefined,
         types.string
     )
