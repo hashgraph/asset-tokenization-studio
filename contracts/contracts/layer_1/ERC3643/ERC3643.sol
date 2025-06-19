@@ -266,10 +266,10 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         external
         onlyUnpaused
         onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_userAddress)
+        onlyListedAllowed(_msgSender()) //Falta test
+        onlyListedAllowed(_userAddress) //Falta test
         onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
+        onlyUnProtectedPartitionsOrWildCardRole //Falta test
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
     {
         _redeemFrom(_userAddress, _amount, '');
@@ -285,7 +285,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         onlyRole(_ISSUER_ROLE)
         onlyListedAllowed(_to)
         onlyWithoutMultiPartition
-        onlyIssuable
+        onlyIssuable //Falta test
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
     {
         _issue(_to, _amount, '');

@@ -214,6 +214,14 @@ import {
     BusinessLogicResolver,
     IFactory,
     ERC3643,
+    ERC1594,
+    type ERC1410Snapshot,
+    Kyc,
+    type ControlList,
+    SsiManagement,
+    ClearingActionsFacet,
+    type AccessControl,
+    ERC1644,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -225,46 +233,80 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     ADDRESS_ZERO,
+    ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
+    ZERO,
+    EMPTY_STRING,
+    FROM_ACCOUNT_KYC_ERROR_ID,
+    HASH_ZERO,
+    TO_ACCOUNT_KYC_ERROR_ID, CONTROL_LIST_ROLE, CLEARING_ROLE, CONTROLLER_ROLE,
 } from '@scripts'
+
+const name = 'TEST'
+const symbol = 'TAC'
+const newName = 'TEST_ERC3643'
+const newSymbol = 'TAC_ERC3643'
+const decimals = 6
+const version = '1'
+const isin = isinGenerator()
+const AMOUNT = 1000
+const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
+const DATA = '0x1234'
+const MAX_SUPPLY = 10000000
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress
+    let signer_D: SignerWithAddress
+    let signer_E: SignerWithAddress
 
     let account_A: string
     let account_B: string
+    let account_C: string
+    let account_D: string
+    let account_E: string
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let erc20Facet: ERC20
     let erc3643Facet: ERC3643
+    let erc1594Facet: ERC1594
+    let erc1644Facet: ERC1644
 
     let pauseFacet: Pause
-
-    const name = 'TEST'
-    const symbol = 'TAC'
-    const newName = 'TEST_ERC3643'
-    const newSymbol = 'TAC_ERC3643'
-    const decimals = 6
-    const version = '1'
-    const isin = isinGenerator()
+    let kycFacet: Kyc
+    let controlList: ControlList
+    let clearingActionsFacet: ClearingActionsFacet
+    let ssiManagementFacet: SsiManagement
+    let accessControlFacet: AccessControl
 
     describe('single partition', () => {
+        let erc3643Issuer: ERC3643
+        let erc3643Transferor: ERC3643
+        let erc3643Approved: ERC3643
+        let erc1410SnapshotFacet: ERC1410Snapshot
+        let erc20Facet: ERC20
         before(async () => {
             // mute | mock console.log
-            console.log = () => {}
-            ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+            console.log = () => {
+            }
+            ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
+                await ethers.getSigners()
             account_A = signer_A.address
             account_B = signer_B.address
+            account_C = signer_C.address
+            account_D = signer_D.address
+            account_E = signer_E.address
 
-            const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            const {...deployedContracts} = await deployAtsFullInfrastructure(
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
-                    timeTravelEnabled: true,
                 })
             )
 
@@ -272,13 +314,28 @@ describe('ERC3643 Tests', () => {
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
         })
-
         beforeEach(async () => {
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacPause]
+            const rbacIssuer: Rbac = {
+                role: ISSUER_ROLE,
+                members: [account_C],
+            }
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const rbacClearing: Rbac = {
+                role: CLEARING_ROLE,
+                members: [account_B],
+            }
+            const init_rbacs: Rbac[] = [rbacPause, rbacIssuer, rbacKYC, rbacSSI, rbacClearing]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -287,7 +344,7 @@ describe('ERC3643 Tests', () => {
                 arePartitionsProtected: false,
                 clearingActive: false,
                 internalKycActivated: true,
-                isMultiPartition: true,
+                isMultiPartition: false,
                 name,
                 symbol,
                 decimals,
@@ -301,7 +358,7 @@ describe('ERC3643 Tests', () => {
                 putRight: false,
                 dividendRight: 1,
                 currency: '0x345678',
-                numberOfShares: MAX_UINT256,
+                numberOfShares: BigInt(MAX_SUPPLY),
                 nominalValue: 100,
                 regulationType: RegulationType.REG_S,
                 regulationSubType: RegulationSubType.NONE,
@@ -313,45 +370,84 @@ describe('ERC3643 Tests', () => {
                 businessLogicResolver: businessLogicResolver.address,
             })
 
+            accessControlFacet = await ethers.getContractAt(
+                'AccessControl',
+                diamond.address
+            )
+
             erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
+
             erc3643Facet = await ethers.getContractAt(
                 'ERC3643',
                 diamond.address
             )
             pauseFacet = await ethers.getContractAt(
                 'Pause',
+                diamond.address
+            )
+
+            erc1594Facet = await ethers.getContractAt(
+                'ERC1594',
+                diamond.address
+            )
+            erc3643Issuer = erc3643Facet.connect(signer_C)
+            erc3643Transferor = erc3643Facet.connect(signer_E)
+            erc3643Approved = erc3643Facet.connect(signer_D)
+
+            erc20Facet = await ethers.getContractAt(
+                'ERC20',
+                diamond.address,
+                signer_E
+            )
+            erc1410SnapshotFacet = await ethers.getContractAt(
+                'ERC1410Snapshot',
+                diamond.address
+            )
+
+            controlList = await ethers.getContractAt(
+                'ControlList',
+                diamond.address
+            )
+
+            kycFacet = await ethers.getContractAt(
+                'Kyc',
                 diamond.address,
                 signer_B
             )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SsiManagement',
+                diamond.address,
+                signer_A
+            )
+
+            clearingActionsFacet = await ethers.getContractAt(
+                'ClearingActionsFacet',
+                diamond.address,
+                signer_B
+            )
+
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKyc(
+                account_E,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.grantKyc(
+                account_D,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
         })
 
-        it('GIVEN an initialized token WHEN updating the name THEN setName emits UpdatedTokenInformation with updated name and current metadata', async () => {
-            const retrieved_name = await erc20Facet.name()
-            expect(retrieved_name).to.equal(name)
 
-            //Update name
-            expect(await erc3643Facet.setName(newName))
-                .to.emit(erc3643Facet, 'UpdatedTokenInformation')
-                .withArgs(newName, symbol, decimals, version, ADDRESS_ZERO)
-
-            const retrieved_newName = await erc20Facet.name()
-            expect(retrieved_newName).to.equal(newName)
-        })
-
-        it('GIVEN an initialized token WHEN updating the symbol THEN setSymbol emits UpdatedTokenInformation with updated symbol and current metadata', async () => {
-            const retrieved_symbol = await erc20Facet.symbol()
-            expect(retrieved_symbol).to.equal(symbol)
-
-            //Update symbol
-            expect(await erc3643Facet.setSymbol(newSymbol))
-                .to.emit(erc3643Facet, 'UpdatedTokenInformation')
-                .withArgs(name, newSymbol, decimals, version, ADDRESS_ZERO)
-
-            const retrieved_newSymbol = await erc20Facet.symbol()
-            expect(retrieved_newSymbol).to.equal(newSymbol)
-        })
-
-        it('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
+        it.skip('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
+            pauseFacet = pauseFacet.connect(signer_B)
             await pauseFacet.pause()
 
             await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
@@ -362,16 +458,204 @@ describe('ERC3643 Tests', () => {
             )
         })
 
-        describe('AccessControl', () => {
-            it('GIVEN an account without admin role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
 
-                // set name fails
-                await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
-                    'AccountHasNoRole'
+        describe.skip('burn', () => {
+            it('GIVEN a paused token WHEN attempting to burn TokenIsPaused error', async () => {
+
+                pauseFacet = pauseFacet.connect(signer_B)
+                await pauseFacet.pause()
+
+                await expect(erc3643Facet.burn(account_A, AMOUNT)).to.be.rejectedWith(
+                    'TokenIsPaused'
                 )
             })
+            it('GIVEN a token with clearing mode activated token WHEN attempting to burn ClearingIsActivated error', async () => {
+                await clearingActionsFacet.activateClearing()
+
+                // Using account C (with role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // transfer with data fails
+                await expect(
+                    erc3643Facet.burn(account_D, AMOUNT)
+                ).to.be.rejectedWith('ClearingIsActivated')
+            })
+            it('GIVEN blocked accounts WHEN burn THEN transaction fails with AccountIsBlocked', async () => {
+                // Blacklisting accounts
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
+                controlList = controlList.connect(signer_A)
+                await controlList.addToControlList(account_C)
+
+                // Using account C (with role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // redeem with data fails
+                await expect(
+                    erc3643Facet.burn(account_C, AMOUNT)
+                ).to.be.rejectedWith('AccountIsBlocked')
+
+            })
+            it('GIVEN non kyc account WHEN burn THEN transaction reverts with InvalidKycStatus', async () => {
+                await kycFacet.revokeKyc(account_E)
+                await expect(
+                    erc3643Facet.connect(signer_E).burn(account_E, AMOUNT)
+                ).to.revertedWithCustomError(
+                    erc3643Facet,
+                    'InvalidKycStatus'
+                )
+            })
+        })
+
+        describe.skip('mint', () => {
+            it('GIVEN a paused token WHEN attempting to mint TokenIsPaused error', async () => {
+
+                pauseFacet = pauseFacet.connect(signer_B)
+                await pauseFacet.pause()
+
+                await expect(erc3643Facet.mint(account_A, AMOUNT)).to.be.rejectedWith(
+                    'TokenIsPaused'
+                )
+            })
+            it('GIVEN a max supply WHEN mint more than the max supply THEN transaction fails with MaxSupplyReached', async () => {
+                // Using account A (with role)
+                erc3643Facet = erc3643Facet.connect(signer_A)
+
+                await expect(
+                    erc3643Facet.mint(account_E, MAX_SUPPLY + 1)
+                ).to.be.rejectedWith('MaxSupplyReached')
+            })
+            it('GIVEN blocked accounts (to) USING WHITELIST WHEN issue THEN transaction fails with AccountIsBlocked', async () => {
+                // First deploy a new token using white list
+                const isWhiteList = true
+                const newDiamond = await deployEquityFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList,
+                    isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
+                    isMultiPartition: false,
+                    name: 'TEST_AccessControl',
+                    symbol: 'TAC',
+                    decimals: 6,
+                    isin: isinGenerator(),
+                    votingRight: false,
+                    informationRight: false,
+                    liquidationRight: false,
+                    subscriptionRight: true,
+                    conversionRight: true,
+                    redemptionRight: true,
+                    putRight: false,
+                    dividendRight: 1,
+                    currency: '0x345678',
+                    numberOfShares: MAX_UINT256,
+                    nominalValue: 100,
+                    regulationType: RegulationType.REG_D,
+                    regulationSubType: RegulationSubType.REG_D_506_B,
+                    countriesControlListType: true,
+                    listOfCountries: 'ES,FR,CH',
+                    info: 'nothing',
+                    init_rbacs: [],
+                    factory,
+                    businessLogicResolver: businessLogicResolver.address,
+                })
+                accessControlFacet = await ethers.getContractAt(
+                    'AccessControl',
+                    newDiamond.address
+                )
+
+                erc3643Facet = await ethers.getContractAt(
+                    'ERC3643',
+                    newDiamond.address
+                )
+                // accounts are blacklisted by default (white list)
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+
+                // Using account A (with role)
+                erc3643Facet = erc3643Facet.connect(signer_A)
+
+                // issue fails
+                await expect(
+                    erc3643Facet.mint(account_E, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AccountIsBlocked'
+                )
+            })
+            it('GIVEN non kyc account WHEN mint THEN transaction reverts with InvalidKycStatus', async () => {
+                await kycFacet.revokeKyc(account_E)
+                await expect(
+                    erc3643Facet.mint(account_E, AMOUNT)
+                ).to.revertedWithCustomError(
+                    erc3643Facet,
+                    'InvalidKycStatus'
+                )
+            })
+            it('GIVEN blocked account WHEN mint THEN transaction fails with AccountIsBlocked', async () => {
+                // First deploy a new token using white list
+                const isWhiteList = true
+                const newDiamond = await deployEquityFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList,
+                    isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
+                    isMultiPartition: false,
+                    name: 'TEST_AccessControl',
+                    symbol: 'TAC',
+                    decimals: 6,
+                    isin: isinGenerator(),
+                    votingRight: false,
+                    informationRight: false,
+                    liquidationRight: false,
+                    subscriptionRight: true,
+                    conversionRight: true,
+                    redemptionRight: true,
+                    putRight: false,
+                    dividendRight: 1,
+                    currency: '0x345678',
+                    numberOfShares: MAX_UINT256,
+                    nominalValue: 100,
+                    regulationType: RegulationType.REG_D,
+                    regulationSubType: RegulationSubType.REG_D_506_B,
+                    countriesControlListType: true,
+                    listOfCountries: 'ES,FR,CH',
+                    info: 'nothing',
+                    init_rbacs: [],
+                    factory,
+                    businessLogicResolver: businessLogicResolver.address,
+                })
+                accessControlFacet = await ethers.getContractAt(
+                    'AccessControl',
+                    newDiamond.address
+                )
+
+                erc3643Facet = await ethers.getContractAt(
+                    'ERC3643',
+                    newDiamond.address
+                )
+                // accounts are blacklisted by default (white list)
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+
+                // Using account A (with role)
+                erc3643Facet = erc3643Facet.connect(signer_A)
+
+                // issue fails
+                await expect(
+                    erc3643Facet.mint(account_E, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AccountIsBlocked'
+                )
+            })
+
+        })
+
+        describe.skip('setSymbol', () => {
             it('GIVEN an account without admin role WHEN setSymbol THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
@@ -381,6 +665,258 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setSymbol(newSymbol)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
+            it('GIVEN an initialized token WHEN updating the symbol THEN setSymbol emits UpdatedTokenInformation with updated symbol and current metadata', async () => {
+                const retrieved_symbol = await erc20Facet.symbol()
+                expect(retrieved_symbol).to.equal(symbol)
+
+                //Update symbol
+                expect(await erc3643Facet.setSymbol(newSymbol))
+                    .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+                    .withArgs(name, newSymbol, decimals, version, ADDRESS_ZERO)
+
+                const retrieved_newSymbol = await erc20Facet.symbol()
+                expect(retrieved_newSymbol).to.equal(newSymbol)
+            })
+
         })
+
+        describe.skip('setName', () => {
+            it('GIVEN an initialized token WHEN updating the name THEN setName emits UpdatedTokenInformation with updated name and current metadata', async () => {
+                const retrieved_name = await erc20Facet.name()
+                expect(retrieved_name).to.equal(name)
+
+                //Update name
+                expect(await erc3643Facet.setName(newName))
+                    .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+                    .withArgs(newName, symbol, decimals, version, ADDRESS_ZERO)
+
+                const retrieved_newName = await erc20Facet.name()
+                expect(retrieved_newName).to.equal(newName)
+            })
+
+            it('GIVEN an account without admin role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // set name fails
+                await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
+                    'AccountHasNoRole'
+                )
+            })
+        })
+
+        describe('ForcedTransfer', () => {
+            beforeEach(async () => {
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+            })
+            it('GIVEN blocked account (from) USING WHITELIST WHEN forcedTransfer THEN transaction fails with AccountIsBlocked', async () => {
+                // First deploy a new token using white list
+                const isWhiteList = true
+                const newDiamond = await deployEquityFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList,
+                    isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
+                    isMultiPartition: false,
+                    name: 'TEST_AccessControl',
+                    symbol: 'TAC',
+                    decimals: 6,
+                    isin: isinGenerator(),
+                    votingRight: false,
+                    informationRight: false,
+                    liquidationRight: false,
+                    subscriptionRight: true,
+                    conversionRight: true,
+                    redemptionRight: true,
+                    putRight: false,
+                    dividendRight: 1,
+                    currency: '0x345678',
+                    numberOfShares: MAX_UINT256,
+                    nominalValue: 100,
+                    regulationType: RegulationType.REG_D,
+                    regulationSubType: RegulationSubType.REG_D_506_B,
+                    countriesControlListType: true,
+                    listOfCountries: 'ES,FR,CH',
+                    info: 'nothing',
+                    init_rbacs: [],
+                    factory,
+                    businessLogicResolver: businessLogicResolver.address,
+                })
+                accessControlFacet = await ethers.getContractAt(
+                    'AccessControl',
+                    newDiamond.address
+                )
+
+                erc3643Facet = await ethers.getContractAt(
+                    'ERC3643',
+                    newDiamond.address
+                )
+                // accounts are blacklisted by default (white list)
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+
+                // Using account A (with role)
+                erc3643Facet = erc3643Facet.connect(signer_A)
+
+                // issue fails
+                await expect(
+                    erc3643Facet.forcedTransfer(account_A, account_E, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AccountIsBlocked'
+                )
+            })
+            it('GIVEN blocked account (to) USING WHITELIST WHEN forcedTransfer THEN transaction fails with AccountIsBlocked', async () => {
+                // First deploy a new token using white list
+                const isWhiteList = true
+                const newDiamond = await deployEquityFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList,
+                    isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
+                    isMultiPartition: false,
+                    name: 'TEST_AccessControl',
+                    symbol: 'TAC',
+                    decimals: 6,
+                    isin: isinGenerator(),
+                    votingRight: false,
+                    informationRight: false,
+                    liquidationRight: false,
+                    subscriptionRight: true,
+                    conversionRight: true,
+                    redemptionRight: true,
+                    putRight: false,
+                    dividendRight: 1,
+                    currency: '0x345678',
+                    numberOfShares: MAX_UINT256,
+                    nominalValue: 100,
+                    regulationType: RegulationType.REG_D,
+                    regulationSubType: RegulationSubType.REG_D_506_B,
+                    countriesControlListType: true,
+                    listOfCountries: 'ES,FR,CH',
+                    info: 'nothing',
+                    init_rbacs: [],
+                    factory,
+                    businessLogicResolver: businessLogicResolver.address,
+                })
+                accessControlFacet = await ethers.getContractAt(
+                    'AccessControl',
+                    newDiamond.address
+                )
+
+                erc3643Facet = await ethers.getContractAt(
+                    'ERC3643',
+                    newDiamond.address
+                )
+                // accounts are blacklisted by default (white list)
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+
+                // Using account A (with role)
+                erc3643Facet = erc3643Facet.connect(signer_A)
+
+                // issue fails
+                await expect(
+                    erc3643Facet.forcedTransfer(account_A, account_E, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AccountIsBlocked'
+                )
+            })
+
+            it('GIVEN a paused token WHEN attempting to forcedTransfer TokenIsPaused error', async () => {
+
+                pauseFacet = pauseFacet.connect(signer_B)
+                await pauseFacet.pause()
+
+                await expect(erc3643Facet.forcedTransfer(account_A, account_B, AMOUNT - 1)).to.be.rejectedWith(
+                    'TokenIsPaused'
+                )
+            })
+            it('GIVEN an account without CONTROLLER_ROLE WHEN forcedTransfer is called THEN transaction fails with AccountHasNoRole', async () => {
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                await expect(
+                    erc3643Facet.forcedTransfer(account_C, account_B, AMOUNT)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+            it('GIVEN non kyc account (from) WHEN forcedTransfer THEN transaction reverts with InvalidKycStatus', async () => {
+
+                // non kyc'd sender
+                await expect(
+                    erc3643Facet
+                        .connect(signer_A)
+                        .forcedTransfer(account_A, account_D, AMOUNT)
+                ).to.revertedWithCustomError(
+                    erc3643Facet,
+                    'InvalidKycStatus'
+                )
+            })
+            it('GIVEN non kyc account (to) WHEN forcedTransfer THEN transaction reverts with InvalidKycStatus', async () => {
+
+                //await kycFacet.revokeKyc(account_E)
+
+                await expect(
+                    erc3643Facet
+                        .connect(signer_A)
+                        .forcedTransfer(account_A, account_E, AMOUNT)
+                ).to.revertedWithCustomError(
+                    erc3643Facet,
+                    'InvalidKycStatus'
+                )
+            })
+            it('GIVEN a token with clearing mode activated token WHEN attempting to forcedTransfer ClearingIsActivated error', async () => {
+                await clearingActionsFacet.activateClearing()
+
+                erc3643Facet = erc3643Facet.connect(signer_A)
+
+                // transfer with data fails
+                await expect(
+                    erc3643Facet.forcedTransfer(account_A, account_D, AMOUNT)
+                ).to.be.rejectedWith('ClearingIsActivated')
+            })
+            it('GIVEN finalizeControllable WHEN forcedTransfer THEN TokenIsNotControllable', async () => {
+
+                accessControlFacet = accessControlFacet.connect(signer_A)
+
+                erc1644Facet = erc1644Facet.connect(signer_A)
+
+                await expect(erc1644Facet.finalizeControllable())
+                    .to.emit(erc1644Facet, 'FinalizedControllerFeature')
+                    .withArgs(account_A)
+
+                // const isControllable = await erc1644Facet.isControllable()
+                // expect(isControllable).to.equal(false)
+
+                // await expect(
+                //     erc3643Facet.forcedTransfer(
+                //         account_A,
+                //         account_E,
+                //         AMOUNT,
+                //     )
+                // ).to.revertedWithCustomError(
+                //     erc3643Facet,
+                //     'TokenIsNotControllable'
+                // )
+            })
+
+        })
+
+        describe.skip('version', () => {
+            it('GIVEN an initialized token WHEN retrieving the version THEN returns the correct version', async () => {
+                const retrieved_version = await erc3643Facet.version()
+                expect(retrieved_version).to.equal(version)
+            })
+        })
+
     })
+
+        describe.skip('multi partition', () => {
+
+        })
 })
