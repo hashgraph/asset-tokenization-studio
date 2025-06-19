@@ -221,7 +221,8 @@ import {
     BusinessLogicResolver,
     Kyc,
     SsiManagement,
-    Hold, ERC3643,
+    Hold,
+    ERC3643,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -245,7 +246,8 @@ import {
     CLEARING_VALIDATOR_ROLE,
     ZERO,
     EMPTY_STRING,
-    ADDRESS_ZERO, CONTROLLER_ROLE,
+    ADDRESS_ZERO,
+    CONTROLLER_ROLE,
 } from '@scripts'
 import { Contract } from 'ethers'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -1266,11 +1268,13 @@ describe('ProtectedPartitions Tests', () => {
             })
 
             it('GIVEN a protected token WHEN performing a ERC3643 forcedTransfer THEN transaction fails with PartitionsAreProtectedAndNoRole', async () => {
-                await accessControlFacet.connect(signer_A).grantRole(CONTROLLER_ROLE, account_A)
-                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C);
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CONTROLLER_ROLE, account_A)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C)
 
                 await expect(
-                    erc3643Facet.forcedTransfer(account_C, account_B, amount,)
+                    erc3643Facet.forcedTransfer(account_C, account_B, amount)
                 ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
             })
 
