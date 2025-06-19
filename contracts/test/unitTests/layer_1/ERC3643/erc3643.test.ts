@@ -214,14 +214,12 @@ import {
     BusinessLogicResolver,
     IFactory,
     ERC3643,
-    ERC1594,
     type ERC1410Snapshot,
     Kyc,
     type ControlList,
     SsiManagement,
     ClearingActionsFacet,
     type AccessControl,
-    ERC1644,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -238,13 +236,9 @@ import {
     SSI_MANAGER_ROLE,
     ZERO,
     EMPTY_STRING,
-    FROM_ACCOUNT_KYC_ERROR_ID,
-    HASH_ZERO,
-    TO_ACCOUNT_KYC_ERROR_ID,
     CONTROL_LIST_ROLE,
     CLEARING_ROLE,
     CONTROLLER_ROLE,
-    SUCCESS,
     DEFAULT_PARTITION,
 } from '@scripts'
 
@@ -290,6 +284,8 @@ describe('ERC3643 Tests', () => {
         let erc3643Transferor: ERC3643
         let erc1410SnapshotFacet: ERC1410Snapshot
         let erc20Facet: ERC20
+        let erc3643Approved: ERC3643
+
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
@@ -390,6 +386,7 @@ describe('ERC3643 Tests', () => {
 
             erc3643Issuer = erc3643Facet.connect(signer_C)
             erc3643Transferor = erc3643Facet.connect(signer_E)
+            erc3643Approved = erc3643Facet.connect(signer_D)
 
             erc20Facet = await ethers.getContractAt(
                 'ERC20',
@@ -521,33 +518,40 @@ describe('ERC3643 Tests', () => {
         })
 
         describe('burn', () => {
-            it.skip('GIVEN an initialized token WHEN burning THEN transaction success', async () => {
+            it('GIVEN an initialized token WHEN burning THEN transaction success', async () => {
                 //happy path
-                await erc3643Issuer.mint(account_E, AMOUNT / 2)
+                await erc3643Facet.mint(account_E, AMOUNT)
 
-                const balance = await erc1410SnapshotFacet.balanceOf(account_E)
+                erc20Facet = erc20Facet.connect(signer_E)
 
-                expect(await erc3643Transferor.burn(account_E, AMOUNT / 4))
-                    .to.emit(erc3643Issuer, 'Redeemed')
-                    .withArgs(account_E, account_E, AMOUNT / 4)
+                await erc20Facet.approve(account_D, AMOUNT / 2)
 
-                // expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(
-                //     AMOUNT / 2
-                // )
-                // expect(await erc1410SnapshotFacet.balanceOf(account_E)).to.be.equal(
-                //     AMOUNT / 2
-                // )
-                // expect(
-                //     await erc1410SnapshotFacet.balanceOfByPartition(
-                //         DEFAULT_PARTITION,
-                //         account_E
-                //     )
-                // ).to.be.equal(AMOUNT / 4)
-                // expect(
-                //     await erc1410SnapshotFacet.totalSupplyByPartition(
-                //         DEFAULT_PARTITION
-                //     )
-                // ).to.be.equal(AMOUNT / 4)
+                erc3643Approved = erc3643Approved.connect(signer_D)
+
+                expect(await erc3643Approved.burn(account_E, AMOUNT / 2))
+                    .to.emit(erc3643Facet, 'Redeemed')
+                    .withArgs(account_D, account_E, AMOUNT / 2)
+
+                expect(
+                    await erc20Facet.allowance(account_E, account_D)
+                ).to.be.equal(0)
+                expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(
+                    AMOUNT / 2
+                )
+                expect(
+                    await erc1410SnapshotFacet.balanceOf(account_E)
+                ).to.be.equal(AMOUNT / 2)
+                expect(
+                    await erc1410SnapshotFacet.balanceOfByPartition(
+                        DEFAULT_PARTITION,
+                        account_E
+                    )
+                ).to.be.equal(AMOUNT / 2)
+                expect(
+                    await erc1410SnapshotFacet.totalSupplyByPartition(
+                        DEFAULT_PARTITION
+                    )
+                ).to.be.equal(AMOUNT / 2)
             })
             it('GIVEN a paused token WHEN attempting to burn TokenIsPaused error', async () => {
                 pauseFacet = pauseFacet.connect(signer_B)
