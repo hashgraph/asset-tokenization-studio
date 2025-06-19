@@ -507,5 +507,5 @@ export {
   RevokeKycMockRequest,
   GetKycStatusMockRequest,
   SetNameRequest,
-  SetSymbolRequest
+  SetSymbolRequest,
 };

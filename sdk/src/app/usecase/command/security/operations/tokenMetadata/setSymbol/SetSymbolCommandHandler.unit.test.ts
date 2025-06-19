@@ -217,9 +217,7 @@ import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import {
-  SetSymbolCommandFixture,
-} from '../../../../../../../../__tests__/fixtures/tokenMetadata/TokenMetadataFixture.js';
+import { SetSymbolCommandFixture } from '../../../../../../../../__tests__/fixtures/tokenMetadata/TokenMetadataFixture.js';
 import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
 import { SetSymbolCommandHandler } from './SetSymbolCommandHandler.js';
 import {
