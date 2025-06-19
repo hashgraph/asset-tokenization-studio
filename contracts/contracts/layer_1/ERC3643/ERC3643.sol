@@ -297,8 +297,8 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         uint256 _amount
     )
         external
-        onlyRole(_CONTROLLER_ROLE)
         onlyWithoutMultiPartition
+        onlyRole(_CONTROLLER_ROLE)
         onlyControllable
         onlyUnpaused
         onlyClearingDisabled
