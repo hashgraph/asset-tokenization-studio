@@ -206,299 +206,35 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
-import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
-import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../constants/roles.sol';
-import {_FREEZE_MANAGER_ROLE} from '../constants/roles.sol';
-import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {_ERC3643_STORAGE_POSITION} from '../constants/storagePositions.sol';
 
-contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
-    using Strings for uint256;
-
-    address private constant _ONCHAIN_ID = address(0);
-
-    function setAddressFrozen(
+abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
+    function _getFrozenAmountFor(
         address _userAddress
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-    {
-        emit TokensFrozen(_userAddress, 0, _DEFAULT_PARTITION); //TODO amount TBD
+    ) internal view returns (uint256) {
+        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        return st.frozenTokens[_userAddress];
     }
 
-    /**
-     * @notice Sets the name of the token.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
-    function setName(
-        string calldata _name
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
-        ERC20Storage storage erc20Storage = _setName(_name);
-
-        emit UpdatedTokenInformation(
-            erc20Storage.name,
-            erc20Storage.symbol,
-            erc20Storage.decimals,
-            _getLatestVersion().toString(),
-            _erc3643Storage().onchainID
-        );
-    }
-
-    /**
-     * @notice Sets the symbol of the token.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
-    function setSymbol(
-        string calldata _symbol
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
-        ERC20Storage storage erc20Storage = _setSymbol(_symbol);
-
-        emit UpdatedTokenInformation(
-            erc20Storage.name,
-            erc20Storage.symbol,
-            erc20Storage.decimals,
-            _getLatestVersion().toString(),
-            _erc3643Storage().onchainID
-        );
-    }
-
-    /**
-     * @notice Sets the onchainID address for the token.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
-    function setOnchainID(
-        address _onchainID
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
-        ERC20Storage storage erc20Storage = _erc20Storage();
-        _erc3643Storage().onchainID = _onchainID;
-
-        emit UpdatedTokenInformation(
-            erc20Storage.name,
-            erc20Storage.symbol,
-            erc20Storage.decimals,
-            _getLatestVersion().toString(),
-            _onchainID
-        );
-    }
-
-    /**
-     * @notice Sets the identity registry contract address.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
-    function setIdentityRegistry(
-        address _identityRegistry
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
-        _erc3643Storage().identityRegistry = _identityRegistry;
-        emit IdentityRegistryAdded(_identityRegistry);
-    }
-
-    /**
-     * @notice Sets the compliance contract address.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
-    function setCompliance(
-        address _compliance
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
-        _erc3643Storage().compliance = _compliance;
-        emit ComplianceAdded(_compliance);
-    }
-
-    /**
-     * @notice Retrieves the onchainID address associated with the token.
-     */
-    function onchainID() external view override returns (address) {
-        return _erc3643Storage().onchainID;
-    }
-
-    /**
-     * @notice Retrieves the identity registry contract address.
-     */
-    function identityRegistry()
-        external
-        view
-        override
-        returns (IIdentityRegistry)
-    {
-        return IIdentityRegistry(_erc3643Storage().identityRegistry);
-    }
-
-    /**
-     * @notice Retrieves the compliance contract address.
-     */
-    function compliance() external view override returns (ICompliance) {
-        return ICompliance(_erc3643Storage().compliance);
-		}
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        _checkUnfreezeAmount(_DEFAULT_PARTITION, _userAddress, _amount);
-        _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
-    function freezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-    {
-        _freezeTokensByPartition(_partition, _userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _partition);
-    }
-
-    function unfreezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-    {
-        _checkUnfreezeAmount(_partition, _userAddress, _amount);
-        _unfreezeTokensByPartition(_partition, _userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _partition);
-    }
-
-    function getFrozenTokensByPartition(
+    function _getFrozenAmountForByPartition(
         bytes32 _partition,
         address _userAddress
-    ) external view override returns (uint256) {
-        return _getFrozenAmountForByPartitionAdjusted(_partition, _userAddress);
+    ) internal view returns (uint256) {
+        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        return st.frozenTokensByPartition[_userAddress][_partition];
     }
 
-    function getFrozenTokens(
-        address _userAddress
-    ) external view override returns (uint256) {
-        return _getFrozenAmountForAdjusted(_userAddress);
-    }
-
-    function getStaticResolverKey()
-        external
+    function _erc3643Storage()
+        internal
         pure
-        override
-        returns (bytes32 staticResolverKey_)
+        returns (IERC3643.ERC3643Storage storage erc3643Storage_)
     {
-        staticResolverKey_ = _ERC3643_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](17);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .identityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setIdentityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setCompliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .freezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .unfreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getFrozenTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .freezePartialTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .unfreezePartialTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getFrozenTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setAddressFrozen
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;
-    }
-
-    function _checkUnfreezeAmount(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    ) private view {
-        uint256 frozenAmount = _getFrozenAmountForByPartitionAdjusted(
-            _partition,
-            _userAddress
-        );
-        if (frozenAmount < _amount) {
-            revert InsufficientFrozenBalance(
-                _userAddress,
-                _amount,
-                frozenAmount,
-                _partition
-            );
+        bytes32 position = _ERC3643_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc3643Storage_.slot := position
         }
     }
 }
