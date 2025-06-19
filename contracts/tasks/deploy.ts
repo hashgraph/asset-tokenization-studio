@@ -247,9 +247,8 @@ task(
         const {
             deployAtsFullInfrastructure,
             DeployAtsFullInfrastructureCommand,
-            addresstoHederaId,
         } = await import('@scripts')
-        const network = hre.network.name as Network
+
         console.log(`Executing deployAll on ${hre.network.name} ...`)
         const { signer }: GetSignerResult = await hre.run('getSigner', {
             privateKey: args.privateKey,
