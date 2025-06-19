@@ -249,6 +249,9 @@ describe('ERC3643 Tests', () => {
     const newSymbol = 'TAC_ERC3643'
     const decimals = 6
     const version = '1'
+    const onchainId = ethers.Wallet.createRandom().address
+    const identityRegistry = ethers.Wallet.createRandom().address
+    const compliance = ethers.Wallet.createRandom().address
     const isin = isinGenerator()
 
     describe('single partition', () => {
@@ -351,6 +354,47 @@ describe('ERC3643 Tests', () => {
             expect(retrieved_newSymbol).to.equal(newSymbol)
         })
 
+        it('GIVEN an initialized token WHEN updating the onChanId THEN UpdatedTokenInformation emits OnchainIDUpdated with updated onchainId and current metadata', async () => {
+            const retrieved_onChainId = await erc3643Facet.onchainID()
+            expect(retrieved_onChainId).to.equal(ADDRESS_ZERO)
+
+            //Update onChainId
+            expect(await erc3643Facet.setOnchainID(onchainId))
+                .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+                .withArgs(name, symbol, decimals, version, onchainId)
+
+            const retrieved_newOnChainId = await erc3643Facet.onchainID()
+            expect(retrieved_newOnChainId).to.equal(onchainId)
+        })
+
+        it('GIVEN an initialized token WHEN updating the identityRegistry THEN setIdentityRegistry emits IdentityRegistryAdded with updated identityRegistry', async () => {
+            const retrieved_identityRegistry =
+                await erc3643Facet.identityRegistry()
+            expect(retrieved_identityRegistry).to.equal(ADDRESS_ZERO)
+
+            //Update identityRegistry
+            expect(await erc3643Facet.setIdentityRegistry(identityRegistry))
+                .to.emit(erc3643Facet, 'IdentityRegistryAdded')
+                .withArgs(identityRegistry)
+
+            const retrieved_newIdentityRegistry =
+                await erc3643Facet.identityRegistry()
+            expect(retrieved_newIdentityRegistry).to.equal(identityRegistry)
+        })
+
+        it('GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance', async () => {
+            const retrieved_compliance = await erc3643Facet.compliance()
+            expect(retrieved_compliance).to.equal(ADDRESS_ZERO)
+
+            //Update compliance
+            expect(await erc3643Facet.setCompliance(compliance))
+                .to.emit(erc3643Facet, 'ComplianceAdded')
+                .withArgs(compliance)
+
+            const retrieved_newCompliance = await erc3643Facet.compliance()
+            expect(retrieved_newCompliance).to.equal(compliance)
+        })
+
         it('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
             await pauseFacet.pause()
 
@@ -360,6 +404,15 @@ describe('ERC3643 Tests', () => {
             await expect(erc3643Facet.setName(newSymbol)).to.be.rejectedWith(
                 'TokenIsPaused'
             )
+            await expect(
+                erc3643Facet.setOnchainID(onchainId)
+            ).to.be.rejectedWith('TokenIsPaused')
+            await expect(
+                erc3643Facet.setIdentityRegistry(identityRegistry)
+            ).to.be.rejectedWith('TokenIsPaused')
+            await expect(
+                erc3643Facet.setCompliance(compliance)
+            ).to.be.rejectedWith('TokenIsPaused')
         })
 
         describe('AccessControl', () => {
@@ -379,6 +432,33 @@ describe('ERC3643 Tests', () => {
                 // set symbol fails
                 await expect(
                     erc3643Facet.setSymbol(newSymbol)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+            it('GIVEN an account without admin role WHEN setOnchainID THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // set onchainID fails
+                await expect(
+                    erc3643Facet.setOnchainID(onchainId)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+            it('GIVEN an account without admin role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // set IdentityRegistry fails
+                await expect(
+                    erc3643Facet.setIdentityRegistry(identityRegistry)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+            it('GIVEN an account without admin role WHEN setCompliance THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // set compliance fails
+                await expect(
+                    erc3643Facet.setCompliance(compliance)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
         })

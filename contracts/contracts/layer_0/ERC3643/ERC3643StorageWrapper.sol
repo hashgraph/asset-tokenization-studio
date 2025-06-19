@@ -207,6 +207,8 @@
 pragma solidity 0.8.18;
 
 import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
+import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {_ERC3643_STORAGE_POSITION} from '../constants/storagePositions.sol';
 
 abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
     function _setName(
@@ -221,5 +223,17 @@ abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
     ) internal returns (ERC20Storage storage erc20Storage_) {
         erc20Storage_ = _erc20Storage();
         erc20Storage_.symbol = _symbol;
+    }
+
+    function _erc3643Storage()
+        internal
+        pure
+        returns (IERC3643.ERC3643Storage storage erc3643Storage_)
+    {
+        bytes32 position = _ERC3643_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc3643Storage_.slot := position
+        }
     }
 }
