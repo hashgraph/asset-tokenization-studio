@@ -302,7 +302,7 @@ task(
             })
         )
 
-        // * Display the deployed addresses
+        // * Display the deployed addresses (without contractIds)
         const addressList = {
             'Business Logic Resolver Proxy': businessLogicResolver.proxyAddress,
             'Business Logic Resolver Proxy Admin':
@@ -348,35 +348,24 @@ task(
             'Protected Partitions': protectedPartitions.address,
         }
 
-        const contractAddress = []
+        const contractAddresses: { name: string; address: string }[] = []
 
-        console.log('\n 🟢 Deployed ATS Contract List:')
+        console.log('\n 🟢 Deployed ATS Contract Addresses:')
         for (const [key, address] of Object.entries(addressList)) {
             if (!address) {
                 continue
             }
-            let contractId = ''
-            try {
-                contractId = await addresstoHederaId({
-                    address,
-                    network,
-                })
-                console.log(`   --> ${key}: ${address} (${contractId})`)
-            } catch (e: unknown) {
-                console.log((e as Error).message)
-            } finally {
-                contractAddress.push({
-                    name: key,
-                    address: address,
-                    contractId: contractId,
-                })
-            }
+            console.log(`   --> ${key}: ${address}`)
+            contractAddresses.push({
+                name: key,
+                address: address,
+            })
         }
         if (args.fileName) {
             console.log('File saved: ' + args.fileName + '.json')
             fs.writeFileSync(
                 args.fileName + '.json',
-                JSON.stringify(contractAddress, null, 2),
+                JSON.stringify(contractAddresses, null, 2),
                 'utf8'
             )
         }
