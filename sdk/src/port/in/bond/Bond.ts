@@ -445,7 +445,7 @@ class BondInPort implements IBondInPort {
   async getAllCoupons(
     request: GetAllCouponsRequest,
   ): Promise<CouponViewModel[]> {
-    ValidatedRequest.handleValidation('GetAllCouponRequest', request);
+    ValidatedRequest.handleValidation('GetAllCouponsRequest', request);
 
     const count = await this.queryBus.execute(
       new GetCouponCountQuery(request.securityId),

@@ -225,7 +225,7 @@ abstract contract ERC1410BasicStorageWrapper is
         bytes memory _data,
         address _operator,
         bytes memory _operatorData
-    ) internal {
+    ) internal returns (bytes32) {
         _beforeTokenTransfer(
             _partition,
             _from,
@@ -247,18 +247,19 @@ abstract contract ERC1410BasicStorageWrapper is
         );
 
         if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
-            return
-                _addPartitionTo(
-                    _basicTransferInfo.value,
-                    _basicTransferInfo.to,
-                    _partition
-                );
+            _addPartitionTo(
+                _basicTransferInfo.value,
+                _basicTransferInfo.to,
+                _partition
+            );
+            return bytes32(0);
         }
         _increaseBalanceByPartition(
             _basicTransferInfo.to,
             _basicTransferInfo.value,
             _partition
         );
+        return bytes32(0);
     }
 
     function _beforeTokenTransfer(

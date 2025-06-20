@@ -210,6 +210,8 @@ import {
     ERC1594StorageWrapper
 } from '../ERC1400/ERC1594/ERC1594StorageWrapper.sol';
 import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -240,8 +242,8 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             erc20Storage.name,
             erc20Storage.symbol,
             erc20Storage.decimals,
-            this.version(),
-            _ONCHAIN_ID
+            _getLatestVersion().toString(),
+            _erc3643Storage().onchainID
         );
     }
 
@@ -258,8 +260,8 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             erc20Storage.name,
             erc20Storage.symbol,
             erc20Storage.decimals,
-            this.version(),
-            _ONCHAIN_ID
+            _getLatestVersion().toString(),
+            _erc3643Storage().onchainID
         );
     }
 
@@ -283,6 +285,58 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         address _to,
         uint256 _amount
     )
+    /**
+     * @notice Sets the onchainID address for the token.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
+    function setOnchainID(
+        address _onchainID
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+        ERC20Storage storage erc20Storage = _erc20Storage();
+        _erc3643Storage().onchainID = _onchainID;
+
+        emit UpdatedTokenInformation(
+            erc20Storage.name,
+            erc20Storage.symbol,
+            erc20Storage.decimals,
+            _getLatestVersion().toString(),
+            _onchainID
+        );
+    }
+
+    /**
+     * @notice Sets the identity registry contract address.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
+    function setIdentityRegistry(
+        address _identityRegistry
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _erc3643Storage().identityRegistry = _identityRegistry;
+        emit IdentityRegistryAdded(_identityRegistry);
+    }
+
+    /**
+     * @notice Sets the compliance contract address.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
+    function setCompliance(
+        address _compliance
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _erc3643Storage().compliance = _compliance;
+        emit ComplianceAdded(_compliance);
+    }
+
+    /**
+     * @notice Retrieves the onchainID address associated with the token.
+     */
+    function onchainID() external view override returns (address) {
+        return _erc3643Storage().onchainID;
+    }
+
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
+    function identityRegistry()
         external
         onlyWithinMaxSupply(_amount)
         onlyUnpaused
@@ -291,8 +345,12 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         onlyWithoutMultiPartition
         onlyIssuable //Falta test
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        view
+        override
+        returns (IIdentityRegistry)
     {
         _issue(_to, _amount, '');
+        return IIdentityRegistry(_erc3643Storage().identityRegistry);
     }
 
     function forcedTransfer(
@@ -319,6 +377,11 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
 
     function version() external view returns (string memory) {
         return Strings.toString(_getLatestVersion());
+    /**
+     * @notice Retrieves the compliance contract address.
+     */
+    function compliance() external view override returns (ICompliance) {
+        return ICompliance(_erc3643Storage().compliance);
     }
 
     function getStaticResolverKey()
@@ -336,12 +399,22 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](6);
+        staticFunctionSelectors_ = new bytes4[](11);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .forcedTransfer
+            .identityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setIdentityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setCompliance
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;

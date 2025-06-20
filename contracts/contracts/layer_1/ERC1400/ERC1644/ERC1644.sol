@@ -223,7 +223,6 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
         _erc1644Storage().initialized = true;
     }
 
-    // solhint-disable no-unused-vars
     /**
      * @notice This function allows an authorised address to transfer tokens between any two token holders.
      * The transfer must still respect the balances of the token holders (so the transfer must be for at most
@@ -294,9 +293,6 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     {
         _finalizeControllable();
     }
-
-    // solhint-enable no-empty-blocks
-    // solhint-enable no-unused-vars
 
     /**
      * @notice In order to provide transparency over whether `controllerTransfer` / `controllerRedeem` are useable

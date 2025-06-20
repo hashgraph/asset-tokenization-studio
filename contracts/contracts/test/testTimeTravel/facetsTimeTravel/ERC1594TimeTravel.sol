@@ -214,8 +214,6 @@ import {
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
 contract ERC1594TimeTravel is ERC1594, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal

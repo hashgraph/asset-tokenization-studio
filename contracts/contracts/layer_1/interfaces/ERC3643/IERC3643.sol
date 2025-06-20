@@ -204,11 +204,18 @@
 */
 
 // SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
 
+import {ICompliance} from './ICompliance.sol';
+import {IIdentityRegistry} from './IIdentityRegistry.sol';
+
 interface IERC3643 {
+    struct ERC3643Storage {
+        address onchainID;
+        address identityRegistry;
+        address compliance;
+    }
+
     event UpdatedTokenInformation(
         string indexed newName,
         string indexed newSymbol,
@@ -216,6 +223,9 @@ interface IERC3643 {
         string newVersion,
         address indexed newOnchainID
     );
+
+    event IdentityRegistryAdded(address indexed identityRegistry);
+    event ComplianceAdded(address indexed compliance);
 
     /**
      * @dev Sets the name of the token to `_name`.
@@ -232,13 +242,16 @@ interface IERC3643 {
     function setSymbol(string calldata _symbol) external;
 
     /**
+     * @dev Sets the onchainID of the token to `_onchainID`.
      * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
      *
      * This function should only be callable by an authorized entities
      *
      * Returns `true` if the transfer was successful.
      *
+     * Emits an UpdatedTokenInformation event.
      */
+    function setOnchainID(address _onchainID) external;
     function forcedTransfer(
         address _from,
         address _to,
@@ -246,22 +259,40 @@ interface IERC3643 {
     ) external returns (bool);
 
     /**
+     * @dev Sets the identity registry contract address.
      * @dev Mints `_amount` tokens to the address `_to`.
      *
+     * Emits an IdentityRegistryAdded event.
      */
+    function setIdentityRegistry(address _identityRegistry) external;
     function mint(address _to, uint256 _amount) external;
 
     /**
+     * @dev Sets the compliance contract address.
      * @dev Burns `_amount` tokens from the address `_userAddress`.
      *
      * Reduces total supply.
      *
+     * Emits a ComplianceAdded event.
      */
+    function setCompliance(address _compliance) external;
+
+    /**
+     * @dev Returns the onchainID address associated with the token.
+     */
+    function onchainID() external view returns (address);
     function burn(address _userAddress, uint256 _amount) external;
 
     /**
+     * @dev Returns the address of the identity registry contract.
      * @dev Returns the version of the contract as a string.
      *
      */
+    function identityRegistry() external view returns (IIdentityRegistry);
+
+    /**
+     * @dev Returns the address of the compliance contract.
+     */
+    function compliance() external view returns (ICompliance);
     function version() external view returns (string memory);
 }

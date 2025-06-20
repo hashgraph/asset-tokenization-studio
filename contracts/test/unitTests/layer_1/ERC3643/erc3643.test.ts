@@ -253,6 +253,9 @@ const AMOUNT = 1000
 const MAX_SUPPLY = 10000000
 const EMPTY_VC_ID = EMPTY_STRING
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
+const onchainId = ethers.Wallet.createRandom().address
+const identityRegistry = ethers.Wallet.createRandom().address
+const compliance = ethers.Wallet.createRandom().address
 
 describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
@@ -270,6 +273,7 @@ describe('ERC3643 Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
+    let erc20Facet: ERC20
     let erc3643Facet: ERC3643
 
     let pauseFacet: Pause
@@ -302,6 +306,7 @@ describe('ERC3643 Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -309,11 +314,13 @@ describe('ERC3643 Tests', () => {
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
         })
+
         beforeEach(async () => {
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
                 members: [account_B],
             }
+            const init_rbacs: Rbac[] = [rbacPause]
             const rbacIssuer: Rbac = {
                 role: ISSUER_ROLE,
                 members: [account_C],
@@ -405,21 +412,88 @@ describe('ERC3643 Tests', () => {
 
             kycFacet = await ethers.getContractAt(
                 'Kyc',
+            pauseFacet = await ethers.getContractAt(
+                'Pause',
                 diamond.address,
                 signer_B
             )
+        })
+
+        it('GIVEN an initialized token WHEN updating the name THEN setName emits UpdatedTokenInformation with updated name and current metadata', async () => {
+            const retrieved_name = await erc20Facet.name()
+            expect(retrieved_name).to.equal(name)
+
+            //Update name
+            expect(await erc3643Facet.setName(newName))
+                .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+                .withArgs(newName, symbol, decimals, version, ADDRESS_ZERO)
+
+            const retrieved_newName = await erc20Facet.name()
+            expect(retrieved_newName).to.equal(newName)
+        })
             ssiManagementFacet = await ethers.getContractAt(
                 'SsiManagement',
                 diamond.address,
                 signer_A
             )
 
+        it('GIVEN an initialized token WHEN updating the symbol THEN setSymbol emits UpdatedTokenInformation with updated symbol and current metadata', async () => {
+            const retrieved_symbol = await erc20Facet.symbol()
+            expect(retrieved_symbol).to.equal(symbol)
             clearingActionsFacet = await ethers.getContractAt(
                 'ClearingActionsFacet',
                 diamond.address,
                 signer_B
             )
 
+            //Update symbol
+            expect(await erc3643Facet.setSymbol(newSymbol))
+                .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+                .withArgs(name, newSymbol, decimals, version, ADDRESS_ZERO)
+
+            const retrieved_newSymbol = await erc20Facet.symbol()
+            expect(retrieved_newSymbol).to.equal(newSymbol)
+        })
+
+        it('GIVEN an initialized token WHEN updating the onChanId THEN UpdatedTokenInformation emits OnchainIDUpdated with updated onchainId and current metadata', async () => {
+            const retrieved_onChainId = await erc3643Facet.onchainID()
+            expect(retrieved_onChainId).to.equal(ADDRESS_ZERO)
+
+            //Update onChainId
+            expect(await erc3643Facet.setOnchainID(onchainId))
+                .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+                .withArgs(name, symbol, decimals, version, onchainId)
+
+            const retrieved_newOnChainId = await erc3643Facet.onchainID()
+            expect(retrieved_newOnChainId).to.equal(onchainId)
+        })
+
+        it('GIVEN an initialized token WHEN updating the identityRegistry THEN setIdentityRegistry emits IdentityRegistryAdded with updated identityRegistry', async () => {
+            const retrieved_identityRegistry =
+                await erc3643Facet.identityRegistry()
+            expect(retrieved_identityRegistry).to.equal(ADDRESS_ZERO)
+
+            //Update identityRegistry
+            expect(await erc3643Facet.setIdentityRegistry(identityRegistry))
+                .to.emit(erc3643Facet, 'IdentityRegistryAdded')
+                .withArgs(identityRegistry)
+
+            const retrieved_newIdentityRegistry =
+                await erc3643Facet.identityRegistry()
+            expect(retrieved_newIdentityRegistry).to.equal(identityRegistry)
+        })
+
+        it('GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance', async () => {
+            const retrieved_compliance = await erc3643Facet.compliance()
+            expect(retrieved_compliance).to.equal(ADDRESS_ZERO)
+
+            //Update compliance
+            expect(await erc3643Facet.setCompliance(compliance))
+                .to.emit(erc3643Facet, 'ComplianceAdded')
+                .withArgs(compliance)
+
+            const retrieved_newCompliance = await erc3643Facet.compliance()
+            expect(retrieved_newCompliance).to.equal(compliance)
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
             await ssiManagementFacet.addIssuer(account_E)
@@ -449,6 +523,20 @@ describe('ERC3643 Tests', () => {
             await expect(erc3643Facet.setName(newSymbol)).to.be.rejectedWith(
                 'TokenIsPaused'
             )
+            await expect(
+                erc3643Facet.setOnchainID(onchainId)
+            ).to.be.rejectedWith('TokenIsPaused')
+            await expect(
+                erc3643Facet.setIdentityRegistry(identityRegistry)
+            ).to.be.rejectedWith('TokenIsPaused')
+            await expect(
+                erc3643Facet.setCompliance(compliance)
+            ).to.be.rejectedWith('TokenIsPaused')
+        })
+
+        describe('AccessControl', () => {
+            it('GIVEN an account without admin role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
         })
 
         describe('mint', () => {
@@ -698,6 +786,10 @@ describe('ERC3643 Tests', () => {
             it('GIVEN an account without CONTROLLER_ROLE WHEN forcedTransfer is called THEN transaction fails with AccountHasNoRole', async () => {
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
+                // set name fails
+                await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
+                    'AccountHasNoRole'
+                )
                 await expect(
                     erc3643Facet.forcedTransfer(account_C, account_B, AMOUNT)
                 ).to.be.rejectedWith('AccountHasNoRole')
@@ -741,6 +833,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setSymbol(newSymbol)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
+            it('GIVEN an account without admin role WHEN setOnchainID THEN transaction fails with AccountHasNoRole', async () => {
             it('GIVEN an initialized token WHEN updating the symbol THEN setSymbol emits UpdatedTokenInformation with updated symbol and current metadata', async () => {
                 const retrieved_symbol = await erc20Facet.symbol()
                 expect(retrieved_symbol).to.equal(symbol)
@@ -773,6 +866,14 @@ describe('ERC3643 Tests', () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
+                // set onchainID fails
+                await expect(
+                    erc3643Facet.setOnchainID(onchainId)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+            it('GIVEN an account without admin role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
                 // set name fails
                 await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
                     'AccountHasNoRole'
@@ -899,6 +1000,14 @@ describe('ERC3643 Tests', () => {
         it('GIVEN an initialized token WHEN burning THEN transaction success', async () => {
             erc3643Facet = erc3643Facet.connect(signer_C)
 
+                // set IdentityRegistry fails
+                await expect(
+                    erc3643Facet.setIdentityRegistry(identityRegistry)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+            it('GIVEN an account without admin role WHEN setCompliance THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
             // burn with data fails
             await expect(
                 erc3643Facet.burn(account_C, 2 * BALANCE_OF_C_ORIGINAL)
@@ -908,6 +1017,11 @@ describe('ERC3643 Tests', () => {
             )
         })
 
+                // set compliance fails
+                await expect(
+                    erc3643Facet.setCompliance(compliance)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
         it('GIVEN an account with balance WHEN forcedTransfer THEN transaction success', async () => {
             // Using account A (with role)
             erc3643Facet = erc3643Facet.connect(signer_A)

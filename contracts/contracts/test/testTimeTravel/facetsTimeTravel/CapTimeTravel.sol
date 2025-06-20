@@ -212,8 +212,6 @@ import {
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
 contract CapTimeTravel is Cap, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
