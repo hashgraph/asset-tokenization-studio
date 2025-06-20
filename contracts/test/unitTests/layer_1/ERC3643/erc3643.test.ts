@@ -982,7 +982,7 @@ describe('ERC3643 Tests', () => {
             await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
         })
 
-        it('GIVEN an account with issuer role WHEN mint THEN transaction succeeds', async () => {
+        it('GIVEN an account with issuer role WHEN mint THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
             erc3643Facet = erc3643Facet.connect(signer_C)
 
             // transfer with data fails
@@ -994,7 +994,7 @@ describe('ERC3643 Tests', () => {
             )
         })
 
-        it('GIVEN an initialized token WHEN burning THEN transaction success', async () => {
+        it('GIVEN an initialized token WHEN burning THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
             erc3643Facet = erc3643Facet.connect(signer_C)
 
             // burn with data fails
@@ -1006,7 +1006,7 @@ describe('ERC3643 Tests', () => {
             )
         })
 
-        it('GIVEN an account with balance WHEN forcedTransfer THEN transaction success', async () => {
+        it('GIVEN an account with balance WHEN forcedTransfer THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
             // Using account A (with role)
             erc3643Facet = erc3643Facet.connect(signer_A)
 
