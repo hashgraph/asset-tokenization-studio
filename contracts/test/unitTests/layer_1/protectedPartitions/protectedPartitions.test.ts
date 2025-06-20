@@ -222,6 +222,7 @@ import {
     Kyc,
     SsiManagement,
     Hold,
+    ERC3643,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -246,6 +247,7 @@ import {
     ZERO,
     EMPTY_STRING,
     ADDRESS_ZERO,
+    CONTROLLER_ROLE,
 } from '@scripts'
 import { Contract } from 'ethers'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -449,6 +451,7 @@ describe('ProtectedPartitions Tests', () => {
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
     let erc1594Facet: ERC1594
+    let erc3643Facet: ERC3643
     let erc20Facet: ERC20
     let transferAndLockFacet: TransferAndLock
     let controlListFacet: ControlList
@@ -493,6 +496,7 @@ describe('ProtectedPartitions Tests', () => {
             address
         )
         erc1594Facet = await ethers.getContractAt('ERC1594', address)
+        erc3643Facet = await ethers.getContractAt('ERC3643', address)
         erc20Facet = await ethers.getContractAt('ERC20', address)
         transferAndLockFacet = await ethers.getContractAt(
             'TransferAndLock',
@@ -1260,6 +1264,17 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a protected token WHEN performing a ERC1594 transfer with Data THEN transaction fails with PartitionsAreProtectedAndNoRole', async () => {
                 await expect(
                     erc1594Facet.transferWithData(account_B, amount, '0x1234')
+                ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
+            })
+
+            it('GIVEN a protected token WHEN performing a ERC3643 forcedTransfer THEN transaction fails with PartitionsAreProtectedAndNoRole', async () => {
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CONTROLLER_ROLE, account_A)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C)
+
+                await expect(
+                    erc3643Facet.forcedTransfer(account_C, account_B, amount)
                 ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
             })
 
