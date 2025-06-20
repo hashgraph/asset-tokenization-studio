@@ -227,12 +227,20 @@ interface IERC3643 {
         bytes32 partition
     );
 
+    event RecoverySuccess(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    );
+
     error InsufficientFrozenBalance(
         address user,
         uint256 requestedUnfreeze,
         uint256 availableFrozen,
         bytes32 partition
     );
+
+    error WalletRecovered();
 
     /**
      * @dev Sets the name of the token to `_name`.
@@ -271,6 +279,14 @@ interface IERC3643 {
     ) external;
 
     function setAddressFrozen(address _userAddress) external;
+
+    function recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) external returns (bool);
+
+    function isAddressRecovered(address _wallet) external returns (bool);
 
     function getFrozenTokens(
         address _userAddress

@@ -213,10 +213,11 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
+import {ERC3643StorageWrapper1} from '../ERC3643/ERC3643StorageWrapper1.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
+abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 

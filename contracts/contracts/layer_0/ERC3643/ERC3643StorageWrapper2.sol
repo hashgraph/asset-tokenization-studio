@@ -213,9 +213,24 @@ import {
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
+    function _setName(
+        string calldata _name
+    ) internal returns (ERC20Storage storage erc20Storage_) {
+        erc20Storage_ = _erc20Storage();
+        erc20Storage_.name = _name;
+    }
+
+    function _setSymbol(
+        string calldata _symbol
+    ) internal returns (ERC20Storage storage erc20Storage_) {
+        erc20Storage_ = _erc20Storage();
+        erc20Storage_.symbol = _symbol;
+    }
+
     function _freezeTokens(address _account, uint256 _amount) internal {
         _freezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
     }
+
     function _unfreezeTokens(address _account, uint256 _amount) internal {
         _unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
     }
@@ -236,6 +251,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
 
         _reduceBalanceByPartition(_account, _amount, _partition);
     }
+
     function _unfreezeTokensByPartition(
         bytes32 _partition,
         address _account,
@@ -324,6 +340,26 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
             return;
         }
         _addPartitionTo(_amount, _to, _partition);
+    }
+
+    function _recoveryAddress(
+        address _lostWallet,
+        address _newWallet
+    ) internal returns (bool) {
+        uint256 balance = _balanceOfAdjusted(_lostWallet);
+        uint256 frozenBalance = _getFrozenAmountForAdjusted(_lostWallet);
+        if (frozenBalance > 0) {
+            _unfreezeTokens(_lostWallet, frozenBalance);
+        }
+        if (balance + frozenBalance > 0) {
+            _transfer(_lostWallet, _newWallet, balance + frozenBalance);
+        }
+        if (frozenBalance > 0) {
+            _freezeTokens(_newWallet, frozenBalance);
+        }
+        // TODO: transfer freeze status to new wallet
+        _getFreezeStorage()._addressRecovered[_lostWallet] = true;
+        return true;
     }
 
     function _getFrozenAmountForAdjusted(

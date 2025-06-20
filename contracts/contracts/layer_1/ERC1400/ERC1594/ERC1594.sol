@@ -234,6 +234,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
+        checkRecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
         onlyWithoutMultiPartition
@@ -255,6 +256,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
+        checkRecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
         onlyListedAllowed(_from)
@@ -283,6 +285,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     )
         external
         override
+        checkRecoveredAddress(_tokenHolder)
         onlyWithinMaxSupply(_value)
         onlyUnpaused
         onlyRole(_ISSUER_ROLE)
@@ -309,6 +312,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
+        checkRecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -334,6 +338,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
+        validateAddress(_tokenHolder)
         onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_tokenHolder)

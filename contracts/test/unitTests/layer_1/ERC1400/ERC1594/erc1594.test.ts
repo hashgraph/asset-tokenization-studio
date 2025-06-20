@@ -1217,12 +1217,9 @@ describe('ERC1594 Tests', () => {
 
         it('GIVEN a non allowed WHEN canTransferFrom THEN responds _ALLOWANCE_REACHED_ERROR_ID', async () => {
             expect(
-                await erc1594Facet.canTransferFrom(
-                    account_A,
-                    account_D,
-                    AMOUNT,
-                    DATA
-                )
+                await erc1594Facet
+                    .connect(signer_D)
+                    .canTransferFrom(account_A, account_D, AMOUNT, DATA)
             ).to.be.deep.equal([
                 false,
                 ALLOWANCE_REACHED_ERROR_ID,

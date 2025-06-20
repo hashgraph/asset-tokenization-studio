@@ -334,6 +334,19 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         emit TokensUnfrozen(_userAddress, _amount, _partition);
     }
 
+    function recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) external returns (bool) {
+        emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
+        return _recoveryAddress(_lostWallet, _newWallet);
+    }
+
+    function isAddressRecovered(address _wallet) external view returns (bool) {
+        return _isRecovered(_wallet);
+    }
+
     function getFrozenTokensByPartition(
         bytes32 _partition,
         address _userAddress
@@ -362,7 +375,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](9);
+        staticFunctionSelectors_ = new bytes4[](11);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
@@ -386,6 +399,12 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .setAddressFrozen
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .recoveryAddress
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .isAddressRecovered
             .selector;
     }
 
