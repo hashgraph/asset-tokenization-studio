@@ -204,387 +204,193 @@
 */
 
 import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { Button, Heading, Text, useToast } from "io-bricks-ui";
-import { SearchInputController, DefinitionList } from "io-bricks-ui";
-import { useForm } from "react-hook-form";
+import { History } from "../../components/History";
 import { useTranslation } from "react-i18next";
-import { isHederaValidAddress, required } from "../../../utils/rules";
 import {
-  GetAccountBalanceRequest,
-  GetClearedAmountForRequest,
-  GetHeldAmountForRequest,
-  GetLocksIdRequest,
-  SecurityViewModel,
+  Text,
+  InputController,
+  InputNumberController,
+  Button,
+  ToggleController,
+  Tooltip,
+  PhosphorIcon,
+} from "io-bricks-ui";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { required, min } from "../../utils/rules";
+import { CancelButton } from "../../components/CancelButton";
+import { useParams } from "react-router";
+import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
+import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";
+import { useWalletStore } from "../../store/walletStore";
+import { useSecurityStore } from "../../store/securityStore";
+import { Info } from "@phosphor-icons/react";
+import {
+  useFreezeSecurity,
+  useUnfreezeSecurity,
+} from "../../hooks/mutations/useFreezeSecurity";
+import {
+  UnfreezeRequest,
+  FreezeRequest,
 } from "@hashgraph/asset-tokenization-sdk";
-import { useGetBalanceOf } from "../../../hooks/queries/useGetSecurityDetails";
-import { useEffect, useMemo, useState } from "react";
-import { useGetLockers } from "../../../hooks/queries/useGetLockers";
-import { useGetHeldAmountFor } from "../../../hooks/queries/useGetHolds";
-import { useSecurityStore } from "../../../store/securityStore";
-import { useGetClearedAmountFor } from "../../../hooks/queries/useClearingOperations";
-import { useGetFreezedAmountFor } from "../../../hooks/queries/useGetFreezers";
 
-interface BalanceProps {
-  id?: string;
-  detailsResponse: SecurityViewModel;
+interface MintFormValues {
+  amount: number;
+  destination: string;
+  isUnfreeze: boolean;
 }
 
-interface BalanceSearchFieldValue {
-  search: string;
-}
-
-export const Balance = ({ id, detailsResponse }: BalanceProps) => {
-  const { details } = useSecurityStore();
-  const {
-    control,
-    formState: { isValid },
-    handleSubmit,
-  } = useForm<BalanceSearchFieldValue>({
-    mode: "onSubmit",
+export const DigitalSecurityFreeze = () => {
+  const { t: tHeader } = useTranslation("security", {
+    keyPrefix: "freeze.header",
   });
+  const { t: tForm } = useTranslation("security", {
+    keyPrefix: "freeze.input",
+  });
+  const { t } = useTranslation("security", { keyPrefix: "freeze" });
+  const { t: tGlobal } = useTranslation("globals");
   const { t: tProperties } = useTranslation("properties");
-  const { t: tSearch } = useTranslation("security", {
-    keyPrefix: "details.balance.search",
+  const { control, formState, handleSubmit, reset } = useForm<MintFormValues>({
+    mode: "all",
   });
-  const { t: tDetails } = useTranslation("security", {
-    keyPrefix: "details.balance.details",
-  });
-  const { t: tError } = useTranslation("security", {
-    keyPrefix: "details.balance.error",
-  });
-  const [targetId, setTargetId] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isLoadingLockers, setIsLoadingLockers] = useState<boolean>(false);
-  const [isLoadingHolds, setIsLoadingHolds] = useState<boolean>(false);
-  const [isLoadingFreezed, setIsLoadingFreezed] = useState<boolean>(false);
-  const [isLoadingCleared, setIsLoadingCleared] = useState<boolean>(false);
-  const toast = useToast();
-
-  const { data: balance, refetch } = useGetBalanceOf(
-    new GetAccountBalanceRequest({
-      securityId: id!,
-      targetId: targetId ?? "",
-    }),
-    {
-      enabled: false,
-      refetchOnMount: false,
-      onSuccess: () => {
-        setIsLoading(false);
-      },
-      onError: () => {
-        setIsLoading(false);
-        toast.show({
-          duration: 3000,
-          title: tError("targetId"),
-          status: "error",
-        });
-      },
-    },
+  const { address: walletAddress } = useWalletStore();
+  const { id = "" } = useParams();
+  const { details } = useSecurityStore();
+  const { isLoading: isBalancePanelLoading, update } = useDetailsBalancePanel(
+    id,
+    walletAddress,
   );
+  const { mutate: freezeSecurity, isLoading: isFreezeLoading } =
+    useFreezeSecurity();
+  const { mutate: unfreezeSecurity, isLoading: isUnfreezeLoading } =
+    useUnfreezeSecurity();
 
-  const { data: lockers, refetch: refetchLockers } = useGetLockers(
-    new GetLocksIdRequest({
-      securityId: id!,
-      targetId: targetId ?? "",
-      start: 0,
-      end: 100,
-    }),
-    {
-      enabled: !!targetId,
-      refetchOnWindowFocus: false,
-      onSuccess: () => {
-        setIsLoadingLockers(false);
-      },
-      onError: () => {
-        setIsLoadingLockers(false);
-        toast.show({
-          duration: 3000,
-          title: tError("targetId"),
-          status: "error",
-        });
-      },
-    },
-  );
+  const submit: SubmitHandler<MintFormValues> = (params) => {
+    const isUnfreeze = params.isUnfreeze;
 
-  const { data: heldBalance, refetch: refetchHolds } = useGetHeldAmountFor(
-    new GetHeldAmountForRequest({
-      securityId: id!,
-      targetId: targetId ?? "",
-    }),
-    {
-      enabled: !!targetId,
-      refetchOnWindowFocus: false,
-      select(data) {
-        return Number(data) / Math.pow(10, Number(details?.decimals));
-      },
-      onSuccess: () => {
-        setIsLoadingHolds(false);
-      },
-      onError: () => {
-        setIsLoadingHolds(false);
-        toast.show({
-          duration: 3000,
-          title: tError("targetId"),
-          status: "error",
-        });
-      },
-    },
-  );
+    if (isUnfreeze) {
+      const unfreezeRequest = new UnfreezeRequest({
+        securityId: id,
+        targetId: params.destination,
+        amount: params.amount.toString(),
+      });
 
-  const { data: frozenBalance, refetch: refetchFrozenBalance } =
-    useGetFreezedAmountFor(
-      new GetFreezedAmountForRequest({
-        securityId: id!,
-        targetId: targetId ?? "",
-      }),
-      {
-        enabled: !!targetId,
-        refetchOnWindowFocus: false,
+      unfreezeSecurity(unfreezeRequest, {
+        onSettled: () => update(),
         onSuccess: () => {
-          setIsLoadingFreezed(false);
+          reset();
         },
-        onError: () => {
-          setIsLoadingFreezed(false);
-          toast.show({
-            duration: 3000,
-            title: tError("targetId"),
-            status: "error",
-          });
-        },
-      },
-    );
+      });
+    } else {
+      const freezeRequest = new FreezeRequest({
+        securityId: id,
+        targetId: params.destination,
+        amount: params.amount.toString(),
+      });
 
-  const { data: clearedBalance, refetch: refetchClearedBalance } =
-    useGetClearedAmountFor(
-      new GetClearedAmountForRequest({
-        securityId: id!,
-        targetId: targetId ?? "",
-      }),
-      {
-        enabled: !!targetId,
-        refetchOnWindowFocus: false,
-        select(data) {
-          return Number(data) / Math.pow(10, Number(details?.decimals));
-        },
+      freezeSecurity(freezeRequest, {
+        onSettled: () => update(),
         onSuccess: () => {
-          setIsLoadingCleared(false);
+          reset();
         },
-        onError: () => {
-          setIsLoadingCleared(false);
-          toast.show({
-            duration: 3000,
-            title: tError("targetId"),
-            status: "error",
-          });
-        },
-      },
-    );
-
-  useEffect(() => {
-    if (targetId && !balance) {
-      setIsLoading(true);
-      setIsLoadingLockers(true);
-      setIsLoadingHolds(true);
-      setIsLoadingCleared(true);
-      refetch();
-      refetchLockers();
-      refetchHolds();
-      refetchClearedBalance();
-      refetchFrozenBalance();
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetId]);
-
-  const isLoadingTotal = useMemo(() => {
-    return (
-      isLoading ||
-      isLoadingLockers ||
-      isLoadingHolds ||
-      isLoadingCleared ||
-      isLoadingFreezed
-    );
-  }, [
-    isLoading,
-    isLoadingLockers,
-    isLoadingHolds,
-    isLoadingCleared,
-    isLoadingFreezed,
-  ]);
-
-  const onSubmit = ({ search }: BalanceSearchFieldValue) => {
-    setTargetId(search);
   };
 
-  const lockBalance = useMemo(() => {
-    if (!lockers) {
-      return "-";
-    }
-
-    return lockers.reduce((acc, current) => {
-      return acc + Number(current.amount);
-    }, 0);
-  }, [lockers]);
-
-  const totalBalance = useMemo(() => {
-    if (!balance?.value) {
-      return "-";
-    }
-
-    let totalBalance = Number(balance?.value);
-
-    if (lockBalance !== "-") {
-      totalBalance += Number(lockBalance);
-    }
-
-    if (Number(heldBalance) > 0) {
-      totalBalance += Number(heldBalance);
-    }
-
-    if (Number(frozenBalance) > 0) {
-      totalBalance += Number(frozenBalance);
-    }
-
-    if (Number(clearedBalance) > 0) {
-      totalBalance += Number(clearedBalance);
-    }
-
-    return totalBalance;
-  }, [clearedBalance, heldBalance, lockBalance, frozenBalance, balance]);
-
   return (
-    <VStack gap={6}>
-      <Stack layerStyle="container" align="center">
-        <VStack maxW="440px" align="flex-start" p={6} gap={4}>
-          <Heading textStyle="HeadingMediumLG">{tSearch("title")}</Heading>
-          <Text textStyle="BodyRegularMD">{tSearch("subtitle")}</Text>
-          <HStack
-            w="440px"
-            gap={6}
-            mt={3}
-            as="form"
-            onSubmit={handleSubmit(onSubmit)}
-            alignItems="flex-start"
-          >
-            <SearchInputController
-              id="search"
-              placeholder={tSearch("placeholder")}
-              onSearch={() => {}}
+    <>
+      <History label={tHeader("title")} />
+      <HStack
+        layerStyle="container"
+        mt={6}
+        pt={20}
+        pb={8}
+        gap={20}
+        justify="center"
+      >
+        <VStack
+          data-testid="mint-form"
+          justifyContent="flex-start"
+          h="full"
+          alignItems="flex-start"
+          w="full"
+          maxW="472px"
+          as="form"
+          onSubmit={handleSubmit(submit)}
+          gap={3}
+        >
+          <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+          <Text textStyle="BodyRegularMD" mt={2}>
+            {t("subtitle")}
+          </Text>
+          <Text textStyle="ElementsRegularSM" mt={8}>
+            {tGlobal("mandatoryFields")}
+          </Text>
+          <VStack>
+            <Tooltip label={tForm("isUnfreeze.tooltip")} placement="right">
+              <HStack>
+                <Text>{tForm("isUnfreeze.label")}</Text>
+                <PhosphorIcon as={Info} />
+              </HStack>
+            </Tooltip>
+            <ToggleController control={control} id="isUnfreeze" />
+          </VStack>
+          <Stack mt={6} w="full">
+            <InputNumberController
+              autoFocus
               control={control}
-              size="sm"
+              id="amount"
               rules={{
                 required,
-                validate: { isHederaValidAddress },
+                min: min(0),
               }}
+              size="md"
+              allowNegative={false}
+              label={tForm("amount.label")}
+              placeholder={tForm("amount.placeholder")}
+              decimalScale={details?.decimals}
+              fixedDecimalScale={true}
+              thousandSeparator=","
+              decimalSeparator="."
             />
+          </Stack>
+          <Stack mt={6} w="full">
+            <InputController
+              autoFocus
+              control={control}
+              id="destination"
+              rules={{ required }}
+              label={tForm("destination.label")}
+              placeholder={tForm("destination.placeholder")}
+              size="md"
+            />
+          </Stack>
+          <HStack
+            gap={4}
+            w="full"
+            mt={10}
+            align="end"
+            justifyContent={"flex-end"}
+          >
+            <CancelButton />
             <Button
-              size="sm"
-              isDisabled={!isValid}
+              data-testid="mint-security-button"
+              size="md"
+              variant="primary"
+              isDisabled={!formState.isValid}
               type="submit"
-              isLoading={isLoadingTotal}
+              minW="unset"
+              isLoading={isFreezeLoading || isUnfreezeLoading}
             >
-              <Text textStyle="ElementsMediumSM" px={4}>
-                {tSearch("button")}
-              </Text>
+              {tGlobal("submit")}
             </Button>
           </HStack>
         </VStack>
-      </Stack>
-      <HStack w="full" gap={8} align="flex-start">
-        <Stack w="394px">
-          <DefinitionList
-            items={[
-              {
-                title: tProperties("id"),
-                description: tProperties(id ?? ""),
-                canCopy: true,
-                valueToCopy: tProperties(id ?? ""),
-              },
-            ]}
-            title={tDetails("title")}
-            layerStyle="container"
-          />
-        </Stack>
-        <VStack w={"full"}>
-          <Stack layerStyle="container" gap={2} p={6} pb={9}>
-            <Text textStyle="ElementsSemiboldMD">
-              {tProperties("totalBalance")}
-            </Text>
-            <VStack gap={0} pb={4}>
-              <Text textStyle="ElementsSemibold2XL">
-                {totalBalance ?? "-"}
-                <Text ml={1} as="span" textStyle="ElementsRegularMD">
-                  {tProperties(detailsResponse.symbol ?? "")}
-                </Text>
-              </Text>
-            </VStack>
-            <HStack
-              gap={8}
-              w="full"
-              h="auto"
-              alignItems={"center"}
-              justifyContent={"center"}
-            >
-              <VStack alignItems={"flex-start"}>
-                <Text textStyle="ElementsRegularXS">
-                  {tDetails("availableBalance")}
-                </Text>
-                <Text textStyle="ElementsSemiboldSM">
-                  {balance?.value ?? "-"}{" "}
-                  {tProperties(detailsResponse.symbol ?? "")}
-                </Text>
-              </VStack>
-
-              <VStack w={"1px"} h={"40px"} bgColor={"gray.500"} />
-
-              <VStack alignItems={"flex-start"}>
-                <Text textStyle="ElementsRegularXS">
-                  {tDetails("lockBalance")}
-                </Text>
-                <Text textStyle="ElementsSemiboldSM">
-                  {lockBalance ?? "0"}{" "}
-                  {tProperties(detailsResponse.symbol ?? "")}
-                </Text>
-              </VStack>
-
-              <VStack w={"1px"} h={"40px"} bgColor={"gray.500"} />
-
-              <VStack alignItems={"flex-start"}>
-                <Text textStyle="ElementsRegularXS">
-                  {tDetails("heldBalance")}
-                </Text>
-                <Text textStyle="ElementsSemiboldSM">
-                  {heldBalance ?? "-"}{" "}
-                  {tProperties(detailsResponse.symbol ?? "")}
-                </Text>
-              </VStack>
-
-              <VStack w={"1px"} h={"40px"} bgColor={"gray.500"} />
-
-              <VStack alignItems={"flex-start"}>
-                <Text textStyle="ElementsRegularXS">
-                  {tDetails("clearedBalance")}
-                </Text>
-                <Text textStyle="ElementsSemiboldSM">
-                  {clearedBalance ?? "-"}{" "}
-                  {tProperties(detailsResponse.symbol ?? "")}
-                </Text>
-              </VStack>
-
-              <VStack w={"1px"} h={"40px"} bgColor={"gray.500"} />
-
-              <VStack alignItems={"flex-start"}>
-                <Text textStyle="ElementsRegularXS">
-                  {tDetails("frozenBalance")}
-                </Text>
-                <Text textStyle="ElementsSemiboldSM">
-                  {frozenBalance ?? "-"}{" "}
-                  {tProperties(detailsResponse.symbol ?? "")}
-                </Text>
-              </VStack>
-            </HStack>
-          </Stack>
-        </VStack>
+        <DetailsBalancePanel
+          balance={details?.totalSupply}
+          isLoading={isBalancePanelLoading}
+          title={tProperties("totalSupply")}
+        />
       </HStack>
-    </VStack>
+    </>
   );
 };

@@ -643,6 +643,30 @@ export class SDKService {
     return response.payload;
   }
 
+  // FREEZE & UNFREEZE ////////////////////////////////////////////
+  public static async freeze(req: FreezeRequest): Promise<boolean> {
+    const response = await Security.freeze(req);
+    return response.payload;
+  }
+
+  public static async unfreeze(req: UnfreezeRequest): Promise<boolean> {
+    const response = await Security.unfreeze(req);
+    return response.payload;
+  }
+
+  public static async getFreeze(
+    req: GetFreezeRequest,
+  ): Promise<FreezeViewModel> {
+    return await Security.getFreeze(req);
+  }
+
+  public static async getFreezedAmountFor(
+    req: GetFreezedAmountForRequest,
+  ): Promise<number> {
+    const response = await Security.getFreezedAmountFor(req);
+    return response;
+  }
+
   // TRANSFER & REDEEM & BALANCES ////////////////////////////////////////////
   public static async transfer(req: TransferRequest): Promise<boolean> {
     const response = await Security.transfer(req);

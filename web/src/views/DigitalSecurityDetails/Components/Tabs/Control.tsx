@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { ExternalPause } from "../ExternalPause/ExternalPause";
 import { ExternalControl } from "../ExternalControl/ExternalControl";
 import { ExternalKYC } from "../ExternalKYC/ExternalKYC";
+import { AdminControlActionsButtons } from "../AdminControlActionsButtons";
 
 interface ControlTabProps {
   details: SecurityViewModel;
@@ -57,6 +58,7 @@ export const ControlTab = ({ details, config }: ControlTabProps) => {
 
   return (
     <Box w={"full"} h={"full"}>
+      <AdminControlActionsButtons />
       <Tabs tabs={tabs} variant="secondary" />
     </Box>
   );

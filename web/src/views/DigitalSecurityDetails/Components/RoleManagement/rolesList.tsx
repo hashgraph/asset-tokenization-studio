@@ -225,6 +225,11 @@ export const rolesList: TRole[] = [
     allowedSecurities: ["BOND", "EQUITY"],
   },
   {
+    label: "freezer",
+    value: SecurityRole._FREEZER_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
+  },
+  {
     label: "controller",
     value: SecurityRole._CONTROLLER_ROLE,
     allowedSecurities: ["BOND", "EQUITY"],
