@@ -306,6 +306,12 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit ComplianceAdded(_compliance);
     }
 
+    /**
+     * @notice Burns a specified amount of tokens from a user address.
+     * @dev Can only be called by the token `owner/issuer` or `controller`.
+     * @param _userAddress The address from which the tokens will be burned.
+     * @param _amount The amount of tokens to burn.
+     */
     function burn(
         address _userAddress,
         uint256 _amount
@@ -322,6 +328,12 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         _redeemFrom(_userAddress, _amount, '');
     }
 
+    /**
+     * @notice Mints a specified amount of tokens to a user address.
+     * @dev Can only be called by the token `owner/issuer`.
+     * @param _to The address to which the tokens will be minted.
+     * @param _amount The amount of tokens to mint.
+     */
     function mint(
         address _to,
         uint256 _amount
@@ -338,6 +350,13 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         _issue(_to, _amount, '');
     }
 
+    /**
+     * @notice Transfers tokens from one address to another.
+     * @dev Can only be called by the token `owner/issuer` or `controller`.
+     * @param _from The address from which the tokens will be transferred.
+     * @param _to The address to which the tokens will be transferred.
+     * @param _amount The amount of tokens to transfer.
+     */
     function forcedTransfer(
         address _from,
         address _to,
@@ -360,6 +379,10 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return true;
     }
 
+    /**
+     * @notice Retrieves the latest version of the contract.
+     * @dev The version is represented as a string.
+     */
     function version() external view returns (string memory) {
         return Strings.toString(_getLatestVersion());
     }
@@ -407,26 +430,26 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     {
         staticFunctionSelectors_ = new bytes4[](12);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .forcedTransfer
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .identityRegistry
             .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setIdentityRegistry
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .setCompliance
             .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setIdentityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
     }
 
     /**

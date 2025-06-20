@@ -253,6 +253,14 @@ interface IERC3643 {
      */
     function setOnchainID(address _onchainID) external;
 
+    /**
+     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     * @dev This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the transfer was successful.
+     *
+     * Emits a ControllerTransfer event.
+     */
     function forcedTransfer(
         address _from,
         address _to,
@@ -267,6 +275,15 @@ interface IERC3643 {
      */
     function setIdentityRegistry(address _identityRegistry) external;
 
+    /**
+     * @dev Mints `_amount` tokens to the address `_to`.
+     *
+     * This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the minting was successful.
+     *
+     * Emits a Issued event.
+     */
     function mint(address _to, uint256 _amount) external;
 
     /**
@@ -279,6 +296,15 @@ interface IERC3643 {
      */
     function setCompliance(address _compliance) external;
 
+    /**
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     *
+     * This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the burn was successful.
+     *
+     * Emits a redeem event.
+     */
     function burn(address _userAddress, uint256 _amount) external;
 
     /**
@@ -298,5 +324,8 @@ interface IERC3643 {
      */
     function compliance() external view returns (ICompliance);
 
+    /**
+     * @dev Returns the version of the token.
+     */
     function version() external view returns (string memory);
 }
