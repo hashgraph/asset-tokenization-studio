@@ -810,6 +810,21 @@ describe('ERC3643 Tests', () => {
                 expect(frozenBalanceB).to.equal(amount / 2)
                 expect(isRecovered).to.equal(true)
             })
+            it('GIVEN lost wallet WHEN calling reovering using a previously recovered address THEN recovered status is set to false', async () => {
+                await erc3643Facet.recoveryAddress(
+                    account_C,
+                    account_B,
+                    ADDRESS_ZERO
+                )
+                await erc3643Facet.recoveryAddress(
+                    account_B,
+                    account_C,
+                    ADDRESS_ZERO
+                )
+                const isRecoveredC =
+                    await erc3643Facet.isAddressRecovered(account_C)
+                expect(isRecoveredC).to.equal(false)
+            })
         })
     })
     describe('Single partition', () => {

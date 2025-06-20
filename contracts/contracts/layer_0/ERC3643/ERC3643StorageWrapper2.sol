@@ -359,6 +359,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         }
         // TODO: transfer freeze status to new wallet
         _getFreezeStorage()._addressRecovered[_lostWallet] = true;
+        _getFreezeStorage()._addressRecovered[_newWallet] = false;
         return true;
     }
 

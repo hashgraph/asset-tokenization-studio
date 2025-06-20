@@ -334,6 +334,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         emit TokensUnfrozen(_userAddress, _amount, _partition);
     }
 
+    //TODO: add onlyAgent
     function recoveryAddress(
         address _lostWallet,
         address _newWallet,
