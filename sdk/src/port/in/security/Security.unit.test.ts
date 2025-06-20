@@ -267,6 +267,8 @@ import {
   ReleaseHoldByPartitionRequest,
   ReleaseRequest,
   SetMaxSupplyRequest,
+  SetNameRequest,
+  SetSymbolRequest,
   TransferAndLockRequest,
   TransferRequest,
 } from '../request';
@@ -438,6 +440,12 @@ import { OperatorClearingTransferByPartitionCommand } from '../../../app/usecase
 import { ClearingRedeemFromByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand';
 import { ProtectedClearingTransferByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
 import { ApproveClearingOperationByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
+import {
+  SetNameRequestFixture,
+  SetSymbolRequestFixture,
+} from '../../../../__tests__/fixtures/tokenMetadata/TokenMetadataFixture';
+import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
+import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -504,6 +512,8 @@ describe('Security', () => {
   let operatorClearingCreateHoldByPartitionRequest: OperatorClearingCreateHoldByPartitionRequest;
   let operatorClearingRedeemByPartitionRequest: OperatorClearingRedeemByPartitionRequest;
   let operatorClearingTransferByPartitionRequest: OperatorClearingTransferByPartitionRequest;
+  let setNameRequest: SetNameRequest;
+  let setSymbolRequest: SetSymbolRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -6925,6 +6935,144 @@ describe('Security', () => {
       await expect(
         Security.approveClearingOperationByPartition(invalidRequest),
       ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('SetName', () => {
+    setNameRequest = new SetNameRequest(SetNameRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set name successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setName(setNameRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetNameRequest',
+        setNameRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetNameCommand(setNameRequest.securityId, setNameRequest.name),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.setName(setNameRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetNameRequest',
+        setNameRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetNameCommand(setNameRequest.securityId, setNameRequest.name),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setNameRequest = new SetNameRequest({
+        ...SetNameRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.setName(setNameRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if name is empty', async () => {
+      setNameRequest = new SetNameRequest({
+        ...SetNameRequestFixture.create({
+          name: '',
+        }),
+      });
+
+      await expect(Security.setName(setNameRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('SetSymbol', () => {
+    setSymbolRequest = new SetSymbolRequest(SetSymbolRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set symbol successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setSymbol(setSymbolRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetSymbolRequest',
+        setSymbolRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetSymbolCommand(
+          setSymbolRequest.securityId,
+          setSymbolRequest.symbol,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.setSymbol(setSymbolRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetSymbolRequest',
+        setSymbolRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetSymbolCommand(
+          setSymbolRequest.securityId,
+          setSymbolRequest.symbol,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setSymbolRequest = new SetSymbolRequest({
+        ...SetSymbolRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.setSymbol(setSymbolRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if symbol is empty', async () => {
+      setSymbolRequest = new SetSymbolRequest({
+        ...SetSymbolRequestFixture.create({
+          symbol: '',
+        }),
+      });
+
+      await expect(Security.setSymbol(setSymbolRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
   });
 });

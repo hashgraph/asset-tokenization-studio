@@ -924,6 +924,19 @@ interface IExternalKycListsMockAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface ITokenMetadataTransactionAdapter {
+  setName(
+    security: EvmAddress,
+    name: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  setSymbol(
+    security: EvmAddress,
+    symbol: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -939,7 +952,8 @@ export default abstract class TransactionAdapter
     IExternalControlListsAdapter,
     IExternalControlListsMockAdapter,
     IExternalKycListsAdapter,
-    IExternalKycListsMockAdapter
+    IExternalKycListsMockAdapter,
+    ITokenMetadataTransactionAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1809,6 +1823,20 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   createExternalKycListMock(): Promise<string | TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setName(
+    security: EvmAddress,
+    name: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setSymbol(
+    security: EvmAddress,
+    symbol: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }

@@ -397,6 +397,8 @@ import { GrantKycMockCommandHandler } from '../app/usecase/command/security/exte
 import { RevokeKycMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommandHandler.js';
 import { GetKycStatusMockQueryHandler } from '../app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQueryHandler.js';
 import { CreateExternalKycListMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommandHandler.js';
+import { SetNameCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommandHandler.js';
+import { SetSymbolCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -760,6 +762,14 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: DeactivateInternalKycCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetNameCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetSymbolCommandHandler,
   },
 ];
 

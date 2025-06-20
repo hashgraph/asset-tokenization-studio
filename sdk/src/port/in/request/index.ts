@@ -353,6 +353,8 @@ import IsInternalKycActivatedRequest from './security/kyc/IsInternalKycActivated
 import GrantKycMockRequest from './security/externalKycLists/mock/GrantKycMockRequest.js';
 import RevokeKycMockRequest from './security/externalKycLists/mock/RevokeKycMockRequest.js';
 import GetKycStatusMockRequest from './security/externalKycLists/mock/GetKycStatusMockRequest.js';
+import SetNameRequest from './security/operations/tokeMetadata/SetNameRequest.js';
+import SetSymbolRequest from './security/operations/tokeMetadata/SetSymbolRequest.js';
 
 export {
   CreateEquityRequest,
@@ -504,4 +506,6 @@ export {
   GrantKycMockRequest,
   RevokeKycMockRequest,
   GetKycStatusMockRequest,
+  SetNameRequest,
+  SetSymbolRequest,
 };
