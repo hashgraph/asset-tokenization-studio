@@ -265,26 +265,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         );
     }
 
-    function burn(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender()) //Falta test
-        onlyListedAllowed(_userAddress) //Falta test
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole //Falta test
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
-    {
-        _redeemFrom(_userAddress, _amount, '');
-    }
-
-    function mint(
-        address _to,
-        uint256 _amount
-    )
     /**
      * @notice Sets the onchainID address for the token.
      * @dev Can only be called by the token `owner/issuer`.
@@ -326,31 +306,36 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit ComplianceAdded(_compliance);
     }
 
-    /**
-     * @notice Retrieves the onchainID address associated with the token.
-     */
-    function onchainID() external view override returns (address) {
-        return _erc3643Storage().onchainID;
+    function burn(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_userAddress)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
+    {
+        _redeemFrom(_userAddress, _amount, '');
     }
 
-    /**
-     * @notice Retrieves the identity registry contract address.
-     */
-    function identityRegistry()
+    function mint(
+        address _to,
+        uint256 _amount
+    )
         external
-        onlyWithinMaxSupply(_amount)
         onlyUnpaused
+        onlyWithinMaxSupply(_amount)
         onlyRole(_ISSUER_ROLE)
         onlyListedAllowed(_to)
         onlyWithoutMultiPartition
-        onlyIssuable //Falta test
+        onlyIssuable
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-        view
-        override
-        returns (IIdentityRegistry)
     {
         _issue(_to, _amount, '');
-        return IIdentityRegistry(_erc3643Storage().identityRegistry);
     }
 
     function forcedTransfer(
@@ -377,11 +362,32 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
 
     function version() external view returns (string memory) {
         return Strings.toString(_getLatestVersion());
+    }
+
     /**
      * @notice Retrieves the compliance contract address.
      */
     function compliance() external view override returns (ICompliance) {
         return ICompliance(_erc3643Storage().compliance);
+    }
+
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
+    function identityRegistry()
+        external
+        view
+        override
+        returns (IIdentityRegistry)
+    {
+        return IIdentityRegistry(_erc3643Storage().identityRegistry);
+    }
+
+    /**
+     * @notice Retrieves the onchainID address associated with the token.
+     */
+    function onchainID() external view override returns (address) {
+        return _erc3643Storage().onchainID;
     }
 
     function getStaticResolverKey()
@@ -399,17 +405,18 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](11);
+        staticFunctionSelectors_ = new bytes4[](12);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .forcedTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
             .identityRegistry
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .setIdentityRegistry
             .selector;
@@ -419,8 +426,12 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
     }
 
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
     function getStaticInterfaceIds()
         external
         pure

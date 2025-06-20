@@ -252,6 +252,7 @@ interface IERC3643 {
      * Emits an UpdatedTokenInformation event.
      */
     function setOnchainID(address _onchainID) external;
+
     function forcedTransfer(
         address _from,
         address _to,
@@ -265,6 +266,7 @@ interface IERC3643 {
      * Emits an IdentityRegistryAdded event.
      */
     function setIdentityRegistry(address _identityRegistry) external;
+
     function mint(address _to, uint256 _amount) external;
 
     /**
@@ -277,11 +279,12 @@ interface IERC3643 {
      */
     function setCompliance(address _compliance) external;
 
+    function burn(address _userAddress, uint256 _amount) external;
+
     /**
      * @dev Returns the onchainID address associated with the token.
      */
     function onchainID() external view returns (address);
-    function burn(address _userAddress, uint256 _amount) external;
 
     /**
      * @dev Returns the address of the identity registry contract.
@@ -294,5 +297,6 @@ interface IERC3643 {
      * @dev Returns the address of the compliance contract.
      */
     function compliance() external view returns (ICompliance);
+
     function version() external view returns (string memory);
 }
