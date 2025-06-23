@@ -348,7 +348,7 @@ import {
   ACTIVATE_INTERNAL_KYC_GAS,
   DEACTIVATE_INTERNAL_KYC_GAS,
   SET_NAME_GAS,
-  SET_SYMBOL_GAS, BURN_GAS,
+  SET_SYMBOL_GAS, BURN_GAS, MINT_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -1243,6 +1243,25 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).issueByPartition(issueData, { gasLimit: ISSUE_GAS }),
       this.networkService.environment,
+    );
+  }
+
+  async mint(
+      security: EvmAddress,
+      target: EvmAddress,
+      amount: BigDecimal,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+        `Minting ${amount} ${security} to account: ${target.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+        await ERC3643__factory.connect(
+            security.toString(),
+            this.signerOrProvider,
+        ).mint(target.toString(), amount.toBigNumber()
+            , {gasLimit: MINT_GAS }),
+        this.networkService.environment,
     );
   }
 

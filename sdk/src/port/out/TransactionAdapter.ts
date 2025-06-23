@@ -301,6 +301,12 @@ interface ITransactionAdapter {
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  mint(
+      security: EvmAddress,
+      target: EvmAddress,
+      amount: BigDecimal,
+      securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   transfer(
     security: EvmAddress,
     targetId: EvmAddress,
@@ -1165,6 +1171,14 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
+  }
+  mint(
+      security: EvmAddress,
+      target: EvmAddress,
+      amount: BigDecimal,
+      securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }

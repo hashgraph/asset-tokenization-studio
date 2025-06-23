@@ -448,6 +448,9 @@ import { SetNameCommand } from '../../../app/usecase/command/security/operations
 import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
 import {BurnRequestFixture} from "../../../../__tests__/fixtures/burn/BurnFixture";
 import {BurnCommand} from "../../../app/usecase/command/security/operations/burn/BurnCommand";
+import MintRequest from "../request/security/operations/mint/MintRequest";
+import {MintRequestFixture} from "../../../../__tests__/fixtures/mint/MintFixture";
+import {MintCommand} from "../../../app/usecase/command/security/operations/mint/MintCommand";
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -456,6 +459,7 @@ describe('Security', () => {
 
   let getSecurityDetailsRequest: GetSecurityDetailsRequest;
   let issueRequest: IssueRequest;
+  let mintRequest: MintRequest;
   let redeemRequest: RedeemRequest;
     let burnRequest: BurnRequest;
   let forceRedeemRequest: ForceRedeemRequest;
@@ -1159,6 +1163,90 @@ describe('Security', () => {
 
       await expect(Security.issue(issueRequest)).rejects.toThrow(
         ValidationError,
+      );
+    });
+  });
+
+  describe('mint', () => {
+    mintRequest = new MintRequest(MintRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should mint successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.mint(mintRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+          'MintRequest',
+          mintRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+          new MintCommand(
+              mintRequest.securityId,
+              mintRequest.targetId,
+              mintRequest.amount
+          ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.mint(mintRequest)).rejects.toThrow(
+          'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+          'MintRequest',
+          mintRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+          new MintCommand(
+              mintRequest.securityId,
+              mintRequest.targetId,
+              mintRequest.amount
+          ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      mintRequest = new MintRequest({
+        ...MintRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.mint(mintRequest)).rejects.toThrow(
+          ValidationError,
+      );
+    });
+    it('should throw error if targetId is invalid', async () => {
+      mintRequest = new MintRequest({
+        ...MintRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(Security.mint(mintRequest)).rejects.toThrow(
+          ValidationError,
+      );
+    });
+    it('should throw error if amount is invalid', async () => {
+      mintRequest = new MintRequest({
+        ...MintRequestFixture.create({
+          amount: 'invalid',
+        }),
+      });
+
+      await expect(Security.mint(mintRequest)).rejects.toThrow(
+          ValidationError,
       );
     });
   });

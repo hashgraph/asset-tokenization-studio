@@ -356,6 +356,8 @@ import { SetNameCommand } from '../../../app/usecase/command/security/operations
 import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand.js';
 import {BurnRequest} from "../request";
 import {BurnCommand} from "../../../app/usecase/command/security/operations/burn/BurnCommand";
+import MintRequest from "../request/security/operations/mint/MintRequest";
+import {MintCommand} from "../../../app/usecase/command/security/operations/mint/MintCommand";
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -668,6 +670,18 @@ class SecurityInPort implements ISecurityInPort {
 
     return await this.commandBus.execute(
       new IssueCommand(amount, targetId, securityId),
+    );
+  }
+
+  @LogError
+  async mint(
+      request: MintRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, amount, targetId } = request;
+    ValidatedRequest.handleValidation('MintRequest', request);
+
+    return await this.commandBus.execute(
+        new MintCommand(securityId, targetId, amount),
     );
   }
 
