@@ -233,7 +233,7 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkRoles(roles, _msgSender());
+            _checkAnyRole(roles, _msgSender());
         }
         _transferByPartition(
             _from,
@@ -262,7 +262,7 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkRoles(roles, _msgSender());
+            _checkAnyRole(roles, _msgSender());
         }
         _redeemByPartition(
             _partition,

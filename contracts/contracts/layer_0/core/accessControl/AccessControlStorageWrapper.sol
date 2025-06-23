@@ -322,7 +322,7 @@ abstract contract AccessControlStorageWrapper is
         return _has(_rolesStorage(), _role, _account);
     }
 
-    function _hasRoles(
+    function _hasAnyRole(
         bytes32[] memory _roles,
         address _account
     ) internal view returns (bool) {
@@ -374,11 +374,11 @@ abstract contract AccessControlStorageWrapper is
         }
     }
 
-    function _checkRoles(
+    function _checkAnyRole(
         bytes32[] memory _roles,
         address _account
     ) internal view {
-        if (!_hasRoles(_roles, _account)) {
+        if (!_hasAnyRole(_roles, _account)) {
             revert AccountHasNoRoles(_account, _roles);
         }
     }

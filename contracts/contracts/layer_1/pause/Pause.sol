@@ -216,7 +216,7 @@ abstract contract Pause is IPause, Common {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _PAUSER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkRoles(roles, _msgSender());
+            _checkAnyRole(roles, _msgSender());
         }
         _setPause(true);
         success_ = true;
@@ -227,7 +227,7 @@ abstract contract Pause is IPause, Common {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _PAUSER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkRoles(roles, _msgSender());
+            _checkAnyRole(roles, _msgSender());
         }
         _setPause(false);
         success_ = true;

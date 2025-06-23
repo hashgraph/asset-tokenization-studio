@@ -430,7 +430,7 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
-        if (_from != _msgSender() && !_hasRoles(roles, _msgSender())) {
+        if (_from != _msgSender() && !_hasAnyRole(roles, _msgSender())) {
             if (!_isAuthorized(_partition, _msgSender(), _from)) {
                 return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
             }

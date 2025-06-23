@@ -257,7 +257,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkRoles(roles, _msgSender());
+            _checkAnyRole(roles, _msgSender());
         }
         _controllerTransfer(_from, _to, _value, _data, _operatorData);
     }
@@ -290,7 +290,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkRoles(roles, _msgSender());
+            _checkAnyRole(roles, _msgSender());
         }
         _controllerRedeem(_tokenHolder, _value, _data, _operatorData);
     }

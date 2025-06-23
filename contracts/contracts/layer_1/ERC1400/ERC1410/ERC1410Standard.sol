@@ -230,7 +230,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkRoles(roles, _msgSender());
+            _checkAnyRole(roles, _msgSender());
         }
         _issueByPartition(_issueData);
     }
