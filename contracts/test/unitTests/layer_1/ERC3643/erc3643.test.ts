@@ -277,6 +277,21 @@ const onchainId = ethers.Wallet.createRandom().address
 const identityRegistry = ethers.Wallet.createRandom().address
 const compliance = ethers.Wallet.createRandom().address
 
+const name = 'TEST'
+const symbol = 'TAC'
+const newName = 'TEST_ERC3643'
+const newSymbol = 'TAC_ERC3643'
+const decimals = 6
+const version = '1'
+const isin = isinGenerator()
+const AMOUNT = 1000
+const MAX_SUPPLY = 10000000
+const EMPTY_VC_ID = EMPTY_STRING
+const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
+const onchainId = ethers.Wallet.createRandom().address
+const identityRegistry = ethers.Wallet.createRandom().address
+const compliance = ethers.Wallet.createRandom().address
+
 describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
