@@ -348,7 +348,7 @@ import {
   ACTIVATE_INTERNAL_KYC_GAS,
   DEACTIVATE_INTERNAL_KYC_GAS,
   SET_NAME_GAS,
-  SET_SYMBOL_GAS,
+  SET_SYMBOL_GAS, BURN_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -1105,6 +1105,24 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         gasLimit: REDEEM_GAS,
       }),
       this.networkService.environment,
+    );
+  }
+
+  async burn(
+      security: EvmAddress,
+      source: EvmAddress,
+      amount: BigDecimal,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(`Burning ${amount} securities from source: ${source.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+        await ERC3643__factory.connect(
+            security.toString(),
+            this.signerOrProvider,
+        ).burn(source.toString(), amount.toBigNumber(), {
+          gasLimit: BURN_GAS,
+        }),
+        this.networkService.environment,
     );
   }
 

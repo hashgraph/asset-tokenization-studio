@@ -354,6 +354,8 @@ import { GetClearingTransferForByPartitionQuery } from '../../../app/usecase/que
 import { SetNameRequest, SetSymbolRequest } from '../request/index.js';
 import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand.js';
 import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand.js';
+import {BurnRequest} from "../request";
+import {BurnCommand} from "../../../app/usecase/command/security/operations/burn/BurnCommand";
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -364,6 +366,9 @@ interface ISecurityInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   redeem(
     request: RedeemRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  burn(
+      request: BurnRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   controllerRedeem(
     request: ForceRedeemRequest,
@@ -674,6 +679,16 @@ class SecurityInPort implements ISecurityInPort {
     ValidatedRequest.handleValidation('RedeemRequest', request);
 
     return await this.commandBus.execute(new RedeemCommand(amount, securityId));
+  }
+
+  @LogError
+  async burn(
+      request: BurnRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, sourceId, amount } = request;
+    ValidatedRequest.handleValidation('BurnRequest', request);
+
+    return await this.commandBus.execute(new BurnCommand(securityId, sourceId, amount));
   }
 
   @LogError

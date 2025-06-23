@@ -207,7 +207,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '../../../core/command/CommandBus';
 import {
   ActivateClearingRequest,
-  ApproveClearingOperationByPartitionRequest,
+  ApproveClearingOperationByPartitionRequest, BurnRequest,
   CancelClearingOperationByPartitionRequest,
   ClearingCreateHoldByPartitionRequest,
   ClearingCreateHoldFromByPartitionRequest,
@@ -446,6 +446,8 @@ import {
 } from '../../../../__tests__/fixtures/tokenMetadata/TokenMetadataFixture';
 import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
 import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
+import {BurnRequestFixture} from "../../../../__tests__/fixtures/burn/BurnFixture";
+import {BurnCommand} from "../../../app/usecase/command/security/operations/burn/BurnCommand";
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -455,6 +457,7 @@ describe('Security', () => {
   let getSecurityDetailsRequest: GetSecurityDetailsRequest;
   let issueRequest: IssueRequest;
   let redeemRequest: RedeemRequest;
+    let burnRequest: BurnRequest;
   let forceRedeemRequest: ForceRedeemRequest;
   let getControlListCountRequest: GetControlListCountRequest;
   let getControlListMembersRequest: GetControlListMembersRequest;
@@ -1224,6 +1227,72 @@ describe('Security', () => {
       );
     });
   });
+
+  describe('burn', () => {
+    burnRequest = new BurnRequest(BurnRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should burn successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.burn(burnRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+          'BurnRequest',
+          burnRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+          new BurnCommand(burnRequest.securityId, burnRequest.sourceId, burnRequest.amount),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.burn(burnRequest)).rejects.toThrow(
+          'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+          'BurnRequest',
+          burnRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+          new BurnCommand(burnRequest.securityId, burnRequest.sourceId, burnRequest.amount),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      burnRequest = new BurnRequest({
+        ...BurnRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.burn(burnRequest)).rejects.toThrow(
+          ValidationError,
+      );
+    });
+    it('should throw error if amount is invalid', async () => {
+      burnRequest = new BurnRequest({
+        ...BurnRequestFixture.create({
+          amount: 'invalid',
+        }),
+      });
+
+      await expect(Security.burn(burnRequest)).rejects.toThrow(
+          ValidationError,
+      );
+    });
+  });
+
 
   describe('controllerRedeem', () => {
     forceRedeemRequest = new ForceRedeemRequest(

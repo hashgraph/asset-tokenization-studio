@@ -337,7 +337,7 @@ import {
   ACTIVATE_INTERNAL_KYC_GAS,
   DEACTIVATE_INTERNAL_KYC_GAS,
   SET_NAME_GAS,
-  SET_SYMBOL_GAS,
+  SET_SYMBOL_GAS, BURN_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -789,6 +789,35 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setContractId(securityId)
       .setGas(REDEEM_GAS)
       .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async burn(
+      security: EvmAddress,
+      source: EvmAddress,
+      amount: BigDecimal,
+      securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'burn';
+    LogService.logTrace(
+        `Burning ${amount} securities from account ${source.toString()}`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(
+        security.toString(),
+    );
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+        FUNCTION_NAME,
+        [source.toString(), amount.toHexString()],
+    );
+    const functionDataEncoded = new Uint8Array(
+        Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+    const transaction = new ContractExecuteTransaction()
+        .setContractId(securityId)
+        .setGas(BURN_GAS)
+        .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }

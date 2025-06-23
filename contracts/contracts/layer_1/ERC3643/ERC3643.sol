@@ -220,7 +220,7 @@ import {
     _DEFAULT_ADMIN_ROLE,
     _CONTROLLER_ROLE,
     _ISSUER_ROLE,
-		_FREEZE_MANAGER_ROLE
+    _FREEZE_MANAGER_ROLE
 } from '../constants/roles.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {IKyc} from '../interfaces/kyc/IKyc.sol';
@@ -418,11 +418,11 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
      */
     function onchainID() external view override returns (address) {
         return _erc3643Storage().onchainID;
-		}
-		
+    }
+
     function compliance() external view override returns (ICompliance) {
         return ICompliance(_erc3643Storage().compliance);
-		}
+    }
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount
@@ -530,7 +530,8 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
-            .setCompliance.selector;
+            .setCompliance
+            .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this

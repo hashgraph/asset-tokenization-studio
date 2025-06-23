@@ -205,6 +205,7 @@
 
 import IssueRequest from './security/operations/issue/IssueRequest.js';
 import RedeemRequest from './security/operations/redeem/RedeemRequest.js';
+import BurnRequest from './security/operations/burn/BurnRequest.js';
 import ForceRedeemRequest from './security/operations/redeem/ForceRedeemRequest.js';
 import CreateEquityRequest from './equity/CreateEquityRequest.js';
 import CreateBondRequest from './bond/CreateBondRequest.js';
@@ -362,6 +363,7 @@ export {
   ValidationResponse,
   IssueRequest,
   RedeemRequest,
+    BurnRequest,
   ForceRedeemRequest,
   RoleRequest,
   ApplyRolesRequest,
