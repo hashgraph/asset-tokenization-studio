@@ -203,24 +203,22 @@
 
 */
 
-import {ICommandHandler} from '../../../../../../core/command/CommandHandler.js';
-import {CommandHandler} from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import AccountService from '../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
-import {BurnCommand, BurnCommandResponse} from './BurnCommand';
+import { BurnCommand, BurnCommandResponse } from './BurnCommand';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import {lazyInject} from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
-import {_PARTITION_ID_1} from '../../../../../../core/Constants.js';
+import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
-import {BurnCommandError} from "./error/BurnCommandError";
+import { BurnCommandError } from './error/BurnCommandError';
 
 @CommandHandler(BurnCommand)
-export class BurnCommandHandler
-  implements ICommandHandler<BurnCommand>
-{
+export class BurnCommandHandler implements ICommandHandler<BurnCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,
@@ -234,9 +232,7 @@ export class BurnCommandHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    command: BurnCommand,
-  ): Promise<BurnCommandResponse> {
+  async execute(command: BurnCommand): Promise<BurnCommandResponse> {
     try {
       const { sourceId, securityId, amount } = command;
       const handler = this.transactionService.getHandler();
@@ -245,29 +241,29 @@ export class BurnCommandHandler
       await this.validationService.checkClearingDeactivated(securityId);
 
       const securityEvmAddress: EvmAddress =
-          await this.contractService.getContractEvmAddress(securityId);
+        await this.contractService.getContractEvmAddress(securityId);
       await this.validationService.checkCanRedeem(
-          securityId,
-          account.id.toString(),
-          amount,
-          _PARTITION_ID_1,
+        securityId,
+        account.id.toString(),
+        amount,
+        _PARTITION_ID_1,
       );
       const sourceEvmAddress: EvmAddress =
-          await this.accountService.getAccountEvmAddress(sourceId);
+        await this.accountService.getAccountEvmAddress(sourceId);
 
       const security = await this.securityService.get(securityId);
       await this.validationService.checkDecimals(security, amount);
 
       const amountBd: BigDecimal = BigDecimal.fromString(
-          amount,
-          security.decimals,
+        amount,
+        security.decimals,
       );
 
       const res = await handler.burn(
-          sourceEvmAddress,
-          securityEvmAddress,
-          amountBd,
-          securityId
+        sourceEvmAddress,
+        securityEvmAddress,
+        amountBd,
+        securityId,
       );
 
       return Promise.resolve(

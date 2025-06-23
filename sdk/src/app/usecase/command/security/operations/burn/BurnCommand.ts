@@ -218,7 +218,7 @@ export class BurnCommand extends Command<BurnCommandResponse> {
   constructor(
     public readonly sourceId: string,
     public readonly amount: string,
-    public readonly securityId: string
+    public readonly securityId: string,
   ) {
     super();
   }

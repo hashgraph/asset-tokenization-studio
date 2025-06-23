@@ -211,7 +211,15 @@ export default class BurnRequest extends ValidatedRequest<BurnRequest> {
   sourceId: string;
   amount: string;
 
-  constructor({ amount, securityId, sourceId }: { amount: string; securityId: string; sourceId: string }) {
+  constructor({
+    amount,
+    securityId,
+    sourceId,
+  }: {
+    amount: string;
+    securityId: string;
+    sourceId: string;
+  }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       sourceId: FormatValidation.checkHederaIdFormatOrEvmAddress(),

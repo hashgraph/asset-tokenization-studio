@@ -207,7 +207,8 @@ import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '../../../core/command/CommandBus';
 import {
   ActivateClearingRequest,
-  ApproveClearingOperationByPartitionRequest, BurnRequest,
+  ApproveClearingOperationByPartitionRequest,
+  BurnRequest,
   CancelClearingOperationByPartitionRequest,
   ClearingCreateHoldByPartitionRequest,
   ClearingCreateHoldFromByPartitionRequest,
@@ -447,13 +448,13 @@ import {
 } from '../../../../__tests__/fixtures/tokenMetadata/TokenMetadataFixture';
 import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
 import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
-import {BurnRequestFixture} from "../../../../__tests__/fixtures/burn/BurnFixture";
-import {BurnCommand} from "../../../app/usecase/command/security/operations/burn/BurnCommand";
-import MintRequest from "../request/security/operations/mint/MintRequest";
-import {MintRequestFixture} from "../../../../__tests__/fixtures/mint/MintFixture";
-import {MintCommand} from "../../../app/usecase/command/security/operations/mint/MintCommand";
-import ForcedTransferRequest from "../request/security/operations/transfer/ForcedTransferRequest";
-import {ForcedTransferCommand} from "../../../app/usecase/command/security/operations/transfer/ForcedTransferCommand";
+import { BurnRequestFixture } from '../../../../__tests__/fixtures/burn/BurnFixture';
+import { BurnCommand } from '../../../app/usecase/command/security/operations/burn/BurnCommand';
+import MintRequest from '../request/security/operations/mint/MintRequest';
+import { MintRequestFixture } from '../../../../__tests__/fixtures/mint/MintFixture';
+import { MintCommand } from '../../../app/usecase/command/security/operations/mint/MintCommand';
+import ForcedTransferRequest from '../request/security/operations/transfer/ForcedTransferRequest';
+import { ForcedTransferCommand } from '../../../app/usecase/command/security/operations/transfer/ForcedTransferCommand';
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -464,7 +465,7 @@ describe('Security', () => {
   let issueRequest: IssueRequest;
   let mintRequest: MintRequest;
   let redeemRequest: RedeemRequest;
-    let burnRequest: BurnRequest;
+  let burnRequest: BurnRequest;
   let forceRedeemRequest: ForceRedeemRequest;
   let getControlListCountRequest: GetControlListCountRequest;
   let getControlListMembersRequest: GetControlListMembersRequest;
@@ -1184,16 +1185,16 @@ describe('Security', () => {
       const result = await Security.mint(mintRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-          'MintRequest',
-          mintRequest,
+        'MintRequest',
+        mintRequest,
       );
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-          new MintCommand(
-              mintRequest.securityId,
-              mintRequest.targetId,
-              mintRequest.amount
-          ),
+        new MintCommand(
+          mintRequest.securityId,
+          mintRequest.targetId,
+          mintRequest.amount,
+        ),
       );
       expect(result).toEqual(expectedResponse);
     });
@@ -1203,20 +1204,20 @@ describe('Security', () => {
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(Security.mint(mintRequest)).rejects.toThrow(
-          'Command execution failed',
+        'Command execution failed',
       );
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-          'MintRequest',
-          mintRequest,
+        'MintRequest',
+        mintRequest,
       );
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-          new MintCommand(
-              mintRequest.securityId,
-              mintRequest.targetId,
-              mintRequest.amount
-          ),
+        new MintCommand(
+          mintRequest.securityId,
+          mintRequest.targetId,
+          mintRequest.amount,
+        ),
       );
     });
 
@@ -1227,9 +1228,7 @@ describe('Security', () => {
         }),
       });
 
-      await expect(Security.mint(mintRequest)).rejects.toThrow(
-          ValidationError,
-      );
+      await expect(Security.mint(mintRequest)).rejects.toThrow(ValidationError);
     });
     it('should throw error if targetId is invalid', async () => {
       mintRequest = new MintRequest({
@@ -1238,9 +1237,7 @@ describe('Security', () => {
         }),
       });
 
-      await expect(Security.mint(mintRequest)).rejects.toThrow(
-          ValidationError,
-      );
+      await expect(Security.mint(mintRequest)).rejects.toThrow(ValidationError);
     });
     it('should throw error if amount is invalid', async () => {
       mintRequest = new MintRequest({
@@ -1249,9 +1246,7 @@ describe('Security', () => {
         }),
       });
 
-      await expect(Security.mint(mintRequest)).rejects.toThrow(
-          ValidationError,
-      );
+      await expect(Security.mint(mintRequest)).rejects.toThrow(ValidationError);
     });
   });
 
@@ -1333,12 +1328,16 @@ describe('Security', () => {
       const result = await Security.burn(burnRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-          'BurnRequest',
-          burnRequest,
+        'BurnRequest',
+        burnRequest,
       );
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-          new BurnCommand(burnRequest.securityId, burnRequest.sourceId, burnRequest.amount),
+        new BurnCommand(
+          burnRequest.securityId,
+          burnRequest.sourceId,
+          burnRequest.amount,
+        ),
       );
       expect(result).toEqual(expectedResponse);
     });
@@ -1348,16 +1347,20 @@ describe('Security', () => {
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(Security.burn(burnRequest)).rejects.toThrow(
-          'Command execution failed',
+        'Command execution failed',
       );
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-          'BurnRequest',
-          burnRequest,
+        'BurnRequest',
+        burnRequest,
       );
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-          new BurnCommand(burnRequest.securityId, burnRequest.sourceId, burnRequest.amount),
+        new BurnCommand(
+          burnRequest.securityId,
+          burnRequest.sourceId,
+          burnRequest.amount,
+        ),
       );
     });
 
@@ -1368,9 +1371,7 @@ describe('Security', () => {
         }),
       });
 
-      await expect(Security.burn(burnRequest)).rejects.toThrow(
-          ValidationError,
-      );
+      await expect(Security.burn(burnRequest)).rejects.toThrow(ValidationError);
     });
     it('should throw error if amount is invalid', async () => {
       burnRequest = new BurnRequest({
@@ -1379,12 +1380,9 @@ describe('Security', () => {
         }),
       });
 
-      await expect(Security.burn(burnRequest)).rejects.toThrow(
-          ValidationError,
-      );
+      await expect(Security.burn(burnRequest)).rejects.toThrow(ValidationError);
     });
   });
-
 
   describe('controllerRedeem', () => {
     forceRedeemRequest = new ForceRedeemRequest(
@@ -2221,11 +2219,11 @@ describe('Security', () => {
         Security.controllerTransfer(forceTransferRequest),
       ).rejects.toThrow(ValidationError);
     });
-  })
+  });
 
   describe('forcedTransfer', () => {
     forcedTransferRequest = new ForcedTransferRequest(
-        ForcedTransferRequestFixture.create(),
+      ForcedTransferRequestFixture.create(),
     );
 
     const expectedResponse = {
@@ -2238,17 +2236,17 @@ describe('Security', () => {
       const result = await Security.forcedTransfer(forcedTransferRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-          'ForcedTransferRequest',
-          forcedTransferRequest,
+        'ForcedTransferRequest',
+        forcedTransferRequest,
       );
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-          new ForcedTransferCommand(
-              forcedTransferRequest.sourceId,
-              forcedTransferRequest.targetId,
-              forcedTransferRequest.amount,
-              forcedTransferRequest.securityId,
-          ),
+        new ForcedTransferCommand(
+          forcedTransferRequest.sourceId,
+          forcedTransferRequest.targetId,
+          forcedTransferRequest.amount,
+          forcedTransferRequest.securityId,
+        ),
       );
       expect(result).toEqual(expectedResponse);
     });
@@ -2258,21 +2256,21 @@ describe('Security', () => {
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-          Security.forcedTransfer(forcedTransferRequest),
+        Security.forcedTransfer(forcedTransferRequest),
       ).rejects.toThrow('Command execution failed');
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-          'ForcedTransferRequest',
-          forcedTransferRequest,
+        'ForcedTransferRequest',
+        forcedTransferRequest,
       );
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-          new ControllerTransferCommand(
-              forcedTransferRequest.amount,
-              forcedTransferRequest.sourceId,
-              forcedTransferRequest.targetId,
-              forcedTransferRequest.securityId,
-          ),
+        new ControllerTransferCommand(
+          forcedTransferRequest.amount,
+          forcedTransferRequest.sourceId,
+          forcedTransferRequest.targetId,
+          forcedTransferRequest.securityId,
+        ),
       );
     });
 
@@ -2284,7 +2282,7 @@ describe('Security', () => {
       });
 
       await expect(
-          Security.forcedTransfer(forcedTransferRequest),
+        Security.forcedTransfer(forcedTransferRequest),
       ).rejects.toThrow(ValidationError);
     });
     it('should throw error if targetId is invalid', async () => {
@@ -2295,7 +2293,7 @@ describe('Security', () => {
       });
 
       await expect(
-          Security.forcedTransfer(forcedTransferRequest),
+        Security.forcedTransfer(forcedTransferRequest),
       ).rejects.toThrow(ValidationError);
     });
     it('should throw error if sourceId is invalid', async () => {
@@ -2306,7 +2304,7 @@ describe('Security', () => {
       });
 
       await expect(
-          Security.forcedTransfer(forcedTransferRequest),
+        Security.forcedTransfer(forcedTransferRequest),
       ).rejects.toThrow(ValidationError);
     });
     it('should throw error if amount is invalid', async () => {
@@ -2317,11 +2315,10 @@ describe('Security', () => {
       });
 
       await expect(
-          Security.forcedTransfer(forcedTransferRequest),
+        Security.forcedTransfer(forcedTransferRequest),
       ).rejects.toThrow(ValidationError);
     });
   });
-
 
   describe('pause', () => {
     const pauseRequest = new PauseRequest(PauseRequestFixture.create());

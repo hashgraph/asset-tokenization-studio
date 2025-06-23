@@ -206,7 +206,7 @@
 import IssueRequest from '../../../src/port/in/request/security/operations/issue/IssueRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import MintRequest from "../../../src/port/in/request/security/operations/mint/MintRequest";
+import MintRequest from '../../../src/port/in/request/security/operations/mint/MintRequest';
 
 export const MintRequestFixture = createFixture<MintRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);

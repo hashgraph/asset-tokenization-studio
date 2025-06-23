@@ -290,11 +290,11 @@ interface ITransactionAdapter {
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   forcedTransfer(
-      security: EvmAddress,
-      source: EvmAddress,
-      target: EvmAddress,
-      amount: BigDecimal,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    source: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   controllerRedeem(
     security: EvmAddress,
@@ -309,10 +309,10 @@ interface ITransactionAdapter {
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   mint(
-      security: EvmAddress,
-      target: EvmAddress,
-      amount: BigDecimal,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   transfer(
     security: EvmAddress,
@@ -333,10 +333,10 @@ interface ITransactionAdapter {
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   burn(
-      source: EvmAddress,
-      security: EvmAddress,
-      amount: BigDecimal,
-      securityId?: ContractId | string,
+    source: EvmAddress,
+    security: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   addToControlList(
     security: EvmAddress,
@@ -1158,11 +1158,11 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   forcedTransfer(
-      security: EvmAddress,
-      source: EvmAddress,
-      target: EvmAddress,
-      amount: BigDecimal,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    source: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -1191,10 +1191,10 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   mint(
-      security: EvmAddress,
-      target: EvmAddress,
-      amount: BigDecimal,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }

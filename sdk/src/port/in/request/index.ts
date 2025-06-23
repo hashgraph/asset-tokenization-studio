@@ -356,8 +356,8 @@ import RevokeKycMockRequest from './security/externalKycLists/mock/RevokeKycMock
 import GetKycStatusMockRequest from './security/externalKycLists/mock/GetKycStatusMockRequest.js';
 import SetNameRequest from './security/operations/tokeMetadata/SetNameRequest.js';
 import SetSymbolRequest from './security/operations/tokeMetadata/SetSymbolRequest.js';
-import ForcedTransferRequest from "./security/operations/transfer/ForcedTransferRequest";
-import MintRequest from "./security/operations/mint/MintRequest.js";
+import ForcedTransferRequest from './security/operations/transfer/ForcedTransferRequest';
+import MintRequest from './security/operations/mint/MintRequest.js';
 
 export {
   CreateEquityRequest,
@@ -365,14 +365,14 @@ export {
   ValidationResponse,
   IssueRequest,
   RedeemRequest,
-    BurnRequest,
+  BurnRequest,
   ForceRedeemRequest,
   RoleRequest,
   ApplyRolesRequest,
   TransferRequest,
   ForceTransferRequest,
-    ForcedTransferRequest,
-    MintRequest,
+  ForcedTransferRequest,
+  MintRequest,
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,

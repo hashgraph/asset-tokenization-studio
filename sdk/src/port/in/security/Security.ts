@@ -354,10 +354,10 @@ import { GetClearingTransferForByPartitionQuery } from '../../../app/usecase/que
 import { SetNameRequest, SetSymbolRequest } from '../request/index.js';
 import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand.js';
 import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand.js';
-import {BurnRequest} from "../request";
-import {BurnCommand} from "../../../app/usecase/command/security/operations/burn/BurnCommand";
-import MintRequest from "../request/security/operations/mint/MintRequest";
-import {MintCommand} from "../../../app/usecase/command/security/operations/mint/MintCommand";
+import { BurnRequest } from '../request';
+import { BurnCommand } from '../../../app/usecase/command/security/operations/burn/BurnCommand';
+import MintRequest from '../request/security/operations/mint/MintRequest';
+import { MintCommand } from '../../../app/usecase/command/security/operations/mint/MintCommand';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -370,7 +370,7 @@ interface ISecurityInPort {
     request: RedeemRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   burn(
-      request: BurnRequest,
+    request: BurnRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   controllerRedeem(
     request: ForceRedeemRequest,
@@ -407,7 +407,7 @@ interface ISecurityInPort {
     request: ForceTransferRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   forcedTransfer(
-      request: ForcedTransferRequest,
+    request: ForcedTransferRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   setMaxSupply(
     request: SetMaxSupplyRequest,
@@ -678,13 +678,13 @@ class SecurityInPort implements ISecurityInPort {
 
   @LogError
   async mint(
-      request: MintRequest,
+    request: MintRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, amount, targetId } = request;
     ValidatedRequest.handleValidation('MintRequest', request);
 
     return await this.commandBus.execute(
-        new MintCommand(securityId, targetId, amount),
+      new MintCommand(securityId, targetId, amount),
     );
   }
 
@@ -700,12 +700,14 @@ class SecurityInPort implements ISecurityInPort {
 
   @LogError
   async burn(
-      request: BurnRequest,
+    request: BurnRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, sourceId, amount } = request;
     ValidatedRequest.handleValidation('BurnRequest', request);
 
-    return await this.commandBus.execute(new BurnCommand(securityId, sourceId, amount));
+    return await this.commandBus.execute(
+      new BurnCommand(securityId, sourceId, amount),
+    );
   }
 
   @LogError
@@ -864,13 +866,13 @@ class SecurityInPort implements ISecurityInPort {
 
   @LogError
   async forcedTransfer(
-      request: ForcedTransferRequest,
+    request: ForcedTransferRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { securityId, amount, targetId, sourceId } = request;
     ValidatedRequest.handleValidation('ForcedTransferRequest', request);
 
     return await this.commandBus.execute(
-        new ControllerTransferCommand(amount, sourceId, targetId, securityId),
+      new ControllerTransferCommand(amount, sourceId, targetId, securityId),
     );
   }
 

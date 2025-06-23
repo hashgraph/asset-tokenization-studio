@@ -220,7 +220,10 @@ import ValidationService from '../../../../../service/validation/ValidationServi
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import { ControllerTransferCommandError } from './error/ControllerTransferCommandError copy.js';
-import {ForcedTransferCommand, ForcedTransferCommandResponse} from "./ForcedTransferCommand";
+import {
+  ForcedTransferCommand,
+  ForcedTransferCommandResponse,
+} from './ForcedTransferCommand';
 
 @CommandHandler(ForcedTransferCommand)
 export class ForcedTransferCommandHandler

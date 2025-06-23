@@ -242,13 +242,12 @@ export const ForceTransferRequestFixture = createFixture<ForceTransferRequest>(
   },
 );
 
-export const ForcedTransferRequestFixture = createFixture<ForcedTransferRequest>(
-    (request) => {
-        request.securityId.as(() => HederaIdPropsFixture.create().value);
-        request.targetId.as(() => HederaIdPropsFixture.create().value);
-        request.sourceId.as(() => HederaIdPropsFixture.create().value);
-        request.amount.faker((faker) =>
-            faker.number.int({ min: 1, max: 10 }).toString(),
-        );
-    },
-);
+export const ForcedTransferRequestFixture =
+  createFixture<ForcedTransferRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.sourceId.as(() => HederaIdPropsFixture.create().value);
+    request.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
+    );
+  });
