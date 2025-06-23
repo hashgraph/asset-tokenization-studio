@@ -257,7 +257,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
     function _issue(
         address _tokenHolder,
         uint256 _value,
-        bytes calldata _data
+        bytes memory _data
     ) internal {
         // Add a function to validate the `_data` parameter
         _mint(_tokenHolder, _value);
@@ -289,7 +289,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
     function _redeemFrom(
         address _tokenHolder,
         uint256 _value,
-        bytes calldata _data
+        bytes memory _data
     ) internal {
         // Add a function to validate the `_data` parameter
         _burnFrom(_tokenHolder, _value);

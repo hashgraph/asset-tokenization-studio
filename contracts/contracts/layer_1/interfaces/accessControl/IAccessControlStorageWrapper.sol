@@ -231,6 +231,15 @@ interface IAccessControlStorageWrapper {
     error AccountHasNoRole(address account, bytes32 role);
 
     /**
+     * @dev Emitted when the provided account is not granted any of the roles
+     *
+     * @param account The account for which the role is checked for granted
+     * @param roles The roles that are checked to see if the account has been granted
+     *
+     */
+    error AccountHasNoRoles(address account, bytes32[] roles);
+
+    /**
      * @dev Emitted when the roles length and actives length are not the same
      *
      * @param rolesLength The length of roles array
