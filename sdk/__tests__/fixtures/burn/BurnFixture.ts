@@ -203,11 +203,9 @@
 
 */
 
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { createFixture } from '../config';
-import RedeemRequest from '../../../src/port/in/request/security/operations/redeem/RedeemRequest';
-import ForceRedeemRequest from '../../../src/port/in/request/security/operations/redeem/ForceRedeemRequest';
-import { BurnRequest } from '../../../src';
+import {HederaIdPropsFixture} from '../shared/DataFixture';
+import {createFixture} from '../config';
+import {BurnRequest} from '../../../src';
 
 export const BurnRequestFixture = createFixture<BurnRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
