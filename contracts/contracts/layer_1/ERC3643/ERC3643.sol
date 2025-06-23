@@ -394,37 +394,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return true;
     }
 
-    /**
-     * @notice Retrieves the latest version of the contract.
-     * @dev The version is represented as a string.
-     */
-    function version() external view returns (string memory) {
-        return Strings.toString(_getLatestVersion());
-    }
-
-    /**
-     * @notice Retrieves the identity registry contract address.
-     */
-    function identityRegistry()
-        external
-        view
-        override
-        returns (IIdentityRegistry)
-    {
-        return IIdentityRegistry(_erc3643Storage().identityRegistry);
-    }
-
-    /**
-     * @notice Retrieves the onchainID address associated with the token.
-     */
-    function onchainID() external view override returns (address) {
-        return _erc3643Storage().onchainID;
-    }
-
-    function compliance() external view override returns (ICompliance) {
-        return ICompliance(_erc3643Storage().compliance);
-    }
-
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount
@@ -532,6 +501,36 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
      */
     function isAgent(address _agent) external view returns (bool) {
         return _hasRole(_AGENT_ROLE, _agent);
+    }
+    /**
+     * @notice Retrieves the latest version of the contract.
+     * @dev The version is represented as a string.
+     */
+    function version() external view returns (string memory) {
+        return Strings.toString(_getLatestVersion());
+    }
+
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
+    function identityRegistry()
+        external
+        view
+        override
+        returns (IIdentityRegistry)
+    {
+        return IIdentityRegistry(_erc3643Storage().identityRegistry);
+    }
+
+    /**
+     * @notice Retrieves the onchainID address associated with the token.
+     */
+    function onchainID() external view override returns (address) {
+        return _erc3643Storage().onchainID;
+    }
+
+    function compliance() external view override returns (ICompliance) {
+        return ICompliance(_erc3643Storage().compliance);
     }
 
     function getStaticResolverKey()

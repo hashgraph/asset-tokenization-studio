@@ -369,6 +369,12 @@ import { SetComplianceCommand } from '../../../app/usecase/command/security/comp
 import { IdentityRegistryQuery } from '../../../app/usecase/query/security/identityRegistry/IdentityRegistryQuery.js';
 import { ComplianceQuery } from '../../../app/usecase/query/security/compliance/compliance/ComplianceQuery.js';
 import { OnchainIDQuery } from '../../../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery.js';
+import FreezePartialTokensRequest from '../request/security/operations/erc3643/FreezePartialTokensRequest.js';
+import GetFrozenPartialTokensRequest from '../request/security/operations/erc3643/GetFrozenPartialTokensRequest.js';
+import UnfreezePartialTokensRequest from '../request/security/operations/erc3643/UnfreezePartialTokensRequest.js';
+import { FreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand.js';
+import { UnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand.js';
+import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -550,6 +556,15 @@ interface ISecurityInPort {
   compliance(request: ComplianceRequest): Promise<string>;
   identityRegistry(request: IdentityRegistryRequest): Promise<string>;
   onchainID(request: OnchainIDRequest): Promise<string>;
+  freezePartialTokens(
+    request: FreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  unfreezePartialTokens(
+    request: UnfreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  getFrozenPartialTokens(
+    request: GetFrozenPartialTokensRequest,
+  ): Promise<number>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1937,6 +1952,40 @@ class SecurityInPort implements ISecurityInPort {
 
     return (await this.queryBus.execute(new OnchainIDQuery(securityId)))
       .payload;
+  }
+
+  @LogError
+  async freezePartialTokens(
+    request: FreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('FreezePartialTokensRequest', request);
+    const { securityId, amount, targetId } = request;
+    return await this.commandBus.execute(
+      new FreezePartialTokensCommand(securityId, amount, targetId),
+    );
+  }
+
+  @LogError
+  async unfreezePartialTokens(
+    request: UnfreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('UnfreezePartialTokensRequest', request);
+    const { securityId, amount, targetId } = request;
+    return await this.commandBus.execute(
+      new UnfreezePartialTokensCommand(securityId, amount, targetId),
+    );
+  }
+
+  @LogError
+  async getFrozenPartialTokens(
+    request: GetFrozenPartialTokensRequest,
+  ): Promise<number> {
+    ValidatedRequest.handleValidation('GetFrozenPartialTokensRequest', request);
+    return (
+      await this.queryBus.execute(
+        new GetFrozenPartialTokensQuery(request.securityId, request.targetId),
+      )
+    ).payload;
   }
 }
 

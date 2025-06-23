@@ -342,28 +342,6 @@ interface IERC3643 {
      */
     function burn(address _userAddress, uint256 _amount) external;
 
-    /**
-     * @dev Returns the onchainID address associated with the token.
-     */
-    function onchainID() external view returns (address);
-
-    /**
-     * @dev Returns the address of the identity registry contract.
-     * @dev Returns the version of the contract as a string.
-     *
-     */
-    function identityRegistry() external view returns (IIdentityRegistry);
-
-    /**
-     * @dev Returns the address of the compliance contract.
-     */
-    function compliance() external view returns (ICompliance);
-
-    /**
-     * @dev Returns the version of the token.
-     */
-    function version() external view returns (string memory);
-
     /*
      * @dev Freezes a partial amount of the user's tokens across all partitions.
      * Emits a TokensFrozen event.
@@ -413,6 +391,27 @@ interface IERC3643 {
     function removeAgent(address _agent) external;
 
     function isAgent(address _agent) external view returns (bool);
+    /**
+     * @dev Returns the onchainID address associated with the token.
+     */
+    function onchainID() external view returns (address);
+
+    /**
+     * @dev Returns the address of the identity registry contract.
+     * @dev Returns the version of the contract as a string.
+     *
+     */
+    function identityRegistry() external view returns (IIdentityRegistry);
+
+    /**
+     * @dev Returns the address of the compliance contract.
+     */
+    function compliance() external view returns (ICompliance);
+
+    /**
+     * @dev Returns the version of the token.
+     */
+    function version() external view returns (string memory);
 
     /*
      * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.

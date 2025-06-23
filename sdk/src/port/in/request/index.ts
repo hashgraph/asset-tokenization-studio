@@ -361,6 +361,9 @@ import ComplianceRequest from './security/compliance/ComplianceRequest.js';
 import SetIdentityRegistryRequest from './security/identityRegistry/SetIdentityRegistryRequest.js';
 import IdentityRegistryRequest from './security/identityRegistry/IdentityRegistryRequest.js';
 import OnchainIDRequest from './security/operations/tokeMetadata/OnchainIDRequest.js';
+import FreezePartialTokensRequest from './security/operations/erc3643/FreezePartialTokensRequest.js';
+import GetFrozenPartialTokensRequest from './security/operations/erc3643/GetFrozenPartialTokensRequest.js';
+import UnfreezePartialTokensRequest from './security/operations/erc3643/UnfreezePartialTokensRequest.js';
 
 export {
   CreateEquityRequest,
@@ -520,4 +523,7 @@ export {
   ComplianceRequest,
   IdentityRegistryRequest,
   OnchainIDRequest,
+  FreezePartialTokensRequest,
+  GetFrozenPartialTokensRequest,
+  UnfreezePartialTokensRequest,
 };

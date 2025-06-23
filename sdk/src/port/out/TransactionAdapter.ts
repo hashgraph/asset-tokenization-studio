@@ -965,6 +965,20 @@ interface IIdentityRegistryTransactionAdapter {
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
+interface IERC3643Adapter {
+  freezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  unfreezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
 
 export default abstract class TransactionAdapter
   implements
@@ -985,6 +999,8 @@ export default abstract class TransactionAdapter
     ITokenMetadataTransactionAdapter,
     IComplianceTransactionAdapter,
     IIdentityRegistryTransactionAdapter
+    ITokenMetadataTransactionAdapter,
+    IERC3643Adapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1866,7 +1882,25 @@ export default abstract class TransactionAdapter
   setSymbol(
     security: EvmAddress,
     symbol: string,
-    securityId: ContractId | string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+
+  freezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+
+  unfreezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
