@@ -337,7 +337,7 @@ import {
   ACTIVATE_INTERNAL_KYC_GAS,
   DEACTIVATE_INTERNAL_KYC_GAS,
   SET_NAME_GAS,
-  SET_SYMBOL_GAS, BURN_GAS, MINT_GAS,
+  SET_SYMBOL_GAS, BURN_GAS, MINT_GAS, FORCED_TRANSFER_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -1085,7 +1085,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'controllerTransferByPartition';
     LogService.logTrace(
-      `Force transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
+      `Controller transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
     const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
@@ -1109,6 +1109,39 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setContractId(securityId)
       .setGas(CONTROLLER_TRANSFER_GAS)
       .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async forcedTransfer(
+      security: EvmAddress,
+      source: EvmAddress,
+      target: EvmAddress,
+      amount: BigDecimal,
+      securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'forcedTransfer';
+    LogService.logTrace(
+        `Forced transfer ${amount} tokens from account ${source.toString()} to account ${target.toString()}`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+        FUNCTION_NAME,
+        [
+          source.toString(),
+          target.toString(),
+          amount.toHexString()
+        ],
+    );
+    const functionDataEncoded = new Uint8Array(
+        Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+    const transaction = new ContractExecuteTransaction()
+        .setContractId(securityId)
+        .setGas(FORCED_TRANSFER_GAS)
+        .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }

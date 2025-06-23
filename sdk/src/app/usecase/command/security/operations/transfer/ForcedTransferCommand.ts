@@ -203,52 +203,24 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import TransferRequest from '../../../src/port/in/request/security/operations/transfer/TransferRequest';
-import TransferAndLockRequest from '../../../src/port/in/request/security/operations/transfer/TransferAndLockRequest';
-import ForceTransferRequest from '../../../src/port/in/request/security/operations/transfer/ForceTransferRequest';
+import { Command } from '../../../../../../core/command/Command.js';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
+import { HederaId } from '../../../../../../domain/context/shared/HederaId.js';
 
-export const TransferRequestFixture = createFixture<TransferRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-  },
-);
+export class ForcedTransferCommandResponse implements CommandResponse {
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
+}
 
-export const TransferAndLockRequestFixture =
-  createFixture<TransferAndLockRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.expirationDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-  });
-
-export const ForceTransferRequestFixture = createFixture<ForceTransferRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.sourceId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-  },
-);
-
-export const ForcedTransferRequestFixture = createFixture<ForcedTransferRequest>(
-    (request) => {
-        request.securityId.as(() => HederaIdPropsFixture.create().value);
-        request.targetId.as(() => HederaIdPropsFixture.create().value);
-        request.sourceId.as(() => HederaIdPropsFixture.create().value);
-        request.amount.faker((faker) =>
-            faker.number.int({ min: 1, max: 10 }).toString(),
-        );
-    },
-);
+export class ForcedTransferCommand extends Command<ForcedTransferCommandResponse> {
+  constructor(
+    public readonly sourceId: string,
+    public readonly targetId: string,
+    public readonly amount: string,
+    public readonly securityId: string,
+  ) {
+    super();
+  }
+}

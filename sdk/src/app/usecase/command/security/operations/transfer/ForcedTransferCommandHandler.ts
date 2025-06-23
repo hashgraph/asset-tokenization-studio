@@ -203,52 +203,90 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import TransferRequest from '../../../src/port/in/request/security/operations/transfer/TransferRequest';
-import TransferAndLockRequest from '../../../src/port/in/request/security/operations/transfer/TransferAndLockRequest';
-import ForceTransferRequest from '../../../src/port/in/request/security/operations/transfer/ForceTransferRequest';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import {
+  ControllerTransferCommand,
+  ControllerTransferCommandResponse,
+} from './ControllerTransferCommand.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { ControllerTransferCommandError } from './error/ControllerTransferCommandError copy.js';
+import {ForcedTransferCommand, ForcedTransferCommandResponse} from "./ForcedTransferCommand";
 
-export const TransferRequestFixture = createFixture<TransferRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-  },
-);
+@CommandHandler(ForcedTransferCommand)
+export class ForcedTransferCommandHandler
+  implements ICommandHandler<ForcedTransferCommand>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    private readonly securityService: SecurityService,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    private readonly transactionService: TransactionService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+  ) {}
 
-export const TransferAndLockRequestFixture =
-  createFixture<TransferAndLockRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.expirationDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-  });
+  async execute(
+    command: ForcedTransferCommand,
+  ): Promise<ForcedTransferCommandResponse> {
+    try {
+      const { sourceId, targetId, amount, securityId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-export const ForceTransferRequestFixture = createFixture<ForceTransferRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.sourceId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-  },
-);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-export const ForcedTransferRequestFixture = createFixture<ForcedTransferRequest>(
-    (request) => {
-        request.securityId.as(() => HederaIdPropsFixture.create().value);
-        request.targetId.as(() => HederaIdPropsFixture.create().value);
-        request.sourceId.as(() => HederaIdPropsFixture.create().value);
-        request.amount.faker((faker) =>
-            faker.number.int({ min: 1, max: 10 }).toString(),
-        );
-    },
-);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
+
+      await this.validationService.checkCanTransfer(
+        securityId,
+        targetId,
+        amount,
+        sourceId,
+        _PARTITION_ID_1,
+        account.id.toString(),
+      );
+
+      await this.validationService.checkRole(
+        SecurityRole._CONTROLLER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
+
+      await this.validationService.checkDecimals(security, amount);
+
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+      const res = await handler.forcedTransfer(
+        securityEvmAddress,
+        sourceEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        securityId,
+      );
+      return Promise.resolve(
+        new ControllerTransferCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new ControllerTransferCommandError(error as Error);
+    }
+  }
+}

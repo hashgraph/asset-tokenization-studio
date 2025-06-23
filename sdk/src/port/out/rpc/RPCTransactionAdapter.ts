@@ -348,7 +348,7 @@ import {
   ACTIVATE_INTERNAL_KYC_GAS,
   DEACTIVATE_INTERNAL_KYC_GAS,
   SET_NAME_GAS,
-  SET_SYMBOL_GAS, BURN_GAS, MINT_GAS,
+  SET_SYMBOL_GAS, BURN_GAS, MINT_GAS, FORCED_TRANSFER_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -1310,7 +1310,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Force transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
+      `Controller transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
@@ -1329,6 +1329,32 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         },
       ),
       this.networkService.environment,
+    );
+  }
+
+  async forcedTransfer(
+      security: EvmAddress,
+      source: EvmAddress,
+      target: EvmAddress,
+      amount: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+        `Forced transfer ${amount} tokens from account ${source.toString()} to account ${target.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+        await ERC3643__factory.connect(
+            security.toString(),
+            this.signerOrProvider,
+        ).forcedTransfer(
+            source.toString(),
+            target.toString(),
+            amount.toBigNumber(),
+            {
+              gasLimit: FORCED_TRANSFER_GAS,
+            },
+        ),
+        this.networkService.environment,
     );
   }
 

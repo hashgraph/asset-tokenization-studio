@@ -331,6 +331,7 @@ import { GetControlListMembersQuery } from '../../../app/usecase/query/security/
 import { GetControlListTypeQuery } from '../../../app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery';
 import { BalanceOfQuery } from '../../../app/usecase/query/security/balanceof/BalanceOfQuery';
 import {
+  ForcedTransferRequestFixture,
   ForceTransferRequestFixture,
   TransferAndLockRequestFixture,
   TransferRequestFixture,
@@ -451,6 +452,8 @@ import {BurnCommand} from "../../../app/usecase/command/security/operations/burn
 import MintRequest from "../request/security/operations/mint/MintRequest";
 import {MintRequestFixture} from "../../../../__tests__/fixtures/mint/MintFixture";
 import {MintCommand} from "../../../app/usecase/command/security/operations/mint/MintCommand";
+import ForcedTransferRequest from "../request/security/operations/transfer/ForcedTransferRequest";
+import {ForcedTransferCommand} from "../../../app/usecase/command/security/operations/transfer/ForcedTransferCommand";
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -469,6 +472,7 @@ describe('Security', () => {
   let transferRequest: TransferRequest;
   let transferAndLockRequest: TransferAndLockRequest;
   let forceTransferRequest: ForceTransferRequest;
+  let forcedTransferRequest: ForcedTransferRequest;
   let setMaxSupplyRequest: SetMaxSupplyRequest;
   let lockRequest: LockRequest;
   let releaseRequest: ReleaseRequest;
@@ -2217,7 +2221,107 @@ describe('Security', () => {
         Security.controllerTransfer(forceTransferRequest),
       ).rejects.toThrow(ValidationError);
     });
+  })
+
+  describe('forcedTransfer', () => {
+    forcedTransferRequest = new ForcedTransferRequest(
+        ForcedTransferRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should forced transfer successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.forcedTransfer(forcedTransferRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+          'ForcedTransferRequest',
+          forcedTransferRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+          new ForcedTransferCommand(
+              forcedTransferRequest.sourceId,
+              forcedTransferRequest.targetId,
+              forcedTransferRequest.amount,
+              forcedTransferRequest.securityId,
+          ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+          Security.forcedTransfer(forcedTransferRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+          'ForcedTransferRequest',
+          forcedTransferRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+          new ControllerTransferCommand(
+              forcedTransferRequest.amount,
+              forcedTransferRequest.sourceId,
+              forcedTransferRequest.targetId,
+              forcedTransferRequest.securityId,
+          ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      forcedTransferRequest = new ForcedTransferRequest({
+        ...ForcedTransferRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+          Security.forcedTransfer(forcedTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if targetId is invalid', async () => {
+      forcedTransferRequest = new ForceTransferRequest({
+        ...ForcedTransferRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+          Security.forcedTransfer(forcedTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if sourceId is invalid', async () => {
+      forcedTransferRequest = new ForcedTransferRequest({
+        ...ForcedTransferRequestFixture.create({
+          sourceId: 'invalid',
+        }),
+      });
+
+      await expect(
+          Security.forcedTransfer(forcedTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if amount is invalid', async () => {
+      forcedTransferRequest = new ForcedTransferRequest({
+        ...ForcedTransferRequestFixture.create({
+          amount: 'invalid',
+        }),
+      });
+
+      await expect(
+          Security.forcedTransfer(forcedTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
   });
+
 
   describe('pause', () => {
     const pauseRequest = new PauseRequest(PauseRequestFixture.create());

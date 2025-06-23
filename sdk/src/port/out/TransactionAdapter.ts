@@ -289,6 +289,13 @@ interface ITransactionAdapter {
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  forcedTransfer(
+      security: EvmAddress,
+      source: EvmAddress,
+      target: EvmAddress,
+      amount: BigDecimal,
+      securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   controllerRedeem(
     security: EvmAddress,
     sourceId: EvmAddress,
@@ -1147,6 +1154,15 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
+  }
+  forcedTransfer(
+      security: EvmAddress,
+      source: EvmAddress,
+      target: EvmAddress,
+      amount: BigDecimal,
+      securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }

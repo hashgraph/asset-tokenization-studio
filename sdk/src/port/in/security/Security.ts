@@ -406,6 +406,9 @@ interface ISecurityInPort {
   controllerTransfer(
     request: ForceTransferRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  forcedTransfer(
+      request: ForcedTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
   setMaxSupply(
     request: SetMaxSupplyRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
@@ -856,6 +859,18 @@ class SecurityInPort implements ISecurityInPort {
 
     return await this.commandBus.execute(
       new ControllerTransferCommand(amount, sourceId, targetId, securityId),
+    );
+  }
+
+  @LogError
+  async forcedTransfer(
+      request: ForcedTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, amount, targetId, sourceId } = request;
+    ValidatedRequest.handleValidation('ForcedTransferRequest', request);
+
+    return await this.commandBus.execute(
+        new ControllerTransferCommand(amount, sourceId, targetId, securityId),
     );
   }
 

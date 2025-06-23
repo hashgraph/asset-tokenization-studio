@@ -203,52 +203,36 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import TransferRequest from '../../../src/port/in/request/security/operations/transfer/TransferRequest';
-import TransferAndLockRequest from '../../../src/port/in/request/security/operations/transfer/TransferAndLockRequest';
-import ForceTransferRequest from '../../../src/port/in/request/security/operations/transfer/ForceTransferRequest';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../FormatValidation.js';
 
-export const TransferRequestFixture = createFixture<TransferRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-  },
-);
+export default class ForcedTransferRequest extends ValidatedRequest<ForcedTransferRequest> {
+  securityId: string;
+  sourceId: string;
+  targetId: string;
+  amount: string;
 
-export const TransferAndLockRequestFixture =
-  createFixture<TransferAndLockRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.expirationDate.faker((faker) =>
-      faker.date.future().getTime().toString(),
-    );
-  });
+  constructor({
+    sourceId,
+    targetId,
+    amount,
+    securityId,
+  }: {
+    sourceId: string;
+    targetId: string;
+    amount: string;
+    securityId: string;
+  }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      sourceId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      amount: FormatValidation.checkAmount(),
+    });
 
-export const ForceTransferRequestFixture = createFixture<ForceTransferRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.sourceId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-  },
-);
-
-export const ForcedTransferRequestFixture = createFixture<ForcedTransferRequest>(
-    (request) => {
-        request.securityId.as(() => HederaIdPropsFixture.create().value);
-        request.targetId.as(() => HederaIdPropsFixture.create().value);
-        request.sourceId.as(() => HederaIdPropsFixture.create().value);
-        request.amount.faker((faker) =>
-            faker.number.int({ min: 1, max: 10 }).toString(),
-        );
-    },
-);
+    this.securityId = securityId;
+    this.sourceId = sourceId;
+    this.targetId = targetId;
+    this.amount = amount;
+  }
+}
