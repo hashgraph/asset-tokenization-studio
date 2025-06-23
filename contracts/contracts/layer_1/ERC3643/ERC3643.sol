@@ -220,7 +220,8 @@ import {
     _DEFAULT_ADMIN_ROLE,
     _CONTROLLER_ROLE,
     _ISSUER_ROLE,
-		_FREEZE_MANAGER_ROLE
+    _FREEZE_MANAGER_ROLE,
+    _AGENT_ROLE
 } from '../constants/roles.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {IKyc} from '../interfaces/kyc/IKyc.sol';
@@ -418,11 +419,12 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
      */
     function onchainID() external view override returns (address) {
         return _erc3643Storage().onchainID;
-		}
-		
+    }
+
     function compliance() external view override returns (ICompliance) {
         return ICompliance(_erc3643Storage().compliance);
-		}
+    }
+
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount
@@ -489,6 +491,29 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit TokensUnfrozen(_userAddress, _amount, _partition);
     }
 
+    /**
+     * @notice Gives an account the agent role
+     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
+     * @dev Can only be called by the role admin
+     */
+    function addAgent(
+        address _agent
+    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+        _addAgent(_agent);
+        emit AgentAdded(_agent);
+    }
+
+    /**
+     * @notice Revokes an account the agent role
+     * @dev Can only be called by the role admin
+     */
+    function removeAgent(
+        address _agent
+    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+        _removeAgent(_agent);
+        emit AgentRemoved(_agent);
+    }
+
     function getFrozenTokensByPartition(
         bytes32 _partition,
         address _userAddress
@@ -500,6 +525,13 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         address _userAddress
     ) external view override returns (uint256) {
         return _getFrozenAmountForAdjusted(_userAddress);
+    }
+
+    /**
+     * @dev Checks if an account has the agent role
+     */
+    function isAgent(address _agent) external view returns (bool) {
+        return _hasRole(_AGENT_ROLE, _agent);
     }
 
     function getStaticResolverKey()
@@ -517,7 +549,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](21);
+        staticFunctionSelectors_ = new bytes4[](24);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
@@ -530,8 +562,10 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
-            .setCompliance.selector;
+            .setCompliance
+            .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .freezePartialTokens
@@ -558,9 +592,11 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             .setIdentityRegistry
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
     }
 
     /**

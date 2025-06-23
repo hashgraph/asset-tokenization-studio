@@ -242,6 +242,19 @@ interface IERC3643 {
         bytes32 partition
     );
 
+    /**
+     * @dev Emitted when the agent role is granted
+     *
+     * @param _agent Address of the agent that has been added
+     */
+    event AgentAdded(address indexed _agent);
+    /**
+     * @dev Emitted when the agent role is revoked
+     *
+     * @param _agent Address of the agent that has been removed
+     */
+    event AgentRemoved(address indexed _agent);
+
     error InsufficientFrozenBalance(
         address user,
         uint256 requestedUnfreeze,
@@ -350,6 +363,7 @@ interface IERC3643 {
      * @dev Returns the version of the token.
      */
     function version() external view returns (string memory);
+
     /*
      * @dev Freezes a partial amount of the user's tokens across all partitions.
      * Emits a TokensFrozen event.
@@ -393,6 +407,12 @@ interface IERC3643 {
      * Emits a TokensFrozen event.
      */
     function setAddressFrozen(address _userAddress) external;
+
+    function addAgent(address _agent) external;
+
+    function removeAgent(address _agent) external;
+
+    function isAgent(address _agent) external view returns (bool);
 
     /*
      * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.

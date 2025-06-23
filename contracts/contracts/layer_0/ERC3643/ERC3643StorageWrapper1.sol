@@ -209,8 +209,24 @@ pragma solidity 0.8.18;
 import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
 import {_ERC3643_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {_AGENT_ROLE} from '../constants/roles.sol';
+import {
+    IAccessControl
+} from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
 
 abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
+    function _addAgent(address _agent) internal {
+        if (!_grantRole(_AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
+        }
+    }
+
+    function _removeAgent(address _agent) internal {
+        if (!_revokeRole(_AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
+        }
+    }
+
     function _getFrozenAmountFor(
         address _userAddress
     ) internal view returns (uint256) {
