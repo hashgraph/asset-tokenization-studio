@@ -262,7 +262,6 @@ import {
     CLEARING_ACTIVE_ERROR_ID,
     CLEARING_ROLE,
     dateToUnixTimestamp,
-    AGENT_ROLE,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -2624,59 +2623,6 @@ describe('ERC1410 Tests', () => {
             expect(dividend.snapshotId.toNumber()).to.equal(2)
         })
 
-        it('GIVEN an account with Agent role WHEN controllerTransferByPartition and controllerRedeemByPartition THEN transaction succeeds', async () => {
-            // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(AGENT_ROLE, account_C)
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            const balanceOf_D_Original = 4 * amount
-            await erc1410Facet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_D,
-                value: balanceOf_D_Original,
-                data: '0x',
-            })
-            await expect(
-                erc1410Facet.controllerTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    account_E,
-                    amount,
-                    data,
-                    operatorData
-                )
-            )
-                .to.emit(erc1410Facet, 'TransferByPartition')
-                .withArgs(
-                    _PARTITION_ID_1,
-                    account_C,
-                    account_D,
-                    account_E,
-                    amount,
-                    data,
-                    operatorData
-                )
-            await expect(
-                erc1410Facet.controllerRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
-            )
-                .to.emit(erc1410Facet, 'RedeemedByPartition')
-                .withArgs(
-                    _PARTITION_ID_1,
-                    account_C,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
-        })
-
         describe('Adjust balances', () => {
             before(async () => {
                 // mute | mock console.log
@@ -2838,44 +2784,6 @@ describe('ERC1410 Tests', () => {
                             .mul(adjustFactor)
                             .add(balanceOf_A_Original[0])
                     )
-                })
-
-                it('GIVEN an account with Agent role THEN ERC140 issueByPartition succeeds', async () => {
-                    // Granting Role to account C
-                    accessControlFacet = accessControlFacet.connect(signer_A)
-                    await accessControlFacet.grantRole(AGENT_ROLE, account_C)
-                    await accessControlFacet.grantRole(KYC_ROLE, account_A)
-
-                    await grantKycToAccounts()
-
-                    // Using account C (with role)
-                    adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-                    erc1410Facet = erc1410Facet.connect(signer_C)
-
-                    await erc1410Facet.issueByPartition({
-                        partition: _PARTITION_ID_1,
-                        tokenHolder: account_A,
-                        value: balanceOf_A_Original[0],
-                        data: '0x',
-                    })
-
-                    // issue
-                    await expect(
-                        erc1410Facet.issueByPartition({
-                            partition: _PARTITION_ID_1,
-                            tokenHolder: account_A,
-                            value: balanceOf_A_Original[0],
-                            data: '0x',
-                        })
-                    )
-                        .to.emit(erc1594Facet, 'IssuedByPartition')
-                        .withArgs(
-                            _PARTITION_ID_1,
-                            account_C,
-                            account_A,
-                            balanceOf_A_Original[0],
-                            '0x'
-                        )
                 })
             })
 
@@ -3397,30 +3305,6 @@ describe('ERC1410 Tests', () => {
                     .to.emit(erc1594Facet, 'Issued')
                     .withArgs(
                         account_A,
-                        account_A,
-                        balanceOf_A_Original[0],
-                        '0x'
-                    )
-            })
-            it('GIVEN an account with Agent role THEN ERC1594 issue succeeds', async () => {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(AGENT_ROLE, account_C)
-                await accessControlFacet.grantRole(KYC_ROLE, account_A)
-
-                await grantKycToAccounts()
-
-                // Using account C (with role)
-                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // issue
-                await expect(
-                    erc1594Facet.issue(account_A, balanceOf_A_Original[0], '0x')
-                )
-                    .to.emit(erc1594Facet, 'Issued')
-                    .withArgs(
-                        account_C,
                         account_A,
                         balanceOf_A_Original[0],
                         '0x'

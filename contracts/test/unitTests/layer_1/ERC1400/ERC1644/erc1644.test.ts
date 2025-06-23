@@ -237,7 +237,6 @@ import {
     SSI_MANAGER_ROLE,
     ZERO,
     EMPTY_STRING,
-    AGENT_ROLE,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../../common'
 
@@ -550,97 +549,6 @@ describe('ERC1644 Tests', () => {
                         await erc1410Facet.balanceOfByPartition(
                             DEFAULT_PARTITION,
                             account_E
-                        )
-                    ).to.equal(amount)
-                }
-            )
-
-            it(
-                'GIVEN a controllable token ' +
-                    'WHEN controllerTransfer ' +
-                    'WITH Agent role ' +
-                    'THEN transaction succeeds',
-                async () => {
-                    await accessControlFacet.grantRole(AGENT_ROLE, account_D)
-                    expect(
-                        await erc1644Facet
-                            .connect(signer_D)
-                            .controllerTransfer(
-                                account_D,
-                                account_E,
-                                amount,
-                                data,
-                                operatorData
-                            )
-                    )
-                        .to.emit(erc1644Facet, 'ControllerTransfer')
-                        .withArgs(
-                            account_B,
-                            account_D,
-                            account_E,
-                            amount,
-                            data,
-                            data
-                        )
-                    expect(await erc1410Facet.totalSupply()).to.equal(
-                        amount * 2
-                    )
-                    expect(await erc1410Facet.balanceOf(account_D)).to.equal(
-                        amount
-                    )
-                    expect(await erc1410Facet.balanceOf(account_E)).to.equal(
-                        amount
-                    )
-                    expect(
-                        await erc1410Facet.totalSupplyByPartition(
-                            DEFAULT_PARTITION
-                        )
-                    ).to.equal(amount * 2)
-                    expect(
-                        await erc1410Facet.balanceOfByPartition(
-                            DEFAULT_PARTITION,
-                            account_D
-                        )
-                    ).to.equal(amount)
-                    expect(
-                        await erc1410Facet.balanceOfByPartition(
-                            DEFAULT_PARTITION,
-                            account_E
-                        )
-                    ).to.equal(amount)
-                }
-            )
-
-            it(
-                'GIVEN a controllable token ' +
-                    'WHEN controllerRedeem ' +
-                    'THEN transaction succeeds',
-                async () => {
-                    expect(
-                        await erc1644Facet
-                            .connect(signer_B)
-                            .controllerRedeem(
-                                account_D,
-                                amount,
-                                data,
-                                operatorData
-                            )
-                    )
-                        .to.emit(erc1644Facet, 'ControllerRedemption')
-                        .withArgs(account_B, account_D, amount, data, data)
-                    expect(await erc1410Facet.totalSupply()).to.equal(amount)
-                    expect(await erc1410Facet.balanceOf(account_D)).to.equal(
-                        amount
-                    )
-                    expect(
-                        await erc1410Facet.totalSupplyByPartition(
-                            DEFAULT_PARTITION
-                        )
-                    ).to.equal(amount)
-                    expect(
-                        await erc1410Facet.balanceOfByPartition(
-                            DEFAULT_PARTITION,
-                            account_D
                         )
                     ).to.equal(amount)
                 }

@@ -210,13 +210,11 @@ import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
     IERC1644StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
-import {
-    SnapshotsStorageWrapper2
-} from '../../snapshots/SnapshotsStorageWrapper2.sol';
+import {ERC3643StorageWrapper2} from '../../ERC3643/ERC3643StorageWrapper2.sol';
 
 abstract contract ERC1644StorageWrapper is
     IERC1644StorageWrapper,
-    SnapshotsStorageWrapper2
+    ERC3643StorageWrapper2
 {
     struct ERC1644Storage {
         bool isControllable;
@@ -232,8 +230,8 @@ abstract contract ERC1644StorageWrapper is
         address _from,
         address _to,
         uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
+        bytes memory _data,
+        bytes memory _operatorData
     ) internal {
         _transfer(_from, _to, _value);
         emit ControllerTransfer(

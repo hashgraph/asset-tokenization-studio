@@ -230,7 +230,6 @@ import {
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
     GAS_LIMIT,
-    AGENT_ROLE,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
@@ -336,7 +335,6 @@ describe('Pause Tests', () => {
 
     it('GIVEN an account without pause role WHEN unpause THEN transaction fails with AccountHasNoRole', async () => {
         // Using account B (non role)
-        await pauseFacet.pause()
         pauseFacet = pauseFacet.connect(signer_B)
 
         // unpause fails
@@ -394,30 +392,6 @@ describe('Pause Tests', () => {
 
         // UNPAUSE ------------------------------------------------------------------
         // remove From list
-        await expect(pauseFacet.unpause())
-            .to.emit(pauseFacet, 'TokenUnpaused')
-            .withArgs(account_B)
-        // check is unpaused
-        paused = await pauseFacet.isPaused()
-        expect(paused).to.be.equal(false)
-    })
-
-    it('GIVEN an account with agent role WHEN pause and unpause THEN transaction succeeds', async () => {
-        // PAUSE ------------------------------------------------------------------
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(AGENT_ROLE, account_B)
-        // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-
-        await expect(pauseFacet.pause())
-            .to.emit(pauseFacet, 'TokenPaused')
-            .withArgs(account_B)
-        // check is paused
-        let paused = await pauseFacet.isPaused()
-        expect(paused).to.be.equal(true)
-
-        // UNPAUSE ------------------------------------------------------------------
         await expect(pauseFacet.unpause())
             .to.emit(pauseFacet, 'TokenUnpaused')
             .withArgs(account_B)

@@ -206,27 +206,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
+import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {_ERC3643_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {_AGENT_ROLE} from '../constants/roles.sol';
 import {
     IAccessControl
 } from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
 
-abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
-    function _setName(
-        string calldata _name
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.name = _name;
-    }
-
-    function _setSymbol(
-        string calldata _symbol
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.symbol = _symbol;
-    }
-
+abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
     function _addAgent(address _agent) internal {
         if (!_grantRole(_AGENT_ROLE, _agent)) {
             revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
@@ -236,6 +224,33 @@ abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
     function _removeAgent(address _agent) internal {
         if (!_revokeRole(_AGENT_ROLE, _agent)) {
             revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
+        }
+    }
+
+    function _getFrozenAmountFor(
+        address _userAddress
+    ) internal view returns (uint256) {
+        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        return st.frozenTokens[_userAddress];
+    }
+
+    function _getFrozenAmountForByPartition(
+        bytes32 _partition,
+        address _userAddress
+    ) internal view returns (uint256) {
+        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        return st.frozenTokensByPartition[_userAddress][_partition];
+    }
+
+    function _erc3643Storage()
+        internal
+        pure
+        returns (IERC3643.ERC3643Storage storage erc3643Storage_)
+    {
+        bytes32 position = _ERC3643_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc3643Storage_.slot := position
         }
     }
 }

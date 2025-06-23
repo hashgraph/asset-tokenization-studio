@@ -207,11 +207,7 @@
 pragma solidity 0.8.18;
 
 import {IERC1644} from '../../interfaces/ERC1400/IERC1644.sol';
-import {
-    _DEFAULT_ADMIN_ROLE,
-    _CONTROLLER_ROLE,
-    _AGENT_ROLE
-} from '../../constants/roles.sol';
+import {_DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE} from '../../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -249,16 +245,11 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     )
         external
         override
+        onlyRole(_CONTROLLER_ROLE)
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyControllable
     {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
         _controllerTransfer(_from, _to, _value, _data, _operatorData);
     }
 
@@ -282,16 +273,11 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     )
         external
         override
+        onlyRole(_CONTROLLER_ROLE)
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyControllable
     {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
         _controllerRedeem(_tokenHolder, _value, _data, _operatorData);
     }
 

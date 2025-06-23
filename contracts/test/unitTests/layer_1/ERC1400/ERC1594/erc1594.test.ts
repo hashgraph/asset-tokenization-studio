@@ -638,6 +638,18 @@ describe('ERC1594 Tests', () => {
             })
         })
 
+        describe('AccessControl', () => {
+            it('GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc1594Facet = erc1594Facet.connect(signer_C)
+
+                // add to list fails
+                await expect(
+                    erc1594Facet.issue(account_E, AMOUNT, DATA)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+        })
+
         describe('NotAllowedInMultiPartitionMode', () => {
             it('GIVEN an initialized token WHEN transferWithData THEN fails with NotAllowedInMultiPartitionMode', async () => {
                 // Using account C (with role)
@@ -1173,18 +1185,6 @@ describe('ERC1594 Tests', () => {
             )
         })
 
-        describe('AccessControl', () => {
-            it('GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc1594Facet = erc1594Facet.connect(signer_D)
-
-                // add to list fails
-                await expect(
-                    erc1594Facet.issue(account_E, AMOUNT, DATA)
-                ).to.be.rejectedWith('AccountHasNoRole')
-            })
-        })
-
         it('GIVEN a zero address in to WHEN canTransfer and canTransferFrom THEN responds _TO_ACCOUNT_NULL_ERROR_ID', async () => {
             await kycFacet.grantKyc(
                 account_A,
@@ -1218,7 +1218,7 @@ describe('ERC1594 Tests', () => {
         it('GIVEN a non allowed WHEN canTransferFrom THEN responds _ALLOWANCE_REACHED_ERROR_ID', async () => {
             expect(
                 await erc1594Facet.canTransferFrom(
-                    account_C,
+                    account_A,
                     account_D,
                     AMOUNT,
                     DATA

@@ -203,316 +203,166 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {_DEFAULT_PARTITION} from '../constants/values.sol';
 import {
-    ERC1410OperatorStorageWrapper
-} from './ERC1410OperatorStorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS,
-    _FROM_ACCOUNT_KYC_ERROR_ID,
-    _CLEARING_ACTIVE_ERROR_ID
-} from '../../constants/values.sol';
-import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
-import {
-    IERC1410Standard
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+    SnapshotsStorageWrapper2
+} from '../snapshots/SnapshotsStorageWrapper2.sol';
+import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
 
-abstract contract ERC1410StandardStorageWrapper is
-    ERC1410OperatorStorageWrapper
-{
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 /*amount*/
-    ) internal override {
-        _triggerAndSyncAll(partition, from, to);
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-        if (from == address(0)) {
-            // mint
-            _updateAccountSnapshot(to, partition);
-            return _updateTotalSupplySnapshot(partition);
-        }
-        if (to == address(0)) {
-            // burn
-            _updateAccountSnapshot(from, partition);
-            return _updateTotalSupplySnapshot(partition);
-        }
-        // transfer
-        _updateAccountSnapshot(from, partition);
-        _updateAccountSnapshot(to, partition);
+abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
+    function _setName(
+        string calldata _name
+    ) internal returns (ERC20Storage storage erc20Storage_) {
+        erc20Storage_ = _erc20Storage();
+        erc20Storage_.name = _name;
     }
 
-    function _triggerAndSyncAll(
+    function _setSymbol(
+        string calldata _symbol
+    ) internal returns (ERC20Storage storage erc20Storage_) {
+        erc20Storage_ = _erc20Storage();
+        erc20Storage_.symbol = _symbol;
+    }
+
+    function _freezeTokens(address _account, uint256 _amount) internal {
+        _freezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
+    }
+
+    function _unfreezeTokens(address _account, uint256 _amount) internal {
+        _unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
+    }
+
+    function _freezeTokensByPartition(
         bytes32 _partition,
-        address _from,
-        address _to
-    ) internal {
-        _triggerScheduledTasks(0);
-        _syncBalanceAdjustments(_partition, _from, _to);
-    }
-
-    function _syncBalanceAdjustments(
-        bytes32 _partition,
-        address _from,
-        address _to
-    ) internal {
-        // adjust the total supply for the partition
-        _adjustTotalAndMaxSupplyForPartition(_partition);
-
-        // adjust "from" total and partition balance
-        if (_from != address(0))
-            _adjustTotalBalanceAndPartitionBalanceFor(_partition, _from);
-
-        // adjust "to" total and partition balance
-        if (_to != address(0))
-            _adjustTotalBalanceAndPartitionBalanceFor(_partition, _to);
-    }
-
-    function _addPartitionTo(
-        uint256 _value,
         address _account,
-        bytes32 _partition
-    ) internal override {
-        _pushLabafUserPartition(_account, _getAbaf());
-
-        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
-
-        erc1410Storage.partitions[_account].push(Partition(_value, _partition));
-        erc1410Storage.partitionToIndex[_account][
-            _partition
-        ] = _erc1410BasicStorage().partitions[_account].length;
-
-        if (_value != 0) erc1410Storage.balances[_account] += _value;
-    }
-
-    function _issueByPartition(
-        IERC1410Standard.IssueData memory _issueData
+        uint256 _amount
     ) internal {
-        _validateParams(_issueData.partition, _issueData.value);
+        _triggerAndSyncAll(_partition, _account, address(0));
 
-        _beforeTokenTransfer(
-            _issueData.partition,
-            address(0),
-            _issueData.tokenHolder,
-            _issueData.value
-        );
+        _updateTotalFreeze(_partition, _account);
 
-        if (
-            !_validPartitionForReceiver(
-                _issueData.partition,
-                _issueData.tokenHolder
-            )
-        ) {
-            _addPartitionTo(
-                _issueData.value,
-                _issueData.tokenHolder,
-                _issueData.partition
-            );
-        } else {
-            _increaseBalanceByPartition(
-                _issueData.tokenHolder,
-                _issueData.value,
-                _issueData.partition
-            );
-        }
+        _beforeFreeze(_partition, _account);
+        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        st.frozenTokens[_account] += _amount;
+        st.frozenTokensByPartition[_account][_partition] += _amount;
 
-        _increaseTotalSupplyByPartition(_issueData.partition, _issueData.value);
-
-        emit IssuedByPartition(
-            _issueData.partition,
-            _msgSender(),
-            _issueData.tokenHolder,
-            _issueData.value,
-            _issueData.data
-        );
+        _reduceBalanceByPartition(_account, _amount, _partition);
     }
 
-    function _redeemByPartition(
+    function _unfreezeTokensByPartition(
         bytes32 _partition,
-        address _from,
-        address _operator,
-        uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
+        address _account,
+        uint256 _amount
     ) internal {
-        _beforeTokenTransfer(_partition, _from, address(0), _value);
+        _triggerAndSyncAll(_partition, _account, address(0));
 
-        _reduceBalanceByPartition(_from, _value, _partition);
+        _updateTotalFreeze(_partition, _account);
 
-        _reduceTotalSupplyByPartition(_partition, _value);
+        _beforeFreeze(_partition, _account);
+        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        st.frozenTokens[_account] -= _amount;
+        st.frozenTokensByPartition[_account][_partition] -= _amount;
+        _transferFrozenBalance(_partition, _account, _amount);
+    }
 
-        emit RedeemedByPartition(
+    function _updateTotalFreeze(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal returns (uint256 abaf_) {
+        abaf_ = _getAbaf();
+        uint256 labaf = _getTotalFrozenLabaf(_tokenHolder);
+        uint256 labafByPartition = _getTotalFrozenLabafByPartition(
             _partition,
-            _operator,
-            _from,
-            _value,
-            _data,
-            _operatorData
+            _tokenHolder
         );
-    }
 
-    function _reduceTotalSupplyByPartition(
-        bytes32 _partition,
-        uint256 _value
-    ) internal {
-        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
+        if (abaf_ != labaf) {
+            uint256 factor = _calculateFactor(abaf_, labaf);
 
-        erc1410Storage.totalSupply -= _value;
-        erc1410Storage.totalSupplyByPartition[_partition] -= _value;
-    }
-
-    function _increaseTotalSupplyByPartition(
-        bytes32 _partition,
-        uint256 _value
-    ) internal {
-        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
-
-        erc1410Storage.totalSupply += _value;
-        erc1410Storage.totalSupplyByPartition[_partition] += _value;
-    }
-
-    function _updateAccountSnapshot(
-        address account,
-        bytes32 partition
-    ) internal virtual;
-
-    function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
-
-    function _adjustTotalAndMaxSupplyForPartition(
-        bytes32 _partition
-    ) internal virtual;
-
-    function _canRedeemByPartition(
-        address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata /*_data*/,
-        bytes calldata /*_operatorData*/
-    ) internal view returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_isClearingActivated()) {
-            return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
+            _updateTotalFreezeAmountAndLabaf(_tokenHolder, factor, abaf_);
         }
 
-        uint256 balance = _balanceOfByPartition(_partition, _from);
+        if (abaf_ != labafByPartition) {
+            uint256 factorByPartition = _calculateFactor(
+                abaf_,
+                labafByPartition
+            );
 
-        if (balance < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (
-            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
-        ) {
-            if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-            }
-        }
-
-        return (true, _SUCCESS, bytes32(0));
-    }
-
-    function _totalSupplyAdjusted() internal view returns (uint256) {
-        return _totalSupplyAdjustedAt(_blockTimestamp());
-    }
-
-    function _totalSupplyAdjustedAt(
-        uint256 _timestamp
-    ) internal view returns (uint256) {
-        (uint256 pendingABAF, ) = _getPendingScheduledBalanceAdjustmentsAt(
-            _timestamp
-        );
-        return _totalSupply() * pendingABAF;
-    }
-
-    function _totalSupplyByPartitionAdjusted(
-        bytes32 _partition
-    ) internal view returns (uint256) {
-        uint256 factor = _calculateFactor(
-            _getAbafAdjusted(),
-            _getLabafByPartition(_partition)
-        );
-        return _totalSupplyByPartition(_partition) * factor;
-    }
-
-    function _balanceOfAdjusted(
-        address _tokenHolder
-    ) internal view returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
-    }
-
-    function _balanceOfAdjustedAt(
-        address _tokenHolder,
-        uint256 _timestamp
-    ) internal view returns (uint256) {
-        uint256 factor = _calculateFactor(
-            _getAbafAdjustedAt(_timestamp),
-            _getLabafByUser(_tokenHolder)
-        );
-        return _balanceOf(_tokenHolder) * factor;
-    }
-
-    function _balanceOfByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256) {
-        return
-            _balanceOfByPartitionAdjustedAt(
+            _updateTotalFreezeAmountAndLabafByPartition(
                 _partition,
                 _tokenHolder,
-                _blockTimestamp()
+                factorByPartition,
+                abaf_
             );
+        }
     }
 
-    function _balanceOfByPartitionAdjustedAt(
+    function _beforeFreeze(bytes32 _partition, address _tokenHolder) internal {
+        _updateAccountSnapshot(_tokenHolder, _partition);
+        _updateAccountFrozenBalancesSnapshot(_tokenHolder, _partition);
+    }
+
+    function _updateTotalFreezeAmountAndLabaf(
+        address _tokenHolder,
+        uint256 _factor,
+        uint256 _abaf
+    ) internal {
+        if (_factor == 1) return;
+
+        _erc3643Storage().frozenTokens[_tokenHolder] *= _factor;
+        _setTotalFreezeLabaf(_tokenHolder, _abaf);
+    }
+
+    function _updateTotalFreezeAmountAndLabafByPartition(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _timestamp
-    ) internal view returns (uint256) {
-        uint256 factor = _calculateFactor(
-            _getAbafAdjustedAt(_timestamp),
-            _getLabafByUserAndPartition(_partition, _tokenHolder)
-        );
-        return _balanceOfByPartition(_partition, _tokenHolder) * factor;
+        uint256 _factor,
+        uint256 _abaf
+    ) internal {
+        if (_factor == 1) return;
+
+        _erc3643Storage().frozenTokensByPartition[_tokenHolder][
+            _partition
+        ] *= _factor;
+        _setTotalFreezeLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
-    function _getLabafByUserAndPartition(
+    function _transferFrozenBalance(
         bytes32 _partition,
-        address _account
-    ) internal view virtual returns (uint256);
+        address _to,
+        uint256 _amount
+    ) internal {
+        if (_validPartitionForReceiver(_partition, _to)) {
+            _increaseBalanceByPartition(_to, _amount, _partition);
+            return;
+        }
+        _addPartitionTo(_amount, _to, _partition);
+    }
 
-    function _validateParams(bytes32 _partition, uint256 _value) internal pure {
-        if (_value == uint256(0)) {
-            revert ZeroValue();
-        }
-        if (_partition == bytes32(0)) {
-            revert ZeroPartition();
-        }
+    function _getFrozenAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 amount_) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjusted(),
+            _getTotalFrozenLabaf(_tokenHolder)
+        );
+
+        return _getFrozenAmountFor(_tokenHolder) * factor;
+    }
+
+    function _getFrozenAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 amount_) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjusted(),
+            _getTotalFrozenLabafByPartition(_partition, _tokenHolder)
+        );
+        return
+            _getFrozenAmountForByPartition(_partition, _tokenHolder) * factor;
     }
 }
