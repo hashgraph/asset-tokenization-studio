@@ -924,6 +924,38 @@ interface IExternalKycListsMockAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface ITokenMetadataTransactionAdapter {
+  setOnchainID(
+    security: EvmAddress,
+    onchainID: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
+interface IComplianceTransactionAdapter {
+  setCompliance(
+    security: EvmAddress,
+    compliance: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  compliance(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
+interface IIdentityRegistryTransactionAdapter {
+  setIdentityRegistry(
+    security: EvmAddress,
+    identityRegistry: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  identityRegistry(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -939,7 +971,10 @@ export default abstract class TransactionAdapter
     IExternalControlListsAdapter,
     IExternalControlListsMockAdapter,
     IExternalKycListsAdapter,
-    IExternalKycListsMockAdapter
+    IExternalKycListsMockAdapter,
+    ITokenMetadataTransactionAdapter,
+    IComplianceTransactionAdapter,
+    IIdentityRegistryTransactionAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1809,6 +1844,39 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   createExternalKycListMock(): Promise<string | TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setIdentityRegistry(
+    security: EvmAddress,
+    identityRegistry: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  identityRegistry(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setCompliance(
+    security: EvmAddress,
+    compliance: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  compliance(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setOnchainID(
+    security: EvmAddress,
+    onchainID: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }
