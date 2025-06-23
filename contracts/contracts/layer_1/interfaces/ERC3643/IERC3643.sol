@@ -243,24 +243,69 @@ interface IERC3643 {
 
     /**
      * @dev Sets the onchainID of the token to `_onchainID`.
+     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     *
+     * This function should only be callable by an authorized entities
+     *
+     * Returns `true` if the transfer was successful.
      *
      * Emits an UpdatedTokenInformation event.
      */
     function setOnchainID(address _onchainID) external;
 
     /**
+     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     * @dev This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the transfer was successful.
+     *
+     * Emits a ControllerTransfer event.
+     */
+    function forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external returns (bool);
+
+    /**
      * @dev Sets the identity registry contract address.
+     * @dev Mints `_amount` tokens to the address `_to`.
      *
      * Emits an IdentityRegistryAdded event.
      */
     function setIdentityRegistry(address _identityRegistry) external;
 
     /**
+     * @dev Mints `_amount` tokens to the address `_to`.
+     *
+     * This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the minting was successful.
+     *
+     * Emits a Issued event.
+     */
+    function mint(address _to, uint256 _amount) external;
+
+    /**
      * @dev Sets the compliance contract address.
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     *
+     * Reduces total supply.
      *
      * Emits a ComplianceAdded event.
      */
     function setCompliance(address _compliance) external;
+
+    /**
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     *
+     * This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the burn was successful.
+     *
+     * Emits a redeem event.
+     */
+    function burn(address _userAddress, uint256 _amount) external;
 
     /**
      * @dev Returns the onchainID address associated with the token.
@@ -269,6 +314,8 @@ interface IERC3643 {
 
     /**
      * @dev Returns the address of the identity registry contract.
+     * @dev Returns the version of the contract as a string.
+     *
      */
     function identityRegistry() external view returns (IIdentityRegistry);
 
@@ -276,4 +323,9 @@ interface IERC3643 {
      * @dev Returns the address of the compliance contract.
      */
     function compliance() external view returns (ICompliance);
+
+    /**
+     * @dev Returns the version of the token.
+     */
+    function version() external view returns (string memory);
 }

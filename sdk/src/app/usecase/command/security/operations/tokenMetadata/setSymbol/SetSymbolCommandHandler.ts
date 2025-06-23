@@ -203,98 +203,64 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
-
-import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
+import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
 import {
-    IERC1644StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
-import {
-    SnapshotsStorageWrapper2
-} from '../../snapshots/SnapshotsStorageWrapper2.sol';
+  SetSymbolCommand,
+  SetSymbolCommandResponse,
+} from './SetSymbolCommand.js';
+import { SetSymbolCommandError } from './error/SetSymbolCommandError.js';
 
-abstract contract ERC1644StorageWrapper is
-    IERC1644StorageWrapper,
-    SnapshotsStorageWrapper2
+@CommandHandler(SetSymbolCommand)
+export class SetSymbolCommandHandler
+  implements ICommandHandler<SetSymbolCommand>
 {
-    struct ERC1644Storage {
-        bool isControllable;
-        bool initialized;
-    }
+  constructor(
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    private readonly transactionService: TransactionService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+  ) {}
 
-    modifier onlyControllable() {
-        _checkControllable();
-        _;
-    }
+  async execute(command: SetSymbolCommand): Promise<SetSymbolCommandResponse> {
+    try {
+      const { securityId, symbol } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    function _controllerTransfer(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) internal {
-        _transfer(_from, _to, _value);
-        emit ControllerTransfer(
-            msg.sender,
-            _from,
-            _to,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    function _controllerRedeem(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) internal {
-        _burn(_tokenHolder, _value);
-        emit ControllerRedemption(
-            msg.sender,
-            _tokenHolder,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
+      await this.validationService.checkPause(securityId);
 
-    /**
-     * @notice It is used to end the controller feature from the token
-     * @dev It only be called by the `owner/issuer` of the token
-     */
-    function _finalizeControllable() internal {
-        if (!_erc1644Storage().isControllable) return;
+      await this.validationService.checkRole(
+        SecurityRole._DEFAULT_ADMIN_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-        _erc1644Storage().isControllable = false;
-        emit FinalizedControllerFeature(_msgSender());
-    }
+      const res = await handler.setSymbol(
+        securityEvmAddress,
+        symbol,
+        securityId,
+      );
 
-    /**
-     * @notice Internal function to know whether the controller functionality
-     * allowed or not.
-     * @return bool `true` when controller address is non-zero otherwise return `false`.
-     */
-    function _isControllable() internal view returns (bool) {
-        return _erc1644Storage().isControllable;
+      return Promise.resolve(
+        new SetSymbolCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new SetSymbolCommandError(error as Error);
     }
-
-    function _erc1644Storage()
-        internal
-        pure
-        returns (ERC1644Storage storage erc1644Storage_)
-    {
-        bytes32 position = _ERC1644_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1644Storage_.slot := position
-        }
-    }
-
-    function _checkControllable() private view {
-        if (!_isControllable()) revert TokenIsNotControllable();
-    }
+  }
 }

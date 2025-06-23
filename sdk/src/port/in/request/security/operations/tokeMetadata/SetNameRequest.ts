@@ -203,98 +203,20 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../FormatValidation.js';
 
-import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {
-    IERC1644StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
-import {
-    SnapshotsStorageWrapper2
-} from '../../snapshots/SnapshotsStorageWrapper2.sol';
+export default class SetNameRequest extends ValidatedRequest<SetNameRequest> {
+  securityId: string;
+  name: string;
 
-abstract contract ERC1644StorageWrapper is
-    IERC1644StorageWrapper,
-    SnapshotsStorageWrapper2
-{
-    struct ERC1644Storage {
-        bool isControllable;
-        bool initialized;
-    }
+  constructor({ securityId, name }: { securityId: string; name: string }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      name: FormatValidation.checkString({ emptyCheck: true }),
+    });
 
-    modifier onlyControllable() {
-        _checkControllable();
-        _;
-    }
-
-    function _controllerTransfer(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) internal {
-        _transfer(_from, _to, _value);
-        emit ControllerTransfer(
-            msg.sender,
-            _from,
-            _to,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    function _controllerRedeem(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) internal {
-        _burn(_tokenHolder, _value);
-        emit ControllerRedemption(
-            msg.sender,
-            _tokenHolder,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    /**
-     * @notice It is used to end the controller feature from the token
-     * @dev It only be called by the `owner/issuer` of the token
-     */
-    function _finalizeControllable() internal {
-        if (!_erc1644Storage().isControllable) return;
-
-        _erc1644Storage().isControllable = false;
-        emit FinalizedControllerFeature(_msgSender());
-    }
-
-    /**
-     * @notice Internal function to know whether the controller functionality
-     * allowed or not.
-     * @return bool `true` when controller address is non-zero otherwise return `false`.
-     */
-    function _isControllable() internal view returns (bool) {
-        return _erc1644Storage().isControllable;
-    }
-
-    function _erc1644Storage()
-        internal
-        pure
-        returns (ERC1644Storage storage erc1644Storage_)
-    {
-        bytes32 position = _ERC1644_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1644Storage_.slot := position
-        }
-    }
-
-    function _checkControllable() private view {
-        if (!_isControllable()) revert TokenIsNotControllable();
-    }
+    this.securityId = securityId;
+    this.name = name;
+  }
 }
