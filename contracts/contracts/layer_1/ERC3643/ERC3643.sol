@@ -565,6 +565,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             .setCompliance
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .freezePartialTokens
