@@ -358,6 +358,8 @@ import { BurnRequest } from '../request';
 import { BurnCommand } from '../../../app/usecase/command/security/operations/burn/BurnCommand';
 import MintRequest from '../request/security/operations/mint/MintRequest';
 import { MintCommand } from '../../../app/usecase/command/security/operations/mint/MintCommand';
+import { ForcedTransferCommand} from "../../../app/usecase/command/security/operations/transfer/ForcedTransferCommand";
+import ForcedTransferRequest from '../request/security/operations/transfer/ForcedTransferRequest.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -706,7 +708,7 @@ class SecurityInPort implements ISecurityInPort {
     ValidatedRequest.handleValidation('BurnRequest', request);
 
     return await this.commandBus.execute(
-      new BurnCommand(securityId, sourceId, amount),
+      new BurnCommand(sourceId, amount, securityId ),
     );
   }
 
@@ -872,7 +874,7 @@ class SecurityInPort implements ISecurityInPort {
     ValidatedRequest.handleValidation('ForcedTransferRequest', request);
 
     return await this.commandBus.execute(
-      new ControllerTransferCommand(amount, sourceId, targetId, securityId),
+      new ForcedTransferCommand(sourceId, targetId, amount, securityId),
     );
   }
 
