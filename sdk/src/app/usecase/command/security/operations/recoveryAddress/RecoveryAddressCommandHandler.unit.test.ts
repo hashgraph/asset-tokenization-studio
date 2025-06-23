@@ -2,17 +2,12 @@
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
-
    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
    1. Definitions.
-
       "License" shall mean the terms and conditions for use, reproduction,
       and distribution as defined by Sections 1 through 9 of this document.
-
       "Licensor" shall mean the copyright owner or entity authorized by
       the copyright owner that is granting the License.
-
       "Legal Entity" shall mean the union of the acting entity and all
       other entities that control, are controlled by, or are under common
       control with that entity. For the purposes of this definition,
@@ -20,24 +15,19 @@
       direction or management of such entity, whether by contract or
       otherwise, or (ii) ownership of fifty percent (50%) or more of the
       outstanding shares, or (iii) beneficial ownership of such entity.
-
       "You" (or "Your") shall mean an individual or Legal Entity
       exercising permissions granted by this License.
-
       "Source" form shall mean the preferred form for making modifications,
       including but not limited to software source code, documentation
       source, and configuration files.
-
       "Object" form shall mean any form resulting from mechanical
       transformation or translation of a Source form, including but
       not limited to compiled object code, generated documentation,
       and conversions to other media types.
-
       "Work" shall mean the work of authorship, whether in Source or
       Object form, made available under the License, as indicated by a
       copyright notice that is included in or attached to the work
       (an example is provided in the Appendix below).
-
       "Derivative Works" shall mean any work, whether in Source or Object
       form, that is based on (or derived from) the Work and for which the
       editorial revisions, annotations, elaborations, or other modifications
@@ -45,7 +35,6 @@
       of this License, Derivative Works shall not include works that remain
       separable from, or merely link (or bind by name) to the interfaces of,
       the Work and Derivative Works thereof.
-
       "Contribution" shall mean any work of authorship, including
       the original version of the Work and any modifications or additions
       to that Work or Derivative Works thereof, that is intentionally
@@ -59,18 +48,15 @@
       Licensor for the purpose of discussing and improving the Work, but
       excluding communication that is conspicuously marked or otherwise
       designated in writing by the copyright owner as "Not a Contribution."
-
       "Contributor" shall mean Licensor and any individual or Legal Entity
       on behalf of whom a Contribution has been received by Licensor and
       subsequently incorporated within the Work.
-
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
       copyright license to reproduce, prepare Derivative Works of,
       publicly display, publicly perform, sublicense, and distribute the
       Work and such Derivative Works in Source or Object form.
-
    3. Grant of Patent License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
@@ -86,24 +72,19 @@
       or contributory patent infringement, then any patent licenses
       granted to You under this License for that Work shall terminate
       as of the date such litigation is filed.
-
    4. Redistribution. You may reproduce and distribute copies of the
       Work or Derivative Works thereof in any medium, with or without
       modifications, and in Source or Object form, provided that You
       meet the following conditions:
-
       (a) You must give any other recipients of the Work or
           Derivative Works a copy of this License; and
-
       (b) You must cause any modified files to carry prominent notices
           stating that You changed the files; and
-
       (c) You must retain, in the Source form of any Derivative Works
           that You distribute, all copyright, patent, trademark, and
           attribution notices from the Source form of the Work,
           excluding those notices that do not pertain to any part of
           the Derivative Works; and
-
       (d) If the Work includes a "NOTICE" text file as part of its
           distribution, then any Derivative Works that You distribute must
           include a readable copy of the attribution notices contained
@@ -120,14 +101,12 @@
           or as an addendum to the NOTICE text from the Work, provided
           that such additional attribution notices cannot be construed
           as modifying the License.
-
       You may add Your own copyright statement to Your modifications and
       may provide additional or different license terms and conditions
       for use, reproduction, or distribution of Your modifications, or
       for any such Derivative Works as a whole, provided Your use,
       reproduction, and distribution of the Work otherwise complies with
       the conditions stated in this License.
-
    5. Submission of Contributions. Unless You explicitly state otherwise,
       any Contribution intentionally submitted for inclusion in the Work
       by You to the Licensor shall be under the terms and conditions of
@@ -135,12 +114,10 @@
       Notwithstanding the above, nothing herein shall supersede or modify
       the terms of any separate license agreement you may have executed
       with Licensor regarding such Contributions.
-
    6. Trademarks. This License does not grant permission to use the trade
       names, trademarks, service marks, or product names of the Licensor,
       except as required for reasonable and customary use in describing the
       origin of the Work and reproducing the content of the NOTICE file.
-
    7. Disclaimer of Warranty. Unless required by applicable law or
       agreed to in writing, Licensor provides the Work (and each
       Contributor provides its Contributions) on an "AS IS" BASIS,
@@ -150,7 +127,6 @@
       PARTICULAR PURPOSE. You are solely responsible for determining the
       appropriateness of using or redistributing the Work and assume any
       risks associated with Your exercise of permissions under this License.
-
    8. Limitation of Liability. In no event and under no legal theory,
       whether in tort (including negligence), contract, or otherwise,
       unless required by applicable law (such as deliberate and grossly
@@ -162,7 +138,6 @@
       work stoppage, computer failure or malfunction, or any and all
       other commercial damages or losses), even if such Contributor
       has been advised of the possibility of such damages.
-
    9. Accepting Warranty or Additional Liability. While redistributing
       the Work or Derivative Works thereof, You may choose to offer,
       and charge a fee for, acceptance of support, warranty, indemnity,
@@ -173,11 +148,8 @@
       defend, and hold each Contributor harmless for any liability
       incurred by, or claims asserted against, such Contributor by reason
       of your accepting any such warranty or additional liability.
-
    END OF TERMS AND CONDITIONS
-
    APPENDIX: How to apply the Apache License to your work.
-
       To apply the Apache License to your work, attach the following
       boilerplate notice, with the fields enclosed by brackets "[]"
       replaced with your own identifying information. (Don't include
@@ -186,177 +158,147 @@
       file or class name and description of purpose be included on the
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
-
    Copyright [yyyy] [name of copyright owner]
-
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
        http://www.apache.org/licenses/LICENSE-2.0
-
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
 */
 
-export const COMMAND_METADATA = '__command__';
-export const COMMAND_HANDLER_METADATA = '__commandHandler__';
-export const QUERY_METADATA = '__query__';
-export const QUERY_HANDLER_METADATA = '__queryHandler__';
-export const TOKEN_CREATION_COST_HBAR = 80;
-export const EVM_ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const HBAR_DECIMALS = 8;
-export const CREATE_EQUITY_ST_GAS = 15000000;
-export const CREATE_BOND_ST_GAS = 15000000;
-export const CASHIN_GAS = 1200000;
-export const BURN_GAS = 700000;
-export const WIPE_GAS = 700000;
-export const RESCUE_GAS = 700000;
-export const RESCUE_HBAR_GAS = 700000;
-export const FREEZE_GAS = 650000;
-export const UNFREEZE_GAS = 650000;
-export const GRANT_KYC_GAS = 650000;
-export const REVOKE_KYC_GAS = 650000;
-export const REDEEM_GAS = 650000;
-export const PROTECTED_REDEEM_GAS = 7000000;
-export const PAUSE_GAS = 15000000;
-export const UNPAUSE_GAS = 650000;
-export const TAKE_SNAPSHOT_GAS = 2000000;
-export const DELETE_GAS = 650000;
-export const GRANT_ROLES_GAS = 2000000;
-export const REVOKE_ROLES_GAS = 2000000;
-export const RENOUNCE_ROLES_GAS = 2000000;
-export const MAX_ROLES_GAS = 15000000;
-export const INCREASE_SUPPLY_GAS = 500000;
-export const DECREASE_SUPPLY_GAS = 500000;
-export const RESET_SUPPLY_GAS = 450000;
-export const UPDATE_RESERVE_ADDRESS_GAS = 450000;
-export const UPDATE_TOKEN_GAS = 1400000;
-export const UPDATE_RESERVE_AMOUNT_GAS = 400000;
-export const CHANGE_PROXY_OWNER_GAS = 500000;
-export const ACCEPT_PROXY_OWNER_GAS = 400000;
-export const UPDATE_PROXY_IMPLEMENTATION_GAS = 400000;
-export const ISSUE_GAS = 7000000;
-export const CONTROLLER_TRANSFER_GAS = 7000000;
-export const CONTROLLER_REDEEM_GAS = 7000000;
-export const SET_DIVIDENDS_GAS = 7000000;
-export const SET_VOTING_RIGHTS_GAS = 7000000;
-export const SET_COUPON_GAS = 7000000;
-export const SET_DOCUMENT_GAS = 7000000;
-export const REMOVE_DOCUMENT_GAS = 7000000;
-export const AUTHORIZE_OPERATOR_GAS = 7000000;
-export const REVOKE_OPERATOR_GAS = 7000000;
-export const TRANSFER_OPERATOR_GAS = 7000000;
-export const TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS = 7000000;
-export const SET_MAX_SUPPLY_GAS = 7000000;
-export const PROTECT_PARTITION_GAS = 15000000;
-export const UNPROTECT_PARTITION_GAS = 650000;
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/account/AccountService.js';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import {
+  RecoveryAddressCommand,
+  RecoveryAddressCommandResponse,
+} from './RecoveryAddressCommand.js';
+import { RecoveryAddressCommandHandler } from './RecoveryAddressCommandHandler.js';
+import { RecoveryAddressCommandFixture } from '../../../../../../../__tests__/fixtures/recovery/RecoveryFixture.js';
+import { RecoveryAddressCommandError } from './error/RecoveryAddressCommandError.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/account/AccountFixture.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import ContractService from 'app/service/contract/ContractService.js';
 
-export const BALANCE_OF_GAS = 1200000;
-export const GET_RESERVE_ADDRESS_GAS = 1200000;
-export const GET_RESERVE_AMOUNT_GAS = 1200000;
-export const GET_ROLES_GAS = 1200000;
-export const HAS_ROLE_GAS = 1200000;
-export const GET_SUPPLY_ALLOWANCE_GAS = 1200000;
-export const IS_UNLIMITED_ALLOWANCE_GAS = 1200000;
+describe('RecoveryAddressCommandHandler', () => {
+  let handler: RecoveryAddressCommandHandler;
+  let command: RecoveryAddressCommand;
 
-export const TRANSFER_GAS = 1200000;
-export const PROTECTED_TRANSFER_GAS = 7000000;
-export const TRANSFER_AND_LOCK_GAS = 1200000;
-export const PROTECTED_TRANSFER_AND_LOCK_GAS = 7000000;
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-export const ADD_TO_CONTROL_LIST_GAS = 1200000;
-export const REMOVE_FROM_CONTROL_LIST_GAS = 1200000;
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const account = new Account(AccountPropsFixture.create());
 
-export const LOCK_GAS = 7000000;
-export const RELEASE_GAS = 7000000;
+  beforeEach(() => {
+    handler = new RecoveryAddressCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+      contractServiceMock,
+    );
+    command = RecoveryAddressCommandFixture.create();
+  });
 
-export const EXECUTE_HOLD_BY_PARTITION_GAS = 7000000;
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-export const UPDATE_CONFIG_VERSION_GAS = 9000000;
-export const UPDATE_CONFIG_GAS = 9000000;
-export const UPDATE_RESOLVER_GAS = 9000000;
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws RecoveryAddressCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-export const UPDATE_MATURITY_DATE_GAS = 7000000;
+        accountServiceMock.getAccountEvmAddress.mockRejectedValue(fakeError);
 
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS = 7000000;
+        const resultPromise = handler.execute(command);
 
-export const CREATE_HOLD_GAS = 7000000;
-export const CREATE_HOLD_FROM_GAS = 7000000;
-export const CONTROLLER_CREATE_HOLD_GAS = 7000000;
-export const PROTECTED_CREATE_HOLD_GAS = 7000000;
-export const RELEASE_HOLD_GAS = 7000000;
-export const RECLAIM_HOLD_GAS = 7000000;
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          RecoveryAddressCommandError,
+        );
 
-export const ADD_ISSUER_GAS = 7000000;
-export const SET_REVOCATION_REGISTRY_GAS = 7000000;
-export const REMOVE_ISSUER_GAS = 7000000;
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while recovering address: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully recover address', async () => {
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
 
-export const ACTIVATE_CLEARING_GAS = 7000000;
-export const DEACTIVATE_CLEARING_GAS = 7000000;
-export const CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const CLEARING_TRANSFER_FROM_BY_PARTITION = 7000000;
-export const PROTECTED_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const APPROVE_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const CANCEL_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const RECLAIM_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const CLEARING_REDEEM_BY_PARTITION = 7000000;
-export const CLEARING_REDEEM_FROM_BY_PARTITION = 7000000;
-export const PROTECTED_CLEARING_REDEEM_BY_PARTITION = 7000000;
-export const CLEARING_CREATE_HOLD_BY_PARTITION = 7000000;
-export const CLEARING_CREATE_HOLD_FROM_BY_PARTITION = 7000000;
-export const PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION = 7000000;
-export const OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION = 7000000;
-export const OPERATOR_CLEARING_REDEEM_BY_PARTITION = 7000000;
-export const OPERATOR_CLEARING_TRANSFER_BY_PARTITION = 7000000;
+        transactionServiceMock.getHandler().recoveryAddress.mockResolvedValue({
+          id: transactionId,
+        });
 
-export const UPDATE_EXTERNAL_PAUSES_GAS = 7000000;
-export const ADD_EXTERNAL_PAUSE_GAS = 7000000;
-export const REMOVE_EXTERNAL_PAUSE_GAS = 7000000;
+        const result = await handler.execute(command);
 
-export const SET_PAUSED_MOCK_GAS = 7000000;
+        expect(result).toBeInstanceOf(RecoveryAddressCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
 
-export const CREATE_EXTERNAL_PAUSE_MOCK_GAS = 7000000;
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(1, command.securityId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+          1,
+          command.lostWalletId,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+          2,
+          command.newWalletId,
+        );
 
-export const UPDATE_EXTERNAL_CONTROL_LISTS_GAS = 7000000;
-export const ADD_EXTERNAL_CONTROL_LIST_GAS = 7000000;
-export const REMOVE_EXTERNAL_CONTROL_LIST_GAS = 7000000;
-export const ACTIVATE_INTERNAL_KYC_GAS = 7000000;
-export const DEACTIVATE_INTERNAL_KYC_GAS = 7000000;
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._AGENT_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
 
-export const ADD_TO_BLACK_LIST_MOCK_GAS = 7000000;
-export const ADD_TO_WHITE_LIST_MOCK_GAS = 7000000;
-export const REMOVE_FROM_BLACK_LIST_MOCK_GAS = 7000000;
-export const REMOVE_FROM_WHITE_LIST_MOCK_GAS = 7000000;
-export const CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS = 7000000;
-export const CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS = 7000000;
-
-export const UPDATE_EXTERNAL_KYC_LISTS_GAS = 7000000;
-export const ADD_EXTERNAL_KYC_LIST_GAS = 7000000;
-export const REMOVE_EXTERNAL_KYC_LIST_GAS = 7000000;
-export const GRANT_KYC_MOCK_GAS = 7000000;
-export const REVOKE_KYC_MOCK_GAS = 7000000;
-export const CREATE_EXTERNAL_KYC_LIST_MOCK_GAS = 7000000;
-
-export const RECOVERY_ADDRESS_GAS = 7000000;
-
-export const _PARTITION_ID_1 =
-  '0x0000000000000000000000000000000000000000000000000000000000000001';
-export const EMPTY_BYTES = '0x';
-
-export const SET_DIVIDEND_EVENT = 'DividendSet';
-export const SET_VOTING_RIGHTS_EVENT = 'VotingSet';
-export const SET_COUPON_EVENT = 'CouponSet';
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT =
-  'ScheduledBalanceAdjustmentSet';
-
-// * Generic
-export const BYTES_32_LENGTH = 32 * 2;
-export const ADDRESS_LENGTH = 40;
-
-// * Events from creation
-export const TOPICS_IN_FACTORY_RESULT = 6;
+        expect(
+          transactionServiceMock.getHandler().recoveryAddress,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().recoveryAddress,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          evmAddress,
+          evmAddress,
+          command.securityId,
+        );
+      });
+    });
+  });
+});

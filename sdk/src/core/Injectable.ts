@@ -397,6 +397,8 @@ import { GrantKycMockCommandHandler } from '../app/usecase/command/security/exte
 import { RevokeKycMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommandHandler.js';
 import { GetKycStatusMockQueryHandler } from '../app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQueryHandler.js';
 import { CreateExternalKycListMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommandHandler.js';
+import { RecoveryAddressCommandHandler } from '../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommandHandler.js';
+import { IsAddressRecoveredQueryHandler } from '../app/usecase/query/security/recovery/IsAddressRecoveredQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -567,6 +569,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: RevokeKycCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RecoveryAddressCommandHandler,
   },
 
   // Bond Operations
@@ -1091,6 +1097,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsInternalKycActivatedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsAddressRecoveredQueryHandler,
   },
 ];
 

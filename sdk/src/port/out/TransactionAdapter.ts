@@ -924,6 +924,15 @@ interface IExternalKycListsMockAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IRecoveryAddress {
+  recoveryAddress(
+    security: EvmAddress,
+    lostWallet: EvmAddress,
+    newWallet: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -939,7 +948,8 @@ export default abstract class TransactionAdapter
     IExternalControlListsAdapter,
     IExternalControlListsMockAdapter,
     IExternalKycListsAdapter,
-    IExternalKycListsMockAdapter
+    IExternalKycListsMockAdapter,
+    IRecoveryAddress
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1809,6 +1819,14 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   createExternalKycListMock(): Promise<string | TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  recoveryAddress(
+    security: EvmAddress,
+    lostWallet: EvmAddress,
+    newWallet: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }

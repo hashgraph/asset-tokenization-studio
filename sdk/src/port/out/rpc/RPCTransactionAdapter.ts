@@ -347,6 +347,8 @@ import {
   CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
   ACTIVATE_INTERNAL_KYC_GAS,
   DEACTIVATE_INTERNAL_KYC_GAS,
+  EVM_ZERO_ADDRESS,
+  RECOVERY_ADDRESS_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -390,6 +392,7 @@ import {
   MockedWhitelist__factory,
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
+  ERC3643__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -3245,6 +3248,31 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       ).deactivateInternalKyc({
         gasLimit: DEACTIVATE_INTERNAL_KYC_GAS,
       }),
+      this.networkService.environment,
+    );
+  }
+
+  async recoveryAddress(
+    security: EvmAddress,
+    lostWallet: EvmAddress,
+    newWallet: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Recovering address ${lostWallet.toString()} to ${newWallet.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).recoveryAddress(
+        lostWallet.toString(),
+        newWallet.toString(),
+        EVM_ZERO_ADDRESS,
+        {
+          gasLimit: RECOVERY_ADDRESS_GAS,
+        },
+      ),
       this.networkService.environment,
     );
   }

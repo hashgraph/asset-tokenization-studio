@@ -256,6 +256,7 @@ import {
   MockedBlacklist__factory,
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
+  ERC3643__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1808,5 +1809,19 @@ export class RPCQueryAdapter {
     ).getKycStatus(targetId.toString());
 
     return kycStatus;
+  }
+
+  async isAddressRecovered(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(`Getting recovery status of ${targetId}`);
+
+    const isAddressRecovered = await this.connect(
+      ERC3643__factory,
+      address.toString(),
+    ).isAddressRecovered(targetId.toString());
+
+    return isAddressRecovered;
   }
 }

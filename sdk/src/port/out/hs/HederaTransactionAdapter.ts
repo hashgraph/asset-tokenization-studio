@@ -244,6 +244,7 @@ import {
   MockedWhitelist__factory,
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
+  ERC3643__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -335,6 +336,8 @@ import {
   CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
   ACTIVATE_INTERNAL_KYC_GAS,
   DEACTIVATE_INTERNAL_KYC_GAS,
+  RECOVERY_ADDRESS_GAS,
+  EVM_ZERO_ADDRESS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -3697,6 +3700,35 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setContractId(securityId)
       .setGas(DEACTIVATE_INTERNAL_KYC_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async recoveryAddress(
+    security: EvmAddress,
+    lostWalletId: EvmAddress,
+    newWalletId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'recoveryAddress';
+    LogService.logTrace(
+      `Recovering address ${lostWalletId.toString()} to ${newWalletId.toString()}`,
+    );
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [lostWalletId.toString(), newWalletId.toString(), EVM_ZERO_ADDRESS],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(RECOVERY_ADDRESS_GAS)
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }

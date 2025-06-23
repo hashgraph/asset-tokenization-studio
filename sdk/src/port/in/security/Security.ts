@@ -351,6 +351,10 @@ import ClearingTransferViewModel from '../response/ClearingTransferViewModel.js'
 import { GetClearingCreateHoldForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery.js';
 import { GetClearingRedeemForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery.js';
 import { GetClearingTransferForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery.js';
+import RecoveryAddressRequest from '../request/security/recovery/RecoveryAddressRequest.js';
+import { RecoveryAddressCommand } from 'app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand.js';
+import IsAddressRecoveredRequest from '../request/security/recovery/IsAddressRecoveredRequest.js';
+import { IsAddressRecoveredQuery } from '../../../app/usecase/query/security/recovery/IsAddressRecoveredQuery.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -514,6 +518,10 @@ interface ISecurityInPort {
   operatorClearingTransferByPartition(
     request: OperatorClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }>;
+  recoveryAddress(
+    request: RecoveryAddressRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  isAddressRecovered(request: IsAddressRecoveredRequest): Promise<boolean>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1816,6 +1824,32 @@ class SecurityInPort implements ISecurityInPort {
         request.expirationDate,
       ),
     );
+  }
+
+  @LogError
+  async recoveryAddress(
+    request: RecoveryAddressRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(RecoveryAddressRequest.name, request);
+    return await this.commandBus.execute(
+      new RecoveryAddressCommand(
+        request.securityId,
+        request.lostWalletId,
+        request.newWalletId,
+      ),
+    );
+  }
+
+  @LogError
+  async isAddressRecovered(
+    request: IsAddressRecoveredRequest,
+  ): Promise<boolean> {
+    ValidatedRequest.handleValidation(IsAddressRecoveredRequest.name, request);
+    return (
+      await this.queryBus.execute(
+        new IsAddressRecoveredQuery(request.securityId, request.targetId),
+      )
+    ).payload;
   }
 }
 
