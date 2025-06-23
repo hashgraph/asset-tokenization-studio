@@ -231,6 +231,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     function _freezeTokens(address _account, uint256 _amount) internal {
         _freezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
     }
+
     function _unfreezeTokens(address _account, uint256 _amount) internal {
         _unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
     }
@@ -251,6 +252,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
 
         _reduceBalanceByPartition(_account, _amount, _partition);
     }
+
     function _unfreezeTokensByPartition(
         bytes32 _partition,
         address _account,

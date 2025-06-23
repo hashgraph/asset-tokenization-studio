@@ -251,6 +251,7 @@ import {
     EMPTY_HEX_BYTES,
     CORPORATE_ACTION_ROLE,
     DEFAULT_PARTITION,
+    AGENT_ROLE,
 } from '@scripts'
 
 const name = 'TEST'
@@ -351,12 +352,17 @@ describe('ERC3643 Tests', () => {
                 role: CLEARING_ROLE,
                 members: [account_B],
             }
+            const rbacAgent: Rbac = {
+                role: AGENT_ROLE,
+                members: [account_A],
+            }
             const init_rbacs: Rbac[] = [
                 rbacPause,
                 rbacIssuer,
                 rbacKYC,
                 rbacSSI,
                 rbacClearing,
+                rbacAgent,
             ]
 
             diamond = await deployEquityFromFactory({
@@ -1094,6 +1100,22 @@ describe('ERC3643 Tests', () => {
             ).to.be.rejectedWith('ZeroAddressNotAllowed')
         })
 
+        describe('Agent', () => {
+            it('GIVEN an initialized token WHEN adding agent THEN addAgent emits AgentAdded with agent address', async () => {
+                expect(await erc3643Facet.addAgent(account_B))
+                    .to.emit(erc3643Facet, 'AgentAdded')
+                    .withArgs(account_B)
+
+                const hasRole = await accessControlFacet.hasRole(
+                    AGENT_ROLE,
+                    account_B
+                )
+                const isAgent = await erc3643Facet.isAgent(account_B)
+                expect(isAgent).to.equal(true)
+                expect(hasRole).to.equal(true)
+            })
+        })
+
         describe('AccessControl', () => {
             it('GIVEN an account without admin role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
@@ -1188,6 +1210,15 @@ describe('ERC3643 Tests', () => {
                     )
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
+            it('GIVEN an account without admin role WHEN addAgent THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc3643Facet = erc3643Facet.connect(signer_C)
+
+                // add agent fails
+                await expect(
+                    erc3643Facet.addAgent(account_A)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
         })
 
         describe('Paused', () => {
@@ -1199,25 +1230,25 @@ describe('ERC3643 Tests', () => {
 
                 await pause.pause()
             })
-            it('Should revert freezePartialTokens if the contract is paused', async () => {
+            it('GIVEN a puased token WHEN freezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     erc3643Facet.freezePartialTokens(account_A, 10)
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
-            it('Should revert unfreezePartialTokens if the contract is paused', async () => {
+            it('GIVEN a puased token WHEN unfreezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     erc3643Facet.unfreezePartialTokens(account_A, 10)
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
-            it('Should revert setAddressFrozen if the contract is paused', async () => {
+            it('GIVEN a puased token WHEN setAddressFrozen THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     erc3643Facet.setAddressFrozen(account_A)
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
-            it('Should revert freezePartialTokensByPartition if the contract is paused', async () => {
+            it('GIVEN a puased token WHEN freezePartialTokensByPartition THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     erc3643Facet.freezePartialTokensByPartition(
                         DEFAULT_PARTITION,
@@ -1227,7 +1258,7 @@ describe('ERC3643 Tests', () => {
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
-            it('Should revert unfreezePartialTokensByPartition if the contract is paused', async () => {
+            it('GIVEN a puased token WHEN unfreezePartialTokensByPartition THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     erc3643Facet.unfreezePartialTokensByPartition(
                         DEFAULT_PARTITION,
@@ -1235,6 +1266,11 @@ describe('ERC3643 Tests', () => {
                         10
                     )
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
+            })
+            it('GIVEN a paused token WHEN attempting to addAgent THEN transactions revert with TokenIsPaused error', async () => {
+                await expect(
+                    erc3643Facet.addAgent(account_A)
+                ).to.be.rejectedWith('TokenIsPaused')
             })
         })
         describe('Adjust balances', () => {
