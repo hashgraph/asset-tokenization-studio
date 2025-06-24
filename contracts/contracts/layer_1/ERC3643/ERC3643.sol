@@ -232,17 +232,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
 
     address private constant _ONCHAIN_ID = address(0);
 
-    function setAddressFrozen(
-        address _userAddress
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-    {
-        emit TokensFrozen(_userAddress, 0, _DEFAULT_PARTITION); //TODO amount TBD
-    }
+    // ====== External functions (state-changing) ======
 
     /**
      * @notice Sets the name of the token.
@@ -321,141 +311,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit ComplianceAdded(_compliance);
     }
 
-    /**
-     * @notice Burns a specified amount of tokens from a user address.
-     * @dev Can only be called by the token `owner/issuer` or `controller`.
-     * @param _userAddress The address from which the tokens will be burned.
-     * @param _amount The amount of tokens to burn.
-     */
-    function burn(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_userAddress)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
-    {
-        _redeemFrom(_userAddress, _amount, '');
-    }
-
-    /**
-     * @notice Mints a specified amount of tokens to a user address.
-     * @dev Can only be called by the token `owner/issuer`.
-     * @param _to The address to which the tokens will be minted.
-     * @param _amount The amount of tokens to mint.
-     */
-    function mint(
-        address _to,
-        uint256 _amount
-    )
-        external
-        onlyUnpaused
-        onlyWithinMaxSupply(_amount)
-        onlyRole(_ISSUER_ROLE)
-        onlyListedAllowed(_to)
-        onlyWithoutMultiPartition
-        onlyIssuable
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-    {
-        _issue(_to, _amount, '');
-    }
-
-    /**
-     * @notice Transfers tokens from one address to another.
-     * @dev Can only be called by the token `owner/issuer` or `controller`.
-     * @param _from The address from which the tokens will be transferred.
-     * @param _to The address to which the tokens will be transferred.
-     * @param _amount The amount of tokens to transfer.
-     */
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    )
-        external
-        onlyWithoutMultiPartition
-        onlyRole(_CONTROLLER_ROLE)
-        onlyControllable
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_from)
-        onlyListedAllowed(_to)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-        returns (bool)
-    {
-        _controllerTransfer(_from, _to, _amount, '', '');
-        return true;
-    }
-
-    /**
-     * @notice Retrieves the latest version of the contract.
-     * @dev The version is represented as a string.
-     */
-    function version() external view returns (string memory) {
-        return Strings.toString(_getLatestVersion());
-    }
-
-    /**
-     * @notice Retrieves the identity registry contract address.
-     */
-    function identityRegistry()
-        external
-        view
-        override
-        returns (IIdentityRegistry)
-    {
-        return IIdentityRegistry(_erc3643Storage().identityRegistry);
-    }
-
-    /**
-     * @notice Retrieves the onchainID address associated with the token.
-     */
-    function onchainID() external view override returns (address) {
-        return _erc3643Storage().onchainID;
-    }
-
-    function compliance() external view override returns (ICompliance) {
-        return ICompliance(_erc3643Storage().compliance);
-    }
-
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        _checkUnfreezeAmount(_DEFAULT_PARTITION, _userAddress, _amount);
-        _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
     function freezePartialTokensByPartition(
         bytes32 _partition,
         address _userAddress,
@@ -514,6 +369,103 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit AgentRemoved(_agent);
     }
 
+    function batchTransfer(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _toList.length; i++) {
+            _transferForBatch(_toList[i], _amounts[i]);
+        }
+    }
+
+    function batchForcedTransfer(
+        address[] calldata _fromList,
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _fromList.length; i++) {
+            forcedTransfer(_fromList[i], _toList[i], _amounts[i]);
+        }
+    }
+
+    function batchMint(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _toList.length; i++) {
+            mint(_toList[i], _amounts[i]);
+        }
+    }
+
+    function batchBurn(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            burn(_userAddresses[i], _amounts[i]);
+        }
+    }
+
+    // function batchSetAddressFrozen(
+    //     address[] calldata _userAddresses,
+    //     bool[] calldata _freeze
+    // ) external {
+    //     for (uint256 i = 0; i < _userAddresses.length; i++) {
+    //         // setAddressFrozen(_userAddresses[i], _freeze[i]);
+    //     }
+    // }
+
+    function batchFreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            freezePartialTokens(_userAddresses[i], _amounts[i]);
+        }
+    }
+
+    function batchUnfreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            unfreezePartialTokens(_userAddresses[i], _amounts[i]);
+        }
+    }
+
+    // ====== External functions (view/pure) ======
+
+    /**
+     * @notice Retrieves the latest version of the contract.
+     * @dev The version is represented as a string.
+     */
+    function version() external view returns (string memory) {
+        return Strings.toString(_getLatestVersion());
+    }
+
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
+    function identityRegistry()
+        external
+        view
+        override
+        returns (IIdentityRegistry)
+    {
+        return IIdentityRegistry(_erc3643Storage().identityRegistry);
+    }
+
+    /**
+     * @notice Retrieves the onchainID address associated with the token.
+     */
+    function onchainID() external view override returns (address) {
+        return _erc3643Storage().onchainID;
+    }
+
+    function compliance() external view override returns (ICompliance) {
+        return ICompliance(_erc3643Storage().compliance);
+    }
+
     function getFrozenTokensByPartition(
         bytes32 _partition,
         address _userAddress
@@ -532,6 +484,20 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
      */
     function isAgent(address _agent) external view returns (bool) {
         return _hasRole(_AGENT_ROLE, _agent);
+    }
+
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;
     }
 
     function getStaticResolverKey()
@@ -599,19 +565,144 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
     }
 
-    /**
-     * @notice Retrieves the identity registry contract address.
-     */
-    function getStaticInterfaceIds()
-        external
-        pure
+    // ====== Public functions ======
+
+    function setAddressFrozen(
+        address _userAddress
+    )
+        public
         override
-        returns (bytes4[] memory staticInterfaceIds_)
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
     {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;
+        emit TokensFrozen(_userAddress, 0, _DEFAULT_PARTITION); //TODO amount TBD
     }
+
+    /**
+     * @notice Burns a specified amount of tokens from a user address.
+     * @dev Can only be called by the token `owner/issuer` or `controller`.
+     * @param _userAddress The address from which the tokens will be burned.
+     * @param _amount The amount of tokens to burn.
+     */
+    function burn(
+        address _userAddress,
+        uint256 _amount
+    )
+        public
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_userAddress)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
+    {
+        _redeemFrom(_userAddress, _amount, '');
+    }
+
+    /**
+     * @notice Mints a specified amount of tokens to a user address.
+     * @dev Can only be called by the token `owner/issuer`.
+     * @param _to The address to which the tokens will be minted.
+     * @param _amount The amount of tokens to mint.
+     */
+    function mint(
+        address _to,
+        uint256 _amount
+    )
+        public
+        onlyUnpaused
+        onlyWithinMaxSupply(_amount)
+        onlyRole(_ISSUER_ROLE)
+        onlyListedAllowed(_to)
+        onlyWithoutMultiPartition
+        onlyIssuable
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+    {
+        _issue(_to, _amount, '');
+    }
+
+    /**
+     * @notice Transfers tokens from one address to another.
+     * @dev Can only be called by the token `owner/issuer` or `controller`.
+     * @param _from The address from which the tokens will be transferred.
+     * @param _to The address to which the tokens will be transferred.
+     * @param _amount The amount of tokens to transfer.
+     */
+    function forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    )
+        public
+        onlyWithoutMultiPartition
+        onlyRole(_CONTROLLER_ROLE)
+        onlyControllable
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_from)
+        onlyListedAllowed(_to)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool)
+    {
+        _controllerTransfer(_from, _to, _amount, '', '');
+        return true;
+    }
+
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        public
+        override
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        _freezeTokens(_userAddress, _amount);
+        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        public
+        override
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        _checkUnfreezeAmount(_DEFAULT_PARTITION, _userAddress, _amount);
+        _unfreezeTokens(_userAddress, _amount);
+        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    //! @dev Internal copy of ERC20.transfer(address,uint256) to allow batchTransfer() in this facets
+    function _transferForBatch(
+        address to,
+        uint256 value
+    )
+        internal
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(to)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
+        returns (bool)
+    {
+        return _transfer(_msgSender(), to, value);
+    }
+
+    // ====== Private/Internal functions ======
 
     function _checkUnfreezeAmount(
         bytes32 _partition,

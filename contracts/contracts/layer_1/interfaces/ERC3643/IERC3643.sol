@@ -342,32 +342,11 @@ interface IERC3643 {
      */
     function burn(address _userAddress, uint256 _amount) external;
 
-    /**
-     * @dev Returns the onchainID address associated with the token.
-     */
-    function onchainID() external view returns (address);
-
-    /**
-     * @dev Returns the address of the identity registry contract.
-     * @dev Returns the version of the contract as a string.
-     *
-     */
-    function identityRegistry() external view returns (IIdentityRegistry);
-
-    /**
-     * @dev Returns the address of the compliance contract.
-     */
-    function compliance() external view returns (ICompliance);
-
-    /**
-     * @dev Returns the version of the token.
-     */
-    function version() external view returns (string memory);
-
     /*
      * @dev Freezes a partial amount of the user's tokens across all partitions.
      * Emits a TokensFrozen event.
      */
+
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount
@@ -408,9 +387,138 @@ interface IERC3643 {
      */
     function setAddressFrozen(address _userAddress) external;
 
+    /**
+     *  @dev function allowing to issue transfers in batch
+     *  Require that the msg.sender and `to` addresses are not frozen.
+     *  Require that the total value should not exceed available balance.
+     *  Require that the `to` addresses are all verified addresses,
+     *  IMPORTANT : THIS TRANSACTION COULD EXCEED GAS LIMIT IF `_toList.length` IS TOO HIGH,
+     *  USE WITH CARE OR YOU COULD LOSE TX FEES WITH AN "OUT OF GAS" TRANSACTION
+     *  @param _toList The addresses of the receivers
+     *  @param _amounts The number of tokens to transfer to the corresponding receiver
+     *  emits _toList.length `Transfer` events
+     */
+    function batchTransfer(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
+
+    /**
+     *  @dev function allowing to issue forced transfers in batch
+     *  Require that `_amounts[i]` should not exceed available balance of `_fromList[i]`.
+     *  Require that the `_toList` addresses are all verified addresses
+     *  IMPORTANT : THIS TRANSACTION COULD EXCEED GAS LIMIT IF `_fromList.length` IS TOO HIGH,
+     *  USE WITH CARE OR YOU COULD LOSE TX FEES WITH AN "OUT OF GAS" TRANSACTION
+     *  @param _fromList The addresses of the senders
+     *  @param _toList The addresses of the receivers
+     *  @param _amounts The number of tokens to transfer to the corresponding receiver
+     *  This function can only be called by a wallet set as agent of the token
+     *  emits `TokensUnfrozen` events if `_amounts[i]` is higher than the free balance of `_fromList[i]`
+     *  emits _fromList.length `Transfer` events
+     */
+    function batchForcedTransfer(
+        address[] calldata _fromList,
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
+
+    /**
+     *  @dev function allowing to mint tokens in batch
+     *  Require that the `_toList` addresses are all verified addresses
+     *  IMPORTANT : THIS TRANSACTION COULD EXCEED GAS LIMIT IF `_toList.length` IS TOO HIGH,
+     *  USE WITH CARE OR YOU COULD LOSE TX FEES WITH AN "OUT OF GAS" TRANSACTION
+     *  @param _toList The addresses of the receivers
+     *  @param _amounts The number of tokens to mint to the corresponding receiver
+     *  This function can only be called by a wallet set as agent of the token
+     *  emits _toList.length `Transfer` events
+     */
+    function batchMint(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
+
+    /**
+     *  @dev function allowing to burn tokens in batch
+     *  Require that the `_userAddresses` addresses are all verified addresses
+     *  IMPORTANT : THIS TRANSACTION COULD EXCEED GAS LIMIT IF `_userAddresses.length` IS TOO HIGH,
+     *  USE WITH CARE OR YOU COULD LOSE TX FEES WITH AN "OUT OF GAS" TRANSACTION
+     *  @param _userAddresses The addresses of the wallets concerned by the burn
+     *  @param _amounts The number of tokens to burn from the corresponding wallets
+     *  This function can only be called by a wallet set as agent of the token
+     *  emits _userAddresses.length `Transfer` events
+     */
+    function batchBurn(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external;
+
+    /**
+     *  @dev function allowing to set frozen addresses in batch
+     *  IMPORTANT : THIS TRANSACTION COULD EXCEED GAS LIMIT IF `_userAddresses.length` IS TOO HIGH,
+     *  USE WITH CARE OR YOU COULD LOSE TX FEES WITH AN "OUT OF GAS" TRANSACTION
+     *  @param _userAddresses The addresses for which to update frozen status
+     *  @param _freeze Frozen status of the corresponding address
+     *  This function can only be called by a wallet set as agent of the token
+     *  emits _userAddresses.length `AddressFrozen` events
+     */
+    // function batchSetAddressFrozen(
+    //     address[] calldata _userAddresses,
+    //     bool[] calldata _freeze
+    // ) external;
+
+    /**
+     *  @dev function allowing to freeze tokens partially in batch
+     *  IMPORTANT : THIS TRANSACTION COULD EXCEED GAS LIMIT IF `_userAddresses.length` IS TOO HIGH,
+     *  USE WITH CARE OR YOU COULD LOSE TX FEES WITH AN "OUT OF GAS" TRANSACTION
+     *  @param _userAddresses The addresses on which tokens need to be frozen
+     *  @param _amounts the amount of tokens to freeze on the corresponding address
+     *  This function can only be called by a wallet set as agent of the token
+     *  emits _userAddresses.length `TokensFrozen` events
+     */
+    function batchFreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external;
+
+    /**
+     *  @dev function allowing to unfreeze tokens partially in batch
+     *  IMPORTANT : THIS TRANSACTION COULD EXCEED GAS LIMIT IF `_userAddresses.length` IS TOO HIGH,
+     *  USE WITH CARE OR YOU COULD LOSE TX FEES WITH AN "OUT OF GAS" TRANSACTION
+     *  @param _userAddresses The addresses on which tokens need to be unfrozen
+     *  @param _amounts the amount of tokens to unfreeze on the corresponding address
+     *  This function can only be called by a wallet set as agent of the token
+     *  emits _userAddresses.length `TokensUnfrozen` events
+     */
+    function batchUnfreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external;
+
     function addAgent(address _agent) external;
 
     function removeAgent(address _agent) external;
+
+    /**
+     * @dev Returns the onchainID address associated with the token.
+     */
+    function onchainID() external view returns (address);
+
+    /**
+     * @dev Returns the address of the identity registry contract.
+     * @dev Returns the version of the contract as a string.
+     *
+     */
+    function identityRegistry() external view returns (IIdentityRegistry);
+
+    /**
+     * @dev Returns the address of the compliance contract.
+     */
+    function compliance() external view returns (ICompliance);
+
+    /**
+     * @dev Returns the version of the token.
+     */
+    function version() external view returns (string memory);
 
     function isAgent(address _agent) external view returns (bool);
 

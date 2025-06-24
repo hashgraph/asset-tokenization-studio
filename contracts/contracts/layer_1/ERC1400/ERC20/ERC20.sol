@@ -244,25 +244,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         return _approve(spender, value);
     }
 
-    function transfer(
-        address to,
-        uint256 value
-    )
-        external
-        override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(to)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
-        returns (bool)
-    {
-        return _transfer(_msgSender(), to, value);
-    }
-
     function transferFrom(
         address from,
         address to,
@@ -397,5 +378,24 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC20).interfaceId;
+    }
+
+    function transfer(
+        address to,
+        uint256 value
+    )
+        public
+        override
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(to)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
+        returns (bool)
+    {
+        return _transfer(_msgSender(), to, value);
     }
 }
