@@ -207,6 +207,8 @@ import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
 import { RecoveryAddressCommand } from '../../../src/app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand';
 import { IsAddressRecoveredQuery } from '../../../src/app/usecase/query/security/recovery/IsAddressRecoveredQuery';
+import RecoveryAddressRequest from '../../../src/port/in/request/security/operations/recovery/RecoveryAddressRequest';
+import IsAddressRecoveredRequest from '../../../src/port/in/request/security/operations/recovery/IsAddressRecoveredRequest';
 
 export const IsAddressRecoveredQueryFixture =
   createFixture<IsAddressRecoveredQuery>((query) => {
@@ -219,4 +221,17 @@ export const RecoveryAddressCommandFixture =
     request.securityId.as(() => HederaIdPropsFixture.create().value);
     request.lostWalletId.as(() => HederaIdPropsFixture.create().value);
     request.newWalletId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const RecoveryAddressRequestFixture =
+  createFixture<RecoveryAddressRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.lostWalletId.as(() => HederaIdPropsFixture.create().value);
+    request.newWalletId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const IsAddressRecoveredRequestFixture =
+  createFixture<IsAddressRecoveredRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
   });

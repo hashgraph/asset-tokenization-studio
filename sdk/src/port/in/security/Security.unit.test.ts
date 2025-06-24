@@ -246,6 +246,7 @@ import {
   GetMaxSupplyRequest,
   GetNounceRequest,
   GetSecurityDetailsRequest,
+  IsAddressRecoveredRequest,
   IsClearingActivatedRequest,
   IssueRequest,
   LockRequest,
@@ -263,6 +264,7 @@ import {
   ProtectedTransferFromByPartitionRequest,
   ReclaimClearingOperationByPartitionRequest,
   ReclaimHoldByPartitionRequest,
+  RecoveryAddressRequest,
   RedeemRequest,
   ReleaseHoldByPartitionRequest,
   ReleaseRequest,
@@ -446,6 +448,12 @@ import {
 } from '../../../../__tests__/fixtures/tokenMetadata/TokenMetadataFixture';
 import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
 import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
+import {
+  IsAddressRecoveredRequestFixture,
+  RecoveryAddressRequestFixture,
+} from '../../../../__tests__/fixtures/recovery/RecoveryFixture';
+import { RecoveryAddressCommand } from '../../../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand';
+import { IsAddressRecoveredQuery } from '../../../app/usecase/query/security/recovery/IsAddressRecoveredQuery';
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -514,6 +522,8 @@ describe('Security', () => {
   let operatorClearingTransferByPartitionRequest: OperatorClearingTransferByPartitionRequest;
   let setNameRequest: SetNameRequest;
   let setSymbolRequest: SetSymbolRequest;
+  let recoveryAddressRequest: RecoveryAddressRequest;
+  let isAddressRecoveredRequest: IsAddressRecoveredRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -7073,6 +7083,169 @@ describe('Security', () => {
       await expect(Security.setSymbol(setSymbolRequest)).rejects.toThrow(
         ValidationError,
       );
+    });
+  });
+
+  describe('RecoveryAddress', () => {
+    recoveryAddressRequest = new RecoveryAddressRequest(
+      RecoveryAddressRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should recover address successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.recoveryAddress(recoveryAddressRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RecoveryAddressRequest',
+        recoveryAddressRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RecoveryAddressCommand(
+          recoveryAddressRequest.securityId,
+          recoveryAddressRequest.lostWalletId,
+          recoveryAddressRequest.newWalletId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.recoveryAddress(recoveryAddressRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RecoveryAddressRequest',
+        recoveryAddressRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RecoveryAddressCommand(
+          recoveryAddressRequest.securityId,
+          recoveryAddressRequest.lostWalletId,
+          recoveryAddressRequest.newWalletId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      recoveryAddressRequest = new RecoveryAddressRequest({
+        ...RecoveryAddressRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.recoveryAddress(recoveryAddressRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if lostWalletId is invalid', async () => {
+      recoveryAddressRequest = new RecoveryAddressRequest({
+        ...RecoveryAddressRequestFixture.create({
+          lostWalletId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.recoveryAddress(recoveryAddressRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if newWalletId is invalid', async () => {
+      recoveryAddressRequest = new RecoveryAddressRequest({
+        ...RecoveryAddressRequestFixture.create({
+          newWalletId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.recoveryAddress(recoveryAddressRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('IsAddressRecovered', () => {
+    isAddressRecoveredRequest = new IsAddressRecoveredRequest(
+      IsAddressRecoveredRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+    };
+    it('should get recovered status successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.isAddressRecovered(
+        isAddressRecoveredRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsAddressRecoveredRequest',
+        isAddressRecoveredRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsAddressRecoveredQuery(
+          isAddressRecoveredRequest.securityId,
+          isAddressRecoveredRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.isAddressRecovered(isAddressRecoveredRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsAddressRecoveredRequest',
+        isAddressRecoveredRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsAddressRecoveredQuery(
+          isAddressRecoveredRequest.securityId,
+          isAddressRecoveredRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      isAddressRecoveredRequest = new IsAddressRecoveredRequest({
+        ...IsAddressRecoveredRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.isAddressRecovered(isAddressRecoveredRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      isAddressRecoveredRequest = new IsAddressRecoveredRequest({
+        ...IsAddressRecoveredRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.isAddressRecovered(isAddressRecoveredRequest),
+      ).rejects.toThrow(ValidationError);
     });
   });
 });

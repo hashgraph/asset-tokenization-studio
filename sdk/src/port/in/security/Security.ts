@@ -354,9 +354,9 @@ import { GetClearingTransferForByPartitionQuery } from '../../../app/usecase/que
 import { SetNameRequest, SetSymbolRequest } from '../request/index.js';
 import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand.js';
 import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand.js';
-import RecoveryAddressRequest from '../request/security/recovery/RecoveryAddressRequest.js';
-import { RecoveryAddressCommand } from 'app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand.js';
-import IsAddressRecoveredRequest from '../request/security/recovery/IsAddressRecoveredRequest.js';
+import RecoveryAddressRequest from '../request/security/operations/recovery/RecoveryAddressRequest.js';
+import { RecoveryAddressCommand } from '../../../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand.js';
+import IsAddressRecoveredRequest from '../request/security/operations/recovery/IsAddressRecoveredRequest.js';
 import { IsAddressRecoveredQuery } from '../../../app/usecase/query/security/recovery/IsAddressRecoveredQuery.js';
 
 export { SecurityViewModel, SecurityControlListType };

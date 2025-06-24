@@ -355,6 +355,8 @@ import RevokeKycMockRequest from './security/externalKycLists/mock/RevokeKycMock
 import GetKycStatusMockRequest from './security/externalKycLists/mock/GetKycStatusMockRequest.js';
 import SetNameRequest from './security/operations/tokeMetadata/SetNameRequest.js';
 import SetSymbolRequest from './security/operations/tokeMetadata/SetSymbolRequest.js';
+import RecoveryAddressRequest from './security/operations/recovery/RecoveryAddressRequest.js';
+import IsAddressRecoveredRequest from './security/operations/recovery/IsAddressRecoveredRequest.js';
 
 export {
   CreateEquityRequest,
@@ -508,4 +510,6 @@ export {
   GetKycStatusMockRequest,
   SetNameRequest,
   SetSymbolRequest,
+  RecoveryAddressRequest,
+  IsAddressRecoveredRequest,
 };

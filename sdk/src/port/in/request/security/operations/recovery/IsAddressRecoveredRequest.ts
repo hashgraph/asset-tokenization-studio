@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../FormatValidation.js';
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import FormatValidation from '../../../FormatValidation.js';
 
 export default class IsAddressRecoveredRequest extends ValidatedRequest<IsAddressRecoveredRequest> {
   securityId: string;
