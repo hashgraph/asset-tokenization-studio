@@ -203,156 +203,123 @@
 
 */
 
-import {
-  CreateBondCommand,
-  CreateBondCommandResponse,
-} from './CreateBondCommand.js';
-import { InvalidRequest } from '../../error/InvalidRequest.js';
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { Security } from '../../../../../domain/context/security/Security.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import { CreateBondCommandError } from './error/CreateBondCommandError.js';
-import { Response } from '../../../../../domain/context/transaction/Response';
+import { createMock } from '@golevelup/ts-jest';
+import { ForcedTransferCommandHandler } from './ForcedTransferCommandHandler';
+import { ForcedTransferCommand, ForcedTransferCommandResponse } from './ForcedTransferCommand';
+import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
 
-@CommandHandler(CreateBondCommand)
-export class CreateBondCommandHandler
-  implements ICommandHandler<CreateBondCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+import AccountService from '../../../../../service/account/AccountService';
+import SecurityService from '../../../../../service/security/SecurityService';
+import TransactionService from '../../../../../service/transaction/TransactionService';
+import ValidationService from '../../../../../service/validation/ValidationService';
+import ContractService from '../../../../../service/contract/ContractService';
 
-  async execute(
-    command: CreateBondCommand,
-  ): Promise<CreateBondCommandResponse> {
-    let res: Response;
-    //TODO: Boy scout remove try catch block and adjust test
-    try {
-      const {
-        security,
-        currency,
-        nominalValue,
-        startingDate,
-        maturityDate,
-        couponFrequency,
-        couponRate,
-        firstCouponDate,
-        factory,
-        resolver,
-        configId,
-        configVersion,
-        diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-      } = command;
+import { HederaIdPropsFixture, EvmAddressPropsFixture, TransactionIdFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture';
+import Account from '../../../../../../domain/context/account/Account';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
+import TransactionAdapter from '../../../../../../port/out/TransactionAdapter';
+import {Security} from "../../../../../../domain/context/security/Security";
+import {FocedTransferCommandFixture} from "../../../../../../../__tests__/fixtures/transfer/TransferFixture";
+import {_PARTITION_ID_1} from "../../../../../../core/Constants";
+import {ForcedTransferCommandError} from "./error/ForcedTransferCommandError";
 
-      if (!factory) {
-        throw new InvalidRequest('Factory not found in request');
-      }
+describe('ForcedTransferCommandHandler', () => {
+  let handler: ForcedTransferCommandHandler;
+  let command: ForcedTransferCommand;
 
-      if (!resolver) {
-        throw new InvalidRequest('Resolver not found in request');
-      }
+  const accountServiceMock = createMock<AccountService>();
+  const securityServiceMock = createMock<SecurityService>();
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const contractServiceMock = createMock<ContractService>();
 
-      if (!configId) {
-        throw new InvalidRequest('Config Id not found in request');
-      }
+  const transactionId = TransactionIdFixture.create().id;
+  const security = { decimals: 6 } as unknown as Security;
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const securityEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const sourceEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const targetEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
 
-      if (configVersion === undefined) {
-        throw new InvalidRequest('Config Version not found in request');
-      }
+  beforeEach(() => {
+    handler = new ForcedTransferCommandHandler(
+        securityServiceMock,
+        accountServiceMock,
+        transactionServiceMock,
+        validationServiceMock,
+        contractServiceMock
+    );
+    command = FocedTransferCommandFixture.create();
+  });
 
-      const diamondOwnerAccountEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const factoryEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(factory.toString());
+  describe('execute', () => {
+    it('should successfully execute forced transfer', async () => {
+      const handlerMock = createMock<TransactionAdapter>();
+      handlerMock.forcedTransfer.mockResolvedValue({ id: transactionId });
 
-      const resolverEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(resolver.toString());
+      transactionServiceMock.getHandler.mockReturnValue(handlerMock);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+      securityServiceMock.get.mockResolvedValue(security);
 
-      const [
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-      ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
-      ]);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(securityEvmAddress);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(sourceEvmAddress);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
 
-      const handler = this.transactionService.getHandler();
+      validationServiceMock.checkCanTransfer.mockResolvedValue(undefined);
+      validationServiceMock.checkRole.mockResolvedValue(undefined);
+      validationServiceMock.checkDecimals.mockResolvedValue(undefined);
 
-      const bondInfo = new BondDetails(
-        currency,
-        BigDecimal.fromString(nominalValue),
-        parseInt(startingDate),
-        parseInt(maturityDate),
+      const result = await handler.execute(command);
+
+      expect(result).toBeInstanceOf(ForcedTransferCommandResponse);
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
+
+      const amountBd = BigDecimal.fromString(command.amount, security.decimals);
+
+      expect(securityServiceMock.get).toHaveBeenCalledWith(command.securityId);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(1, command.sourceId);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(2, command.targetId);
+
+      expect(validationServiceMock.checkCanTransfer).toHaveBeenCalledWith(
+          command.securityId,
+          command.targetId,
+          command.amount,
+          command.sourceId,
+          _PARTITION_ID_1,
+          account.id.toString()
       );
 
-      const couponInfo = new CouponDetails(
-        parseInt(couponFrequency),
-        BigDecimal.fromString(couponRate),
-        parseInt(firstCouponDate),
+      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._CONTROLLER_ROLE,
+          account.id.toString(),
+          command.securityId
       );
 
-      res = await handler.createBond(
-        new Security(security),
-        bondInfo,
-        couponInfo,
-        factoryEvmAddress,
-        resolverEvmAddress,
-        configId,
-        configVersion,
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-        diamondOwnerAccountEvmAddress,
-        factory.toString(),
+      expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(security, command.amount);
+
+      expect(handlerMock.forcedTransfer).toHaveBeenCalledWith(
+          securityEvmAddress,
+          sourceEvmAddress,
+          targetEvmAddress,
+          amountBd,
+          command.securityId
       );
+    });
 
-      const contractAddress =
-        await this.transactionService.getTransactionResult({
-          res,
-          result: res.response?.bondAddress,
-          className: CreateBondCommandHandler.name,
-          position: 0,
-          numberOfResultsItems: 1,
-        });
+    it('should throw ForcedTransferCommandError on failure', async () => {
+      securityServiceMock.get.mockRejectedValue(new Error('Failed'));
 
-      const contractId =
-        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
-          contractAddress,
-        );
-
-      return Promise.resolve(
-        new CreateBondCommandResponse(new ContractId(contractId), res.id!),
-      );
-    } catch (error) {
-      if (res?.response == 1) {
-        return Promise.resolve(
-          new CreateBondCommandResponse(new ContractId('0.0.0'), res.id!),
-        );
-      }
-      throw new CreateBondCommandError(error as Error);
-    }
-  }
-}
+      await expect(handler.execute(command)).rejects.toThrow(ForcedTransferCommandError);
+    });
+  });
+});

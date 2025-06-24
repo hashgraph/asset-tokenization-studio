@@ -216,8 +216,9 @@ import {SecurityRole} from '../../../../../../domain/context/security/SecurityRo
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import {_PARTITION_ID_1} from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
-import {ControllerTransferCommandError} from './error/ControllerTransferCommandError copy.js';
+import {ControllerTransferCommandError} from './error/ControllerTransferCommandError';
 import {ForcedTransferCommand, ForcedTransferCommandResponse,} from './ForcedTransferCommand';
+import {ForcedTransferCommandError} from "./error/ForcedTransferCommandError";
 
 @CommandHandler(ForcedTransferCommand)
 export class ForcedTransferCommandHandler
@@ -280,10 +281,10 @@ export class ForcedTransferCommandHandler
         securityId,
       );
       return Promise.resolve(
-        new ControllerTransferCommandResponse(res.error === undefined, res.id!),
+        new ForcedTransferCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new ControllerTransferCommandError(error as Error);
+      throw new ForcedTransferCommandError(error as Error);
     }
   }
 }

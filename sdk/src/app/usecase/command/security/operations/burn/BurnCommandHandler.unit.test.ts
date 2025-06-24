@@ -203,156 +203,115 @@
 
 */
 
+import {createMock} from '@golevelup/ts-jest';
+import {BurnCommandHandler} from "./BurnCommandHandler";
+import {BurnCommand, BurnCommandResponse} from "./BurnCommand";
+import SecurityService from "../../../../../service/security/SecurityService";
+import ValidationService from "../../../../../service/validation/ValidationService";
+import {BurnCommandFixture} from "../../../../../../../__tests__/fixtures/burn/BurnFixture";
+import TransactionService from 'app/service/transaction/TransactionService';
+import AccountService from "../../../../../service/account/AccountService";
+import ContractService from "../../../../../service/contract/ContractService";
+
 import {
-  CreateBondCommand,
-  CreateBondCommandResponse,
-} from './CreateBondCommand.js';
-import { InvalidRequest } from '../../error/InvalidRequest.js';
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { Security } from '../../../../../domain/context/security/Security.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import { CreateBondCommandError } from './error/CreateBondCommandError.js';
-import { Response } from '../../../../../domain/context/transaction/Response';
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  TransactionIdFixture
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture';
+import {SecurityRole} from "../../../../../../domain/context/security/SecurityRole";
+import Account from "../../../../../../domain/context/account/Account";
+import {Security} from "../../../../../../domain/context/security/Security";
+import {_PARTITION_ID_1} from "../../../../../../core/Constants";
+import BigDecimal from "../../../../../../domain/context/shared/BigDecimal";
+import {BurnCommandError} from "./error/BurnCommandError";
+import EvmAddress from "../../../../../../domain/context/contract/EvmAddress";
+import TransactionAdapter from "../../../../../../port/out/TransactionAdapter";
 
-@CommandHandler(CreateBondCommand)
-export class CreateBondCommandHandler
-  implements ICommandHandler<CreateBondCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+describe('BurnCommandHandler', () => {
+  let handler: BurnCommandHandler;
+  let command: BurnCommand;
 
-  async execute(
-    command: CreateBondCommand,
-  ): Promise<CreateBondCommandResponse> {
-    let res: Response;
-    //TODO: Boy scout remove try catch block and adjust test
-    try {
-      const {
-        security,
-        currency,
-        nominalValue,
-        startingDate,
-        maturityDate,
-        couponFrequency,
-        couponRate,
-        firstCouponDate,
-        factory,
-        resolver,
-        configId,
-        configVersion,
-        diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-      } = command;
+  const transactionServiceMock = createMock<TransactionService>();
+  const accountServiceMock = createMock<AccountService>();
+  const securityServiceMock = createMock<SecurityService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const contractServiceMock = createMock<ContractService>();
 
-      if (!factory) {
-        throw new InvalidRequest('Factory not found in request');
-      }
+  const securityEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const sourceEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const security: Security = {
+    decimals: 6,
+  } as unknown as Security;
 
-      if (!resolver) {
-        throw new InvalidRequest('Resolver not found in request');
-      }
+  beforeEach(() => {
+    handler = new BurnCommandHandler(
+        securityServiceMock,
+        accountServiceMock,
+        transactionServiceMock,
+        validationServiceMock,
+        contractServiceMock,
+    );
+    command = BurnCommandFixture.create();
+  });
 
-      if (!configId) {
-        throw new InvalidRequest('Config Id not found in request');
-      }
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      if (configVersion === undefined) {
-        throw new InvalidRequest('Config Version not found in request');
-      }
+  describe('execute', () => {
+    it('should successfully burn tokens', async () => {
+      const handlerMock = createMock<TransactionAdapter>();
+      handlerMock.burn.mockResolvedValue({ id: transactionId });
+      transactionServiceMock.getHandler.mockReturnValue(handlerMock);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+      // @ts-ignore
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(securityEvmAddress);
+      validationServiceMock.checkClearingDeactivated.mockResolvedValue(undefined);
+      validationServiceMock.checkCanRedeem.mockResolvedValue(undefined);
+      // @ts-ignore
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(sourceEvmAddress);
+      securityServiceMock.get.mockResolvedValueOnce(security);
+      validationServiceMock.checkDecimals.mockResolvedValue(undefined);
 
-      const diamondOwnerAccountEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
+      const result = await handler.execute(command);
 
-      const factoryEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(factory.toString());
+      expect(result).toBeInstanceOf(BurnCommandResponse);
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
 
-      const resolverEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(resolver.toString());
-
-      const [
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-      ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
-      ]);
-
-      const handler = this.transactionService.getHandler();
-
-      const bondInfo = new BondDetails(
-        currency,
-        BigDecimal.fromString(nominalValue),
-        parseInt(startingDate),
-        parseInt(maturityDate),
+      expect(transactionServiceMock.getHandler).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
+      expect(validationServiceMock.checkClearingDeactivated).toHaveBeenCalledWith(command.securityId);
+      expect(validationServiceMock.checkCanRedeem).toHaveBeenCalledWith(
+          command.securityId,
+          account.id.toString(),
+          command.amount,
+          _PARTITION_ID_1,
       );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(command.sourceId);
+      expect(securityServiceMock.get).toHaveBeenCalledWith(command.securityId);
+      expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(security, command.amount);
 
-      const couponInfo = new CouponDetails(
-        parseInt(couponFrequency),
-        BigDecimal.fromString(couponRate),
-        parseInt(firstCouponDate),
+      const expectedAmountBd = BigDecimal.fromString(command.amount, security.decimals);
+      expect(handlerMock.burn).toHaveBeenCalledWith(
+          sourceEvmAddress,
+          securityEvmAddress,
+          expectedAmountBd,
+          command.securityId,
       );
+    });
 
-      res = await handler.createBond(
-        new Security(security),
-        bondInfo,
-        couponInfo,
-        factoryEvmAddress,
-        resolverEvmAddress,
-        configId,
-        configVersion,
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-        diamondOwnerAccountEvmAddress,
-        factory.toString(),
-      );
+    it('should throw BurnCommandError if any error occurs', async () => {
+      const error = new Error('Something went wrong');
+      validationServiceMock.checkClearingDeactivated.mockRejectedValueOnce(error);
 
-      const contractAddress =
-        await this.transactionService.getTransactionResult({
-          res,
-          result: res.response?.bondAddress,
-          className: CreateBondCommandHandler.name,
-          position: 0,
-          numberOfResultsItems: 1,
-        });
-
-      const contractId =
-        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
-          contractAddress,
-        );
-
-      return Promise.resolve(
-        new CreateBondCommandResponse(new ContractId(contractId), res.id!),
-      );
-    } catch (error) {
-      if (res?.response == 1) {
-        return Promise.resolve(
-          new CreateBondCommandResponse(new ContractId('0.0.0'), res.id!),
-        );
-      }
-      throw new CreateBondCommandError(error as Error);
-    }
-  }
-}
+      await expect(handler.execute(command)).rejects.toThrow(BurnCommandError);
+    });
+  });
+});
