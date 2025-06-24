@@ -404,6 +404,7 @@ import { SetIdentityRegistryCommandHandler } from '../app/usecase/command/securi
 import { OnchainIDQueryHandler } from '../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQueryHandler.js';
 import { IdentityRegistryQueryHandler } from '../app/usecase/query/security/identityRegistry/IdentityRegistryQueryHandler.js';
 import { ComplianceQueryHandler } from '../app/usecase/query/security/compliance/compliance/ComplianceQueryHandler.js';
+import { SetOnchainIDCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -783,6 +784,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetIdentityRegistryCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetOnchainIDCommandHandler,
   },
 ];
 
