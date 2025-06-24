@@ -205,67 +205,29 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetNameCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
-import { SetSymbolCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
-import SetNameRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetNameRequest';
-import SetSymbolRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetSymbolRequest';
-import { SetOnchainIDCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
-import { OnchainIDQuery } from '../../../src/app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
-import SetOnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetOnchainIDRequest';
-import OnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/OnchainIDRequest';
+import { SetIdentityRegistryCommand } from '../../../src/app/usecase/command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommand';
+import { IdentityRegistryQuery } from '../../../src/app/usecase/query/security/identityRegistry/IdentityRegistryQuery';
+import SetIdentityRegistryRequest from '../../../src/port/in/request/security/identityRegistry/SetIdentityRegistryRequest';
+import IdentityRegistryRequest from '../../../src/port/in/request/security/identityRegistry/IdentityRegistryRequest';
 
-export const SetNameCommandFixture = createFixture<SetNameCommand>(
-  (command) => {
+export const SetIdentityRegistryCommandFixture =
+  createFixture<SetIdentityRegistryCommand>((command) => {
     command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.name.faker((faker) => faker.company.name());
-  },
-);
+    command.identityRegistry.as(() => HederaIdPropsFixture.create().value);
+  });
 
-export const SetSymbolCommandFixture = createFixture<SetSymbolCommand>(
-  (command) => {
+export const IdentityRegistryQueryFixture =
+  createFixture<IdentityRegistryQuery>((command) => {
     command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.symbol.faker((faker) =>
-      faker.string.alpha({ length: 3, casing: 'upper' }),
-    );
-  },
-);
+  });
 
-export const SetNameRequestFixture = createFixture<SetNameRequest>(
-  (request) => {
+export const SetIdentityRegistryRequestFixture =
+  createFixture<SetIdentityRegistryRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.name.faker((faker) => faker.company.name());
-  },
-);
+    request.identityRegistry.as(() => HederaIdPropsFixture.create().value);
+  });
 
-export const SetSymbolRequestFixture = createFixture<SetSymbolRequest>(
-  (request) => {
+export const IdentityRegistryRequestFixture =
+  createFixture<IdentityRegistryRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.symbol.faker((faker) =>
-      faker.string.alpha({ length: 3, casing: 'upper' }),
-    );
-  },
-);
-
-export const SetOnchainIDCommandFixture = createFixture<SetOnchainIDCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.onchainID.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const OnchainIDQueryFixture = createFixture<OnchainIDQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-});
-
-export const SetOnchainIDRequestFixture = createFixture<SetOnchainIDRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.onchainID.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const OnchainIDRequestFixture = createFixture<OnchainIDRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  });

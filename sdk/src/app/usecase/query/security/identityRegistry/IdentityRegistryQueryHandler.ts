@@ -203,69 +203,43 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetNameCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
-import { SetSymbolCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
-import SetNameRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetNameRequest';
-import SetSymbolRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetSymbolRequest';
-import { SetOnchainIDCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
-import { OnchainIDQuery } from '../../../src/app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
-import SetOnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetOnchainIDRequest';
-import OnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/OnchainIDRequest';
+import {
+  IdentityRegistryQuery,
+  IdentityRegistryQueryResponse,
+} from './IdentityRegistryQuery.js';
+import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../service/contract/ContractService.js';
+import { IdentityRegistryQueryError } from './error/IdentityRegistryQueryError.js';
 
-export const SetNameCommandFixture = createFixture<SetNameCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.name.faker((faker) => faker.company.name());
-  },
-);
+@QueryHandler(IdentityRegistryQuery)
+export class IdentityRegistryQueryHandler
+  implements IQueryHandler<IdentityRegistryQuery>
+{
+  constructor(
+    @lazyInject(RPCQueryAdapter)
+    private readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+  ) {}
 
-export const SetSymbolCommandFixture = createFixture<SetSymbolCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.symbol.faker((faker) =>
-      faker.string.alpha({ length: 3, casing: 'upper' }),
-    );
-  },
-);
+  async execute(
+    query: IdentityRegistryQuery,
+  ): Promise<IdentityRegistryQueryResponse> {
+    try {
+      const { securityId } = query;
 
-export const SetNameRequestFixture = createFixture<SetNameRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.name.faker((faker) => faker.company.name());
-  },
-);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-export const SetSymbolRequestFixture = createFixture<SetSymbolRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.symbol.faker((faker) =>
-      faker.string.alpha({ length: 3, casing: 'upper' }),
-    );
-  },
-);
+      const res = await this.queryAdapter.identityRegistry(securityEvmAddress);
 
-export const SetOnchainIDCommandFixture = createFixture<SetOnchainIDCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.onchainID.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const OnchainIDQueryFixture = createFixture<OnchainIDQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-});
-
-export const SetOnchainIDRequestFixture = createFixture<SetOnchainIDRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.onchainID.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const OnchainIDRequestFixture = createFixture<OnchainIDRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+      return new IdentityRegistryQueryResponse(res);
+    } catch (error) {
+      throw new IdentityRegistryQueryError(error as Error);
+    }
+  }
+}

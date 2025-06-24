@@ -203,69 +203,17 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetNameCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
-import { SetSymbolCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
-import SetNameRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetNameRequest';
-import SetSymbolRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetSymbolRequest';
-import { SetOnchainIDCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
-import { OnchainIDQuery } from '../../../src/app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
-import SetOnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetOnchainIDRequest';
-import OnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/OnchainIDRequest';
+import ValidatedRequest from '../../../../../core/validation/ValidatedArgs';
+import FormatValidation from '../../FormatValidation';
 
-export const SetNameCommandFixture = createFixture<SetNameCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.name.faker((faker) => faker.company.name());
-  },
-);
+export default class ComplianceRequest extends ValidatedRequest<ComplianceRequest> {
+  securityId: string;
 
-export const SetSymbolCommandFixture = createFixture<SetSymbolCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.symbol.faker((faker) =>
-      faker.string.alpha({ length: 3, casing: 'upper' }),
-    );
-  },
-);
+  constructor({ securityId }: { securityId: string }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+    });
 
-export const SetNameRequestFixture = createFixture<SetNameRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.name.faker((faker) => faker.company.name());
-  },
-);
-
-export const SetSymbolRequestFixture = createFixture<SetSymbolRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.symbol.faker((faker) =>
-      faker.string.alpha({ length: 3, casing: 'upper' }),
-    );
-  },
-);
-
-export const SetOnchainIDCommandFixture = createFixture<SetOnchainIDCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.onchainID.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const OnchainIDQueryFixture = createFixture<OnchainIDQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
-});
-
-export const SetOnchainIDRequestFixture = createFixture<SetOnchainIDRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.onchainID.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const OnchainIDRequestFixture = createFixture<OnchainIDRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+    this.securityId = securityId;
+  }
+}

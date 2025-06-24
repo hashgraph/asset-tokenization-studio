@@ -203,69 +203,88 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetNameCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
-import { SetSymbolCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
-import SetNameRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetNameRequest';
-import SetSymbolRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetSymbolRequest';
-import { SetOnchainIDCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
-import { OnchainIDQuery } from '../../../src/app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
-import SetOnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetOnchainIDRequest';
-import OnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/OnchainIDRequest';
+import { createMock } from '@golevelup/ts-jest';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../service/contract/ContractService.js';
+import {
+  IdentityRegistryQuery,
+  IdentityRegistryQueryResponse,
+} from './IdentityRegistryQuery.js';
+import { IdentityRegistryQueryHandler } from './IdentityRegistryQueryHandler.js';
+import { IdentityRegistryQueryError } from './error/IdentityRegistryQueryError.js';
+import { IdentityRegistryQueryFixture } from '../../../../../../__tests__/fixtures/identityRegistry/IdentityRegistryFixture.js';
 
-export const SetNameCommandFixture = createFixture<SetNameCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.name.faker((faker) => faker.company.name());
-  },
-);
+describe('IdentityRegistryQueryHandler', () => {
+  let handler: IdentityRegistryQueryHandler;
+  let query: IdentityRegistryQuery;
 
-export const SetSymbolCommandFixture = createFixture<SetSymbolCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.symbol.faker((faker) =>
-      faker.string.alpha({ length: 3, casing: 'upper' }),
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const identityRegistry = new EvmAddress(EvmAddressPropsFixture.create().value)
+    .value;
+  const errorMsg = ErrorMsgFixture.create().msg;
+
+  beforeEach(() => {
+    handler = new IdentityRegistryQueryHandler(
+      queryAdapterServiceMock,
+      contractServiceMock,
     );
-  },
-);
+    query = IdentityRegistryQueryFixture.create();
+  });
 
-export const SetNameRequestFixture = createFixture<SetNameRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.name.faker((faker) => faker.company.name());
-  },
-);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-export const SetSymbolRequestFixture = createFixture<SetSymbolRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.symbol.faker((faker) =>
-      faker.string.alpha({ length: 3, casing: 'upper' }),
-    );
-  },
-);
+  describe('execute', () => {
+    it('throws IdentityRegistryQueryError when query fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
 
-export const SetOnchainIDCommandFixture = createFixture<SetOnchainIDCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.onchainID.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
-export const OnchainIDQueryFixture = createFixture<OnchainIDQuery>((query) => {
-  query.securityId.as(() => HederaIdPropsFixture.create().value);
+      const resultPromise = handler.execute(query);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        IdentityRegistryQueryError,
+      );
+
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while querying identity registry: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtQueryError,
+      });
+    });
+
+    it('should successfully get identity registry address', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      queryAdapterServiceMock.identityRegistry.mockResolvedValueOnce(
+        identityRegistry,
+      );
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(IdentityRegistryQueryResponse);
+      expect(result.payload).toBe(identityRegistry);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+      expect(queryAdapterServiceMock.identityRegistry).toHaveBeenCalledWith(
+        evmAddress,
+      );
+    });
+  });
 });
-
-export const SetOnchainIDRequestFixture = createFixture<SetOnchainIDRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.onchainID.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const OnchainIDRequestFixture = createFixture<OnchainIDRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
