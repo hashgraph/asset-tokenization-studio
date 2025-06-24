@@ -425,41 +425,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
-    function freezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-    {
-        _freezeTokensByPartition(_partition, _userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _partition);
-    }
-
-    function unfreezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-    {
-        _checkUnfreezeAmount(_partition, _userAddress, _amount);
-        _unfreezeTokensByPartition(_partition, _userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _partition);
-    }
-
     /**
      * @notice Gives an account the agent role
      * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
@@ -481,13 +446,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
         _removeAgent(_agent);
         emit AgentRemoved(_agent);
-    }
-
-    function getFrozenTokensByPartition(
-        bytes32 _partition,
-        address _userAddress
-    ) external view override returns (uint256) {
-        return _getFrozenAmountForByPartitionAdjusted(_partition, _userAddress);
     }
 
     function getFrozenTokens(
@@ -576,15 +534,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             .getFrozenTokens
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
-            .freezePartialTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .unfreezePartialTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getFrozenTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
             .setAddressFrozen
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
@@ -598,9 +547,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
     }
 
-    /**
-     * @notice Retrieves the identity registry contract address.
-     */
     function getStaticInterfaceIds()
         external
         pure

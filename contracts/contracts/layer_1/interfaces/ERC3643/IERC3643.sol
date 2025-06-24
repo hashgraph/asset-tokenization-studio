@@ -361,26 +361,6 @@ interface IERC3643 {
     ) external;
 
     /*
-     * @dev Freezes a partial amount of the user's tokens within a specific partition.
-     * Emits a TokensFrozen event.
-     */
-    function freezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Unfreezes a partial amount of the user's previously frozen tokens within a specific partition.
-     * Emits a TokensUnfrozen event.
-     */
-    function unfreezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
      * @dev Freezes the user's address entirely, disabling all token operations.
      * Emits a TokensFrozen event.
      */
@@ -417,14 +397,6 @@ interface IERC3643 {
      * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.
      */
     function getFrozenTokens(
-        address _userAddress
-    ) external view returns (uint256);
-
-    /*
-     * @dev Returns the amount of tokens currently frozen for the given user in a specific partition.
-     */
-    function getFrozenTokensByPartition(
-        bytes32 _partition,
         address _userAddress
     ) external view returns (uint256);
 }
