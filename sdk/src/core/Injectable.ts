@@ -399,6 +399,11 @@ import { GetKycStatusMockQueryHandler } from '../app/usecase/query/security/exte
 import { CreateExternalKycListMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommandHandler.js';
 import { SetNameCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommandHandler.js';
 import { SetSymbolCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommandHandler.js';
+import {MintCommandHandler} from "../app/usecase/command/security/operations/mint/MintCommandHandler";
+import {
+  ForcedTransferCommandHandler
+} from "../app/usecase/command/security/operations/transfer/ForcedTransferCommandHandler";
+import {BurnCommandHandler} from "../app/usecase/command/security/operations/burn/BurnCommandHandler";
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -469,6 +474,18 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: IssueCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: MintCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ForcedTransferCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BurnCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,
