@@ -203,29 +203,29 @@
 
 */
 
-import {createMock} from '@golevelup/ts-jest';
-import {BurnCommandHandler} from "./BurnCommandHandler";
-import {BurnCommand, BurnCommandResponse} from "./BurnCommand";
-import SecurityService from "../../../../../service/security/SecurityService";
-import ValidationService from "../../../../../service/validation/ValidationService";
-import {BurnCommandFixture} from "../../../../../../../__tests__/fixtures/burn/BurnFixture";
+import { createMock } from '@golevelup/ts-jest';
+import { BurnCommandHandler } from './BurnCommandHandler';
+import { BurnCommand, BurnCommandResponse } from './BurnCommand';
+import SecurityService from '../../../../../service/security/SecurityService';
+import ValidationService from '../../../../../service/validation/ValidationService';
+import { BurnCommandFixture } from '../../../../../../../__tests__/fixtures/burn/BurnFixture';
 import TransactionService from 'app/service/transaction/TransactionService';
-import AccountService from "../../../../../service/account/AccountService";
-import ContractService from "../../../../../service/contract/ContractService";
+import AccountService from '../../../../../service/account/AccountService';
+import ContractService from '../../../../../service/contract/ContractService';
 
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
-  TransactionIdFixture
+  TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture';
-import {SecurityRole} from "../../../../../../domain/context/security/SecurityRole";
-import Account from "../../../../../../domain/context/account/Account";
-import {Security} from "../../../../../../domain/context/security/Security";
-import {_PARTITION_ID_1} from "../../../../../../core/Constants";
-import BigDecimal from "../../../../../../domain/context/shared/BigDecimal";
-import {BurnCommandError} from "./error/BurnCommandError";
-import EvmAddress from "../../../../../../domain/context/contract/EvmAddress";
-import TransactionAdapter from "../../../../../../port/out/TransactionAdapter";
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
+import Account from '../../../../../../domain/context/account/Account';
+import { Security } from '../../../../../../domain/context/security/Security';
+import { _PARTITION_ID_1 } from '../../../../../../core/Constants';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
+import { BurnCommandError } from './error/BurnCommandError';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import TransactionAdapter from '../../../../../../port/out/TransactionAdapter';
 
 describe('BurnCommandHandler', () => {
   let handler: BurnCommandHandler;
@@ -237,8 +237,12 @@ describe('BurnCommandHandler', () => {
   const validationServiceMock = createMock<ValidationService>();
   const contractServiceMock = createMock<ContractService>();
 
-  const securityEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const sourceEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const securityEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const sourceEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
   const transactionId = TransactionIdFixture.create().id;
   const account = new Account({
     id: HederaIdPropsFixture.create().value,
@@ -250,11 +254,11 @@ describe('BurnCommandHandler', () => {
 
   beforeEach(() => {
     handler = new BurnCommandHandler(
-        securityServiceMock,
-        accountServiceMock,
-        transactionServiceMock,
-        validationServiceMock,
-        contractServiceMock,
+      securityServiceMock,
+      accountServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+      contractServiceMock,
     );
     command = BurnCommandFixture.create();
   });
@@ -270,11 +274,17 @@ describe('BurnCommandHandler', () => {
       transactionServiceMock.getHandler.mockReturnValue(handlerMock);
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
       // @ts-ignore
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(securityEvmAddress);
-      validationServiceMock.checkClearingDeactivated.mockResolvedValue(undefined);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        securityEvmAddress,
+      );
+      validationServiceMock.checkClearingDeactivated.mockResolvedValue(
+        undefined,
+      );
       validationServiceMock.checkCanRedeem.mockResolvedValue(undefined);
       // @ts-ignore
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(sourceEvmAddress);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        sourceEvmAddress,
+      );
       securityServiceMock.get.mockResolvedValueOnce(security);
       validationServiceMock.checkDecimals.mockResolvedValue(undefined);
 
@@ -286,30 +296,44 @@ describe('BurnCommandHandler', () => {
 
       expect(transactionServiceMock.getHandler).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
-      expect(validationServiceMock.checkClearingDeactivated).toHaveBeenCalledWith(command.securityId);
-      expect(validationServiceMock.checkCanRedeem).toHaveBeenCalledWith(
-          command.securityId,
-          account.id.toString(),
-          command.amount,
-          _PARTITION_ID_1,
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        command.securityId,
       );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(command.sourceId);
+      expect(
+        validationServiceMock.checkClearingDeactivated,
+      ).toHaveBeenCalledWith(command.securityId);
+      expect(validationServiceMock.checkCanRedeem).toHaveBeenCalledWith(
+        command.securityId,
+        account.id.toString(),
+        command.amount,
+        _PARTITION_ID_1,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+        command.sourceId,
+      );
       expect(securityServiceMock.get).toHaveBeenCalledWith(command.securityId);
-      expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(security, command.amount);
+      expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
+        security,
+        command.amount,
+      );
 
-      const expectedAmountBd = BigDecimal.fromString(command.amount, security.decimals);
+      const expectedAmountBd = BigDecimal.fromString(
+        command.amount,
+        security.decimals,
+      );
       expect(handlerMock.burn).toHaveBeenCalledWith(
-          sourceEvmAddress,
-          securityEvmAddress,
-          expectedAmountBd,
-          command.securityId,
+        sourceEvmAddress,
+        securityEvmAddress,
+        expectedAmountBd,
+        command.securityId,
       );
     });
 
     it('should throw BurnCommandError if any error occurs', async () => {
       const error = new Error('Something went wrong');
-      validationServiceMock.checkClearingDeactivated.mockRejectedValueOnce(error);
+      validationServiceMock.checkClearingDeactivated.mockRejectedValueOnce(
+        error,
+      );
 
       await expect(handler.execute(command)).rejects.toThrow(BurnCommandError);
     });

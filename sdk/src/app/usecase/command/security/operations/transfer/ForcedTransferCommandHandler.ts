@@ -203,22 +203,25 @@
 
 */
 
-import {ICommandHandler} from '../../../../../../core/command/CommandHandler.js';
-import {CommandHandler} from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import AccountService from '../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
-import {ControllerTransferCommandResponse,} from './ControllerTransferCommand.js';
+import { ControllerTransferCommandResponse } from './ControllerTransferCommand.js';
 import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import {lazyInject} from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import {SecurityRole} from '../../../../../../domain/context/security/SecurityRole.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
-import {_PARTITION_ID_1} from '../../../../../../core/Constants.js';
+import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
-import {ControllerTransferCommandError} from './error/ControllerTransferCommandError';
-import {ForcedTransferCommand, ForcedTransferCommandResponse,} from './ForcedTransferCommand';
-import {ForcedTransferCommandError} from "./error/ForcedTransferCommandError";
+import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
+import {
+  ForcedTransferCommand,
+  ForcedTransferCommandResponse,
+} from './ForcedTransferCommand';
+import { ForcedTransferCommandError } from './error/ForcedTransferCommandError';
 
 @CommandHandler(ForcedTransferCommand)
 export class ForcedTransferCommandHandler

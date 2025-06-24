@@ -419,11 +419,11 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
      */
     function onchainID() external view override returns (address) {
         return _erc3643Storage().onchainID;
-		}
-		
+    }
+
     function compliance() external view override returns (ICompliance) {
         return ICompliance(_erc3643Storage().compliance);
-		}
+    }
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount

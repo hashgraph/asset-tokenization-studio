@@ -205,7 +205,10 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import { ForcedTransferCommandHandler } from './ForcedTransferCommandHandler';
-import { ForcedTransferCommand, ForcedTransferCommandResponse } from './ForcedTransferCommand';
+import {
+  ForcedTransferCommand,
+  ForcedTransferCommandResponse,
+} from './ForcedTransferCommand';
 import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
 
 import AccountService from '../../../../../service/account/AccountService';
@@ -214,16 +217,20 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import ValidationService from '../../../../../service/validation/ValidationService';
 import ContractService from '../../../../../service/contract/ContractService';
 
-import { HederaIdPropsFixture, EvmAddressPropsFixture, TransactionIdFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture';
+import {
+  HederaIdPropsFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture';
 import Account from '../../../../../../domain/context/account/Account';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import TransactionAdapter from '../../../../../../port/out/TransactionAdapter';
-import {Security} from "../../../../../../domain/context/security/Security";
-import {FocedTransferCommandFixture} from "../../../../../../../__tests__/fixtures/transfer/TransferFixture";
-import {_PARTITION_ID_1} from "../../../../../../core/Constants";
-import {ForcedTransferCommandError} from "./error/ForcedTransferCommandError";
+import { Security } from '../../../../../../domain/context/security/Security';
+import { FocedTransferCommandFixture } from '../../../../../../../__tests__/fixtures/transfer/TransferFixture';
+import { _PARTITION_ID_1 } from '../../../../../../core/Constants';
+import { ForcedTransferCommandError } from './error/ForcedTransferCommandError';
 
 describe('ForcedTransferCommandHandler', () => {
   let handler: ForcedTransferCommandHandler;
@@ -241,17 +248,23 @@ describe('ForcedTransferCommandHandler', () => {
     id: HederaIdPropsFixture.create().value,
     evmAddress: EvmAddressPropsFixture.create().value,
   });
-  const securityEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const sourceEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const targetEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const securityEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const sourceEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const targetEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
 
   beforeEach(() => {
     handler = new ForcedTransferCommandHandler(
-        securityServiceMock,
-        accountServiceMock,
-        transactionServiceMock,
-        validationServiceMock,
-        contractServiceMock
+      securityServiceMock,
+      accountServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+      contractServiceMock,
     );
     command = FocedTransferCommandFixture.create();
   });
@@ -269,9 +282,15 @@ describe('ForcedTransferCommandHandler', () => {
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
       securityServiceMock.get.mockResolvedValue(security);
 
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(securityEvmAddress);
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(sourceEvmAddress);
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        securityEvmAddress,
+      );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        sourceEvmAddress,
+      );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        targetEvmAddress,
+      );
 
       validationServiceMock.checkCanTransfer.mockResolvedValue(undefined);
       validationServiceMock.checkRole.mockResolvedValue(undefined);
@@ -286,40 +305,53 @@ describe('ForcedTransferCommandHandler', () => {
       const amountBd = BigDecimal.fromString(command.amount, security.decimals);
 
       expect(securityServiceMock.get).toHaveBeenCalledWith(command.securityId);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(1, command.sourceId);
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(2, command.targetId);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+        1,
+        command.sourceId,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+        2,
+        command.targetId,
+      );
 
       expect(validationServiceMock.checkCanTransfer).toHaveBeenCalledWith(
-          command.securityId,
-          command.targetId,
-          command.amount,
-          command.sourceId,
-          _PARTITION_ID_1,
-          account.id.toString()
+        command.securityId,
+        command.targetId,
+        command.amount,
+        command.sourceId,
+        _PARTITION_ID_1,
+        account.id.toString(),
       );
 
       expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-          SecurityRole._CONTROLLER_ROLE,
-          account.id.toString(),
-          command.securityId
+        SecurityRole._CONTROLLER_ROLE,
+        account.id.toString(),
+        command.securityId,
       );
 
-      expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(security, command.amount);
+      expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
+        security,
+        command.amount,
+      );
 
       expect(handlerMock.forcedTransfer).toHaveBeenCalledWith(
-          securityEvmAddress,
-          sourceEvmAddress,
-          targetEvmAddress,
-          amountBd,
-          command.securityId
+        securityEvmAddress,
+        sourceEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        command.securityId,
       );
     });
 
     it('should throw ForcedTransferCommandError on failure', async () => {
       securityServiceMock.get.mockRejectedValue(new Error('Failed'));
 
-      await expect(handler.execute(command)).rejects.toThrow(ForcedTransferCommandError);
+      await expect(handler.execute(command)).rejects.toThrow(
+        ForcedTransferCommandError,
+      );
     });
   });
 });

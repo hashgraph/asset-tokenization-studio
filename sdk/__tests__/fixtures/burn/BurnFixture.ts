@@ -203,10 +203,10 @@
 
 */
 
-import {HederaIdPropsFixture} from '../shared/DataFixture';
-import {createFixture} from '../config';
-import {BurnRequest} from '../../../src';
-import {BurnCommand} from "../../../src/app/usecase/command/security/operations/burn/BurnCommand";
+import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { createFixture } from '../config';
+import { BurnRequest } from '../../../src';
+import { BurnCommand } from '../../../src/app/usecase/command/security/operations/burn/BurnCommand';
 
 export const BurnRequestFixture = createFixture<BurnRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -216,12 +216,10 @@ export const BurnRequestFixture = createFixture<BurnRequest>((request) => {
   );
 });
 
-export const BurnCommandFixture = createFixture<BurnCommand>(
-    (command) => {
-      command.sourceId.as(() => HederaIdPropsFixture.create().value);
-        command.amount.faker((faker) =>
-            faker.number.int({ min: 1, max: 1000 }).toString(),
-        );
-      command.securityId.as(() => HederaIdPropsFixture.create().value);
-    }
-);
+export const BurnCommandFixture = createFixture<BurnCommand>((command) => {
+  command.sourceId.as(() => HederaIdPropsFixture.create().value);
+  command.amount.faker((faker) =>
+    faker.number.int({ min: 1, max: 1000 }).toString(),
+  );
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
+});

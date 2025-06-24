@@ -258,54 +258,54 @@ describe('AddExternalPauseCommandHandler', () => {
 
   describe('execute', () => {
     it('should successfully add external pause', async () => {
-        contractServiceMock.getContractEvmAddress
-          .mockResolvedValueOnce(evmAddress)
-          .mockResolvedValueOnce(externalEvmAddress);
-        accountServiceMock.getCurrentAccount.mockReturnValue(account);
-        validationServiceMock.checkPause.mockResolvedValue(undefined);
-        validationServiceMock.checkRole.mockResolvedValue(undefined);
-        transactionServiceMock.getHandler().addExternalPause.mockResolvedValue({
-          id: transactionId,
-        });
+      contractServiceMock.getContractEvmAddress
+        .mockResolvedValueOnce(evmAddress)
+        .mockResolvedValueOnce(externalEvmAddress);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+      validationServiceMock.checkPause.mockResolvedValue(undefined);
+      validationServiceMock.checkRole.mockResolvedValue(undefined);
+      transactionServiceMock.getHandler().addExternalPause.mockResolvedValue({
+        id: transactionId,
+      });
 
-        const result = await handler.execute(command);
+      const result = await handler.execute(command);
 
-        expect(result).toBeInstanceOf(AddExternalPauseCommandResponse);
-        expect(result.payload).toBe(true);
-        expect(result.transactionId).toBe(transactionId);
+      expect(result).toBeInstanceOf(AddExternalPauseCommandResponse);
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          2,
-        );
-        expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().addExternalPause,
-        ).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        2,
+      );
+      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().addExternalPause,
+      ).toHaveBeenCalledTimes(1);
 
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-          SecurityRole._PAUSE_MANAGER_ROLE,
-          account.id.toString(),
-          command.securityId,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-          1,
-          command.securityId,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-          2,
-          command.externalPauseAddress,
-        );
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+        SecurityRole._PAUSE_MANAGER_ROLE,
+        account.id.toString(),
+        command.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        1,
+        command.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        2,
+        command.externalPauseAddress,
+      );
 
-        expect(
-          transactionServiceMock.getHandler().addExternalPause,
-        ).toHaveBeenCalledWith(
-          evmAddress,
-          externalEvmAddress,
-          command.securityId,
-        );
+      expect(
+        transactionServiceMock.getHandler().addExternalPause,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        externalEvmAddress,
+        command.securityId,
+      );
     });
   });
 });
