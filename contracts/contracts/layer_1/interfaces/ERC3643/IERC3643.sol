@@ -206,8 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ICompliance} from "./ICompliance.sol";
-import {IIdentityRegistry} from "./IIdentityRegistry.sol";
+import {ICompliance} from './ICompliance.sol';
+import {IIdentityRegistry} from './IIdentityRegistry.sol';
 
 interface IERC3643 {
     struct ERC3643Storage {
@@ -452,12 +452,12 @@ interface IERC3643 {
     ) external returns (bool);
 
     /**
-     * @dev Retrieves recovery status of a wallet
+     * @notice Retrieves recovery status of a wallet
      */
     function isAddressRecovered(address _wallet) external returns (bool);
 
     /**
-     * @dev Checks if an account has the agent role
+     * @notice Checks if an account has the agent role
      */
     function isAgent(address _agent) external view returns (bool);
 
