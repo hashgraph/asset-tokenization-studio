@@ -206,8 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ICompliance} from './ICompliance.sol';
-import {IIdentityRegistry} from './IIdentityRegistry.sol';
+import {ICompliance} from "./ICompliance.sol";
+import {IIdentityRegistry} from "./IIdentityRegistry.sol";
 
 interface IERC3643 {
     struct ERC3643Storage {
@@ -451,6 +451,9 @@ interface IERC3643 {
         address _investorOnchainID
     ) external returns (bool);
 
+    /**
+     * @dev Retrieves recovery status of a wallet
+     */
     function isAddressRecovered(address _wallet) external returns (bool);
 
     /**
