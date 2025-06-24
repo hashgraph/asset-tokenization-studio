@@ -279,7 +279,6 @@ interface IERC3643 {
 
     /**
      * @notice Thrown when calling from a recovered wallet
-     *
      */
     error WalletRecovered();
 
@@ -429,10 +428,23 @@ interface IERC3643 {
      */
     function setAddressFrozen(address _userAddress) external;
 
+    /**
+     * @notice Gives an account the agent role
+     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
+     * @dev Can only be called by the role admin
+     */
     function addAgent(address _agent) external;
 
+    /**
+     * @notice Revokes an account the agent role
+     * @dev Can only be called by the role admin
+     */
     function removeAgent(address _agent) external;
 
+    /**
+     * @notice Transfers the status of a lost wallet to a new wallet
+     * @dev Can only be called by the agent
+     */
     function recoveryAddress(
         address _lostWallet,
         address _newWallet,
@@ -441,6 +453,9 @@ interface IERC3643 {
 
     function isAddressRecovered(address _wallet) external returns (bool);
 
+    /**
+     * @dev Checks if an account has the agent role
+     */
     function isAgent(address _agent) external view returns (bool);
 
     /*

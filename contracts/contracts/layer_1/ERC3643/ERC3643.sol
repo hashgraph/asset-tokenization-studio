@@ -491,11 +491,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit TokensUnfrozen(_userAddress, _amount, _partition);
     }
 
-    /**
-     * @notice Gives an account the agent role
-     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
-     * @dev Can only be called by the role admin
-     */
     function addAgent(
         address _agent
     ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
@@ -503,10 +498,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit AgentAdded(_agent);
     }
 
-    /**
-     * @notice Revokes an account the agent role
-     * @dev Can only be called by the role admin
-     */
     function removeAgent(
         address _agent
     ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
@@ -540,9 +531,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return _getFrozenAmountForAdjusted(_userAddress);
     }
 
-    /**
-     * @dev Checks if an account has the agent role
-     */
     function isAgent(address _agent) external view returns (bool) {
         return _hasRole(_AGENT_ROLE, _agent);
     }
