@@ -254,7 +254,7 @@ describe('GetAccountBalanceQueryHandler', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('execute', () => {
