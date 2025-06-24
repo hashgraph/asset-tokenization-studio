@@ -230,8 +230,8 @@ abstract contract ERC1644StorageWrapper is
         address _from,
         address _to,
         uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
+        bytes memory _data,
+        bytes memory _operatorData
     ) internal {
         _transfer(_from, _to, _value);
         emit ControllerTransfer(

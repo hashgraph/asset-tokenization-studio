@@ -206,7 +206,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {ICompliance} from './ICompliance.sol';
+import {IIdentityRegistry} from './IIdentityRegistry.sol';
+
 interface IERC3643 {
+    struct ERC3643Storage {
+        address onchainID;
+        address identityRegistry;
+        address compliance;
+        mapping(address => uint256) frozenTokens;
+        mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
+        mapping(address => bool) _addressRecovered;
+    }
+
     event UpdatedTokenInformation(
         string indexed newName,
         string indexed newSymbol,
@@ -214,6 +226,10 @@ interface IERC3643 {
         string newVersion,
         address indexed newOnchainID
     );
+
+    event IdentityRegistryAdded(address indexed identityRegistry);
+
+    event ComplianceAdded(address indexed compliance);
 
     event TokensFrozen(
         address indexed account,
@@ -227,6 +243,27 @@ interface IERC3643 {
         bytes32 partition
     );
 
+    /**
+     * @dev Emitted when the agent role is granted
+     *
+     * @param _agent Address of the agent that has been added
+     */
+    event AgentAdded(address indexed _agent);
+
+    /**
+     * @dev Emitted when the agent role is revoked
+     *
+     * @param _agent Address of the agent that has been removed
+     */
+    event AgentRemoved(address indexed _agent);
+
+    /**
+     * @dev Emitted when a wallet is recovered
+     *
+     * @param _lostWallet Address of the lost wallet
+     * @param _newWallet Address of the new wallet
+     * @param _investorOnchainID OnchainID
+     */
     event RecoverySuccess(
         address _lostWallet,
         address _newWallet,
@@ -240,6 +277,9 @@ interface IERC3643 {
         bytes32 partition
     );
 
+    /**
+     * @notice Thrown when calling from a recovered wallet
+     */
     error WalletRecovered();
 
     /**
@@ -256,42 +296,181 @@ interface IERC3643 {
      */
     function setSymbol(string calldata _symbol) external;
 
+    /**
+     * @dev Sets the onchainID of the token to `_onchainID`.
+     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     *
+     * This function should only be callable by an authorized entities
+     *
+     * Returns `true` if the transfer was successful.
+     *
+     * Emits an UpdatedTokenInformation event.
+     */
+    function setOnchainID(address _onchainID) external;
+
+    /**
+     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     * @dev This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the transfer was successful.
+     *
+     * Emits a ControllerTransfer event.
+     */
+    function forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external returns (bool);
+
+    /**
+     * @dev Sets the identity registry contract address.
+     * @dev Mints `_amount` tokens to the address `_to`.
+     *
+     * Emits an IdentityRegistryAdded event.
+     */
+    function setIdentityRegistry(address _identityRegistry) external;
+
+    /**
+     * @dev Mints `_amount` tokens to the address `_to`.
+     *
+     * This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the minting was successful.
+     *
+     * Emits a Issued event.
+     */
+    function mint(address _to, uint256 _amount) external;
+
+    /**
+     * @dev Sets the compliance contract address.
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     *
+     * Reduces total supply.
+     *
+     * Emits a ComplianceAdded event.
+     */
+    function setCompliance(address _compliance) external;
+
+    /**
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     *
+     * This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the burn was successful.
+     *
+     * Emits a redeem event.
+     */
+    function burn(address _userAddress, uint256 _amount) external;
+
+    /**
+     * @dev Returns the onchainID address associated with the token.
+     */
+    function onchainID() external view returns (address);
+
+    /**
+     * @dev Returns the address of the identity registry contract.
+     * @dev Returns the version of the contract as a string.
+     *
+     */
+    function identityRegistry() external view returns (IIdentityRegistry);
+
+    /**
+     * @dev Returns the address of the compliance contract.
+     */
+    function compliance() external view returns (ICompliance);
+
+    /**
+     * @dev Returns the version of the token.
+     */
+    function version() external view returns (string memory);
+
+    /*
+     * @dev Freezes a partial amount of the user's tokens across all partitions.
+     * Emits a TokensFrozen event.
+     */
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount
     ) external;
 
+    /*
+     * @dev Unfreezes a partial amount of the user's previously frozen tokens across all partitions.
+     * Emits a TokensUnfrozen event.
+     */
     function unfreezePartialTokens(
         address _userAddress,
         uint256 _amount
     ) external;
 
+    /*
+     * @dev Freezes a partial amount of the user's tokens within a specific partition.
+     * Emits a TokensFrozen event.
+     */
     function freezePartialTokensByPartition(
         bytes32 _partition,
         address _userAddress,
         uint256 _amount
     ) external;
 
+    /*
+     * @dev Unfreezes a partial amount of the user's previously frozen tokens within a specific partition.
+     * Emits a TokensUnfrozen event.
+     */
     function unfreezePartialTokensByPartition(
         bytes32 _partition,
         address _userAddress,
         uint256 _amount
     ) external;
 
+    /*
+     * @dev Freezes the user's address entirely, disabling all token operations.
+     * Emits a TokensFrozen event.
+     */
     function setAddressFrozen(address _userAddress) external;
 
+    /**
+     * @notice Gives an account the agent role
+     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
+     * @dev Can only be called by the role admin
+     */
+    function addAgent(address _agent) external;
+
+    /**
+     * @notice Revokes an account the agent role
+     * @dev Can only be called by the role admin
+     */
+    function removeAgent(address _agent) external;
+
+    /**
+     * @notice Transfers the status of a lost wallet to a new wallet
+     * @dev Can only be called by the agent
+     */
     function recoveryAddress(
         address _lostWallet,
         address _newWallet,
         address _investorOnchainID
     ) external returns (bool);
 
+    /**
+     * @notice Retrieves recovery status of a wallet
+     */
     function isAddressRecovered(address _wallet) external returns (bool);
 
+    /**
+     * @notice Checks if an account has the agent role
+     */
+    function isAgent(address _agent) external view returns (bool);
+
+    /*
+     * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.
+     */
     function getFrozenTokens(
         address _userAddress
     ) external view returns (uint256);
 
+    /*
+     * @dev Returns the amount of tokens currently frozen for the given user in a specific partition.
+     */
     function getFrozenTokensByPartition(
         bytes32 _partition,
         address _userAddress

@@ -206,18 +206,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
+import {
+    ERC1594StorageWrapper
+} from '../ERC1400/ERC1594/ERC1594StorageWrapper.sol';
 import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../constants/roles.sol';
-import {_FREEZE_MANAGER_ROLE} from '../constants/roles.sol';
+import {
+    _DEFAULT_ADMIN_ROLE,
+    _CONTROLLER_ROLE,
+    _ISSUER_ROLE,
+    _FREEZE_MANAGER_ROLE,
+    _AGENT_ROLE
+} from '../constants/roles.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
-contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
+contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     using Strings for uint256;
 
     address private constant _ONCHAIN_ID = address(0);
@@ -248,7 +258,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             erc20Storage.symbol,
             erc20Storage.decimals,
             _getLatestVersion().toString(),
-            _ONCHAIN_ID
+            _erc3643Storage().onchainID
         );
     }
 
@@ -266,8 +276,153 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             erc20Storage.symbol,
             erc20Storage.decimals,
             _getLatestVersion().toString(),
-            _ONCHAIN_ID
+            _erc3643Storage().onchainID
         );
+    }
+
+    /**
+     * @notice Sets the onchainID address for the token.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
+    function setOnchainID(
+        address _onchainID
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+        ERC20Storage storage erc20Storage = _erc20Storage();
+        _erc3643Storage().onchainID = _onchainID;
+
+        emit UpdatedTokenInformation(
+            erc20Storage.name,
+            erc20Storage.symbol,
+            erc20Storage.decimals,
+            _getLatestVersion().toString(),
+            _onchainID
+        );
+    }
+
+    /**
+     * @notice Sets the identity registry contract address.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
+    function setIdentityRegistry(
+        address _identityRegistry
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _erc3643Storage().identityRegistry = _identityRegistry;
+        emit IdentityRegistryAdded(_identityRegistry);
+    }
+
+    /**
+     * @notice Sets the compliance contract address.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
+    function setCompliance(
+        address _compliance
+    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _erc3643Storage().compliance = _compliance;
+        emit ComplianceAdded(_compliance);
+    }
+
+    /**
+     * @notice Burns a specified amount of tokens from a user address.
+     * @dev Can only be called by the token `owner/issuer` or `controller`.
+     * @param _userAddress The address from which the tokens will be burned.
+     * @param _amount The amount of tokens to burn.
+     */
+    function burn(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_userAddress)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
+    {
+        _redeemFrom(_userAddress, _amount, '');
+    }
+
+    /**
+     * @notice Mints a specified amount of tokens to a user address.
+     * @dev Can only be called by the token `owner/issuer`.
+     * @param _to The address to which the tokens will be minted.
+     * @param _amount The amount of tokens to mint.
+     */
+    function mint(
+        address _to,
+        uint256 _amount
+    )
+        external
+        onlyUnpaused
+        onlyWithinMaxSupply(_amount)
+        onlyRole(_ISSUER_ROLE)
+        onlyListedAllowed(_to)
+        onlyWithoutMultiPartition
+        onlyIssuable
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+    {
+        _issue(_to, _amount, '');
+    }
+
+    /**
+     * @notice Transfers tokens from one address to another.
+     * @dev Can only be called by the token `owner/issuer` or `controller`.
+     * @param _from The address from which the tokens will be transferred.
+     * @param _to The address to which the tokens will be transferred.
+     * @param _amount The amount of tokens to transfer.
+     */
+    function forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    )
+        external
+        onlyWithoutMultiPartition
+        onlyRole(_CONTROLLER_ROLE)
+        onlyControllable
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_from)
+        onlyListedAllowed(_to)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool)
+    {
+        _controllerTransfer(_from, _to, _amount, '', '');
+        return true;
+    }
+
+    /**
+     * @notice Retrieves the latest version of the contract.
+     * @dev The version is represented as a string.
+     */
+    function version() external view returns (string memory) {
+        return Strings.toString(_getLatestVersion());
+    }
+
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
+    function identityRegistry()
+        external
+        view
+        override
+        returns (IIdentityRegistry)
+    {
+        return IIdentityRegistry(_erc3643Storage().identityRegistry);
+    }
+
+    /**
+     * @notice Retrieves the onchainID address associated with the token.
+     */
+    function onchainID() external view override returns (address) {
+        return _erc3643Storage().onchainID;
+    }
+
+    function compliance() external view override returns (ICompliance) {
+        return ICompliance(_erc3643Storage().compliance);
     }
 
     function freezePartialTokens(
@@ -279,6 +434,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         onlyUnpaused
         onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
+        onlyWithoutMultiPartition
     {
         _freezeTokens(_userAddress, _amount);
         emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
@@ -293,6 +449,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         onlyUnpaused
         onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
+        onlyWithoutMultiPartition
     {
         _checkUnfreezeAmount(_DEFAULT_PARTITION, _userAddress, _amount);
         _unfreezeTokens(_userAddress, _amount);
@@ -334,12 +491,25 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         emit TokensUnfrozen(_userAddress, _amount, _partition);
     }
 
-    //TODO: add onlyAgent
+    function addAgent(
+        address _agent
+    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+        _addAgent(_agent);
+        emit AgentAdded(_agent);
+    }
+
+    function removeAgent(
+        address _agent
+    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+        _removeAgent(_agent);
+        emit AgentRemoved(_agent);
+    }
+
     function recoveryAddress(
         address _lostWallet,
         address _newWallet,
         address _investorOnchainID
-    ) external returns (bool) {
+    ) external onlyRole(_AGENT_ROLE) returns (bool) {
         emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return _recoveryAddress(_lostWallet, _newWallet);
     }
@@ -352,13 +522,17 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         bytes32 _partition,
         address _userAddress
     ) external view override returns (uint256) {
-        return _getFrozenAmountForByPartition(_partition, _userAddress);
+        return _getFrozenAmountForByPartitionAdjusted(_partition, _userAddress);
     }
 
     function getFrozenTokens(
         address _userAddress
     ) external view override returns (uint256) {
-        return _getFrozenAmountFor(_userAddress);
+        return _getFrozenAmountForAdjusted(_userAddress);
+    }
+
+    function isAgent(address _agent) external view returns (bool) {
+        return _hasRole(_AGENT_ROLE, _agent);
     }
 
     function getStaticResolverKey()
@@ -376,9 +550,23 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](11);
+        staticFunctionSelectors_ = new bytes4[](26);
         uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .forcedTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .identityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setCompliance
+            .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .freezePartialTokens
@@ -402,6 +590,15 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             .setAddressFrozen
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
+            .setIdentityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
             .recoveryAddress
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
@@ -409,6 +606,9 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             .selector;
     }
 
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
     function getStaticInterfaceIds()
         external
         pure
@@ -425,7 +625,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         address _userAddress,
         uint256 _amount
     ) private view {
-        uint256 frozenAmount = _getFrozenAmountForByPartition(
+        uint256 frozenAmount = _getFrozenAmountForByPartitionAdjusted(
             _partition,
             _userAddress
         );

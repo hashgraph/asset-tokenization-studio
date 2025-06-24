@@ -206,21 +206,45 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
-import {_FREEZE_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {_ERC3643_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {_AGENT_ROLE} from '../constants/roles.sol';
+import {
+    IAccessControl
+} from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
 
 abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
-    struct FreezeStorage {
-        mapping(address => uint256) _frozenTokens;
-        mapping(address => mapping(bytes32 => uint256)) _frozenTokensByPartition;
-        mapping(address => bool) _addressRecovered;
-    }
-
     modifier checkRecoveredAddress(address _sender) {
         _checkRecoveredAddress(_sender);
         _;
+    }
+
+    function _addAgent(address _agent) internal {
+        if (!_grantRole(_AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
+        }
+    }
+
+    function _removeAgent(address _agent) internal {
+        if (!_revokeRole(_AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
+        }
+    }
+
+    function _getFrozenAmountFor(
+        address _userAddress
+    ) internal view returns (uint256) {
+        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        return st.frozenTokens[_userAddress];
+    }
+
+    function _getFrozenAmountForByPartition(
+        bytes32 _partition,
+        address _userAddress
+    ) internal view returns (uint256) {
+        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        return st.frozenTokensByPartition[_userAddress][_partition];
     }
 
     function _checkRecoveredAddress(address _sender) internal view {
@@ -228,33 +252,18 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
     }
 
     function _isRecovered(address _sender) internal view returns (bool) {
-        return _getFreezeStorage()._addressRecovered[_sender];
+        return _erc3643Storage()._addressRecovered[_sender];
     }
 
-    function _getFrozenAmountFor(
-        address _userAddress
-    ) internal view returns (uint256) {
-        FreezeStorage storage freeze_ = _getFreezeStorage();
-        return freeze_._frozenTokens[_userAddress];
-    }
-
-    function _getFrozenAmountForByPartition(
-        bytes32 _partition,
-        address _userAddress
-    ) internal view returns (uint256) {
-        FreezeStorage storage freeze_ = _getFreezeStorage();
-        return freeze_._frozenTokensByPartition[_userAddress][_partition];
-    }
-
-    function _getFreezeStorage()
+    function _erc3643Storage()
         internal
         pure
-        returns (FreezeStorage storage freeze_)
+        returns (IERC3643.ERC3643Storage storage erc3643Storage_)
     {
-        bytes32 position = _FREEZE_STORAGE_POSITION;
+        bytes32 position = _ERC3643_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            freeze_.slot := position
+            erc3643Storage_.slot := position
         }
     }
 }

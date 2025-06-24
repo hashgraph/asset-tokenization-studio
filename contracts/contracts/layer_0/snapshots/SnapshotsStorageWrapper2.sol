@@ -553,7 +553,6 @@ abstract contract SnapshotsStorageWrapper2 is
                 _getFrozenAmountForByPartitionAdjusted(_partition, _tokenHolder)
             );
     }
-
     function _clearedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
