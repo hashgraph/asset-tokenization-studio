@@ -351,6 +351,9 @@ import ClearingTransferViewModel from '../response/ClearingTransferViewModel.js'
 import { GetClearingCreateHoldForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery.js';
 import { GetClearingRedeemForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery.js';
 import { GetClearingTransferForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery.js';
+import { SetNameRequest, SetSymbolRequest } from '../request/index.js';
+import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand.js';
+import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand.js';
 import RecoveryAddressRequest from '../request/security/recovery/RecoveryAddressRequest.js';
 import { RecoveryAddressCommand } from 'app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand.js';
 import IsAddressRecoveredRequest from '../request/security/recovery/IsAddressRecoveredRequest.js';
@@ -518,6 +521,12 @@ interface ISecurityInPort {
   operatorClearingTransferByPartition(
     request: OperatorClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }>;
+  setName(
+    request: SetNameRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  setSymbol(
+    request: SetSymbolRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
   recoveryAddress(
     request: RecoveryAddressRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
@@ -1823,6 +1832,28 @@ class SecurityInPort implements ISecurityInPort {
         request.targetId,
         request.expirationDate,
       ),
+    );
+  }
+
+  @LogError
+  async setName(
+    request: SetNameRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, name } = request;
+    ValidatedRequest.handleValidation('SetNameRequest', request);
+
+    return await this.commandBus.execute(new SetNameCommand(securityId, name));
+  }
+
+  @LogError
+  async setSymbol(
+    request: SetSymbolRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, symbol } = request;
+    ValidatedRequest.handleValidation('SetSymbolRequest', request);
+
+    return await this.commandBus.execute(
+      new SetSymbolCommand(securityId, symbol),
     );
   }
 

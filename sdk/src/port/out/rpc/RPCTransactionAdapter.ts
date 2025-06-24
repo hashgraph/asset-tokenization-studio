@@ -347,6 +347,8 @@ import {
   CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
   ACTIVATE_INTERNAL_KYC_GAS,
   DEACTIVATE_INTERNAL_KYC_GAS,
+  SET_NAME_GAS,
+  SET_SYMBOL_GAS,
   EVM_ZERO_ADDRESS,
   RECOVERY_ADDRESS_GAS,
 } from '../../../core/Constants.js';
@@ -3247,6 +3249,40 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).deactivateInternalKyc({
         gasLimit: DEACTIVATE_INTERNAL_KYC_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setName(
+    security: EvmAddress,
+    name: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting name to ${security.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setName(name, {
+        gasLimit: SET_NAME_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setSymbol(
+    security: EvmAddress,
+    symbol: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting symbol to ${security.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setName(symbol, {
+        gasLimit: SET_SYMBOL_GAS,
       }),
       this.networkService.environment,
     );
