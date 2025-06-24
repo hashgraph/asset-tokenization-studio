@@ -342,6 +342,35 @@ interface IERC3643 {
      */
     function burn(address _userAddress, uint256 _amount) external;
 
+    /*
+     * @dev Freezes a partial amount of the user's tokens across all partitions.
+     * Emits a TokensFrozen event.
+     */
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    ) external;
+
+    /*
+     * @dev Unfreezes a partial amount of the user's previously frozen tokens across all partitions.
+     * Emits a TokensUnfrozen event.
+     */
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    ) external;
+
+    /*
+     * @dev Freezes the user's address entirely, disabling all token operations.
+     * Emits a TokensFrozen event.
+     */
+    function setAddressFrozen(address _userAddress) external;
+
+    function addAgent(address _agent) external;
+
+    function removeAgent(address _agent) external;
+
+    function isAgent(address _agent) external view returns (bool);
     /**
      * @dev Returns the onchainID address associated with the token.
      */
@@ -365,67 +394,9 @@ interface IERC3643 {
     function version() external view returns (string memory);
 
     /*
-     * @dev Freezes a partial amount of the user's tokens across all partitions.
-     * Emits a TokensFrozen event.
-     */
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Unfreezes a partial amount of the user's previously frozen tokens across all partitions.
-     * Emits a TokensUnfrozen event.
-     */
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Freezes a partial amount of the user's tokens within a specific partition.
-     * Emits a TokensFrozen event.
-     */
-    function freezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Unfreezes a partial amount of the user's previously frozen tokens within a specific partition.
-     * Emits a TokensUnfrozen event.
-     */
-    function unfreezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Freezes the user's address entirely, disabling all token operations.
-     * Emits a TokensFrozen event.
-     */
-    function setAddressFrozen(address _userAddress) external;
-
-    function addAgent(address _agent) external;
-
-    function removeAgent(address _agent) external;
-
-    function isAgent(address _agent) external view returns (bool);
-
-    /*
      * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.
      */
     function getFrozenTokens(
-        address _userAddress
-    ) external view returns (uint256);
-
-    /*
-     * @dev Returns the amount of tokens currently frozen for the given user in a specific partition.
-     */
-    function getFrozenTokensByPartition(
-        bytes32 _partition,
         address _userAddress
     ) external view returns (uint256);
 }

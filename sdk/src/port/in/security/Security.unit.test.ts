@@ -235,6 +235,7 @@ import {
   GetControlListCountRequest,
   GetControlListMembersRequest,
   GetControlListTypeRequest,
+  GetFrozenPartialTokensRequest,
   GetHeldAmountForByPartitionRequest,
   GetHeldAmountForRequest,
   GetHoldCountForByPartitionRequest,
@@ -277,6 +278,7 @@ import {
   SetSymbolRequest,
   TransferAndLockRequest,
   TransferRequest,
+  UnfreezePartialTokensRequest,
 } from '../request';
 import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
 import LogService from '../../../app/service/log/LogService';
@@ -468,6 +470,22 @@ import { SetComplianceCommand } from '../../../app/usecase/command/security/comp
 import { IdentityRegistryQuery } from '../../../app/usecase/query/security/identityRegistry/IdentityRegistryQuery';
 import { ComplianceQuery } from '../../../app/usecase/query/security/compliance/compliance/ComplianceQuery';
 import { OnchainIDQuery } from '../../../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
+import FreezePartialTokensRequest from '../request/security/operations/erc3643/FreezePartialTokensRequest';
+import {
+  FreezePartialTokensRequestFixture,
+  GetFrozenPartialTokensQueryFixture,
+  UnfreezePartialTokensRequestFixture,
+} from '../../../../__tests__/fixtures/erc3643/ERC3643Fixture';
+import {
+  FreezePartialTokensCommand,
+  FreezePartialTokensResponse,
+} from '../../../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand';
+import {
+  UnfreezePartialTokensCommand,
+  UnfreezePartialTokensResponse,
+} from '../../../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand';
+
+import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -542,6 +560,9 @@ describe('Security', () => {
   let complianceRequest: ComplianceRequest;
   let identityRegistryRequest: IdentityRegistryRequest;
   let onchainIDRequest: OnchainIDRequest;
+  let freezePartialTokensRequest: FreezePartialTokensRequest;
+  let unfreezePartialTokensRequest: UnfreezePartialTokensRequest;
+  let getFrozenPartialTokensRequest: GetFrozenPartialTokensRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -7057,7 +7078,6 @@ describe('Security', () => {
       );
       expect(result).toEqual(expectedResponse);
     });
-
     it('should throw an error if command execution fails', async () => {
       const error = new Error('Command execution failed');
       commandBusMock.execute.mockRejectedValue(error);
@@ -7078,14 +7098,12 @@ describe('Security', () => {
         ),
       );
     });
-
     it('should throw error if securityId is invalid', async () => {
       setSymbolRequest = new SetSymbolRequest({
         ...SetSymbolRequestFixture.create({
           securityId: 'invalid',
         }),
       });
-
       await expect(Security.setSymbol(setSymbolRequest)).rejects.toThrow(
         ValidationError,
       );
@@ -7486,6 +7504,237 @@ describe('Security', () => {
       await expect(Security.onchainID(onchainIDRequest)).rejects.toThrow(
         ValidationError,
       );
+    });
+  });
+  describe('FreezePartialTokens', () => {
+    freezePartialTokensRequest = new FreezePartialTokensRequest(
+      FreezePartialTokensRequestFixture.create(),
+    );
+    const expectedResponse = new FreezePartialTokensResponse(
+      true,
+      transactionId,
+    );
+    it('should freeze partial tokens sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.freezePartialTokens(
+        freezePartialTokensRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'FreezePartialTokensRequest',
+        freezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new FreezePartialTokensCommand(
+          freezePartialTokensRequest.securityId,
+          freezePartialTokensRequest.amount,
+          freezePartialTokensRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.freezePartialTokens(freezePartialTokensRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'FreezePartialTokensRequest',
+        freezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new FreezePartialTokensCommand(
+          freezePartialTokensRequest.securityId,
+          freezePartialTokensRequest.amount,
+          freezePartialTokensRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      freezePartialTokensRequest = new FreezePartialTokensRequest({
+        ...FreezePartialTokensRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.freezePartialTokens(freezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is empty', async () => {
+      freezePartialTokensRequest = new FreezePartialTokensRequest({
+        ...FreezePartialTokensRequestFixture.create({
+          targetId: '',
+        }),
+      });
+
+      await expect(
+        Security.freezePartialTokens(freezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('UnfreezePartialTokens', () => {
+    unfreezePartialTokensRequest = new UnfreezePartialTokensRequest(
+      FreezePartialTokensRequestFixture.create(),
+    );
+    const expectedResponse = new UnfreezePartialTokensResponse(
+      true,
+      transactionId,
+    );
+    it('should unfreeze partial tokens sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.unfreezePartialTokens(
+        unfreezePartialTokensRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'UnfreezePartialTokensRequest',
+        unfreezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UnfreezePartialTokensCommand(
+          unfreezePartialTokensRequest.securityId,
+          unfreezePartialTokensRequest.amount,
+          unfreezePartialTokensRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.unfreezePartialTokens(unfreezePartialTokensRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'UnfreezePartialTokensRequest',
+        unfreezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UnfreezePartialTokensCommand(
+          unfreezePartialTokensRequest.securityId,
+          unfreezePartialTokensRequest.amount,
+          unfreezePartialTokensRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      unfreezePartialTokensRequest = new UnfreezePartialTokensRequest({
+        ...UnfreezePartialTokensRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.unfreezePartialTokens(unfreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is empty', async () => {
+      unfreezePartialTokensRequest = new UnfreezePartialTokensRequest({
+        ...UnfreezePartialTokensRequestFixture.create({
+          targetId: '',
+        }),
+      });
+
+      await expect(
+        Security.unfreezePartialTokens(unfreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getFrozenPartialTokens', () => {
+    getFrozenPartialTokensRequest = new GetFrozenPartialTokensRequest(
+      GetFrozenPartialTokensQueryFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: new BigDecimal(BigNumber.from(1)),
+    };
+    it('should get hold count for by partition successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.getFrozenPartialTokens(
+        getFrozenPartialTokensRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetFrozenPartialTokensRequest',
+        getFrozenPartialTokensRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetFrozenPartialTokensQuery(
+          getFrozenPartialTokensRequest.securityId,
+          getFrozenPartialTokensRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          value: expectedResponse.payload.toString(),
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.getFrozenPartialTokens(getFrozenPartialTokensRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetFrozenPartialTokensRequest',
+        getFrozenPartialTokensRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetFrozenPartialTokensQuery(
+          getFrozenPartialTokensRequest.securityId,
+          getFrozenPartialTokensRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getFrozenPartialTokensRequest = new GetFrozenPartialTokensRequest({
+        ...GetFrozenPartialTokensQueryFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.getFrozenPartialTokens(getFrozenPartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if targetId is invalid', async () => {
+      getFrozenPartialTokensRequest = new GetFrozenPartialTokensRequest({
+        ...GetFrozenPartialTokensQueryFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.getFrozenPartialTokens(getFrozenPartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
     });
   });
 });

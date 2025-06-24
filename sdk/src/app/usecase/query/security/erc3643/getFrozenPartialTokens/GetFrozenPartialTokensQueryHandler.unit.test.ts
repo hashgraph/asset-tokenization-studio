@@ -203,166 +203,111 @@
 
 */
 
-export const COMMAND_METADATA = '__command__';
-export const COMMAND_HANDLER_METADATA = '__commandHandler__';
-export const QUERY_METADATA = '__query__';
-export const QUERY_HANDLER_METADATA = '__queryHandler__';
-export const TOKEN_CREATION_COST_HBAR = 80;
-export const EVM_ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const HBAR_DECIMALS = 8;
-export const CREATE_EQUITY_ST_GAS = 15000000;
-export const CREATE_BOND_ST_GAS = 15000000;
-export const CASHIN_GAS = 1200000;
-export const BURN_GAS = 700000;
-export const WIPE_GAS = 700000;
-export const RESCUE_GAS = 700000;
-export const RESCUE_HBAR_GAS = 700000;
-export const FREEZE_GAS = 650000;
-export const UNFREEZE_GAS = 650000;
-export const GRANT_KYC_GAS = 650000;
-export const REVOKE_KYC_GAS = 650000;
-export const REDEEM_GAS = 650000;
-export const PROTECTED_REDEEM_GAS = 7000000;
-export const PAUSE_GAS = 15000000;
-export const UNPAUSE_GAS = 650000;
-export const TAKE_SNAPSHOT_GAS = 2000000;
-export const DELETE_GAS = 650000;
-export const GRANT_ROLES_GAS = 2000000;
-export const REVOKE_ROLES_GAS = 2000000;
-export const RENOUNCE_ROLES_GAS = 2000000;
-export const MAX_ROLES_GAS = 15000000;
-export const INCREASE_SUPPLY_GAS = 500000;
-export const DECREASE_SUPPLY_GAS = 500000;
-export const RESET_SUPPLY_GAS = 450000;
-export const UPDATE_RESERVE_ADDRESS_GAS = 450000;
-export const UPDATE_TOKEN_GAS = 1400000;
-export const UPDATE_RESERVE_AMOUNT_GAS = 400000;
-export const CHANGE_PROXY_OWNER_GAS = 500000;
-export const ACCEPT_PROXY_OWNER_GAS = 400000;
-export const UPDATE_PROXY_IMPLEMENTATION_GAS = 400000;
-export const ISSUE_GAS = 7000000;
-export const CONTROLLER_TRANSFER_GAS = 7000000;
-export const CONTROLLER_REDEEM_GAS = 7000000;
-export const SET_DIVIDENDS_GAS = 7000000;
-export const SET_VOTING_RIGHTS_GAS = 7000000;
-export const SET_COUPON_GAS = 7000000;
-export const SET_DOCUMENT_GAS = 7000000;
-export const REMOVE_DOCUMENT_GAS = 7000000;
-export const AUTHORIZE_OPERATOR_GAS = 7000000;
-export const REVOKE_OPERATOR_GAS = 7000000;
-export const TRANSFER_OPERATOR_GAS = 7000000;
-export const TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS = 7000000;
-export const SET_MAX_SUPPLY_GAS = 7000000;
-export const PROTECT_PARTITION_GAS = 15000000;
-export const UNPROTECT_PARTITION_GAS = 650000;
+import { createMock } from '@golevelup/ts-jest';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import {
+  GetFrozenPartialTokensQuery,
+  GetFrozenPartialTokensQueryResponse,
+} from './GetFrozenPartialTokensQuery.js';
+import { GetFrozenPartialTokensQueryHandler } from './GetFrozenPartialTokensQueryHandler.js';
 
-export const BALANCE_OF_GAS = 1200000;
-export const GET_RESERVE_ADDRESS_GAS = 1200000;
-export const GET_RESERVE_AMOUNT_GAS = 1200000;
-export const GET_ROLES_GAS = 1200000;
-export const HAS_ROLE_GAS = 1200000;
-export const GET_SUPPLY_ALLOWANCE_GAS = 1200000;
-export const IS_UNLIMITED_ALLOWANCE_GAS = 1200000;
+import { GetFrozenPartialTokensQueryError } from './error/GetFrozenPartialTokensQueryError.js';
+import { GetFrozenPartialTokensQueryFixture } from '../../../../../../../__tests__/fixtures/erc3643/ERC3643Fixture.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 
-export const TRANSFER_GAS = 1200000;
-export const PROTECTED_TRANSFER_GAS = 7000000;
-export const TRANSFER_AND_LOCK_GAS = 1200000;
-export const PROTECTED_TRANSFER_AND_LOCK_GAS = 7000000;
+describe('GetFrozenPartialTokensQueryHandler', () => {
+  let handler: GetFrozenPartialTokensQueryHandler;
+  let query: GetFrozenPartialTokensQuery;
 
-export const ADD_TO_CONTROL_LIST_GAS = 1200000;
-export const REMOVE_FROM_CONTROL_LIST_GAS = 1200000;
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
+  const securityServiceMock = createMock<SecurityService>();
 
-export const LOCK_GAS = 7000000;
-export const RELEASE_GAS = 7000000;
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const targetEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const security = new Security(SecurityPropsFixture.create());
 
-export const EXECUTE_HOLD_BY_PARTITION_GAS = 7000000;
+  beforeEach(() => {
+    handler = new GetFrozenPartialTokensQueryHandler(
+      securityServiceMock,
+      queryAdapterServiceMock,
+      accountServiceMock,
+      contractServiceMock,
+    );
+    query = GetFrozenPartialTokensQueryFixture.create();
+  });
 
-export const UPDATE_CONFIG_VERSION_GAS = 9000000;
-export const UPDATE_CONFIG_GAS = 9000000;
-export const UPDATE_RESOLVER_GAS = 9000000;
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-export const UPDATE_MATURITY_DATE_GAS = 7000000;
+  describe('execute', () => {
+    it('throws GetFrozenPartialTokensQueryError when query fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
 
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS = 7000000;
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
-export const CREATE_HOLD_GAS = 7000000;
-export const CREATE_HOLD_FROM_GAS = 7000000;
-export const CONTROLLER_CREATE_HOLD_GAS = 7000000;
-export const PROTECTED_CREATE_HOLD_GAS = 7000000;
-export const RELEASE_HOLD_GAS = 7000000;
-export const RECLAIM_HOLD_GAS = 7000000;
+      const resultPromise = handler.execute(query);
 
-export const ADD_ISSUER_GAS = 7000000;
-export const SET_REVOCATION_REGISTRY_GAS = 7000000;
-export const REMOVE_ISSUER_GAS = 7000000;
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        GetFrozenPartialTokensQueryError,
+      );
 
-export const ACTIVATE_CLEARING_GAS = 7000000;
-export const DEACTIVATE_CLEARING_GAS = 7000000;
-export const CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const CLEARING_TRANSFER_FROM_BY_PARTITION = 7000000;
-export const PROTECTED_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const APPROVE_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const CANCEL_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const RECLAIM_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const CLEARING_REDEEM_BY_PARTITION = 7000000;
-export const CLEARING_REDEEM_FROM_BY_PARTITION = 7000000;
-export const PROTECTED_CLEARING_REDEEM_BY_PARTITION = 7000000;
-export const CLEARING_CREATE_HOLD_BY_PARTITION = 7000000;
-export const CLEARING_CREATE_HOLD_FROM_BY_PARTITION = 7000000;
-export const PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION = 7000000;
-export const OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION = 7000000;
-export const OPERATOR_CLEARING_REDEEM_BY_PARTITION = 7000000;
-export const OPERATOR_CLEARING_TRANSFER_BY_PARTITION = 7000000;
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while querying frozen partial tokens: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtQueryError,
+      });
+    });
 
-export const UPDATE_EXTERNAL_PAUSES_GAS = 7000000;
-export const ADD_EXTERNAL_PAUSE_GAS = 7000000;
-export const REMOVE_EXTERNAL_PAUSE_GAS = 7000000;
+    it('should successfully get hold count for by partition', async () => {
+      const amount = 1;
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      securityServiceMock.get.mockResolvedValue(security);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        targetEvmAddress,
+      );
+      queryAdapterServiceMock.getFrozenPartialTokens.mockResolvedValueOnce(
+        amount,
+      );
 
-export const SET_PAUSED_MOCK_GAS = 7000000;
+      const result = await handler.execute(query);
 
-export const CREATE_EXTERNAL_PAUSE_MOCK_GAS = 7000000;
-
-export const UPDATE_EXTERNAL_CONTROL_LISTS_GAS = 7000000;
-export const ADD_EXTERNAL_CONTROL_LIST_GAS = 7000000;
-export const REMOVE_EXTERNAL_CONTROL_LIST_GAS = 7000000;
-export const ACTIVATE_INTERNAL_KYC_GAS = 7000000;
-export const DEACTIVATE_INTERNAL_KYC_GAS = 7000000;
-
-export const ADD_TO_BLACK_LIST_MOCK_GAS = 7000000;
-export const ADD_TO_WHITE_LIST_MOCK_GAS = 7000000;
-export const REMOVE_FROM_BLACK_LIST_MOCK_GAS = 7000000;
-export const REMOVE_FROM_WHITE_LIST_MOCK_GAS = 7000000;
-export const CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS = 7000000;
-export const CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS = 7000000;
-
-export const UPDATE_EXTERNAL_KYC_LISTS_GAS = 7000000;
-export const ADD_EXTERNAL_KYC_LIST_GAS = 7000000;
-export const REMOVE_EXTERNAL_KYC_LIST_GAS = 7000000;
-export const GRANT_KYC_MOCK_GAS = 7000000;
-export const REVOKE_KYC_MOCK_GAS = 7000000;
-export const CREATE_EXTERNAL_KYC_LIST_MOCK_GAS = 7000000;
-
-export const SET_NAME_GAS = 7000000;
-export const SET_SYMBOL_GAS = 7000000;
-export const FREEZE_PARTIAL_TOKENS_GAS = 7000000;
-export const UNFREEZE_PARTIAL_TOKENS_GAS = 7000000;
-export const SET_ONCHAIN_ID_GAS = 700000;
-export const SET_IDENTITY_REGISTRY_GAS = 700000;
-export const SET_COMPLIANCE_GAS = 700000;
-
-export const _PARTITION_ID_1 =
-  '0x0000000000000000000000000000000000000000000000000000000000000001';
-export const EMPTY_BYTES = '0x';
-
-export const SET_DIVIDEND_EVENT = 'DividendSet';
-export const SET_VOTING_RIGHTS_EVENT = 'VotingSet';
-export const SET_COUPON_EVENT = 'CouponSet';
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT =
-  'ScheduledBalanceAdjustmentSet';
-
-// * Generic
-export const BYTES_32_LENGTH = 32 * 2;
-export const ADDRESS_LENGTH = 40;
-
-// * Events from creation
-export const TOPICS_IN_FACTORY_RESULT = 6;
+      expect(result).toBeInstanceOf(GetFrozenPartialTokensQueryResponse);
+      expect(result.payload).toStrictEqual(
+        BigDecimal.fromStringFixed(amount.toString(), security.decimals),
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+        query.targetId,
+      );
+      expect(
+        queryAdapterServiceMock.getFrozenPartialTokens,
+      ).toHaveBeenCalledWith(evmAddress, targetEvmAddress);
+    });
+  });
+});

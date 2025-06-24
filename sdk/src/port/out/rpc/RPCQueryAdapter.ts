@@ -1838,4 +1838,20 @@ export class RPCQueryAdapter {
       address.toString(),
     ).compliance();
   }
+
+  async getFrozenPartialTokens(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting frozen partial tokens for account ${targetId}} for the mock contract ${address.toString()}`,
+    );
+
+    const frozenTokens = await this.connect(
+      ERC3643__factory,
+      address.toString(),
+    ).getFrozenTokens(targetId.toString());
+
+    return frozenTokens.toNumber();
+  }
 }

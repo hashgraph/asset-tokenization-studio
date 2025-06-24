@@ -405,6 +405,9 @@ import { OnchainIDQueryHandler } from '../app/usecase/query/security/tokenMetada
 import { IdentityRegistryQueryHandler } from '../app/usecase/query/security/identityRegistry/IdentityRegistryQueryHandler.js';
 import { ComplianceQueryHandler } from '../app/usecase/query/security/compliance/compliance/ComplianceQueryHandler.js';
 import { SetOnchainIDCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommandHandler.js';
+import { FreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommandHandler.js';
+import { UnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommandHandler.js';
+import { GetFrozenPartialTokensQueryHandler } from '../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -789,6 +792,14 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetOnchainIDCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: FreezePartialTokensCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UnfreezePartialTokensCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [
@@ -1131,6 +1142,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: ComplianceQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetFrozenPartialTokensQueryHandler,
   },
 ];
 

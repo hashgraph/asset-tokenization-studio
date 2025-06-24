@@ -338,6 +338,8 @@ import {
   DEACTIVATE_INTERNAL_KYC_GAS,
   SET_NAME_GAS,
   SET_SYMBOL_GAS,
+  UNFREEZE_PARTIAL_TOKENS_GAS,
+  FREEZE_PARTIAL_TOKENS_GAS,
   SET_ONCHAIN_ID_GAS,
   SET_IDENTITY_REGISTRY_GAS,
   SET_COMPLIANCE_GAS,
@@ -3714,14 +3716,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'setName';
     LogService.logTrace(`Setting name to ${security.toString()}`);
-
     const factoryInstance = new ERC3643__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
       [name],
     );
-
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -3741,18 +3741,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'setSymbol';
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
-
     const factoryInstance = new ERC3643__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
       [symbol],
     );
-
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
-
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(SET_SYMBOL_GAS)
@@ -3837,6 +3834,62 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(SET_COMPLIANCE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async freezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'freezePartialTokens';
+    LogService.logTrace(
+      `Freezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
+    );
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString(), amount.toBigNumber()],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(FREEZE_PARTIAL_TOKENS_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async unfreezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'unfreezePartialTokens';
+    LogService.logTrace(
+      `Unfreezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
+    );
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString(), amount.toBigNumber()],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UNFREEZE_PARTIAL_TOKENS_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
