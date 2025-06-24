@@ -3291,7 +3291,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async setOnchainID(
     security: EvmAddress,
-    onchainID: string,
+    onchainID: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting onchainID to ${security.toString()}`);
 
@@ -3299,7 +3299,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await ERC3643__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).setOnchainID(onchainID, {
+      ).setOnchainID(onchainID.toString(), {
         gasLimit: SET_ONCHAIN_ID_GAS,
       }),
       this.networkService.environment,
@@ -3308,7 +3308,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async setIdentityRegistry(
     security: EvmAddress,
-    identityRegistry: string,
+    identityRegistry: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting Identity Registry to ${security.toString()}`);
 
@@ -3316,7 +3316,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await ERC3643__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).setIdentityRegistry(identityRegistry, {
+      ).setIdentityRegistry(identityRegistry.toString(), {
         gasLimit: SET_IDENTITY_REGISTRY_GAS,
       }),
       this.networkService.environment,
@@ -3325,7 +3325,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async setCompliance(
     security: EvmAddress,
-    compliance: string,
+    compliance: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting Compliance to ${security.toString()}`);
 
@@ -3333,7 +3333,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await ERC3643__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).setCompliance(compliance, {
+      ).setCompliance(compliance.toString(), {
         gasLimit: SET_COMPLIANCE_GAS,
       }),
       this.networkService.environment,

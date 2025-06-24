@@ -203,6 +203,10 @@ describe('SetIdentityRegistryCommandHandler', () => {
   const contractServiceMock = createMock<ContractService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const identityRegistryEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+
   const account = new Account({
     id: HederaIdPropsFixture.create().value,
     evmAddress: EvmAddressPropsFixture.create().value,
@@ -243,9 +247,9 @@ describe('SetIdentityRegistryCommandHandler', () => {
       });
     });
     it('should successfully set identity registry', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
+      contractServiceMock.getContractEvmAddress
+        .mockResolvedValueOnce(evmAddress)
+        .mockResolvedValueOnce(identityRegistryEvmAddress);
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
       validationServiceMock.checkPause.mockResolvedValue(undefined);
       validationServiceMock.checkRole.mockResolvedValue(undefined);
@@ -262,7 +266,7 @@ describe('SetIdentityRegistryCommandHandler', () => {
       expect(result.transactionId).toBe(transactionId);
 
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
+        2,
       );
       expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
       expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
@@ -279,15 +283,20 @@ describe('SetIdentityRegistryCommandHandler', () => {
         account.id.toString(),
         command.securityId,
       );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        1,
         command.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        2,
+        command.identityRegistry,
       );
 
       expect(
         transactionServiceMock.getHandler().setIdentityRegistry,
       ).toHaveBeenCalledWith(
         evmAddress,
-        command.identityRegistry,
+        identityRegistryEvmAddress,
         command.securityId,
       );
     });

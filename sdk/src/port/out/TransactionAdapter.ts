@@ -937,7 +937,7 @@ interface ITokenMetadataTransactionAdapter {
   ): Promise<TransactionResponse>;
   setOnchainID(
     security: EvmAddress,
-    onchainID: string,
+    onchainID: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
@@ -945,7 +945,7 @@ interface ITokenMetadataTransactionAdapter {
 interface IComplianceTransactionAdapter {
   setCompliance(
     security: EvmAddress,
-    compliance: string,
+    compliance: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   compliance(
@@ -957,7 +957,7 @@ interface IComplianceTransactionAdapter {
 interface IIdentityRegistryTransactionAdapter {
   setIdentityRegistry(
     security: EvmAddress,
-    identityRegistry: string,
+    identityRegistry: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   identityRegistry(
@@ -1872,7 +1872,7 @@ export default abstract class TransactionAdapter
   }
   setIdentityRegistry(
     security: EvmAddress,
-    identityRegistry: string,
+    identityRegistry: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
@@ -1885,7 +1885,7 @@ export default abstract class TransactionAdapter
   }
   setCompliance(
     security: EvmAddress,
-    compliance: string,
+    compliance: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
@@ -1898,7 +1898,7 @@ export default abstract class TransactionAdapter
   }
   setOnchainID(
     security: EvmAddress,
-    onchainID: string,
+    onchainID: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

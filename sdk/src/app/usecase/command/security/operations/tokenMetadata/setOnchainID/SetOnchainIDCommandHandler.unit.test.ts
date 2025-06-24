@@ -203,6 +203,10 @@ describe('SetOnchainIDCommandHandler', () => {
   const contractServiceMock = createMock<ContractService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const onchainIDEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+
   const account = new Account({
     id: HederaIdPropsFixture.create().value,
     evmAddress: EvmAddressPropsFixture.create().value,
@@ -243,9 +247,9 @@ describe('SetOnchainIDCommandHandler', () => {
       });
     });
     it('should successfully set onchainID', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
+      contractServiceMock.getContractEvmAddress
+        .mockResolvedValueOnce(evmAddress)
+        .mockResolvedValueOnce(onchainIDEvmAddress);
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
       validationServiceMock.checkPause.mockResolvedValue(undefined);
       validationServiceMock.checkRole.mockResolvedValue(undefined);
@@ -260,7 +264,7 @@ describe('SetOnchainIDCommandHandler', () => {
       expect(result.transactionId).toBe(transactionId);
 
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
+        2,
       );
       expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
       expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
@@ -277,13 +281,22 @@ describe('SetOnchainIDCommandHandler', () => {
         account.id.toString(),
         command.securityId,
       );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        1,
         command.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
+        2,
+        command.onchainID,
       );
 
       expect(
         transactionServiceMock.getHandler().setOnchainID,
-      ).toHaveBeenCalledWith(evmAddress, command.onchainID, command.securityId);
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        onchainIDEvmAddress,
+        command.securityId,
+      );
     });
   });
 });

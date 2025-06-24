@@ -211,6 +211,9 @@ export class SetOnchainIDCommandHandler
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
 
+      const onchainIDEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(onchainID);
+
       await this.validationService.checkPause(securityId);
 
       await this.validationService.checkRole(
@@ -221,7 +224,7 @@ export class SetOnchainIDCommandHandler
 
       const res = await handler.setOnchainID(
         securityEvmAddress,
-        onchainID,
+        onchainIDEvmAddress,
         securityId,
       );
 

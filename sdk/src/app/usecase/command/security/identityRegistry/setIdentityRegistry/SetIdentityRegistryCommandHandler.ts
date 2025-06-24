@@ -211,6 +211,9 @@ export class SetIdentityRegistryCommandHandler
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
 
+      const identityRegistryEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(identityRegistry);
+
       await this.validationService.checkPause(securityId);
 
       await this.validationService.checkRole(
@@ -221,7 +224,7 @@ export class SetIdentityRegistryCommandHandler
 
       const res = await handler.setIdentityRegistry(
         securityEvmAddress,
-        identityRegistry,
+        identityRegistryEvmAddress,
         securityId,
       );
 

@@ -3763,7 +3763,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
   async setOnchainID(
     security: EvmAddress,
-    onchainID: string,
+    onchainID: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'setOnchainID';
@@ -3773,7 +3773,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [onchainID],
+      [onchainID.toString()],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -3790,7 +3790,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
   async setIdentityRegistry(
     security: EvmAddress,
-    identityRegistry: string,
+    identityRegistry: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'setIdentityRegistry';
@@ -3800,7 +3800,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [identityRegistry],
+      [identityRegistry.toString()],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -3817,7 +3817,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
   async setCompliance(
     security: EvmAddress,
-    compliance: string,
+    compliance: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'setCompliance';
@@ -3827,7 +3827,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [compliance],
+      [compliance.toString()],
     );
 
     const functionDataEncoded = new Uint8Array(

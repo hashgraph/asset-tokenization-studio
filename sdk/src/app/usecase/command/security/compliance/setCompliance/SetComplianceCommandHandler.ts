@@ -211,6 +211,9 @@ export class SetComplianceCommandHandler
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
 
+      const complianceEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(compliance);
+
       await this.validationService.checkPause(securityId);
 
       await this.validationService.checkRole(
@@ -221,7 +224,7 @@ export class SetComplianceCommandHandler
 
       const res = await handler.setCompliance(
         securityEvmAddress,
-        compliance,
+        complianceEvmAddress,
         securityId,
       );
 
