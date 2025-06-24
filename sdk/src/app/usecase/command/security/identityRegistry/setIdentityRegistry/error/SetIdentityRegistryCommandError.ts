@@ -170,12 +170,12 @@
    limitations under the License.
 */
 
-import { CommandError } from '../../../../../error/CommandError';
-import BaseError from '../../../../../../../../core/error/BaseError';
+import { CommandError } from '../../../../error/CommandError';
+import BaseError from '../../../../../../../core/error/BaseError';
 
-export class SetOnchainIDCommandError extends CommandError {
+export class SetIdentityRegistryCommandError extends CommandError {
   constructor(error: Error) {
-    const msg = `An error occurred while setting onchain id: ${error.message}`;
+    const msg = `An error occurred while setting identity registry: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

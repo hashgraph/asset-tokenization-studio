@@ -173,17 +173,17 @@
 import { Command } from '../../../../../../core/command/Command.js';
 import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
 
-export class SetOnchainIDCommandResponse implements CommandResponse {
+export class SetComplianceCommandResponse implements CommandResponse {
   constructor(
     public readonly payload: boolean,
     public readonly transactionId: string,
   ) {}
 }
 
-export class SetOnchainIDCommand extends Command<SetOnchainIDCommandResponse> {
+export class SetComplianceCommand extends Command<SetComplianceCommandResponse> {
   constructor(
     public readonly securityId: string,
-    public readonly onchainID: string,
+    public readonly compliance: string,
   ) {
     super();
   }

@@ -170,124 +170,21 @@
    limitations under the License.
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
-import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-  HederaIdPropsFixture,
-  TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { SetComplianceCommandHandler } from './SetComplianceCommandHandler.js';
-import {
-  SetComplianceCommand,
-  SetComplianceCommandResponse,
-} from './SetComplianceCommand.js';
-import { SetComplianceCommandFixture } from '../../../../../../../__tests__/fixtures/compliance/ComplianceFixture.js';
-import { SetComplianceCommandError } from './error/SetComplianceCommandError.js';
+import { Command } from '../../../../../../core/command/Command.js';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
 
-describe('SetComplianceCommandHandler', () => {
-  let handler: SetComplianceCommandHandler;
-  let command: SetComplianceCommand;
+export class SetIdentityRegistryCommandResponse implements CommandResponse {
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
+}
 
-  const transactionServiceMock = createMock<TransactionService>();
-  const validationServiceMock = createMock<ValidationService>();
-  const accountServiceMock = createMock<AccountService>();
-  const contractServiceMock = createMock<ContractService>();
-
-  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const account = new Account({
-    id: HederaIdPropsFixture.create().value,
-    evmAddress: EvmAddressPropsFixture.create().value,
-  });
-  const transactionId = TransactionIdFixture.create().id;
-  const errorMsg = ErrorMsgFixture.create().msg;
-
-  beforeEach(() => {
-    handler = new SetComplianceCommandHandler(
-      accountServiceMock,
-      transactionServiceMock,
-      validationServiceMock,
-      contractServiceMock,
-    );
-    command = SetComplianceCommandFixture.create();
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
-  describe('execute', () => {
-    it('throws SetComplianceCommandError when command fails with uncaught error', async () => {
-      const fakeError = new Error(errorMsg);
-
-      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
-
-      const resultPromise = handler.execute(command);
-
-      await expect(resultPromise).rejects.toBeInstanceOf(
-        SetComplianceCommandError,
-      );
-      await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(
-          `An error occurred while setting compliance: ${errorMsg}`,
-        ),
-        errorCode: ErrorCode.UncaughtCommandError,
-      });
-    });
-    it('should successfully set compliance', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
-      accountServiceMock.getCurrentAccount.mockReturnValue(account);
-      validationServiceMock.checkPause.mockResolvedValue(undefined);
-      validationServiceMock.checkRole.mockResolvedValue(undefined);
-      transactionServiceMock.getHandler().setCompliance.mockResolvedValue({
-        id: transactionId,
-      });
-
-      const result = await handler.execute(command);
-
-      expect(result).toBeInstanceOf(SetComplianceCommandResponse);
-      expect(result.payload).toBe(true);
-      expect(result.transactionId).toBe(transactionId);
-
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
-      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().setCompliance,
-      ).toHaveBeenCalledTimes(1);
-
-      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._DEFAULT_ADMIN_ROLE,
-        account.id.toString(),
-        command.securityId,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        command.securityId,
-      );
-
-      expect(
-        transactionServiceMock.getHandler().setCompliance,
-      ).toHaveBeenCalledWith(
-        evmAddress,
-        command.compliance,
-        command.securityId,
-      );
-    });
-  });
-});
+export class SetIdentityRegistryCommand extends Command<SetIdentityRegistryCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly identityRegistry: string,
+  ) {
+    super();
+  }
+}

@@ -170,24 +170,24 @@
    limitations under the License.
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import {
-  SetOnchainIDCommand,
-  SetOnchainIDCommandResponse,
+  SetComplianceCommand,
+  SetComplianceCommandResponse,
 } from './SetComplianceCommand.js';
-import { SetOnchainIDCommandError } from './error/SetOnchainIDCommandError.js';
+import { SetComplianceCommandError } from './error/SetComplianceCommandError.js';
 
-@CommandHandler(SetOnchainIDCommand)
-export class SetOnchainIDCommandHandler
-  implements ICommandHandler<SetOnchainIDCommand>
+@CommandHandler(SetComplianceCommand)
+export class SetComplianceCommandHandler
+  implements ICommandHandler<SetComplianceCommand>
 {
   constructor(
     @lazyInject(AccountService)
@@ -201,10 +201,10 @@ export class SetOnchainIDCommandHandler
   ) {}
 
   async execute(
-    command: SetOnchainIDCommand,
-  ): Promise<SetOnchainIDCommandResponse> {
+    command: SetComplianceCommand,
+  ): Promise<SetComplianceCommandResponse> {
     try {
-      const { securityId, onchainID } = command;
+      const { securityId, compliance } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
@@ -219,17 +219,17 @@ export class SetOnchainIDCommandHandler
         securityId,
       );
 
-      const res = await handler.setOnchainID(
+      const res = await handler.setCompliance(
         securityEvmAddress,
-        onchainID,
+        compliance,
         securityId,
       );
 
       return Promise.resolve(
-        new SetOnchainIDCommandResponse(res.error === undefined, res.id!),
+        new SetComplianceCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new SetOnchainIDCommandError(error as Error);
+      throw new SetComplianceCommandError(error as Error);
     }
   }
 }

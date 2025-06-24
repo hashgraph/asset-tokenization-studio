@@ -338,6 +338,9 @@ import {
   DEACTIVATE_INTERNAL_KYC_GAS,
   SET_NAME_GAS,
   SET_SYMBOL_GAS,
+  SET_ONCHAIN_ID_GAS,
+  SET_IDENTITY_REGISTRY_GAS,
+  SET_COMPLIANCE_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -3753,6 +3756,87 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(SET_SYMBOL_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async setOnchainID(
+    security: EvmAddress,
+    onchainID: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'setOnchainID';
+    LogService.logTrace(`Setting onchainID to ${security.toString()}`);
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [onchainID],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(SET_ONCHAIN_ID_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async setIdentityRegistry(
+    security: EvmAddress,
+    identityRegistry: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'setIdentityRegistry';
+    LogService.logTrace(`Setting identity registry to ${security.toString()}`);
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [identityRegistry],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(SET_IDENTITY_REGISTRY_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async setCompliance(
+    security: EvmAddress,
+    compliance: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'setCompliance';
+    LogService.logTrace(`Setting compliance to ${security.toString()}`);
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [compliance],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(SET_COMPLIANCE_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

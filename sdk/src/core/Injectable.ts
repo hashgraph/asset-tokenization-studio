@@ -399,6 +399,11 @@ import { GetKycStatusMockQueryHandler } from '../app/usecase/query/security/exte
 import { CreateExternalKycListMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommandHandler.js';
 import { SetNameCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommandHandler.js';
 import { SetSymbolCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommandHandler.js';
+import { SetComplianceCommandHandler } from '../app/usecase/command/security/compliance/setCompliance/SetComplianceCommandHandler.js';
+import { SetIdentityRegistryCommandHandler } from '../app/usecase/command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommandHandler.js';
+import { OnchainIDQueryHandler } from '../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQueryHandler.js';
+import { IdentityRegistryQueryHandler } from '../app/usecase/query/security/identityRegistry/IdentityRegistryQueryHandler.js';
+import { ComplianceQueryHandler } from '../app/usecase/query/security/compliance/compliance/ComplianceQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -771,6 +776,14 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetSymbolCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetComplianceCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetIdentityRegistryCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [
@@ -1101,6 +1114,18 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsInternalKycActivatedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: OnchainIDQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IdentityRegistryQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: ComplianceQueryHandler,
   },
 ];
 

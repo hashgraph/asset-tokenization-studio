@@ -185,17 +185,17 @@ import ValidationService from '../../../../../service/validation/ValidationServi
 import Account from '../../../../../../domain/context/account/Account.js';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { SetComplianceCommandHandler } from './SetComplianceCommandHandler.js';
+import { SetIdentityRegistryCommandHandler } from './SetIdentityRegistryCommandHandler.js';
 import {
-  SetComplianceCommand,
-  SetComplianceCommandResponse,
-} from './SetComplianceCommand.js';
-import { SetComplianceCommandFixture } from '../../../../../../../__tests__/fixtures/compliance/ComplianceFixture.js';
-import { SetComplianceCommandError } from './error/SetComplianceCommandError.js';
+  SetIdentityRegistryCommand,
+  SetIdentityRegistryCommandResponse,
+} from './SetIdentityRegistryCommand.js';
+import { SetIdentityRegistryCommandError } from './error/SetIdentityRegistryCommandError.js';
+import { SetIdentityRegistryCommandFixture } from '../../../../../../../__tests__/fixtures/identityRegistry/IdentityRegistryFixture.js';
 
-describe('SetComplianceCommandHandler', () => {
-  let handler: SetComplianceCommandHandler;
-  let command: SetComplianceCommand;
+describe('SetIdentityRegistryCommandHandler', () => {
+  let handler: SetIdentityRegistryCommandHandler;
+  let command: SetIdentityRegistryCommand;
 
   const transactionServiceMock = createMock<TransactionService>();
   const validationServiceMock = createMock<ValidationService>();
@@ -211,13 +211,13 @@ describe('SetComplianceCommandHandler', () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new SetComplianceCommandHandler(
+    handler = new SetIdentityRegistryCommandHandler(
       accountServiceMock,
       transactionServiceMock,
       validationServiceMock,
       contractServiceMock,
     );
-    command = SetComplianceCommandFixture.create();
+    command = SetIdentityRegistryCommandFixture.create();
   });
 
   afterEach(() => {
@@ -225,7 +225,7 @@ describe('SetComplianceCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('throws SetComplianceCommandError when command fails with uncaught error', async () => {
+    it('throws SetIdentityRegistryCommandError when command fails with uncaught error', async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
@@ -233,29 +233,31 @@ describe('SetComplianceCommandHandler', () => {
       const resultPromise = handler.execute(command);
 
       await expect(resultPromise).rejects.toBeInstanceOf(
-        SetComplianceCommandError,
+        SetIdentityRegistryCommandError,
       );
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
-          `An error occurred while setting compliance: ${errorMsg}`,
+          `An error occurred while setting identity registry: ${errorMsg}`,
         ),
         errorCode: ErrorCode.UncaughtCommandError,
       });
     });
-    it('should successfully set compliance', async () => {
+    it('should successfully set identity registry', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,
       );
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
       validationServiceMock.checkPause.mockResolvedValue(undefined);
       validationServiceMock.checkRole.mockResolvedValue(undefined);
-      transactionServiceMock.getHandler().setCompliance.mockResolvedValue({
-        id: transactionId,
-      });
+      transactionServiceMock
+        .getHandler()
+        .setIdentityRegistry.mockResolvedValue({
+          id: transactionId,
+        });
 
       const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(SetComplianceCommandResponse);
+      expect(result).toBeInstanceOf(SetIdentityRegistryCommandResponse);
       expect(result.payload).toBe(true);
       expect(result.transactionId).toBe(transactionId);
 
@@ -266,7 +268,7 @@ describe('SetComplianceCommandHandler', () => {
       expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
       expect(
-        transactionServiceMock.getHandler().setCompliance,
+        transactionServiceMock.getHandler().setIdentityRegistry,
       ).toHaveBeenCalledTimes(1);
 
       expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
@@ -282,10 +284,10 @@ describe('SetComplianceCommandHandler', () => {
       );
 
       expect(
-        transactionServiceMock.getHandler().setCompliance,
+        transactionServiceMock.getHandler().setIdentityRegistry,
       ).toHaveBeenCalledWith(
         evmAddress,
-        command.compliance,
+        command.identityRegistry,
         command.securityId,
       );
     });
