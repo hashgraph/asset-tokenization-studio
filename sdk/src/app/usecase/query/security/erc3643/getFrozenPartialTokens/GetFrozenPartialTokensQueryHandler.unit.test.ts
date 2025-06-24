@@ -221,6 +221,10 @@ import { GetFrozenPartialTokensQueryHandler } from './GetFrozenPartialTokensQuer
 
 import { GetFrozenPartialTokensQueryError } from './error/GetFrozenPartialTokensQueryError.js';
 import { GetFrozenPartialTokensQueryFixture } from '../../../../../../../__tests__/fixtures/erc3643/ERC3643Fixture.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 
 describe('GetFrozenPartialTokensQueryHandler', () => {
   let handler: GetFrozenPartialTokensQueryHandler;
@@ -229,15 +233,18 @@ describe('GetFrozenPartialTokensQueryHandler', () => {
   const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
   const contractServiceMock = createMock<ContractService>();
   const accountServiceMock = createMock<AccountService>();
+  const securityServiceMock = createMock<SecurityService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const targetEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
   );
   const errorMsg = ErrorMsgFixture.create().msg;
+  const security = new Security(SecurityPropsFixture.create());
 
   beforeEach(() => {
     handler = new GetFrozenPartialTokensQueryHandler(
+      securityServiceMock,
       queryAdapterServiceMock,
       accountServiceMock,
       contractServiceMock,
@@ -270,18 +277,24 @@ describe('GetFrozenPartialTokensQueryHandler', () => {
     });
 
     it('should successfully get hold count for by partition', async () => {
+      const amount = 1;
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,
       );
+      securityServiceMock.get.mockResolvedValue(security);
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
         targetEvmAddress,
       );
-      queryAdapterServiceMock.getFrozenPartialTokens.mockResolvedValueOnce(1);
+      queryAdapterServiceMock.getFrozenPartialTokens.mockResolvedValueOnce(
+        amount,
+      );
 
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(GetFrozenPartialTokensQueryResponse);
-      expect(result.payload).toBe(1);
+      expect(result.payload).toStrictEqual(
+        BigDecimal.fromStringFixed(amount.toString(), security.decimals),
+      );
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
         1,
       );

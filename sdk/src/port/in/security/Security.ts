@@ -564,7 +564,7 @@ interface ISecurityInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   getFrozenPartialTokens(
     request: GetFrozenPartialTokensRequest,
-  ): Promise<number>;
+  ): Promise<BalanceViewModel>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1979,13 +1979,14 @@ class SecurityInPort implements ISecurityInPort {
   @LogError
   async getFrozenPartialTokens(
     request: GetFrozenPartialTokensRequest,
-  ): Promise<number> {
+  ): Promise<BalanceViewModel> {
     ValidatedRequest.handleValidation('GetFrozenPartialTokensRequest', request);
-    return (
-      await this.queryBus.execute(
-        new GetFrozenPartialTokensQuery(request.securityId, request.targetId),
-      )
-    ).payload;
+    const res = await this.queryBus.execute(
+      new GetFrozenPartialTokensQuery(request.securityId, request.targetId),
+    );
+
+    const balance: BalanceViewModel = { value: res.payload.toString() };
+    return balance;
   }
 }
 

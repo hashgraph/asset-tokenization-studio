@@ -216,11 +216,16 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import ContractService from '../../../../../service/contract/ContractService.js';
 import { GetFrozenPartialTokensQueryError } from './error/GetFrozenPartialTokensQueryError.js';
 
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+
 @QueryHandler(GetFrozenPartialTokensQuery)
 export class GetFrozenPartialTokensQueryHandler
   implements IQueryHandler<GetFrozenPartialTokensQuery>
 {
   constructor(
+    @lazyInject(SecurityService)
+    private readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
@@ -239,13 +244,18 @@ export class GetFrozenPartialTokensQueryHandler
         await this.contractService.getContractEvmAddress(securityId);
       const targetEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(targetId);
+      const security = await this.securityService.get(securityId);
 
       const res = await this.queryAdapter.getFrozenPartialTokens(
         securityEvmAddress,
         targetEvmAddress,
       );
+      const amount = BigDecimal.fromStringFixed(
+        res.toString(),
+        security.decimals,
+      );
 
-      return new GetFrozenPartialTokensQueryResponse(res);
+      return new GetFrozenPartialTokensQueryResponse(amount);
     } catch (error) {
       throw new GetFrozenPartialTokensQueryError(error as Error);
     }

@@ -7666,7 +7666,7 @@ describe('Security', () => {
     );
 
     const expectedResponse = {
-      payload: 1,
+      payload: new BigDecimal(BigNumber.from(1)),
     };
     it('should get hold count for by partition successfully', async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
@@ -7686,7 +7686,11 @@ describe('Security', () => {
           getFrozenPartialTokensRequest.targetId,
         ),
       );
-      expect(result).toEqual(expectedResponse.payload);
+      expect(result).toEqual(
+        expect.objectContaining({
+          value: expectedResponse.payload.toString(),
+        }),
+      );
     });
 
     it('should throw an error if query execution fails', async () => {

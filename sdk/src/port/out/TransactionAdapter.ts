@@ -998,7 +998,7 @@ export default abstract class TransactionAdapter
     IExternalKycListsMockAdapter,
     ITokenMetadataTransactionAdapter,
     IComplianceTransactionAdapter,
-    IIdentityRegistryTransactionAdapter
+    IIdentityRegistryTransactionAdapter,
     ITokenMetadataTransactionAdapter,
     IERC3643Adapter
 {

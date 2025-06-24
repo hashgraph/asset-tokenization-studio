@@ -204,20 +204,12 @@
 */
 
 import { createFixture } from '../config';
-import {
-  HederaIdPropsFixture,
-  PartitionIdFixture,
-} from '../shared/DataFixture';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { FreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand';
 import FreezePartialTokensRequest from 'port/in/request/security/operations/erc3643/FreezePartialTokensRequest';
 import { UnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand';
 import UnfreezePartialTokensRequest from 'port/in/request/security/operations/erc3643/UnfreezePartialTokensRequest';
-import { FreezePartialTokensByPartitionCommand } from 'app/usecase/command/security/operations/erc3643/freezePartialTokensByPartition/FreezePartialTokensByPartitionCommand';
-import FreezePartialTokensByPartitionRequest from 'port/in/request/security/operations/erc3643/FreezePartialTokensByPartitionRequest';
-import { UnfreezePartialTokensByPartitionCommand } from 'app/usecase/command/security/operations/erc3643/unfreezePartialTokensByPartition/UnfreezePartialTokensByPartitionCommand';
-import UnfreezePartialTokensByPartitionRequest from 'port/in/request/security/operations/erc3643/UnfreezePartialTokensByPartitionRequest';
 import { GetFrozenPartialTokensQuery } from 'app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
-import { GetFrozenPartialTokensByPartitionQuery } from 'app/usecase/query/security/erc3643/getFrozenPartialTokensByPartition/GetFrozenPartialTokensByPartitionQuery';
 
 export const FreezePartialTokensCommandFixture =
   createFixture<FreezePartialTokensCommand>((command) => {
@@ -255,55 +247,8 @@ export const UnfreezePartialTokensRequestFixture =
     request.targetId.as(() => HederaIdPropsFixture.create().value);
   });
 
-export const FreezePartialTokensByPartitionCommandFixture =
-  createFixture<FreezePartialTokensByPartitionCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-    command.partitionId.as(() => PartitionIdFixture.create().value);
-  });
-
-export const FreezePartialTokensByPartitionRequestFixture =
-  createFixture<FreezePartialTokensByPartitionRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.partitionId.as(() => PartitionIdFixture.create().value);
-  });
-
-export const UnfreezePartialTokensByPartitionCommandFixture =
-  createFixture<UnfreezePartialTokensByPartitionCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-    command.partitionId.as(() => PartitionIdFixture.create().value);
-  });
-
-export const UnfreezePartialTokensByPartitionRequestFixture =
-  createFixture<UnfreezePartialTokensByPartitionRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.partitionId.as(() => PartitionIdFixture.create().value);
-  });
-
 export const GetFrozenPartialTokensQueryFixture =
   createFixture<GetFrozenPartialTokensQuery>((query) => {
     query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const GetFrozenPartialTokensByPartitionQueryFixture =
-  createFixture<GetFrozenPartialTokensByPartitionQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.partitionId.as(() => PartitionIdFixture.create().value);
     query.targetId.as(() => HederaIdPropsFixture.create().value);
   });

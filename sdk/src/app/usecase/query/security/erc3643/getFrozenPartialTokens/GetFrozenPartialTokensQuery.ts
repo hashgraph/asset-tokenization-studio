@@ -203,11 +203,12 @@
 
 */
 
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { Query } from '../../../../../../core/query/Query.js';
 import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 
 export class GetFrozenPartialTokensQueryResponse implements QueryResponse {
-  constructor(public readonly payload: number) {}
+  constructor(public readonly payload: BigDecimal) {}
 }
 
 export class GetFrozenPartialTokensQuery extends Query<GetFrozenPartialTokensQueryResponse> {

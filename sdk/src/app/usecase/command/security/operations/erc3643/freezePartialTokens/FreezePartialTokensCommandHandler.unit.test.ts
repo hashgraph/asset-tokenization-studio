@@ -227,6 +227,9 @@ import {
 import { FreezePartialTokensCommandHandler } from './FreezePartialTokensCommandHandler.js';
 import { FreezePartialTokensCommandFixture } from '../../../../../../../../__tests__/fixtures/erc3643/ERC3643Fixture.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import SecurityService from '../../../../../../service/security/SecurityService.js';
+import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { Security } from '../../../../../../../domain/context/security/Security.js';
 
 describe('FreezePartialTokensCommandHandler', () => {
   let handler: FreezePartialTokensCommandHandler;
@@ -236,6 +239,7 @@ describe('FreezePartialTokensCommandHandler', () => {
   const validationServiceMock = createMock<ValidationService>();
   const accountServiceMock = createMock<AccountService>();
   const contractServiceMock = createMock<ContractService>();
+  const securityServiceMock = createMock<SecurityService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const account = new Account({
@@ -244,9 +248,11 @@ describe('FreezePartialTokensCommandHandler', () => {
   });
   const transactionId = TransactionIdFixture.create().id;
   const errorMsg = ErrorMsgFixture.create().msg;
+  const security = new Security(SecurityPropsFixture.create());
 
   beforeEach(() => {
     handler = new FreezePartialTokensCommandHandler(
+      securityServiceMock,
       accountServiceMock,
       transactionServiceMock,
       validationServiceMock,
@@ -286,6 +292,8 @@ describe('FreezePartialTokensCommandHandler', () => {
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
       validationServiceMock.checkPause.mockResolvedValue(undefined);
       validationServiceMock.checkRole.mockResolvedValue(undefined);
+      validationServiceMock.checkDecimals.mockResolvedValue(undefined);
+      securityServiceMock.get.mockResolvedValue(security);
       transactionServiceMock
         .getHandler()
         .freezePartialTokens.mockResolvedValue({
@@ -324,7 +332,7 @@ describe('FreezePartialTokensCommandHandler', () => {
         transactionServiceMock.getHandler().freezePartialTokens,
       ).toHaveBeenCalledWith(
         evmAddress,
-        BigDecimal.fromString(command.amount),
+        BigDecimal.fromString(command.amount, security.decimals),
         evmAddress,
         command.securityId,
       );

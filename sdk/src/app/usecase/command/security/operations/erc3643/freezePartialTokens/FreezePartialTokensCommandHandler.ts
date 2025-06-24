@@ -218,12 +218,15 @@ import {
   FreezePartialTokensResponse,
 } from './FreezePartialTokensCommand.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import SecurityService from '../../../../../../service/security/SecurityService.js';
 
 @CommandHandler(FreezePartialTokensCommand)
 export class FreezePartialTokensCommandHandler
   implements ICommandHandler<FreezePartialTokensCommand>
 {
   constructor(
+    @lazyInject(SecurityService)
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
     @lazyInject(TransactionService)
@@ -246,6 +249,8 @@ export class FreezePartialTokensCommandHandler
         await this.contractService.getContractEvmAddress(securityId);
 
       await this.validationService.checkPause(securityId);
+      const security = await this.securityService.get(securityId);
+      await this.validationService.checkDecimals(security, amount);
 
       await this.validationService.checkRole(
         SecurityRole._FREEZE_MANAGER_ROLE,
@@ -255,7 +260,7 @@ export class FreezePartialTokensCommandHandler
 
       const res = await handler.freezePartialTokens(
         securityEvmAddress,
-        BigDecimal.fromString(amount),
+        BigDecimal.fromString(amount, security.decimals),
         await this.accountService.getAccountEvmAddress(targetId),
         securityId,
       );
