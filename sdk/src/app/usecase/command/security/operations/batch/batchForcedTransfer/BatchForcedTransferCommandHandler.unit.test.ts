@@ -229,7 +229,7 @@ import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
 import { Security } from '../../../../../../../domain/context/security/Security.js';
-import { BatchForcedTransferCommandFixture } from '../../../../../../../../__tests__/fixtures/erc3643/ERC3643Fixture.js';
+import { BatchForcedTransferCommandFixture } from '../../../../../../../../__tests__/fixtures/batch/BatchFixture.js';
 
 describe('BatchForcedTransferCommandHandler', () => {
   let handler: BatchForcedTransferCommandHandler;

@@ -3570,7 +3570,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async batchSetAddressFrozen(
     security: EvmAddress,
-    freezeList: BigDecimal[],
+    freezeList: boolean[],
     targetList: EvmAddress[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -3584,7 +3584,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
     const tx = await contract.batchSetAddressFrozen(
       targetList.map((item) => item.toString()),
-      freezeList.map((item) => item.toBigNumber()),
+      freezeList,
       {
         gasLimit: BATCH_SET_ADDRESS_FROZEN_GAS,
       },

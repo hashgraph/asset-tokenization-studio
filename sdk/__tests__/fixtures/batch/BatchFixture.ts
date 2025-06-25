@@ -205,11 +205,6 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { FreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand';
-import FreezePartialTokensRequest from 'port/in/request/security/operations/erc3643/FreezePartialTokensRequest';
-import { UnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand';
-import UnfreezePartialTokensRequest from 'port/in/request/security/operations/erc3643/UnfreezePartialTokensRequest';
-import { GetFrozenPartialTokensQuery } from 'app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
 import { BigNumber } from 'ethers';
 import {
   BatchBurnRequest,
@@ -220,55 +215,13 @@ import {
   BatchTransferRequest,
   BatchUnfreezePartialTokensRequest,
 } from 'index';
-import { BatchTransferCommand } from 'app/usecase/command/security/operations/erc3643/batchTransfer/BatchTransferCommand';
-import { BatchBurnCommand } from 'app/usecase/command/security/operations/erc3643/batchBurn/BatchBurnCommand';
-import { BatchForcedTransferCommand } from 'app/usecase/command/security/operations/erc3643/batchForcedTransfer/BatchForcedTransferCommand';
-import { BatchFreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/batchFreezePartialTokens/BatchFreezePartialTokensCommand';
-import { BatchMintCommand } from 'app/usecase/command/security/operations/erc3643/batchMint/BatchMintCommand';
-import { BatchSetAddressFrozenCommand } from 'app/usecase/command/security/operations/erc3643/batchSetAddressFrozen/BatchSetAddressFrozenCommand';
-import { BatchUnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand';
-
-export const FreezePartialTokensCommandFixture =
-  createFixture<FreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const FreezePartialTokensRequestFixture =
-  createFixture<FreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const UnfreezePartialTokensCommandFixture =
-  createFixture<UnfreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const UnfreezePartialTokensRequestFixture =
-  createFixture<UnfreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const GetFrozenPartialTokensQueryFixture =
-  createFixture<GetFrozenPartialTokensQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+import { BatchTransferCommand } from 'app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommand';
+import { BatchBurnCommand } from 'app/usecase/command/security/operations/batch/batchBurn/BatchBurnCommand';
+import { BatchForcedTransferCommand } from 'app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand';
+import { BatchFreezePartialTokensCommand } from 'app/usecase/command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommand';
+import { BatchMintCommand } from 'app/usecase/command/security/operations/batch/batchMint/BatchMintCommand';
+import { BatchSetAddressFrozenCommand } from 'app/usecase/command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommand';
+import { BatchUnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand';
 
 export const BatchTransferRequestFixture = createFixture<BatchTransferRequest>(
   (request) => {

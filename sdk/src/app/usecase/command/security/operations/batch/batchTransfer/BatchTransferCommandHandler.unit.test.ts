@@ -218,22 +218,22 @@ import ValidationService from '../../../../../../service/validation/ValidationSe
 import Account from '../../../../../../../domain/context/account/Account.js';
 
 import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import { BatchFreezePartialTokensCommandError } from './error/BatchFreezePartialTokensCommandError.js';
+import { BatchTransferCommandError } from './error/BatchTransferCommandError.js';
 import {
-  BatchFreezePartialTokensCommand,
-  BatchFreezePartialTokensResponse,
-} from './BatchFreezePartialTokensCommand.js';
-import { BatchFreezePartialTokensCommandHandler } from './BatchFreezePartialTokensCommandHandler.js';
+  BatchTransferCommand,
+  BatchTransferResponse,
+} from './BatchTransferCommand.js';
+import { BatchTransferCommandHandler } from './BatchTransferCommandHandler.js';
 
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
 import { Security } from '../../../../../../../domain/context/security/Security.js';
-import { BatchFreezePartialTokensCommandFixture } from '../../../../../../../../__tests__/fixtures/erc3643/ERC3643Fixture.js';
+import { BatchTransferCommandFixture } from '../../../../../../../../__tests__/fixtures/batch/BatchFixture.js';
 
-describe('BatchFreezePartialTokensCommandHandler', () => {
-  let handler: BatchFreezePartialTokensCommandHandler;
-  let command: BatchFreezePartialTokensCommand;
+describe('BatchTransferCommandHandler', () => {
+  let handler: BatchTransferCommandHandler;
+  let command: BatchTransferCommand;
 
   const transactionServiceMock = createMock<TransactionService>();
   const validationServiceMock = createMock<ValidationService>();
@@ -251,14 +251,14 @@ describe('BatchFreezePartialTokensCommandHandler', () => {
   const security = new Security(SecurityPropsFixture.create());
 
   beforeEach(() => {
-    handler = new BatchFreezePartialTokensCommandHandler(
+    handler = new BatchTransferCommandHandler(
       securityServiceMock,
       accountServiceMock,
       transactionServiceMock,
       validationServiceMock,
       contractServiceMock,
     );
-    command = BatchFreezePartialTokensCommandFixture.create();
+    command = BatchTransferCommandFixture.create();
   });
 
   afterEach(() => {
@@ -266,7 +266,7 @@ describe('BatchFreezePartialTokensCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('throws BatchFreezePartialTokensCommandError when command fails with uncaught error', async () => {
+    it('throws BatchTransferCommandError when command fails with uncaught error', async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
@@ -274,11 +274,11 @@ describe('BatchFreezePartialTokensCommandHandler', () => {
       const resultPromise = handler.execute(command);
 
       await expect(resultPromise).rejects.toBeInstanceOf(
-        BatchFreezePartialTokensCommandError,
+        BatchTransferCommandError,
       );
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
-          `An error occurred while batch freeze partial tokens: ${errorMsg}`,
+          `An error occurred while batch transfer: ${errorMsg}`,
         ),
         errorCode: ErrorCode.UncaughtCommandError,
       });
@@ -296,15 +296,13 @@ describe('BatchFreezePartialTokensCommandHandler', () => {
       );
       validationServiceMock.checkDecimals.mockResolvedValue(undefined);
       securityServiceMock.get.mockResolvedValue(security);
-      transactionServiceMock
-        .getHandler()
-        .batchFreezePartialTokens.mockResolvedValue({
-          id: transactionId,
-        });
+      transactionServiceMock.getHandler().batchTransfer.mockResolvedValue({
+        id: transactionId,
+      });
 
       const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(BatchFreezePartialTokensResponse);
+      expect(result).toBeInstanceOf(BatchTransferResponse);
       expect(result.payload).toBe(true);
       expect(result.transactionId).toBe(transactionId);
 
@@ -317,7 +315,7 @@ describe('BatchFreezePartialTokensCommandHandler', () => {
       ).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
       expect(
-        transactionServiceMock.getHandler().batchFreezePartialTokens,
+        transactionServiceMock.getHandler().batchTransfer,
       ).toHaveBeenCalledTimes(1);
 
       expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
@@ -328,7 +326,7 @@ describe('BatchFreezePartialTokensCommandHandler', () => {
       );
 
       expect(
-        transactionServiceMock.getHandler().batchFreezePartialTokens,
+        transactionServiceMock.getHandler().batchTransfer,
       ).toHaveBeenCalledWith(
         evmAddress,
         [BigDecimal.fromString(command.amountList[0], security.decimals)],

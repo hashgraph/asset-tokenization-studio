@@ -203,53 +203,62 @@
 
 */
 
+import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import AccountService from '../../../../../service/account/AccountService.js';
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import Account from '../../../../../../../domain/context/account/Account.js';
+import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+
+import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+import { FreezePartialTokensCommandError } from './error/FreezePartialTokensCommandError.js';
 import {
-  GetFrozenPartialTokensQuery,
-  GetFrozenPartialTokensQueryResponse,
-} from './GetFrozenPartialTokensQuery.js';
-import { GetFrozenPartialTokensQueryHandler } from './GetFrozenPartialTokensQueryHandler.js';
+  FreezePartialTokensCommand,
+  FreezePartialTokensResponse,
+} from './FreezePartialTokensCommand.js';
+import { FreezePartialTokensCommandHandler } from './FreezePartialTokensCommandHandler.js';
+import { FreezePartialTokensCommandFixture } from '../../../../../../../../__tests__/fixtures/freeze/FreezeFixture.js';
+import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import SecurityService from '../../../../../../service/security/SecurityService.js';
+import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { Security } from '../../../../../../../domain/context/security/Security.js';
 
-import { GetFrozenPartialTokensQueryError } from './error/GetFrozenPartialTokensQueryError.js';
-import { GetFrozenPartialTokensQueryFixture } from '../../../../../../../__tests__/fixtures/erc3643/ERC3643Fixture.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+describe('FreezePartialTokensCommandHandler', () => {
+  let handler: FreezePartialTokensCommandHandler;
+  let command: FreezePartialTokensCommand;
 
-describe('GetFrozenPartialTokensQueryHandler', () => {
-  let handler: GetFrozenPartialTokensQueryHandler;
-  let query: GetFrozenPartialTokensQuery;
-
-  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
-  const contractServiceMock = createMock<ContractService>();
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
   const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
   const securityServiceMock = createMock<SecurityService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const targetEvmAddress = new EvmAddress(
-    EvmAddressPropsFixture.create().value,
-  );
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const transactionId = TransactionIdFixture.create().id;
   const errorMsg = ErrorMsgFixture.create().msg;
   const security = new Security(SecurityPropsFixture.create());
 
   beforeEach(() => {
-    handler = new GetFrozenPartialTokensQueryHandler(
+    handler = new FreezePartialTokensCommandHandler(
       securityServiceMock,
-      queryAdapterServiceMock,
       accountServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
       contractServiceMock,
     );
-    query = GetFrozenPartialTokensQueryFixture.create();
+    command = FreezePartialTokensCommandFixture.create();
   });
 
   afterEach(() => {
@@ -257,57 +266,76 @@ describe('GetFrozenPartialTokensQueryHandler', () => {
   });
 
   describe('execute', () => {
-    it('throws GetFrozenPartialTokensQueryError when query fails with uncaught error', async () => {
+    it('throws FreezePartialTokensCommandError when command fails with uncaught error', async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
-      const resultPromise = handler.execute(query);
+      const resultPromise = handler.execute(command);
 
       await expect(resultPromise).rejects.toBeInstanceOf(
-        GetFrozenPartialTokensQueryError,
+        FreezePartialTokensCommandError,
       );
-
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
-          `An error occurred while querying frozen partial tokens: ${errorMsg}`,
+          `An error occurred while freeze partial tokens: ${errorMsg}`,
         ),
-        errorCode: ErrorCode.UncaughtQueryError,
+        errorCode: ErrorCode.UncaughtCommandError,
       });
     });
 
-    it('should successfully get hold count for by partition', async () => {
-      const amount = 1;
+    it('should successfully freeze amount of tokens', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,
       );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(evmAddress);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+      validationServiceMock.checkPause.mockResolvedValue(undefined);
+      validationServiceMock.checkRole.mockResolvedValue(undefined);
+      validationServiceMock.checkDecimals.mockResolvedValue(undefined);
       securityServiceMock.get.mockResolvedValue(security);
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
-        targetEvmAddress,
-      );
-      queryAdapterServiceMock.getFrozenPartialTokens.mockResolvedValueOnce(
-        amount,
-      );
+      transactionServiceMock
+        .getHandler()
+        .freezePartialTokens.mockResolvedValue({
+          id: transactionId,
+        });
 
-      const result = await handler.execute(query);
+      const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(GetFrozenPartialTokensQueryResponse);
-      expect(result.payload).toStrictEqual(
-        BigDecimal.fromStringFixed(amount.toString(), security.decimals),
-      );
+      expect(result).toBeInstanceOf(FreezePartialTokensResponse);
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
+
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
         1,
       );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
-      );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
-        query.targetId,
-      );
+      expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+      expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
       expect(
-        queryAdapterServiceMock.getFrozenPartialTokens,
-      ).toHaveBeenCalledWith(evmAddress, targetEvmAddress);
+        transactionServiceMock.getHandler().freezePartialTokens,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+        SecurityRole._FREEZE_MANAGER_ROLE,
+        account.id.toString(),
+        command.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        command.securityId,
+      );
+
+      expect(
+        transactionServiceMock.getHandler().freezePartialTokens,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        BigDecimal.fromString(command.amount, security.decimals),
+        evmAddress,
+        command.securityId,
+      );
     });
   });
 });

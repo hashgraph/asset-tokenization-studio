@@ -225,7 +225,7 @@ import {
   UnfreezePartialTokensResponse,
 } from './UnfreezePartialTokensCommand.js';
 import { UnfreezePartialTokensCommandHandler } from './UnfreezePartialTokensCommandHandler.js';
-import { UnfreezePartialTokensCommandFixture } from '../../../../../../../../__tests__/fixtures/erc3643/ERC3643Fixture.js';
+import { UnfreezePartialTokensCommandFixture } from '../../../../../../../../__tests__/fixtures/freeze/FreezeFixture.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
