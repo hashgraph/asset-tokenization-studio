@@ -361,6 +361,9 @@ import {
   IsInternalKycActivatedRequest,
   ActivateInternalKycRequest,
   DeactivateInternalKycRequest,
+  FreezePartialTokensRequest,
+  UnfreezePartialTokensRequest,
+  GetFrozenPartialTokensRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -644,26 +647,24 @@ export class SDKService {
   }
 
   // FREEZE & UNFREEZE ////////////////////////////////////////////
-  public static async freeze(req: FreezeRequest): Promise<boolean> {
-    const response = await Security.freeze(req);
+  public static async freezePartialTokens(
+    req: FreezePartialTokensRequest,
+  ): Promise<boolean> {
+    const response = await Security.freezePartialTokens(req);
     return response.payload;
   }
 
-  public static async unfreeze(req: UnfreezeRequest): Promise<boolean> {
-    const response = await Security.unfreeze(req);
+  public static async unfreezePartialTokens(
+    req: UnfreezePartialTokensRequest,
+  ): Promise<boolean> {
+    const response = await Security.unfreezePartialTokens(req);
     return response.payload;
   }
 
-  public static async getFreeze(
-    req: GetFreezeRequest,
-  ): Promise<FreezeViewModel> {
-    return await Security.getFreeze(req);
-  }
-
-  public static async getFreezedAmountFor(
-    req: GetFreezedAmountForRequest,
-  ): Promise<number> {
-    const response = await Security.getFreezedAmountFor(req);
+  public static async getFrozenTokens(
+    req: GetFrozenPartialTokensRequest,
+  ): Promise<BalanceViewModel> {
+    const response = await Security.getFrozenPartialTokens(req);
     return response;
   }
 

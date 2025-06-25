@@ -202,207 +202,75 @@
    limitations under the License.
 
 */
-import { useWatch } from "react-hook-form";
-import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { History } from "../../components/History";
-import { useTranslation } from "react-i18next";
-import {
-  Text,
-  InputController,
-  InputNumberController,
-  Button,
-  ToggleController,
-  Tooltip,
-  PhosphorIcon,
-} from "io-bricks-ui";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { required, min } from "../../utils/rules";
-import { CancelButton } from "../../components/CancelButton";
-import { useParams } from "react-router";
-import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
-import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";
-import { useWalletStore } from "../../store/walletStore";
-import { useSecurityStore } from "../../store/securityStore";
-import { Info } from "@phosphor-icons/react";
-import {
-  useFreezeSecurity,
-  useUnfreezeSecurity,
-} from "../../hooks/mutations/useFreezeSecurity";
-import {
-  UnfreezePartialTokensRequest,
-  FreezePartialTokensRequest,
-} from "@hashgraph/asset-tokenization-sdk";
 
-interface MintFormValues {
-  amount: number;
-  destination: string;
-  isUnfreeze: boolean;
-}
+import { render } from "../../../../test-utils";
+import { useRolesStore } from "../../../../store/rolesStore";
+import { SecurityRole } from "../../../../utils/SecurityRole";
+import { AdminControlActionsButtons } from "../AdminControlActionsButtons";
 
-export const DigitalSecurityFreeze = () => {
-  const { t: tHeader } = useTranslation("security", {
-    keyPrefix: "freeze.header",
-  });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "freeze.input",
-  });
-  const { t } = useTranslation("security", { keyPrefix: "freeze" });
-  const { t: tGlobal } = useTranslation("globals");
-  const { t: tProperties } = useTranslation("properties");
-  const { control, formState, handleSubmit, reset } = useForm<MintFormValues>({
-    mode: "all",
-  });
-  const { address: walletAddress } = useWalletStore();
-  const { id = "" } = useParams();
-  const { details } = useSecurityStore();
-  const { isLoading: isBalancePanelLoading, update } = useDetailsBalancePanel(
-    id,
-    walletAddress,
-  );
-  const { mutate: freezeSecurity, isLoading: isFreezeLoading } =
-    useFreezeSecurity();
-  const { mutate: unfreezeSecurity, isLoading: isUnfreezeLoading } =
-    useUnfreezeSecurity();
+jest.mock("../../../../router/RouterManager", () => ({
+  RouterManager: {
+    ...jest.requireActual("../../../../router/RouterManager").RouterManager,
+    getUrl: jest.fn(),
+    to: jest.fn(),
+  },
+}));
 
-  const isUnfreeze = useWatch({
-    control,
-    name: "isUnfreeze",
-    defaultValue: false,
+jest.mock("../../../../hooks/queries/usePauseSecurity", () => ({
+  usePauseSecurity: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
+
+jest.mock("../../../../hooks/queries/useUnpauseSecurity", () => ({
+  useUnpauseSecurity: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
+
+const defaultAdminRole = [SecurityRole._DEFAULT_ADMIN_ROLE];
+const initialStoreState = useRolesStore.getState();
+
+describe(`${AdminControlActionsButtons.name}`, () => {
+  beforeEach(() => {
+    useRolesStore.setState(initialStoreState, true);
+    jest.clearAllMocks();
   });
 
-  const submit: SubmitHandler<MintFormValues> = (params) => {
-    const isUnfreeze = params.isUnfreeze;
+  const factoryComponent = () => render(<AdminControlActionsButtons />);
 
-    if (isUnfreeze) {
-      const unfreezePartialTokensRequest = new UnfreezePartialTokensRequest({
-        securityId: id,
-        targetId: params.destination,
-        amount: params.amount.toString(),
-      });
+  test("should render correctly", () => {
+    const component = factoryComponent();
 
-      unfreezeSecurity(unfreezePartialTokensRequest, {
-        onSettled: () => update(),
-        onSuccess: () => {
-          reset();
-        },
-      });
-    } else {
-      const freezePartialTokensRequest = new FreezePartialTokensRequest({
-        securityId: id,
-        targetId: params.destination,
-        amount: params.amount.toString(),
-      });
+    expect(component.asFragment()).toMatchSnapshot("defaultAdminRole");
+  });
 
-      freezeSecurity(freezePartialTokensRequest, {
-        onSettled: () => update(),
-        onSuccess: () => {
-          reset();
-        },
-      });
-    }
-  };
+  test("by default admin has not freeze manager role", () => {
+    const component = factoryComponent();
 
-  return (
-    <>
-      <History label={tHeader("title")} />
-      <HStack
-        layerStyle="container"
-        mt={6}
-        pt={20}
-        pb={8}
-        gap={20}
-        justify="center"
-      >
-        <VStack
-          data-testid="mint-form"
-          justifyContent="flex-start"
-          h="full"
-          alignItems="flex-start"
-          w="full"
-          maxW="472px"
-          as="form"
-          onSubmit={handleSubmit(submit)}
-          gap={3}
-        >
-          <Text textStyle="HeadingMediumLG">{t("title")}</Text>
-          <Text textStyle="BodyRegularMD" mt={2}>
-            {t("subtitle")}
-          </Text>
-          <Text textStyle="ElementsRegularSM" mt={8}>
-            {tGlobal("mandatoryFields")}
-          </Text>
-          <VStack>
-            <Tooltip label={tForm("isUnfreeze.tooltip")} placement="right">
-              <HStack>
-                <Text>{tForm("isUnfreeze.label")}</Text>
-                <PhosphorIcon as={Info} />
-              </HStack>
-            </Tooltip>
-            <ToggleController control={control} id="isUnfreeze" />
-          </VStack>
-          <Stack mt={6} w="full">
-            <InputNumberController
-              autoFocus
-              control={control}
-              id="amount"
-              rules={{
-                required,
-                min: min(0),
-              }}
-              size="md"
-              allowNegative={false}
-              label={tForm(
-                isUnfreeze ? "amountUnfreeze.label" : "amountFreeze.label",
-              )}
-              placeholder={tForm(
-                isUnfreeze
-                  ? "amountUnfreeze.placeholder"
-                  : "amountFreeze.placeholder",
-              )}
-              decimalScale={details?.decimals}
-              fixedDecimalScale={true}
-              thousandSeparator=","
-              decimalSeparator="."
-            />
-          </Stack>
-          <Stack mt={6} w="full">
-            <InputController
-              autoFocus
-              control={control}
-              id="destination"
-              rules={{ required }}
-              label={tForm("destination.label")}
-              placeholder={tForm("destination.placeholder")}
-              size="md"
-            />
-          </Stack>
-          <HStack
-            gap={4}
-            w="full"
-            mt={10}
-            align="end"
-            justifyContent={"flex-end"}
-          >
-            <CancelButton />
-            <Button
-              data-testid="mint-security-button"
-              size="md"
-              variant="primary"
-              isDisabled={!formState.isValid}
-              type="submit"
-              minW="unset"
-              isLoading={isFreezeLoading || isUnfreezeLoading}
-            >
-              {tGlobal("submit")}
-            </Button>
-          </HStack>
-        </VStack>
-        <DetailsBalancePanel
-          balance={details?.totalSupply}
-          isLoading={isBalancePanelLoading}
-          title={tProperties("totalSupply")}
-        />
-      </HStack>
-    </>
-  );
-};
+    expect(component.queryByTestId("freeze-button")).not.toBeInTheDocument();
+  });
+
+  describe("Admin has freeze manager role", () => {
+    beforeEach(() => {
+      useRolesStore.setState({
+        ...initialStoreState,
+        roles: [...defaultAdminRole, SecurityRole._FREEZE_MANAGER_ROLE],
+      });
+    });
+
+    test("should render correctly", () => {
+      const component = factoryComponent();
+
+      expect(component.asFragment()).toMatchSnapshot("minterRole");
+    });
+
+    test("should show freeze manager button", () => {
+      const component = factoryComponent();
+
+      expect(component.getByTestId("freeze-button")).toBeInTheDocument();
+    });
+  });
+});

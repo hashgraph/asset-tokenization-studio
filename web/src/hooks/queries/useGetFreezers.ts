@@ -203,57 +203,24 @@
 
 */
 
-import {
-  GetFreezeRequest,
-  GetFreezeIdRequest,
-  FreezeViewModel,
-  GetFreezeAmountForRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+import { GetFrozenPartialTokensRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import SDKService from "../../services/SDKService";
 
-export const GET_FREEZERS = (securityId: string, targetId: string) =>
-  `GET_FREEZERS_${securityId}_${targetId}`;
-export const GET_FREEZED_BALANCE = (securityId: string, targetId: string) =>
-  `GET_FREEZED_BALANCE_${securityId}_${targetId}`;
+export const GET_FROZEN_BALANCE = (securityId: string, targetId: string) =>
+  `GET_FROZEN_BALANCE_${securityId}_${targetId}`;
 
-export const useGetFreezers = (
-  request: GetFreezeIdRequest,
-  options?: UseQueryOptions<
-    FreezeViewModel[],
-    unknown,
-    FreezeViewModel[],
-    string[]
-  >,
-) => {
-  return useQuery(
-    [GET_FREEZERS(request.securityId, request.targetId)],
-    async () => {
-      try {
-        const freezeRequest = new GetFreezeRequest({
-          securityId: request.securityId,
-          targetId: request.targetId,
-        });
-
-        return await SDKService.getFreeze(freezeRequest);
-      } catch (error) {
-        console.error("Error fetching freezers", error);
-        throw error;
-      }
-    },
-    options,
-  );
-};
-
-export const useGetFreezedAmountFor = (
-  request: GetFreezeAmountForRequest,
+export const useGetFrozenTokens = (
+  request: GetFrozenPartialTokensRequest,
   options?: UseQueryOptions<number, unknown, number, string[]>,
 ) => {
   return useQuery(
-    [GET_FREEZED_BALANCE(request.securityId, request.targetId)],
+    [GET_FROZEN_BALANCE(request.securityId, request.targetId)],
     async () => {
       try {
-        const freezeAmount = await SDKService.getFreezedAmountFor(request);
+        const freezeAmount = Number(
+          (await SDKService.getFrozenTokens(request)).value,
+        );
 
         return freezeAmount;
       } catch (error) {

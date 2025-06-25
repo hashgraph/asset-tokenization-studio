@@ -206,8 +206,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
 import {
-  FreezeRequest,
-  UnfreezeRequest,
+  FreezePartialTokensRequest,
+  UnfreezePartialTokensRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useToast } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
@@ -221,7 +221,8 @@ export const useFreezeSecurity = () => {
   });
 
   return useMutation(
-    (freezeRequest: FreezeRequest) => SDKService.freeze(freezeRequest),
+    (freezeRequest: FreezePartialTokensRequest) =>
+      SDKService.freezePartialTokens(freezeRequest),
     {
       onSuccess: (data) => {
         if (data === true) {
@@ -243,7 +244,7 @@ export const useFreezeSecurity = () => {
         }
       },
       onError: (error: { message: string }) => {
-        console.log("SDK message --> Security mint error: ", error);
+        console.log("SDK message --> Freeze Partial Tokens error: ", error);
         const knownError = checkError(error);
 
         const errorTranslations = {
@@ -278,7 +279,8 @@ export const useUnfreezeSecurity = () => {
   });
 
   return useMutation(
-    (unfreezeRequest: UnfreezeRequest) => SDKService.unfreeze(unfreezeRequest),
+    (unfreezeRequest: UnfreezePartialTokensRequest) =>
+      SDKService.unfreezePartialTokens(unfreezeRequest),
     {
       onSuccess: (data) => {
         if (data === true) {
@@ -300,7 +302,7 @@ export const useUnfreezeSecurity = () => {
         }
       },
       onError: (error: { message: string }) => {
-        console.log("SDK message --> Security mint error: ", error);
+        console.log("SDK message --> Unfreeze Partial Tokens: ", error);
         const knownError = checkError(error);
 
         const errorTranslations = {

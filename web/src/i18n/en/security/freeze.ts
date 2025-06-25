@@ -210,9 +210,13 @@ export default {
   title: "Freeze securities",
   subtitle: "Enter the information to freeze the securities",
   input: {
-    amount: {
+    amountFreeze: {
       label: "Amount to freeze",
       placeholder: "Enter the amount to freeze",
+    },
+    amountUnfreeze: {
+      label: "Amount to Unfreeze",
+      placeholder: "Enter the amount to unfreeze",
     },
     destination: {
       label: "Destination account",

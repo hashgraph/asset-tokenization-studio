@@ -225,7 +225,7 @@ export const AdminControlActionsButtons = () => {
   const { roles } = useRolesStore();
 
   const hasFreezeRole = roles.find(
-    (role) => role === SecurityRole._FREEZER_ROLE,
+    (role) => role === SecurityRole._FREEZE_MANAGER_ROLE,
   );
 
   if (isPaused || !hasFreezeRole) return null;

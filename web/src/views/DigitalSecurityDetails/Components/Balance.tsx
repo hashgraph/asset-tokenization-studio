@@ -212,6 +212,7 @@ import { isHederaValidAddress, required } from "../../../utils/rules";
 import {
   GetAccountBalanceRequest,
   GetClearedAmountForRequest,
+  GetFrozenPartialTokensRequest,
   GetHeldAmountForRequest,
   GetLocksIdRequest,
   SecurityViewModel,
@@ -222,7 +223,7 @@ import { useGetLockers } from "../../../hooks/queries/useGetLockers";
 import { useGetHeldAmountFor } from "../../../hooks/queries/useGetHolds";
 import { useSecurityStore } from "../../../store/securityStore";
 import { useGetClearedAmountFor } from "../../../hooks/queries/useClearingOperations";
-import { useGetFreezedAmountFor } from "../../../hooks/queries/useGetFreezers";
+import { useGetFrozenTokens } from "../../../hooks/queries/useGetFreezers";
 
 interface BalanceProps {
   id?: string;
@@ -332,8 +333,8 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
   );
 
   const { data: frozenBalance, refetch: refetchFrozenBalance } =
-    useGetFreezedAmountFor(
-      new GetFreezedAmountForRequest({
+    useGetFrozenTokens(
+      new GetFrozenPartialTokensRequest({
         securityId: id!,
         targetId: targetId ?? "",
       }),
