@@ -382,12 +382,12 @@ import { SetComplianceCommand } from '../../../app/usecase/command/security/comp
 import { IdentityRegistryQuery } from '../../../app/usecase/query/security/identityRegistry/IdentityRegistryQuery.js';
 import { ComplianceQuery } from '../../../app/usecase/query/security/compliance/compliance/ComplianceQuery.js';
 import { OnchainIDQuery } from '../../../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery.js';
-import FreezePartialTokensRequest from '../request/security/operations/erc3643/FreezePartialTokensRequest.js';
-import GetFrozenPartialTokensRequest from '../request/security/operations/erc3643/GetFrozenPartialTokensRequest.js';
-import UnfreezePartialTokensRequest from '../request/security/operations/erc3643/UnfreezePartialTokensRequest.js';
-import { FreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand.js';
-import { UnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand.js';
-import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery.js';
+import FreezePartialTokensRequest from '../request/security/operations/freeze/FreezePartialTokensRequest.js';
+import GetFrozenPartialTokensRequest from '../request/security/operations/freeze/GetFrozenPartialTokensRequest.js';
+import UnfreezePartialTokensRequest from '../request/security/operations/freeze/UnfreezePartialTokensRequest.js';
+import { FreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand.js';
+import { UnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand.js';
+import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery.js';
 import RecoveryAddressRequest from '../request/security/operations/recovery/RecoveryAddressRequest.js';
 import { RecoveryAddressCommand } from '../../../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand.js';
 import IsAddressRecoveredRequest from '../request/security/operations/recovery/IsAddressRecoveredRequest.js';
@@ -396,13 +396,13 @@ import AddAgentRequest from '../request/security/operations/agent/AddAgentReques
 import RemoveAgentRequest from '../request/security/operations/agent/RemoveAgentRequest.js';
 import { AddAgentCommand } from '../../../app/usecase/command/security/operations/agent/addAgent/AddAgentCommand.js';
 import { RemoveAgentCommand } from '../../../app/usecase/command/security/operations/agent/removeAgent/RemoveAgentCommand.js';
-import { BatchTransferCommand } from '../../../app/usecase/command/security/operations/erc3643/batchTransfer/BatchTransferCommand.js';
-import { BatchMintCommand } from '../../../app/usecase/command/security/operations/erc3643/batchMint/BatchMintCommand.js';
-import { BatchBurnCommand } from '../../../app/usecase/command/security/operations/erc3643/batchBurn/BatchBurnCommand.js';
-import { BatchSetAddressFrozenCommand } from '../../../app/usecase/command/security/operations/erc3643/batchSetAddressFrozen/BatchSetAddressFrozenCommand.js';
-import { BatchFreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/batchFreezePartialTokens/BatchFreezePartialTokensCommand.js';
-import { BatchForcedTransferCommand } from '../../../app/usecase/command/security/operations/erc3643/batchForcedTransfer/BatchForcedTransferCommand.js';
-import { BatchUnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand.js';
+import { BatchTransferCommand } from '../../../app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommand.js';
+import { BatchMintCommand } from '../../../app/usecase/command/security/operations/batch/batchMint/BatchMintCommand.js';
+import { BatchBurnCommand } from '../../../app/usecase/command/security/operations/batch/batchBurn/BatchBurnCommand.js';
+import { BatchSetAddressFrozenCommand } from '../../../app/usecase/command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommand.js';
+import { BatchFreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommand.js';
+import { BatchForcedTransferCommand } from '../../../app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand.js';
+import { BatchUnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 

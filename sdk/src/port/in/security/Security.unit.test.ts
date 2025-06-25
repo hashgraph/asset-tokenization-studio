@@ -493,7 +493,7 @@ import { SetComplianceCommand } from '../../../app/usecase/command/security/comp
 import { IdentityRegistryQuery } from '../../../app/usecase/query/security/identityRegistry/IdentityRegistryQuery';
 import { ComplianceQuery } from '../../../app/usecase/query/security/compliance/compliance/ComplianceQuery';
 import { OnchainIDQuery } from '../../../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
-import FreezePartialTokensRequest from '../request/security/operations/erc3643/FreezePartialTokensRequest';
+import FreezePartialTokensRequest from '../request/security/operations/freeze/FreezePartialTokensRequest';
 import {
   BatchBurnRequestFixture,
   BatchForcedTransferRequestFixture,
@@ -502,20 +502,17 @@ import {
   BatchSetAddressFrozenRequestFixture,
   BatchTransferRequestFixture,
   BatchUnfreezePartialTokensRequestFixture,
-  FreezePartialTokensRequestFixture,
-  GetFrozenPartialTokensQueryFixture,
-  UnfreezePartialTokensRequestFixture,
-} from '../../../../__tests__/fixtures/erc3643/ERC3643Fixture';
+} from '../../../../__tests__/fixtures/batch/BatchFixture';
 import {
   FreezePartialTokensCommand,
   FreezePartialTokensResponse,
-} from '../../../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand';
+} from '../../../app/usecase/command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand';
 import {
   UnfreezePartialTokensCommand,
   UnfreezePartialTokensResponse,
-} from '../../../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand';
+} from '../../../app/usecase/command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand';
 
-import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
+import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
 import {
   IsAddressRecoveredRequestFixture,
   RecoveryAddressRequestFixture,
@@ -531,31 +528,36 @@ import { RemoveAgentCommand } from '../../../app/usecase/command/security/operat
 import {
   BatchTransferResponse,
   BatchTransferCommand,
-} from '../../../app/usecase/command/security/operations/erc3643/batchTransfer/BatchTransferCommand';
+} from '../../../app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommand';
 import {
   BatchForcedTransferCommand,
   BatchForcedTransferResponse,
-} from '../../../app/usecase/command/security/operations/erc3643/batchForcedTransfer/BatchForcedTransferCommand';
+} from '../../../app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand';
 import {
   BatchMintCommand,
   BatchMintResponse,
-} from '../../../app/usecase/command/security/operations/erc3643/batchMint/BatchMintCommand';
+} from '../../../app/usecase/command/security/operations/batch/batchMint/BatchMintCommand';
 import {
   BatchBurnResponse,
   BatchBurnCommand,
-} from '../../../app/usecase/command/security/operations/erc3643/batchBurn/BatchBurnCommand';
+} from '../../../app/usecase/command/security/operations/batch/batchBurn/BatchBurnCommand';
 import {
   BatchSetAddressFrozenResponse,
   BatchSetAddressFrozenCommand,
-} from '../../../app/usecase/command/security/operations/erc3643/batchSetAddressFrozen/BatchSetAddressFrozenCommand';
+} from '../../../app/usecase/command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommand';
 import {
   BatchFreezePartialTokensResponse,
   BatchFreezePartialTokensCommand,
-} from '../../../app/usecase/command/security/operations/erc3643/batchFreezePartialTokens/BatchFreezePartialTokensCommand';
+} from '../../../app/usecase/command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommand';
 import {
   BatchUnfreezePartialTokensResponse,
   BatchUnfreezePartialTokensCommand,
-} from '../../../app/usecase/command/security/operations/erc3643/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand';
+} from '../../../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand';
+import {
+  FreezePartialTokensRequestFixture,
+  UnfreezePartialTokensRequestFixture,
+  GetFrozenPartialTokensQueryFixture,
+} from '../../../../__tests__/fixtures/freeze/FreezeFixture';
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
