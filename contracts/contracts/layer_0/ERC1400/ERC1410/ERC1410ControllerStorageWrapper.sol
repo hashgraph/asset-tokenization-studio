@@ -222,7 +222,8 @@ import {
     _SUCCESS,
     _FROM_ACCOUNT_KYC_ERROR_ID,
     _TO_ACCOUNT_KYC_ERROR_ID,
-    _CLEARING_ACTIVE_ERROR_ID
+    _CLEARING_ACTIVE_ERROR_ID,
+    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID
 } from '../../constants/values.sol';
 
 abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
@@ -234,6 +235,15 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
         bytes calldata /*_data*/,
         bytes calldata /*_operatorData*/
     ) internal view returns (bool, bytes1, bytes32) {
+        if (_from == _msgSender()) {
+            if (_isRecovered(_msgSender())) {
+                return (
+                    false,
+                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+                    bytes32(0)
+                );
+            }
+        }
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
@@ -268,7 +278,6 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
         // TODO: Better to check all in one boolean expression defined in a different pure function.
-
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
@@ -276,8 +285,14 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
             if (!_isAuthorized(_partition, _msgSender(), _from)) {
                 return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
             }
+            if (_isRecovered(_msgSender())) {
+                return (
+                    false,
+                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+                    bytes32(0)
+                );
+            }
         }
-
         return (true, _SUCCESS, bytes32(0));
     }
 }

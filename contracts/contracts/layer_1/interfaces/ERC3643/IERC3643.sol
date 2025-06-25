@@ -216,6 +216,7 @@ interface IERC3643 {
         address compliance;
         mapping(address => uint256) frozenTokens;
         mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
+        mapping(address => bool) addressRecovered;
     }
 
     event UpdatedTokenInformation(
@@ -268,12 +269,30 @@ interface IERC3643 {
         address indexed owner
     );
 
+    /**
+     * @dev Emitted when a wallet is recovered
+     *
+     * @param _lostWallet Address of the lost wallet
+     * @param _newWallet Address of the new wallet
+     * @param _investorOnchainID OnchainID
+     */
+    event RecoverySuccess(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    );
+
     error InsufficientFrozenBalance(
         address user,
         uint256 requestedUnfreeze,
         uint256 availableFrozen,
         bytes32 partition
     );
+
+    /**
+     * @notice Thrown when calling from a recovered wallet
+     */
+    error WalletRecovered();
 
     /**
      * @dev Sets the name of the token to `_name`.
@@ -394,6 +413,21 @@ interface IERC3643 {
      * @dev Can only be called by the role admin
      */
     function removeAgent(address _agent) external;
+
+    /**
+     * @notice Transfers the status of a lost wallet to a new wallet
+     * @dev Can only be called by the agent
+     */
+    function recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) external returns (bool);
+
+    /**
+     * @notice Retrieves recovery status of a wallet
+     */
+    function isAddressRecovered(address _wallet) external returns (bool);
 
     /**
      * @dev Checks if an account has the agent role

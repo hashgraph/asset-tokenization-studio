@@ -441,6 +441,15 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit AgentRemoved(_agent);
     }
 
+    function recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) external onlyRole(_AGENT_ROLE) returns (bool) {
+        emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
+        return _recoveryAddress(_lostWallet, _newWallet);
+    }
+
     function getFrozenTokens(
         address _userAddress
     ) external view override returns (uint256) {
@@ -482,6 +491,10 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return ICompliance(_erc3643Storage().compliance);
     }
 
+    function isAddressRecovered(address _wallet) external view returns (bool) {
+        return _isRecovered(_wallet);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -497,7 +510,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](21);
+        staticFunctionSelectors_ = new bytes4[](23);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
@@ -536,6 +549,12 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .recoveryAddress
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .isAddressRecovered
+            .selector;
     }
 
     function getStaticInterfaceIds()

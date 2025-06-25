@@ -242,6 +242,9 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _basicTransferInfo.to)
         returns (bytes32)
     {
+        {
+            _checkRecoveredAddress(_msgSender());
+        }
         // Add a function to verify the `_data` parameter
         // TODO: Need to create the bytes division of the `_partition` so it can be easily findout in which receiver's
         // partition token will transfered. For current implementation we are assuming that the receiver's partition
