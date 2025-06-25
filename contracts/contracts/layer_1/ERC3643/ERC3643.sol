@@ -233,7 +233,8 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     address private constant _ONCHAIN_ID = address(0);
 
     function setAddressFrozen(
-        address _userAddress
+        address _userAddress,
+        bool _freezStatus
     )
         external
         override
@@ -241,7 +242,8 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
     {
-        emit TokensFrozen(_userAddress, 0, _DEFAULT_PARTITION); //TODO amount TBD
+        _setAddresFrozen(_userAddress, _freezStatus);
+        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
     }
 
     /**
@@ -425,11 +427,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
-    /**
-     * @notice Gives an account the agent role
-     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
-     * @dev Can only be called by the role admin
-     */
     function addAgent(
         address _agent
     ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
@@ -437,15 +434,20 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit AgentAdded(_agent);
     }
 
-    /**
-     * @notice Revokes an account the agent role
-     * @dev Can only be called by the role admin
-     */
     function removeAgent(
         address _agent
     ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
         _removeAgent(_agent);
         emit AgentRemoved(_agent);
+    }
+
+    function recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) external onlyRole(_AGENT_ROLE) returns (bool) {
+        emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
+        return _recoveryAddress(_lostWallet, _newWallet);
     }
 
     function getFrozenTokens(
@@ -454,12 +456,10 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return _getFrozenAmountForAdjusted(_userAddress);
     }
 
-    /**
-     * @dev Checks if an account has the agent role
-     */
     function isAgent(address _agent) external view returns (bool) {
         return _hasRole(_AGENT_ROLE, _agent);
     }
+
     /**
      * @notice Retrieves the latest version of the contract.
      * @dev The version is represented as a string.
@@ -491,6 +491,10 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return ICompliance(_erc3643Storage().compliance);
     }
 
+    function isAddressRecovered(address _wallet) external view returns (bool) {
+        return _isRecovered(_wallet);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -506,7 +510,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](21);
+        staticFunctionSelectors_ = new bytes4[](23);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
@@ -545,6 +549,12 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .recoveryAddress
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .isAddressRecovered
+            .selector;
     }
 
     function getStaticInterfaceIds()

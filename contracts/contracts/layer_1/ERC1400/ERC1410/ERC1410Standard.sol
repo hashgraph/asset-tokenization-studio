@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
 import {Common} from '../../common/Common.sol';
 
-import {_ISSUER_ROLE} from '../../constants/roles.sol';
+import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410Standard is IERC1410Standard, Common {
@@ -218,15 +218,22 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     )
         external
         override
+        checkRecoveredAddress(_issueData.tokenHolder)
         onlyWithinMaxSupply(_issueData.value)
         onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
         validateAddress(_issueData.tokenHolder)
         onlyListedAllowed(_issueData.tokenHolder)
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
-        onlyRole(_ISSUER_ROLE)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _issueData.tokenHolder)
     {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _ISSUER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+            _checkRecoveredAddress(_msgSender());
+        }
         _issueByPartition(_issueData);
     }
 
@@ -244,6 +251,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyListedAllowed(_msgSender())
+        checkRecoveredAddress(_msgSender())
         onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
@@ -284,6 +292,9 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
+        {
+            _checkRecoveredAddress(_msgSender());
+        }
         _redeemByPartition(
             _partition,
             _tokenHolder,

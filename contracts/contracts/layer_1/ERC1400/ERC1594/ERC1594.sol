@@ -211,7 +211,7 @@ import {
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
-import {_ISSUER_ROLE} from '../../constants/roles.sol';
+import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
@@ -234,6 +234,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
+        checkRecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
         onlyWithoutMultiPartition
@@ -255,6 +256,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
+        checkRecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
         onlyListedAllowed(_from)
@@ -283,14 +285,20 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     )
         external
         override
+        checkRecoveredAddress(_tokenHolder)
         onlyWithinMaxSupply(_value)
         onlyUnpaused
-        onlyRole(_ISSUER_ROLE)
         onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
         onlyIssuable
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _ISSUER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         _issue(_tokenHolder, _value, _data);
     }
 
@@ -309,6 +317,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
+        checkRecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -334,6 +343,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
+        validateAddress(_tokenHolder)
         onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_tokenHolder)

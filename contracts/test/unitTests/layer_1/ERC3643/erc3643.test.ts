@@ -225,6 +225,11 @@ import {
     AdjustBalances,
     Cap,
     Equity,
+    ERC1644,
+    ERC1594,
+    Lock,
+    Hold,
+    ProtectedPartitions,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -252,7 +257,11 @@ import {
     CORPORATE_ACTION_ROLE,
     DEFAULT_PARTITION,
     AGENT_ROLE,
+    PROTECTED_PARTITIONS_ROLE,
+    PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
+    ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
 } from '@scripts'
+import { Contract } from 'ethers'
 
 const name = 'TEST'
 const symbol = 'TAC'
@@ -298,6 +307,12 @@ describe('ERC3643 Tests', () => {
     let clearingActionsFacet: ClearingActionsFacet
     let ssiManagementFacet: SsiManagement
     let accessControlFacet: AccessControl
+    let erc1644Facet: ERC1644
+    let erc1594Facet: ERC1594
+    let lockFacet: Lock
+    let clearingFacet: Contract
+    let holdFacet: Hold
+    let protectedPartitionsFacet: ProtectedPartitions
 
     describe('single partition', () => {
         let erc3643Issuer: ERC3643
@@ -476,6 +491,49 @@ describe('ERC3643 Tests', () => {
                 'ClearingActionsFacet',
                 diamond.address,
                 signer_B
+            )
+            erc1594Facet = await ethers.getContractAt(
+                'ERC1594',
+                diamond.address
+            )
+            erc1644Facet = await ethers.getContractAt(
+                'ERC1644',
+                diamond.address
+            )
+            lockFacet = await ethers.getContractAt('Lock', diamond.address)
+            const clearingRedeemFacet = await ethers.getContractAt(
+                'ClearingRedeemFacet',
+                diamond.address,
+                signer_A
+            )
+            const clearingHoldCreationFacet = await ethers.getContractAt(
+                'ClearingHoldCreationFacet',
+                diamond.address,
+                signer_A
+            )
+            const clearingTransferFacet = await ethers.getContractAt(
+                'ClearingTransferFacet',
+                diamond.address,
+                signer_A
+            )
+
+            clearingFacet = new Contract(
+                diamond.address,
+                [
+                    ...clearingTransferFacet.interface.fragments,
+                    ...clearingRedeemFacet.interface.fragments,
+                    ...clearingHoldCreationFacet.interface.fragments,
+                ],
+                signer_A
+            )
+            holdFacet = await ethers.getContractAt(
+                'Hold',
+                diamond.address,
+                signer_A
+            )
+            protectedPartitionsFacet = await ethers.getContractAt(
+                'ProtectedPartitions',
+                diamond.address
             )
 
             accessControlFacet = accessControlFacet.connect(signer_A)
@@ -819,6 +877,189 @@ describe('ERC3643 Tests', () => {
             })
         })
 
+        describe('Freeze', () => {
+            it('GIVEN a invalid address WHEN attempting to setAddressFrozen THEN transactions revert with ZeroAddressNotAllowed error', async () => {
+                await expect(
+                    erc3643Facet.setAddressFrozen(ADDRESS_ZERO, true)
+                ).to.be.rejectedWith('ZeroAddressNotAllowed')
+            })
+
+            it('GIVEN a valid address WHEN setAddressFrozen AND blacklist THEN address should be added (freeze) and removed (unfreeze) from control list', async () => {
+                await expect(erc3643Facet.setAddressFrozen(account_B, true))
+                    .to.emit(erc3643Facet, 'AddressFrozen')
+                    .withArgs(account_B, true, account_A)
+
+                let isInControlList =
+                    await controlList.isInControlList(account_B)
+                expect(isInControlList).to.equal(true)
+                await expect(erc3643Facet.setAddressFrozen(account_B, false))
+                    .to.emit(erc3643Facet, 'AddressFrozen')
+                    .withArgs(account_B, false, account_A)
+                isInControlList = await controlList.isInControlList(account_B)
+                expect(isInControlList).to.equal(false)
+            })
+
+            it('GIVEN a valid address WHEN setAddressFrozen AND whitelist THEN address should be removed (freeze) and added (unfreeze) to control list', async () => {
+                const rbacFreezer: Rbac = {
+                    role: FREEZE_MANAGER_ROLE,
+                    members: [account_A],
+                }
+                const rbacControlList: Rbac = {
+                    role: CONTROL_LIST_ROLE,
+                    members: [account_A],
+                }
+                const init_rbacs = [rbacFreezer, rbacControlList]
+                const newDiamond = await deployEquityFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList: true,
+                    isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
+                    isMultiPartition: false,
+                    name,
+                    symbol,
+                    decimals,
+                    isin,
+                    votingRight: false,
+                    informationRight: false,
+                    liquidationRight: false,
+                    subscriptionRight: true,
+                    conversionRight: true,
+                    redemptionRight: true,
+                    putRight: false,
+                    dividendRight: 1,
+                    currency: '0x345678',
+                    numberOfShares: BigInt(MAX_SUPPLY),
+                    nominalValue: 100,
+                    regulationType: RegulationType.REG_S,
+                    regulationSubType: RegulationSubType.NONE,
+                    countriesControlListType: true,
+                    listOfCountries: 'ES,FR,CH',
+                    info: 'nothing',
+                    init_rbacs,
+                    factory,
+                    businessLogicResolver: businessLogicResolver.address,
+                })
+                erc3643Facet = await ethers.getContractAt(
+                    'ERC3643',
+                    newDiamond.address
+                )
+                controlList = await ethers.getContractAt(
+                    'ControlList',
+                    newDiamond.address
+                )
+                await controlList.addToControlList(account_B)
+                await expect(erc3643Facet.setAddressFrozen(account_B, true))
+                    .to.emit(erc3643Facet, 'AddressFrozen')
+                    .withArgs(account_B, true, account_A)
+
+                let isInControlList =
+                    await controlList.isInControlList(account_B)
+                expect(isInControlList).to.equal(false)
+                await expect(erc3643Facet.setAddressFrozen(account_B, false))
+                    .to.emit(erc3643Facet, 'AddressFrozen')
+                    .withArgs(account_B, false, account_A)
+                isInControlList = await controlList.isInControlList(account_B)
+                expect(isInControlList).to.equal(true)
+            })
+
+            it('GIVEN a invalid address WHEN attempting to freezePartialTokens THEN transactions revert with ZeroAddressNotAllowed error', async () => {
+                await expect(
+                    erc3643Facet.freezePartialTokens(ADDRESS_ZERO, 10)
+                ).to.be.rejectedWith('ZeroAddressNotAllowed')
+            })
+
+            it('GIVEN a valid address WHEN attempting to freezePartialTokens THEN transactions succeed', async () => {
+                const amount = 1000
+
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: '0x',
+                })
+                await expect(
+                    erc3643Facet.freezePartialTokens(account_E, amount)
+                )
+                    .to.emit(erc3643Facet, 'TokensFrozen')
+                    .withArgs(account_E, amount, DEFAULT_PARTITION)
+                expect(
+                    await erc3643Facet.getFrozenTokens(account_E)
+                ).to.be.equal(amount)
+                expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(0)
+            })
+
+            it('GIVEN a freeze amount greater than balance WHEN attempting to freezePartialTokens THEN transactions revert with InsufficientBalance error', async () => {
+                const amount = 1000
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: '0x',
+                })
+                await expect(
+                    erc3643Facet.freezePartialTokens(account_E, amount + 1)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'InsufficientBalance'
+                )
+            })
+
+            it('GIVEN a invalid address WHEN attempting to unfreezePartialTokens THEN transactions revert with ZeroAddressNotAllowed error', async () => {
+                await expect(
+                    erc3643Facet.unfreezePartialTokens(ADDRESS_ZERO, 10)
+                ).to.be.rejectedWith('ZeroAddressNotAllowed')
+            })
+
+            it('GIVEN a valid address WHEN attempting to unfreezePartialTokens THEN transactions succeed', async () => {
+                const amount = 1000
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: '0x',
+                })
+                await erc3643Facet.freezePartialTokens(account_E, amount)
+
+                expect(
+                    await erc3643Facet.getFrozenTokens(account_E)
+                ).to.be.equal(amount)
+                expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(0)
+
+                await expect(
+                    erc3643Facet.unfreezePartialTokens(account_E, amount)
+                )
+                    .to.emit(erc3643Facet, 'TokensUnfrozen')
+                    .withArgs(account_E, amount, DEFAULT_PARTITION)
+                expect(
+                    await erc3643Facet.getFrozenTokens(account_E)
+                ).to.be.equal(0)
+                expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(
+                    amount
+                )
+            })
+
+            it('GIVEN a freeze amount greater than balance WHEN attempting to unfreezePartialTokens THEN transactions revert with InsufficientFrozenBalance error', async () => {
+                const amount = 1000
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: '0x',
+                })
+                await erc3643Facet.freezePartialTokens(account_E, amount)
+                await expect(
+                    erc3643Facet.unfreezePartialTokens(account_E, amount + 1)
+                )
+                    .to.be.revertedWithCustomError(
+                        erc3643Facet,
+                        'InsufficientFrozenBalance'
+                    )
+                    .withArgs(account_E, amount + 1, amount, DEFAULT_PARTITION)
+            })
+        })
+
         it('GIVEN an initialized token WHEN retrieving the version THEN returns the right version', async () => {
             const retrieved_version = await erc3643Facet.version()
             expect(retrieved_version).to.equal('0')
@@ -865,116 +1106,6 @@ describe('ERC3643 Tests', () => {
             expect(retrieved_newCompliance).to.equal(compliance)
         })
 
-        it('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
-            await pauseFacet.pause()
-
-            await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
-                'TokenIsPaused'
-            )
-            await expect(erc3643Facet.setName(newSymbol)).to.be.rejectedWith(
-                'TokenIsPaused'
-            )
-            await expect(
-                erc3643Facet.setOnchainID(onchainId)
-            ).to.be.rejectedWith('TokenIsPaused')
-            await expect(
-                erc3643Facet.setIdentityRegistry(identityRegistry)
-            ).to.be.rejectedWith('TokenIsPaused')
-            await expect(
-                erc3643Facet.setCompliance(compliance)
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
-
-        it('GIVEN a invalid address WHEN attempting to freezePartialTokens THEN transactions revert with ZeroAddressNotAllowed error', async () => {
-            await expect(
-                erc3643Facet.freezePartialTokens(ADDRESS_ZERO, 10)
-            ).to.be.rejectedWith('ZeroAddressNotAllowed')
-        })
-
-        it('GIVEN a valid address WHEN attempting to freezePartialTokens THEN transactions succeed', async () => {
-            const amount = 1000
-
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_E,
-                value: amount,
-                data: '0x',
-            })
-            await expect(erc3643Facet.freezePartialTokens(account_E, amount))
-                .to.emit(erc3643Facet, 'TokensFrozen')
-                .withArgs(account_E, amount, DEFAULT_PARTITION)
-            expect(await erc3643Facet.getFrozenTokens(account_E)).to.be.equal(
-                amount
-            )
-            expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(0)
-        })
-
-        it('GIVEN a freeze amount greater than balance WHEN attempting to freezePartialTokens THEN transactions revert with InsufficientBalance error', async () => {
-            const amount = 1000
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_E,
-                value: amount,
-                data: '0x',
-            })
-            await expect(
-                erc3643Facet.freezePartialTokens(account_E, amount + 1)
-            ).to.be.revertedWithCustomError(erc3643Facet, 'InsufficientBalance')
-        })
-
-        it('GIVEN a invalid address WHEN attempting to unfreezePartialTokens THEN transactions revert with ZeroAddressNotAllowed error', async () => {
-            await expect(
-                erc3643Facet.unfreezePartialTokens(ADDRESS_ZERO, 10)
-            ).to.be.rejectedWith('ZeroAddressNotAllowed')
-        })
-
-        it('GIVEN a valid address WHEN attempting to unfreezePartialTokens THEN transactions succeed', async () => {
-            const amount = 1000
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_E,
-                value: amount,
-                data: '0x',
-            })
-            await erc3643Facet.freezePartialTokens(account_E, amount)
-
-            expect(await erc3643Facet.getFrozenTokens(account_E)).to.be.equal(
-                amount
-            )
-            expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(0)
-
-            await expect(erc3643Facet.unfreezePartialTokens(account_E, amount))
-                .to.emit(erc3643Facet, 'TokensUnfrozen')
-                .withArgs(account_E, amount, DEFAULT_PARTITION)
-            expect(await erc3643Facet.getFrozenTokens(account_E)).to.be.equal(0)
-            expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(amount)
-        })
-
-        it('GIVEN a freeze amount greater than balance WHEN attempting to unfreezePartialTokens THEN transactions revert with InsufficientFrozenBalance error', async () => {
-            const amount = 1000
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_E,
-                value: amount,
-                data: '0x',
-            })
-            await erc3643Facet.freezePartialTokens(account_E, amount)
-            await expect(
-                erc3643Facet.unfreezePartialTokens(account_E, amount + 1)
-            )
-                .to.be.revertedWithCustomError(
-                    erc3643Facet,
-                    'InsufficientFrozenBalance'
-                )
-                .withArgs(account_E, amount + 1, amount, DEFAULT_PARTITION)
-        })
-
-        it('GIVEN a invalid address WHEN attempting to setAddressFrozen THEN transactions revert with ZeroAddressNotAllowed error', async () => {
-            await expect(
-                erc3643Facet.setAddressFrozen(ADDRESS_ZERO)
-            ).to.be.rejectedWith('ZeroAddressNotAllowed')
-        })
-
         describe('Agent', () => {
             it('GIVEN an initialized token WHEN adding agent THEN addAgent emits AgentAdded with agent address', async () => {
                 expect(await erc3643Facet.addAgent(account_B))
@@ -988,6 +1119,77 @@ describe('ERC3643 Tests', () => {
                 const isAgent = await erc3643Facet.isAgent(account_B)
                 expect(isAgent).to.equal(true)
                 expect(hasRole).to.equal(true)
+            })
+
+            it('GIVEN a user with the agent role WHEN performing actions using ERC-1400 methods succeeds', async () => {
+                await accessControlFacet.grantRole(AGENT_ROLE, account_B)
+                erc1410Facet = erc1410Facet.connect(signer_B)
+                erc1644Facet = erc1644Facet.connect(signer_B)
+                const amount = 1000
+                await expect(
+                    erc1410Facet.issueByPartition({
+                        partition: DEFAULT_PARTITION,
+                        tokenHolder: account_E,
+                        value: 4 * amount,
+                        data: EMPTY_HEX_BYTES,
+                    })
+                ).to.emit(erc1410Facet, 'IssuedByPartition')
+                const canTransferFrom = await erc1594Facet.canTransferFrom(
+                    account_E,
+                    account_D,
+                    amount,
+                    '0x'
+                )
+                const canTransferByPartition =
+                    await erc1410Facet.canTransferByPartition(
+                        account_E,
+                        account_D,
+                        DEFAULT_PARTITION,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
+                const canRedeemFrom = await erc1410Facet.canRedeemByPartition(
+                    account_E,
+                    DEFAULT_PARTITION,
+                    amount,
+                    '0x',
+                    '0x'
+                )
+                expect(canTransferFrom[0]).to.equal(true)
+                expect(canTransferByPartition[0]).to.equal(true)
+                expect(canRedeemFrom[0]).to.equal(true)
+                await expect(
+                    erc1644Facet.controllerRedeem(account_E, amount, '0x', '0x')
+                ).to.emit(erc1644Facet, 'ControllerRedemption')
+                await expect(
+                    erc1410Facet.controllerRedeemByPartition(
+                        DEFAULT_PARTITION,
+                        account_E,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
+                ).to.emit(erc1410Facet, 'RedeemedByPartition')
+                await expect(
+                    erc1644Facet.controllerTransfer(
+                        account_E,
+                        account_D,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
+                ).to.emit(erc1644Facet, 'TransferByPartition')
+                await expect(
+                    erc1410Facet.controllerTransferByPartition(
+                        DEFAULT_PARTITION,
+                        account_E,
+                        account_D,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
+                ).to.emit(erc1410Facet, 'TransferByPartition')
             })
         })
 
@@ -1058,7 +1260,7 @@ describe('ERC3643 Tests', () => {
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
                 await expect(
-                    erc3643Facet.setAddressFrozen(account_A)
+                    erc3643Facet.setAddressFrozen(account_A, true)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
@@ -1096,13 +1298,31 @@ describe('ERC3643 Tests', () => {
 
             it('GIVEN a paused token WHEN setAddressFrozen THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
-                    erc3643Facet.setAddressFrozen(account_A)
+                    erc3643Facet.setAddressFrozen(account_A, true)
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused token WHEN attempting to addAgent THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     erc3643Facet.addAgent(account_A)
+                ).to.be.rejectedWith('TokenIsPaused')
+            })
+
+            it('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
+                await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
+                    'TokenIsPaused'
+                )
+                await expect(
+                    erc3643Facet.setName(newSymbol)
+                ).to.be.rejectedWith('TokenIsPaused')
+                await expect(
+                    erc3643Facet.setOnchainID(onchainId)
+                ).to.be.rejectedWith('TokenIsPaused')
+                await expect(
+                    erc3643Facet.setIdentityRegistry(identityRegistry)
+                ).to.be.rejectedWith('TokenIsPaused')
+                await expect(
+                    erc3643Facet.setCompliance(compliance)
                 ).to.be.rejectedWith('TokenIsPaused')
             })
         })
@@ -1234,6 +1454,463 @@ describe('ERC3643 Tests', () => {
                     balance_Before_Partition_1
                         .sub(_AMOUNT)
                         .mul(adjustFactor * adjustFactor)
+                )
+            })
+        })
+
+        describe('Recovery', () => {
+            it('GIVEN lost wallet WHEN calling recoveryAddress THEN normal balance and freeze balance and status is successfully transferred', async () => {
+                const amount = 1000
+                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: '0x',
+                })
+                await erc3643Facet.freezePartialTokens(account_E, amount / 2)
+                await controlList.addToControlList(account_E)
+                expect(
+                    await erc3643Facet.recoveryAddress(
+                        account_E,
+                        account_B,
+                        ADDRESS_ZERO
+                    )
+                )
+                    .to.emit(erc3643Facet, 'RecoverySuccess')
+                    .withArgs(account_E, account_B, ADDRESS_ZERO)
+                const balanceE = await erc1410Facet.balanceOf(account_E)
+                const balanceB = await erc1410Facet.balanceOf(account_B)
+                const frozenBalanceE =
+                    await erc3643Facet.getFrozenTokens(account_E)
+                const frozenBalanceB =
+                    await erc3643Facet.getFrozenTokens(account_B)
+                const controlListStatusE =
+                    await controlList.isInControlList(account_E)
+                const controlListStatusB =
+                    await controlList.isInControlList(account_B)
+                const isRecovered =
+                    await erc3643Facet.isAddressRecovered(account_E)
+                expect(balanceE).to.equal(0)
+                expect(balanceB).to.equal(amount / 2)
+                expect(frozenBalanceE).to.equal(0)
+                expect(frozenBalanceB).to.equal(amount / 2)
+                expect(controlListStatusE).to.equal(true)
+                expect(controlListStatusB).to.equal(true)
+                expect(isRecovered).to.equal(true)
+            })
+            it('GIVEN lost wallet WHEN calling recovery using a previously recovered address THEN recovered status is set to false', async () => {
+                await erc3643Facet.recoveryAddress(
+                    account_C,
+                    account_B,
+                    ADDRESS_ZERO
+                )
+                await erc3643Facet.recoveryAddress(
+                    account_B,
+                    account_C,
+                    ADDRESS_ZERO
+                )
+                const isRecoveredC =
+                    await erc3643Facet.isAddressRecovered(account_C)
+                expect(isRecoveredC).to.equal(false)
+            })
+
+            it('GIVEN a recovered address THEN operations should fail', async () => {
+                // Set up
+                await kycFacet.grantKyc(
+                    account_A,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_E
+                )
+                await kycFacet.grantKyc(
+                    account_B,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_E
+                )
+                await kycFacet.grantKyc(
+                    account_C,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_E
+                )
+                await accessControlFacet.grantRole(
+                    PROTECTED_PARTITIONS_ROLE,
+                    account_A
+                )
+                // Recover
+                await erc3643Facet.recoveryAddress(
+                    account_C,
+                    account_B,
+                    ADDRESS_ZERO
+                )
+                // Transfers
+                const amount = 1000
+                const basicTransferInfo = {
+                    to: account_B,
+                    value: amount,
+                }
+                await expect(
+                    erc1410Facet
+                        .connect(signer_C)
+                        .transferByPartition(
+                            DEFAULT_PARTITION,
+                            basicTransferInfo,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await expect(
+                    erc20Facet
+                        .connect(signer_C)
+                        .transfer(basicTransferInfo.to, amount)
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                const packedData = ethers.utils.defaultAbiCoder.encode(
+                    ['bytes32', 'bytes32'],
+                    [PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION]
+                )
+                const packedDataWithoutPrefix = packedData.slice(2)
+
+                const ProtectedPartitionRole_1 = ethers.utils.keccak256(
+                    '0x' + packedDataWithoutPrefix
+                )
+                await accessControlFacet.grantRole(
+                    ProtectedPartitionRole_1,
+                    account_A
+                )
+                await protectedPartitionsFacet.protectPartitions()
+                await expect(
+                    erc1410Facet.protectedTransferFromByPartition(
+                        DEFAULT_PARTITION,
+                        account_C,
+                        account_B,
+                        amount,
+                        MAX_UINT256,
+                        1,
+                        '0x1234'
+                    )
+                ).to.be.rejectedWith('WalletRecovered')
+                await protectedPartitionsFacet.unprotectPartitions()
+                await erc1410Facet.authorizeOperator(account_C)
+                const operatorTransferData = {
+                    partition: DEFAULT_PARTITION,
+                    from: account_A,
+                    to: account_B,
+                    value: amount,
+                    data: EMPTY_HEX_BYTES,
+                    operatorData: EMPTY_HEX_BYTES,
+                }
+                await expect(
+                    erc1410Facet
+                        .connect(signer_C)
+                        .operatorTransferByPartition(operatorTransferData)
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await expect(
+                    erc1594Facet
+                        .connect(signer_C)
+                        .transferWithData(account_A, amount, EMPTY_HEX_BYTES)
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await expect(
+                    erc1594Facet
+                        .connect(signer_C)
+                        .transferFromWithData(
+                            account_A,
+                            account_B,
+                            amount,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                // Allowance
+                await expect(
+                    erc20Facet
+                        .connect(signer_C)
+                        .increaseAllowance(account_A, amount)
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await expect(
+                    erc20Facet.connect(signer_C).approve(account_A, amount)
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await expect(
+                    erc1410Facet.connect(signer_C).authorizeOperator(account_A)
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await expect(
+                    erc1410Facet
+                        .connect(signer_C)
+                        .authorizeOperatorByPartition(
+                            DEFAULT_PARTITION,
+                            account_A
+                        )
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                // Redeems
+                await expect(
+                    erc1594Facet
+                        .connect(signer_C)
+                        .redeem(amount, EMPTY_HEX_BYTES)
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await protectedPartitionsFacet.protectPartitions()
+                await expect(
+                    erc1410Facet.protectedRedeemFromByPartition(
+                        DEFAULT_PARTITION,
+                        account_C,
+                        amount,
+                        MAX_UINT256,
+                        1,
+                        '0x1234'
+                    )
+                ).to.be.rejectedWith('WalletRecovered')
+                await protectedPartitionsFacet.unprotectPartitions()
+                await expect(
+                    erc1410Facet
+                        .connect(signer_C)
+                        .operatorRedeemByPartition(
+                            DEFAULT_PARTITION,
+                            account_A,
+                            amount,
+                            EMPTY_HEX_BYTES,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await expect(
+                    erc1410Facet
+                        .connect(signer_C)
+                        .redeemByPartition(
+                            DEFAULT_PARTITION,
+                            amount,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.rejectedWith('WalletRecovered')
+                // Issue
+                await expect(
+                    erc1594Facet.issue(account_C, amount, EMPTY_HEX_BYTES)
+                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                await expect(
+                    erc1410Facet.issueByPartition({
+                        partition: DEFAULT_PARTITION,
+                        tokenHolder: account_C,
+                        value: amount,
+                        data: EMPTY_HEX_BYTES,
+                    })
+                ).to.be.rejectedWith('WalletRecovered')
+                // Locks
+                await expect(
+                    lockFacet.lock(amount, account_C, MAX_UINT256)
+                ).to.be.rejectedWith('WalletRecovered')
+                await expect(
+                    lockFacet.lockByPartition(
+                        DEFAULT_PARTITION,
+                        amount,
+                        account_C,
+                        MAX_UINT256
+                    )
+                ).to.be.rejectedWith('WalletRecovered')
+
+                // Clearings
+                await clearingActionsFacet.activateClearing()
+                const clearingOperation = {
+                    partition: DEFAULT_PARTITION,
+                    expirationTimestamp: MAX_UINT256,
+                    data: EMPTY_HEX_BYTES,
+                }
+                const clearingOperationFrom = {
+                    clearingOperation: clearingOperation,
+                    from: account_A,
+                    operatorData: EMPTY_HEX_BYTES,
+                }
+                // Clearings - Transfers
+                await expect(
+                    clearingFacet
+                        .connect(signer_C)
+                        .clearingTransferByPartition(
+                            clearingOperation,
+                            amount,
+                            account_A
+                        )
+                ).to.be.rejectedWith('WalletRecovered')
+                await expect(
+                    clearingFacet
+                        .connect(signer_C)
+                        .clearingTransferFromByPartition(
+                            clearingOperationFrom,
+                            amount,
+                            account_A
+                        )
+                ).to.be.rejectedWith('WalletRecovered')
+                const protectedClearingOperation = {
+                    clearingOperation: clearingOperation,
+                    from: account_C,
+                    deadline: MAX_UINT256,
+                    nonce: 1,
+                }
+                await protectedPartitionsFacet.protectPartitions()
+                await expect(
+                    clearingFacet.protectedClearingTransferByPartition(
+                        protectedClearingOperation,
+                        amount,
+                        account_A,
+                        '0x1234'
+                    )
+                ).to.be.rejectedWith('WalletRecovered')
+                await protectedPartitionsFacet.unprotectPartitions()
+                // Clearings - Holds
+                const hold = {
+                    amount: amount,
+                    expirationTimestamp: MAX_UINT256,
+                    escrow: account_B,
+                    to: account_C,
+                    data: EMPTY_HEX_BYTES,
+                }
+                await expect(
+                    clearingFacet
+                        .connect(signer_C)
+                        .clearingCreateHoldByPartition(clearingOperation, hold)
+                ).to.be.rejectedWith('WalletRecovered')
+                await expect(
+                    clearingFacet
+                        .connect(signer_C)
+                        .clearingCreateHoldFromByPartition(
+                            clearingOperationFrom,
+                            hold
+                        )
+                ).to.be.rejectedWith('WalletRecovered')
+                await protectedPartitionsFacet.protectPartitions()
+                await expect(
+                    clearingFacet.protectedClearingCreateHoldByPartition(
+                        protectedClearingOperation,
+                        hold,
+                        '0x1234'
+                    )
+                ).to.be.rejectedWith('WalletRecovered')
+                await protectedPartitionsFacet.unprotectPartitions()
+                // Clearings - Redeems
+                await expect(
+                    clearingFacet
+                        .connect(signer_C)
+                        .clearingRedeemByPartition(clearingOperation, amount)
+                ).to.be.rejectedWith('WalletRecovered')
+                await expect(
+                    clearingFacet
+                        .connect(signer_C)
+                        .clearingRedeemFromByPartition(
+                            clearingOperationFrom,
+                            amount
+                        )
+                ).to.be.rejectedWith('WalletRecovered')
+                await protectedPartitionsFacet.protectPartitions()
+                await expect(
+                    clearingFacet.protectedClearingRedeemByPartition(
+                        protectedClearingOperation,
+                        amount,
+                        '0x1234'
+                    )
+                ).to.be.rejectedWith('WalletRecovered')
+                await protectedPartitionsFacet.unprotectPartitions()
+                await clearingActionsFacet.deactivateClearing()
+                // Holds
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .createHoldByPartition(DEFAULT_PARTITION, hold)
+                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .createHoldFromByPartition(
+                            DEFAULT_PARTITION,
+                            account_A,
+                            hold,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                await protectedPartitionsFacet.protectPartitions()
+                const protectedHold = {
+                    hold: hold,
+                    deadline: MAX_UINT256,
+                    nonce: 1,
+                }
+                await expect(
+                    holdFacet.protectedCreateHoldByPartition(
+                        DEFAULT_PARTITION,
+                        account_C,
+                        protectedHold,
+                        '0x1234'
+                    )
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await protectedPartitionsFacet.unprotectPartitions()
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .operatorCreateHoldByPartition(
+                            DEFAULT_PARTITION,
+                            account_A,
+                            hold,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                // Can transfer
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: amount,
+                    data: '0x',
+                })
+                let canTransferByPartition = await erc1410Facet
+                    .connect(signer_C)
+                    .canTransferByPartition(
+                        account_A,
+                        account_C,
+                        DEFAULT_PARTITION,
+                        amount,
+                        EMPTY_HEX_BYTES,
+                        EMPTY_HEX_BYTES
+                    )
+                expect(canTransferByPartition[1]).to.equal(
+                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                )
+                canTransferByPartition = await erc1410Facet
+                    .connect(signer_C)
+                    .canTransferByPartition(
+                        account_C,
+                        account_A,
+                        DEFAULT_PARTITION,
+                        amount,
+                        EMPTY_HEX_BYTES,
+                        EMPTY_HEX_BYTES
+                    )
+                expect(canTransferByPartition[1]).to.equal(
+                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                )
+                const canTransfer = await erc1594Facet
+                    .connect(signer_C)
+                    .canTransfer(account_A, amount, EMPTY_HEX_BYTES)
+                expect(canTransfer[1]).to.equal(
+                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                )
+                // Can redeem
+                let canRedeemByPartition = await erc1410Facet
+                    .connect(signer_C)
+                    .canRedeemByPartition(
+                        account_A,
+                        DEFAULT_PARTITION,
+                        amount,
+                        EMPTY_HEX_BYTES,
+                        EMPTY_HEX_BYTES
+                    )
+                expect(canRedeemByPartition[1]).to.equal(
+                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                )
+                canRedeemByPartition = await erc1410Facet
+                    .connect(signer_C)
+                    .canRedeemByPartition(
+                        account_C,
+                        DEFAULT_PARTITION,
+                        amount,
+                        EMPTY_HEX_BYTES,
+                        EMPTY_HEX_BYTES
+                    )
+                expect(canRedeemByPartition[1]).to.equal(
+                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
                 )
             })
         })
