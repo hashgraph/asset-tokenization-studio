@@ -202,24 +202,22 @@
    limitations under the License.
 
 */
+import { Command } from '../../../../../../../core/command/Command.js';
+import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+export class FreezePartialTokensResponse implements CommandResponse {
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
+}
 
-import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
-
-abstract contract ERC3643StorageWrapper is ERC20StorageWrapper2 {
-    function _setName(
-        string calldata _name
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.name = _name;
-    }
-
-    function _setSymbol(
-        string calldata _symbol
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.symbol = _symbol;
-    }
+export class FreezePartialTokensCommand extends Command<FreezePartialTokensResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly amount: string,
+    public readonly targetId: string,
+  ) {
+    super();
+  }
 }

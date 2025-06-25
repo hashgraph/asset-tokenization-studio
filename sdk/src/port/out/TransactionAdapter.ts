@@ -924,6 +924,62 @@ interface IExternalKycListsMockAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface ITokenMetadataTransactionAdapter {
+  setName(
+    security: EvmAddress,
+    name: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  setSymbol(
+    security: EvmAddress,
+    symbol: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse>;
+  setOnchainID(
+    security: EvmAddress,
+    onchainID: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
+interface IComplianceTransactionAdapter {
+  setCompliance(
+    security: EvmAddress,
+    compliance: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  compliance(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
+interface IIdentityRegistryTransactionAdapter {
+  setIdentityRegistry(
+    security: EvmAddress,
+    identityRegistry: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  identityRegistry(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+interface IERC3643Adapter {
+  freezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  unfreezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -939,7 +995,12 @@ export default abstract class TransactionAdapter
     IExternalControlListsAdapter,
     IExternalControlListsMockAdapter,
     IExternalKycListsAdapter,
-    IExternalKycListsMockAdapter
+    IExternalKycListsMockAdapter,
+    ITokenMetadataTransactionAdapter,
+    IComplianceTransactionAdapter,
+    IIdentityRegistryTransactionAdapter,
+    ITokenMetadataTransactionAdapter,
+    IERC3643Adapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1809,6 +1870,71 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   createExternalKycListMock(): Promise<string | TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setName(
+    security: EvmAddress,
+    name: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setSymbol(
+    security: EvmAddress,
+    symbol: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+
+  freezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+
+  unfreezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setIdentityRegistry(
+    security: EvmAddress,
+    identityRegistry: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  identityRegistry(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setCompliance(
+    security: EvmAddress,
+    compliance: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  compliance(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setOnchainID(
+    security: EvmAddress,
+    onchainID: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }

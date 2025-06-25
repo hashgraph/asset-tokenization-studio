@@ -397,6 +397,17 @@ import { GrantKycMockCommandHandler } from '../app/usecase/command/security/exte
 import { RevokeKycMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommandHandler.js';
 import { GetKycStatusMockQueryHandler } from '../app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQueryHandler.js';
 import { CreateExternalKycListMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommandHandler.js';
+import { SetNameCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommandHandler.js';
+import { SetSymbolCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommandHandler.js';
+import { SetComplianceCommandHandler } from '../app/usecase/command/security/compliance/setCompliance/SetComplianceCommandHandler.js';
+import { SetIdentityRegistryCommandHandler } from '../app/usecase/command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommandHandler.js';
+import { OnchainIDQueryHandler } from '../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQueryHandler.js';
+import { IdentityRegistryQueryHandler } from '../app/usecase/query/security/identityRegistry/IdentityRegistryQueryHandler.js';
+import { ComplianceQueryHandler } from '../app/usecase/query/security/compliance/compliance/ComplianceQueryHandler.js';
+import { SetOnchainIDCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommandHandler.js';
+import { FreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommandHandler.js';
+import { UnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommandHandler.js';
+import { GetFrozenPartialTokensQueryHandler } from '../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -761,6 +772,34 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: DeactivateInternalKycCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetNameCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetSymbolCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetComplianceCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetIdentityRegistryCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetOnchainIDCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: FreezePartialTokensCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UnfreezePartialTokensCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [
@@ -1091,6 +1130,22 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsInternalKycActivatedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: OnchainIDQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IdentityRegistryQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: ComplianceQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetFrozenPartialTokensQueryHandler,
   },
 ];
 

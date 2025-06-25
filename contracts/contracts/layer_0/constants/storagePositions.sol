@@ -282,4 +282,6 @@ bytes32 constant _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION = 0x3553e9f946bd0c6ac
 
 // keccak256('security.token.standard.kycManagement.storage');
 bytes32 constant _KYC_MANAGEMENT_STORAGE_POSITION = 0x57364604d3fde2768df7beea76ca84783455ba461f6f84450864597901db12b9;
-// solhint-enable max-line-length
+
+// keccak256('security.token.standard.erc3643.storage');
+bytes32 constant _ERC3643_STORAGE_POSITION = 0xba82ce8c38a926a01a84988222ab779cf1852f228ccaafd725c8d06d090d0906;

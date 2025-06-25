@@ -243,8 +243,11 @@ abstract contract AdjustBalancesStorageWrapper1 is
         // Clearings
         mapping(address => uint256) labafClearedAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) labafClearedAmountByAccountAndPartition;
-        // solhint-disable-next-line
+        // solhint-disable max-line-length
         mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => mapping(uint256 => uint256)))) labafClearedAmountByAccountPartitionTypeAndId;
+        // freezeByAccountPartitionAndId
+        mapping(address => uint256) labafFrozenAmountByAccount;
+        mapping(address => mapping(bytes32 => uint256)) labafFrozenAmountByAccountAndPartition;
     }
 
     modifier validateFactor(uint256 _factor) {
@@ -345,6 +348,25 @@ abstract contract AdjustBalancesStorageWrapper1 is
         uint256 _labaf
     ) internal {
         _adjustBalancesStorage().labafHeldAmountByAccountAndPartition[
+            _tokenHolder
+        ][_partition] = _labaf;
+    }
+
+    function _setTotalFreezeLabaf(
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal {
+        _adjustBalancesStorage().labafFrozenAmountByAccount[
+            _tokenHolder
+        ] = _labaf;
+    }
+
+    function _setTotalFreezeLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal {
+        _adjustBalancesStorage().labafFrozenAmountByAccountAndPartition[
             _tokenHolder
         ][_partition] = _labaf;
     }
@@ -534,6 +556,23 @@ abstract contract AdjustBalancesStorageWrapper1 is
     ) internal view returns (uint256 labaf_) {
         return
             _adjustBalancesStorage().labafHeldAmountByAccountAndPartition[
+                _tokenHolder
+            ][_partition];
+    }
+
+    function _getTotalFrozenLabaf(
+        address _tokenHolder
+    ) internal view returns (uint256 labaf_) {
+        return
+            _adjustBalancesStorage().labafFrozenAmountByAccount[_tokenHolder];
+    }
+
+    function _getTotalFrozenLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view returns (uint256 labaf_) {
+        return
+            _adjustBalancesStorage().labafFrozenAmountByAccountAndPartition[
                 _tokenHolder
             ][_partition];
     }

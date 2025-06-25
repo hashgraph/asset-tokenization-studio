@@ -250,14 +250,15 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         // out of bound error).
         // Note- There is no operator used for the execution of this call so `_operator` value in
         // in event is address(0) same for the `_operatorData`
-        _transferByPartition(
-            msg.sender,
-            _basicTransferInfo,
-            _partition,
-            _data,
-            address(0),
-            ''
-        );
+        return
+            _transferByPartition(
+                msg.sender,
+                _basicTransferInfo,
+                _partition,
+                _data,
+                address(0),
+                ''
+            );
     }
 
     /**
