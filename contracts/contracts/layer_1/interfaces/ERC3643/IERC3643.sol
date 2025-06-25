@@ -255,6 +255,19 @@ interface IERC3643 {
      */
     event AgentRemoved(address indexed _agent);
 
+    /**
+     *  @dev This event is emitted when the wallet of an investor is frozen or unfrozen
+     *  @dev The event is emitted by setAddressFrozen and batchSetAddressFrozen functions
+     *  @param userAddress Is the wallet of the investor that is concerned by the freezing status
+     *  @param isFrozen Is the freezing status of the wallet
+     *  @param owner Is the address of the agent who called the function to freeze the wallet
+     */
+    event AddressFrozen(
+        address indexed userAddress,
+        bool indexed isFrozen,
+        address indexed owner
+    );
+
     error InsufficientFrozenBalance(
         address user,
         uint256 requestedUnfreeze,
@@ -364,13 +377,29 @@ interface IERC3643 {
      * @dev Freezes the user's address entirely, disabling all token operations.
      * Emits a TokensFrozen event.
      */
-    function setAddressFrozen(address _userAddress) external;
+    function setAddressFrozen(
+        address _userAddress,
+        bool _freezeStatus
+    ) external;
 
+    /**
+     * @notice Gives an account the agent role
+     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
+     * @dev Can only be called by the role admin
+     */
     function addAgent(address _agent) external;
 
+    /**
+     * @notice Revokes an account the agent role
+     * @dev Can only be called by the role admin
+     */
     function removeAgent(address _agent) external;
 
+    /**
+     * @dev Checks if an account has the agent role
+     */
     function isAgent(address _agent) external view returns (bool);
+
     /**
      * @dev Returns the onchainID address associated with the token.
      */

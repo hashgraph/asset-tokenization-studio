@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
+import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
@@ -268,9 +268,11 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
         // TODO: Better to check all in one boolean expression defined in a different pure function.
-        if (
-            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
-        ) {
+
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _CONTROLLER_ROLE;
+        roles[1] = _AGENT_ROLE;
+        if (_from != _msgSender() && !_hasAnyRole(roles, _msgSender())) {
             if (!_isAuthorized(_partition, _msgSender(), _from)) {
                 return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
             }

@@ -215,6 +215,21 @@ import {
 } from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
 
 abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
+    function _setAddresFrozen(
+        address _userAddress,
+        bool _freezeStatus
+    ) internal {
+        if (_freezeStatus) {
+            _getControlListType()
+                ? _removeFromControlList(_userAddress)
+                : _addToControlList(_userAddress);
+            return;
+        }
+        _getControlListType()
+            ? _addToControlList(_userAddress)
+            : _removeFromControlList(_userAddress);
+    }
+
     function _addAgent(address _agent) internal {
         if (!_grantRole(_AGENT_ROLE, _agent)) {
             revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
