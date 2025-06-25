@@ -346,6 +346,13 @@ import {
   SET_ONCHAIN_ID_GAS,
   SET_IDENTITY_REGISTRY_GAS,
   SET_COMPLIANCE_GAS,
+  BATCH_TRANSFER_GAS,
+  BATCH_FORCED_TRANSFER_GAS,
+  BATCH_MINT_GAS,
+  BATCH_BURN_GAS,
+  BATCH_SET_ADDRESS_FROZEN_GAS,
+  BATCH_FREEZE_PARTIAL_TOKENS_GAS,
+  BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
   RECOVERY_ADDRESS_GAS,
   EVM_ZERO_ADDRESS,
   ADD_AGENT_GAS,
@@ -4061,6 +4068,229 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(ADD_AGENT_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async batchTransfer(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    toList: EvmAddress[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'batchTransfer';
+    LogService.logTrace(
+      `Batch transferring ${amountList.length} tokens from ${security.toString()} to ${toList.map((item) => item.toString())}`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        toList.map((addr) => addr.toString()),
+        amountList.map((amount) => amount.toBigNumber()),
+      ],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(BATCH_TRANSFER_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async batchForcedTransfer(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    fromList: EvmAddress[],
+    toList: EvmAddress[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'batchForcedTransfer';
+    LogService.logTrace(
+      `Batch forced transferring ${amountList.length} tokens from ${fromList.map((item) => item.toString())} to ${toList.map((item) => item.toString())}`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        fromList.map((addr) => addr.toString()),
+        toList.map((addr) => addr.toString()),
+        amountList.map((amount) => amount.toBigNumber()),
+      ],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(BATCH_FORCED_TRANSFER_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async batchMint(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    toList: EvmAddress[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'batchMint';
+    LogService.logTrace(
+      `Batch minting ${amountList.length} tokens to ${toList.map((item) => item.toString())}`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        toList.map((addr) => addr.toString()),
+        amountList.map((amount) => amount.toBigNumber()),
+      ],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(BATCH_MINT_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async batchBurn(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'batchBurn';
+    LogService.logTrace(
+      `Batch burning ${amountList.length} tokens from ${targetList.map((item) => item.toString())}`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        targetList.map((addr) => addr.toString()),
+        amountList.map((amount) => amount.toBigNumber()),
+      ],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(BATCH_BURN_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async batchSetAddressFrozen(
+    security: EvmAddress,
+    freezeList: boolean[],
+    targetList: EvmAddress[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'batchSetAddressFrozen';
+    LogService.logTrace(
+      `Batch setting freeze status for ${targetList.length} addresses`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetList.map((addr) => addr.toString()), freezeList],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(BATCH_SET_ADDRESS_FROZEN_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async batchFreezePartialTokens(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'batchFreezePartialTokens';
+    LogService.logTrace(
+      `Batch freezing partial tokens for ${targetList.length} addresses`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        targetList.map((addr) => addr.toString()),
+        amountList.map((amount) => amount.toBigNumber()),
+      ],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(BATCH_FREEZE_PARTIAL_TOKENS_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async batchUnfreezePartialTokens(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'batchUnfreezePartialTokens';
+    LogService.logTrace(
+      `Batch unfreezing partial tokens for ${targetList.length} addresses`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        targetList.map((addr) => addr.toString()),
+        amountList.map((amount) => amount.toBigNumber()),
+      ],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(BATCH_UNFREEZE_PARTIAL_TOKENS_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

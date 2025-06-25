@@ -371,6 +371,13 @@ import RecoveryAddressRequest from './security/operations/recovery/RecoveryAddre
 import IsAddressRecoveredRequest from './security/operations/recovery/IsAddressRecoveredRequest.js';
 import AddAgentRequest from './security/operations/agent/AddAgentRequest.js';
 import RemoveAgentRequest from './security/operations/agent/RemoveAgentRequest.js';
+import BatchBurnRequest from './security/operations/erc3643/BatchBurnRequest.js';
+import BatchForcedTransferRequest from './security/operations/erc3643/BatchForcedTransferRequest.js';
+import BatchFreezePartialTokensRequest from './security/operations/erc3643/BatchFreezePartialTokensRequest.js';
+import BatchMintRequest from './security/operations/erc3643/BatchMintRequest.js';
+import BatchSetAddressFrozenRequest from './security/operations/erc3643/BatchSetAddressFrozenRequest.js';
+import BatchTransferRequest from './security/operations/erc3643/BatchTransferRequest.js';
+import BatchUnfreezePartialTokensRequest from './security/operations/erc3643/BatchUnfreezePartialTokensRequest.js';
 
 export {
   CreateEquityRequest,
@@ -540,4 +547,11 @@ export {
   IsAddressRecoveredRequest,
   AddAgentRequest,
   RemoveAgentRequest,
+  BatchBurnRequest,
+  BatchForcedTransferRequest,
+  BatchFreezePartialTokensRequest,
+  BatchMintRequest,
+  BatchSetAddressFrozenRequest,
+  BatchTransferRequest,
+  BatchUnfreezePartialTokensRequest,
 };

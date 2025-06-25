@@ -352,6 +352,13 @@ import { GetClearingCreateHoldForByPartitionQuery } from '../../../app/usecase/q
 import { GetClearingRedeemForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery.js';
 import { GetClearingTransferForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery.js';
 import {
+  BatchBurnRequest,
+  BatchForcedTransferRequest,
+  BatchFreezePartialTokensRequest,
+  BatchMintRequest,
+  BatchSetAddressFrozenRequest,
+  BatchTransferRequest,
+  BatchUnfreezePartialTokensRequest,
   ComplianceRequest,
   IdentityRegistryRequest,
   OnchainIDRequest,
@@ -389,6 +396,13 @@ import AddAgentRequest from '../request/security/operations/agent/AddAgentReques
 import RemoveAgentRequest from '../request/security/operations/agent/RemoveAgentRequest.js';
 import { AddAgentCommand } from '../../../app/usecase/command/security/operations/agent/addAgent/AddAgentCommand.js';
 import { RemoveAgentCommand } from '../../../app/usecase/command/security/operations/agent/removeAgent/RemoveAgentCommand.js';
+import { BatchTransferCommand } from '../../../app/usecase/command/security/operations/erc3643/batchTransfer/BatchTransferCommand.js';
+import { BatchMintCommand } from '../../../app/usecase/command/security/operations/erc3643/batchMint/BatchMintCommand.js';
+import { BatchBurnCommand } from '../../../app/usecase/command/security/operations/erc3643/batchBurn/BatchBurnCommand.js';
+import { BatchSetAddressFrozenCommand } from '../../../app/usecase/command/security/operations/erc3643/batchSetAddressFrozen/BatchSetAddressFrozenCommand.js';
+import { BatchFreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/batchFreezePartialTokens/BatchFreezePartialTokensCommand.js';
+import { BatchForcedTransferCommand } from '../../../app/usecase/command/security/operations/erc3643/batchForcedTransfer/BatchForcedTransferCommand.js';
+import { BatchUnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -595,6 +609,27 @@ interface ISecurityInPort {
   removeAgent(
     request: RemoveAgentRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  batchTransfer(
+    request: BatchTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchForcedTransfer(
+    request: BatchForcedTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchMint(
+    request: BatchMintRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchBurn(
+    request: BatchBurnRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchSetAddressFrozen(
+    request: BatchSetAddressFrozenRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchFreezePartialTokens(
+    request: BatchFreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchUnfreezePartialTokens(
+    request: BatchUnfreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -605,6 +640,105 @@ class SecurityInPort implements ISecurityInPort {
       MirrorNodeAdapter,
     ),
   ) {}
+
+  @LogError
+  async batchTransfer(
+    request: BatchTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('BatchTransferRequest', request);
+    return await this.commandBus.execute(
+      new BatchTransferCommand(
+        request.securityId,
+        request.amountList,
+        request.toList,
+      ),
+    );
+  }
+  @LogError
+  async batchForcedTransfer(
+    request: BatchForcedTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('BatchForcedTransferRequest', request);
+    return await this.commandBus.execute(
+      new BatchForcedTransferCommand(
+        request.securityId,
+        request.amountList,
+        request.fromList,
+        request.toList,
+      ),
+    );
+  }
+  @LogError
+  async batchMint(
+    request: BatchMintRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('BatchMintRequest', request);
+    return await this.commandBus.execute(
+      new BatchMintCommand(
+        request.securityId,
+        request.amountList,
+        request.toList,
+      ),
+    );
+  }
+  @LogError
+  async batchBurn(
+    request: BatchBurnRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('BatchBurnRequest', request);
+    return await this.commandBus.execute(
+      new BatchBurnCommand(
+        request.securityId,
+        request.amountList,
+        request.targetList,
+      ),
+    );
+  }
+  @LogError
+  async batchSetAddressFrozen(
+    request: BatchSetAddressFrozenRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('BatchSetAddressFrozenRequest', request);
+    return await this.commandBus.execute(
+      new BatchSetAddressFrozenCommand(
+        request.securityId,
+        request.freezeList,
+        request.targetList,
+      ),
+    );
+  }
+  @LogError
+  async batchFreezePartialTokens(
+    request: BatchFreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(
+      'BatchFreezePartialTokensRequest',
+      request,
+    );
+    return await this.commandBus.execute(
+      new BatchFreezePartialTokensCommand(
+        request.securityId,
+        request.amountList,
+        request.targetList,
+      ),
+    );
+  }
+  @LogError
+  async batchUnfreezePartialTokens(
+    request: BatchUnfreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(
+      'BatchUnfreezePartialTokensRequest',
+      request,
+    );
+    return await this.commandBus.execute(
+      new BatchUnfreezePartialTokensCommand(
+        request.securityId,
+        request.amountList,
+        request.targetList,
+      ),
+    );
+  }
 
   @LogError
   async lock(
