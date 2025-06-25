@@ -203,171 +203,131 @@
 
 */
 
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { FreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand';
-import FreezePartialTokensRequest from 'port/in/request/security/operations/erc3643/FreezePartialTokensRequest';
-import { UnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand';
-import UnfreezePartialTokensRequest from 'port/in/request/security/operations/erc3643/UnfreezePartialTokensRequest';
-import { GetFrozenPartialTokensQuery } from 'app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
-import { BigNumber } from 'ethers';
+import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import {
-  BatchBurnRequest,
-  BatchForcedTransferRequest,
-  BatchFreezePartialTokensRequest,
-  BatchMintRequest,
-  BatchSetAddressFrozenRequest,
-  BatchTransferRequest,
-  BatchUnfreezePartialTokensRequest,
-} from 'index';
-import { BatchTransferCommand } from 'app/usecase/command/security/operations/erc3643/batchTransfer/BatchTransferCommand';
-import { BatchBurnCommand } from 'app/usecase/command/security/operations/erc3643/batchBurn/BatchBurnCommand';
-import { BatchForcedTransferCommand } from 'app/usecase/command/security/operations/erc3643/batchForcedTransfer/BatchForcedTransferCommand';
-import { BatchFreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/batchFreezePartialTokens/BatchFreezePartialTokensCommand';
-import { BatchMintCommand } from 'app/usecase/command/security/operations/erc3643/batchMint/BatchMintCommand';
-import { BatchSetAddressFrozenCommand } from 'app/usecase/command/security/operations/erc3643/batchSetAddressFrozen/BatchSetAddressFrozenCommand';
-import { BatchUnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand';
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import Account from '../../../../../../../domain/context/account/Account.js';
 
-export const FreezePartialTokensCommandFixture =
-  createFixture<FreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
+import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+import { BatchBurnCommandError } from './error/BatchBurnCommandError.js';
+import { BatchBurnCommand, BatchBurnResponse } from './BatchBurnCommand.js';
+import { BatchBurnCommandHandler } from './BatchBurnCommandHandler.js';
+
+import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import SecurityService from '../../../../../../service/security/SecurityService.js';
+import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { Security } from '../../../../../../../domain/context/security/Security.js';
+import { BatchBurnCommandFixture } from '../../../../../../../../__tests__/fixtures/erc3643/ERC3643Fixture.js';
+
+describe('BatchBurnCommandHandler', () => {
+  let handler: BatchBurnCommandHandler;
+  let command: BatchBurnCommand;
+
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+  const securityServiceMock = createMock<SecurityService>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const security = new Security(SecurityPropsFixture.create());
+
+  beforeEach(() => {
+    handler = new BatchBurnCommandHandler(
+      securityServiceMock,
+      accountServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+      contractServiceMock,
     );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command = BatchBurnCommandFixture.create();
   });
 
-export const FreezePartialTokensRequestFixture =
-  createFixture<FreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
-export const UnfreezePartialTokensCommandFixture =
-  createFixture<UnfreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
+  describe('execute', () => {
+    it('throws BatchBurnCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(BatchBurnCommandError);
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while batch burn: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
+    it('should successfully batch burn', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(evmAddress);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+      validationServiceMock.checkPause.mockResolvedValue(undefined);
+      validationServiceMock.checkClearingDeactivated.mockResolvedValue(
+        undefined,
+      );
+      validationServiceMock.checkDecimals.mockResolvedValue(undefined);
+      securityServiceMock.get.mockResolvedValue(security);
+      transactionServiceMock.getHandler().batchBurn.mockResolvedValue({
+        id: transactionId,
+      });
+
+      const result = await handler.execute(command);
+
+      expect(result).toBeInstanceOf(BatchBurnResponse);
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+      expect(
+        validationServiceMock.checkClearingDeactivated,
+      ).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
+      expect(
+        transactionServiceMock.getHandler().batchBurn,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        command.securityId,
+      );
+
+      expect(
+        transactionServiceMock.getHandler().batchBurn,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        [BigDecimal.fromString(command.amountList[0], security.decimals)],
+        [evmAddress],
+        command.securityId,
+      );
+    });
   });
-
-export const UnfreezePartialTokensRequestFixture =
-  createFixture<UnfreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const GetFrozenPartialTokensQueryFixture =
-  createFixture<GetFrozenPartialTokensQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const BatchTransferRequestFixture = createFixture<BatchTransferRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amountList.as(() => [BigNumber.from(1)]);
-    request.toList.as(() => [HederaIdPropsFixture.create().value]);
-  },
-);
-
-export const BatchForcedTransferRequestFixture =
-  createFixture<BatchForcedTransferRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amountList.as(() => [BigNumber.from(1)]);
-    request.toList.as(() => [HederaIdPropsFixture.create().value]);
-    request.fromList.as(() => [HederaIdPropsFixture.create().value]);
-  });
-export const BatchMintRequestFixture = createFixture<BatchMintRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amountList.as(() => [BigNumber.from(1)]);
-    request.toList.as(() => [HederaIdPropsFixture.create().value]);
-  },
-);
-export const BatchBurnRequestFixture = createFixture<BatchBurnRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetList.as(() => [HederaIdPropsFixture.create().value]);
-    request.amountList.as(() => [BigNumber.from(1)]);
-  },
-);
-export const BatchSetAddressFrozenRequestFixture =
-  createFixture<BatchSetAddressFrozenRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetList.as(() => [HederaIdPropsFixture.create().value]);
-    request.freezeList.as(() => [true]);
-  });
-export const BatchFreezePartialTokensRequestFixture =
-  createFixture<BatchFreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amountList.as(() => [BigNumber.from(1)]);
-    request.targetList.as(() => [HederaIdPropsFixture.create().value]);
-  });
-
-export const BatchUnfreezePartialTokensRequestFixture =
-  createFixture<BatchUnfreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amountList.as(() => [BigNumber.from(1)]);
-    request.targetList.as(() => [HederaIdPropsFixture.create().value]);
-  });
-
-export const BatchTransferCommandFixture = createFixture<BatchTransferCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amountList.as(() => [BigNumber.from(1)]);
-    command.toList.as(() => [HederaIdPropsFixture.create().value]);
-  },
-);
-
-export const BatchMintCommandFixture = createFixture<BatchMintCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amountList.as(() => [BigNumber.from(1)]);
-    command.toList.as(() => [HederaIdPropsFixture.create().value]);
-  },
-);
-
-export const BatchBurnCommandFixture = createFixture<BatchBurnCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amountList.as(() => [BigNumber.from(1)]);
-    command.targetList.as(() => [HederaIdPropsFixture.create().value]);
-  },
-);
-
-export const BatchSetAddressFrozenCommandFixture =
-  createFixture<BatchSetAddressFrozenCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.freezeStatusList.as(() => [HederaIdPropsFixture.create().value]);
-    command.targetList.as(() => [HederaIdPropsFixture.create().value]);
-  });
-
-export const BatchFreezePartialTokensCommandFixture =
-  createFixture<BatchFreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amountList.as(() => [BigNumber.from(1)]);
-    command.targetList.as(() => [HederaIdPropsFixture.create().value]);
-  });
-
-export const BatchForcedTransferCommandFixture =
-  createFixture<BatchForcedTransferCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amountList.as(() => [BigNumber.from(1)]);
-    command.fromList.as(() => [HederaIdPropsFixture.create().value]);
-    command.toList.as(() => [HederaIdPropsFixture.create().value]);
-  });
-
-export const BatchUnfreezePartialTokensCommandFixture =
-  createFixture<BatchUnfreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amountList.as(() => [BigNumber.from(1)]);
-    command.targetList.as(() => [HederaIdPropsFixture.create().value]);
-  });
+});

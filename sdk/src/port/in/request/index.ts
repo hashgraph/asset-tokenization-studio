@@ -367,6 +367,13 @@ import OnchainIDRequest from './security/operations/tokeMetadata/OnchainIDReques
 import FreezePartialTokensRequest from './security/operations/erc3643/FreezePartialTokensRequest.js';
 import GetFrozenPartialTokensRequest from './security/operations/erc3643/GetFrozenPartialTokensRequest.js';
 import UnfreezePartialTokensRequest from './security/operations/erc3643/UnfreezePartialTokensRequest.js';
+import BatchBurnRequest from './security/operations/erc3643/BatchBurnRequest.js';
+import BatchForcedTransferRequest from './security/operations/erc3643/BatchForcedTransferRequest.js';
+import BatchFreezePartialTokensRequest from './security/operations/erc3643/BatchFreezePartialTokensRequest.js';
+import BatchMintRequest from './security/operations/erc3643/BatchMintRequest.js';
+import BatchSetAddressFrozenRequest from './security/operations/erc3643/BatchSetAddressFrozenRequest.js';
+import BatchTransferRequest from './security/operations/erc3643/BatchTransferRequest.js';
+import BatchUnfreezePartialTokensRequest from './security/operations/erc3643/BatchUnfreezePartialTokensRequest.js';
 
 export {
   CreateEquityRequest,
@@ -532,4 +539,11 @@ export {
   FreezePartialTokensRequest,
   GetFrozenPartialTokensRequest,
   UnfreezePartialTokensRequest,
+  BatchBurnRequest,
+  BatchForcedTransferRequest,
+  BatchFreezePartialTokensRequest,
+  BatchMintRequest,
+  BatchSetAddressFrozenRequest,
+  BatchTransferRequest,
+  BatchUnfreezePartialTokensRequest,
 };

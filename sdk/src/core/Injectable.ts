@@ -411,6 +411,13 @@ import { SetOnchainIDCommandHandler } from '../app/usecase/command/security/oper
 import { FreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommandHandler.js';
 import { UnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommandHandler.js';
 import { GetFrozenPartialTokensQueryHandler } from '../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQueryHandler.js';
+import { BatchBurnCommandHandler } from '../app/usecase/command/security/operations/erc3643/batchBurn/BatchBurnCommandHandler.js';
+import { BatchForcedTransferCommandHandler } from '../app/usecase/command/security/operations/erc3643/batchForcedTransfer/BatchForcedTransferCommandHandler.js';
+import { BatchFreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/batchFreezePartialTokens/BatchFreezePartialTokensCommandHandler.js';
+import { BatchMintCommandHandler } from '../app/usecase/command/security/operations/erc3643/batchMint/BatchMintCommandHandler.js';
+import { BatchSetAddressFrozenCommandHandler } from '../app/usecase/command/security/operations/erc3643/batchSetAddressFrozen/BatchSetAddressFrozenCommandHandler.js';
+import { BatchTransferCommandHandler } from '../app/usecase/command/security/operations/erc3643/batchTransfer/BatchTransferCommandHandler.js';
+import { BatchUnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -814,6 +821,34 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: UnfreezePartialTokensCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchBurnCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchForcedTransferCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchFreezePartialTokensCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchMintCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchSetAddressFrozenCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchTransferCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchUnfreezePartialTokensCommandHandler,
   },
 ];
 
