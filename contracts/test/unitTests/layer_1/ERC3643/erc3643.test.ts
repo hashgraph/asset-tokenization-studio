@@ -1012,22 +1012,6 @@ describe('ERC3643 Tests', () => {
                     )
                     .withArgs(account_E, amount + 1, amount, DEFAULT_PARTITION)
             })
-
-            describe('Agent', () => {
-                it('GIVEN an initialized token WHEN adding agent THEN addAgent emits AgentAdded with agent address', async () => {
-                    expect(await erc3643Facet.addAgent(account_B))
-                        .to.emit(erc3643Facet, 'AgentAdded')
-                        .withArgs(account_B)
-
-                    const hasRole = await accessControlFacet.hasRole(
-                        AGENT_ROLE,
-                        account_B
-                    )
-                    const isAgent = await erc3643Facet.isAgent(account_B)
-                    expect(isAgent).to.equal(true)
-                    expect(hasRole).to.equal(true)
-                })
-            })
         })
 
         it('GIVEN an initialized token WHEN retrieving the version THEN returns the right version', async () => {
@@ -1061,6 +1045,19 @@ describe('ERC3643 Tests', () => {
             const retrieved_newIdentityRegistry =
                 await erc3643Facet.identityRegistry()
             expect(retrieved_newIdentityRegistry).to.equal(identityRegistry)
+        })
+
+        it('GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance', async () => {
+            const retrieved_compliance = await erc3643Facet.compliance()
+            expect(retrieved_compliance).to.equal(ADDRESS_ZERO)
+
+            //Update compliance
+            expect(await erc3643Facet.setCompliance(compliance))
+                .to.emit(erc3643Facet, 'ComplianceAdded')
+                .withArgs(compliance)
+
+            const retrieved_newCompliance = await erc3643Facet.compliance()
+            expect(retrieved_newCompliance).to.equal(compliance)
         })
 
         describe('Agent', () => {
@@ -1148,19 +1145,6 @@ describe('ERC3643 Tests', () => {
                     )
                 ).to.emit(erc1410Facet, 'TransferByPartition')
             })
-        })
-
-        it('GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance', async () => {
-            const retrieved_compliance = await erc3643Facet.compliance()
-            expect(retrieved_compliance).to.equal(ADDRESS_ZERO)
-
-            //Update compliance
-            expect(await erc3643Facet.setCompliance(compliance))
-                .to.emit(erc3643Facet, 'ComplianceAdded')
-                .withArgs(compliance)
-
-            const retrieved_newCompliance = await erc3643Facet.compliance()
-            expect(retrieved_newCompliance).to.equal(compliance)
         })
 
         describe('AccessControl', () => {
