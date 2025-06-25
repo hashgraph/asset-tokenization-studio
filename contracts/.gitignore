@@ -33,6 +33,7 @@ gas-report.txt
 cache
 artifacts
 
+.deps/
 ./docs/*
 ./cache/*
 ./typechain-types/*

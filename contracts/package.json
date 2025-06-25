@@ -1,10 +1,11 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "main": "./build/typechain-types/index.js",
   "module": "./build/typechain-types/index.js",
   "files": [
-    "build/"
+    "build/",
+    "contracts/"
   ],
   "exports": {
     ".": {
