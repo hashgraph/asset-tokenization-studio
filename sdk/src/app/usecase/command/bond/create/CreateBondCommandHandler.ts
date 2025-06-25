@@ -243,7 +243,6 @@ export class CreateBondCommandHandler
     command: CreateBondCommand,
   ): Promise<CreateBondCommandResponse> {
     let res: Response;
-    //TODO: Boy scout remove try catch block and adjust test
     try {
       const {
         security,
@@ -264,6 +263,7 @@ export class CreateBondCommandHandler
         externalKycLists,
       } = command;
 
+      //TODO: Boy scout: remove request validations and adjust test
       if (!factory) {
         throw new InvalidRequest('Factory not found in request');
       }
