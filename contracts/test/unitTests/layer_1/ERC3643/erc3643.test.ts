@@ -969,131 +969,6 @@ describe('ERC3643 Tests', () => {
                 .withArgs(account_E, amount + 1, amount, DEFAULT_PARTITION)
         })
 
-        it('GIVEN a invalid address WHEN attempting to freezePartialTokensByPartition THEN transactions revert with ZeroAddressNotAllowed error', async () => {
-            await expect(
-                erc3643Facet.freezePartialTokensByPartition(
-                    DEFAULT_PARTITION,
-                    ADDRESS_ZERO,
-                    10
-                )
-            ).to.be.rejectedWith('ZeroAddressNotAllowed')
-        })
-
-        it('GIVEN a freeze amount greater than balance WHEN attempting to freezePartialTokens THEN transactions revert with InsufficientBalance error', async () => {
-            const amount = 1000
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_E,
-                value: amount,
-                data: '0x',
-            })
-            await expect(
-                erc3643Facet.freezePartialTokensByPartition(
-                    DEFAULT_PARTITION,
-                    account_E,
-                    amount + 1
-                )
-            ).to.be.revertedWithCustomError(erc3643Facet, 'InsufficientBalance')
-        })
-
-        it('GIVEN a valid address WHEN attempting to freezePartialTokensByPartition THEN transactions succeed', async () => {
-            const amount = 1000
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_E,
-                value: amount,
-                data: '0x',
-            })
-            await expect(
-                erc3643Facet.freezePartialTokensByPartition(
-                    DEFAULT_PARTITION,
-                    account_E,
-                    amount
-                )
-            )
-                .to.emit(erc3643Facet, 'TokensFrozen')
-                .withArgs(account_E, amount, DEFAULT_PARTITION)
-            expect(await erc3643Facet.getFrozenTokens(account_E)).to.be.equal(
-                amount
-            )
-            expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(0)
-            expect(
-                await erc1410Facet.balanceOfByPartition(
-                    DEFAULT_PARTITION,
-                    account_E
-                )
-            ).to.be.equal(0)
-        })
-
-        it('GIVEN a invalid address WHEN attempting to unfreezePartialTokensByPartition THEN transactions revert with ZeroAddressNotAllowed error', async () => {
-            await expect(
-                erc3643Facet.unfreezePartialTokensByPartition(
-                    DEFAULT_PARTITION,
-                    ADDRESS_ZERO,
-                    10
-                )
-            ).to.be.rejectedWith('ZeroAddressNotAllowed')
-        })
-
-        it('GIVEN a valid address WHEN attempting to unfreezePartialTokensByPartition THEN transactions succeed', async () => {
-            const amount = 1000
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_E,
-                value: amount,
-                data: '0x',
-            })
-            await erc3643Facet.freezePartialTokensByPartition(
-                DEFAULT_PARTITION,
-                account_E,
-                amount
-            )
-
-            expect(await erc3643Facet.getFrozenTokens(account_E)).to.be.equal(
-                amount
-            )
-            expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(0)
-
-            await expect(
-                erc3643Facet.unfreezePartialTokensByPartition(
-                    DEFAULT_PARTITION,
-                    account_E,
-                    amount
-                )
-            )
-                .to.emit(erc3643Facet, 'TokensUnfrozen')
-                .withArgs(account_E, amount, DEFAULT_PARTITION)
-            expect(await erc3643Facet.getFrozenTokens(account_E)).to.be.equal(0)
-            expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(amount)
-        })
-
-        it('GIVEN a freeze amount greater than balance WHEN attempting to unfreezePartialTokensByPartition THEN transactions revert with InsufficientFrozenBalance error', async () => {
-            const amount = 1000
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_E,
-                value: amount,
-                data: '0x',
-            })
-            await erc3643Facet.freezePartialTokensByPartition(
-                DEFAULT_PARTITION,
-                account_E,
-                amount
-            )
-            await expect(
-                erc3643Facet.unfreezePartialTokensByPartition(
-                    DEFAULT_PARTITION,
-                    account_E,
-                    amount + 1
-                )
-            )
-                .to.be.revertedWithCustomError(
-                    erc3643Facet,
-                    'InsufficientFrozenBalance'
-                )
-                .withArgs(account_E, amount + 1, amount, DEFAULT_PARTITION)
-        })
-
         it('GIVEN a invalid address WHEN attempting to setAddressFrozen THEN transactions revert with ZeroAddressNotAllowed error', async () => {
             await expect(
                 erc3643Facet.setAddressFrozen(ADDRESS_ZERO)
@@ -1187,29 +1062,6 @@ describe('ERC3643 Tests', () => {
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
-            it('GIVEN an account without FREEZE MANAGER role WHEN freezePartialTokensByPartition THEN transaction fails with AccountHasNoRole', async () => {
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
-                await expect(
-                    erc3643Facet.freezePartialTokensByPartition(
-                        DEFAULT_PARTITION,
-                        account_A,
-                        10
-                    )
-                ).to.be.rejectedWith('AccountHasNoRole')
-            })
-
-            it('GIVEN an account without FREEZE MANAGER role WHEN unfreezePartialTokensByPartition THEN transaction fails with AccountHasNoRole', async () => {
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
-                await expect(
-                    erc3643Facet.unfreezePartialTokensByPartition(
-                        DEFAULT_PARTITION,
-                        account_A,
-                        10
-                    )
-                ).to.be.rejectedWith('AccountHasNoRole')
-            })
             it('GIVEN an account without admin role WHEN addAgent THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
@@ -1230,43 +1082,24 @@ describe('ERC3643 Tests', () => {
 
                 await pause.pause()
             })
-            it('GIVEN a puased token WHEN freezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
+            it('GIVEN a paused token WHEN freezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     erc3643Facet.freezePartialTokens(account_A, 10)
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
-            it('GIVEN a puased token WHEN unfreezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
+            it('GIVEN a paused token WHEN unfreezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     erc3643Facet.unfreezePartialTokens(account_A, 10)
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
-            it('GIVEN a puased token WHEN setAddressFrozen THEN transactions revert with TokenIsPaused error', async () => {
+            it('GIVEN a paused token WHEN setAddressFrozen THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     erc3643Facet.setAddressFrozen(account_A)
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
-            it('GIVEN a puased token WHEN freezePartialTokensByPartition THEN transactions revert with TokenIsPaused error', async () => {
-                await expect(
-                    erc3643Facet.freezePartialTokensByPartition(
-                        DEFAULT_PARTITION,
-                        account_A,
-                        10
-                    )
-                ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
-            })
-
-            it('GIVEN a puased token WHEN unfreezePartialTokensByPartition THEN transactions revert with TokenIsPaused error', async () => {
-                await expect(
-                    erc3643Facet.unfreezePartialTokensByPartition(
-                        DEFAULT_PARTITION,
-                        account_A,
-                        10
-                    )
-                ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
-            })
             it('GIVEN a paused token WHEN attempting to addAgent THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     erc3643Facet.addAgent(account_A)
@@ -1328,19 +1161,12 @@ describe('ERC3643 Tests', () => {
                 // HOLD
                 erc3643Facet = erc3643Facet.connect(signer_A)
 
-                await erc3643Facet.freezePartialTokensByPartition(
-                    DEFAULT_PARTITION,
-                    account_E,
-                    _AMOUNT
-                )
+                await erc3643Facet.freezePartialTokens(account_E, _AMOUNT)
 
                 const frozen_TotalAmount_Before =
                     await erc3643Facet.getFrozenTokens(account_E)
                 const frozen_TotalAmount_Before_Partition_1 =
-                    await erc3643Facet.getFrozenTokensByPartition(
-                        DEFAULT_PARTITION,
-                        account_E
-                    )
+                    await erc3643Facet.getFrozenTokens(account_E)
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -1381,10 +1207,7 @@ describe('ERC3643 Tests', () => {
                 const frozen_TotalAmount_After =
                     await erc3643Facet.getFrozenTokens(account_E)
                 const frozen_TotalAmount_After_Partition_1 =
-                    await erc3643Facet.getFrozenTokensByPartition(
-                        DEFAULT_PARTITION,
-                        account_E
-                    )
+                    await erc3643Facet.getFrozenTokens(account_E)
 
                 const balance_After = await erc1410Facet.balanceOf(account_E)
                 const balance_After_Partition_1 =
