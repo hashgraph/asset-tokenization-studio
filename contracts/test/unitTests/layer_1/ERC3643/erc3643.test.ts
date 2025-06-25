@@ -495,6 +495,14 @@ describe('ERC3643 Tests', () => {
                 MAX_UINT256,
                 account_E
             )
+            // Grant KYC to account C for batch tests
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
             await accessControlFacet.grantRole(FREEZE_MANAGER_ROLE, account_A)
             await accessControlFacet.grantRole(PAUSER_ROLE, account_A)
         })
@@ -1098,6 +1106,336 @@ describe('ERC3643 Tests', () => {
             await expect(
                 erc3643Facet.setAddressFrozen(ADDRESS_ZERO)
             ).to.be.rejectedWith('ZeroAddressNotAllowed')
+        })
+
+        describe('Batch Operations', () => {
+            describe('batchMint', () => {
+                it('GIVEN an account with issuer role WHEN batchMint THEN transaction succeeds and balances are updated', async () => {
+                    const mintAmount = AMOUNT / 2
+                    const toList = [account_D, account_E]
+                    const amounts = [mintAmount, mintAmount]
+
+                    const initialBalanceD =
+                        await erc1410SnapshotFacet.balanceOf(account_D)
+                    const initialBalanceE =
+                        await erc1410SnapshotFacet.balanceOf(account_E)
+                    const initialTotalSupply =
+                        await erc1410SnapshotFacet.totalSupply()
+
+                    await expect(erc3643Issuer.batchMint(toList, amounts)).to
+                        .not.be.reverted
+
+                    const finalBalanceD =
+                        await erc1410SnapshotFacet.balanceOf(account_D)
+                    const finalBalanceE =
+                        await erc1410SnapshotFacet.balanceOf(account_E)
+                    const finalTotalSupply =
+                        await erc1410SnapshotFacet.totalSupply()
+
+                    expect(finalBalanceD).to.be.equal(
+                        initialBalanceD.add(mintAmount)
+                    )
+                    expect(finalBalanceE).to.be.equal(
+                        initialBalanceE.add(mintAmount)
+                    )
+                    expect(finalTotalSupply).to.be.equal(
+                        initialTotalSupply.add(mintAmount * 2)
+                    )
+                })
+
+                it('GIVEN an account without issuer role WHEN batchMint THEN transaction fails with AccountHasNoRole', async () => {
+                    const mintAmount = AMOUNT / 2
+                    const toList = [account_D, account_E]
+                    const amounts = [mintAmount, mintAmount]
+
+                    // signer_B does not have ISSUER_ROLE
+                    erc3643Facet = erc3643Facet.connect(signer_B)
+
+                    await expect(
+                        erc3643Facet.batchMint(toList, amounts)
+                    ).to.be.rejectedWith('AccountHasNoRole')
+                })
+            })
+
+            describe('batchTransfer', () => {
+                const transferAmount = AMOUNT / 4
+                const initialMintAmount = AMOUNT
+
+                beforeEach(async () => {
+                    // Mint initial tokens to the sender (signer_E)
+                    await erc3643Issuer.mint(account_E, initialMintAmount)
+                })
+
+                it('GIVEN a valid sender WHEN batchTransfer THEN transaction succeeds and balances are updated', async () => {
+                    const toList = [account_C, account_D]
+                    const amounts = [transferAmount, transferAmount]
+
+                    const initialBalanceSender =
+                        await erc1410SnapshotFacet.balanceOf(account_E)
+                    const initialBalanceC =
+                        await erc1410SnapshotFacet.balanceOf(account_C)
+                    const initialBalanceD =
+                        await erc1410SnapshotFacet.balanceOf(account_D)
+
+                    erc3643Transferor = erc3643Facet.connect(signer_E)
+                    await expect(
+                        erc3643Transferor.batchTransfer(toList, amounts)
+                    ).to.not.be.reverted
+
+                    const finalBalanceSender =
+                        await erc1410SnapshotFacet.balanceOf(account_E)
+                    const finalBalanceC =
+                        await erc1410SnapshotFacet.balanceOf(account_C)
+                    const finalBalanceD =
+                        await erc1410SnapshotFacet.balanceOf(account_D)
+
+                    expect(finalBalanceSender).to.equal(
+                        initialBalanceSender.sub(transferAmount * 2)
+                    )
+                    expect(finalBalanceC).to.equal(
+                        initialBalanceC.add(transferAmount)
+                    )
+                    expect(finalBalanceD).to.equal(
+                        initialBalanceD.add(transferAmount)
+                    )
+                })
+
+                it('GIVEN insufficient balance WHEN batchTransfer THEN transaction fails', async () => {
+                    const toList = [account_C, account_D]
+                    // Total amount > balance
+                    const amounts = [initialMintAmount, transferAmount]
+                    erc3643Transferor = erc3643Facet.connect(signer_E)
+
+                    await expect(
+                        erc3643Transferor.batchTransfer(toList, amounts)
+                    ).to.be.revertedWithCustomError(
+                        erc3643Facet,
+                        'InvalidPartition'
+                    )
+                })
+            })
+
+            describe('batchForcedTransfer', () => {
+                const transferAmount = AMOUNT / 2
+
+                beforeEach(async () => {
+                    await erc3643Issuer.mint(account_C, transferAmount)
+                    await erc3643Issuer.mint(account_D, transferAmount)
+                    await accessControlFacet.grantRole(
+                        CONTROLLER_ROLE,
+                        account_A
+                    )
+                })
+
+                it('GIVEN controller role WHEN batchForcedTransfer THEN transaction succeeds', async () => {
+                    const fromList = [account_C, account_D]
+                    const toList = [account_E, account_E]
+                    const amounts = [transferAmount, transferAmount]
+
+                    const initialBalanceC =
+                        await erc1410SnapshotFacet.balanceOf(account_C)
+                    const initialBalanceD =
+                        await erc1410SnapshotFacet.balanceOf(account_D)
+                    const initialBalanceE =
+                        await erc1410SnapshotFacet.balanceOf(account_E)
+
+                    erc3643Facet = erc3643Facet.connect(signer_A)
+                    await expect(
+                        erc3643Facet.batchForcedTransfer(
+                            fromList,
+                            toList,
+                            amounts
+                        )
+                    ).to.not.be.reverted
+
+                    const finalBalanceC =
+                        await erc1410SnapshotFacet.balanceOf(account_C)
+                    const finalBalanceD =
+                        await erc1410SnapshotFacet.balanceOf(account_D)
+                    const finalBalanceE =
+                        await erc1410SnapshotFacet.balanceOf(account_E)
+
+                    expect(finalBalanceC).to.equal(
+                        initialBalanceC.sub(transferAmount)
+                    )
+                    expect(finalBalanceD).to.equal(
+                        initialBalanceD.sub(transferAmount)
+                    )
+                    expect(finalBalanceE).to.equal(
+                        initialBalanceE.add(transferAmount * 2)
+                    )
+                })
+
+                it('GIVEN account without controller role WHEN batchForcedTransfer THEN transaction fails with AccountHasNoRole', async () => {
+                    const fromList = [account_C]
+                    const toList = [account_E]
+                    const amounts = [transferAmount]
+
+                    // signer_B does not have CONTROLLER_ROLE
+                    erc3643Facet = erc3643Facet.connect(signer_B)
+                    await expect(
+                        erc3643Facet.batchForcedTransfer(
+                            fromList,
+                            toList,
+                            amounts
+                        )
+                    ).to.be.rejectedWith('AccountHasNoRole')
+                })
+            })
+
+            describe('batchBurn', () => {
+                const burnAmount = AMOUNT / 2
+
+                beforeEach(async () => {
+                    await erc3643Issuer.mint(account_D, burnAmount)
+                    await erc3643Issuer.mint(account_E, burnAmount)
+
+                    const erc20FacetD = erc20Facet.connect(signer_D)
+                    const erc20FacetE = erc20Facet.connect(signer_E)
+
+                    // The burner (signer_A) needs approval from the token holders
+                    await erc20FacetD.approve(account_A, burnAmount)
+                    await erc20FacetE.approve(account_A, burnAmount)
+                })
+
+                it('GIVEN approved operator WHEN batchBurn THEN transaction succeeds', async () => {
+                    const userAddresses = [account_D, account_E]
+                    const amounts = [burnAmount, burnAmount]
+
+                    const initialTotalSupply =
+                        await erc1410SnapshotFacet.totalSupply()
+                    const initialBalanceD =
+                        await erc1410SnapshotFacet.balanceOf(account_D)
+                    const initialBalanceE =
+                        await erc1410SnapshotFacet.balanceOf(account_E)
+
+                    erc3643Facet = erc3643Facet.connect(signer_A)
+                    await expect(erc3643Facet.batchBurn(userAddresses, amounts))
+                        .to.not.be.reverted
+
+                    const finalTotalSupply =
+                        await erc1410SnapshotFacet.totalSupply()
+                    const finalBalanceD =
+                        await erc1410SnapshotFacet.balanceOf(account_D)
+                    const finalBalanceE =
+                        await erc1410SnapshotFacet.balanceOf(account_E)
+
+                    expect(finalBalanceD).to.equal(
+                        initialBalanceD.sub(burnAmount)
+                    )
+                    expect(finalBalanceE).to.equal(
+                        initialBalanceE.sub(burnAmount)
+                    )
+                    expect(finalTotalSupply).to.equal(
+                        initialTotalSupply.sub(burnAmount * 2)
+                    )
+                })
+            })
+
+            // TODO: batchSetAddressFrozen
+
+            describe('batchFreezePartialTokens', () => {
+                const freezeAmount = AMOUNT / 2
+                beforeEach(async () => {
+                    await erc3643Issuer.mint(account_D, freezeAmount)
+                    await erc3643Issuer.mint(account_E, freezeAmount)
+                })
+
+                it('GIVEN FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN tokens are frozen successfully', async () => {
+                    const userAddresses = [account_D, account_E]
+                    const amounts = [freezeAmount, freezeAmount]
+
+                    const initialFrozenD =
+                        await erc3643Facet.getFrozenTokens(account_D)
+                    const initialFrozenE =
+                        await erc3643Facet.getFrozenTokens(account_E)
+
+                    erc3643Facet = erc3643Facet.connect(signer_A) // signer_A has FREEZE_MANAGER_ROLE
+                    await expect(
+                        erc3643Facet.batchFreezePartialTokens(
+                            userAddresses,
+                            amounts
+                        )
+                    ).to.not.be.reverted
+
+                    const finalFrozenD =
+                        await erc3643Facet.getFrozenTokens(account_D)
+                    const finalFrozenE =
+                        await erc3643Facet.getFrozenTokens(account_E)
+
+                    expect(finalFrozenD).to.equal(
+                        initialFrozenD.add(freezeAmount)
+                    )
+                    expect(finalFrozenE).to.equal(
+                        initialFrozenE.add(freezeAmount)
+                    )
+                })
+            })
+
+            describe('batchUnfreezePartialTokens', () => {
+                const totalAmount = AMOUNT
+                const unfreezeAmount = AMOUNT / 2
+
+                beforeEach(async () => {
+                    await erc3643Issuer.mint(account_D, totalAmount)
+                    await erc3643Issuer.mint(account_E, totalAmount)
+
+                    erc3643Facet = erc3643Facet.connect(signer_A) // signer_A has FREEZE_MANAGER_ROLE
+                    await erc3643Facet.freezePartialTokens(
+                        account_D,
+                        totalAmount
+                    )
+                    await erc3643Facet.freezePartialTokens(
+                        account_E,
+                        totalAmount
+                    )
+                })
+
+                it('GIVEN frozen tokens WHEN batchUnfreezePartialTokens THEN tokens are unfrozen successfully', async () => {
+                    const userAddresses = [account_D, account_E]
+                    const amounts = [unfreezeAmount, unfreezeAmount]
+
+                    const initialFrozenD =
+                        await erc3643Facet.getFrozenTokens(account_D)
+                    const initialFrozenE =
+                        await erc3643Facet.getFrozenTokens(account_E)
+
+                    await expect(
+                        erc3643Facet.batchUnfreezePartialTokens(
+                            userAddresses,
+                            amounts
+                        )
+                    ).to.not.be.reverted
+
+                    const finalFrozenD =
+                        await erc3643Facet.getFrozenTokens(account_D)
+                    const finalFrozenE =
+                        await erc3643Facet.getFrozenTokens(account_E)
+
+                    expect(finalFrozenD).to.equal(
+                        initialFrozenD.sub(unfreezeAmount)
+                    )
+                    expect(finalFrozenE).to.equal(
+                        initialFrozenE.sub(unfreezeAmount)
+                    )
+                })
+
+                it('GIVEN insufficient frozen tokens WHEN batchUnfreezePartialTokens THEN transaction fails', async () => {
+                    const userAddresses = [account_D, account_E]
+                    // Try to unfreeze more than was frozen for account_D
+                    const amounts = [totalAmount + 1, unfreezeAmount]
+
+                    await expect(
+                        erc3643Facet.batchUnfreezePartialTokens(
+                            userAddresses,
+                            amounts
+                        )
+                    ).to.be.revertedWithCustomError(
+                        erc3643Facet,
+                        'InsufficientFrozenBalance'
+                    )
+                })
+            })
         })
 
         describe('Agent', () => {

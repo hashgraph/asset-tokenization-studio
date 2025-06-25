@@ -515,7 +515,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](24);
+        staticFunctionSelectors_ = new bytes4[](30);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
@@ -563,6 +563,23 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchForcedTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
+        // staticFunctionSelectors_[selectorsIndex++] = this
+        //     .batchSetAddressFrozen
+        //     .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchFreezePartialTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchUnfreezePartialTokens
+            .selector;
     }
 
     // ====== Public functions ======
@@ -683,7 +700,9 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
-    //! @dev Internal copy of ERC20.transfer(address,uint256) to allow batchTransfer() in this facets
+    // ====== Private/Internal functions ======
+
+    //! @dev Internal copy of ERC20.transfer(address,uint256) to allow ERC3643.batchTransfer() in this facet
     function _transferForBatch(
         address to,
         uint256 value
@@ -701,8 +720,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     {
         return _transfer(_msgSender(), to, value);
     }
-
-    // ====== Private/Internal functions ======
 
     function _checkUnfreezeAmount(
         bytes32 _partition,
