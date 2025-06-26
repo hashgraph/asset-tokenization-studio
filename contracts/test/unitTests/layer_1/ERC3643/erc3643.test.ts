@@ -1399,23 +1399,6 @@ describe('ERC3643 Tests', () => {
                         ])
                     ).to.not.be.reverted
 
-                    // ! Explicitly re-grant KYC status, which is not restored automatically
-                    await kycFacet.grantKyc(
-                        account_D,
-                        EMPTY_VC_ID,
-                        ZERO,
-                        MAX_UINT256,
-                        account_E
-                    )
-                    await kycFacet.grantKyc(
-                        account_E,
-                        EMPTY_VC_ID,
-                        ZERO,
-                        MAX_UINT256,
-                        account_E
-                    )
-
-                    // Transfers from unfrozen accounts should now succeed
                     const erc20FacetD = erc20Facet.connect(signer_D)
                     await expect(
                         erc20FacetD.transfer(account_A, transferAmount)
