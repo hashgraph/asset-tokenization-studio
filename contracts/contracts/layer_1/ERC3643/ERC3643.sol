@@ -206,45 +206,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC1594StorageWrapper
-} from '../ERC1400/ERC1594/ERC1594StorageWrapper.sol';
-import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
-import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
-import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    _DEFAULT_ADMIN_ROLE,
-    _CONTROLLER_ROLE,
-    _ISSUER_ROLE,
-    _FREEZE_MANAGER_ROLE,
-    _AGENT_ROLE
-} from '../constants/roles.sol';
-import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {ERC1594StorageWrapper} from "../ERC1400/ERC1594/ERC1594StorageWrapper.sol";
+import {IERC3643} from "../interfaces/ERC3643/IERC3643.sol";
+import {ICompliance} from "../interfaces/ERC3643/ICompliance.sol";
+import {IIdentityRegistry} from "../interfaces/ERC3643/IIdentityRegistry.sol";
+import {IStaticFunctionSelectors} from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import {_ERC3643_RESOLVER_KEY} from "../constants/resolverKeys.sol";
+import {_DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _ISSUER_ROLE, _FREEZE_MANAGER_ROLE, _AGENT_ROLE} from "../constants/roles.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {IKyc} from "../interfaces/kyc/IKyc.sol";
+import {_DEFAULT_PARTITION} from "../../layer_0/constants/values.sol";
 
 contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     using Strings for uint256;
 
     address private constant _ONCHAIN_ID = address(0);
 
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezStatus
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-    {
-        _setAddresFrozen(_userAddress, _freezStatus);
-        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
-    }
+    // ====== External functions (state-changing) ======
 
     /**
      * @notice Sets the name of the token.
@@ -323,110 +301,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit ComplianceAdded(_compliance);
     }
 
-    /**
-     * @notice Burns a specified amount of tokens from a user address.
-     * @dev Can only be called by the token `owner/issuer` or `controller`.
-     * @param _userAddress The address from which the tokens will be burned.
-     * @param _amount The amount of tokens to burn.
-     */
-    function burn(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_userAddress)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
-    {
-        _redeemFrom(_userAddress, _amount, '');
-    }
-
-    /**
-     * @notice Mints a specified amount of tokens to a user address.
-     * @dev Can only be called by the token `owner/issuer`.
-     * @param _to The address to which the tokens will be minted.
-     * @param _amount The amount of tokens to mint.
-     */
-    function mint(
-        address _to,
-        uint256 _amount
-    )
-        external
-        onlyUnpaused
-        onlyWithinMaxSupply(_amount)
-        onlyRole(_ISSUER_ROLE)
-        onlyListedAllowed(_to)
-        onlyWithoutMultiPartition
-        onlyIssuable
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-    {
-        _issue(_to, _amount, '');
-    }
-
-    /**
-     * @notice Transfers tokens from one address to another.
-     * @dev Can only be called by the token `owner/issuer` or `controller`.
-     * @param _from The address from which the tokens will be transferred.
-     * @param _to The address to which the tokens will be transferred.
-     * @param _amount The amount of tokens to transfer.
-     */
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    )
-        external
-        onlyWithoutMultiPartition
-        onlyRole(_CONTROLLER_ROLE)
-        onlyControllable
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_from)
-        onlyListedAllowed(_to)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-        returns (bool)
-    {
-        _controllerTransfer(_from, _to, _amount, '', '');
-        return true;
-    }
-
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        _checkUnfreezeAmount(_DEFAULT_PARTITION, _userAddress, _amount);
-        _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
     function addAgent(
         address _agent
     ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
@@ -449,6 +323,72 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return _recoveryAddress(_lostWallet, _newWallet);
     }
+
+    function batchTransfer(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _toList.length; i++) {
+            _transferForBatch(_toList[i], _amounts[i]);
+        }
+    }
+
+    function batchForcedTransfer(
+        address[] calldata _fromList,
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _fromList.length; i++) {
+            forcedTransfer(_fromList[i], _toList[i], _amounts[i]);
+        }
+    }
+
+    function batchMint(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _toList.length; i++) {
+            mint(_toList[i], _amounts[i]);
+        }
+    }
+
+    function batchBurn(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            burn(_userAddresses[i], _amounts[i]);
+        }
+    }
+
+    function batchSetAddressFrozen(
+        address[] calldata _userAddresses,
+        bool[] calldata _freeze
+    ) external {
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            setAddressFrozen(_userAddresses[i], _freeze[i]);
+        }
+    }
+
+    function batchFreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            freezePartialTokens(_userAddresses[i], _amounts[i]);
+        }
+    }
+
+    function batchUnfreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external {
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            unfreezePartialTokens(_userAddresses[i], _amounts[i]);
+        }
+    }
+
+    // ====== External functions (view/pure) ======
 
     function getFrozenTokens(
         address _userAddress
@@ -510,7 +450,9 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](23);
+        staticFunctionSelectors_ = new bytes4[](
+            36 // Total number of selectors defined below
+        );
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
@@ -555,6 +497,23 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorsIndex++] = this
             .isAddressRecovered
             .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchForcedTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchSetAddressFrozen
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchFreezePartialTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchUnfreezePartialTokens
+            .selector;
     }
 
     function getStaticInterfaceIds()
@@ -566,6 +525,147 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;
+    }
+
+    // ====== Public functions ======
+
+    function setAddressFrozen(
+        address _userAddress,
+        bool _freezStatus
+    )
+        public
+        override
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
+    {
+        _setAddresFrozen(_userAddress, _freezStatus);
+        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
+    }
+
+    /**
+     * @notice Burns a specified amount of tokens from a user address.
+     * @dev Can only be called by the token `owner/issuer` or `controller`.
+     * @param _userAddress The address from which the tokens will be burned.
+     * @param _amount The amount of tokens to burn.
+     */
+    function burn(
+        address _userAddress,
+        uint256 _amount
+    )
+        public
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_userAddress)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
+    {
+        _redeemFrom(_userAddress, _amount, "");
+    }
+
+    /**
+     * @notice Mints a specified amount of tokens to a user address.
+     * @dev Can only be called by the token `owner/issuer`.
+     * @param _to The address to which the tokens will be minted.
+     * @param _amount The amount of tokens to mint.
+     */
+    function mint(
+        address _to,
+        uint256 _amount
+    )
+        public
+        onlyUnpaused
+        onlyWithinMaxSupply(_amount)
+        onlyRole(_ISSUER_ROLE)
+        onlyListedAllowed(_to)
+        onlyWithoutMultiPartition
+        onlyIssuable
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+    {
+        _issue(_to, _amount, "");
+    }
+
+    /**
+     * @notice Transfers tokens from one address to another.
+     * @dev Can only be called by the token `owner/issuer` or `controller`.
+     * @param _from The address from which the tokens will be transferred.
+     * @param _to The address to which the tokens will be transferred.
+     * @param _amount The amount of tokens to transfer.
+     */
+    function forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    )
+        public
+        onlyWithoutMultiPartition
+        onlyRole(_CONTROLLER_ROLE)
+        onlyControllable
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_from)
+        onlyListedAllowed(_to)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool)
+    {
+        _controllerTransfer(_from, _to, _amount, "", "");
+        return true;
+    }
+
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        public
+        override
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        _freezeTokens(_userAddress, _amount);
+        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        public
+        override
+        onlyUnpaused
+        onlyRole(_FREEZE_MANAGER_ROLE)
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        _checkUnfreezeAmount(_DEFAULT_PARTITION, _userAddress, _amount);
+        _unfreezeTokens(_userAddress, _amount);
+        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    // ====== Private/Internal functions ======
+
+    //! @dev Internal copy of ERC20.transfer(address,uint256) to allow ERC3643.batchTransfer() in this facet
+    function _transferForBatch(
+        address to,
+        uint256 value
+    )
+        internal
+        onlyUnpaused
+        onlyClearingDisabled
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(to)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
+        returns (bool)
+    {
+        return _transfer(_msgSender(), to, value);
     }
 
     function _checkUnfreezeAmount(
