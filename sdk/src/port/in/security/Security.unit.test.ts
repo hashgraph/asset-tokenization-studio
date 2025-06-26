@@ -1406,9 +1406,9 @@ describe('Security', () => {
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new BurnCommand(
-          burnRequest.securityId,
           burnRequest.sourceId,
           burnRequest.amount,
+          burnRequest.securityId,
         ),
       );
     });
