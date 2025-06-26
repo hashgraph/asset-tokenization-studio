@@ -459,13 +459,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return _recoveryAddress(_lostWallet, _newWallet);
     }
 
-    /**
-     * @notice Retrieves the onchainID address associated with the token.
-     */
-    function onchainID() external view override returns (address) {
-        return _erc3643Storage().onchainID;
-    }
-
     function getFrozenTokens(
         address _userAddress
     ) external view override returns (uint256) {
@@ -529,7 +522,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](19);
+        staticFunctionSelectors_ = new bytes4[](21);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
