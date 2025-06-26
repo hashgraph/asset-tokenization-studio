@@ -310,110 +310,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit ComplianceAdded(_compliance);
     }
 
-    /**
-     * @notice Burns a specified amount of tokens from a user address.
-     * @dev Can only be called by the token `owner/issuer` or `controller`.
-     * @param _userAddress The address from which the tokens will be burned.
-     * @param _amount The amount of tokens to burn.
-     */
-    function burn(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_userAddress)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
-    {
-        _redeemFrom(_userAddress, _amount, '');
-    }
-
-    /**
-     * @notice Mints a specified amount of tokens to a user address.
-     * @dev Can only be called by the token `owner/issuer`.
-     * @param _to The address to which the tokens will be minted.
-     * @param _amount The amount of tokens to mint.
-     */
-    function mint(
-        address _to,
-        uint256 _amount
-    )
-        external
-        onlyUnpaused
-        onlyWithinMaxSupply(_amount)
-        onlyRole(_ISSUER_ROLE)
-        onlyListedAllowed(_to)
-        onlyWithoutMultiPartition
-        onlyIssuable
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-    {
-        _issue(_to, _amount, '');
-    }
-
-    /**
-     * @notice Transfers tokens from one address to another.
-     * @dev Can only be called by the token `owner/issuer` or `controller`.
-     * @param _from The address from which the tokens will be transferred.
-     * @param _to The address to which the tokens will be transferred.
-     * @param _amount The amount of tokens to transfer.
-     */
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    )
-        external
-        onlyWithoutMultiPartition
-        onlyRole(_CONTROLLER_ROLE)
-        onlyControllable
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_from)
-        onlyListedAllowed(_to)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-        returns (bool)
-    {
-        _controllerTransfer(_from, _to, _amount, '', '');
-        return true;
-    }
-
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        _checkUnfreezeAmount(_DEFAULT_PARTITION, _userAddress, _amount);
-        _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
     function addAgent(
         address _agent
     ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
@@ -571,7 +467,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         staticFunctionSelectors_ = new bytes4[](
-            36 // Total number of selectors defined below
+            30 // Total number of selectors defined below
         );
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
