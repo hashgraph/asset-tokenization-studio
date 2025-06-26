@@ -209,7 +209,6 @@ import {
   ForcedTransferCommand,
   ForcedTransferCommandResponse,
 } from './ForcedTransferCommand';
-import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
 
 import AccountService from '../../../../../service/account/AccountService';
 import SecurityService from '../../../../../service/security/SecurityService';
@@ -218,8 +217,8 @@ import ValidationService from '../../../../../service/validation/ValidationServi
 import ContractService from '../../../../../service/contract/ContractService';
 
 import {
-  HederaIdPropsFixture,
   EvmAddressPropsFixture,
+  HederaIdPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture';
 import Account from '../../../../../../domain/context/account/Account';

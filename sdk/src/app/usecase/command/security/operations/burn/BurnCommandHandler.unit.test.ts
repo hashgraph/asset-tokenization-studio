@@ -218,7 +218,6 @@ import {
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../__tests__/fixtures/shared/DataFixture';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import Account from '../../../../../../domain/context/account/Account';
 import { Security } from '../../../../../../domain/context/security/Security';
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants';
