@@ -445,7 +445,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         address _lostWallet,
         address _newWallet,
         address _investorOnchainID
-    ) external onlyRole(_AGENT_ROLE) returns (bool) {
+    ) external onlyRole(_AGENT_ROLE) canRecover(_lostWallet) returns (bool) {
         emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return _recoveryAddress(_lostWallet, _newWallet);
     }

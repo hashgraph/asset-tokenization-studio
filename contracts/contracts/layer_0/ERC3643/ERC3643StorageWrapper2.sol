@@ -214,6 +214,11 @@ import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
+    modifier canRecover(address _tokenHolder) {
+        if (!_canRecover(_tokenHolder)) revert IERC3643.CannotRecoverWallet();
+        _;
+    }
+
     function _setName(
         string calldata _name
     ) internal returns (ERC20Storage storage erc20Storage_) {
@@ -387,5 +392,15 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         );
         return
             _getFrozenAmountForByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _canRecover(
+        address _tokenHolder
+    ) internal view returns (bool isEmpty_) {
+        isEmpty_ =
+            _getLockedAmountFor(_tokenHolder) +
+                _getHeldAmountFor(_tokenHolder) +
+                _getClearedAmountFor(_tokenHolder) ==
+            0;
     }
 }

@@ -260,6 +260,7 @@ import {
     PROTECTED_PARTITIONS_ROLE,
     PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
     ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+    LOCKER_ROLE,
 } from '@scripts'
 import { Contract } from 'ethers'
 
@@ -1459,6 +1460,97 @@ describe('ERC3643 Tests', () => {
         })
 
         describe('Recovery', () => {
+            it('GIVEN lost wallet with pending locks, holds or clearings THEN recovery fails with CannotRecoverWallet', async () => {
+                await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
+                const amount = 1000
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: '0x',
+                })
+                // Lock
+                await lockFacet.lock(
+                    amount,
+                    account_E,
+                    dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                )
+                await expect(
+                    erc3643Facet.recoveryAddress(
+                        account_E,
+                        account_B,
+                        ADDRESS_ZERO
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'CannotRecoverWallet'
+                )
+                await timeTravelFacet.changeSystemTimestamp(
+                    dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                )
+                await lockFacet.release(1, account_E)
+                // Hold
+                const hold = {
+                    amount: amount,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:06Z'
+                    ),
+                    escrow: account_B,
+                    to: account_C,
+                    data: EMPTY_HEX_BYTES,
+                }
+                await holdFacet
+                    .connect(signer_E)
+                    .createHoldByPartition(DEFAULT_PARTITION, hold)
+                await expect(
+                    erc3643Facet.recoveryAddress(
+                        account_E,
+                        account_B,
+                        ADDRESS_ZERO
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'CannotRecoverWallet'
+                )
+                await timeTravelFacet.changeSystemTimestamp(
+                    dateToUnixTimestamp('2030-01-01T00:00:06Z')
+                )
+                const holdIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    holdId: 1,
+                }
+                await holdFacet
+                    .connect(signer_B)
+                    .releaseHoldByPartition(holdIdentifier, amount)
+                // Clearing
+                await clearingActionsFacet.activateClearing()
+                const clearingOperation = {
+                    partition: DEFAULT_PARTITION,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:09Z'
+                    ),
+                    data: EMPTY_HEX_BYTES,
+                }
+                await clearingFacet
+                    .connect(signer_E)
+                    .clearingTransferByPartition(
+                        clearingOperation,
+                        amount,
+                        account_A
+                    )
+                await expect(
+                    erc3643Facet.recoveryAddress(
+                        account_E,
+                        account_B,
+                        ADDRESS_ZERO
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'CannotRecoverWallet'
+                )
+            })
+
             it('GIVEN lost wallet WHEN calling recoveryAddress THEN normal balance and freeze balance and status is successfully transferred', async () => {
                 const amount = 1000
                 await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
