@@ -378,8 +378,8 @@ import { OnchainIDQuery } from '../../../app/usecase/query/security/tokenMetadat
 import FreezePartialTokensRequest from '../request/security/operations/erc3643/FreezePartialTokensRequest.js';
 import GetFrozenPartialTokensRequest from '../request/security/operations/erc3643/GetFrozenPartialTokensRequest.js';
 import UnfreezePartialTokensRequest from '../request/security/operations/erc3643/UnfreezePartialTokensRequest.js';
-import { FreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand.js';
-import { UnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand.js';
+import { FreezePartialTokensCommand } from '@command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand.js';
+import { UnfreezePartialTokensCommand } from '@command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand.js';
 import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery.js';
 import RecoveryAddressRequest from '../request/security/operations/recovery/RecoveryAddressRequest.js';
 import { RecoveryAddressCommand } from '../../../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand.js';

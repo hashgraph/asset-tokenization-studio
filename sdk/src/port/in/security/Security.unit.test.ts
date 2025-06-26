@@ -293,7 +293,7 @@ import {
   AccountPropsFixture,
   GetAccountBalanceRequestFixture,
 } from '../../../../__tests__/fixtures/account/AccountFixture';
-import { MirrorNodeAdapter } from 'port/out/mirror/MirrorNodeAdapter';
+import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter';
 import { SecurityControlListType } from './Security';
 import {
   GetLockCountRequestFixture,

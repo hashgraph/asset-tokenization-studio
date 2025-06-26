@@ -205,11 +205,11 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { FreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand';
-import FreezePartialTokensRequest from 'port/in/request/security/operations/erc3643/FreezePartialTokensRequest';
-import { UnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand';
-import UnfreezePartialTokensRequest from 'port/in/request/security/operations/erc3643/UnfreezePartialTokensRequest';
-import { GetFrozenPartialTokensQuery } from 'app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
+import { FreezePartialTokensCommand } from '../../../src/app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand';
+import FreezePartialTokensRequest from '../../../src/port/in/request/security/operations/erc3643/FreezePartialTokensRequest';
+import { UnfreezePartialTokensCommand } from '../../../src/app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand';
+import UnfreezePartialTokensRequest from '../../../src/port/in/request/security/operations/erc3643/UnfreezePartialTokensRequest';
+import { GetFrozenPartialTokensQuery } from '../../../src/app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
 
 export const FreezePartialTokensCommandFixture =
   createFixture<FreezePartialTokensCommand>((command) => {

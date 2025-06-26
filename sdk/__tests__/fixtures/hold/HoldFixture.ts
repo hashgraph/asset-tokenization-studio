@@ -228,7 +228,7 @@ import { GetHeldAmountForByPartitionQuery } from '../../../src/app/usecase/query
 import { GetHoldCountForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQuery';
 import { GetHoldForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery';
 import { HoldDetails } from '../../../src/domain/context/security/Hold';
-import { GetHoldsIdForByPartitionQuery } from 'app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery';
+import { GetHoldsIdForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery';
 
 export const CreateHoldByPartitionRequestFixture =
   createFixture<CreateHoldByPartitionRequest>((request) => {

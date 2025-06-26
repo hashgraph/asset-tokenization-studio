@@ -215,7 +215,7 @@ import { GetKycAccountsCountQuery } from '../../../src/app/usecase/query/securit
 import { GetKycAccountsDataQuery } from '../../../src/app/usecase/query/security/kyc/getKycAccountsData/GetKycAccountsDataQuery';
 import { GetKycForQuery } from '../../../src/app/usecase/query/security/kyc/getKycFor/GetKycForQuery';
 import { Kyc } from '../../../src/domain/context/kyc/Kyc';
-import { GetKycStatusForQuery } from 'app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
+import { GetKycStatusForQuery } from '../../../src/app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
 import GrantKycRequest from '../../../src/port/in/request/security/kyc/GrantKycRequest';
 import RevokeKycRequest from '../../../src/port/in/request/security/kyc/RevokeKycRequest';
 import GetKycForRequest from '../../../src/port/in/request/security/kyc/GetKycForRequest';

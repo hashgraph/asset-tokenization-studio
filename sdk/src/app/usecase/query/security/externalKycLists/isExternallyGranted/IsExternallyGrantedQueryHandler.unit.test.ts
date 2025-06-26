@@ -216,7 +216,7 @@ import {
   IsExternallyGrantedQuery,
   IsExternallyGrantedQueryResponse,
 } from './IsExternallyGrantedQuery.js';
-import AccountService from 'app/service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import { IsExternallyGrantedQueryFixture } from '../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
 
 describe('IsExternallyGrantedQueryHandler', () => {

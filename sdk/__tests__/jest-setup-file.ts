@@ -206,7 +206,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import 'reflect-metadata';
-import BigDecimal from '../src/domain/context/shared/BigDecimal.js';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
 import { SecurityRole } from '../src/domain/context/security/SecurityRole.js';
 import { EquityDetails } from '../src/domain/context/equity/EquityDetails.js';

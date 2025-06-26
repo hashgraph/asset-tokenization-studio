@@ -246,8 +246,8 @@ import {
 } from '../../../src/domain/context/equity/DividendType';
 import { VotingFor } from '../../../src/domain/context/equity/VotingFor';
 import { VotingRights } from '../../../src/domain/context/equity/VotingRights';
-import { GetRegulationDetailsQuery } from 'app/usecase/query/factory/get/GetRegulationDetailsQuery';
-import { GetConfigInfoQuery } from 'app/usecase/query/management/GetConfigInfoQuery';
+import { GetRegulationDetailsQuery } from '../../../src/app/usecase/query/factory/get/GetRegulationDetailsQuery';
+import { GetConfigInfoQuery } from '../../../src/app/usecase/query/management/GetConfigInfoQuery';
 
 export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
   (request) => {
