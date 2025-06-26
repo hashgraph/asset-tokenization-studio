@@ -232,6 +232,7 @@ import { AddExternalControl } from "../views/AddExternalControl/AddExternalContr
 import { ExternalControlDetails } from "../views/ExternalControlDetails/ExternalControlDetails";
 import { ExternalKYCList } from "../views/ExternalKYCList/ExternalKYCList";
 import { AddExternalKYC } from "../views/AddExternalKYC/AddExternalKYC";
+import { DigitalSecurityFreeze } from "../views/DigitalSecurityFreeze/DigitalSecurityFreeze";
 
 const t = (key: RouteName) => i18n.t(`routes:${key}`);
 
@@ -395,6 +396,15 @@ export const routes = [
         element: (
           <PrivateRoute>
             <DigitalSecurityMint />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: RoutePath.DIGITAL_SECURITY_FREEZE,
+        breadcrumb: t(RouteName.DigitalSecurityFreeze),
+        element: (
+          <PrivateRoute>
+            <DigitalSecurityFreeze />
           </PrivateRoute>
         ),
       },

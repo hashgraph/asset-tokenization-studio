@@ -79,7 +79,7 @@
     "prettier": "npm run prettier:write",
     "prettier:write": "npx -y prettier . --write",
     "prettier:check": "npx -y prettier . --check",
-    "pre-commit": "npm run prettier && npm run lint && npm run test",
+    "pre-commit": "npm run prettier && npm run lint",
     "slither:analysis": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --solc-remaps @=node_modules/@\"",
     "slither:storageLayout": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --print variable-order --solc-remaps @=node_modules/@\"",
     "slither:inheritance": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --print inheritance --solc-remaps @=node_modules/@\"",

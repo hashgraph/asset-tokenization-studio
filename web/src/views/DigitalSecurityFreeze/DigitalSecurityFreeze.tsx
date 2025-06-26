@@ -202,34 +202,207 @@
    limitations under the License.
 
 */
+import { useWatch } from "react-hook-form";
+import { HStack, Stack, VStack } from "@chakra-ui/react";
+import { History } from "../../components/History";
+import { useTranslation } from "react-i18next";
+import {
+  Text,
+  InputController,
+  InputNumberController,
+  Button,
+  ToggleController,
+  Tooltip,
+  PhosphorIcon,
+} from "io-bricks-ui";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { required, min } from "../../utils/rules";
+import { CancelButton } from "../../components/CancelButton";
+import { useParams } from "react-router";
+import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
+import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";
+import { useWalletStore } from "../../store/walletStore";
+import { useSecurityStore } from "../../store/securityStore";
+import { Info } from "@phosphor-icons/react";
+import {
+  useFreezeSecurity,
+  useUnfreezeSecurity,
+} from "../../hooks/mutations/useFreezeSecurity";
+import {
+  UnfreezePartialTokensRequest,
+  FreezePartialTokensRequest,
+} from "@hashgraph/asset-tokenization-sdk";
 
-import { RouteName } from "./RouteName";
+interface MintFormValues {
+  amount: number;
+  destination: string;
+  isUnfreeze: boolean;
+}
 
-export const RoutePath: Record<RouteName, string> = {
-  [RouteName.Dashboard]: "/",
-  [RouteName.ExternalPauseList]: "/external-pause",
-  [RouteName.CreateExternalPause]: "/external-pause/create",
-  [RouteName.AddExternalPause]: "/external-pause/add",
-  [RouteName.Landing]: "/connect-to-metamask",
-  [RouteName.ExternalControlList]: "/external-control",
-  [RouteName.CreateExternalControl]: "/external-control/create",
-  [RouteName.AddExternalControl]: "/external-control/add",
-  [RouteName.ExternalControlDetails]: "/external-control/:id",
-  [RouteName.ExternalKYCList]: "/external-kyc",
-  [RouteName.CreateExternalKYC]: "/external-kyc/create",
-  [RouteName.AddExternalKYC]: "/external-kyc/add",
-  [RouteName.ExternalKYCDetails]: "/external-kyc/:id",
-  [RouteName.DigitalSecurityDetails]: "/security/:id",
-  [RouteName.DigitalSecurityMint]: "/security/:id/mint",
-  [RouteName.DigitalSecurityFreeze]: "/security/:id/freeze",
-  [RouteName.DigitalSecurityTransfer]: "/security/:id/transfer",
-  [RouteName.DigitalSecurityForceTransfer]: "/security/:id/forceTransfer",
-  [RouteName.DigitalSecurityRedeem]: "/security/:id/redeem",
-  [RouteName.DigitalSecurityForceRedeem]: "/security/:id/forceRedeem",
-  [RouteName.DigitalSecurityLock]: "/security/:id/lock",
-  [RouteName.DigitalSecuritiesList]: "/list/:type",
-  [RouteName.AddSecurity]: "/security/add",
-  [RouteName.CreateSecurity]: "/security/create",
-  [RouteName.CreateEquity]: "/security/create/equity",
-  [RouteName.CreateBond]: "/security/create/bond",
+export const DigitalSecurityFreeze = () => {
+  const { t: tHeader } = useTranslation("security", {
+    keyPrefix: "freeze.header",
+  });
+  const { t: tForm } = useTranslation("security", {
+    keyPrefix: "freeze.input",
+  });
+  const { t } = useTranslation("security", { keyPrefix: "freeze" });
+  const { t: tGlobal } = useTranslation("globals");
+  const { t: tProperties } = useTranslation("properties");
+  const { control, formState, handleSubmit, reset } = useForm<MintFormValues>({
+    mode: "all",
+  });
+  const { address: walletAddress } = useWalletStore();
+  const { id = "" } = useParams();
+  const { details } = useSecurityStore();
+  const { isLoading: isBalancePanelLoading, update } = useDetailsBalancePanel(
+    id,
+    walletAddress,
+  );
+  const { mutate: freezeSecurity, isLoading: isFreezeLoading } =
+    useFreezeSecurity();
+  const { mutate: unfreezeSecurity, isLoading: isUnfreezeLoading } =
+    useUnfreezeSecurity();
+
+  const isUnfreeze = useWatch({
+    control,
+    name: "isUnfreeze",
+    defaultValue: false,
+  });
+
+  const submit: SubmitHandler<MintFormValues> = (params) => {
+    const isUnfreeze = params.isUnfreeze;
+
+    if (isUnfreeze) {
+      const unfreezePartialTokensRequest = new UnfreezePartialTokensRequest({
+        securityId: id,
+        targetId: params.destination,
+        amount: params.amount.toString(),
+      });
+
+      unfreezeSecurity(unfreezePartialTokensRequest, {
+        onSettled: () => update(),
+        onSuccess: () => {
+          reset();
+        },
+      });
+    } else {
+      const freezePartialTokensRequest = new FreezePartialTokensRequest({
+        securityId: id,
+        targetId: params.destination,
+        amount: params.amount.toString(),
+      });
+
+      freezeSecurity(freezePartialTokensRequest, {
+        onSettled: () => update(),
+        onSuccess: () => {
+          reset();
+        },
+      });
+    }
+  };
+
+  return (
+    <>
+      <History label={tHeader("title")} />
+      <HStack
+        layerStyle="container"
+        mt={6}
+        pt={20}
+        pb={8}
+        gap={20}
+        justify="center"
+      >
+        <VStack
+          data-testid="mint-form"
+          justifyContent="flex-start"
+          h="full"
+          alignItems="flex-start"
+          w="full"
+          maxW="472px"
+          as="form"
+          onSubmit={handleSubmit(submit)}
+          gap={3}
+        >
+          <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+          <Text textStyle="BodyRegularMD" mt={2}>
+            {t("subtitle")}
+          </Text>
+          <Text textStyle="ElementsRegularSM" mt={8}>
+            {tGlobal("mandatoryFields")}
+          </Text>
+          <VStack>
+            <Tooltip label={tForm("isUnfreeze.tooltip")} placement="right">
+              <HStack>
+                <Text>{tForm("isUnfreeze.label")}</Text>
+                <PhosphorIcon as={Info} />
+              </HStack>
+            </Tooltip>
+            <ToggleController control={control} id="isUnfreeze" />
+          </VStack>
+          <Stack mt={6} w="full">
+            <InputNumberController
+              autoFocus
+              control={control}
+              id="amount"
+              rules={{
+                required,
+                min: min(0),
+              }}
+              size="md"
+              allowNegative={false}
+              label={tForm(
+                isUnfreeze ? "amountUnfreeze.label" : "amountFreeze.label",
+              )}
+              placeholder={tForm(
+                isUnfreeze
+                  ? "amountUnfreeze.placeholder"
+                  : "amountFreeze.placeholder",
+              )}
+              decimalScale={details?.decimals}
+              fixedDecimalScale={true}
+              thousandSeparator=","
+              decimalSeparator="."
+            />
+          </Stack>
+          <Stack mt={6} w="full">
+            <InputController
+              autoFocus
+              control={control}
+              id="destination"
+              rules={{ required }}
+              label={tForm("destination.label")}
+              placeholder={tForm("destination.placeholder")}
+              size="md"
+            />
+          </Stack>
+          <HStack
+            gap={4}
+            w="full"
+            mt={10}
+            align="end"
+            justifyContent={"flex-end"}
+          >
+            <CancelButton />
+            <Button
+              data-testid="mint-security-button"
+              size="md"
+              variant="primary"
+              isDisabled={!formState.isValid}
+              type="submit"
+              minW="unset"
+              isLoading={isFreezeLoading || isUnfreezeLoading}
+            >
+              {tGlobal("submit")}
+            </Button>
+          </HStack>
+        </VStack>
+        <DetailsBalancePanel
+          balance={details?.totalSupply}
+          isLoading={isBalancePanelLoading}
+          title={tProperties("totalSupply")}
+        />
+      </HStack>
+    </>
+  );
 };

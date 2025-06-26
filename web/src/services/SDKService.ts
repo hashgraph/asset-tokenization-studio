@@ -361,6 +361,9 @@ import {
   IsInternalKycActivatedRequest,
   ActivateInternalKycRequest,
   DeactivateInternalKycRequest,
+  FreezePartialTokensRequest,
+  UnfreezePartialTokensRequest,
+  GetFrozenPartialTokensRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -641,6 +644,28 @@ export class SDKService {
   public static async mint(req: IssueRequest): Promise<boolean> {
     const response = await Security.issue(req);
     return response.payload;
+  }
+
+  // FREEZE & UNFREEZE ////////////////////////////////////////////
+  public static async freezePartialTokens(
+    req: FreezePartialTokensRequest,
+  ): Promise<boolean> {
+    const response = await Security.freezePartialTokens(req);
+    return response.payload;
+  }
+
+  public static async unfreezePartialTokens(
+    req: UnfreezePartialTokensRequest,
+  ): Promise<boolean> {
+    const response = await Security.unfreezePartialTokens(req);
+    return response.payload;
+  }
+
+  public static async getFrozenTokens(
+    req: GetFrozenPartialTokensRequest,
+  ): Promise<BalanceViewModel> {
+    const response = await Security.getFrozenPartialTokens(req);
+    return response;
   }
 
   // TRANSFER & REDEEM & BALANCES ////////////////////////////////////////////
