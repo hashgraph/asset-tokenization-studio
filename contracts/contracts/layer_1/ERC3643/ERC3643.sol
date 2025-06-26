@@ -233,7 +233,8 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     address private constant _ONCHAIN_ID = address(0);
 
     function setAddressFrozen(
-        address _userAddress
+        address _userAddress,
+        bool _freezStatus
     )
         external
         override
@@ -241,7 +242,8 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
     {
-        emit TokensFrozen(_userAddress, 0, _DEFAULT_PARTITION); //TODO amount TBD
+        _setAddresFrozen(_userAddress, _freezStatus);
+        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
     }
 
     /**
@@ -448,6 +450,15 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit AgentRemoved(_agent);
     }
 
+    function recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) external onlyRole(_AGENT_ROLE) returns (bool) {
+        emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
+        return _recoveryAddress(_lostWallet, _newWallet);
+    }
+
     /**
      * @notice Retrieves the onchainID address associated with the token.
      */
@@ -488,8 +499,19 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return IIdentityRegistry(_erc3643Storage().identityRegistry);
     }
 
+    /**
+     * @notice Retrieves the onchainID address associated with the token.
+     */
+    function onchainID() external view override returns (address) {
+        return _erc3643Storage().onchainID;
+    }
+
     function compliance() external view override returns (ICompliance) {
         return ICompliance(_erc3643Storage().compliance);
+    }
+
+    function isAddressRecovered(address _wallet) external view returns (bool) {
+        return _isRecovered(_wallet);
     }
 
     function getStaticResolverKey()
@@ -544,6 +566,12 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .recoveryAddress
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .isAddressRecovered
+            .selector;
     }
 
     /**

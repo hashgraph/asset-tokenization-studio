@@ -215,6 +215,26 @@ import {
 } from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
 
 abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
+    modifier checkRecoveredAddress(address _sender) {
+        _checkRecoveredAddress(_sender);
+        _;
+    }
+
+    function _setAddresFrozen(
+        address _userAddress,
+        bool _freezeStatus
+    ) internal {
+        if (_freezeStatus) {
+            _getControlListType()
+                ? _removeFromControlList(_userAddress)
+                : _addToControlList(_userAddress);
+            return;
+        }
+        _getControlListType()
+            ? _addToControlList(_userAddress)
+            : _removeFromControlList(_userAddress);
+    }
+
     function _addAgent(address _agent) internal {
         if (!_grantRole(_AGENT_ROLE, _agent)) {
             revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
@@ -225,6 +245,14 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
         if (!_revokeRole(_AGENT_ROLE, _agent)) {
             revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
         }
+    }
+
+    function _checkRecoveredAddress(address _sender) internal view {
+        if (_isRecovered(_sender)) revert IERC3643.WalletRecovered();
+    }
+
+    function _isRecovered(address _sender) internal view returns (bool) {
+        return _erc3643Storage().addressRecovered[_sender];
     }
 
     function _getFrozenAmountFor(
