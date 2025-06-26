@@ -233,7 +233,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     address private constant _ONCHAIN_ID = address(0);
 
     // ====== External functions (state-changing) ======
-
     /**
      * @notice Sets the name of the token.
      * @dev Can only be called by the token `owner/issuer`.
@@ -318,6 +317,10 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit AgentAdded(_agent);
     }
 
+    /**
+     * @notice Revokes an account the agent role
+     * @dev Can only be called by the role admin
+     */
     function removeAgent(
         address _agent
     ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
@@ -406,6 +409,9 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return _getFrozenAmountForAdjusted(_userAddress);
     }
 
+    /**
+     * @dev Checks if an account has the agent role
+     */
     function isAgent(address _agent) external view returns (bool) {
         return _hasRole(_AGENT_ROLE, _agent);
     }
@@ -461,7 +467,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         staticFunctionSelectors_ = new bytes4[](
-            36 // Total number of selectors defined below
+            30 // Total number of selectors defined below
         );
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
@@ -526,6 +532,9 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             .selector;
     }
 
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
     function getStaticInterfaceIds()
         external
         pure

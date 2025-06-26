@@ -203,12 +203,23 @@
 
 */
 
-import { CommandError } from '../../../../error/CommandError';
-import BaseError from '../../../../../../../core/error/BaseError';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { createFixture } from '../config';
+import { BurnRequest } from '../../../src';
+import { BurnCommand } from '../../../src/app/usecase/command/security/operations/burn/BurnCommand';
 
-export class ControllerTransferCommandError extends CommandError {
-  constructor(error: Error) {
-    const msg = `An error occurred while force transferring tokens: ${error.message}`;
-    super(msg, error instanceof BaseError ? error.errorCode : undefined);
-  }
-}
+export const BurnRequestFixture = createFixture<BurnRequest>((request) => {
+  request.securityId.as(() => HederaIdPropsFixture.create().value);
+  request.sourceId.as(() => HederaIdPropsFixture.create().value);
+  request.amount.faker((faker) =>
+    faker.number.int({ min: 1, max: 10 }).toString(),
+  );
+});
+
+export const BurnCommandFixture = createFixture<BurnCommand>((command) => {
+  command.sourceId.as(() => HederaIdPropsFixture.create().value);
+  command.amount.faker((faker) =>
+    faker.number.int({ min: 1, max: 1000 }).toString(),
+  );
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
+});

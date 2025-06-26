@@ -203,156 +203,90 @@
 
 */
 
-import {
-  CreateBondCommand,
-  CreateBondCommandResponse,
-} from './CreateBondCommand.js';
-import { InvalidRequest } from '../../error/InvalidRequest.js';
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { Security } from '../../../../../domain/context/security/Security.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import { CreateBondCommandError } from './error/CreateBondCommandError.js';
-import { Response } from '../../../../../domain/context/transaction/Response';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
+import { MintCommand, MintCommandResponse } from './MintCommand.js';
+import { MintCommandError } from './error/MintCommandError';
 
-@CommandHandler(CreateBondCommand)
-export class CreateBondCommandHandler
-  implements ICommandHandler<CreateBondCommand>
-{
+@CommandHandler(MintCommand)
+export class MintCommandHandler implements ICommandHandler<MintCommand> {
   constructor(
+    @lazyInject(SecurityService)
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    command: CreateBondCommand,
-  ): Promise<CreateBondCommandResponse> {
-    let res: Response;
+  async execute(command: MintCommand): Promise<MintCommandResponse> {
     try {
-      const {
-        security,
-        currency,
-        nominalValue,
-        startingDate,
-        maturityDate,
-        couponFrequency,
-        couponRate,
-        firstCouponDate,
-        factory,
-        resolver,
-        configId,
-        configVersion,
-        diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-      } = command;
-
-      //TODO: Boy scout: remove request validations and adjust test
-      if (!factory) {
-        throw new InvalidRequest('Factory not found in request');
-      }
-
-      if (!resolver) {
-        throw new InvalidRequest('Resolver not found in request');
-      }
-
-      if (!configId) {
-        throw new InvalidRequest('Config Id not found in request');
-      }
-
-      if (configVersion === undefined) {
-        throw new InvalidRequest('Config Version not found in request');
-      }
-
-      const diamondOwnerAccountEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
-
-      const factoryEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(factory.toString());
-
-      const resolverEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(resolver.toString());
-
-      const [
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-      ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
-      ]);
+      const { securityId, targetId, amount } = command;
 
       const handler = this.transactionService.getHandler();
+      const security = await this.securityService.get(securityId);
+      const account = this.accountService.getCurrentAccount();
 
-      const bondInfo = new BondDetails(
-        currency,
-        BigDecimal.fromString(nominalValue),
-        parseInt(startingDate),
-        parseInt(maturityDate),
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
+
+      await this.validationService.checkDecimals(security, amount);
+
+      await this.validationService.checkMaxSupply(
+        securityId,
+        amountBd,
+        security,
       );
 
-      const couponInfo = new CouponDetails(
-        parseInt(couponFrequency),
-        BigDecimal.fromString(couponRate),
-        parseInt(firstCouponDate),
+      await this.validationService.checkControlList(securityId, targetId);
+
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.GRANTED,
       );
 
-      res = await handler.createBond(
-        new Security(security),
-        bondInfo,
-        couponInfo,
-        factoryEvmAddress,
-        resolverEvmAddress,
-        configId,
-        configVersion,
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-        diamondOwnerAccountEvmAddress,
-        factory.toString(),
+      await this.validationService.checkRole(
+        SecurityRole._ISSUER_ROLE,
+        account.id.toString(),
+        securityId,
       );
 
-      const contractAddress =
-        await this.transactionService.getTransactionResult({
-          res,
-          result: res.response?.bondAddress,
-          className: CreateBondCommandHandler.name,
-          position: 0,
-          numberOfResultsItems: 1,
-        });
+      await this.validationService.checkMultiPartition(security);
 
-      const contractId =
-        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
-          contractAddress,
-        );
+      await this.validationService.checkIssuable(security);
 
+      // Check that the amount to issue + total supply is not greater than max supply
+
+      const res = await handler.mint(
+        securityEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        securityId,
+      );
       return Promise.resolve(
-        new CreateBondCommandResponse(new ContractId(contractId), res.id!),
+        new MintCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      if (res?.response == 1) {
-        return Promise.resolve(
-          new CreateBondCommandResponse(new ContractId('0.0.0'), res.id!),
-        );
-      }
-      throw new CreateBondCommandError(error as Error);
+      throw new MintCommandError(error as Error);
     }
   }
 }

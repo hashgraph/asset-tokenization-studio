@@ -289,6 +289,13 @@ interface ITransactionAdapter {
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  forcedTransfer(
+    security: EvmAddress,
+    source: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   controllerRedeem(
     security: EvmAddress,
     sourceId: EvmAddress,
@@ -298,6 +305,12 @@ interface ITransactionAdapter {
   issue(
     security: EvmAddress,
     targetId: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  mint(
+    security: EvmAddress,
+    target: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -315,6 +328,12 @@ interface ITransactionAdapter {
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   redeem(
+    security: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  burn(
+    source: EvmAddress,
     security: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
@@ -1185,6 +1204,15 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
+  forcedTransfer(
+    security: EvmAddress,
+    source: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
+  }
   controllerRedeem(
     security: EvmAddress,
     sourceId: EvmAddress,
@@ -1193,9 +1221,25 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
+  burn(
+    security: EvmAddress,
+    source: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
+  }
   issue(
     security: EvmAddress,
     targetId: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
+  }
+  mint(
+    security: EvmAddress,
+    target: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {

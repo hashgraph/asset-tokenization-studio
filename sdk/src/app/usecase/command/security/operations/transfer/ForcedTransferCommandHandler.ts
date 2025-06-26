@@ -203,156 +203,89 @@
 
 */
 
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import {
-  CreateBondCommand,
-  CreateBondCommandResponse,
-} from './CreateBondCommand.js';
-import { InvalidRequest } from '../../error/InvalidRequest.js';
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { Security } from '../../../../../domain/context/security/Security.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { BondDetails } from '../../../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../../../domain/context/bond/CouponDetails.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import { CreateBondCommandError } from './error/CreateBondCommandError.js';
-import { Response } from '../../../../../domain/context/transaction/Response';
+  ForcedTransferCommand,
+  ForcedTransferCommandResponse,
+} from './ForcedTransferCommand';
+import { ForcedTransferCommandError } from './error/ForcedTransferCommandError';
 
-@CommandHandler(CreateBondCommand)
-export class CreateBondCommandHandler
-  implements ICommandHandler<CreateBondCommand>
+@CommandHandler(ForcedTransferCommand)
+export class ForcedTransferCommandHandler
+  implements ICommandHandler<ForcedTransferCommand>
 {
   constructor(
+    @lazyInject(SecurityService)
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
   ) {}
 
   async execute(
-    command: CreateBondCommand,
-  ): Promise<CreateBondCommandResponse> {
-    let res: Response;
+    command: ForcedTransferCommand,
+  ): Promise<ForcedTransferCommandResponse> {
     try {
-      const {
-        security,
-        currency,
-        nominalValue,
-        startingDate,
-        maturityDate,
-        couponFrequency,
-        couponRate,
-        firstCouponDate,
-        factory,
-        resolver,
-        configId,
-        configVersion,
-        diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-      } = command;
-
-      //TODO: Boy scout: remove request validations and adjust test
-      if (!factory) {
-        throw new InvalidRequest('Factory not found in request');
-      }
-
-      if (!resolver) {
-        throw new InvalidRequest('Resolver not found in request');
-      }
-
-      if (!configId) {
-        throw new InvalidRequest('Config Id not found in request');
-      }
-
-      if (configVersion === undefined) {
-        throw new InvalidRequest('Config Version not found in request');
-      }
-
-      const diamondOwnerAccountEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
-
-      const factoryEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(factory.toString());
-
-      const resolverEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(resolver.toString());
-
-      const [
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-      ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
-      ]);
-
+      const { sourceId, targetId, amount, securityId } = command;
       const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-      const bondInfo = new BondDetails(
-        currency,
-        BigDecimal.fromString(nominalValue),
-        parseInt(startingDate),
-        parseInt(maturityDate),
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
+
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
+
+      await this.validationService.checkCanTransfer(
+        securityId,
+        targetId,
+        amount,
+        sourceId,
+        _PARTITION_ID_1,
+        account.id.toString(),
       );
 
-      const couponInfo = new CouponDetails(
-        parseInt(couponFrequency),
-        BigDecimal.fromString(couponRate),
-        parseInt(firstCouponDate),
+      await this.validationService.checkRole(
+        SecurityRole._CONTROLLER_ROLE,
+        account.id.toString(),
+        securityId,
       );
 
-      res = await handler.createBond(
-        new Security(security),
-        bondInfo,
-        couponInfo,
-        factoryEvmAddress,
-        resolverEvmAddress,
-        configId,
-        configVersion,
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-        diamondOwnerAccountEvmAddress,
-        factory.toString(),
+      await this.validationService.checkDecimals(security, amount);
+
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+      const res = await handler.forcedTransfer(
+        securityEvmAddress,
+        sourceEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        securityId,
       );
-
-      const contractAddress =
-        await this.transactionService.getTransactionResult({
-          res,
-          result: res.response?.bondAddress,
-          className: CreateBondCommandHandler.name,
-          position: 0,
-          numberOfResultsItems: 1,
-        });
-
-      const contractId =
-        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
-          contractAddress,
-        );
-
       return Promise.resolve(
-        new CreateBondCommandResponse(new ContractId(contractId), res.id!),
+        new ForcedTransferCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      if (res?.response == 1) {
-        return Promise.resolve(
-          new CreateBondCommandResponse(new ContractId('0.0.0'), res.id!),
-        );
-      }
-      throw new CreateBondCommandError(error as Error);
+      throw new ForcedTransferCommandError(error as Error);
     }
   }
 }
