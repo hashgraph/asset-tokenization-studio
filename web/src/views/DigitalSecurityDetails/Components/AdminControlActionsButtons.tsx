@@ -203,33 +203,47 @@
 
 */
 
-import { RouteName } from "./RouteName";
+import { Link as RouterLink, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { HStack } from "@chakra-ui/react";
+import { Button } from "io-bricks-ui";
+import { RouteName } from "../../../router/RouteName";
+import { RouterManager } from "../../../router/RouterManager";
+import { PauseRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";
+import { useRolesStore } from "../../../store/rolesStore";
+import { SecurityRole } from "../../../utils/SecurityRole";
 
-export const RoutePath: Record<RouteName, string> = {
-  [RouteName.Dashboard]: "/",
-  [RouteName.ExternalPauseList]: "/external-pause",
-  [RouteName.CreateExternalPause]: "/external-pause/create",
-  [RouteName.AddExternalPause]: "/external-pause/add",
-  [RouteName.Landing]: "/connect-to-metamask",
-  [RouteName.ExternalControlList]: "/external-control",
-  [RouteName.CreateExternalControl]: "/external-control/create",
-  [RouteName.AddExternalControl]: "/external-control/add",
-  [RouteName.ExternalControlDetails]: "/external-control/:id",
-  [RouteName.ExternalKYCList]: "/external-kyc",
-  [RouteName.CreateExternalKYC]: "/external-kyc/create",
-  [RouteName.AddExternalKYC]: "/external-kyc/add",
-  [RouteName.ExternalKYCDetails]: "/external-kyc/:id",
-  [RouteName.DigitalSecurityDetails]: "/security/:id",
-  [RouteName.DigitalSecurityMint]: "/security/:id/mint",
-  [RouteName.DigitalSecurityFreeze]: "/security/:id/freeze",
-  [RouteName.DigitalSecurityTransfer]: "/security/:id/transfer",
-  [RouteName.DigitalSecurityForceTransfer]: "/security/:id/forceTransfer",
-  [RouteName.DigitalSecurityRedeem]: "/security/:id/redeem",
-  [RouteName.DigitalSecurityForceRedeem]: "/security/:id/forceRedeem",
-  [RouteName.DigitalSecurityLock]: "/security/:id/lock",
-  [RouteName.DigitalSecuritiesList]: "/list/:type",
-  [RouteName.AddSecurity]: "/security/add",
-  [RouteName.CreateSecurity]: "/security/create",
-  [RouteName.CreateEquity]: "/security/create/equity",
-  [RouteName.CreateBond]: "/security/create/bond",
+export const AdminControlActionsButtons = () => {
+  const { t: tButtons } = useTranslation("security", {
+    keyPrefix: "details.actions",
+  });
+  const { id = "" } = useParams();
+  const { data: isPaused } = useGetIsPaused(
+    new PauseRequest({ securityId: id }),
+  );
+  const { roles } = useRolesStore();
+
+  const hasFreezeRole = roles.find(
+    (role) => role === SecurityRole._FREEZE_MANAGER_ROLE,
+  );
+
+  if (isPaused || !hasFreezeRole) return null;
+
+  return (
+    <HStack w="full" justifyContent="flex-end" gap={4} pb={6}>
+      {hasFreezeRole && (
+        <Button
+          data-testid="freeze-button"
+          as={RouterLink}
+          to={RouterManager.getUrl(RouteName.DigitalSecurityFreeze, {
+            params: { id },
+          })}
+          variant="secondary"
+        >
+          {tButtons("freeze")}
+        </Button>
+      )}
+    </HStack>
+  );
 };

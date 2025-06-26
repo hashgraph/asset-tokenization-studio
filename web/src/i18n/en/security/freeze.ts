@@ -203,33 +203,39 @@
 
 */
 
-import { RouteName } from "./RouteName";
-
-export const RoutePath: Record<RouteName, string> = {
-  [RouteName.Dashboard]: "/",
-  [RouteName.ExternalPauseList]: "/external-pause",
-  [RouteName.CreateExternalPause]: "/external-pause/create",
-  [RouteName.AddExternalPause]: "/external-pause/add",
-  [RouteName.Landing]: "/connect-to-metamask",
-  [RouteName.ExternalControlList]: "/external-control",
-  [RouteName.CreateExternalControl]: "/external-control/create",
-  [RouteName.AddExternalControl]: "/external-control/add",
-  [RouteName.ExternalControlDetails]: "/external-control/:id",
-  [RouteName.ExternalKYCList]: "/external-kyc",
-  [RouteName.CreateExternalKYC]: "/external-kyc/create",
-  [RouteName.AddExternalKYC]: "/external-kyc/add",
-  [RouteName.ExternalKYCDetails]: "/external-kyc/:id",
-  [RouteName.DigitalSecurityDetails]: "/security/:id",
-  [RouteName.DigitalSecurityMint]: "/security/:id/mint",
-  [RouteName.DigitalSecurityFreeze]: "/security/:id/freeze",
-  [RouteName.DigitalSecurityTransfer]: "/security/:id/transfer",
-  [RouteName.DigitalSecurityForceTransfer]: "/security/:id/forceTransfer",
-  [RouteName.DigitalSecurityRedeem]: "/security/:id/redeem",
-  [RouteName.DigitalSecurityForceRedeem]: "/security/:id/forceRedeem",
-  [RouteName.DigitalSecurityLock]: "/security/:id/lock",
-  [RouteName.DigitalSecuritiesList]: "/list/:type",
-  [RouteName.AddSecurity]: "/security/add",
-  [RouteName.CreateSecurity]: "/security/create",
-  [RouteName.CreateEquity]: "/security/create/equity",
-  [RouteName.CreateBond]: "/security/create/bond",
+export default {
+  header: {
+    title: "Digital security freeze",
+  },
+  title: "Freeze securities",
+  subtitle: "Enter the information to freeze the securities",
+  input: {
+    amountFreeze: {
+      label: "Amount to freeze",
+      placeholder: "Enter the amount to freeze",
+    },
+    amountUnfreeze: {
+      label: "Amount to Unfreeze",
+      placeholder: "Enter the amount to unfreeze",
+    },
+    destination: {
+      label: "Destination account",
+      placeholder: "Choose destination account",
+    },
+    isUnfreeze: {
+      label: "Unfreeze",
+      tooltip: "Choose to unfreeze the security",
+    },
+  },
+  list: {
+    details: {
+      label: "Details",
+    },
+  },
+  messages: {
+    success: "Success: ",
+    descriptionSuccess: "The freeze operation has been executed successfully",
+    error: "Error: ",
+    descriptionFailed: "The freeze operation has failed",
+  },
 };
