@@ -203,7 +203,7 @@
 
 */
 
-import GetSecurityDetailsRequest from 'port/in/request/security/GetSecurityDetailsRequest';
+import GetSecurityDetailsRequest from '../../../src/port/in/request/security/GetSecurityDetailsRequest';
 import { createFixture } from '../config';
 import {
   HederaIdPropsFixture,
