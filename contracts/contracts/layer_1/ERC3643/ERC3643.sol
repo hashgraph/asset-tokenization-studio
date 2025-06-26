@@ -425,39 +425,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
-    function freezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-    {
-        _freezeTokensByPartition(_partition, _userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _partition);
-    }
-
-    function unfreezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-    {
-        _checkUnfreezeAmount(_partition, _userAddress, _amount);
-        _unfreezeTokensByPartition(_partition, _userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _partition);
-    }
-
     /**
      * @notice Gives an account the agent role
      * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
@@ -488,13 +455,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return _erc3643Storage().onchainID;
     }
 
-    function getFrozenTokensByPartition(
-        bytes32 _partition,
-        address _userAddress
-    ) external view returns (uint256) {
-        return _getFrozenAmountForByPartitionAdjusted(_partition, _userAddress);
-    }
-
     function getFrozenTokens(
         address _userAddress
     ) external view override returns (uint256) {
@@ -507,6 +467,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     function isAgent(address _agent) external view returns (bool) {
         return _hasRole(_AGENT_ROLE, _agent);
     }
+
     /**
      * @notice Retrieves the latest version of the contract.
      * @dev The version is represented as a string.
@@ -546,7 +507,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](29);
+        staticFunctionSelectors_ = new bytes4[](19);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
@@ -558,6 +519,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .setCompliance
             .selector;
@@ -573,22 +535,11 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             .getFrozenTokens
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
-            .freezePartialTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .unfreezePartialTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getFrozenTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
             .setAddressFrozen
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .setIdentityRegistry
             .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
