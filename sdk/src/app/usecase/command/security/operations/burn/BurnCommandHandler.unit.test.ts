@@ -272,7 +272,6 @@ describe('BurnCommandHandler', () => {
       handlerMock.burn.mockResolvedValue({ id: transactionId });
       transactionServiceMock.getHandler.mockReturnValue(handlerMock);
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
-      // @ts-ignore
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         securityEvmAddress,
       );
@@ -280,7 +279,6 @@ describe('BurnCommandHandler', () => {
         undefined,
       );
       validationServiceMock.checkCanRedeem.mockResolvedValue(undefined);
-      // @ts-ignore
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
         sourceEvmAddress,
       );
