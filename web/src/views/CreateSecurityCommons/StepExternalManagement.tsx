@@ -230,6 +230,7 @@ import { CancelButton } from "../../components/CancelButton";
 import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
 import { NextStepButton } from "../CreateEquity/Components/NextStepButton";
 import { useExternalControlStore } from "../../store/externalControlStore";
+import { useExternalKYCStore } from "../../store/externalKYCStore";
 
 type SelectOption = {
   value: string;
@@ -243,6 +244,7 @@ export const StepExternalManagement = () => {
 
   const { externalPauses } = useExternalPauseStore();
   const { externalControls } = useExternalControlStore();
+  const { externalKYCs } = useExternalKYCStore();
 
   const { control, watch, setValue } = useFormContext<
     ICreateEquityFormValues | ICreateBondFormValues
@@ -258,11 +260,20 @@ export const StepExternalManagement = () => {
   const [externalControlsSelected, setExternalControlsSelected] = useState<
     string[]
   >(watch("externalControlList") ?? []);
+  const [externalKYCsSelected, setExternalKYCsSelected] = useState<string[]>(
+    watch("externalKYCList") ?? [],
+  );
 
   useEffect(() => {
     setValue("externalPausesList", externalPausesSelected);
     setValue("externalControlList", externalControlsSelected);
-  }, [externalPausesSelected, externalControlsSelected, setValue]);
+    setValue("externalKYCList", externalKYCsSelected);
+  }, [
+    externalPausesSelected,
+    externalControlsSelected,
+    externalKYCsSelected,
+    setValue,
+  ]);
 
   const externalPauseOptions = externalPauses
     .map(({ address }) => ({
@@ -277,6 +288,13 @@ export const StepExternalManagement = () => {
       value: address,
     }))
     .filter((option) => !externalControlsSelected.includes(option.value));
+
+  const externalKYCOptions = externalKYCs
+    .map(({ address }) => ({
+      label: address,
+      value: address,
+    }))
+    .filter((option) => !externalKYCsSelected.includes(option.value));
 
   const handlePauseSelect = (option: SelectOption[]) => {
     const selectedAddress = option[0].value;
@@ -306,6 +324,22 @@ export const StepExternalManagement = () => {
 
   const handleControlRemove = (addressToRemove: string) => {
     setExternalControlsSelected((prev) =>
+      prev.filter((address) => address !== addressToRemove),
+    );
+  };
+
+  const handleKYCSelect = (option: SelectOption[]) => {
+    const selectedAddress = option[0].value;
+
+    setExternalKYCsSelected((prev) => {
+      if (prev.includes(selectedAddress)) return prev;
+
+      return [...prev, selectedAddress];
+    });
+  };
+
+  const handleKYCRemove = (addressToRemove: string) => {
+    setExternalKYCsSelected((prev) =>
       prev.filter((address) => address !== addressToRemove),
     );
   };
@@ -376,6 +410,37 @@ export const StepExternalManagement = () => {
                   size="sm"
                   rightIcon={<PhosphorIcon as={X} />}
                   onClick={() => handleControlRemove(item)}
+                />
+              ))}
+            </HStack>
+          </VStack>
+          <InfoDivider title={t("externalKYC")} type="main" />
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">{t("kycList")}</Text>
+            </HStack>
+            <SelectController
+              control={control}
+              id="externalKYCList"
+              placeholder={t("kycListPlaceholder")}
+              options={externalKYCOptions}
+              isMulti
+              setsFullOption
+              onChange={(option) =>
+                handleKYCSelect(option as unknown as SelectOption[])
+              }
+            />
+          </Stack>
+          <VStack w="auto" layerStyle="whiteContainer">
+            <PanelTitle title={t("externalKYCsSelected")} />
+            <HStack layerStyle="whiteContainer" noOfLines={20} lineHeight={10}>
+              {externalKYCsSelected.map((item) => (
+                <Tag
+                  key={item}
+                  label={item}
+                  size="sm"
+                  rightIcon={<PhosphorIcon as={X} />}
+                  onClick={() => handleKYCRemove(item)}
                 />
               ))}
             </HStack>

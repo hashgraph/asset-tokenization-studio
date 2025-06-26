@@ -225,7 +225,7 @@ import { IssueCommandHandler } from '../app/usecase/command/security/operations/
 import { RedeemCommandHandler } from '../app/usecase/command/security/operations/redeem/RedeemCommandHandler.js';
 import { TransferCommandHandler } from '../app/usecase/command/security/operations/transfer/TransferCommandHandler.js';
 import { TransferAndLockCommandHandler } from '../app/usecase/command/security/operations/transfer/TransferAndLockCommandHandler.js';
-import { AddToControlListCommandHandler } from '../app/usecase/command/security/operations/AddToControlList/AddToControlListCommandHandler.js';
+import { AddToControlListCommandHandler } from '../app/usecase/command/security/operations/addToControlList/AddToControlListCommandHandler.js';
 import { PauseCommandHandler } from '../app/usecase/command/security/operations/pause/PauseCommandHandler.js';
 import { RemoveFromControlListCommandHandler } from '../app/usecase/command/security/operations/removeFromControlList/RemoveFromControlListCommandHandler.js';
 import { UnpauseCommandHandler } from '../app/usecase/command/security/operations/unpause/UnpauseCommandHandler.js';
@@ -253,7 +253,7 @@ import { ExecuteHoldByPartitionCommandHandler } from '../app/usecase/command/sec
 import { WalletEvents } from '../app/service/event/WalletEvent.js';
 import { CommandHandlerType } from './command/CommandBus.js';
 import { QueryHandlerType } from './query/QueryBus.js';
-import { NetworkProps } from '../app/service/NetworkService.js';
+import { NetworkProps } from '../app/service/network/NetworkService.js';
 // eslint-disable-next-line jest/no-mocks-import
 import { ConcreteQueryHandler } from '../../__tests__/integration/__mocks__/ConcreteQueryHandler.js';
 // eslint-disable-next-line jest/no-mocks-import
@@ -298,9 +298,6 @@ import { UpdateMaturityDateCommandHandler } from '../app/usecase/command/bond/up
 import { SetScheduledBalanceAdjustmentCommandHandler } from '../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommandHandler.js';
 import { GetScheduledBalanceAdjustmentQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQueryHandler.js';
 import { GetScheduledBalanceAdjustmentCountQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQueryHandler';
-import { GetLastAggregatedBalanceAdjustmentFactorForQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQueryHandler.js';
-import { GetAggregatedBalanceAdjustmentFactorQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQueryHandler';
-import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler.js';
 import { DFNSTransactionAdapter } from '../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
 import { FireblocksTransactionAdapter } from '../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
 import { AWSKMSTransactionAdapter } from '../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
@@ -385,6 +382,21 @@ import { CreateExternalWhiteListMockCommandHandler } from '../app/usecase/comman
 import { CreateExternalBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/createExternalBlackListMock/CreateExternalBlackListMockCommandHandler.js';
 import { RemoveFromBlackListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommandHandler.js';
 import { RemoveFromWhiteListMockCommandHandler } from '../app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommandHandler.js';
+import { GetTotalSupplyByPartitionQueryHandler } from '../app/usecase/query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQueryHandler.js';
+import { UpdateExternalKycListsCommandHandler } from '../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommandHandler.js';
+import { AddExternalKycListCommandHandler } from '../app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommandHandler.js';
+import { RemoveExternalKycListCommandHandler } from '../app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommandHandler.js';
+import { GetExternalKycListsCountQueryHandler } from '../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQueryHandler.js';
+import { GetExternalKycListsMembersQueryHandler } from '../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQueryHandler.js';
+import { IsExternalKycListQueryHandler } from '../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQueryHandler.js';
+import { IsExternallyGrantedQueryHandler } from '../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQueryHandler.js';
+import { ActivateInternalKycCommandHandler } from '../app/usecase/command/security/kyc/activateInternalKyc/ActivateInternalKycCommandHandler.js';
+import { DeactivateInternalKycCommandHandler } from '../app/usecase/command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommandHandler.js';
+import { IsInternalKycActivatedQueryHandler } from '../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQueryHandler.js';
+import { GrantKycMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommandHandler.js';
+import { RevokeKycMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommandHandler.js';
+import { GetKycStatusMockQueryHandler } from '../app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQueryHandler.js';
+import { CreateExternalKycListMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -429,6 +441,18 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: RemoveFromWhiteListMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: GrantKycMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RevokeKycMockCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateExternalKycListMockCommandHandler,
   },
   // Security Creation
   {
@@ -717,6 +741,26 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: RemoveExternalControlListCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UpdateExternalKycListsCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddExternalKycListCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveExternalKycListCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ActivateInternalKycCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: DeactivateInternalKycCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [
@@ -735,6 +779,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsAuthorizedWhiteListMockQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKycStatusMockQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
@@ -878,6 +926,10 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
+    useClass: GetTotalSupplyByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
     useClass: GetConfigInfoQueryHandler,
   },
   {
@@ -891,19 +943,6 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetScheduledBalanceAdjustmentCountQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetLastAggregatedBalanceAdjustmentFactorForQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetAggregatedBalanceAdjustmentFactorQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass:
-      GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
@@ -1032,6 +1071,26 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetExternalControlListsMembersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalKycListsCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetExternalKycListsMembersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsExternalKycListQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsExternallyGrantedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsInternalKycActivatedQueryHandler,
   },
 ];
 

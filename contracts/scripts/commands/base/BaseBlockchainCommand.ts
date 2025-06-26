@@ -216,6 +216,6 @@ export default abstract class BaseBlockchainCommand {
 
     constructor({ signer, overrides }: BaseBlockchainCommandParams) {
         this.signer = signer
-        this.overrides = overrides
+        this.overrides = overrides ?? {}
     }
 }

@@ -267,24 +267,6 @@ task('getResolverBusinessLogics', 'Get business logics from resolver')
         undefined,
         types.string
     )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
     .setAction(async (args: GetResolverBusinessLogicsArgs, hre) => {
         console.log(
             `Executing getResolverBusinessLogics on ${hre.network.name} ...`

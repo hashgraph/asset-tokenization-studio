@@ -213,10 +213,11 @@ import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js'
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../service/security/SecurityService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import { EMPTY_BYTES } from '../../../../../core/Constants.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
+import { CanTransferByPartitionQueryError } from './error/CanTransferByPartitionQueryError.js';
 
 @QueryHandler(CanTransferByPartitionQuery)
 export class CanTransferByPartitionQueryHandler
@@ -224,42 +225,46 @@ export class CanTransferByPartitionQueryHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(
     query: CanTransferByPartitionQuery,
   ): Promise<CanTransferByPartitionQueryResponse> {
-    const { securityId, sourceId, targetId, partitionId, amount } = query;
+    try {
+      const { securityId, sourceId, targetId, partitionId, amount } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const security = await this.securityService.get(securityId);
+      const security = await this.securityService.get(securityId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    const [, res] = await this.queryAdapter.canTransferByPartition(
-      securityEvmAddress,
-      sourceEvmAddress,
-      targetEvmAddress,
-      amountBd,
-      partitionId,
-      EMPTY_BYTES,
-      EMPTY_BYTES,
-    );
+      const [, res] = await this.queryAdapter.canTransferByPartition(
+        securityEvmAddress,
+        sourceEvmAddress,
+        targetEvmAddress,
+        amountBd,
+        partitionId,
+        EMPTY_BYTES,
+        EMPTY_BYTES,
+      );
 
-    return new CanTransferByPartitionQueryResponse(res);
+      return new CanTransferByPartitionQueryResponse(res);
+    } catch (error) {
+      throw new CanTransferByPartitionQueryError(error as Error);
+    }
   }
 }

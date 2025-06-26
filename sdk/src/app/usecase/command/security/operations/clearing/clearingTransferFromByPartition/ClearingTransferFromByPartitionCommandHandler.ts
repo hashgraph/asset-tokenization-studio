@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
@@ -215,8 +215,10 @@ import {
   ClearingTransferFromByPartitionCommand,
   ClearingTransferFromByPartitionCommandResponse,
 } from './ClearingTransferFromByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ClearingTransferFromByPartitionCommandError } from './error/ClearingTransferFromByPartitionCommandError.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ClearingTransferFromByPartitionCommand)
 export class ClearingTransferFromByPartitionCommandHandler
@@ -224,82 +226,87 @@ export class ClearingTransferFromByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: ClearingTransferFromByPartitionCommand,
   ): Promise<ClearingTransferFromByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      amount,
-      sourceId,
-      targetId,
-      expirationDate,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
+      await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [sourceId, targetId],
+        KycStatus.GRANTED,
+      );
 
-    await this.validationService.checkControlList(
-      securityId,
-      sourceEvmAddress.toString(),
-      targetEvmAddress.toString(),
-    );
+      await this.validationService.checkControlList(
+        securityId,
+        sourceEvmAddress.toString(),
+        targetEvmAddress.toString(),
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    const res = await handler.clearingTransferFromByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      securityId,
-    );
+      const res = await handler.clearingTransferFromByPartition(
+        securityEvmAddress,
+        partitionId,
+        amountBd,
+        sourceEvmAddress,
+        targetEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        securityId,
+      );
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: ClearingTransferFromByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const clearingId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.clearingId,
+        className: ClearingTransferFromByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new ClearingTransferFromByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ClearingTransferFromByPartitionCommandResponse(
+          parseInt(clearingId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ClearingTransferFromByPartitionCommandError(error as Error);
+    }
   }
 }

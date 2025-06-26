@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
@@ -216,8 +216,10 @@ import {
   OperatorClearingRedeemByPartitionCommand,
   OperatorClearingRedeemByPartitionCommandResponse,
 } from './OperatorClearingRedeemByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { OperatorClearingRedeemByPartitionCommandError } from './error/OperatorClearingRedeemByPartitionCommandError.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(OperatorClearingRedeemByPartitionCommand)
 export class OperatorClearingRedeemByPartitionCommandHandler
@@ -225,83 +227,88 @@ export class OperatorClearingRedeemByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: OperatorClearingRedeemByPartitionCommand,
   ): Promise<OperatorClearingRedeemByPartitionCommandResponse> {
-    const { securityId, partitionId, amount, sourceId, expirationDate } =
-      command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, partitionId, amount, sourceId, expirationDate } =
+        command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const sourceEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(sourceId);
 
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-    await this.validationService.checkControlList(
-      securityId,
-      account.evmAddress,
-      sourceEvmAddress.toString(),
-    );
+      await this.validationService.checkControlList(
+        securityId,
+        account.evmAddress,
+        sourceEvmAddress.toString(),
+      );
 
-    await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkDecimals(security, amount);
 
-    await this.validationService.checkBalance(securityId, sourceId, amountBd);
+      await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-    await this.validationService.checkOperator(
-      securityId,
-      partitionId,
-      account.id.toString(),
-      sourceId,
-    );
+      await this.validationService.checkOperator(
+        securityId,
+        partitionId,
+        account.id.toString(),
+        sourceId,
+      );
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(securityId, [
-      account.id.toString(),
-      sourceId,
-    ]);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [account.id.toString(), sourceId],
+        KycStatus.GRANTED,
+      );
 
-    const res = await handler.operatorClearingRedeemByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      sourceEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      securityId,
-    );
+      const res = await handler.operatorClearingRedeemByPartition(
+        securityEvmAddress,
+        partitionId,
+        amountBd,
+        sourceEvmAddress,
+        BigDecimal.fromString(expirationDate),
+        securityId,
+      );
 
-    const clearingId = await this.transactionService.getTransactionResult({
-      res,
-      result: res.response?.clearingId,
-      className: OperatorClearingRedeemByPartitionCommandHandler.name,
-      position: 1,
-      numberOfResultsItems: 2,
-    });
+      const clearingId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.clearingId,
+        className: OperatorClearingRedeemByPartitionCommandHandler.name,
+        position: 1,
+        numberOfResultsItems: 2,
+      });
 
-    return Promise.resolve(
-      new OperatorClearingRedeemByPartitionCommandResponse(
-        parseInt(clearingId, 16),
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new OperatorClearingRedeemByPartitionCommandResponse(
+          parseInt(clearingId, 16),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new OperatorClearingRedeemByPartitionCommandError(error as Error);
+    }
   }
 }

@@ -216,7 +216,7 @@ import {ERC1410Operator} from './ERC1410Operator.sol';
 
 import {ERC1410Standard} from './ERC1410Standard.sol';
 
-// solhint-disable-next-line
+// solhint-disable-next-line no-empty-blocks
 abstract contract ERC1410Snapshot is
     IStaticFunctionSelectors,
     ERC1410Basic,

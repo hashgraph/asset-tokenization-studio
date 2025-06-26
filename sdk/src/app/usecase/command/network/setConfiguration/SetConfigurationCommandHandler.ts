@@ -207,7 +207,8 @@ import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import NetworkService from '../../../../service/NetworkService.js';
+import NetworkService from '../../../../service/network/NetworkService.js';
+import { SetConfigurationCommandError } from './error/SetConfigurationCommandError.js';
 import {
   SetConfigurationCommand,
   SetConfigurationCommandResponse,
@@ -219,23 +220,27 @@ export class SetConfigurationCommandHandler
 {
   constructor(
     @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
+    private readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
   ) {}
 
   async execute(
     command: SetConfigurationCommand,
   ): Promise<SetConfigurationCommandResponse> {
-    this.networkService.configuration = {
-      factoryAddress: command.factoryAddress,
-      resolverAddress: command.resolverAddress,
-    };
-    return Promise.resolve(
-      new SetConfigurationCommandResponse(
-        this.networkService.configuration.factoryAddress,
-        this.networkService.configuration.resolverAddress,
-      ),
-    );
+    try {
+      this.networkService.configuration = {
+        factoryAddress: command.factoryAddress,
+        resolverAddress: command.resolverAddress,
+      };
+      return Promise.resolve(
+        new SetConfigurationCommandResponse(
+          this.networkService.configuration.factoryAddress,
+          this.networkService.configuration.resolverAddress,
+        ),
+      );
+    } catch (error) {
+      throw new SetConfigurationCommandError(error as Error);
+    }
   }
 }

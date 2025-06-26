@@ -216,6 +216,7 @@ import { EvmAddressPropsFixture, HederaIdPropsFixture } from './DataFixture';
 import EvmAddress from '../../../src/domain/context/contract/EvmAddress';
 import { HederaId } from '../../../src/domain/context/shared/HederaId';
 import { faker } from '@faker-js/faker';
+import { GetSecurityQuery } from '../../../src/app/usecase/query/security/get/GetSecurityQuery';
 
 export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
   security.name.faker((faker) => faker.company.name());
@@ -231,6 +232,7 @@ export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
   security.isControllable.faker((faker) => faker.datatype.boolean());
   security.arePartitionsProtected.faker((faker) => faker.datatype.boolean());
   security.clearingActive.faker((faker) => faker.datatype.boolean());
+  security.internalKycActivated.faker((faker) => faker.datatype.boolean());
   security.isMultiPartition.faker((faker) => faker.datatype.boolean());
   security.isIssuable?.faker((faker) => faker.datatype.boolean());
   security.totalSupply?.faker((faker) =>
@@ -281,3 +283,9 @@ export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
   );
   security.info?.faker((faker) => faker.lorem.sentence());
 });
+
+export const GetSecurityQueryFixture = createFixture<GetSecurityQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+  },
+);

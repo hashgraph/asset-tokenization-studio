@@ -279,4 +279,6 @@ bytes32 constant _PAUSE_MANAGEMENT_STORAGE_POSITION = 0x80cd138137fb7aaf8068b75b
 
 // keccak256('security.token.standard.controlListManagement.storage');
 bytes32 constant _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION = 0x3553e9f946bd0c6ac12c2e96bf561ec7aafbed39334ffde761beba62ed8dbad6;
-// solhint-enable max-line-length
+
+// keccak256('security.token.standard.kycManagement.storage');
+bytes32 constant _KYC_MANAGEMENT_STORAGE_POSITION = 0x57364604d3fde2768df7beea76ca84783455ba461f6f84450864597901db12b9;

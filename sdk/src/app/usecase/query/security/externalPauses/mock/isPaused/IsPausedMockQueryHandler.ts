@@ -211,7 +211,7 @@ import { QueryHandler } from '../../../../../../../core/decorator/QueryHandlerDe
 import { IQueryHandler } from '../../../../../../../core/query/QueryHandler.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractService from '../../../../../../../app/service/ContractService.js';
+import ContractService from '../../../../../../../app/service/contract/ContractService.js';
 
 @QueryHandler(IsPausedMockQuery)
 export class IsPausedMockQueryHandler

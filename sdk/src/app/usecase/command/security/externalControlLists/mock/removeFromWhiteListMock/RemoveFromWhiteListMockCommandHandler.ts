@@ -211,8 +211,8 @@ import {
 } from './RemoveFromWhiteListMockCommand';
 import TransactionService from '../../../../../../service/transaction/TransactionService';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import ContractService from '../../../../../../../app/service/ContractService';
-import AccountService from '../../../../../../../app/service/AccountService';
+import ContractService from '../../../../../../../app/service/contract/ContractService';
+import AccountService from '../../../../../../../app/service/account/AccountService';
 
 @CommandHandler(RemoveFromWhiteListMockCommand)
 export class RemoveFromWhiteListMockCommandHandler

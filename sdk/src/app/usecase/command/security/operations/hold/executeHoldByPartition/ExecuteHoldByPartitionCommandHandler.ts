@@ -215,9 +215,10 @@ import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecora
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ExecuteHoldByPartitionCommand)
 export class ExecuteHoldByPartitionCommandHandler
@@ -225,17 +226,17 @@ export class ExecuteHoldByPartitionCommandHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -268,10 +269,11 @@ export class ExecuteHoldByPartitionCommandHandler
       amountBd,
     );
 
-    await this.validationService.checkKycAddresses(securityId, [
-      sourceId,
-      targetId,
-    ]);
+    await this.validationService.checkKycAddresses(
+      securityId,
+      [sourceId, targetId],
+      KycStatus.GRANTED,
+    );
 
     const res = await handler.executeHoldByPartition(
       securityEvmAddress,

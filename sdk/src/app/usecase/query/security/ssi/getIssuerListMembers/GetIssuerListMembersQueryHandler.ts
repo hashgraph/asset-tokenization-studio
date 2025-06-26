@@ -211,9 +211,10 @@ import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecor
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import AccountService from '../../../../../service/AccountService';
+import AccountService from '../../../../../service/account/AccountService';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import ContractService from '../../../../../service/ContractService';
+import ContractService from '../../../../../service/contract/ContractService';
+import { GetIssuerListMembersQueryError } from './error/GetIssuerListMembersQueryError';
 
 @QueryHandler(GetIssuerListMembersQuery)
 export class GetIssuerListMembersQueryHandler
@@ -221,32 +222,35 @@ export class GetIssuerListMembersQueryHandler
 {
   constructor(
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetIssuerListMembersQuery,
   ): Promise<GetIssuerListMembersQueryResponse> {
-    const { securityId, start, end } = query;
+    try {
+      const { securityId, start, end } = query;
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const res = await this.queryAdapter.getIssuerListMembers(
-      securityEvmAddress,
-      start,
-      end,
-    );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const res = await this.queryAdapter.getIssuerListMembers(
+        securityEvmAddress,
+        start,
+        end,
+      );
 
-    const hederaIds = await Promise.all(
-      res.map(async (t) =>
-        (await this.accountService.getAccountInfo(t)).id.toString(),
-      ),
-    );
-
-    return new GetIssuerListMembersQueryResponse(hederaIds);
+      const hederaIds = await Promise.all(
+        res.map(async (t) =>
+          (await this.accountService.getAccountInfo(t)).id.toString(),
+        ),
+      );
+      return new GetIssuerListMembersQueryResponse(hederaIds);
+    } catch (error) {
+      throw new GetIssuerListMembersQueryError(error as Error);
+    }
   }
 }

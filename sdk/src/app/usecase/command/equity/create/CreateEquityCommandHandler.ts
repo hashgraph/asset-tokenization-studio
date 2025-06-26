@@ -214,13 +214,15 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js
 import ContractId from '../../../../../domain/context/contract/ContractId.js';
 import { Security } from '../../../../../domain/context/security/Security.js';
 import TransactionService from '../../../../service/transaction/TransactionService.js';
-import NetworkService from '../../../../service/NetworkService.js';
+import NetworkService from '../../../../service/network/NetworkService.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
 import { EquityDetails } from '../../../../../domain/context/equity/EquityDetails.js';
-import ContractService from '../../../../service/ContractService.js';
-import AccountService from '../../../../service/AccountService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { Response } from '../../../../../domain/context/transaction/Response';
+import { CreateEquityCommandError } from './error/CreateEquityCommandError.js';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler
@@ -228,119 +230,108 @@ export class CreateEquityCommandHandler
 {
   constructor(
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
+    private readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(
     command: CreateEquityCommand,
   ): Promise<CreateEquityCommandResponse> {
-    const {
-      security,
-      factory,
-      resolver,
-      configId,
-      configVersion,
-      diamondOwnerAccount,
-      votingRight,
-      informationRight,
-      liquidationRight,
-      subscriptionRight,
-      conversionRight,
-      redemptionRight,
-      putRight,
-      dividendRight,
-      currency,
-      nominalValue,
-      externalPauses,
-      externalControlLists,
-    } = command;
-
-    if (!factory) {
-      throw new InvalidRequest('Factory not found in request');
-    }
-
-    if (!resolver) {
-      throw new InvalidRequest('Resolver not found in request');
-    }
-
-    if (!configId) {
-      throw new InvalidRequest('Config Id not found in request');
-    }
-
-    if (configVersion === undefined) {
-      throw new InvalidRequest('Config Version not found in request');
-    }
-
-    const diamondOwnerAccountEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
-
-    const factoryEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(factory.toString());
-
-    const resolverEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(resolver.toString());
-
-    let externalPausesEvmAddresses: EvmAddress[] = [];
-    if (externalPauses) {
-      externalPausesEvmAddresses = await Promise.all(
-        externalPauses.map(
-          async (address) =>
-            await this.contractService.getContractEvmAddress(
-              address.toString(),
-            ),
-        ),
-      );
-    }
-
-    let externalControlListsEvmAddresses: EvmAddress[] = [];
-    if (externalControlLists) {
-      externalControlListsEvmAddresses = await Promise.all(
-        externalControlLists.map(
-          async (address) =>
-            await this.contractService.getContractEvmAddress(
-              address.toString(),
-            ),
-        ),
-      );
-    }
-
-    const handler = this.transactionService.getHandler();
-
-    const equityInfo = new EquityDetails(
-      votingRight,
-      informationRight,
-      liquidationRight,
-      subscriptionRight,
-      conversionRight,
-      redemptionRight,
-      putRight,
-      dividendRight,
-      currency,
-      BigDecimal.fromString(nominalValue),
-    );
-
-    const res = await handler.createEquity(
-      new Security(security),
-      equityInfo,
-      factoryEvmAddress,
-      resolverEvmAddress,
-      configId,
-      configVersion,
-      externalPausesEvmAddresses,
-      externalControlListsEvmAddresses,
-      diamondOwnerAccountEvmAddress,
-      factory.toString(),
-    );
-
+    let res: Response;
     try {
+      const {
+        security,
+        factory,
+        resolver,
+        configId,
+        configVersion,
+        diamondOwnerAccount,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        nominalValue,
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+      } = command;
+
+      if (!factory) {
+        throw new InvalidRequest('Factory not found in request');
+      }
+
+      if (!resolver) {
+        throw new InvalidRequest('Resolver not found in request');
+      }
+
+      if (!configId) {
+        throw new InvalidRequest('Config Id not found in request');
+      }
+
+      if (configVersion === undefined) {
+        throw new InvalidRequest('Config Version not found in request');
+      }
+
+      const diamondOwnerAccountEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
+
+      const factoryEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(factory.toString());
+
+      const resolverEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(resolver.toString());
+
+      const [
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
+        externalKycListsEvmAddresses,
+      ] = await Promise.all([
+        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
+        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
+        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
+      ]);
+
+      const handler = this.transactionService.getHandler();
+
+      const equityInfo = new EquityDetails(
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        BigDecimal.fromString(nominalValue),
+      );
+
+      res = await handler.createEquity(
+        new Security(security),
+        equityInfo,
+        factoryEvmAddress,
+        resolverEvmAddress,
+        configId,
+        configVersion,
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
+        externalKycListsEvmAddresses,
+        diamondOwnerAccountEvmAddress,
+        factory.toString(),
+      );
+
       const contractAddress =
         await this.transactionService.getTransactionResult({
           res,
@@ -349,7 +340,6 @@ export class CreateEquityCommandHandler
           position: 0,
           numberOfResultsItems: 1,
         });
-
       const contractId =
         await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
           contractAddress,
@@ -358,12 +348,12 @@ export class CreateEquityCommandHandler
       return Promise.resolve(
         new CreateEquityCommandResponse(new ContractId(contractId), res.id!),
       );
-    } catch (e) {
-      if (res.response == 1)
+    } catch (error) {
+      if (res?.response == 1)
         return Promise.resolve(
           new CreateEquityCommandResponse(new ContractId('0.0.0'), res.id!),
         );
-      else throw e;
+      else throw new CreateEquityCommandError(error as Error);
     }
   }
 }

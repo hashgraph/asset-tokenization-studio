@@ -241,6 +241,7 @@ export default {
     clearingMode: "Clearing mode",
     isClearing: "Clearing mode enabled",
     isClearingTooltip: "Enable or disable clearing mode",
+    internalKycActivated: "Internal Kyc Activated",
   },
 
   stepNewSerie: {
@@ -285,6 +286,10 @@ export default {
     controlList: "Control list",
     controlListPlaceholder: "Choose external control ...",
     externalControlsSelected: "External controls selected:",
+    externalKYC: "External KYC",
+    kycList: "KYC list",
+    kycListPlaceholder: "Choose external KYC ...",
+    externalKYCsSelected: "External KYCs selected:",
   },
 
   stepReview: {

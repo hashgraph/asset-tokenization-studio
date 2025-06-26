@@ -263,17 +263,18 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     function _operatorTransferByPartition(
         IERC1410Operator.OperatorTransferData calldata _operatorTransferData
     ) internal returns (bytes32) {
-        _transferByPartition(
-            _operatorTransferData.from,
-            IERC1410Basic.BasicTransferInfo(
-                _operatorTransferData.to,
-                _operatorTransferData.value
-            ),
-            _operatorTransferData.partition,
-            _operatorTransferData.data,
-            _msgSender(),
-            _operatorTransferData.operatorData
-        );
+        return
+            _transferByPartition(
+                _operatorTransferData.from,
+                IERC1410Basic.BasicTransferInfo(
+                    _operatorTransferData.to,
+                    _operatorTransferData.value
+                ),
+                _operatorTransferData.partition,
+                _operatorTransferData.data,
+                _msgSender(),
+                _operatorTransferData.operatorData
+            );
     }
 
     function _isOperator(

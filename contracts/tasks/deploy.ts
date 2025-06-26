@@ -206,17 +206,12 @@
 import { task, types } from 'hardhat/config'
 import { CONTRACT_NAMES, ContractName, Network } from '@configuration'
 import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
+import * as fs from 'fs'
 
 task(
     'deployAll',
     'Deploy new factory, new facet implementation, new resolver and initialize it with the new facet implementations'
 )
-    .addOptionalPositionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
-        types.string
-    )
     .addOptionalParam(
         'useDeployed',
         'Use already deployed contracts',
@@ -240,6 +235,12 @@ task(
         'The index of the signer in the Hardhat signers array',
         undefined,
         types.int
+    )
+    .addOptionalParam(
+        'fileName',
+        'The output file name',
+        undefined,
+        types.string
     )
     .setAction(async (args: DeployAllArgs, hre) => {
         // Inlined to avoid circular dependency
@@ -290,6 +291,8 @@ task(
             clearingReadFacet,
             externalPauseManagement,
             externalControlListManagement,
+            externalKycListManagement,
+            protectedPartitions,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -340,18 +343,42 @@ task(
             'External Pause Management Facet': externalPauseManagement.address,
             'External Control List Management Facet':
                 externalControlListManagement.address,
+            'External Kyc List Management Facet':
+                externalKycListManagement.address,
+            'Protected Partitions': protectedPartitions.address,
         }
+
+        const contractAddress = []
 
         console.log('\n 🟢 Deployed ATS Contract List:')
         for (const [key, address] of Object.entries(addressList)) {
             if (!address) {
                 continue
             }
-            const contractId = await addresstoHederaId({
-                address,
-                network,
-            })
-            console.log(`   --> ${key}: ${address} (${contractId})`)
+            let contractId = ''
+            try {
+                contractId = await addresstoHederaId({
+                    address,
+                    network,
+                })
+                console.log(`   --> ${key}: ${address} (${contractId})`)
+            } catch (e: unknown) {
+                console.log((e as Error).message)
+            } finally {
+                contractAddress.push({
+                    name: key,
+                    address: address,
+                    contractId: contractId,
+                })
+            }
+        }
+        if (args.fileName) {
+            console.log('File saved: ' + args.fileName + '.json')
+            fs.writeFileSync(
+                args.fileName + '.json',
+                JSON.stringify(contractAddress, null, 2),
+                'utf8'
+            )
         }
     })
 

@@ -205,19 +205,20 @@
 
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   ApproveClearingOperationByPartitionCommand,
   ApproveClearingOperationByPartitionCommandResponse,
 } from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/ContractService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { ApproveClearingOperationByPartitionCommandError } from './error/ApproveClearingOperationByPartitionCommandError.js';
+import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ApproveClearingOperationByPartitionCommand)
 export class ApproveClearingOperationByPartitionCommandHandler
@@ -225,71 +226,77 @@ export class ApproveClearingOperationByPartitionCommandHandler
 {
   constructor(
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly securityService: SecurityService,
     @lazyInject(ValidationService)
-    public readonly validationService: ValidationService,
+    private readonly validationService: ValidationService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     command: ApproveClearingOperationByPartitionCommand,
   ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+    try {
+      const {
+        securityId,
+        partitionId,
+        targetId,
+        clearingId,
+        clearingOperationType,
+      } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkClearingActivated(securityId);
+      await this.validationService.checkClearingActivated(securityId);
 
-    await this.validationService.checkKycAddresses(securityId, [targetId]);
+      await this.validationService.checkKycAddresses(
+        securityId,
+        [targetId],
+        KycStatus.GRANTED,
+      );
 
-    await this.validationService.checkRole(
-      SecurityRole._CLEARING_VALIDATOR_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._CLEARING_VALIDATOR_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    await this.validationService.checkControlList(
-      securityId,
-      targetEvmAddress.toString(),
-    );
+      await this.validationService.checkControlList(
+        securityId,
+        targetEvmAddress.toString(),
+      );
 
-    await this.validationService.checkMultiPartition(security, partitionId);
+      await this.validationService.checkMultiPartition(security, partitionId);
 
-    const res = await handler.approveClearingOperationByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
-      securityId,
-    );
+      const res = await handler.approveClearingOperationByPartition(
+        securityEvmAddress,
+        partitionId,
+        targetEvmAddress,
+        clearingId,
+        clearingOperationType,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new ApproveClearingOperationByPartitionCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ApproveClearingOperationByPartitionCommandError(error as Error);
+    }
   }
 }

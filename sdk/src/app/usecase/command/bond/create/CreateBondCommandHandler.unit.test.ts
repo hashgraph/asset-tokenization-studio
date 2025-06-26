@@ -207,22 +207,24 @@ import TransactionService from '../../../../service/transaction/TransactionServi
 import { CreateBondCommandHandler } from './CreateBondCommandHandler.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../service/AccountService.js';
+import AccountService from '../../../../service/account/AccountService.js';
 import { CreateBondCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
-import { InvalidRequest } from '../../error/InvalidRequest.js';
 import {
   CreateBondCommand,
   CreateBondCommandResponse,
 } from './CreateBondCommand.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   HederaIdZeroAddressFixture,
   TransactionIdFixture,
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../service/ContractService.js';
+import ContractService from '../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import { CreateBondCommandError } from './error/CreateBondCommandError.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
 
 describe('CreateBondCommandHandler', () => {
   let handler: CreateBondCommandHandler;
@@ -234,12 +236,19 @@ describe('CreateBondCommandHandler', () => {
   const contractServiceMock = createMock<ContractService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const externalEvmAddress = new EvmAddress(
+  const externalPauseEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalControlEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalKycEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
   );
   const transactionId = TransactionIdFixture.create().id;
   const hederaId = HederaIdPropsFixture.create();
   const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new CreateBondCommandHandler(
@@ -263,9 +272,13 @@ describe('CreateBondCommandHandler', () => {
           factory: undefined,
         };
 
-        await expect(handler.execute(commandWithNotFactory)).rejects.toThrow(
-          new InvalidRequest('Factory not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotFactory);
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the bond: Factory not found in request`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
 
       it('should throw InvalidRequest if resolver is not provided', async () => {
@@ -274,9 +287,13 @@ describe('CreateBondCommandHandler', () => {
           resolver: undefined,
         };
 
-        await expect(handler.execute(commandWithNotResolver)).rejects.toThrow(
-          new InvalidRequest('Resolver not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotResolver);
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the bond: Resolver not found in request`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
 
       it('should throw InvalidRequest if configId is not provided', async () => {
@@ -285,9 +302,13 @@ describe('CreateBondCommandHandler', () => {
           configId: undefined,
         };
 
-        await expect(handler.execute(commandWithNotConfigId)).rejects.toThrow(
-          new InvalidRequest('Config Id not found in request'),
-        );
+        const resultPromise = handler.execute(commandWithNotConfigId);
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the bond: Config Id not found in request`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
       });
 
       it('should throw InvalidRequest if configVersion is not provided', async () => {
@@ -296,11 +317,32 @@ describe('CreateBondCommandHandler', () => {
           configVersion: undefined,
         };
 
-        await expect(
-          handler.execute(commandWithNotConfigVersion),
-        ).rejects.toThrow(
-          new InvalidRequest('Config Version not found in request'),
+        const resultPromise = handler.execute(commandWithNotConfigVersion);
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the bond: Config Version not found in request`,
+          ),
+          errorCode: ErrorCode.InvalidRequest,
+        });
+      });
+
+      it('throws CreateBondCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        accountServiceMock.getAccountEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          CreateBondCommandError,
         );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the bond: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
       });
     });
 
@@ -308,8 +350,11 @@ describe('CreateBondCommandHandler', () => {
       it('should successfully create a bond with bondAddress in response', async () => {
         contractServiceMock.getContractEvmAddress
           .mockResolvedValueOnce(evmAddress)
-          .mockResolvedValueOnce(evmAddress)
-          .mockResolvedValueOnce(externalEvmAddress);
+          .mockResolvedValueOnce(evmAddress);
+        contractServiceMock.getEvmAddressesFromHederaIds
+          .mockResolvedValueOnce([externalPauseEvmAddress])
+          .mockResolvedValueOnce([externalControlEvmAddress])
+          .mockResolvedValueOnce([externalKycEvmAddress]);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
 
         transactionServiceMock.getHandler().createBond.mockResolvedValue({
@@ -331,8 +376,11 @@ describe('CreateBondCommandHandler', () => {
         expect(result.securityId.value).toBe(transactionId);
         expect(result.transactionId).toBe(transactionId);
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          3,
+          2,
         );
+        expect(
+          contractServiceMock.getEvmAddressesFromHederaIds,
+        ).toHaveBeenCalledTimes(3);
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
           1,
         );
@@ -364,8 +412,9 @@ describe('CreateBondCommandHandler', () => {
           evmAddress,
           command.configId,
           command.configVersion,
-          [],
-          [externalEvmAddress],
+          [externalPauseEvmAddress],
+          [externalControlEvmAddress],
+          [externalKycEvmAddress],
           evmAddress,
           command.factory?.toString(),
         );

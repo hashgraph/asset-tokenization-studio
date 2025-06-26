@@ -205,7 +205,7 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import { EvmAddressPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';

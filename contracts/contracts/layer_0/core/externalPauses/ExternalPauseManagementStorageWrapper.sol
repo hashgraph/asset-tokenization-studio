@@ -214,14 +214,11 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    _PAUSE_MANAGEMENT_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {
-    IExternalPauseManagement
-} from '../../../layer_1/interfaces/externalPauses/IExternalPauseManagement.sol';
-import {
     IExternalPause
 } from '../../../layer_1/interfaces/externalPauses/IExternalPause.sol';
+import {
+    _PAUSE_MANAGEMENT_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
 
 abstract contract ExternalPauseManagementStorageWrapper is
     ControlListStorageWrapper
@@ -229,110 +226,24 @@ abstract contract ExternalPauseManagementStorageWrapper is
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    struct ExternalPauseDataStorage {
-        bool initialized;
-        EnumerableSet.AddressSet pauseList;
-    }
-
-    function _updateExternalPauses(
-        address[] calldata _pauses,
-        bool[] calldata _actives
-    ) internal returns (bool success_) {
-        uint256 length = _pauses.length;
-        unchecked {
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalPause(_pauses[index]))
-                        _addExternalPause(_pauses[index]);
-                    continue;
-                }
-                if (_isExternalPause(_pauses[index]))
-                    _removeExternalPause(_pauses[index]);
-            }
-            for (uint256 index; index < length; ++index) {
-                if (_actives[index]) {
-                    if (!_isExternalPause(_pauses[index]))
-                        revert IExternalPauseManagement
-                            .UpdateExternalPausesContradiction(
-                                _pauses,
-                                _actives,
-                                _pauses[index]
-                            );
-                    continue;
-                }
-                if (_isExternalPause(_pauses[index]))
-                    revert IExternalPauseManagement
-                        .UpdateExternalPausesContradiction(
-                            _pauses,
-                            _actives,
-                            _pauses[index]
-                        );
-            }
-        }
-
-        success_ = true;
-    }
-
-    function _addExternalPause(
-        address _pause
-    ) internal returns (bool success_) {
-        success_ = _externalPauseStorage().pauseList.add(_pause);
-    }
-
-    function _removeExternalPause(
-        address _pause
-    ) internal returns (bool success_) {
-        success_ = _externalPauseStorage().pauseList.remove(_pause);
-    }
-
-    function _isExternalPause(address _pause) internal view returns (bool) {
-        return _externalPauseStorage().pauseList.contains(_pause);
-    }
-
-    function _getExternalPausesCount()
-        internal
-        view
-        returns (uint256 externalPausesCount_)
-    {
-        externalPausesCount_ = _externalPauseStorage().pauseList.length();
-    }
-
-    function _getExternalPausesMembers(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
-        return
-            _externalPauseStorage().pauseList.getFromSet(
-                _pageIndex,
-                _pageLength
-            );
-    }
-
     function _isExternallyPaused() internal view returns (bool) {
-        ExternalPauseDataStorage
-            storage externalPauseDataStorage = _externalPauseStorage();
-        uint256 length = _getExternalPausesCount();
-        unchecked {
-            for (uint256 index = 0; index < length; ++index) {
-                if (
-                    IExternalPause(externalPauseDataStorage.pauseList.at(index))
-                        .isPaused()
-                ) return true;
+        ExternalListDataStorage
+            storage externalPauseDataStorage = _externalListStorage(
+                _PAUSE_MANAGEMENT_STORAGE_POSITION
+            );
+        uint256 length = _getExternalListsCount(
+            _PAUSE_MANAGEMENT_STORAGE_POSITION
+        );
+
+        for (uint256 index; index < length; ++index) {
+            if (
+                IExternalPause(externalPauseDataStorage.list.at(index))
+                    .isPaused()
+            ) return true;
+            unchecked {
+                ++index;
             }
         }
         return false;
-    }
-
-    function _externalPauseStorage()
-        internal
-        pure
-        virtual
-        returns (ExternalPauseDataStorage storage externalPause_)
-    {
-        bytes32 position = _PAUSE_MANAGEMENT_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            externalPause_.slot := position
-        }
     }
 }

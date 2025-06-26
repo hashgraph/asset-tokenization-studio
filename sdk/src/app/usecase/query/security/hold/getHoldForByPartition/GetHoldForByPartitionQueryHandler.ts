@@ -213,9 +213,10 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import SecurityService from '../../../../../service/security/SecurityService.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import AccountService from '../../../../../service/AccountService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/ContractService.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetHoldForByPartitionQueryError } from './error/GetHoldForByPartitionQueryError.js';
 
 @QueryHandler(GetHoldForByPartitionQuery)
 export class GetHoldForByPartitionQueryHandler
@@ -223,38 +224,42 @@ export class GetHoldForByPartitionQueryHandler
 {
   constructor(
     @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    private readonly securityService: SecurityService,
     @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(AccountService)
-    public readonly accountService: AccountService,
+    private readonly accountService: AccountService,
     @lazyInject(ContractService)
-    public readonly contractService: ContractService,
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(
     query: GetHoldForByPartitionQuery,
   ): Promise<GetHoldForByPartitionQueryResponse> {
-    const { securityId, partitionId, targetId, holdId } = query;
-    const security = await this.securityService.get(securityId);
+    try {
+      const { securityId, partitionId, targetId, holdId } = query;
+      const security = await this.securityService.get(securityId);
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
-    const targetEvmAddress: EvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const holdDetail = await this.queryAdapter.getHoldForByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      holdId,
-    );
+      const holdDetail = await this.queryAdapter.getHoldForByPartition(
+        securityEvmAddress,
+        partitionId,
+        targetEvmAddress,
+        holdId,
+      );
 
-    holdDetail.amount = BigDecimal.fromStringFixed(
-      holdDetail.amount.toString(),
-      security.decimals,
-    );
+      holdDetail.amount = BigDecimal.fromStringFixed(
+        holdDetail.amount.toString(),
+        security.decimals,
+      );
 
-    return new GetHoldForByPartitionQueryResponse(holdDetail);
+      return new GetHoldForByPartitionQueryResponse(holdDetail);
+    } catch (error) {
+      throw new GetHoldForByPartitionQueryError(error as Error);
+    }
   }
 }

@@ -231,8 +231,8 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
         address _to,
         bytes32 _partition,
         uint256 _value,
-        bytes calldata _data, // solhint-disable-line no-unused-vars
-        bytes calldata _operatorData // solhint-disable-line no-unused-vars
+        bytes calldata /*_data*/,
+        bytes calldata /*_operatorData*/
     ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
@@ -255,10 +255,10 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
         if (!_isAbleToAccess(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
-        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
             return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
         if (!_validPartition(_partition, _from)) {
