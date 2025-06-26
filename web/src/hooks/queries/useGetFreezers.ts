@@ -203,33 +203,31 @@
 
 */
 
-import { RouteName } from "./RouteName";
+import { GetFrozenPartialTokensRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import SDKService from "../../services/SDKService";
 
-export const RoutePath: Record<RouteName, string> = {
-  [RouteName.Dashboard]: "/",
-  [RouteName.ExternalPauseList]: "/external-pause",
-  [RouteName.CreateExternalPause]: "/external-pause/create",
-  [RouteName.AddExternalPause]: "/external-pause/add",
-  [RouteName.Landing]: "/connect-to-metamask",
-  [RouteName.ExternalControlList]: "/external-control",
-  [RouteName.CreateExternalControl]: "/external-control/create",
-  [RouteName.AddExternalControl]: "/external-control/add",
-  [RouteName.ExternalControlDetails]: "/external-control/:id",
-  [RouteName.ExternalKYCList]: "/external-kyc",
-  [RouteName.CreateExternalKYC]: "/external-kyc/create",
-  [RouteName.AddExternalKYC]: "/external-kyc/add",
-  [RouteName.ExternalKYCDetails]: "/external-kyc/:id",
-  [RouteName.DigitalSecurityDetails]: "/security/:id",
-  [RouteName.DigitalSecurityMint]: "/security/:id/mint",
-  [RouteName.DigitalSecurityFreeze]: "/security/:id/freeze",
-  [RouteName.DigitalSecurityTransfer]: "/security/:id/transfer",
-  [RouteName.DigitalSecurityForceTransfer]: "/security/:id/forceTransfer",
-  [RouteName.DigitalSecurityRedeem]: "/security/:id/redeem",
-  [RouteName.DigitalSecurityForceRedeem]: "/security/:id/forceRedeem",
-  [RouteName.DigitalSecurityLock]: "/security/:id/lock",
-  [RouteName.DigitalSecuritiesList]: "/list/:type",
-  [RouteName.AddSecurity]: "/security/add",
-  [RouteName.CreateSecurity]: "/security/create",
-  [RouteName.CreateEquity]: "/security/create/equity",
-  [RouteName.CreateBond]: "/security/create/bond",
+export const GET_FROZEN_BALANCE = (securityId: string, targetId: string) =>
+  `GET_FROZEN_BALANCE_${securityId}_${targetId}`;
+
+export const useGetFrozenTokens = (
+  request: GetFrozenPartialTokensRequest,
+  options?: UseQueryOptions<number, unknown, number, string[]>,
+) => {
+  return useQuery(
+    [GET_FROZEN_BALANCE(request.securityId, request.targetId)],
+    async () => {
+      try {
+        const freezeAmount = Number(
+          (await SDKService.getFrozenTokens(request)).value,
+        );
+
+        return freezeAmount;
+      } catch (error) {
+        console.error("Error fetching freeze", error);
+        throw error;
+      }
+    },
+    options,
+  );
 };

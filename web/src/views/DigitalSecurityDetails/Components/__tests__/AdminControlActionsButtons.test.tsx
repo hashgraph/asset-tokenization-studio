@@ -203,33 +203,74 @@
 
 */
 
-import { RouteName } from "./RouteName";
+import { render } from "../../../../test-utils";
+import { useRolesStore } from "../../../../store/rolesStore";
+import { SecurityRole } from "../../../../utils/SecurityRole";
+import { AdminControlActionsButtons } from "../AdminControlActionsButtons";
 
-export const RoutePath: Record<RouteName, string> = {
-  [RouteName.Dashboard]: "/",
-  [RouteName.ExternalPauseList]: "/external-pause",
-  [RouteName.CreateExternalPause]: "/external-pause/create",
-  [RouteName.AddExternalPause]: "/external-pause/add",
-  [RouteName.Landing]: "/connect-to-metamask",
-  [RouteName.ExternalControlList]: "/external-control",
-  [RouteName.CreateExternalControl]: "/external-control/create",
-  [RouteName.AddExternalControl]: "/external-control/add",
-  [RouteName.ExternalControlDetails]: "/external-control/:id",
-  [RouteName.ExternalKYCList]: "/external-kyc",
-  [RouteName.CreateExternalKYC]: "/external-kyc/create",
-  [RouteName.AddExternalKYC]: "/external-kyc/add",
-  [RouteName.ExternalKYCDetails]: "/external-kyc/:id",
-  [RouteName.DigitalSecurityDetails]: "/security/:id",
-  [RouteName.DigitalSecurityMint]: "/security/:id/mint",
-  [RouteName.DigitalSecurityFreeze]: "/security/:id/freeze",
-  [RouteName.DigitalSecurityTransfer]: "/security/:id/transfer",
-  [RouteName.DigitalSecurityForceTransfer]: "/security/:id/forceTransfer",
-  [RouteName.DigitalSecurityRedeem]: "/security/:id/redeem",
-  [RouteName.DigitalSecurityForceRedeem]: "/security/:id/forceRedeem",
-  [RouteName.DigitalSecurityLock]: "/security/:id/lock",
-  [RouteName.DigitalSecuritiesList]: "/list/:type",
-  [RouteName.AddSecurity]: "/security/add",
-  [RouteName.CreateSecurity]: "/security/create",
-  [RouteName.CreateEquity]: "/security/create/equity",
-  [RouteName.CreateBond]: "/security/create/bond",
-};
+jest.mock("../../../../router/RouterManager", () => ({
+  RouterManager: {
+    ...jest.requireActual("../../../../router/RouterManager").RouterManager,
+    getUrl: jest.fn(),
+    to: jest.fn(),
+  },
+}));
+
+jest.mock("../../../../hooks/queries/usePauseSecurity", () => ({
+  usePauseSecurity: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
+
+jest.mock("../../../../hooks/queries/useUnpauseSecurity", () => ({
+  useUnpauseSecurity: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
+
+const defaultAdminRole = [SecurityRole._DEFAULT_ADMIN_ROLE];
+const initialStoreState = useRolesStore.getState();
+
+describe(`${AdminControlActionsButtons.name}`, () => {
+  beforeEach(() => {
+    useRolesStore.setState(initialStoreState, true);
+    jest.clearAllMocks();
+  });
+
+  const factoryComponent = () => render(<AdminControlActionsButtons />);
+
+  test("should render correctly", () => {
+    const component = factoryComponent();
+
+    expect(component.asFragment()).toMatchSnapshot("defaultAdminRole");
+  });
+
+  test("by default admin has not freeze manager role", () => {
+    const component = factoryComponent();
+
+    expect(component.queryByTestId("freeze-button")).not.toBeInTheDocument();
+  });
+
+  describe("Admin has freeze manager role", () => {
+    beforeEach(() => {
+      useRolesStore.setState({
+        ...initialStoreState,
+        roles: [...defaultAdminRole, SecurityRole._FREEZE_MANAGER_ROLE],
+      });
+    });
+
+    test("should render correctly", () => {
+      const component = factoryComponent();
+
+      expect(component.asFragment()).toMatchSnapshot("minterRole");
+    });
+
+    test("should show freeze manager button", () => {
+      const component = factoryComponent();
+
+      expect(component.getByTestId("freeze-button")).toBeInTheDocument();
+    });
+  });
+});
