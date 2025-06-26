@@ -207,6 +207,8 @@ import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/GetLockQuery';
 import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
+import { LockedBalanceOfQuery } from '../../../src/app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
+import { LocksIdQuery } from '../../../src/app/usecase/query/security/locksId/LocksIdQuery';
 import LockRequest from '../../../src/port/in/request/security/operations/lock/LockRequest';
 import ReleaseRequest from '../../../src/port/in/request/security/operations/release/ReleaseRequest';
 import GetLockedBalanceRequest from '../../../src/port/in/request/security/operations/lock/GetLockedBalanceRequest';
@@ -217,10 +219,8 @@ import { Lock } from '../../../src/domain/context/security/Lock';
 import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
 import { LockCommand } from '../../../src/app/usecase/command/security/operations/lock/LockCommand';
-import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
 import { HederaId } from '../../../src/domain/context/shared/HederaId';
 import { ReleaseCommand } from '../../../src/app/usecase/command/security/operations/release/ReleaseCommand';
-import { LockedBalanceOfQuery } from '../../../src/app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
 
 export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
   query.securityId.as(() => HederaIdPropsFixture.create().value);
