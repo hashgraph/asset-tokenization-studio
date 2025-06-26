@@ -1384,6 +1384,14 @@ describe('ERC3643 Tests', () => {
                 it('GIVEN frozen addresses WHEN batchSetAddressFrozen with false THEN transfers from those addresses succeed', async () => {
                     const userAddresses = [account_D, account_E]
                     erc3643Facet = erc3643Facet.connect(signer_A)
+                    // grant KYC to account_A
+                    await kycFacet.grantKyc(
+                        account_A,
+                        EMPTY_VC_ID,
+                        ZERO,
+                        MAX_UINT256,
+                        account_E
+                    )
 
                     // First, freeze the addresses
                     await erc3643Facet.batchSetAddressFrozen(userAddresses, [
