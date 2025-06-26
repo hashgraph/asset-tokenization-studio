@@ -209,6 +209,10 @@ import { SetNameCommand } from '../../../src/app/usecase/command/security/operat
 import { SetSymbolCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
 import SetNameRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetNameRequest';
 import SetSymbolRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetSymbolRequest';
+import { SetOnchainIDCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
+import { OnchainIDQuery } from '../../../src/app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
+import SetOnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetOnchainIDRequest';
+import OnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/OnchainIDRequest';
 
 export const SetNameCommandFixture = createFixture<SetNameCommand>(
   (command) => {
@@ -239,5 +243,29 @@ export const SetSymbolRequestFixture = createFixture<SetSymbolRequest>(
     request.symbol.faker((faker) =>
       faker.string.alpha({ length: 3, casing: 'upper' }),
     );
+  },
+);
+
+export const SetOnchainIDCommandFixture = createFixture<SetOnchainIDCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.onchainID.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const OnchainIDQueryFixture = createFixture<OnchainIDQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const SetOnchainIDRequestFixture = createFixture<SetOnchainIDRequest>(
+  (request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.onchainID.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const OnchainIDRequestFixture = createFixture<OnchainIDRequest>(
+  (request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
   },
 );

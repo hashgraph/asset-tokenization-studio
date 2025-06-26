@@ -215,6 +215,7 @@ import {
   ClearingRedeemFromByPartitionRequest,
   ClearingTransferByPartitionRequest,
   ClearingTransferFromByPartitionRequest,
+  ComplianceRequest,
   ControllerCreateHoldByPartitionRequest,
   ControlListRequest,
   CreateHoldByPartitionRequest,
@@ -234,6 +235,7 @@ import {
   GetControlListCountRequest,
   GetControlListMembersRequest,
   GetControlListTypeRequest,
+  GetFrozenPartialTokensRequest,
   GetHeldAmountForByPartitionRequest,
   GetHeldAmountForRequest,
   GetHoldCountForByPartitionRequest,
@@ -246,10 +248,12 @@ import {
   GetMaxSupplyRequest,
   GetNounceRequest,
   GetSecurityDetailsRequest,
+  IdentityRegistryRequest,
   IsAddressRecoveredRequest,
   IsClearingActivatedRequest,
   IssueRequest,
   LockRequest,
+  OnchainIDRequest,
   OperatorClearingCreateHoldByPartitionRequest,
   OperatorClearingRedeemByPartitionRequest,
   OperatorClearingTransferByPartitionRequest,
@@ -268,11 +272,15 @@ import {
   RedeemRequest,
   ReleaseHoldByPartitionRequest,
   ReleaseRequest,
+  SetComplianceRequest,
+  SetIdentityRegistryRequest,
   SetMaxSupplyRequest,
   SetNameRequest,
+  SetOnchainIDRequest,
   SetSymbolRequest,
   TransferAndLockRequest,
   TransferRequest,
+  UnfreezePartialTokensRequest,
 } from '../request';
 import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
 import LogService from '../../../app/service/log/LogService';
@@ -443,11 +451,43 @@ import { ClearingRedeemFromByPartitionCommand } from '../../../app/usecase/comma
 import { ProtectedClearingTransferByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
 import { ApproveClearingOperationByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
 import {
+  OnchainIDRequestFixture,
   SetNameRequestFixture,
+  SetOnchainIDRequestFixture,
   SetSymbolRequestFixture,
 } from '../../../../__tests__/fixtures/tokenMetadata/TokenMetadataFixture';
 import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
 import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
+import { SetOnchainIDCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
+import {
+  IdentityRegistryQueryFixture,
+  SetIdentityRegistryRequestFixture,
+} from '../../../../__tests__/fixtures/identityRegistry/IdentityRegistryFixture';
+import { SetIdentityRegistryCommand } from '../../../app/usecase/command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommand';
+import {
+  ComplianceQueryFixture,
+  SetComplianceCommandFixture,
+} from '../../../../__tests__/fixtures/compliance/ComplianceFixture';
+import { SetComplianceCommand } from '../../../app/usecase/command/security/compliance/setCompliance/SetComplianceCommand';
+import { IdentityRegistryQuery } from '../../../app/usecase/query/security/identityRegistry/IdentityRegistryQuery';
+import { ComplianceQuery } from '../../../app/usecase/query/security/compliance/compliance/ComplianceQuery';
+import { OnchainIDQuery } from '../../../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
+import FreezePartialTokensRequest from '../request/security/operations/erc3643/FreezePartialTokensRequest';
+import {
+  FreezePartialTokensRequestFixture,
+  GetFrozenPartialTokensQueryFixture,
+  UnfreezePartialTokensRequestFixture,
+} from '../../../../__tests__/fixtures/erc3643/ERC3643Fixture';
+import {
+  FreezePartialTokensCommand,
+  FreezePartialTokensResponse,
+} from '../../../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand';
+import {
+  UnfreezePartialTokensCommand,
+  UnfreezePartialTokensResponse,
+} from '../../../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand';
+
+import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
 import {
   IsAddressRecoveredRequestFixture,
   RecoveryAddressRequestFixture,
@@ -522,6 +562,15 @@ describe('Security', () => {
   let operatorClearingTransferByPartitionRequest: OperatorClearingTransferByPartitionRequest;
   let setNameRequest: SetNameRequest;
   let setSymbolRequest: SetSymbolRequest;
+  let setOnchainIDRequest: SetOnchainIDRequest;
+  let setIdentityRegistryRequest: SetIdentityRegistryRequest;
+  let setComplianceRequest: SetComplianceRequest;
+  let complianceRequest: ComplianceRequest;
+  let identityRegistryRequest: IdentityRegistryRequest;
+  let onchainIDRequest: OnchainIDRequest;
+  let freezePartialTokensRequest: FreezePartialTokensRequest;
+  let unfreezePartialTokensRequest: UnfreezePartialTokensRequest;
+  let getFrozenPartialTokensRequest: GetFrozenPartialTokensRequest;
   let recoveryAddressRequest: RecoveryAddressRequest;
   let isAddressRecoveredRequest: IsAddressRecoveredRequest;
 
@@ -7039,7 +7088,6 @@ describe('Security', () => {
       );
       expect(result).toEqual(expectedResponse);
     });
-
     it('should throw an error if command execution fails', async () => {
       const error = new Error('Command execution failed');
       commandBusMock.execute.mockRejectedValue(error);
@@ -7060,14 +7108,12 @@ describe('Security', () => {
         ),
       );
     });
-
     it('should throw error if securityId is invalid', async () => {
       setSymbolRequest = new SetSymbolRequest({
         ...SetSymbolRequestFixture.create({
           securityId: 'invalid',
         }),
       });
-
       await expect(Security.setSymbol(setSymbolRequest)).rejects.toThrow(
         ValidationError,
       );
@@ -7083,6 +7129,622 @@ describe('Security', () => {
       await expect(Security.setSymbol(setSymbolRequest)).rejects.toThrow(
         ValidationError,
       );
+    });
+  });
+
+  describe('SetOnchainID', () => {
+    setOnchainIDRequest = new SetOnchainIDRequest(
+      SetOnchainIDRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set onchainID successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setOnchainID(setOnchainIDRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetOnchainIDRequest',
+        setOnchainIDRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetOnchainIDCommand(
+          setOnchainIDRequest.securityId,
+          setOnchainIDRequest.onchainID,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.setOnchainID(setOnchainIDRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetOnchainIDRequest',
+        setOnchainIDRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetOnchainIDCommand(
+          setOnchainIDRequest.securityId,
+          setOnchainIDRequest.onchainID,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setOnchainIDRequest = new SetOnchainIDRequest({
+        ...SetOnchainIDRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.setOnchainID(setOnchainIDRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if onchainID is invalid', async () => {
+      setOnchainIDRequest = new SetOnchainIDRequest({
+        ...SetOnchainIDRequestFixture.create({
+          onchainID: 'invalid',
+        }),
+      });
+
+      await expect(Security.setOnchainID(setOnchainIDRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('SetIdentityRegistry', () => {
+    setIdentityRegistryRequest = new SetIdentityRegistryRequest(
+      SetIdentityRegistryRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set identity registry successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setIdentityRegistry(
+        setIdentityRegistryRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetIdentityRegistryRequest',
+        setIdentityRegistryRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetIdentityRegistryCommand(
+          setIdentityRegistryRequest.securityId,
+          setIdentityRegistryRequest.identityRegistry,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.setIdentityRegistry(setIdentityRegistryRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetIdentityRegistryRequest',
+        setIdentityRegistryRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetIdentityRegistryCommand(
+          setIdentityRegistryRequest.securityId,
+          setIdentityRegistryRequest.identityRegistry,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setIdentityRegistryRequest = new SetIdentityRegistryRequest({
+        ...SetIdentityRegistryRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.setIdentityRegistry(setIdentityRegistryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if identityRegistry is invalid', async () => {
+      setIdentityRegistryRequest = new SetIdentityRegistryRequest({
+        ...SetIdentityRegistryRequestFixture.create({
+          identityRegistry: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.setIdentityRegistry(setIdentityRegistryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('SetCompliance', () => {
+    setComplianceRequest = new SetComplianceRequest(
+      SetComplianceCommandFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set compliance successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setCompliance(setComplianceRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetComplianceRequest',
+        setComplianceRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetComplianceCommand(
+          setComplianceRequest.securityId,
+          setComplianceRequest.compliance,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.setCompliance(setComplianceRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetComplianceRequest',
+        setComplianceRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetComplianceCommand(
+          setComplianceRequest.securityId,
+          setComplianceRequest.compliance,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setComplianceRequest = new SetComplianceRequest({
+        ...SetComplianceCommandFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.setCompliance(setComplianceRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if compliance is invalid', async () => {
+      setComplianceRequest = new SetComplianceRequest({
+        ...SetComplianceCommandFixture.create({
+          compliance: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.setCompliance(setComplianceRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('Identity Registry', () => {
+    identityRegistryRequest = new IdentityRegistryRequest(
+      IdentityRegistryQueryFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: transactionId,
+    };
+    it('should get identity registry successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.identityRegistry(identityRegistryRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IdentityRegistryRequest',
+        identityRegistryRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IdentityRegistryQuery(identityRegistryRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.identityRegistry(identityRegistryRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IdentityRegistryRequest',
+        identityRegistryRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IdentityRegistryQuery(identityRegistryRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      identityRegistryRequest = new IdentityRegistryRequest({
+        ...IdentityRegistryQueryFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.identityRegistry(identityRegistryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('Compliance', () => {
+    complianceRequest = new ComplianceRequest(ComplianceQueryFixture.create());
+
+    const expectedResponse = {
+      payload: transactionId,
+    };
+    it('should get compliance successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.compliance(complianceRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'ComplianceRequest',
+        complianceRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new ComplianceQuery(complianceRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.compliance(complianceRequest)).rejects.toThrow(
+        'Query execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'ComplianceRequest',
+        complianceRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new ComplianceQuery(complianceRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      complianceRequest = new ComplianceRequest({
+        ...ComplianceQueryFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.compliance(complianceRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('OnchainID', () => {
+    onchainIDRequest = new OnchainIDRequest(OnchainIDRequestFixture.create());
+
+    const expectedResponse = {
+      payload: transactionId,
+    };
+    it('should get onchanID successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.onchainID(onchainIDRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'OnchainIDRequest',
+        onchainIDRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new OnchainIDQuery(onchainIDRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.onchainID(onchainIDRequest)).rejects.toThrow(
+        'Query execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'OnchainIDRequest',
+        onchainIDRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new OnchainIDQuery(onchainIDRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      onchainIDRequest = new OnchainIDRequest({
+        ...OnchainIDRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.onchainID(onchainIDRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+  describe('FreezePartialTokens', () => {
+    freezePartialTokensRequest = new FreezePartialTokensRequest(
+      FreezePartialTokensRequestFixture.create(),
+    );
+    const expectedResponse = new FreezePartialTokensResponse(
+      true,
+      transactionId,
+    );
+    it('should freeze partial tokens sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.freezePartialTokens(
+        freezePartialTokensRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'FreezePartialTokensRequest',
+        freezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new FreezePartialTokensCommand(
+          freezePartialTokensRequest.securityId,
+          freezePartialTokensRequest.amount,
+          freezePartialTokensRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.freezePartialTokens(freezePartialTokensRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'FreezePartialTokensRequest',
+        freezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new FreezePartialTokensCommand(
+          freezePartialTokensRequest.securityId,
+          freezePartialTokensRequest.amount,
+          freezePartialTokensRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      freezePartialTokensRequest = new FreezePartialTokensRequest({
+        ...FreezePartialTokensRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.freezePartialTokens(freezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is empty', async () => {
+      freezePartialTokensRequest = new FreezePartialTokensRequest({
+        ...FreezePartialTokensRequestFixture.create({
+          targetId: '',
+        }),
+      });
+
+      await expect(
+        Security.freezePartialTokens(freezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('UnfreezePartialTokens', () => {
+    unfreezePartialTokensRequest = new UnfreezePartialTokensRequest(
+      FreezePartialTokensRequestFixture.create(),
+    );
+    const expectedResponse = new UnfreezePartialTokensResponse(
+      true,
+      transactionId,
+    );
+    it('should unfreeze partial tokens sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.unfreezePartialTokens(
+        unfreezePartialTokensRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'UnfreezePartialTokensRequest',
+        unfreezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UnfreezePartialTokensCommand(
+          unfreezePartialTokensRequest.securityId,
+          unfreezePartialTokensRequest.amount,
+          unfreezePartialTokensRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.unfreezePartialTokens(unfreezePartialTokensRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'UnfreezePartialTokensRequest',
+        unfreezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UnfreezePartialTokensCommand(
+          unfreezePartialTokensRequest.securityId,
+          unfreezePartialTokensRequest.amount,
+          unfreezePartialTokensRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      unfreezePartialTokensRequest = new UnfreezePartialTokensRequest({
+        ...UnfreezePartialTokensRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.unfreezePartialTokens(unfreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is empty', async () => {
+      unfreezePartialTokensRequest = new UnfreezePartialTokensRequest({
+        ...UnfreezePartialTokensRequestFixture.create({
+          targetId: '',
+        }),
+      });
+
+      await expect(
+        Security.unfreezePartialTokens(unfreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getFrozenPartialTokens', () => {
+    getFrozenPartialTokensRequest = new GetFrozenPartialTokensRequest(
+      GetFrozenPartialTokensQueryFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: new BigDecimal(BigNumber.from(1)),
+    };
+    it('should get hold count for by partition successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.getFrozenPartialTokens(
+        getFrozenPartialTokensRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetFrozenPartialTokensRequest',
+        getFrozenPartialTokensRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetFrozenPartialTokensQuery(
+          getFrozenPartialTokensRequest.securityId,
+          getFrozenPartialTokensRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          value: expectedResponse.payload.toString(),
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.getFrozenPartialTokens(getFrozenPartialTokensRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetFrozenPartialTokensRequest',
+        getFrozenPartialTokensRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetFrozenPartialTokensQuery(
+          getFrozenPartialTokensRequest.securityId,
+          getFrozenPartialTokensRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getFrozenPartialTokensRequest = new GetFrozenPartialTokensRequest({
+        ...GetFrozenPartialTokensQueryFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.getFrozenPartialTokens(getFrozenPartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if targetId is invalid', async () => {
+      getFrozenPartialTokensRequest = new GetFrozenPartialTokensRequest({
+        ...GetFrozenPartialTokensQueryFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.getFrozenPartialTokens(getFrozenPartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
     });
   });
 

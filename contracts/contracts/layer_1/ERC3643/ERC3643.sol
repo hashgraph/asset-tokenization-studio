@@ -233,7 +233,8 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     address private constant _ONCHAIN_ID = address(0);
 
     function setAddressFrozen(
-        address _userAddress
+        address _userAddress,
+        bool _freezStatus
     )
         external
         override
@@ -241,7 +242,8 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
     {
-        emit TokensFrozen(_userAddress, 0, _DEFAULT_PARTITION); //TODO amount TBD
+        _setAddresFrozen(_userAddress, _freezStatus);
+        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
     }
 
     /**
@@ -394,37 +396,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return true;
     }
 
-    /**
-     * @notice Retrieves the latest version of the contract.
-     * @dev The version is represented as a string.
-     */
-    function version() external view returns (string memory) {
-        return Strings.toString(_getLatestVersion());
-    }
-
-    /**
-     * @notice Retrieves the identity registry contract address.
-     */
-    function identityRegistry()
-        external
-        view
-        override
-        returns (IIdentityRegistry)
-    {
-        return IIdentityRegistry(_erc3643Storage().identityRegistry);
-    }
-
-    /**
-     * @notice Retrieves the onchainID address associated with the token.
-     */
-    function onchainID() external view override returns (address) {
-        return _erc3643Storage().onchainID;
-    }
-
-    function compliance() external view override returns (ICompliance) {
-        return ICompliance(_erc3643Storage().compliance);
-    }
-
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount
@@ -456,41 +427,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
-    function freezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-    {
-        _freezeTokensByPartition(_partition, _userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _partition);
-    }
-
-    function unfreezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-    {
-        _checkUnfreezeAmount(_partition, _userAddress, _amount);
-        _unfreezeTokensByPartition(_partition, _userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _partition);
-    }
-
     function addAgent(
         address _agent
     ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
@@ -514,17 +450,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return _recoveryAddress(_lostWallet, _newWallet);
     }
 
-    function isAddressRecovered(address _wallet) external view returns (bool) {
-        return _isRecovered(_wallet);
-    }
-
-    function getFrozenTokensByPartition(
-        bytes32 _partition,
-        address _userAddress
-    ) external view override returns (uint256) {
-        return _getFrozenAmountForByPartitionAdjusted(_partition, _userAddress);
-    }
-
     function getFrozenTokens(
         address _userAddress
     ) external view override returns (uint256) {
@@ -533,6 +458,41 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
 
     function isAgent(address _agent) external view returns (bool) {
         return _hasRole(_AGENT_ROLE, _agent);
+    }
+
+    /**
+     * @notice Retrieves the latest version of the contract.
+     * @dev The version is represented as a string.
+     */
+    function version() external view returns (string memory) {
+        return Strings.toString(_getLatestVersion());
+    }
+
+    /**
+     * @notice Retrieves the identity registry contract address.
+     */
+    function identityRegistry()
+        external
+        view
+        override
+        returns (IIdentityRegistry)
+    {
+        return IIdentityRegistry(_erc3643Storage().identityRegistry);
+    }
+
+    /**
+     * @notice Retrieves the onchainID address associated with the token.
+     */
+    function onchainID() external view override returns (address) {
+        return _erc3643Storage().onchainID;
+    }
+
+    function compliance() external view override returns (ICompliance) {
+        return ICompliance(_erc3643Storage().compliance);
+    }
+
+    function isAddressRecovered(address _wallet) external view returns (bool) {
+        return _isRecovered(_wallet);
     }
 
     function getStaticResolverKey()
@@ -550,7 +510,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](26);
+        staticFunctionSelectors_ = new bytes4[](23);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
@@ -578,15 +538,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             .getFrozenTokens
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
-            .freezePartialTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .unfreezePartialTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getFrozenTokensByPartition
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
             .setAddressFrozen
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
@@ -606,9 +557,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             .selector;
     }
 
-    /**
-     * @notice Retrieves the identity registry contract address.
-     */
     function getStaticInterfaceIds()
         external
         pure

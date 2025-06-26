@@ -1811,6 +1811,50 @@ export class RPCQueryAdapter {
     return kycStatus;
   }
 
+  async onchainID(address: EvmAddress): Promise<string> {
+    LogService.logTrace(`Getting OnchainID for security ${address.toString()}`);
+
+    return await this.connect(ERC3643__factory, address.toString()).onchainID();
+  }
+
+  async identityRegistry(address: EvmAddress): Promise<string> {
+    LogService.logTrace(
+      `Getting IdentityRegistry for security ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ERC3643__factory,
+      address.toString(),
+    ).identityRegistry();
+  }
+
+  async compliance(address: EvmAddress): Promise<string> {
+    LogService.logTrace(
+      `Getting Compliance for security ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ERC3643__factory,
+      address.toString(),
+    ).compliance();
+  }
+
+  async getFrozenPartialTokens(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting frozen partial tokens for account ${targetId}} for the mock contract ${address.toString()}`,
+    );
+
+    const frozenTokens = await this.connect(
+      ERC3643__factory,
+      address.toString(),
+    ).getFrozenTokens(targetId.toString());
+
+    return frozenTokens.toNumber();
+  }
+
   async isAddressRecovered(
     address: EvmAddress,
     targetId: EvmAddress,

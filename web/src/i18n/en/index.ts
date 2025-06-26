@@ -322,6 +322,7 @@ export default {
     controlListManager: "Control Manager role",
     kycListManager: "KYC Manager role",
     internalKYCManager: "Internal KYC Manager role",
+    freezer: "Freeze Manager Role",
   },
   landing,
   routes,

@@ -361,8 +361,8 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         if (_isInControlList(_lostWallet)) {
             _addToControlList(_newWallet);
         }
-        _erc3643Storage()._addressRecovered[_lostWallet] = true;
-        _erc3643Storage()._addressRecovered[_newWallet] = false;
+        _erc3643Storage().addressRecovered[_lostWallet] = true;
+        _erc3643Storage().addressRecovered[_newWallet] = false;
         return true;
     }
 

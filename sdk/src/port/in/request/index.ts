@@ -355,6 +355,15 @@ import RevokeKycMockRequest from './security/externalKycLists/mock/RevokeKycMock
 import GetKycStatusMockRequest from './security/externalKycLists/mock/GetKycStatusMockRequest.js';
 import SetNameRequest from './security/operations/tokeMetadata/SetNameRequest.js';
 import SetSymbolRequest from './security/operations/tokeMetadata/SetSymbolRequest.js';
+import SetOnchainIDRequest from './security/operations/tokeMetadata/SetOnchainIDRequest.js';
+import SetComplianceRequest from './security/compliance/SetComplianceRequest.js';
+import ComplianceRequest from './security/compliance/ComplianceRequest.js';
+import SetIdentityRegistryRequest from './security/identityRegistry/SetIdentityRegistryRequest.js';
+import IdentityRegistryRequest from './security/identityRegistry/IdentityRegistryRequest.js';
+import OnchainIDRequest from './security/operations/tokeMetadata/OnchainIDRequest.js';
+import FreezePartialTokensRequest from './security/operations/erc3643/FreezePartialTokensRequest.js';
+import GetFrozenPartialTokensRequest from './security/operations/erc3643/GetFrozenPartialTokensRequest.js';
+import UnfreezePartialTokensRequest from './security/operations/erc3643/UnfreezePartialTokensRequest.js';
 import RecoveryAddressRequest from './security/operations/recovery/RecoveryAddressRequest.js';
 import IsAddressRecoveredRequest from './security/operations/recovery/IsAddressRecoveredRequest.js';
 
@@ -510,6 +519,15 @@ export {
   GetKycStatusMockRequest,
   SetNameRequest,
   SetSymbolRequest,
+  SetOnchainIDRequest,
+  SetComplianceRequest,
+  SetIdentityRegistryRequest,
+  ComplianceRequest,
+  IdentityRegistryRequest,
+  OnchainIDRequest,
+  FreezePartialTokensRequest,
+  GetFrozenPartialTokensRequest,
+  UnfreezePartialTokensRequest,
   RecoveryAddressRequest,
   IsAddressRecoveredRequest,
 };

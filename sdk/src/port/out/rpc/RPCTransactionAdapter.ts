@@ -349,6 +349,11 @@ import {
   DEACTIVATE_INTERNAL_KYC_GAS,
   SET_NAME_GAS,
   SET_SYMBOL_GAS,
+  SET_ONCHAIN_ID_GAS,
+  SET_IDENTITY_REGISTRY_GAS,
+  SET_COMPLIANCE_GAS,
+  FREEZE_PARTIAL_TOKENS_GAS,
+  UNFREEZE_PARTIAL_TOKENS_GAS,
   EVM_ZERO_ADDRESS,
   RECOVERY_ADDRESS_GAS,
 } from '../../../core/Constants.js';
@@ -436,6 +441,7 @@ import {
 } from '../../../domain/context/security/Clearing.js';
 import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
 import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
+import { ContractId } from '@hashgraph/sdk';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -3259,7 +3265,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     name: string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting name to ${security.toString()}`);
-
     return RPCTransactionResponseAdapter.manageResponse(
       await ERC3643__factory.connect(
         security.toString(),
@@ -3270,19 +3275,108 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       this.networkService.environment,
     );
   }
-
   async setSymbol(
     security: EvmAddress,
     symbol: string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
-
     return RPCTransactionResponseAdapter.manageResponse(
       await ERC3643__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).setName(symbol, {
         gasLimit: SET_SYMBOL_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setOnchainID(
+    security: EvmAddress,
+    onchainID: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting onchainID to ${security.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setOnchainID(onchainID.toString(), {
+        gasLimit: SET_ONCHAIN_ID_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setIdentityRegistry(
+    security: EvmAddress,
+    identityRegistry: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting Identity Registry to ${security.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setIdentityRegistry(identityRegistry.toString(), {
+        gasLimit: SET_IDENTITY_REGISTRY_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setCompliance(
+    security: EvmAddress,
+    compliance: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting Compliance to ${security.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setCompliance(compliance.toString(), {
+        gasLimit: SET_COMPLIANCE_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async freezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Freezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
+    );
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).freezePartialTokens(targetId.toString(), amount.toBigNumber(), {
+        gasLimit: FREEZE_PARTIAL_TOKENS_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async unfreezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Unfreezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
+    );
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).unfreezePartialTokens(targetId.toString(), amount.toBigNumber(), {
+        gasLimit: UNFREEZE_PARTIAL_TOKENS_GAS,
       }),
       this.networkService.environment,
     );

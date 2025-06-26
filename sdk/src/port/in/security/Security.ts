@@ -351,9 +351,30 @@ import ClearingTransferViewModel from '../response/ClearingTransferViewModel.js'
 import { GetClearingCreateHoldForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery.js';
 import { GetClearingRedeemForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery.js';
 import { GetClearingTransferForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery.js';
-import { SetNameRequest, SetSymbolRequest } from '../request/index.js';
+import {
+  ComplianceRequest,
+  IdentityRegistryRequest,
+  OnchainIDRequest,
+  SetComplianceRequest,
+  SetIdentityRegistryRequest,
+  SetNameRequest,
+  SetOnchainIDRequest,
+  SetSymbolRequest,
+} from '../request/index.js';
 import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand.js';
 import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand.js';
+import { SetOnchainIDCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand.js';
+import { SetIdentityRegistryCommand } from '../../../app/usecase/command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommand.js';
+import { SetComplianceCommand } from '../../../app/usecase/command/security/compliance/setCompliance/SetComplianceCommand.js';
+import { IdentityRegistryQuery } from '../../../app/usecase/query/security/identityRegistry/IdentityRegistryQuery.js';
+import { ComplianceQuery } from '../../../app/usecase/query/security/compliance/compliance/ComplianceQuery.js';
+import { OnchainIDQuery } from '../../../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery.js';
+import FreezePartialTokensRequest from '../request/security/operations/erc3643/FreezePartialTokensRequest.js';
+import GetFrozenPartialTokensRequest from '../request/security/operations/erc3643/GetFrozenPartialTokensRequest.js';
+import UnfreezePartialTokensRequest from '../request/security/operations/erc3643/UnfreezePartialTokensRequest.js';
+import { FreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand.js';
+import { UnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand.js';
+import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery.js';
 import RecoveryAddressRequest from '../request/security/operations/recovery/RecoveryAddressRequest.js';
 import { RecoveryAddressCommand } from '../../../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand.js';
 import IsAddressRecoveredRequest from '../request/security/operations/recovery/IsAddressRecoveredRequest.js';
@@ -527,6 +548,27 @@ interface ISecurityInPort {
   setSymbol(
     request: SetSymbolRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  setOnchainID(
+    request: SetOnchainIDRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  setIdentityRegistry(
+    request: SetIdentityRegistryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  setCompliance(
+    request: SetComplianceRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  compliance(request: ComplianceRequest): Promise<string>;
+  identityRegistry(request: IdentityRegistryRequest): Promise<string>;
+  onchainID(request: OnchainIDRequest): Promise<string>;
+  freezePartialTokens(
+    request: FreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  unfreezePartialTokens(
+    request: UnfreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  getFrozenPartialTokens(
+    request: GetFrozenPartialTokensRequest,
+  ): Promise<BalanceViewModel>;
   recoveryAddress(
     request: RecoveryAddressRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
@@ -1855,6 +1897,104 @@ class SecurityInPort implements ISecurityInPort {
     return await this.commandBus.execute(
       new SetSymbolCommand(securityId, symbol),
     );
+  }
+
+  @LogError
+  async setOnchainID(
+    request: SetOnchainIDRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, onchainID } = request;
+    ValidatedRequest.handleValidation('SetOnchainIDRequest', request);
+
+    return await this.commandBus.execute(
+      new SetOnchainIDCommand(securityId, onchainID),
+    );
+  }
+
+  @LogError
+  async setIdentityRegistry(
+    request: SetIdentityRegistryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, identityRegistry } = request;
+    ValidatedRequest.handleValidation('SetIdentityRegistryRequest', request);
+
+    return await this.commandBus.execute(
+      new SetIdentityRegistryCommand(securityId, identityRegistry),
+    );
+  }
+
+  @LogError
+  async setCompliance(
+    request: SetComplianceRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, compliance } = request;
+    ValidatedRequest.handleValidation('SetComplianceRequest', request);
+
+    return await this.commandBus.execute(
+      new SetComplianceCommand(securityId, compliance),
+    );
+  }
+
+  @LogError
+  async identityRegistry(request: IdentityRegistryRequest): Promise<string> {
+    const { securityId } = request;
+    ValidatedRequest.handleValidation('IdentityRegistryRequest', request);
+
+    return (await this.queryBus.execute(new IdentityRegistryQuery(securityId)))
+      .payload;
+  }
+
+  @LogError
+  async compliance(request: ComplianceRequest): Promise<string> {
+    const { securityId } = request;
+    ValidatedRequest.handleValidation('ComplianceRequest', request);
+
+    return (await this.queryBus.execute(new ComplianceQuery(securityId)))
+      .payload;
+  }
+
+  @LogError
+  async onchainID(request: OnchainIDRequest): Promise<string> {
+    const { securityId } = request;
+    ValidatedRequest.handleValidation('OnchainIDRequest', request);
+
+    return (await this.queryBus.execute(new OnchainIDQuery(securityId)))
+      .payload;
+  }
+
+  @LogError
+  async freezePartialTokens(
+    request: FreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('FreezePartialTokensRequest', request);
+    const { securityId, amount, targetId } = request;
+    return await this.commandBus.execute(
+      new FreezePartialTokensCommand(securityId, amount, targetId),
+    );
+  }
+
+  @LogError
+  async unfreezePartialTokens(
+    request: UnfreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('UnfreezePartialTokensRequest', request);
+    const { securityId, amount, targetId } = request;
+    return await this.commandBus.execute(
+      new UnfreezePartialTokensCommand(securityId, amount, targetId),
+    );
+  }
+
+  @LogError
+  async getFrozenPartialTokens(
+    request: GetFrozenPartialTokensRequest,
+  ): Promise<BalanceViewModel> {
+    ValidatedRequest.handleValidation('GetFrozenPartialTokensRequest', request);
+    const res = await this.queryBus.execute(
+      new GetFrozenPartialTokensQuery(request.securityId, request.targetId),
+    );
+
+    const balance: BalanceViewModel = { value: res.payload.toString() };
+    return balance;
   }
 
   @LogError

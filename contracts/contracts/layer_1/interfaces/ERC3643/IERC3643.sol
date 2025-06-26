@@ -216,7 +216,7 @@ interface IERC3643 {
         address compliance;
         mapping(address => uint256) frozenTokens;
         mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
-        mapping(address => bool) _addressRecovered;
+        mapping(address => bool) addressRecovered;
     }
 
     event UpdatedTokenInformation(
@@ -256,6 +256,19 @@ interface IERC3643 {
      * @param _agent Address of the agent that has been removed
      */
     event AgentRemoved(address indexed _agent);
+
+    /**
+     *  @dev This event is emitted when the wallet of an investor is frozen or unfrozen
+     *  @dev The event is emitted by setAddressFrozen and batchSetAddressFrozen functions
+     *  @param userAddress Is the wallet of the investor that is concerned by the freezing status
+     *  @param isFrozen Is the freezing status of the wallet
+     *  @param owner Is the address of the agent who called the function to freeze the wallet
+     */
+    event AddressFrozen(
+        address indexed userAddress,
+        bool indexed isFrozen,
+        address indexed owner
+    );
 
     /**
      * @dev Emitted when a wallet is recovered
@@ -362,28 +375,6 @@ interface IERC3643 {
      */
     function burn(address _userAddress, uint256 _amount) external;
 
-    /**
-     * @dev Returns the onchainID address associated with the token.
-     */
-    function onchainID() external view returns (address);
-
-    /**
-     * @dev Returns the address of the identity registry contract.
-     * @dev Returns the version of the contract as a string.
-     *
-     */
-    function identityRegistry() external view returns (IIdentityRegistry);
-
-    /**
-     * @dev Returns the address of the compliance contract.
-     */
-    function compliance() external view returns (ICompliance);
-
-    /**
-     * @dev Returns the version of the token.
-     */
-    function version() external view returns (string memory);
-
     /*
      * @dev Freezes a partial amount of the user's tokens across all partitions.
      * Emits a TokensFrozen event.
@@ -403,30 +394,13 @@ interface IERC3643 {
     ) external;
 
     /*
-     * @dev Freezes a partial amount of the user's tokens within a specific partition.
-     * Emits a TokensFrozen event.
-     */
-    function freezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Unfreezes a partial amount of the user's previously frozen tokens within a specific partition.
-     * Emits a TokensUnfrozen event.
-     */
-    function unfreezePartialTokensByPartition(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
      * @dev Freezes the user's address entirely, disabling all token operations.
      * Emits a TokensFrozen event.
      */
-    function setAddressFrozen(address _userAddress) external;
+    function setAddressFrozen(
+        address _userAddress,
+        bool _freezeStatus
+    ) external;
 
     /**
      * @notice Gives an account the agent role
@@ -457,22 +431,36 @@ interface IERC3643 {
     function isAddressRecovered(address _wallet) external returns (bool);
 
     /**
-     * @notice Checks if an account has the agent role
+     * @dev Checks if an account has the agent role
      */
     function isAgent(address _agent) external view returns (bool);
+
+    /**
+     * @dev Returns the onchainID address associated with the token.
+     */
+    function onchainID() external view returns (address);
+
+    /**
+     * @dev Returns the address of the identity registry contract.
+     * @dev Returns the version of the contract as a string.
+     *
+     */
+    function identityRegistry() external view returns (IIdentityRegistry);
+
+    /**
+     * @dev Returns the address of the compliance contract.
+     */
+    function compliance() external view returns (ICompliance);
+
+    /**
+     * @dev Returns the version of the token.
+     */
+    function version() external view returns (string memory);
 
     /*
      * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.
      */
     function getFrozenTokens(
-        address _userAddress
-    ) external view returns (uint256);
-
-    /*
-     * @dev Returns the amount of tokens currently frozen for the given user in a specific partition.
-     */
-    function getFrozenTokensByPartition(
-        bytes32 _partition,
         address _userAddress
     ) external view returns (uint256);
 }
