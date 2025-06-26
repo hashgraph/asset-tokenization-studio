@@ -220,7 +220,7 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
         _;
     }
 
-    function _setAddresFrozen(
+    function _setAddressFrozen(
         address _userAddress,
         bool _freezeStatus
     ) internal {

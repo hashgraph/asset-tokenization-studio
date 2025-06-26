@@ -242,7 +242,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
     {
-        _setAddresFrozen(_userAddress, _freezStatus);
+        _setAddressFrozen(_userAddress, _freezStatus);
         emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
     }
 
