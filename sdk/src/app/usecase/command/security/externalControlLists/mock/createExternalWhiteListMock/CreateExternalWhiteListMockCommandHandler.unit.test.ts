@@ -203,20 +203,20 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import { CreateExternalWhiteListMockCommandHandler } from './CreateExternalWhiteListMockCommandHandler.js';
-import { CreateExternalWhiteListMockCommandError } from './error/CreateExternalWhiteListMockCommandError.js';
-import { CreateExternalWhiteListMockCommandResponse } from './CreateExternalWhiteListMockCommand.js';
+} from '@test/fixtures/shared/DataFixture';
+import { CreateExternalWhiteListMockCommandHandler } from './CreateExternalWhiteListMockCommandHandler';
+import { CreateExternalWhiteListMockCommandResponse } from './CreateExternalWhiteListMockCommand';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Account from '@domain/context/account/Account';
+import { ErrorCode } from '@core/error/BaseError';
+import { CreateExternalWhiteListMockCommandError } from './error/CreateExternalWhiteListMockCommandError';
 
 describe('CreateExternalWhiteListMockCommandHandler', () => {
   let handler: CreateExternalWhiteListMockCommandHandler;

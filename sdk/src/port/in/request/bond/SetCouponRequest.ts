@@ -203,10 +203,10 @@
 
 */
 
-import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../FormatValidation.js';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
-import { SecurityDate } from '../../../../domain/context/shared/SecurityDate.js';
+import { SecurityDate } from '@domain/context/shared/SecurityDate';
 
 export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest> {
   securityId: string;

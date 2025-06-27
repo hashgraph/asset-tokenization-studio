@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import { ClearingRedeem } from '../../../../../../domain/context/security/Clearing.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
+import { ClearingRedeem } from '@domain/context/security/Clearing';
 
 export class GetClearingRedeemForByPartitionQueryResponse
   implements QueryResponse

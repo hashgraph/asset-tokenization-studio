@@ -208,53 +208,53 @@ import {
   HederaIdPropsFixture,
   PartitionIdFixture,
 } from '../shared/DataFixture';
-import { GetClearedAmountForQuery } from '../../../src/app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery';
-import { GetClearedAmountForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery';
-import { GetClearingCountForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery';
-import ActivateClearingRequest from '../../../src/port/in/request/security/operations/clearing/ActivateClearingRequest';
-import DeactivateClearingRequest from '../../../src/port/in/request/security/operations/clearing/DeactivateClearingRequest';
-import ClearingTransferByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ClearingTransferByPartitionRequest';
-import ClearingTransferFromByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ClearingTransferFromByPartitionRequest';
-import ProtectedClearingTransferByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ProtectedClearingTransferByPartitionRequest';
-import ApproveClearingOperationByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ApproveClearingOperationByPartitionRequest';
+import { GetClearedAmountForQuery } from '@query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery';
+import { GetClearedAmountForByPartitionQuery } from '@query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery';
+import { GetClearingCountForByPartitionQuery } from '@query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery';
+import ActivateClearingRequest from '@port/in/request/security/operations/clearing/ActivateClearingRequest';
+import DeactivateClearingRequest from '@port/in/request/security/operations/clearing/DeactivateClearingRequest';
+import ClearingTransferByPartitionRequest from '@port/in/request/security/operations/clearing/ClearingTransferByPartitionRequest';
+import ClearingTransferFromByPartitionRequest from '@port/in/request/security/operations/clearing/ClearingTransferFromByPartitionRequest';
+import ProtectedClearingTransferByPartitionRequest from '@port/in/request/security/operations/clearing/ProtectedClearingTransferByPartitionRequest';
+import ApproveClearingOperationByPartitionRequest from '@port/in/request/security/operations/clearing/ApproveClearingOperationByPartitionRequest';
 import {
   ClearingHoldCreation,
   ClearingOperationType,
   ClearingRedeem,
   ClearingTransfer,
-} from '../../../src/domain/context/security/Clearing';
-import { GetClearingCreateHoldForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery';
-import CancelClearingOperationByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/CancelClearingOperationByPartitionRequest';
-import ReclaimClearingOperationByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ReclaimClearingOperationByPartitionRequest';
-import ClearingRedeemByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ClearingRedeemByPartitionRequest';
-import ClearingRedeemFromByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ClearingRedeemFromByPartitionRequest';
-import ProtectedClearingRedeemByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ProtectedClearingRedeemByPartitionRequest';
-import ClearingCreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ClearingCreateHoldByPartitionRequest';
-import ClearingCreateHoldFromByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ClearingCreateHoldFromByPartitionRequest';
-import ProtectedClearingCreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/ProtectedClearingCreateHoldByPartitionRequest';
-import GetClearedAmountForRequest from '../../../src/port/in/request/security/operations/clearing/GetClearedAmountForRequest';
-import GetClearedAmountForByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/GetClearedAmountForByPartitionRequest';
-import GetClearingCountForByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/GetClearingCountForByPartitionRequest';
-import GetClearingCreateHoldForByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/GetClearingCreateHoldForByPartitionRequest';
-import GetClearingRedeemForByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/GetClearingRedeemForByPartitionRequest';
-import GetClearingTransferForByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/GetClearingTransferForByPartitionRequest';
-import GetClearingsIdForByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/GetClearingsIdForByPartitionRequest';
-import IsClearingActivatedRequest from '../../../src/port/in/request/security/operations/clearing/IsClearingActivatedRequest';
-import OperatorClearingCreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/OperatorClearingCreateHoldByPartitionRequest';
-import OperatorClearingRedeemByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/OperatorClearingRedeemByPartitionRequest';
-import OperatorClearingTransferByPartitionRequest from '../../../src/port/in/request/security/operations/clearing/OperatorClearingTransferByPartitionRequest';
+} from '@domain/context/security/Clearing';
+import { GetClearingCreateHoldForByPartitionQuery } from '@query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery';
+import CancelClearingOperationByPartitionRequest from '@port/in/request/security/operations/clearing/CancelClearingOperationByPartitionRequest';
+import ReclaimClearingOperationByPartitionRequest from '@port/in/request/security/operations/clearing/ReclaimClearingOperationByPartitionRequest';
+import ClearingRedeemByPartitionRequest from '@port/in/request/security/operations/clearing/ClearingRedeemByPartitionRequest';
+import ClearingRedeemFromByPartitionRequest from '@port/in/request/security/operations/clearing/ClearingRedeemFromByPartitionRequest';
+import ProtectedClearingRedeemByPartitionRequest from '@port/in/request/security/operations/clearing/ProtectedClearingRedeemByPartitionRequest';
+import ClearingCreateHoldByPartitionRequest from '@port/in/request/security/operations/clearing/ClearingCreateHoldByPartitionRequest';
+import ClearingCreateHoldFromByPartitionRequest from '@port/in/request/security/operations/clearing/ClearingCreateHoldFromByPartitionRequest';
+import ProtectedClearingCreateHoldByPartitionRequest from '@port/in/request/security/operations/clearing/ProtectedClearingCreateHoldByPartitionRequest';
+import GetClearedAmountForRequest from '@port/in/request/security/operations/clearing/GetClearedAmountForRequest';
+import GetClearedAmountForByPartitionRequest from '@port/in/request/security/operations/clearing/GetClearedAmountForByPartitionRequest';
+import GetClearingCountForByPartitionRequest from '@port/in/request/security/operations/clearing/GetClearingCountForByPartitionRequest';
+import GetClearingCreateHoldForByPartitionRequest from '@port/in/request/security/operations/clearing/GetClearingCreateHoldForByPartitionRequest';
+import GetClearingRedeemForByPartitionRequest from '@port/in/request/security/operations/clearing/GetClearingRedeemForByPartitionRequest';
+import GetClearingTransferForByPartitionRequest from '@port/in/request/security/operations/clearing/GetClearingTransferForByPartitionRequest';
+import GetClearingsIdForByPartitionRequest from '@port/in/request/security/operations/clearing/GetClearingsIdForByPartitionRequest';
+import IsClearingActivatedRequest from '@port/in/request/security/operations/clearing/IsClearingActivatedRequest';
+import OperatorClearingCreateHoldByPartitionRequest from '@port/in/request/security/operations/clearing/OperatorClearingCreateHoldByPartitionRequest';
+import OperatorClearingRedeemByPartitionRequest from '@port/in/request/security/operations/clearing/OperatorClearingRedeemByPartitionRequest';
+import OperatorClearingTransferByPartitionRequest from '@port/in/request/security/operations/clearing/OperatorClearingTransferByPartitionRequest';
 import { BigNumber } from 'ethers';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
-import { GetClearingRedeemForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery';
-import { GetClearingsIdForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery';
-import { GetClearingTransferForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery';
-import { IsClearingActivatedQuery } from '../../../src/app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
-import { ActivateClearingCommand } from '../../../src/app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommand';
-import { ApproveClearingOperationByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
-import { DeactivateClearingCommand } from '../../../src/app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand';
-import { ProtectedClearingCreateHoldByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand';
-import { ProtectedClearingTransferByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
-import { ProtectedClearingRedeemByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { GetClearingRedeemForByPartitionQuery } from '@query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery';
+import { GetClearingsIdForByPartitionQuery } from '@query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery';
+import { GetClearingTransferForByPartitionQuery } from '@query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery';
+import { IsClearingActivatedQuery } from '@query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
+import { ActivateClearingCommand } from '@command/security/operations/clearing/activateClearing/ActivateClearingCommand';
+import { ApproveClearingOperationByPartitionCommand } from '@command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
+import { DeactivateClearingCommand } from '@command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand';
+import { ProtectedClearingCreateHoldByPartitionCommand } from '@command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand';
+import { ProtectedClearingRedeemByPartitionCommand } from '@command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand';
+import { ProtectedClearingTransferByPartitionCommand } from '@command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
 
 export const ActivateClearingRequestFixture =
   createFixture<ActivateClearingRequest>((request) => {

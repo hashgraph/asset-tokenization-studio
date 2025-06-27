@@ -203,10 +203,10 @@
 
 */
 
-import KeyProps, { KeyType } from './KeyProps.js';
+import KeyProps, { KeyType } from './KeyProps';
 import { PublicKey as HPublicKey } from '@hashgraph/sdk';
-import BaseError from '../../../core/error/BaseError.js';
-import { RuntimeError } from '../../../core/error/RuntimeError.js';
+import BaseError from '@core/error/BaseError';
+import { RuntimeError } from '@core/error/RuntimeError';
 
 export default class PublicKey implements KeyProps {
   public static readonly NULL: PublicKey = new PublicKey({

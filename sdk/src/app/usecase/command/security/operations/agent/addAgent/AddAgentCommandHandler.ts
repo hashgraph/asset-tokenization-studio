@@ -203,17 +203,17 @@
 
 */
 
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import { AddAgentCommand, AddAgentCommandResponse } from './AddAgentCommand';
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import AccountService from '../../../../../../service/account/AccountService';
-import TransactionService from '../../../../../../service/transaction/TransactionService';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole';
-import ValidationService from '../../../../../../service/validation/ValidationService';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import ValidationService from '@service/validation/ValidationService';
 import { AddAgentCommandError } from './error/AddAgentCommandError';
-import ContractService from '../../../../../../service/contract/ContractService';
+import ContractService from '@service/contract/ContractService';
 
 @CommandHandler(AddAgentCommand)
 export class AddAgentCommandHandler

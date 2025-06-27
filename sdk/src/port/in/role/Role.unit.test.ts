@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   ApplyRolesRequest,
   GetRoleCountForRequest,
@@ -213,12 +213,12 @@ import {
   GetRolesForRequest,
   RoleRequest,
 } from '../request';
-import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
-import { MirrorNodeAdapter } from '../../out/mirror/MirrorNodeAdapter';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import {
   ApplyRolesRequestFixture,
   GetRoleCountForRequestFixture,
@@ -226,19 +226,19 @@ import {
   GetRoleMembersRequestFixture,
   GetRolesForRequestFixture,
   RoleRequestFixture,
-} from '../../../../__tests__/fixtures/role/RoleFixture';
+} from '@test/fixtures/role/RoleFixture';
 import Role from './Role';
-import { HasRoleQuery } from '../../../app/usecase/query/security/roles/hasRole/HasRoleQuery';
-import { GrantRoleCommand } from '../../../app/usecase/command/security/roles/grantRole/GrantRoleCommand';
-import { RevokeRoleCommand } from '../../../app/usecase/command/security/roles/revokeRole/RevokeRoleCommand';
-import { GetRoleCountForQuery } from '../../../app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery';
-import { GetRolesForQuery } from '../../../app/usecase/query/security/roles/getRolesFor/GetRolesForQuery';
-import { GetRoleMemberCountQuery } from '../../../app/usecase/query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery';
-import { GetRoleMembersQuery } from '../../../app/usecase/query/security/roles/getRoleMembers/GetRoleMembersQuery';
-import Account from '../../../domain/context/account/Account';
-import { AccountPropsFixture } from '../../../../__tests__/fixtures/account/AccountFixture';
-import { ApplyRolesCommand } from '../../../app/usecase/command/security/roles/applyRoles/ApplyRolesCommand';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole';
+import { HasRoleQuery } from '@query/security/roles/hasRole/HasRoleQuery';
+import { GrantRoleCommand } from '@command/security/roles/grantRole/GrantRoleCommand';
+import { RevokeRoleCommand } from '@command/security/roles/revokeRole/RevokeRoleCommand';
+import { GetRoleCountForQuery } from '@query/security/roles/getRoleCountFor/GetRoleCountForQuery';
+import { GetRolesForQuery } from '@query/security/roles/getRolesFor/GetRolesForQuery';
+import { GetRoleMemberCountQuery } from '@query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery';
+import { GetRoleMembersQuery } from '@query/security/roles/getRoleMembers/GetRoleMembersQuery';
+import Account from '@domain/context/account/Account';
+import { AccountPropsFixture } from '@test/fixtures/account/AccountFixture';
+import { ApplyRolesCommand } from '@command/security/roles/applyRoles/ApplyRolesCommand';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 
 describe('Role', () => {
   let commandBusMock: jest.Mocked<CommandBus>;

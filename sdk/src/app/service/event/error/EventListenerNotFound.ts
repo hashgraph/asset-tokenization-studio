@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class EventListenerNotFound extends BaseError {
   constructor(name: string) {

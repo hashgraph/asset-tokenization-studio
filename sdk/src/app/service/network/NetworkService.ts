@@ -204,11 +204,11 @@
 */
 
 import { singleton, inject } from 'tsyringe';
-import Configuration from '../../../domain/context/network/Configuration.js';
-import { Environment } from '../../../domain/context/network/Environment.js';
-import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay.js';
-import Service from '../Service.js';
+import Configuration from '@domain/context/network/Configuration';
+import { Environment } from '@domain/context/network/Environment';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import Service from '@service/Service';
 
 export interface NetworkProps {
   environment: Environment;

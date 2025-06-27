@@ -211,17 +211,17 @@
 import { ethers } from 'ethers';
 import { BigNumber } from '@ethersproject/bignumber';
 import { singleton } from 'tsyringe';
-import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
-import LogService from '../../../app/service/log/LogService.js';
-import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
-import { Security } from '../../../domain/context/security/Security.js';
-import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
-import { Dividend } from '../../../domain/context/equity/Dividend.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import { HederaId } from '../../../domain/context/shared/HederaId.js';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import NetworkService from '@service/network/NetworkService';
+import LogService from '@service/log/LogService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter';
+import { Security } from '@domain/context/security/Security';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import { Dividend } from '@domain/context/equity/Dividend';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { HederaId } from '@domain/context/shared/HederaId';
 import {
   ERC1594__factory,
   ERC1644__factory,
@@ -259,14 +259,14 @@ import {
   ERC3643__factory,
   FreezeFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
-import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
-import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
-import { Coupon } from '../../../domain/context/bond/Coupon.js';
-import { EquityDetails } from '../../../domain/context/equity/EquityDetails.js';
-import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
-import { CastSecurityType } from '../../../domain/context/factory/SecurityType.js';
-import { Regulation } from '../../../domain/context/factory/Regulation.js';
-import { _PARTITION_ID_1 } from '../../../core/Constants.js';
+import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
+import { VotingRights } from '@domain/context/equity/VotingRights';
+import { Coupon } from '@domain/context/bond/Coupon';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import { CastDividendType } from '@domain/context/equity/DividendType';
+import { CastSecurityType } from '@domain/context/factory/SecurityType';
+import { Regulation } from '@domain/context/factory/Regulation';
+import { _PARTITION_ID_1 } from '@core/Constants';
 import {
   CastAccreditedInvestors,
   CastManualInvestorVerification,
@@ -274,20 +274,20 @@ import {
   CastResaleHoldPeriodorscation,
   CastRegulationSubType,
   CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
-import { DividendFor } from '../../../domain/context/equity/DividendFor';
-import { VotingFor } from '../../../domain/context/equity/VotingFor';
-import { Kyc } from '../../../domain/context/kyc/Kyc.js';
-import { KycAccountData } from '../../../domain/context/kyc/KycAccountData.js';
+} from '@domain/context/factory/RegulationType';
+import { ScheduledBalanceAdjustment } from '@domain/context/equity/ScheduledBalanceAdjustment';
+import { DividendFor } from '@domain/context/equity/DividendFor';
+import { VotingFor } from '@domain/context/equity/VotingFor';
+import { Kyc } from '@domain/context/kyc/Kyc';
+import { KycAccountData } from '@domain/context/kyc/KycAccountData';
 import {
   CastClearingOperationType,
   ClearingHoldCreation,
   ClearingOperationType,
   ClearingRedeem,
   ClearingTransfer,
-} from '../../../domain/context/security/Clearing.js';
-import { HoldDetails } from '../../../domain/context/security/Hold.js';
+} from '@domain/context/security/Clearing';
+import { HoldDetails } from '@domain/context/security/Hold';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 

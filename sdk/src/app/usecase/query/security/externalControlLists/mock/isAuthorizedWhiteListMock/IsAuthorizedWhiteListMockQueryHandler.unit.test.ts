@@ -204,17 +204,17 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { EvmAddressPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { IsAuthorizedWhiteListMockQueryFixture } from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import { IsAuthorizedWhiteListMockQueryHandler } from './IsAuthorizedWhiteListMockQueryHandler.js';
+import { EvmAddressPropsFixture } from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { IsAuthorizedWhiteListMockQueryFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
+import { IsAuthorizedWhiteListMockQueryHandler } from './IsAuthorizedWhiteListMockQueryHandler';
 import {
   IsAuthorizedWhiteListMockQuery,
   IsAuthorizedWhiteListMockQueryResponse,
-} from './IsAuthorizedWhiteListMockQuery.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import AccountService from '../../../../../../../app/service/account/AccountService.js';
+} from './IsAuthorizedWhiteListMockQuery';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import AccountService from '@service/account/AccountService';
 
 describe('IsAuthorizedWhiteListMockQueryHandler', () => {
   let handler: IsAuthorizedWhiteListMockQueryHandler;

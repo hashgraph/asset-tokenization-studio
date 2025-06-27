@@ -203,15 +203,15 @@
 
 */
 
-import { IsOperatorQuery, IsOperatorQueryResponse } from './IsOperatorQuery.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/account/AccountService';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { IsOperatorQueryError } from './error/IsOperatorQueryError.js';
+import { IsOperatorQuery, IsOperatorQueryResponse } from './IsOperatorQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import { IsOperatorQueryError } from './error/IsOperatorQueryError';
 
 @QueryHandler(IsOperatorQuery)
 export class IsOperatorQueryHandler implements IQueryHandler<IsOperatorQuery> {

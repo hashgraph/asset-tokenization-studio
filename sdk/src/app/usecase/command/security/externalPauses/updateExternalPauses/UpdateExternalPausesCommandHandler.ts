@@ -203,19 +203,19 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/account/AccountService';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import AccountService from '@service/account/AccountService';
 import {
   UpdateExternalPausesCommand,
   UpdateExternalPausesCommandResponse,
 } from './UpdateExternalPausesCommand';
-import TransactionService from '../../../../../service/transaction/TransactionService';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import ValidationService from '../../../../../service/validation/ValidationService';
-import ContractService from '../../../../../service/contract/ContractService';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService';
 
 @CommandHandler(UpdateExternalPausesCommand)
 export class UpdateExternalPausesCommandHandler

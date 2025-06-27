@@ -203,14 +203,14 @@
 
 */
 
-import GetRegulationDetailsRequest from '../../../src/port/in/request/factory/GetRegulationDetailsRequest';
+import GetRegulationDetailsRequest from '@port/in/request/factory/GetRegulationDetailsRequest';
 import { createFixture } from '../config';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType';
+} from '@domain/context/factory/RegulationType';
 import { faker } from '@faker-js/faker/.';
 
 export const GetRegulationDetailsRequestFixture =

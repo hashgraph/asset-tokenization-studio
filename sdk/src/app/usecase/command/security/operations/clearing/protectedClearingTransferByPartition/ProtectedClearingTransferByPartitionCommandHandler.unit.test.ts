@@ -203,32 +203,32 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import { ClearingTransferByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../../domain/context/security/Security.js';
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ClearingTransferByPartitionCommandFixture } from '@test/fixtures/clearing/ClearingFixture';
+import SecurityService from '@service/security/SecurityService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { faker } from '@faker-js/faker/.';
-import Account from '../../../../../../../domain/context/account/Account.js';
-import { ProtectedClearingTransferByPartitionCommandHandler } from './ProtectedClearingTransferByPartitionCommandHandler.js';
+import Account from '@domain/context/account/Account';
+import { ProtectedClearingTransferByPartitionCommandHandler } from './ProtectedClearingTransferByPartitionCommandHandler';
 import {
   ProtectedClearingTransferByPartitionCommand,
   ProtectedClearingTransferByPartitionCommandResponse,
-} from './ProtectedClearingTransferByPartitionCommand.js';
-import { ProtectedClearingTransferByPartitionCommandError } from './error/ProtectedClearingTransferByPartitionCommandError.js';
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+} from './ProtectedClearingTransferByPartitionCommand';
+import { ProtectedClearingTransferByPartitionCommandError } from './error/ProtectedClearingTransferByPartitionCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('ProtectedClearingTransferByPartitionCommandHandler', () => {
   let handler: ProtectedClearingTransferByPartitionCommandHandler;

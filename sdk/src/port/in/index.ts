@@ -203,20 +203,20 @@
 
 */
 
-import Account from './account/Account.js';
-import Role from './role/Role.js';
-import Security from './security/Security.js';
-import Equity from './equity/Equity.js';
-import Bond from './bond/Bond.js';
-import Event from './event/Event.js';
-import Network from './network/Network.js';
-import Factory from './factory/Factory.js';
-import Management from './management/Management.js';
-import SsiManagement from './ssiManagement/SsiManagement.js';
-import ExternalPausesManagement from './externalPausesManagement/ExternalPausesManagement.js';
-import Kyc from './kyc/Kyc.js';
-import ExternalControlListsManagement from './externalControlListsManagement/ExternalControlListsManagement.js';
-import ExternalKycListsManagement from './externalKycListsManagement/ExternalKycListsManagement.js';
+import Account from './account/Account';
+import Role from './role/Role';
+import Security from './security/Security';
+import Equity from './equity/Equity';
+import Bond from './bond/Bond';
+import Event from './event/Event';
+import Network from './network/Network';
+import Factory from './factory/Factory';
+import Management from './management/Management';
+import SsiManagement from './ssiManagement/SsiManagement';
+import ExternalPausesManagement from './externalPausesManagement/ExternalPausesManagement';
+import Kyc from './kyc/Kyc';
+import ExternalControlListsManagement from './externalControlListsManagement/ExternalControlListsManagement';
+import ExternalKycListsManagement from './externalKycListsManagement/ExternalKycListsManagement';
 
 export {
   Security,
@@ -238,18 +238,18 @@ export {
 export * from './request';
 export * from './response';
 
-export * from './security/Security.js';
-export * from './equity/Equity.js';
-export * from './bond/Bond.js';
-export * from './account/Account.js';
-export * from './role/Role.js';
-export * from './event/Event.js';
-export * from './Common.js';
-export * from './network/Network.js';
-export * from './factory/Factory.js';
-export * from './management/Management.js';
-export * from './kyc/Kyc.js';
-export * from './ssiManagement/SsiManagement.js';
-export * from './externalPausesManagement/ExternalPausesManagement.js';
-export * from './externalControlListsManagement/ExternalControlListsManagement.js';
-export * from './externalKycListsManagement/ExternalKycListsManagement.js';
+export * from './security/Security';
+export * from './equity/Equity';
+export * from './bond/Bond';
+export * from './account/Account';
+export * from './role/Role';
+export * from './event/Event';
+export * from './Common';
+export * from './network/Network';
+export * from './factory/Factory';
+export * from './management/Management';
+export * from './kyc/Kyc';
+export * from './ssiManagement/SsiManagement';
+export * from './externalPausesManagement/ExternalPausesManagement';
+export * from './externalControlListsManagement/ExternalControlListsManagement';
+export * from './externalKycListsManagement/ExternalKycListsManagement';

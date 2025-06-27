@@ -203,11 +203,11 @@
 
 */
 
-import { Environment } from '../../../../domain/context/network/Environment.js';
-import { MirrorNode } from '../../../../domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../../domain/context/network/JsonRpcRelay.js';
-import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../FormatValidation.js';
+import { Environment } from '@domain/context/network/Environment';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
 export interface SetNetworkRequestProps {
   environment: Environment;

@@ -203,32 +203,32 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { TransferAndLockCommandFixture } from '../../../../../../../__tests__/fixtures/transfer/TransferFixture.js';
-import SecurityService from 'app/service/security/SecurityService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { TransferAndLockCommandError } from './error/TransferAndLockCommandError.js';
-import { TransferAndLockCommandHandler } from './TransferAndLockCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import { TransferAndLockCommandFixture } from '@test/fixtures/transfer/TransferFixture';
+import Account from '@domain/context/account/Account';
+import { Security } from '@domain/context/security/Security';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { TransferAndLockCommandError } from './error/TransferAndLockCommandError';
+import { TransferAndLockCommandHandler } from './TransferAndLockCommandHandler';
 import {
   TransferAndLockCommand,
   TransferAndLockCommandResponse,
-} from './TransferAndLockCommand.js';
+} from './TransferAndLockCommand';
 import { faker } from '@faker-js/faker/.';
+import SecurityService from '@service/security/SecurityService';
 
 describe('TransferAndLockCommandHandler', () => {
   let handler: TransferAndLockCommandHandler;

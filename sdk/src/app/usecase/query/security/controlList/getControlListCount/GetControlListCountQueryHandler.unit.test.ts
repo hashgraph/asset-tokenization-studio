@@ -207,18 +207,18 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import { GetControlListCountQueryError } from './error/GetControlListCountQueryError.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetControlListCountQueryError } from './error/GetControlListCountQueryError';
 import {
   GetControlListCountQuery,
   GetControlListCountQueryResponse,
-} from './GetControlListCountQuery.js';
-import { GetControlListCountQueryHandler } from './GetControlListCountQueryHandler.js';
-import { GetControlListCountQueryFixture } from '../../../../../../../__tests__/fixtures/controlList/ControlListFixture.js';
+} from './GetControlListCountQuery';
+import { GetControlListCountQueryHandler } from './GetControlListCountQueryHandler';
+import { GetControlListCountQueryFixture } from '@test/fixtures/controlList/ControlListFixture';
 
 describe('GetControlListCountQueryHandler', () => {
   let handler: GetControlListCountQueryHandler;

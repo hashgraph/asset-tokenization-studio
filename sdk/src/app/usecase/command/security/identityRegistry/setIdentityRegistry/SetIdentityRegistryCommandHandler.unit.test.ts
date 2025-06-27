@@ -170,28 +170,28 @@
    limitations under the License.
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { SetIdentityRegistryCommandHandler } from './SetIdentityRegistryCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { ErrorCode } from '@core/error/BaseError';
+import { SetIdentityRegistryCommandHandler } from './SetIdentityRegistryCommandHandler';
 import {
   SetIdentityRegistryCommand,
   SetIdentityRegistryCommandResponse,
-} from './SetIdentityRegistryCommand.js';
-import { SetIdentityRegistryCommandError } from './error/SetIdentityRegistryCommandError.js';
-import { SetIdentityRegistryCommandFixture } from '../../../../../../../__tests__/fixtures/identityRegistry/IdentityRegistryFixture.js';
+} from './SetIdentityRegistryCommand';
+import { SetIdentityRegistryCommandError } from './error/SetIdentityRegistryCommandError';
+import { SetIdentityRegistryCommandFixture } from '@test/fixtures/identityRegistry/IdentityRegistryFixture';
 
 describe('SetIdentityRegistryCommandHandler', () => {
   let handler: SetIdentityRegistryCommandHandler;

@@ -203,28 +203,28 @@
 
 */
 
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import { CreateBondCommandHandler } from './CreateBondCommandHandler.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import TransactionService from '@service/transaction/TransactionService';
+import { CreateBondCommandHandler } from './CreateBondCommandHandler';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../service/account/AccountService.js';
-import { CreateBondCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
+import AccountService from '@service/account/AccountService';
+import { CreateBondCommandFixture } from '@test/fixtures/bond/BondFixture';
 import {
   CreateBondCommand,
   CreateBondCommandResponse,
-} from './CreateBondCommand.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+} from './CreateBondCommand';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   HederaIdZeroAddressFixture,
   TransactionIdFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { CreateBondCommandError } from './error/CreateBondCommandError.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { CreateBondCommandError } from './error/CreateBondCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('CreateBondCommandHandler', () => {
   let handler: CreateBondCommandHandler;

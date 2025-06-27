@@ -203,21 +203,21 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   RevokeKycMockCommand,
   RevokeKycMockCommandResponse,
-} from './RevokeKycMockCommand.js';
-import { RevokeKycMockCommandHandler } from './RevokeKycMockCommandHandler.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import { RevokeKycMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
+} from './RevokeKycMockCommand';
+import { RevokeKycMockCommandHandler } from './RevokeKycMockCommandHandler';
+import AccountService from '@service/account/AccountService';
+import { RevokeKycMockCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
 
 describe('RevokeKycMockCommandHandler', () => {
   let handler: RevokeKycMockCommandHandler;

@@ -203,25 +203,25 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { ApplyRolesCommandHandler } from './ApplyRolesCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import { ApplyRolesCommandHandler } from './ApplyRolesCommandHandler';
 import {
   ApplyRolesCommand,
   ApplyRolesCommandResponse,
-} from './ApplyRolesCommand.js';
-import { ApplyRolesCommandFixture } from '../../../../../../../__tests__/fixtures/role/RoleFixture.js';
-import { ApplyRolesCommandError } from './error/ApplyRolesCommandError.js';
+} from './ApplyRolesCommand';
+import { ApplyRolesCommandFixture } from '@test/fixtures/role/RoleFixture';
+import { ApplyRolesCommandError } from './error/ApplyRolesCommandError';
 
 describe('ApplyRolesCommandHandler', () => {
   let handler: ApplyRolesCommandHandler;

@@ -203,30 +203,30 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { GrantKycCommandHandler } from './GrantKycCommandHandler.js';
-import { GrantKycCommand, GrantKycCommandResponse } from './GrantKycCommand.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { GrantKycCommandHandler } from './GrantKycCommandHandler';
+import { GrantKycCommand, GrantKycCommandResponse } from './GrantKycCommand';
 import {
   GrantKycCommandFixture,
   SignedCredentialFixture,
-} from '../../../../../../../__tests__/fixtures/kyc/KycFixture.js';
-import { Terminal3Vc } from '../../../../../../domain/context/kyc/Terminal3.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { GrantKycCommandError } from './error/GrantKycCommandError.js';
+} from '@test/fixtures/kyc/KycFixture';
+import { Terminal3Vc } from '@domain/context/kyc/Terminal3';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { ErrorCode } from '@core/error/BaseError';
+import { GrantKycCommandError } from './error/GrantKycCommandError';
 const { setVerificationValid } = require('@terminal3/verify_vc');
 
 describe('GrantKycCommandHandler', () => {

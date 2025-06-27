@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../core/query/QueryResponse.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 
 export class LockedBalanceOfQueryResponse implements QueryResponse {
   constructor(public readonly payload: BigDecimal) {}

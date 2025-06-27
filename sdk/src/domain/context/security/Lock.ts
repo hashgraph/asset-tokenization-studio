@@ -204,7 +204,7 @@
 */
 
 import { BigNumber } from 'ethers';
-import BigDecimal from '../shared/BigDecimal.js';
+import BigDecimal from '../shared/BigDecimal';
 
 export class Lock {
   constructor(
