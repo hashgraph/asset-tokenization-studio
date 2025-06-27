@@ -232,6 +232,7 @@ contract ClearingTransferFacet is
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         validateAddress(_to)
         checkRecoveredAddress(_msgSender())
+        checkRecoveredAddress(_to)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -267,6 +268,8 @@ contract ClearingTransferFacet is
             _checkValidAddress(_clearingOperationFrom.from);
             _checkValidAddress(_to);
             _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_to);
+            _checkRecoveredAddress(_clearingOperationFrom.from);
         }
         (success_, clearingId_) = _clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
@@ -311,6 +314,8 @@ contract ClearingTransferFacet is
                 _clearingOperationFrom.from
             );
             _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_to);
+            _checkRecoveredAddress(_clearingOperationFrom.from);
         }
 
         (success_, clearingId_) = _clearingTransferCreation(
@@ -336,6 +341,7 @@ contract ClearingTransferFacet is
         validateAddress(_protectedClearingOperation.from)
         validateAddress(_to)
         checkRecoveredAddress(_protectedClearingOperation.from)
+        checkRecoveredAddress(_to)
         onlyWithValidExpirationTimestamp(
             _protectedClearingOperation.clearingOperation.expirationTimestamp
         )

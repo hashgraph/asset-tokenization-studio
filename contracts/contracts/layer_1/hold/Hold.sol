@@ -227,6 +227,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyUnpaused
         validateAddress(_hold.escrow)
         checkRecoveredAddress(_msgSender())
+        checkRecoveredAddress(_hold.to)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
@@ -263,12 +264,16 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_hold.escrow)
-        checkRecoveredAddress(_msgSender())
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
+        {
+            _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_hold.to);
+            _checkRecoveredAddress(_from);
+        }
         (success_, holdId_) = _createHoldByPartition(
             _partition,
             _from,
@@ -314,6 +319,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     {
         {
             _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_hold.to);
+            _checkRecoveredAddress(_from);
         }
         (success_, holdId_) = _createHoldByPartition(
             _partition,
@@ -381,6 +388,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         validateAddress(_from)
         validateAddress(_protectedHold.hold.escrow)
         checkRecoveredAddress(_from)
+        checkRecoveredAddress(_protectedHold.hold.to)
         onlyRole(_protectedPartitionsRole(_partition))
         onlyWithValidExpirationTimestamp(
             _protectedHold.hold.expirationTimestamp
@@ -413,6 +421,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        checkRecoveredAddress(_to)
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyWithValidHoldId(_holdIdentifier)
         onlyListedAllowed(_to)

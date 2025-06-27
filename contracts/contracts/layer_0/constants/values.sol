@@ -245,5 +245,7 @@ bytes1 constant _FROM_ACCOUNT_KYC_ERROR_ID = 0x50;
 bytes1 constant _TO_ACCOUNT_KYC_ERROR_ID = 0x51;
 bytes1 constant _CLEARING_ACTIVE_ERROR_ID = 0x52;
 bytes1 constant _ADDRESS_RECOVERED_OPERATOR_ERROR_ID = 0x53;
+bytes1 constant _ADDRESS_RECOVERED_FROM_ERROR_ID = 0x54;
+bytes1 constant _ADDRESS_RECOVERED_TO_ERROR_ID = 0x55;
 
 bytes1 constant _SUCCESS = 0x00;

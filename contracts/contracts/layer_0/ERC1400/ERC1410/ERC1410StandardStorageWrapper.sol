@@ -220,7 +220,8 @@ import {
     _SUCCESS,
     _FROM_ACCOUNT_KYC_ERROR_ID,
     _CLEARING_ACTIVE_ERROR_ID,
-    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+    _ADDRESS_RECOVERED_FROM_ERROR_ID
 } from '../../constants/values.sol';
 import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
@@ -401,14 +402,8 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes calldata /*_data*/,
         bytes calldata /*_operatorData*/
     ) internal view returns (bool, bytes1, bytes32) {
-        if (_from == _msgSender()) {
-            if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-                    bytes32(0)
-                );
-            }
+        if (_isRecovered(_msgSender())) {
+            return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
         }
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
@@ -444,12 +439,8 @@ abstract contract ERC1410StandardStorageWrapper is
             if (!_isAuthorized(_partition, _msgSender(), _from)) {
                 return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
             }
-            if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-                    bytes32(0)
-                );
+            if (_isRecovered(_from)) {
+                return (false, _ADDRESS_RECOVERED_FROM_ERROR_ID, bytes32(0));
             }
         }
         return (true, _SUCCESS, bytes32(0));

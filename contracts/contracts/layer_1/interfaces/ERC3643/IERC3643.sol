@@ -296,6 +296,11 @@ interface IERC3643 {
     error WalletRecovered();
 
     /**
+     * @notice Thrown when attempting to recover a wallet with pending locks, holds or clearings
+     */
+    error CannotRecoverWallet();
+
+    /**
      * @dev Sets the name of the token to `_name`.
      *
      * Emits an UpdatedTokenInformation event.

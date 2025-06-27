@@ -232,7 +232,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
 
     address private constant _ONCHAIN_ID = address(0);
 
-    // ====== External functions (state-changing) ======
     /**
      * @notice Sets the name of the token.
      * @dev Can only be called by the token `owner/issuer`.
@@ -332,7 +331,13 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         address _lostWallet,
         address _newWallet,
         address _investorOnchainID
-    ) external onlyRole(_AGENT_ROLE) returns (bool) {
+    )
+        external
+        checkRecoveredAddress(_lostWallet)
+        onlyRole(_AGENT_ROLE)
+        canRecover(_lostWallet)
+        returns (bool)
+    {
         emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return _recoveryAddress(_lostWallet, _newWallet);
     }
@@ -558,7 +563,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
     {
-        _setAddresFrozen(_userAddress, _freezStatus);
+        _setAddressFrozen(_userAddress, _freezStatus);
         emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
     }
 
