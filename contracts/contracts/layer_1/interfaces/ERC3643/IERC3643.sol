@@ -249,6 +249,7 @@ interface IERC3643 {
      * @param _agent Address of the agent that has been added
      */
     event AgentAdded(address indexed _agent);
+
     /**
      * @dev Emitted when the agent role is revoked
      *

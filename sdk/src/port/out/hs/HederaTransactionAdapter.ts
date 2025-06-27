@@ -346,6 +346,8 @@ import {
   SET_ONCHAIN_ID_GAS,
   SET_IDENTITY_REGISTRY_GAS,
   SET_COMPLIANCE_GAS,
+  RECOVERY_ADDRESS_GAS,
+  EVM_ZERO_ADDRESS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -3977,6 +3979,35 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(UNFREEZE_PARTIAL_TOKENS_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async recoveryAddress(
+    security: EvmAddress,
+    lostWalletId: EvmAddress,
+    newWalletId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'recoveryAddress';
+    LogService.logTrace(
+      `Recovering address ${lostWalletId.toString()} to ${newWalletId.toString()}`,
+    );
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [lostWalletId.toString(), newWalletId.toString(), EVM_ZERO_ADDRESS],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(RECOVERY_ADDRESS_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

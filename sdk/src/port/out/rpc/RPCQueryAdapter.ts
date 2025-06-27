@@ -1854,4 +1854,18 @@ export class RPCQueryAdapter {
 
     return frozenTokens.toNumber();
   }
+
+  async isAddressRecovered(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(`Getting recovery status of ${targetId}`);
+
+    const isAddressRecovered = await this.connect(
+      ERC3643__factory,
+      address.toString(),
+    ).isAddressRecovered(targetId.toString());
+
+    return isAddressRecovered;
+  }
 }

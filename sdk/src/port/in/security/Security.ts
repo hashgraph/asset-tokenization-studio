@@ -381,6 +381,10 @@ import UnfreezePartialTokensRequest from '../request/security/operations/erc3643
 import { FreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand.js';
 import { UnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand.js';
 import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery.js';
+import RecoveryAddressRequest from '../request/security/operations/recovery/RecoveryAddressRequest.js';
+import { RecoveryAddressCommand } from '../../../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand.js';
+import IsAddressRecoveredRequest from '../request/security/operations/recovery/IsAddressRecoveredRequest.js';
+import { IsAddressRecoveredQuery } from '../../../app/usecase/query/security/recovery/IsAddressRecoveredQuery.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -577,6 +581,10 @@ interface ISecurityInPort {
   getFrozenPartialTokens(
     request: GetFrozenPartialTokensRequest,
   ): Promise<BalanceViewModel>;
+  recoveryAddress(
+    request: RecoveryAddressRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  isAddressRecovered(request: IsAddressRecoveredRequest): Promise<boolean>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -2035,6 +2043,32 @@ class SecurityInPort implements ISecurityInPort {
 
     const balance: BalanceViewModel = { value: res.payload.toString() };
     return balance;
+  }
+
+  @LogError
+  async recoveryAddress(
+    request: RecoveryAddressRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(RecoveryAddressRequest.name, request);
+    return await this.commandBus.execute(
+      new RecoveryAddressCommand(
+        request.securityId,
+        request.lostWalletId,
+        request.newWalletId,
+      ),
+    );
+  }
+
+  @LogError
+  async isAddressRecovered(
+    request: IsAddressRecoveredRequest,
+  ): Promise<boolean> {
+    ValidatedRequest.handleValidation(IsAddressRecoveredRequest.name, request);
+    return (
+      await this.queryBus.execute(
+        new IsAddressRecoveredQuery(request.securityId, request.targetId),
+      )
+    ).payload;
   }
 }
 

@@ -357,6 +357,8 @@ import {
   SET_COMPLIANCE_GAS,
   FREEZE_PARTIAL_TOKENS_GAS,
   UNFREEZE_PARTIAL_TOKENS_GAS,
+  EVM_ZERO_ADDRESS,
+  RECOVERY_ADDRESS_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -3443,6 +3445,31 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       ).unfreezePartialTokens(targetId.toString(), amount.toBigNumber(), {
         gasLimit: UNFREEZE_PARTIAL_TOKENS_GAS,
       }),
+      this.networkService.environment,
+    );
+  }
+
+  async recoveryAddress(
+    security: EvmAddress,
+    lostWallet: EvmAddress,
+    newWallet: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Recovering address ${lostWallet.toString()} to ${newWallet.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).recoveryAddress(
+        lostWallet.toString(),
+        newWallet.toString(),
+        EVM_ZERO_ADDRESS,
+        {
+          gasLimit: RECOVERY_ADDRESS_GAS,
+        },
+      ),
       this.networkService.environment,
     );
   }

@@ -999,6 +999,15 @@ interface IERC3643Adapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IRecoveryAddress {
+  recoveryAddress(
+    security: EvmAddress,
+    lostWallet: EvmAddress,
+    newWallet: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -1016,6 +1025,7 @@ export default abstract class TransactionAdapter
     IExternalKycListsAdapter,
     IExternalKycListsMockAdapter,
     ITokenMetadataTransactionAdapter,
+    IRecoveryAddress,
     IComplianceTransactionAdapter,
     IIdentityRegistryTransactionAdapter,
     ITokenMetadataTransactionAdapter,
@@ -1977,6 +1987,15 @@ export default abstract class TransactionAdapter
   setOnchainID(
     security: EvmAddress,
     onchainID: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+
+  recoveryAddress(
+    security: EvmAddress,
+    lostWallet: EvmAddress,
+    newWallet: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
