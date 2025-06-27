@@ -369,6 +369,8 @@ import GetFrozenPartialTokensRequest from './security/operations/erc3643/GetFroz
 import UnfreezePartialTokensRequest from './security/operations/erc3643/UnfreezePartialTokensRequest.js';
 import RecoveryAddressRequest from './security/operations/recovery/RecoveryAddressRequest.js';
 import IsAddressRecoveredRequest from './security/operations/recovery/IsAddressRecoveredRequest.js';
+import AddAgentRequest from './security/operations/agent/AddAgentRequest.js';
+import RemoveAgentRequest from './security/operations/agent/RemoveAgentRequest.js';
 
 export {
   CreateEquityRequest,
@@ -536,4 +538,6 @@ export {
   UnfreezePartialTokensRequest,
   RecoveryAddressRequest,
   IsAddressRecoveredRequest,
+  AddAgentRequest,
+  RemoveAgentRequest,
 };

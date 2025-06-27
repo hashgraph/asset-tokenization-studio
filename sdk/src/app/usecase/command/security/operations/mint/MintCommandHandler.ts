@@ -264,15 +264,15 @@ export class MintCommandHandler implements ICommandHandler<MintCommand> {
         KycStatus.GRANTED,
       );
 
-      await this.validationService.checkRole(
-        SecurityRole._ISSUER_ROLE,
-        account.id.toString(),
-        securityId,
-      );
-
       await this.validationService.checkMultiPartition(security);
 
       await this.validationService.checkIssuable(security);
+
+      await this.validationService.checkAnyRole(
+        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
+        account.id.toString(),
+        securityId,
+      );
 
       // Check that the amount to issue + total supply is not greater than max supply
 

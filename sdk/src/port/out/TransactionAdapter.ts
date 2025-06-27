@@ -1008,6 +1008,19 @@ interface IRecoveryAddress {
   ): Promise<TransactionResponse>;
 }
 
+interface IAgent {
+  addAgent(
+    security: EvmAddress,
+    agentId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeAgent(
+    security: EvmAddress,
+    agentId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -1029,7 +1042,8 @@ export default abstract class TransactionAdapter
     IComplianceTransactionAdapter,
     IIdentityRegistryTransactionAdapter,
     ITokenMetadataTransactionAdapter,
-    IERC3643Adapter
+    IERC3643Adapter,
+    IAgent
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1940,7 +1954,6 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
-
   freezePartialTokens(
     security: EvmAddress,
     amount: BigDecimal,
@@ -1991,11 +2004,24 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
-
   recoveryAddress(
     security: EvmAddress,
     lostWallet: EvmAddress,
     newWallet: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addAgent(
+    security: EvmAddress,
+    agentId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeAgent(
+    security: EvmAddress,
+    agentId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

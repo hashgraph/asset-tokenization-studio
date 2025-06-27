@@ -203,90 +203,21 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { IssueCommand, IssueCommandResponse } from './IssueCommand.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { IssueCommandError } from './error/IssueCommandError.js';
-import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
+import { CommandResponse } from '../../../../../../../core/command/CommandResponse';
+import { Command } from '../../../../../../../core/command/Command';
 
-@CommandHandler(IssueCommand)
-export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
+export class RemoveAgentCommandResponse implements CommandResponse {
   constructor(
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
+    public readonly payload: boolean,
+    public readonly transactionId: string,
   ) {}
+}
 
-  async execute(command: IssueCommand): Promise<IssueCommandResponse> {
-    try {
-      const { securityId, targetId, amount } = command;
-
-      const handler = this.transactionService.getHandler();
-      const security = await this.securityService.get(securityId);
-      const account = this.accountService.getCurrentAccount();
-
-      const amountBd = BigDecimal.fromString(amount, security.decimals);
-
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
-
-      await this.validationService.checkDecimals(security, amount);
-
-      await this.validationService.checkMaxSupply(
-        securityId,
-        amountBd,
-        security,
-      );
-
-      await this.validationService.checkControlList(securityId, targetId);
-
-      await this.validationService.checkKycAddresses(
-        securityId,
-        [targetId],
-        KycStatus.GRANTED,
-      );
-
-      await this.validationService.checkAnyRole(
-        [SecurityRole._ISSUER_ROLE, SecurityRole._AGENT_ROLE],
-        account.id.toString(),
-        securityId,
-      );
-
-      await this.validationService.checkMultiPartition(security);
-
-      await this.validationService.checkIssuable(security);
-
-      // Check that the amount to issue + total supply is not greater than max supply
-
-      const res = await handler.issue(
-        securityEvmAddress,
-        targetEvmAddress,
-        amountBd,
-        securityId,
-      );
-      return Promise.resolve(
-        new IssueCommandResponse(res.error === undefined, res.id!),
-      );
-    } catch (error) {
-      throw new IssueCommandError(error as Error);
-    }
+export class RemoveAgentCommand extends Command<RemoveAgentCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly agentId: string,
+  ) {
+    super();
   }
 }

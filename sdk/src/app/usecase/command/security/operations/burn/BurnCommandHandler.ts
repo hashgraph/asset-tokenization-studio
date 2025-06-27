@@ -216,6 +216,7 @@ import ValidationService from '../../../../../service/validation/ValidationServi
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import { BurnCommandError } from './error/BurnCommandError';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 
 @CommandHandler(BurnCommand)
 export class BurnCommandHandler implements ICommandHandler<BurnCommand> {
@@ -253,6 +254,12 @@ export class BurnCommandHandler implements ICommandHandler<BurnCommand> {
 
       const security = await this.securityService.get(securityId);
       await this.validationService.checkDecimals(security, amount);
+
+      await this.validationService.checkAnyRole(
+        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
+        account.id.toString(),
+        securityId,
+      );
 
       const amountBd: BigDecimal = BigDecimal.fromString(
         amount,

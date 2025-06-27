@@ -326,8 +326,8 @@ describe('MintCommandHandler', () => {
         [command.targetId],
         KycStatus.GRANTED,
       );
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._ISSUER_ROLE,
+      expect(validationServiceMock.checkAnyRole).toHaveBeenCalledWith(
+        [SecurityRole._ISSUER_ROLE, SecurityRole._AGENT_ROLE],
         account.id.toString(),
         command.securityId,
       );
