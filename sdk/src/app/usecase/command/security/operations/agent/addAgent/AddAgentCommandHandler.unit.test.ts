@@ -187,7 +187,7 @@ import { SecurityRole } from '../../../../../../../domain/context/security/Secur
 import { AccountPropsFixture } from '../../../../../../../../__tests__/fixtures/account/AccountFixture.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
 import ContractService from '../../../../../../../../src/app/service/contract/ContractService.js';
-import { AddAgentCommandFixture } from '../../../../../../../../__tests__/fixtures/agent/RecoveryFixture.js';
+import { AddAgentCommandFixture } from '../../../../../../../../__tests__/fixtures/agent/AgentFixture.js';
 import { AddAgentCommandError } from './error/AddAgentCommandError.js';
 
 describe('AddAgentCommandHandler', () => {

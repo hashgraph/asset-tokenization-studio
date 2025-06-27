@@ -508,7 +508,7 @@ import { IsAddressRecoveredQuery } from '../../../app/usecase/query/security/rec
 import {
   AddAgentRequestFixture,
   RemoveAgentRequestFixture,
-} from '../../../../__tests__/fixtures/agent/RecoveryFixture';
+} from '../../../../__tests__/fixtures/agent/AgentFixture';
 import { AddAgentCommand } from '../../../app/usecase/command/security/operations/agent/addAgent/AddAgentCommand';
 import { RemoveAgentCommand } from '../../../app/usecase/command/security/operations/agent/removeAgent/RemoveAgentCommand';
 

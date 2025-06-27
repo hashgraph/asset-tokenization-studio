@@ -185,7 +185,7 @@ import { SecurityRole } from '../../../../../../../domain/context/security/Secur
 import { AccountPropsFixture } from '../../../../../../../../__tests__/fixtures/account/AccountFixture.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
 import ContractService from '../../../../../../service/contract/ContractService.js';
-import { RemoveAgentCommandFixture } from '../../../../../../../../__tests__/fixtures/agent/RecoveryFixture.js';
+import { RemoveAgentCommandFixture } from '../../../../../../../../__tests__/fixtures/agent/AgentFixture.js';
 import { RemoveAgentCommandHandler } from './RemoveAgentCommandHandler.js';
 import {
   RemoveAgentCommand,
