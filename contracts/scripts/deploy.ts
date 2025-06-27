@@ -351,7 +351,7 @@ export async function deployAtsFullInfrastructure({
         console.log(MESSAGES.businessLogicResolver.info.initializing)
         const initResponse =
             await resolver.contract.initialize_BusinessLogicResolver({
-                gasLimit: GAS_LIMIT.initilize.businessLogicResolver,
+                gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
             })
         await validateTxResponse(
             new ValidateTxResponseCommand({

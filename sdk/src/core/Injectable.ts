@@ -399,6 +399,9 @@ import { GetKycStatusMockQueryHandler } from '../app/usecase/query/security/exte
 import { CreateExternalKycListMockCommandHandler } from '../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommandHandler.js';
 import { SetNameCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommandHandler.js';
 import { SetSymbolCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommandHandler.js';
+import { MintCommandHandler } from '../app/usecase/command/security/operations/mint/MintCommandHandler';
+import { ForcedTransferCommandHandler } from '../app/usecase/command/security/operations/transfer/ForcedTransferCommandHandler';
+import { BurnCommandHandler } from '../app/usecase/command/security/operations/burn/BurnCommandHandler';
 import { SetComplianceCommandHandler } from '../app/usecase/command/security/compliance/setCompliance/SetComplianceCommandHandler.js';
 import { SetIdentityRegistryCommandHandler } from '../app/usecase/command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommandHandler.js';
 import { OnchainIDQueryHandler } from '../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQueryHandler.js';
@@ -480,6 +483,18 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: IssueCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: MintCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ForcedTransferCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BurnCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,

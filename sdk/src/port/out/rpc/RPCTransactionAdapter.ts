@@ -349,6 +349,9 @@ import {
   DEACTIVATE_INTERNAL_KYC_GAS,
   SET_NAME_GAS,
   SET_SYMBOL_GAS,
+  BURN_GAS,
+  MINT_GAS,
+  FORCED_TRANSFER_GAS,
   SET_ONCHAIN_ID_GAS,
   SET_IDENTITY_REGISTRY_GAS,
   SET_COMPLIANCE_GAS,
@@ -1116,6 +1119,26 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async burn(
+    security: EvmAddress,
+    source: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Burning ${amount} securities from source: ${source.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).burn(source.toString(), amount.toBigNumber(), {
+        gasLimit: BURN_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
   async pause(security: EvmAddress): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(`Pausing security: ${security.toString()}`);
 
@@ -1236,6 +1259,24 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async mint(
+    security: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Minting ${amount} ${security} to account: ${target.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).mint(target.toString(), amount.toBigNumber(), { gasLimit: MINT_GAS }),
+      this.networkService.environment,
+    );
+  }
+
   async addToControlList(
     security: EvmAddress,
     targetId: EvmAddress,
@@ -1281,7 +1322,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Force transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
+      `Controller transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
@@ -1297,6 +1338,32 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         '0x',
         {
           gasLimit: CONTROLLER_TRANSFER_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async forcedTransfer(
+    security: EvmAddress,
+    source: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Forced transfer ${amount} tokens from account ${source.toString()} to account ${target.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).forcedTransfer(
+        source.toString(),
+        target.toString(),
+        amount.toBigNumber(),
+        {
+          gasLimit: FORCED_TRANSFER_GAS,
         },
       ),
       this.networkService.environment,
