@@ -293,7 +293,7 @@ export async function deployProxyForBusinessLogicResolver({
 
     const txResponse =
         await businessLogicResolver.initialize_BusinessLogicResolver({
-            gasLimit: GAS_LIMIT.initilize.businessLogicResolver,
+            gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
         })
     validateTxResponse(
         new ValidateTxResponseCommand({

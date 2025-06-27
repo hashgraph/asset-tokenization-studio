@@ -326,7 +326,7 @@ export const GAS_LIMIT = {
     default: 3_000_000,
     low: 1_000_000,
     high: 10_000_000,
-    initilize: {
+    initialize: {
         businessLogicResolver: 8_000_000,
     },
     proxyAdmin: {
