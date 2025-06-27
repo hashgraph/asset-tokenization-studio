@@ -203,17 +203,17 @@
 
 */
 
-import { GetNounceQuery } from '../../../src/app/usecase/query/security/protectedPartitions/getNounce/GetNounceQuery';
+import { GetNounceQuery } from '@query/security/protectedPartitions/getNounce/GetNounceQuery';
 import {
   HederaIdPropsFixture,
   PartitionIdFixture,
 } from '../shared/DataFixture';
 import { createFixture } from '../config';
-import ProtectedTransferFromByPartitionRequest from '../../../src/port/in/request/security/operations/transfer/ProtectedTransferFromByPartitionRequest';
-import ProtectedRedeemFromByPartitionRequest from '../../../src/port/in/request/security/operations/redeem/ProtectedRedeemFromByPartitionRequest';
-import PartitionsProtectedRequest from '../../../src/port/in/request/security/operations/protectedPartitions/PartitionsProtectedRequest';
-import GetNounceRequest from '../../../src/port/in/request/security/operations/protectedPartitions/GetNounceRequest';
-import ProtectedTransferAndLockByPartitionRequest from '../../../src/port/in/request/security/operations/transfer/ProtectedTransferAndLockByPartitionRequest';
+import ProtectedTransferFromByPartitionRequest from '@port/in/request/security/operations/transfer/ProtectedTransferFromByPartitionRequest';
+import ProtectedRedeemFromByPartitionRequest from '@port/in/request/security/operations/redeem/ProtectedRedeemFromByPartitionRequest';
+import PartitionsProtectedRequest from '@port/in/request/security/operations/protectedPartitions/PartitionsProtectedRequest';
+import GetNounceRequest from '@port/in/request/security/operations/protectedPartitions/GetNounceRequest';
+import ProtectedTransferAndLockByPartitionRequest from '@port/in/request/security/operations/transfer/ProtectedTransferAndLockByPartitionRequest';
 
 export const ProtectedTransferFromByPartitionRequestFixture =
   createFixture<ProtectedTransferFromByPartitionRequest>((request) => {

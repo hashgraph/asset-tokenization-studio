@@ -203,18 +203,18 @@
 
 */
 
-import { GetLockQuery, GetLockQueryResponse } from './GetLockQuery.js';
-import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../service/security/SecurityService.js';
-import { Lock } from '../../../../../domain/context/security/Lock.js';
-import AccountService from '../../../../service/account/AccountService';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import { GetLockQueryError } from './error/GetLockQueryError.js';
+import { GetLockQuery, GetLockQueryResponse } from './GetLockQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import SecurityService from '@service/security/SecurityService';
+import { Lock } from '@domain/context/security/Lock';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import ContractService from '@service/contract/ContractService';
+import { GetLockQueryError } from './error/GetLockQueryError';
 
 @QueryHandler(GetLockQuery)
 export class GetLockQueryHandler implements IQueryHandler<GetLockQuery> {

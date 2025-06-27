@@ -203,21 +203,21 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RemoveFromWhiteListMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import AccountService from '../../../../../../../app/service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { RemoveFromWhiteListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
+import AccountService from '@service/account/AccountService';
 import {
   RemoveFromWhiteListMockCommand,
   RemoveFromWhiteListMockCommandResponse,
-} from './RemoveFromWhiteListMockCommand.js';
-import { RemoveFromWhiteListMockCommandHandler } from './RemoveFromWhiteListMockCommandHandler.js';
+} from './RemoveFromWhiteListMockCommand';
+import { RemoveFromWhiteListMockCommandHandler } from './RemoveFromWhiteListMockCommandHandler';
 
 describe('RemoveFromWhiteListMockCommandHandler', () => {
   let handler: RemoveFromWhiteListMockCommandHandler;

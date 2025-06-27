@@ -204,19 +204,19 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { EvmAddressPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { GetExternalControlListsCountQueryFixture } from '../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
+import { EvmAddressPropsFixture } from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { GetExternalControlListsCountQueryFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
 import {
   GetExternalControlListsCountQuery,
   GetExternalControlListsCountQueryResponse,
-} from './GetExternalControlListsCountQuery.js';
-import { GetExternalControlListsCountQueryHandler } from './GetExternalControlListsCountQueryHandler.js';
-import SecurityService from '../../../../../../app/service/security/SecurityService.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+} from './GetExternalControlListsCountQuery';
+import { GetExternalControlListsCountQueryHandler } from './GetExternalControlListsCountQueryHandler';
+import SecurityService from '@service/security/SecurityService';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { Security } from '@domain/context/security/Security';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 
 describe('GetExternalControlListsCountQueryHandler', () => {
   let handler: GetExternalControlListsCountQueryHandler;

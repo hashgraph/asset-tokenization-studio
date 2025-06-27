@@ -205,13 +205,13 @@
 
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
-import { GetControlListCountQuery } from '../../../src/app/usecase/query/security/controlList/getControlListCount/GetControlListCountQuery';
-import { GetControlListMembersQuery } from '../../../src/app/usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery';
-import { GetControlListTypeQuery } from '../../../src/app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery';
-import ControlListRequest from '../../../src/port/in/request/security/operations/controlList/ControlListRequest';
-import GetControlListCountRequest from '../../../src/port/in/request/security/operations/controlList/GetControlListCountRequest';
-import GetControlListMembersRequest from '../../../src/port/in/request/security/operations/controlList/GetControlListMembersRequest';
-import GetControlListTypeRequest from '../../../src/port/in/request/security/operations/controlList/GetControlListTypeRequest';
+import { GetControlListCountQuery } from '@query/security/controlList/getControlListCount/GetControlListCountQuery';
+import { GetControlListMembersQuery } from '@query/security/controlList/getControlListMembers/GetControlListMembersQuery';
+import { GetControlListTypeQuery } from '@query/security/controlList/getControlListType/GetControlListTypeQuery';
+import ControlListRequest from '@port/in/request/security/operations/controlList/ControlListRequest';
+import GetControlListCountRequest from '@port/in/request/security/operations/controlList/GetControlListCountRequest';
+import GetControlListMembersRequest from '@port/in/request/security/operations/controlList/GetControlListMembersRequest';
+import GetControlListTypeRequest from '@port/in/request/security/operations/controlList/GetControlListTypeRequest';
 
 export const GetControlListCountQueryFixture =
   createFixture<GetControlListCountQuery>((query) => {

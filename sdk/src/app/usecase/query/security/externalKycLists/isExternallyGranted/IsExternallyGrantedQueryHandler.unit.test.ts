@@ -204,20 +204,20 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { EvmAddressPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { IsExternallyGrantedQueryHandler } from './IsExternallyGrantedQueryHandler.js';
+import { EvmAddressPropsFixture } from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import SecurityService from '@service/security/SecurityService';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { Security } from '@domain/context/security/Security';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { IsExternallyGrantedQueryHandler } from './IsExternallyGrantedQueryHandler';
 import {
   IsExternallyGrantedQuery,
   IsExternallyGrantedQueryResponse,
-} from './IsExternallyGrantedQuery.js';
+} from './IsExternallyGrantedQuery';
 import AccountService from '@service/account/AccountService';
-import { IsExternallyGrantedQueryFixture } from '../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
+import { IsExternallyGrantedQueryFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
 
 describe('IsExternallyGrantedQueryHandler', () => {
   let handler: IsExternallyGrantedQueryHandler;

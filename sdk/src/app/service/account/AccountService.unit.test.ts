@@ -203,25 +203,25 @@
 
 */
 
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import Account from '../../../domain/context/account/Account.js';
+import { QueryBus } from '@core/query/QueryBus';
+import Account from '@domain/context/account/Account';
 import {
   HEDERA_FORMAT_ID_REGEX,
   HederaId,
-} from '../../../domain/context/shared/HederaId.js';
-import { GetAccountInfoQuery } from '../../usecase/query/account/info/GetAccountInfoQuery.js';
-import NetworkService from '../network/NetworkService.js';
-import TransactionService from '../transaction/TransactionService.js';
-import AccountService from './AccountService.js';
-import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter';
-import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import { EVM_ZERO_ADDRESS } from '../../../core/Constants.js';
-import Injectable from '../../../core/Injectable.js';
+} from '@domain/context/shared/HederaId';
+import { GetAccountInfoQuery } from '@query/account/info/GetAccountInfoQuery';
+import AccountService from './AccountService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { EVM_ZERO_ADDRESS } from '@core/Constants';
+import Injectable from '@core/Injectable';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import NetworkService from '@service/network/NetworkService';
+import TransactionService from '@service/transaction/TransactionService';
 
 describe('AccountService', () => {
   let service: AccountService;

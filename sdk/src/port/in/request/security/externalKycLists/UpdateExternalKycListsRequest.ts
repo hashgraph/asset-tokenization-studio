@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedRequest from '../../../../../core/validation/ValidatedArgs';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 import FormatValidation from '../../FormatValidation';
-import { InvalidValue } from '../../error/InvalidValue.js';
+import { InvalidValue } from '../../error/InvalidValue';
 
 export default class UpdateExternalKycListsRequest extends ValidatedRequest<UpdateExternalKycListsRequest> {
   securityId: string;

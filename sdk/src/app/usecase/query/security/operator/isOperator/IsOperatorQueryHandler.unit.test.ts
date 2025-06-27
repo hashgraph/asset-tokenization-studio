@@ -207,16 +207,16 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { IsOperatorQuery, IsOperatorQueryResponse } from './IsOperatorQuery.js';
-import { IsOperatorQueryHandler } from './IsOperatorQueryHandler.js';
-import { IsOperatorQueryError } from './error/IsOperatorQueryError.js';
-import { IsOperatorQueryFixture } from '../../../../../../../__tests__/fixtures/erc1400/ERC1400Fixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
+import { IsOperatorQuery, IsOperatorQueryResponse } from './IsOperatorQuery';
+import { IsOperatorQueryHandler } from './IsOperatorQueryHandler';
+import { IsOperatorQueryError } from './error/IsOperatorQueryError';
+import { IsOperatorQueryFixture } from '@test/fixtures/erc1400/ERC1400Fixture';
 
 describe('IsOperatorQueryHandler', () => {
   let handler: IsOperatorQueryHandler;

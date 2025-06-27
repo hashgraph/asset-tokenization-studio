@@ -205,10 +205,9 @@
 
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
-import { RecoveryAddressCommand } from '../../../src/app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand';
-import { IsAddressRecoveredQuery } from '../../../src/app/usecase/query/security/recovery/IsAddressRecoveredQuery';
-import RecoveryAddressRequest from '../../../src/port/in/request/security/operations/recovery/RecoveryAddressRequest';
-import IsAddressRecoveredRequest from '../../../src/port/in/request/security/operations/recovery/IsAddressRecoveredRequest';
+import { RecoveryAddressCommand } from '@command/security/operations/recoveryAddress/RecoveryAddressCommand';
+import { IsAddressRecoveredQuery } from '@query/security/recovery/IsAddressRecoveredQuery';
+import { RecoveryAddressRequest, IsAddressRecoveredRequest } from '@port/in';
 
 export const IsAddressRecoveredQueryFixture =
   createFixture<IsAddressRecoveredQuery>((query) => {

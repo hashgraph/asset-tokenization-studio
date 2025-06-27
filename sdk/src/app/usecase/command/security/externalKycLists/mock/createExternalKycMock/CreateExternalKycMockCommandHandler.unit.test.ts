@@ -203,19 +203,19 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { CreateExternalKycListMockCommandHandler } from './CreateExternalKycMockCommandHandler.js';
-import { CreateExternalKycListMockCommandResponse } from './CreateExternalKycMockCommand.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
-import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
+} from '@test/fixtures/shared/DataFixture';
+import { CreateExternalKycListMockCommandHandler } from './CreateExternalKycMockCommandHandler';
+import { CreateExternalKycListMockCommandResponse } from './CreateExternalKycMockCommand';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Account from '@domain/context/account/Account';
+import { EmptyResponse } from '@service/transaction/error/EmptyResponse';
+import { InvalidResponse } from '@core/error/InvalidResponse';
 
 describe('CreateExternalKycListMockCommandHandler', () => {
   let handler: CreateExternalKycListMockCommandHandler;

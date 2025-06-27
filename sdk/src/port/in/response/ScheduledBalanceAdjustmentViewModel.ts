@@ -203,7 +203,7 @@
 
 */
 
-import { QueryResponse } from '../../../core/query/QueryResponse.js';
+import { QueryResponse } from '@core/query/QueryResponse';
 
 export default interface ScheduledBalanceAdjustmentViewModel
   extends QueryResponse {

@@ -204,16 +204,16 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { EvmAddressPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { IsPausedMockQueryHandler } from './IsPausedMockQueryHandler.js';
+import { EvmAddressPropsFixture } from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { IsPausedMockQueryHandler } from './IsPausedMockQueryHandler';
 import {
   IsPausedMockQuery,
   IsPausedMockQueryResponse,
-} from './IsPausedMockQuery.js';
-import { IsPausedMockQueryFixture } from '../../../../../../../../__tests__/fixtures/externalPauses/ExternalPausesFixture.js';
+} from './IsPausedMockQuery';
+import { IsPausedMockQueryFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
 
 describe('IsPausedMockQueryHandler', () => {
   let handler: IsPausedMockQueryHandler;

@@ -203,7 +203,7 @@
 
 */
 
-import ValidatedDomain from '../../../core/validation/ValidatedArgs';
+import ValidatedDomain from '@core/validation/ValidatedArgs';
 import { SecurityDate } from '../shared/SecurityDate';
 
 export const MIN_ID = 1;

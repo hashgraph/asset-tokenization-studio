@@ -203,7 +203,7 @@
 
 */
 
-import IssueRequest from '../../../src/port/in/request/security/operations/issue/IssueRequest';
+import IssueRequest from '@port/in/request/security/operations/issue/IssueRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 

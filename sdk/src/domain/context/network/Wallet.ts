@@ -203,7 +203,7 @@
 
 */
 
-import Account from '../account/Account.js';
+import Account from '../account/Account';
 
 export enum SupportedWallets {
   METAMASK = 'Metamask',

@@ -203,18 +203,18 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/account/AccountService';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import AccountService from '@service/account/AccountService';
 import {
   AddExternalControlListCommand,
   AddExternalControlListCommandResponse,
 } from './AddExternalControlListCommand';
-import TransactionService from '../../../../../service/transaction/TransactionService';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import ContractService from '../../../../../../app/service/contract/ContractService';
-import ValidationService from '../../../../../../app/service/validation/ValidationService';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import ContractService from '@service/contract/ContractService';
+import ValidationService from '@service/validation/ValidationService';
 
 @CommandHandler(AddExternalControlListCommand)
 export class AddExternalControlListCommandHandler

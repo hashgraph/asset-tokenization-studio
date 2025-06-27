@@ -203,18 +203,18 @@
 
 */
 
-import BaseError from '../../../core/error/BaseError.js';
-import { Environment } from '../network/Environment.js';
+import BaseError from '@core/error/BaseError';
+import { Environment } from '../network/Environment';
 import {
   CheckRegulations,
   RegulationSubType,
   RegulationType,
-} from './RegulationType.js';
+} from './RegulationType';
 import {
   InvalidRegulationSubType,
   InvalidRegulationSubTypeForType,
-} from './error/InvalidRegulationSubType.js';
-import { InvalidRegulationType } from './error/InvalidRegulationType.js';
+} from './error/InvalidRegulationSubType';
+import { InvalidRegulationType } from './error/InvalidRegulationType';
 
 export class EnvironmentFactory {
   factory: string;

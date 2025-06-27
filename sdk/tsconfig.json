@@ -17,13 +17,13 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "paths": {
-      "@command/*": ["src/app/usecase/command/*"],
-      "@query/*": ["src/app/usecase/query/*"],
-      "@service/*": ["src/app/service/*"],
-      "@domain/*": ["src/domain/*"],
-      "@port/*": ["src/port/*"],
-      "@core/*": ["src/core/*"],
-      "@tests/*": ["__tests__/*"]
+      "@command/*": ["./src/app/usecase/command/*"],
+      "@query/*": ["./src/app/usecase/query/*"],
+      "@service/*": ["./src/app/service/*"],
+      "@domain/*": ["./src/domain/*"],
+      "@port/*": ["./src/port/*"],
+      "@core/*": ["./src/core/*"],
+      "@test/*": ["./__tests__/*"]
     }
   },
   "exclude": ["build/**/*", "node_modules", "example/**/*"],

@@ -203,8 +203,8 @@
 
 */
 
-import BaseError from '../../../core/error/BaseError.js';
-import InvalidTimestampRange from './error/InvalidTimestampRange.js';
+import BaseError from '@core/error/BaseError';
+import InvalidTimestampRange from './error/InvalidTimestampRange';
 
 export const ONE_THOUSAND = 1000;
 
