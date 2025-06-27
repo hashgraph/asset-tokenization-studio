@@ -1917,7 +1917,7 @@ describe('ERC3643 Tests', () => {
             })
         })
 
-        describe.only('Recovery', () => {
+        describe('Recovery', () => {
             it('GIVEN lost wallet with pending locks, holds or clearings THEN recovery fails with CannotRecoverWallet', async () => {
                 await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
                 const amount = 1000
@@ -2065,7 +2065,7 @@ describe('ERC3643 Tests', () => {
                 expect(isRecoveredC).to.equal(false)
             })
 
-            it.only('GIVEN a recovered address THEN operations should fail', async () => {
+            it('GIVEN a recovered address THEN operations should fail', async () => {
                 // Set up
                 await kycFacet.grantKyc(
                     account_A,
