@@ -203,18 +203,18 @@
 
 */
 
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import {
   IsInControlListQuery,
   IsInControlListQueryResponse,
-} from './IsInControlListQuery.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../app/service/account/AccountService.js';
-import ContractService from '../../../../../app/service/contract/ContractService.js';
-import { IsInControlListQueryError } from './error/IsInControlListQueryError.js';
+} from './IsInControlListQuery';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import { IsInControlListQueryError } from './error/IsInControlListQueryError';
 
 @QueryHandler(IsInControlListQuery)
 export class IsInControlListQueryHandler

@@ -206,15 +206,15 @@
 import {
   GetHoldCountForByPartitionQuery,
   GetHoldCountForByPartitionQueryResponse,
-} from './GetHoldCountForByPartitionQuery.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { GetHoldCountForByPartitionQueryError } from './error/GetHoldCountForByPartitionQueryError.js';
+} from './GetHoldCountForByPartitionQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetHoldCountForByPartitionQueryError } from './error/GetHoldCountForByPartitionQueryError';
 
 @QueryHandler(GetHoldCountForByPartitionQuery)
 export class GetHoldCountForByPartitionQueryHandler

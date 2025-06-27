@@ -203,9 +203,9 @@
 
 */
 
-import { ERC20MetadataInfo } from './ERC20Metadata.js';
-import { Rbac } from './Rbac.js';
-import { ResolverProxyConfiguration } from './ResolverProxyConfiguration.js';
+import { ERC20MetadataInfo } from './ERC20Metadata';
+import { Rbac } from './Rbac';
+import { ResolverProxyConfiguration } from './ResolverProxyConfiguration';
 
 export class SecurityData {
   public arePartitionsProtected: boolean;

@@ -203,18 +203,18 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/account/AccountService';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import AccountService from '@service/account/AccountService';
 import {
   ActivateInternalKycCommand,
   ActivateInternalKycCommandResponse,
 } from './ActivateInternalKycCommand';
-import TransactionService from '../../../../../service/transaction/TransactionService';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import ContractService from '../../../../../service/contract/ContractService';
-import ValidationService from '../../../../../service/validation/ValidationService';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import ContractService from '@service/contract/ContractService';
+import ValidationService from '@service/validation/ValidationService';
 
 @CommandHandler(ActivateInternalKycCommand)
 export class ActivateInternalKycCommandHandler

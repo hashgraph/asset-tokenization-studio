@@ -203,7 +203,7 @@
 
 */
 
-import { Security, SecurityProps } from '../security/Security.js';
+import { Security, SecurityProps } from '../security/Security';
 
 export interface BondProps extends SecurityProps {}
 

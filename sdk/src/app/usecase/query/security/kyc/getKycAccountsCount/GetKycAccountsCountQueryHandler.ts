@@ -203,17 +203,17 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
 import {
   GetKycAccountsCountQuery,
   GetKycAccountsCountQueryResponse,
-} from './GetKycAccountsCountQuery.js';
-import { GetKycAccountsCountQueryError } from './error/GetKycAccountsCountQueryError.js';
+} from './GetKycAccountsCountQuery';
+import { GetKycAccountsCountQueryError } from './error/GetKycAccountsCountQueryError';
 
 @QueryHandler(GetKycAccountsCountQuery)
 export class GetKycAccountsCountQueryHandler

@@ -204,22 +204,22 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../app/service/account/AccountService.js';
-import { IsInControlListQueryFixture } from '../../../../../../__tests__/fixtures/account/AccountFixture.js';
+import AccountService from '@service/account/AccountService';
+import { IsInControlListQueryFixture } from '@test/fixtures/account/AccountFixture';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { IsInControlListQueryError } from './error/IsInControlListQueryError.js';
-import { IsInControlListQueryHandler } from './IsInControlListQueryHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { IsInControlListQueryError } from './error/IsInControlListQueryError';
+import { IsInControlListQueryHandler } from './IsInControlListQueryHandler';
 import {
   IsInControlListQuery,
   IsInControlListQueryResponse,
-} from './IsInControlListQuery.js';
+} from './IsInControlListQuery';
 
 describe('IsInControlListQueryHandler', () => {
   let handler: IsInControlListQueryHandler;

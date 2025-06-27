@@ -203,25 +203,25 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { UpdateExternalKycListsCommandHandler } from './UpdateExternalKycListsCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { UpdateExternalKycListsCommandHandler } from './UpdateExternalKycListsCommandHandler';
 import {
   UpdateExternalKycListsCommand,
   UpdateExternalKycListsCommandResponse,
-} from './UpdateExternalKycListsCommand.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { UpdateExternalKycListsCommandFixture } from '../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
+} from './UpdateExternalKycListsCommand';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { UpdateExternalKycListsCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
 
 describe('UpdateExternalKycListCommandHandler', () => {
   let handler: UpdateExternalKycListsCommandHandler;

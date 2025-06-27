@@ -205,27 +205,27 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { ActivateInternalKycCommand } from '../../../src/app/usecase/command/security/kyc/activateInternalKyc/ActivateInternalKycCommand';
-import { DeactivateInternalKycCommand } from '../../../src/app/usecase/command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommand';
-import { IsInternalKycActivatedQuery } from '../../../src/app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
-import ActivateInternalKycRequest from '../../../src/port/in/request/security/kyc/ActivateInternalKycRequest';
-import DeactivateInternalKycRequest from '../../../src/port/in/request/security/kyc/DeactivateInternalKycRequest';
-import IsInternalKycActivatedRequest from '../../../src/port/in/request/security/kyc/IsInternalKycActivatedRequest';
-import { GetKycAccountsCountQuery } from '../../../src/app/usecase/query/security/kyc/getKycAccountsCount/GetKycAccountsCountQuery';
-import { GetKycAccountsDataQuery } from '../../../src/app/usecase/query/security/kyc/getKycAccountsData/GetKycAccountsDataQuery';
-import { GetKycForQuery } from '../../../src/app/usecase/query/security/kyc/getKycFor/GetKycForQuery';
-import { Kyc } from '../../../src/domain/context/kyc/Kyc';
-import { GetKycStatusForQuery } from '../../../src/app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
-import GrantKycRequest from '../../../src/port/in/request/security/kyc/GrantKycRequest';
-import RevokeKycRequest from '../../../src/port/in/request/security/kyc/RevokeKycRequest';
-import GetKycForRequest from '../../../src/port/in/request/security/kyc/GetKycForRequest';
-import GetKycAccountsCountRequest from '../../../src/port/in/request/security/kyc/GetKycAccountsCountRequest';
-import GetKycAccountsDataRequest from '../../../src/port/in/request/security/kyc/GetKycAccountsDataRequest';
-import { KycAccountData } from '../../../src/domain/context/kyc/KycAccountData';
-import GetKycStatusForRequest from '../../../src/port/in/request/security/kyc/GetKycStatusForRequest';
-import { GrantKycCommand } from '../../../src/app/usecase/command/security/kyc/grantKyc/GrantKycCommand';
+import { ActivateInternalKycCommand } from '@command/security/kyc/activateInternalKyc/ActivateInternalKycCommand';
+import { DeactivateInternalKycCommand } from '@command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommand';
+import { IsInternalKycActivatedQuery } from '@query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
+import ActivateInternalKycRequest from '@port/in/request/security/kyc/ActivateInternalKycRequest';
+import DeactivateInternalKycRequest from '@port/in/request/security/kyc/DeactivateInternalKycRequest';
+import IsInternalKycActivatedRequest from '@port/in/request/security/kyc/IsInternalKycActivatedRequest';
+import { GetKycAccountsCountQuery } from '@query/security/kyc/getKycAccountsCount/GetKycAccountsCountQuery';
+import { GetKycAccountsDataQuery } from '@query/security/kyc/getKycAccountsData/GetKycAccountsDataQuery';
+import { GetKycForQuery } from '@query/security/kyc/getKycFor/GetKycForQuery';
+import { Kyc } from '@domain/context/kyc/Kyc';
+import { GetKycStatusForQuery } from '@query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
+import GrantKycRequest from '@port/in/request/security/kyc/GrantKycRequest';
+import RevokeKycRequest from '@port/in/request/security/kyc/RevokeKycRequest';
+import GetKycForRequest from '@port/in/request/security/kyc/GetKycForRequest';
+import GetKycAccountsCountRequest from '@port/in/request/security/kyc/GetKycAccountsCountRequest';
+import GetKycAccountsDataRequest from '@port/in/request/security/kyc/GetKycAccountsDataRequest';
+import { KycAccountData } from '@domain/context/kyc/KycAccountData';
+import GetKycStatusForRequest from '@port/in/request/security/kyc/GetKycStatusForRequest';
 import { SignedCredential } from '@terminal3/vc_core';
-import { RevokeKycCommand } from '../../../src/app/usecase/command/security/kyc/revokeKyc/RevokeKycCommand';
+import { GrantKycCommand } from '@command/security/kyc/grantKyc/GrantKycCommand';
+import { RevokeKycCommand } from '@command/security/kyc/revokeKyc/RevokeKycCommand';
 
 export const ActivateInternalKycCommandFixture =
   createFixture<ActivateInternalKycCommand>((command) => {

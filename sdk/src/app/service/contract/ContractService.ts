@@ -204,14 +204,14 @@
 */
 
 import { singleton } from 'tsyringe';
-import Injectable from '../../../core/Injectable.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import NetworkService from '../network/NetworkService.js';
-import Service from '../Service.js';
-import TransactionService from '../transaction/TransactionService.js';
-import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../domain/context/shared/HederaId.js';
-import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter.js';
+import Injectable from '@core/Injectable';
+import { QueryBus } from '@core/query/QueryBus';
+import NetworkService from '@service/network/NetworkService';
+import Service from '@service/Service';
+import TransactionService from '@service/transaction/TransactionService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '@domain/context/shared/HederaId';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 @singleton()
 export default class ContractService extends Service {
   queryBus: QueryBus;

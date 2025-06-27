@@ -203,8 +203,8 @@
 
 */
 
-import { CommandError } from '../../../../error/CommandError';
-import BaseError from '../../../../../../../core/error/BaseError';
+import { CommandError } from '@command/error/CommandError';
+import BaseError from '@core/error/BaseError';
 
 export class SetMaxSupplyCommandError extends CommandError {
   constructor(error: Error) {

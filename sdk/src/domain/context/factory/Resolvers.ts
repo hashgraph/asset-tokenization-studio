@@ -203,7 +203,7 @@
 
 */
 
-import { Environment } from '../network/Environment.js';
+import { Environment } from '../network/Environment';
 
 export class EnvironmentResolver {
   resolver: string;

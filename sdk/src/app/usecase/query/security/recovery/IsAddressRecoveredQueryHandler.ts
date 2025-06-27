@@ -203,18 +203,18 @@
 
 */
 
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import {
   IsAddressRecoveredQuery,
   IsAddressRecoveredQueryResponse,
-} from './IsAddressRecoveredQuery.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import { IsAddressRecoveredQueryError } from './error/IsAddressRecoveredQueryError.js';
+} from './IsAddressRecoveredQuery';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { IsAddressRecoveredQueryError } from './error/IsAddressRecoveredQueryError';
 
 @QueryHandler(IsAddressRecoveredQuery)
 export class IsAddressRecoveredQueryHandler

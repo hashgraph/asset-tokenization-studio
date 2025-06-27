@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
-import FormatValidation from '../../../FormatValidation.js';
+import FormatValidation from '../../../FormatValidation';
 
 export default class SetAddressFrozenRequest extends ValidatedRequest<SetAddressFrozenRequest> {
   securityId: string;

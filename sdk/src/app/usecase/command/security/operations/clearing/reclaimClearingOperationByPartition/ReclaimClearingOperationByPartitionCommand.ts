@@ -203,9 +203,9 @@
 
 */
 
-import { ClearingOperationType } from '../../../../../../../domain/context/security/Clearing.js';
-import { Command } from '../../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
+import { ClearingOperationType } from '@domain/context/security/Clearing';
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
 
 export class ReclaimClearingOperationByPartitionCommandResponse
   implements CommandResponse

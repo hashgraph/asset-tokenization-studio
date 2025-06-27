@@ -208,45 +208,45 @@
 import 'reflect-metadata';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
-import { SecurityRole } from '../src/domain/context/security/SecurityRole.js';
-import { EquityDetails } from '../src/domain/context/equity/EquityDetails.js';
-import { BondDetails } from '../src/domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../src/domain/context/bond/CouponDetails.js';
-import { Dividend } from '../src/domain/context/equity/Dividend.js';
-import { VotingRights } from '../src/domain/context/equity/VotingRights.js';
-import { Coupon } from '../src/domain/context/bond/Coupon.js';
-import { ScheduledSnapshot } from '../src/domain/context/security/ScheduledSnapshot.js';
-import { Security } from '../src/domain/context/security/Security.js';
-import { HederaId } from '../src/domain/context/shared/HederaId.js';
-import { SecurityType } from '../src/domain/context/factory/SecurityType.js';
-import EvmAddress from '../src/domain/context/contract/EvmAddress.js';
-import TransactionResponse from '../src/domain/context/transaction/TransactionResponse.js';
-import { Environment } from '../src/domain/context/network/Environment.js';
-import { InitializationData } from '../src/port/out/TransactionAdapter.js';
-import Account from '../src/domain/context/account/Account.js';
-import { MirrorNodeAdapter } from '../src/port/out/mirror/MirrorNodeAdapter.js';
-import ContractViewModel from '../src/port/in/response/ContractViewModel.js';
-import TransactionResultViewModel from '../src/port/in/response/TransactionResultViewModel.js';
-import { HBAR_DECIMALS } from '../src/core/Constants.js';
-import Injectable from '../src/core/Injectable.js';
-import { CLIENT_PUBLIC_KEY_ECDSA } from './config.js';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import { Dividend } from '@domain/context/equity/Dividend';
+import { VotingRights } from '@domain/context/equity/VotingRights';
+import { Coupon } from '@domain/context/bond/Coupon';
+import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
+import { Security } from '@domain/context/security/Security';
+import { HederaId } from '@domain/context/shared/HederaId';
+import { SecurityType } from '@domain/context/factory/SecurityType';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
+import { Environment } from '@domain/context/network/Environment';
+import { InitializationData } from '@port/out/TransactionAdapter';
+import Account from '@domain/context/account/Account';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import ContractViewModel from '@port/in/response/ContractViewModel';
+import TransactionResultViewModel from '@port/in/response/TransactionResultViewModel';
+import { HBAR_DECIMALS } from '@core/Constants';
+import Injectable from '@core/Injectable';
+import { CLIENT_PUBLIC_KEY_ECDSA } from './config';
 import {
   CastRegulationSubType,
   CastRegulationType,
-} from '../src/domain/context/factory/RegulationType.js';
-import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/ScheduledBalanceAdjustment.js';
-import { DividendFor } from '../src/domain/context/equity/DividendFor';
-import { VotingFor } from '../src/domain/context/equity/VotingFor';
-import DfnsSettings from '../src/core/settings/custodialWalletSettings/DfnsSettings.js';
-import { Kyc } from '../src/domain/context/kyc/Kyc.js';
-import { KycAccountData } from '../src/domain/context/kyc/KycAccountData.js';
+} from '@domain/context/factory/RegulationType';
+import { ScheduledBalanceAdjustment } from '@domain/context/equity/ScheduledBalanceAdjustment';
+import { DividendFor } from '@domain/context/equity/DividendFor';
+import { VotingFor } from '@domain/context/equity/VotingFor';
+import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
+import { Kyc } from '@domain/context/kyc/Kyc';
+import { KycAccountData } from '@domain/context/kyc/KycAccountData';
 import {
   ClearingHoldCreation,
   ClearingOperationType,
   ClearingRedeem,
   ClearingTransfer,
-} from '../src/domain/context/security/Clearing.js';
-import { HoldDetails } from '../src/domain/context/security/Hold.js';
+} from '@domain/context/security/Clearing';
+import { HoldDetails } from '@domain/context/security/Hold';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -654,8 +654,8 @@ const createClearing = async (
   return { status: 'success', id: transactionId } as TransactionResponse;
 };
 
-jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
-  const actual = jest.requireActual('../src/port/out/rpc/RPCQueryAdapter.ts');
+jest.mock('@port/out/rpc/RPCQueryAdapter', () => {
+  const actual = jest.requireActual('@port/out/rpc/RPCQueryAdapter.ts');
 
   const singletonInstance = new actual.RPCQueryAdapter();
 
@@ -1638,10 +1638,8 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   };
 });
 
-jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
-  const actual = jest.requireActual(
-    '../src/port/out/rpc/RPCTransactionAdapter.ts',
-  );
+jest.mock('@port/out/rpc/RPCTransactionAdapter', () => {
+  const actual = jest.requireActual('@port/out/rpc/RPCTransactionAdapter.ts');
 
   const singletonInstance = new actual.RPCTransactionAdapter();
 
@@ -2778,9 +2776,9 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
   };
 });
 
-jest.mock('../src/port/out/hs/hts/custodial/DFNSTransactionAdapter', () => {
+jest.mock('@port/out/hs/hts/custodial/DFNSTransactionAdapter', () => {
   const actual = jest.requireActual(
-    '../src/port/out/hs/hts/custodial/DFNSTransactionAdapter.ts',
+    '@port/out/hs/hts/custodial/DFNSTransactionAdapter.ts',
   );
 
   const singletonInstance = new actual.DFNSTransactionAdapter();
@@ -2794,28 +2792,25 @@ jest.mock('../src/port/out/hs/hts/custodial/DFNSTransactionAdapter', () => {
   };
 });
 
-jest.mock(
-  '../src/port/out/hs/hts/custodial/FireblocksTransactionAdapter',
-  () => {
-    const actual = jest.requireActual(
-      '../src/port/out/hs/hts/custodial/FireblocksTransactionAdapter.ts',
-    );
-
-    const singletonInstance = new actual.FireblocksTransactionAdapter();
-
-    singletonInstance.init = jest.fn(async () => {
-      return network;
-    });
-
-    return {
-      FireblocksTransactionAdapter: jest.fn(() => singletonInstance),
-    };
-  },
-);
-
-jest.mock('../src/port/out/hs/hts/custodial/AWSKMSTransactionAdapter', () => {
+jest.mock('@port/out/hs/hts/custodial/FireblocksTransactionAdapter', () => {
   const actual = jest.requireActual(
-    '../src/port/out/hs/hts/custodial/AWSKMSTransactionAdapter.ts',
+    '@port/out/hs/hts/custodial/FireblocksTransactionAdapter.ts',
+  );
+
+  const singletonInstance = new actual.FireblocksTransactionAdapter();
+
+  singletonInstance.init = jest.fn(async () => {
+    return network;
+  });
+
+  return {
+    FireblocksTransactionAdapter: jest.fn(() => singletonInstance),
+  };
+});
+
+jest.mock('@port/out/hs/hts/custodial/AWSKMSTransactionAdapter', () => {
+  const actual = jest.requireActual(
+    '@port/out/hs/hts/custodial/AWSKMSTransactionAdapter.ts',
   );
 
   const singletonInstance = new actual.AWSKMSTransactionAdapter();
@@ -2829,29 +2824,24 @@ jest.mock('../src/port/out/hs/hts/custodial/AWSKMSTransactionAdapter', () => {
   };
 });
 
-jest.mock(
-  '../src/port/out/hs/hts/custodial/CustodialTransactionAdapter',
-  () => {
-    const actual = jest.requireActual(
-      '../src/port/out/hs/hts/custodial/CustodialTransactionAdapter.ts',
-    );
-
-    const singletonInstance = new actual.CustodialTransactionAdapter();
-
-    singletonInstance.register = jest.fn(async (settings: DfnsSettings) => {
-      Injectable.registerTransactionHandler(singletonInstance);
-      return {} as InitializationData;
-    });
-    return {
-      CustodialTransactionAdapter: jest.fn(() => singletonInstance),
-    };
-  },
-);
-
-jest.mock('../src/port/out/hs/HederaTransactionAdapter', () => {
+jest.mock('@port/out/hs/hts/custodial/CustodialTransactionAdapter', () => {
   const actual = jest.requireActual(
-    '../src/port/out/hs/HederaTransactionAdapter.ts',
+    '@port/out/hs/hts/custodial/CustodialTransactionAdapter.ts',
   );
+
+  const singletonInstance = new actual.CustodialTransactionAdapter();
+
+  singletonInstance.register = jest.fn(async (settings: DfnsSettings) => {
+    Injectable.registerTransactionHandler(singletonInstance);
+    return {} as InitializationData;
+  });
+  return {
+    CustodialTransactionAdapter: jest.fn(() => singletonInstance),
+  };
+});
+
+jest.mock('@port/out/hs/HederaTransactionAdapter', () => {
+  const actual = jest.requireActual('@port/out/hs/HederaTransactionAdapter.ts');
 
   const singletonInstance = new actual.HederaTransactionAdapter();
 
@@ -2866,10 +2856,8 @@ jest.mock('../src/port/out/hs/HederaTransactionAdapter', () => {
   };
 });
 
-jest.mock('../src/port/out/mirror/MirrorNodeAdapter', () => {
-  const actual = jest.requireActual(
-    '../src/port/out/mirror/MirrorNodeAdapter.ts',
-  );
+jest.mock('@port/out/mirror/MirrorNodeAdapter', () => {
+  const actual = jest.requireActual('@port/out/mirror/MirrorNodeAdapter.ts');
 
   const MirrorNodeAdapterMock = new actual.MirrorNodeAdapter();
 

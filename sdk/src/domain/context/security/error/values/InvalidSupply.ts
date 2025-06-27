@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export default class InvalidSupply extends BaseError {
   constructor(totalSupply: string, maxSupply: string) {

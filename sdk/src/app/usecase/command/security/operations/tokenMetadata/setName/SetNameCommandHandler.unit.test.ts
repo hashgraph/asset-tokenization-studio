@@ -203,25 +203,25 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import { SetNameCommand, SetNameCommandResponse } from './SetNameCommand.js';
-import { SetNameCommandHandler } from './SetNameCommandHandler.js';
-import { SetNameCommandFixture } from '../../../../../../../../__tests__/fixtures/tokenMetadata/TokenMetadataFixture.js';
-import { SetNameCommandError } from './error/SetNameCommandError.js';
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { SetNameCommand, SetNameCommandResponse } from './SetNameCommand';
+import { SetNameCommandHandler } from './SetNameCommandHandler';
+import { SetNameCommandFixture } from '@test/fixtures/tokenMetadata/TokenMetadataFixture';
+import { SetNameCommandError } from './error/SetNameCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('SetNameCommandHandler', () => {
   let handler: SetNameCommandHandler;
