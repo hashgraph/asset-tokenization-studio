@@ -227,6 +227,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         override
         onlyUnpaused
         checkRecoveredAddress(_msgSender())
+        checkRecoveredAddress(_operator)
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_operator)
     {
@@ -253,6 +254,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         checkRecoveredAddress(_msgSender())
+        checkRecoveredAddress(_operator)
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_operator)
     {
@@ -300,6 +302,8 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         {
             _checkValidAddress(_operatorTransferData.to);
             _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_operatorTransferData.to);
+            _checkRecoveredAddress(_operatorTransferData.from);
         }
         return _operatorTransferByPartition(_operatorTransferData);
     }

@@ -234,6 +234,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
+        checkRecoveredAddress(_to)
         checkRecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
@@ -256,7 +257,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
-        checkRecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
         onlyListedAllowed(_from)
@@ -265,6 +265,11 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
     {
+        {
+            _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_to);
+            _checkRecoveredAddress(_from);
+        }
         // Add a function to validate the `_data` parameter
         _transferFrom(_msgSender(), _from, _to, _value);
     }
@@ -350,6 +355,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
+        checkRecoveredAddress(_msgSender())
+        checkRecoveredAddress(_tokenHolder)
     {
         _redeemFrom(_tokenHolder, _value, _data);
     }

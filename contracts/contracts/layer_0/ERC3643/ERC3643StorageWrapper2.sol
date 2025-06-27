@@ -352,13 +352,13 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         address _lostWallet,
         address _newWallet
     ) internal returns (bool) {
-        uint256 balance = _balanceOfAdjusted(_lostWallet);
         uint256 frozenBalance = _getFrozenAmountForAdjusted(_lostWallet);
         if (frozenBalance > 0) {
             _unfreezeTokens(_lostWallet, frozenBalance);
         }
+        uint256 balance = _balanceOfAdjusted(_lostWallet);
         if (balance + frozenBalance > 0) {
-            _transfer(_lostWallet, _newWallet, balance + frozenBalance);
+            _transfer(_lostWallet, _newWallet, balance);
         }
         if (frozenBalance > 0) {
             _freezeTokens(_newWallet, frozenBalance);

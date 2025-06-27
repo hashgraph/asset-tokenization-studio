@@ -215,8 +215,8 @@ import {
 } from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
 
 abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
-    modifier checkRecoveredAddress(address _sender) {
-        _checkRecoveredAddress(_sender);
+    modifier checkRecoveredAddress(address _account) {
+        _checkRecoveredAddress(_account);
         _;
     }
 

@@ -249,6 +249,7 @@ contract ClearingRedeemFacet is
         external
         override
         onlyUnpaused
+        checkRecoveredAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
@@ -284,6 +285,7 @@ contract ClearingRedeemFacet is
         external
         override
         onlyUnpaused
+        checkRecoveredAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
