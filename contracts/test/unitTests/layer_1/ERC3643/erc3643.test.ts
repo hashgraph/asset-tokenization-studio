@@ -262,6 +262,7 @@ import {
     ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
     LOCKER_ROLE,
     ADDRESS_RECOVERED_TO_ERROR_ID,
+    ADDRESS_RECOVERED_FROM_ERROR_ID,
 } from '@scripts'
 import { Contract } from 'ethers'
 
@@ -1916,7 +1917,7 @@ describe('ERC3643 Tests', () => {
             })
         })
 
-        describe('Recovery', () => {
+        describe.only('Recovery', () => {
             it('GIVEN lost wallet with pending locks, holds or clearings THEN recovery fails with CannotRecoverWallet', async () => {
                 await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
                 const amount = 1000
@@ -2064,7 +2065,7 @@ describe('ERC3643 Tests', () => {
                 expect(isRecoveredC).to.equal(false)
             })
 
-            it('GIVEN a recovered address THEN operations should fail', async () => {
+            it.only('GIVEN a recovered address THEN operations should fail', async () => {
                 // Set up
                 await kycFacet.grantKyc(
                     account_A,
@@ -2095,6 +2096,9 @@ describe('ERC3643 Tests', () => {
                 await erc1410Facet
                     .connect(signer_C)
                     .authorizeOperator(account_A)
+                await erc1410Facet
+                    .connect(signer_C)
+                    .authorizeOperator(account_B)
                 await erc1410Facet
                     .connect(signer_A)
                     .authorizeOperator(account_C)
@@ -2709,19 +2713,32 @@ describe('ERC3643 Tests', () => {
                     ADDRESS_RECOVERED_OPERATOR_ERROR_ID
                 )
                 // 2 - From
-                // TODO: For now, this will always return false due to insufficient balance
-                // canTransferByPartition =
-                //     await erc1410Facet.canTransferByPartition(
-                //         account_C,
-                //         account_A,
-                //         DEFAULT_PARTITION,
-                //         amount,
-                //         EMPTY_HEX_BYTES,
-                //         EMPTY_HEX_BYTES
-                //     )
-                // expect(canTransferByPartition[1]).to.equal(
-                //     ADDRESS_RECOVERED_FROM_ERROR_ID
-                // )
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: amount,
+                    data: '0x',
+                })
+                await erc1644Facet.controllerTransfer(
+                    account_A,
+                    account_C,
+                    amount,
+                    EMPTY_HEX_BYTES,
+                    EMPTY_HEX_BYTES
+                )
+                canTransferByPartition = await erc1410Facet
+                    .connect(signer_B)
+                    .canTransferByPartition(
+                        account_C,
+                        account_A,
+                        DEFAULT_PARTITION,
+                        amount,
+                        EMPTY_HEX_BYTES,
+                        EMPTY_HEX_BYTES
+                    )
+                expect(canTransferByPartition[1]).to.equal(
+                    ADDRESS_RECOVERED_FROM_ERROR_ID
+                )
                 // 3 - To
                 canTransferByPartition =
                     await erc1410Facet.canTransferByPartition(
@@ -2768,17 +2785,18 @@ describe('ERC3643 Tests', () => {
                     ADDRESS_RECOVERED_OPERATOR_ERROR_ID
                 )
                 // 2 - From
-                // TODO: For now, this will always return false due to insufficient balance
-                // canRedeemByPartition = await erc1410Facet.canRedeemByPartition(
-                //     account_C,
-                //     DEFAULT_PARTITION,
-                //     amount,
-                //     EMPTY_HEX_BYTES,
-                //     EMPTY_HEX_BYTES
-                // )
-                // expect(canRedeemByPartition[1]).to.equal(
-                //     ADDRESS_RECOVERED_FROM_ERROR_ID
-                // )
+                canRedeemByPartition = await erc1410Facet
+                    .connect(signer_B)
+                    .canRedeemByPartition(
+                        account_C,
+                        DEFAULT_PARTITION,
+                        amount,
+                        EMPTY_HEX_BYTES,
+                        EMPTY_HEX_BYTES
+                    )
+                expect(canRedeemByPartition[1]).to.equal(
+                    ADDRESS_RECOVERED_FROM_ERROR_ID
+                )
             })
         })
     })

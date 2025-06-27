@@ -232,20 +232,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
 
     address private constant _ONCHAIN_ID = address(0);
 
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezStatus
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-    {
-        _setAddressFrozen(_userAddress, _freezStatus);
-        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
-    }
-
     /**
      * @notice Sets the name of the token.
      * @dev Can only be called by the token `owner/issuer`.
@@ -577,7 +563,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
     {
-        _setAddresFrozen(_userAddress, _freezStatus);
+        _setAddressFrozen(_userAddress, _freezStatus);
         emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
     }
 
