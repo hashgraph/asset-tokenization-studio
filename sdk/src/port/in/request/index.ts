@@ -205,6 +205,7 @@
 
 import IssueRequest from './security/operations/issue/IssueRequest.js';
 import RedeemRequest from './security/operations/redeem/RedeemRequest.js';
+import BurnRequest from './security/operations/burn/BurnRequest.js';
 import ForceRedeemRequest from './security/operations/redeem/ForceRedeemRequest.js';
 import CreateEquityRequest from './equity/CreateEquityRequest.js';
 import CreateBondRequest from './bond/CreateBondRequest.js';
@@ -355,6 +356,8 @@ import RevokeKycMockRequest from './security/externalKycLists/mock/RevokeKycMock
 import GetKycStatusMockRequest from './security/externalKycLists/mock/GetKycStatusMockRequest.js';
 import SetNameRequest from './security/operations/tokeMetadata/SetNameRequest.js';
 import SetSymbolRequest from './security/operations/tokeMetadata/SetSymbolRequest.js';
+import ForcedTransferRequest from './security/operations/transfer/ForcedTransferRequest';
+import MintRequest from './security/operations/mint/MintRequest.js';
 import SetOnchainIDRequest from './security/operations/tokeMetadata/SetOnchainIDRequest.js';
 import SetComplianceRequest from './security/compliance/SetComplianceRequest.js';
 import ComplianceRequest from './security/compliance/ComplianceRequest.js';
@@ -371,11 +374,14 @@ export {
   ValidationResponse,
   IssueRequest,
   RedeemRequest,
+  BurnRequest,
   ForceRedeemRequest,
   RoleRequest,
   ApplyRolesRequest,
   TransferRequest,
   ForceTransferRequest,
+  ForcedTransferRequest,
+  MintRequest,
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,

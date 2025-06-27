@@ -219,7 +219,7 @@ import { SecurityRole } from '../../../../../../domain/context/security/Security
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
-import { ControllerTransferCommandError } from './error/ControllerTransferCommandError copy.js';
+import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
 
 @CommandHandler(ControllerTransferCommand)
 export class ControllerTransferCommandHandler

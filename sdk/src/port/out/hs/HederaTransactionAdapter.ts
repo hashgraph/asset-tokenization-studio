@@ -338,6 +338,9 @@ import {
   DEACTIVATE_INTERNAL_KYC_GAS,
   SET_NAME_GAS,
   SET_SYMBOL_GAS,
+  BURN_GAS,
+  MINT_GAS,
+  FORCED_TRANSFER_GAS,
   UNFREEZE_PARTIAL_TOKENS_GAS,
   FREEZE_PARTIAL_TOKENS_GAS,
   SET_ONCHAIN_ID_GAS,
@@ -798,6 +801,33 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     return this.signAndSendTransaction(transaction);
   }
 
+  async burn(
+    security: EvmAddress,
+    source: EvmAddress,
+    amount: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'burn';
+    LogService.logTrace(
+      `Burning ${amount} securities from account ${source.toString()}`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [source.toString(), amount.toHexString()],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(BURN_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
   async pause(
     security: EvmAddress,
     securityId: ContractId | string,
@@ -968,6 +998,34 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     return this.signAndSendTransaction(transaction);
   }
 
+  async mint(
+    security: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'mint';
+    LogService.logTrace(
+      `Minting ${amount} ${security} to account: ${target.toString()}`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [target.toString(), amount.toHexString()],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(MINT_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
   async addToControlList(
     security: EvmAddress,
     targetId: EvmAddress,
@@ -1033,7 +1091,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'controllerTransferByPartition';
     LogService.logTrace(
-      `Force transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
+      `Controller transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
     const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
@@ -1056,6 +1114,35 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(CONTROLLER_TRANSFER_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async forcedTransfer(
+    security: EvmAddress,
+    source: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'forcedTransfer';
+    LogService.logTrace(
+      `Forced transfer ${amount} tokens from account ${source.toString()} to account ${target.toString()}`,
+    );
+
+    const factoryInstance = new ERC3643__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [source.toString(), target.toString(), amount.toHexString()],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(FORCED_TRANSFER_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
