@@ -203,10 +203,10 @@
 
 */
 
-import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
-import BigDecimal from '../shared/BigDecimal.js';
-import { DividendType } from './DividendType.js';
-import { Equity } from './Equity.js';
+import ValidatedDomain from '@core/validation/ValidatedArgs';
+import BigDecimal from '../shared/BigDecimal';
+import { DividendType } from './DividendType';
+import { Equity } from './Equity';
 
 export class EquityDetails extends ValidatedDomain<EquityDetails> {
   votingRight: boolean;

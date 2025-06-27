@@ -206,18 +206,18 @@
 import {
   CanRedeemByPartitionQuery,
   CanRedeemByPartitionQueryResponse,
-} from './CanRedeemByPartitionQuery.js';
-import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../service/security/SecurityService.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import { EMPTY_BYTES } from '../../../../../core/Constants.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import { CanRedeemByPartitionQueryError } from './error/CanRedeemByPartitionQueryError.js';
+} from './CanRedeemByPartitionQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import SecurityService from '@service/security/SecurityService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { EMPTY_BYTES } from '@core/Constants';
+import ContractService from '@service/contract/ContractService';
+import { CanRedeemByPartitionQueryError } from './error/CanRedeemByPartitionQueryError';
 
 @QueryHandler(CanRedeemByPartitionQuery)
 export class CanRedeemByPartitionQueryHandler

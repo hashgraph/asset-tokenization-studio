@@ -207,25 +207,22 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../app/service/account/AccountService.js';
-import SecurityService from '../../../../../app/service/security/SecurityService.js';
-import { CanTransferQueryFixture } from '../../../../../../__tests__/fixtures/erc1400/ERC1400Fixture.js';
-import { SecurityPropsFixture } from '../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../domain/context/security/Security.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import { EMPTY_BYTES } from '../../../../../core/Constants.js';
-import { CanTransferQueryHandler } from './CanTransferQueryHandler.js';
-import {
-  CanTransferQuery,
-  CanTransferQueryResponse,
-} from './CanTransferQuery.js';
-import ValidationService from '../../../../../app/service/validation/ValidationService.js';
-import { CanTransferQueryError } from './error/CanTransferQueryError.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
+import SecurityService from '@service/security/SecurityService';
+import { CanTransferQueryFixture } from '@test/fixtures/erc1400/ERC1400Fixture';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { EMPTY_BYTES } from '@core/Constants';
+import { CanTransferQueryHandler } from './CanTransferQueryHandler';
+import { CanTransferQuery, CanTransferQueryResponse } from './CanTransferQuery';
+import ValidationService from '@service/validation/ValidationService';
+import { CanTransferQueryError } from './error/CanTransferQueryError';
 
 describe('CanTransferQueryHandler', () => {
   let handler: CanTransferQueryHandler;

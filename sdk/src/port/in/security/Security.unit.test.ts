@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   ActivateClearingRequest,
   AddAgentRequest,
@@ -231,6 +231,7 @@ import {
   CreateHoldFromByPartitionRequest,
   DeactivateClearingRequest,
   ExecuteHoldByPartitionRequest,
+  ForcedTransferRequest,
   ForceRedeemRequest,
   ForceTransferRequest,
   GetAccountBalanceRequest,
@@ -262,6 +263,7 @@ import {
   IsClearingActivatedRequest,
   IssueRequest,
   LockRequest,
+  MintRequest,
   OnchainIDRequest,
   OperatorClearingCreateHoldByPartitionRequest,
   OperatorClearingRedeemByPartitionRequest,
@@ -292,22 +294,23 @@ import {
   TransferRequest,
   UnfreezePartialTokensRequest,
   SetAddressFrozenRequest,
+  FreezePartialTokensRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
-import Account from '../../../domain/context/account/Account';
+} from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import Account from '@domain/context/account/Account';
 import {
   AccountPropsFixture,
   GetAccountBalanceRequestFixture,
-} from '../../../../__tests__/fixtures/account/AccountFixture';
-import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter';
-import { SecurityControlListType } from './Security';
+} from '@test/fixtures/account/AccountFixture';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security, { SecurityControlListType } from '@port/in/security/Security';
 import {
   GetLockCountRequestFixture,
   GetLockedBalanceRequestFixture,
@@ -316,72 +319,72 @@ import {
   LockFixture,
   LockRequestFixture,
   ReleaseRequestFixture,
-} from '../../../../__tests__/fixtures/lock/LockFixture';
-import { Security } from '..';
-import { LockCommand } from '../../../app/usecase/command/security/operations/lock/LockCommand';
-import { ReleaseCommand } from '../../../app/usecase/command/security/operations/release/ReleaseCommand';
-import BigDecimal from '../../../domain/context/shared/BigDecimal';
+} from '@test/fixtures/lock/LockFixture';
+
+import { LockCommand } from '@command/security/operations/lock/LockCommand';
+import { ReleaseCommand } from '@command/security/operations/release/ReleaseCommand';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
-import { LockedBalanceOfQuery } from '../../../app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
-import { LockCountQuery } from '../../../app/usecase/query/security/lockCount/LockCountQuery';
-import { LocksIdQuery } from '../../../app/usecase/query/security/locksId/LocksIdQuery';
-import { GetLockQuery } from '../../../app/usecase/query/security/getLock/GetLockQuery';
+import { LockedBalanceOfQuery } from '@query/security/lockedBalanceOf/LockedBalanceOfQuery';
+import { LockCountQuery } from '@query/security/lockCount/LockCountQuery';
+import { LocksIdQuery } from '@query/security/locksId/LocksIdQuery';
+import { GetLockQuery } from '@query/security/getLock/GetLockQuery';
 import {
   GetMaxSupplyRequestFixture,
   GetSecurityDetailsRequestFixture,
   SetMaxSupplyRequestFixture,
-} from '../../../../__tests__/fixtures/erc1400/ERC1400Fixture';
-import { SecurityPropsFixture } from '../../../../__tests__/fixtures/shared/SecurityFixture';
-import { GetSecurityQuery } from '../../../app/usecase/query/security/get/GetSecurityQuery';
-import { IssueRequestFixture } from '../../../../__tests__/fixtures/issue/IssueFixture';
-import { IssueCommand } from '../../../app/usecase/command/security/operations/issue/IssueCommand';
+} from '@test/fixtures/erc1400/ERC1400Fixture';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { GetSecurityQuery } from '@query/security/get/GetSecurityQuery';
+import { IssueRequestFixture } from '@test/fixtures/issue/IssueFixture';
+import { IssueCommand } from '@command/security/operations/issue/IssueCommand';
 import {
   ForceRedeemRequestFixture,
   RedeemRequestFixture,
-} from '../../../../__tests__/fixtures/redeem/RedeemFixture';
-import { RedeemCommand } from '../../../app/usecase/command/security/operations/redeem/RedeemCommand';
-import { ControllerRedeemCommand } from '../../../app/usecase/command/security/operations/redeem/ControllerRedeemCommand';
+} from '@test/fixtures/redeem/RedeemFixture';
+import { RedeemCommand } from '@command/security/operations/redeem/RedeemCommand';
+import { ControllerRedeemCommand } from '@command/security/operations/redeem/ControllerRedeemCommand';
 import {
   ControlListRequestFixture,
   GetControlListCountRequestFixture,
   GetControlListMembersRequestFixture,
   GetControlListTypeRequestFixture,
-} from '../../../../__tests__/fixtures/controlList/ControlListFixture';
-import { AddToControlListCommand } from '../../../app/usecase/command/security/operations/addToControlList/AddToControlListCommand';
-import { RemoveFromControlListCommand } from '../../../app/usecase/command/security/operations/removeFromControlList/RemoveFromControlListCommand';
-import { IsInControlListQuery } from '../../../app/usecase/query/account/controlList/IsInControlListQuery';
-import { GetControlListCountQuery } from '../../../app/usecase/query/security/controlList/getControlListCount/GetControlListCountQuery';
-import { GetControlListMembersQuery } from '../../../app/usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery';
-import { GetControlListTypeQuery } from '../../../app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery';
-import { BalanceOfQuery } from '../../../app/usecase/query/security/balanceof/BalanceOfQuery';
+} from '@test/fixtures/controlList/ControlListFixture';
+import { AddToControlListCommand } from '@command/security/operations/addToControlList/AddToControlListCommand';
+import { RemoveFromControlListCommand } from '@command/security/operations/removeFromControlList/RemoveFromControlListCommand';
+import { IsInControlListQuery } from '@query/account/controlList/IsInControlListQuery';
+import { GetControlListCountQuery } from '@query/security/controlList/getControlListCount/GetControlListCountQuery';
+import { GetControlListMembersQuery } from '@query/security/controlList/getControlListMembers/GetControlListMembersQuery';
+import { GetControlListTypeQuery } from '@query/security/controlList/getControlListType/GetControlListTypeQuery';
+import { BalanceOfQuery } from '@query/security/balanceof/BalanceOfQuery';
 import {
   ForcedTransferRequestFixture,
   ForceTransferRequestFixture,
   TransferAndLockRequestFixture,
   TransferRequestFixture,
-} from '../../../../__tests__/fixtures/transfer/TransferFixture';
-import { TransferCommand } from '../../../app/usecase/command/security/operations/transfer/TransferCommand';
-import { TransferAndLockCommand } from '../../../app/usecase/command/security/operations/transfer/TransferAndLockCommand';
-import { ControllerTransferCommand } from '../../../app/usecase/command/security/operations/transfer/ControllerTransferCommand';
-import { PauseRequestFixture } from '../../../../__tests__/fixtures/pause/PauseFixture';
-import { PauseCommand } from '../../../app/usecase/command/security/operations/pause/PauseCommand';
-import { IsPausedQuery } from '../../../app/usecase/query/security/isPaused/IsPausedQuery';
-import { SetMaxSupplyCommand } from '../../../app/usecase/command/security/operations/cap/SetMaxSupplyCommand';
-import { GetMaxSupplyQuery } from '../../../app/usecase/query/security/cap/getMaxSupply/GetMaxSupplyQuery';
+} from '@test/fixtures/transfer/TransferFixture';
+import { TransferCommand } from '@command/security/operations/transfer/TransferCommand';
+import { TransferAndLockCommand } from '@command/security/operations/transfer/TransferAndLockCommand';
+import { ControllerTransferCommand } from '@command/security/operations/transfer/ControllerTransferCommand';
+import { PauseRequestFixture } from '@test/fixtures/pause/PauseFixture';
+import { PauseCommand } from '@command/security/operations/pause/PauseCommand';
+import { IsPausedQuery } from '@query/security/isPaused/IsPausedQuery';
+import { SetMaxSupplyCommand } from '@command/security/operations/cap/SetMaxSupplyCommand';
+import { GetMaxSupplyQuery } from '@query/security/cap/getMaxSupply/GetMaxSupplyQuery';
 import {
   GetNounceRequestFixture,
   PartitionsProtectedRequestFixture,
   ProtectedRedeemFromByPartitionRequestFixture,
   ProtectedTransferAndLockByPartitionRequestFixture,
   ProtectedTransferFromByPartitionRequestFixture,
-} from '../../../../__tests__/fixtures/protectedPartitions/ProtectedPartitionsFixture';
-import { ProtectedTransferFromByPartitionCommand } from '../../../app/usecase/command/security/operations/transfer/ProtectedTransferFromByPartitionCommand';
-import { ProtectedRedeemFromByPartitionCommand } from '../../../app/usecase/command/security/operations/redeem/ProtectedRedeemFromByPartitionCommand';
-import { PartitionsProtectedQuery } from '../../../app/usecase/query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQuery';
-import { GetNounceQuery } from '../../../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQuery';
-import { ProtectPartitionsCommand } from '../../../app/usecase/command/security/operations/protectPartitions/ProtectPartitionsCommand';
-import { UnprotectPartitionsCommand } from '../../../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommand';
-import { ProtectedTransferAndLockByPartitionCommand } from '../../../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand';
+} from '@test/fixtures/protectedPartitions/ProtectedPartitionsFixture';
+import { ProtectedTransferFromByPartitionCommand } from '@command/security/operations/transfer/ProtectedTransferFromByPartitionCommand';
+import { ProtectedRedeemFromByPartitionCommand } from '@command/security/operations/redeem/ProtectedRedeemFromByPartitionCommand';
+import { PartitionsProtectedQuery } from '@query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQuery';
+import { GetNounceQuery } from '@query/security/protectedPartitions/getNounce/GetNounceQuery';
+import { ProtectPartitionsCommand } from '@command/security/operations/protectPartitions/ProtectPartitionsCommand';
+import { UnprotectPartitionsCommand } from '@command/security/operations/unprotectPartitions/UnprotectPartitionsCommand';
+import { ProtectedTransferAndLockByPartitionCommand } from '@command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand';
 import {
   ControllerCreateHoldByPartitionRequestFixture,
   CreateHoldByPartitionRequestFixture,
@@ -396,20 +399,20 @@ import {
   ProtectedCreateHoldByPartitionRequestFixture,
   ReclaimHoldByPartitionRequestFixture,
   ReleaseHoldByPartitionRequestFixture,
-} from '../../../../__tests__/fixtures/hold/HoldFixture';
-import { CreateHoldByPartitionCommand } from '../../../app/usecase/command/security/operations/hold/createHoldByPartition/CreateHoldByPartitionCommand';
-import { CreateHoldFromByPartitionCommand } from '../../../app/usecase/command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommand';
-import { ControllerCreateHoldByPartitionCommand } from '../../../app/usecase/command/security/operations/hold/controllerCreateHoldByPartition/ControllerCreateHoldByPartitionCommand';
-import { ProtectedCreateHoldByPartitionCommand } from '../../../app/usecase/command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommand';
-import { GetHeldAmountForQuery } from '../../../app/usecase/query/security/hold/getHeldAmountFor/GetHeldAmountForQuery';
-import { GetHeldAmountForByPartitionQuery } from '../../../app/usecase/query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQuery';
-import { GetHoldCountForByPartitionQuery } from '../../../app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQuery';
-import { GetHoldsIdForByPartitionQuery } from '../../../app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery';
-import { GetHoldForByPartitionQuery } from '../../../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery';
-import { ONE_THOUSAND } from '../../../domain/context/shared/SecurityDate';
-import { ReleaseHoldByPartitionCommand } from '../../../app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommand';
-import { ReclaimHoldByPartitionCommand } from '../../../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommand';
-import { ExecuteHoldByPartitionCommand } from '../../../app/usecase/command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommand';
+} from '@test/fixtures/hold/HoldFixture';
+import { CreateHoldByPartitionCommand } from '@command/security/operations/hold/createHoldByPartition/CreateHoldByPartitionCommand';
+import { CreateHoldFromByPartitionCommand } from '@command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommand';
+import { ControllerCreateHoldByPartitionCommand } from '@command/security/operations/hold/controllerCreateHoldByPartition/ControllerCreateHoldByPartitionCommand';
+import { ProtectedCreateHoldByPartitionCommand } from '@command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommand';
+import { GetHeldAmountForQuery } from '@query/security/hold/getHeldAmountFor/GetHeldAmountForQuery';
+import { GetHeldAmountForByPartitionQuery } from '@query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQuery';
+import { GetHoldCountForByPartitionQuery } from '@query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQuery';
+import { GetHoldsIdForByPartitionQuery } from '@query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery';
+import { GetHoldForByPartitionQuery } from '@query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery';
+import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
+import { ReleaseHoldByPartitionCommand } from '@command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommand';
+import { ReclaimHoldByPartitionCommand } from '@command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommand';
+import { ExecuteHoldByPartitionCommand } from '@command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommand';
 import {
   ActivateClearingRequestFixture,
   ApproveClearingOperationByPartitionRequestFixture,
@@ -439,131 +442,127 @@ import {
   ProtectedClearingRedeemByPartitionRequestFixture,
   ProtectedClearingTransferByPartitionRequestFixture,
   ReclaimClearingOperationByPartitionRequestFixture,
-} from '../../../../__tests__/fixtures/clearing/ClearingFixture';
-import { ActivateClearingCommand } from '../../../app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommand';
-import { DeactivateClearingCommand } from '../../../app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand';
-import { ClearingTransferByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommand';
-import { ClearingTransferFromByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommand';
-import { CancelClearingOperationByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommand';
-import { ReclaimClearingOperationByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommand';
-import { ClearingRedeemByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand';
-import { ProtectedClearingRedeemByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand';
-import { ClearingCreateHoldByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommand';
-import { ClearingCreateHoldFromByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand';
-import { ProtectedClearingCreateHoldByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand';
-import { GetClearedAmountForQuery } from '../../../app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery';
-import { GetClearedAmountForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery';
-import { GetClearingCountForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery';
-import { GetClearingCreateHoldForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery';
-import { GetClearingRedeemForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery';
-import { GetClearingTransferForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery';
-import { GetClearingsIdForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery';
-import { IsClearingActivatedQuery } from '../../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
-import { OperatorClearingCreateHoldByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand';
-import { OperatorClearingRedeemByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand';
-import { OperatorClearingTransferByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommand';
-import { ClearingRedeemFromByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand';
-import { ProtectedClearingTransferByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
-import { ApproveClearingOperationByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
+} from '@test/fixtures/clearing/ClearingFixture';
+import { ActivateClearingCommand } from '@command/security/operations/clearing/activateClearing/ActivateClearingCommand';
+import { DeactivateClearingCommand } from '@command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand';
+import { ClearingTransferByPartitionCommand } from '@command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommand';
+import { ClearingTransferFromByPartitionCommand } from '@command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommand';
+import { CancelClearingOperationByPartitionCommand } from '@command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommand';
+import { ReclaimClearingOperationByPartitionCommand } from '@command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommand';
+import { ClearingRedeemByPartitionCommand } from '@command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand';
+import { ProtectedClearingRedeemByPartitionCommand } from '@command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand';
+import { ClearingCreateHoldByPartitionCommand } from '@command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommand';
+import { ClearingCreateHoldFromByPartitionCommand } from '@command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand';
+import { ProtectedClearingCreateHoldByPartitionCommand } from '@command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand';
+import { GetClearedAmountForQuery } from '@query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery';
+import { GetClearedAmountForByPartitionQuery } from '@query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery';
+import { GetClearingCountForByPartitionQuery } from '@query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery';
+import { GetClearingCreateHoldForByPartitionQuery } from '@query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery';
+import { GetClearingRedeemForByPartitionQuery } from '@query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery';
+import { GetClearingTransferForByPartitionQuery } from '@query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery';
+import { GetClearingsIdForByPartitionQuery } from '@query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery';
+import { IsClearingActivatedQuery } from '@query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
+import { OperatorClearingCreateHoldByPartitionCommand } from '@command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand';
+import { OperatorClearingRedeemByPartitionCommand } from '@command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand';
+import { OperatorClearingTransferByPartitionCommand } from '@command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommand';
+import { ClearingRedeemFromByPartitionCommand } from '@command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand';
+import { ProtectedClearingTransferByPartitionCommand } from '@command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
+import { ApproveClearingOperationByPartitionCommand } from '@command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
 import {
   OnchainIDRequestFixture,
   SetNameRequestFixture,
   SetOnchainIDRequestFixture,
   SetSymbolRequestFixture,
-} from '../../../../__tests__/fixtures/tokenMetadata/TokenMetadataFixture';
-import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
-import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
-import { BurnRequestFixture } from '../../../../__tests__/fixtures/burn/BurnFixture';
-import { BurnCommand } from '../../../app/usecase/command/security/operations/burn/BurnCommand';
-import MintRequest from '../request/security/operations/mint/MintRequest';
-import { MintRequestFixture } from '../../../../__tests__/fixtures/mint/MintFixture';
-import { MintCommand } from '../../../app/usecase/command/security/operations/mint/MintCommand';
-import ForcedTransferRequest from '../request/security/operations/transfer/ForcedTransferRequest';
-import { ForcedTransferCommand } from '../../../app/usecase/command/security/operations/transfer/ForcedTransferCommand';
-import { SetOnchainIDCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
+} from '@test/fixtures/tokenMetadata/TokenMetadataFixture';
+import { SetNameCommand } from '@command/security/operations/tokenMetadata/setName/SetNameCommand';
+import { SetSymbolCommand } from '@command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
+import { SetOnchainIDCommand } from '@command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
 import {
   IdentityRegistryQueryFixture,
   SetIdentityRegistryRequestFixture,
-} from '../../../../__tests__/fixtures/identityRegistry/IdentityRegistryFixture';
-import { SetIdentityRegistryCommand } from '../../../app/usecase/command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommand';
+} from '@test/fixtures/identityRegistry/IdentityRegistryFixture';
+import { SetIdentityRegistryCommand } from '@command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommand';
 import {
   ComplianceQueryFixture,
   SetComplianceCommandFixture,
-} from '../../../../__tests__/fixtures/compliance/ComplianceFixture';
-import { SetComplianceCommand } from '../../../app/usecase/command/security/compliance/setCompliance/SetComplianceCommand';
-import { IdentityRegistryQuery } from '../../../app/usecase/query/security/identityRegistry/IdentityRegistryQuery';
-import { ComplianceQuery } from '../../../app/usecase/query/security/compliance/compliance/ComplianceQuery';
-import { OnchainIDQuery } from '../../../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
-import FreezePartialTokensRequest from '../request/security/operations/freeze/FreezePartialTokensRequest';
-import {
-  BatchBurnRequestFixture,
-  BatchForcedTransferRequestFixture,
-  BatchFreezePartialTokensRequestFixture,
-  BatchMintRequestFixture,
-  BatchSetAddressFrozenRequestFixture,
-  BatchTransferRequestFixture,
-  BatchUnfreezePartialTokensRequestFixture,
-} from '../../../../__tests__/fixtures/batch/BatchFixture';
-import {
-  FreezePartialTokensCommand,
-  FreezePartialTokensResponse,
-} from '../../../app/usecase/command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand';
-import {
-  UnfreezePartialTokensCommand,
-  UnfreezePartialTokensResponse,
-} from '../../../app/usecase/command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand';
-
-import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
-import {
-  IsAddressRecoveredRequestFixture,
-  RecoveryAddressRequestFixture,
-} from '../../../../__tests__/fixtures/recovery/RecoveryFixture';
-import { RecoveryAddressCommand } from '../../../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand';
-import { IsAddressRecoveredQuery } from '../../../app/usecase/query/security/recovery/IsAddressRecoveredQuery';
-import {
-  AddAgentRequestFixture,
-  RemoveAgentRequestFixture,
-} from '../../../../__tests__/fixtures/agent/AgentFixture';
-import { AddAgentCommand } from '../../../app/usecase/command/security/operations/agent/addAgent/AddAgentCommand';
-import { RemoveAgentCommand } from '../../../app/usecase/command/security/operations/agent/removeAgent/RemoveAgentCommand';
-import {
-  BatchTransferResponse,
-  BatchTransferCommand,
-} from '../../../app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommand';
-import {
-  BatchForcedTransferCommand,
-  BatchForcedTransferResponse,
-} from '../../../app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand';
-import {
-  BatchMintCommand,
-  BatchMintResponse,
-} from '../../../app/usecase/command/security/operations/batch/batchMint/BatchMintCommand';
+} from '@test/fixtures/compliance/ComplianceFixture';
+import { SetComplianceCommand } from '@command/security/compliance/setCompliance/SetComplianceCommand';
+import { IdentityRegistryQuery } from '@query/security/identityRegistry/IdentityRegistryQuery';
+import { ComplianceQuery } from '@query/security/compliance/compliance/ComplianceQuery';
+import { OnchainIDQuery } from '@query/security/tokenMetadata/onchainId/OnchainIDQuery';
+import { AddAgentCommand } from '@command/security/operations/agent/addAgent/AddAgentCommand';
+import { RemoveAgentCommand } from '@command/security/operations/agent/removeAgent/RemoveAgentCommand';
 import {
   BatchBurnResponse,
   BatchBurnCommand,
-} from '../../../app/usecase/command/security/operations/batch/batchBurn/BatchBurnCommand';
+} from '@command/security/operations/batch/batchBurn/BatchBurnCommand';
 import {
-  BatchSetAddressFrozenResponse,
-  BatchSetAddressFrozenCommand,
-} from '../../../app/usecase/command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommand';
+  BatchForcedTransferResponse,
+  BatchForcedTransferCommand,
+} from '@command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand';
 import {
   BatchFreezePartialTokensResponse,
   BatchFreezePartialTokensCommand,
-} from '../../../app/usecase/command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommand';
+} from '@command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommand';
+import {
+  BatchMintResponse,
+  BatchMintCommand,
+} from '@command/security/operations/batch/batchMint/BatchMintCommand';
+import {
+  BatchSetAddressFrozenResponse,
+  BatchSetAddressFrozenCommand,
+} from '@command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommand';
+import {
+  BatchTransferResponse,
+  BatchTransferCommand,
+} from '@command/security/operations/batch/batchTransfer/BatchTransferCommand';
 import {
   BatchUnfreezePartialTokensResponse,
   BatchUnfreezePartialTokensCommand,
-} from '../../../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand';
+} from '@command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand';
+import { BurnCommand } from '@command/security/operations/burn/BurnCommand';
+import {
+  FreezePartialTokensResponse,
+  FreezePartialTokensCommand,
+} from '@command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand';
+import {
+  UnfreezePartialTokensResponse,
+  UnfreezePartialTokensCommand,
+} from '@command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand';
+import { MintCommand } from '@command/security/operations/mint/MintCommand';
+import { RecoveryAddressCommand } from '@command/security/operations/recoveryAddress/RecoveryAddressCommand';
+import { ForcedTransferCommand } from '@command/security/operations/transfer/ForcedTransferCommand';
+import { GetFrozenPartialTokensQuery } from '@query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
+import { IsAddressRecoveredQuery } from '@query/security/recovery/IsAddressRecoveredQuery';
+import {
+  AddAgentRequestFixture,
+  RemoveAgentRequestFixture,
+} from '@test/fixtures/agent/AgentFixture';
+import {
+  BatchTransferRequestFixture,
+  BatchForcedTransferRequestFixture,
+  BatchMintRequestFixture,
+  BatchBurnRequestFixture,
+  BatchSetAddressFrozenRequestFixture,
+  BatchFreezePartialTokensRequestFixture,
+  BatchUnfreezePartialTokensRequestFixture,
+} from '@test/fixtures/batch/BatchFixture';
+import { BurnRequestFixture } from '@test/fixtures/burn/BurnFixture';
 import {
   FreezePartialTokensRequestFixture,
   UnfreezePartialTokensRequestFixture,
   GetFrozenPartialTokensQueryFixture,
   SetAddressFrozenRequestFixture,
-} from '../../../../__tests__/fixtures/freeze/FreezeFixture';
+} from '@test/fixtures/freeze/FreezeFixture';
+import { MintRequestFixture } from '@test/fixtures/mint/MintFixture';
 import {
-  SetAddressFrozenCommand,
+  IsAddressRecoveredRequestFixture,
+  RecoveryAddressRequestFixture,
+} from '@test/fixtures/recovery/RecoveryFixture';
+import {
   SetAddressFrozenCommandResponse,
-} from '../../../app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand';
+  SetAddressFrozenCommand,
+} from '@command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand';
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;

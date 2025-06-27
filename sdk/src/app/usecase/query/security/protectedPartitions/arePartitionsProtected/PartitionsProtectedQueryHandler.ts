@@ -206,14 +206,14 @@
 import {
   PartitionsProtectedQuery,
   PartitionsProtectedQueryResponse,
-} from './PartitionsProtectedQuery.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService';
-import { PartitionsProtectedQueryError } from './error/PartitionsProtectedQueryError.js';
+} from './PartitionsProtectedQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { PartitionsProtectedQueryError } from './error/PartitionsProtectedQueryError';
 
 @QueryHandler(PartitionsProtectedQuery)
 export class PartitionsProtectedQueryHandler

@@ -204,23 +204,23 @@
 */
 
 import { createFixture } from '../config';
+import { HederaId } from '@domain/context/shared/HederaId';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/GetLockQuery';
-import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
-import { LockedBalanceOfQuery } from '../../../src/app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
-import { LocksIdQuery } from '../../../src/app/usecase/query/security/locksId/LocksIdQuery';
-import LockRequest from '../../../src/port/in/request/security/operations/lock/LockRequest';
-import ReleaseRequest from '../../../src/port/in/request/security/operations/release/ReleaseRequest';
-import GetLockedBalanceRequest from '../../../src/port/in/request/security/operations/lock/GetLockedBalanceRequest';
-import GetLockCountRequest from '../../../src/port/in/request/security/operations/lock/GetLockCountRequest';
-import GetLocksIdRequest from '../../../src/port/in/request/security/operations/lock/GetLocksIdRequest';
-import GetLockRequest from '../../../src/port/in/request/security/operations/lock/GetLockRequest';
-import { Lock } from '../../../src/domain/context/security/Lock';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
+import { GetLockQuery } from '@query/security/getLock/GetLockQuery';
+import { LockCountQuery } from '@query/security/lockCount/LockCountQuery';
+import { LockedBalanceOfQuery } from '@query/security/lockedBalanceOf/LockedBalanceOfQuery';
+import { LocksIdQuery } from '@query/security/locksId/LocksIdQuery';
+import LockRequest from '@port/in/request/security/operations/lock/LockRequest';
+import ReleaseRequest from '@port/in/request/security/operations/release/ReleaseRequest';
+import GetLockedBalanceRequest from '@port/in/request/security/operations/lock/GetLockedBalanceRequest';
+import GetLockCountRequest from '@port/in/request/security/operations/lock/GetLockCountRequest';
+import GetLocksIdRequest from '@port/in/request/security/operations/lock/GetLocksIdRequest';
+import GetLockRequest from '@port/in/request/security/operations/lock/GetLockRequest';
+import { Lock } from '@domain/context/security/Lock';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
-import { LockCommand } from '../../../src/app/usecase/command/security/operations/lock/LockCommand';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
-import { ReleaseCommand } from '../../../src/app/usecase/command/security/operations/release/ReleaseCommand';
+import { LockCommand } from '@command/security/operations/lock/LockCommand';
+import { ReleaseCommand } from '@command/security/operations/release/ReleaseCommand';
 
 export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
   query.securityId.as(() => HederaIdPropsFixture.create().value);

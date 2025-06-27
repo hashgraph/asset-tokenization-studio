@@ -206,7 +206,7 @@
 import { ethers } from 'ethers';
 import { createEcdsaCredential, EthrDID } from '@terminal3/ecdsa_vc';
 import { DID, type VerificationOptions } from '@terminal3/vc_core';
-import PrivateKey from '../../src/domain/context/account/PrivateKey';
+import PrivateKey from '@domain/context/account/PrivateKey';
 import { CLIENT_ACCOUNT_ECDSA } from '../config';
 
 async function createVcT3(address: string): Promise<string> {

@@ -205,17 +205,17 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import { GetRegulationDetailsRequest } from '../request';
-import { HederaIdPropsFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
-import NetworkService from '../../../app/service/network/NetworkService';
-import ContractId from '../../../domain/context/contract/ContractId';
+import { HederaIdPropsFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import NetworkService from '@service/network/NetworkService';
+import ContractId from '@domain/context/contract/ContractId';
 import Factory from './Factory';
-import { GetRegulationDetailsRequestFixture } from '../../../../__tests__/fixtures/factory/FactoryFixture';
-import { RegulationFixture } from '../../../../__tests__/fixtures/shared/RegulationFixture';
-import { GetRegulationDetailsQuery } from '../../../app/usecase/query/factory/get/GetRegulationDetailsQuery';
+import { GetRegulationDetailsRequestFixture } from '@test/fixtures/factory/FactoryFixture';
+import { RegulationFixture } from '@test/fixtures/shared/RegulationFixture';
+import { GetRegulationDetailsQuery } from '@query/factory/get/GetRegulationDetailsQuery';
 
 describe('Factory', () => {
   let queryBusMock: jest.Mocked<QueryBus>;

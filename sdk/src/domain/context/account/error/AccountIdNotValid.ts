@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class AccountIdNotValid extends BaseError {
   constructor(accountId: string) {

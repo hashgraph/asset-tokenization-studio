@@ -203,21 +203,21 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { AddToWhiteListMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { AddToWhiteListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
 import {
   AddToWhiteListMockCommand,
   AddToWhiteListMockCommandResponse,
-} from './AddToWhiteListMockCommand.js';
-import { AddToWhiteListMockCommandHandler } from './AddToWhiteListMockCommandHandler.js';
-import AccountService from '../../../../../../../app/service/account/AccountService.js';
+} from './AddToWhiteListMockCommand';
+import { AddToWhiteListMockCommandHandler } from './AddToWhiteListMockCommandHandler';
+import AccountService from '@service/account/AccountService';
 
 describe('AddToWhiteListMockCommandHandler', () => {
   let handler: AddToWhiteListMockCommandHandler;

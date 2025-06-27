@@ -347,67 +347,67 @@ import {
   SET_ONCHAIN_ID_GAS,
   SET_IDENTITY_REGISTRY_GAS,
   SET_COMPLIANCE_GAS,
-  BATCH_TRANSFER_GAS,
-  BATCH_FORCED_TRANSFER_GAS,
-  BATCH_MINT_GAS,
-  BATCH_BURN_GAS,
-  BATCH_SET_ADDRESS_FROZEN_GAS,
-  BATCH_FREEZE_PARTIAL_TOKENS_GAS,
-  BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
-  RECOVERY_ADDRESS_GAS,
   EVM_ZERO_ADDRESS,
+  RECOVERY_ADDRESS_GAS,
   ADD_AGENT_GAS,
   SET_ADDRESS_FROZEN_GAS,
-} from '../../../core/Constants.js';
+  BATCH_BURN_GAS,
+  BATCH_FORCED_TRANSFER_GAS,
+  BATCH_FREEZE_PARTIAL_TOKENS_GAS,
+  BATCH_MINT_GAS,
+  BATCH_SET_ADDRESS_FROZEN_GAS,
+  BATCH_TRANSFER_GAS,
+  BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
+} from '@core/Constants';
 import TransactionAdapter from '../TransactionAdapter';
-import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
-import { SigningError } from '../error/SigningError.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
-import LogService from '../../../app/service/log/LogService.js';
+import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter';
+import { SigningError } from '../error/SigningError';
+import NetworkService from '@service/network/NetworkService';
+import LogService from '@service/log/LogService';
 import {
   FactoryBondToken,
   FactoryEquityToken,
   FactoryRegulationData,
-} from '../../../domain/context/factory/FactorySecurityToken.js';
+} from '@domain/context/factory/FactorySecurityToken';
 import {
   CastRegulationSubType,
   CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
-import { MirrorNodes } from '../../../domain/context/network/MirrorNode.js';
-import { JsonRpcRelays } from '../../../domain/context/network/JsonRpcRelay.js';
-import { Factories } from '../../../domain/context/factory/Factories.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import { Security } from '../../../domain/context/security/Security.js';
-import { Rbac } from '../../../domain/context/factory/Rbac.js';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
-import { ERC20MetadataInfo } from '../../../domain/context/factory/ERC20Metadata.js';
-import { Resolvers } from '../../../domain/context/factory/Resolvers.js';
-import { BusinessLogicKeys } from '../../../domain/context/factory/BusinessLogicKeys.js';
-import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
-import { BondDetailsData } from '../../../domain/context/factory/BondDetailsData.js';
-import { CouponDetailsData } from '../../../domain/context/factory/CouponDetailsData.js';
-import { EquityDetails } from '../../../domain/context/equity/EquityDetails.js';
-import { EquityDetailsData } from '../../../domain/context/factory/EquityDetailsData.js';
-import { SecurityData } from '../../../domain/context/factory/SecurityData.js';
-import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
-import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
-import { Interface } from 'ethers/lib/utils.js';
-import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
-import { TransactionType } from '../TransactionResponseEnums.js';
-import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
+} from '@domain/context/factory/RegulationType';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
+import { MirrorNodes } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelays } from '@domain/context/network/JsonRpcRelay';
+import { Factories } from '@domain/context/factory/Factories';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { Security } from '@domain/context/security/Security';
+import { Rbac } from '@domain/context/factory/Rbac';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { ERC20MetadataInfo } from '@domain/context/factory/ERC20Metadata';
+import { Resolvers } from '@domain/context/factory/Resolvers';
+import { BusinessLogicKeys } from '@domain/context/factory/BusinessLogicKeys';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import { BondDetailsData } from '@domain/context/factory/BondDetailsData';
+import { CouponDetailsData } from '@domain/context/factory/CouponDetailsData';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import { EquityDetailsData } from '@domain/context/factory/EquityDetailsData';
+import { SecurityData } from '@domain/context/factory/SecurityData';
+import { CastDividendType } from '@domain/context/equity/DividendType';
+import { AdditionalSecurityData } from '@domain/context/factory/AdditionalSecurityData';
+import { Interface } from 'ethers/lib/utils';
+import { ResolverProxyConfiguration } from '@domain/context/factory/ResolverProxyConfiguration';
+import { TransactionType } from '../TransactionResponseEnums';
+import { TransferAndLock } from '@domain/context/security/TransferAndLock';
 import {
   Hold,
   HoldIdentifier,
   ProtectedHold,
-} from '../../../domain/context/security/Hold.js';
+} from '@domain/context/security/Hold';
 import {
   BasicTransferInfo,
   IssueData,
   OperatorTransferData,
-} from '../../../domain/context/factory/ERC1410Metadata.js';
+} from '@domain/context/factory/ERC1410Metadata';
 import {
   CastClearingOperationType,
   ClearingOperation,
@@ -415,9 +415,9 @@ import {
   ClearingOperationIdentifier,
   ClearingOperationType,
   ProtectedClearingOperation,
-} from '../../../domain/context/security/Clearing.js';
-import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
-import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
+} from '@domain/context/security/Clearing';
+import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
+import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;

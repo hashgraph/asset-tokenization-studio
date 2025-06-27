@@ -203,8 +203,8 @@
 
 */
 
-import { Factory } from '../../../../domain/context/factory/Factories.js';
-import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
+import { Factory } from '@domain/context/factory/Factories';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
 export default class GetRegulationDetailsRequest extends ValidatedRequest<GetRegulationDetailsRequest> {
   regulationType: number;

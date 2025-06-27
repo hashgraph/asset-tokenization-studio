@@ -1,6 +1,6 @@
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
-import { SetMaxSupplyCommand } from '../../../src/app/usecase/command/security/operations/cap/SetMaxSupplyCommand';
+import { SetMaxSupplyCommand } from '@command/security/operations/cap/SetMaxSupplyCommand';
 
 export const SetMaxSupplyCommandFixture = createFixture<SetMaxSupplyCommand>(
   (command) => {

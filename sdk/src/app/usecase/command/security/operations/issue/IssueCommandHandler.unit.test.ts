@@ -203,30 +203,30 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import { IssueCommandHandler } from './IssueCommandHandler.js';
-import { IssueCommand, IssueCommandResponse } from './IssueCommand.js';
-import { IssueCommandError } from './error/IssueCommandError.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { IssueCommandFixture } from '../../../../../../../__tests__/fixtures/issue/IssueFixture.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import SecurityService from '@service/security/SecurityService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import { IssueCommandHandler } from './IssueCommandHandler';
+import { IssueCommand, IssueCommandResponse } from './IssueCommand';
+import { IssueCommandError } from './error/IssueCommandError';
+import Account from '@domain/context/account/Account';
+import { AccountPropsFixture } from '@test/fixtures/shared/DataFixture';
+import { KycStatus } from '@domain/context/kyc/Kyc';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { IssueCommandFixture } from '@test/fixtures/issue/IssueFixture';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 
 describe('IssueCommandHandler', () => {
   let handler: IssueCommandHandler;

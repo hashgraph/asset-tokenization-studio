@@ -207,19 +207,19 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../app/service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
 import {
   GetRegulationDetailsQuery,
   GetRegulationDetailsQueryResponse,
-} from './GetRegulationDetailsQuery.js';
-import { GetRegulationDetailsQueryHandler } from './GetRegulationDetailsQueryHandler.js';
-import { GetRegulationDetailsQueryError } from './error/GetRegulationDetailsQueryError.js';
-import { GetRegulationDetailsQueryFixture } from '../../../../../../__tests__/fixtures/equity/EquityFixture.js';
-import { RegulationFixture } from '../../../../../../__tests__/fixtures/shared/RegulationFixture.js';
+} from './GetRegulationDetailsQuery';
+import { GetRegulationDetailsQueryHandler } from './GetRegulationDetailsQueryHandler';
+import { GetRegulationDetailsQueryError } from './error/GetRegulationDetailsQueryError';
+import { GetRegulationDetailsQueryFixture } from '@test/fixtures/equity/EquityFixture';
+import { RegulationFixture } from '@test/fixtures/shared/RegulationFixture';
 
 describe('GetRegulationDetailsQueryHandler', () => {
   let handler: GetRegulationDetailsQueryHandler;

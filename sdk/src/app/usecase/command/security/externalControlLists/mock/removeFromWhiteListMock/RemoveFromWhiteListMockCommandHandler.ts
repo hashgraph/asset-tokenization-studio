@@ -203,16 +203,16 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import {
   RemoveFromWhiteListMockCommand,
   RemoveFromWhiteListMockCommandResponse,
 } from './RemoveFromWhiteListMockCommand';
-import TransactionService from '../../../../../../service/transaction/TransactionService';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import ContractService from '../../../../../../../app/service/contract/ContractService';
-import AccountService from '../../../../../../../app/service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
 
 @CommandHandler(RemoveFromWhiteListMockCommand)
 export class RemoveFromWhiteListMockCommandHandler

@@ -203,21 +203,21 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   GrantKycMockCommand,
   GrantKycMockCommandResponse,
-} from './GrantKycMockCommand.js';
-import { GrantKycMockCommandHandler } from './GrantKycMockCommandHandler.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import { GrantKycMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
+} from './GrantKycMockCommand';
+import { GrantKycMockCommandHandler } from './GrantKycMockCommandHandler';
+import AccountService from '@service/account/AccountService';
+import { GrantKycMockCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
 
 describe('GrantKycMockCommandHandler', () => {
   let handler: GrantKycMockCommandHandler;

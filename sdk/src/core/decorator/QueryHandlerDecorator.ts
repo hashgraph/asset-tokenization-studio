@@ -203,10 +203,10 @@
 
 */
 
-import { QUERY_HANDLER_METADATA, QUERY_METADATA } from '../Constants';
+import { QUERY_HANDLER_METADATA, QUERY_METADATA } from '@core/Constants';
 import { v4 } from 'uuid';
-import { BaseQuery } from '../query/Query.js';
-import { Constructor } from '../Type.js';
+import { BaseQuery } from '@core/query/Query';
+import { Constructor } from '@core/Type';
 import { injectable } from 'tsyringe';
 
 /**

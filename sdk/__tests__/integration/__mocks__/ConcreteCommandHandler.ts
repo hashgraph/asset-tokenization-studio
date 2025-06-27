@@ -204,10 +204,10 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Command } from '../../../src/core/command/Command.js';
-import { ICommandHandler } from '../../../src/core/command/CommandHandler.js';
-import { CommandResponse } from '../../../src/core/command/CommandResponse.js';
-import { CommandHandler } from '../../../src/core/decorator/CommandHandlerDecorator.js';
+import { Command } from '@core/command/Command';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandResponse } from '@core/command/CommandResponse';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 
 export class ConcreteCommandResponse implements CommandResponse {
   constructor(public readonly payload: number) {}

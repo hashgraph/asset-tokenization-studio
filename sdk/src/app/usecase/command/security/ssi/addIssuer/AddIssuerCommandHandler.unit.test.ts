@@ -203,28 +203,25 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { AddIssuerCommandHandler } from './AddIssuerCommandHandler.js';
-import {
-  AddIssuerCommand,
-  AddIssuerCommandResponse,
-} from './AddIssuerCommand.js';
-import { AddIssuerCommandFixture } from '../../../../../../../__tests__/fixtures/ssi/SsiFixture.js';
-import { AddIssuerCommandError } from './error/AddIssuerCommandError.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import { AddIssuerCommandHandler } from './AddIssuerCommandHandler';
+import { AddIssuerCommand, AddIssuerCommandResponse } from './AddIssuerCommand';
+import { AddIssuerCommandFixture } from '@test/fixtures/ssi/SsiFixture';
+import { AddIssuerCommandError } from './error/AddIssuerCommandError';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 
 describe('AddIssuerCommandHandler', () => {
   let handler: AddIssuerCommandHandler;

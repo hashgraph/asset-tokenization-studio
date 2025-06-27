@@ -203,18 +203,18 @@
 
 */
 
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import {
   GetEquityDetailsQuery,
   GetEquityDetailsQueryResponse,
-} from './GetEquityDetailsQuery.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { EquityDetails } from '../../../../../../domain/context/equity/EquityDetails.js';
-import { GetEquityDetailsQueryError } from './error/GetEquityDetailsQueryError.js';
+} from './GetEquityDetailsQuery';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import { GetEquityDetailsQueryError } from './error/GetEquityDetailsQueryError';
 
 @QueryHandler(GetEquityDetailsQuery)
 export class GetEquityDetailsQueryHandler

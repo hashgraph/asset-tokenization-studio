@@ -203,24 +203,24 @@
 
 */
 
-import { AddExternalPauseCommand } from '../../../src/app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommand';
+import { AddExternalPauseCommand } from '@command/security/externalPauses/addExternalPause/AddExternalPauseCommand';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
-import { SetPausedMockCommand } from '../../../src/app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommand';
-import { RemoveExternalPauseCommand } from '../../../src/app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand';
-import { UpdateExternalPausesCommand } from '../../../src/app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
-import UpdateExternalPausesRequest from '../../../src/port/in/request/security/externalPauses/UpdateExternalPausesRequest';
-import AddExternalPauseRequest from '../../../src/port/in/request/security/externalPauses/AddExternalPauseRequest';
-import RemoveExternalPauseRequest from '../../../src/port/in/request/security/externalPauses/RemoveExternalPauseRequest';
-import IsExternalPauseRequest from '../../../src/port/in/request/security/externalPauses/IsExternalPauseRequest';
-import GetExternalPausesCountRequest from '../../../src/port/in/request/security/externalPauses/GetExternalPausesCountRequest';
-import GetExternalPausesMembersRequest from '../../../src/port/in/request/security/externalPauses/GetExternalPausesMembersRequest';
-import SetPausedMockRequest from '../../../src/port/in/request/security/externalPauses/mock/SetPausedMockRequest';
-import IsPausedMockRequest from '../../../src/port/in/request/security/externalPauses/mock/IsPausedMockRequest';
-import { GetExternalPausesCountQuery } from '../../../src/app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery';
-import { GetExternalPausesMembersQuery } from '../../../src/app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery';
-import { IsExternalPauseQuery } from '../../../src/app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery';
-import { IsPausedMockQuery } from '../../../src/app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery';
+import { SetPausedMockCommand } from '@command/security/externalPauses/mock/setPaused/SetPausedMockCommand';
+import { RemoveExternalPauseCommand } from '@command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand';
+import { UpdateExternalPausesCommand } from '@command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
+import UpdateExternalPausesRequest from '@port/in/request/security/externalPauses/UpdateExternalPausesRequest';
+import AddExternalPauseRequest from '@port/in/request/security/externalPauses/AddExternalPauseRequest';
+import RemoveExternalPauseRequest from '@port/in/request/security/externalPauses/RemoveExternalPauseRequest';
+import IsExternalPauseRequest from '@port/in/request/security/externalPauses/IsExternalPauseRequest';
+import GetExternalPausesCountRequest from '@port/in/request/security/externalPauses/GetExternalPausesCountRequest';
+import GetExternalPausesMembersRequest from '@port/in/request/security/externalPauses/GetExternalPausesMembersRequest';
+import SetPausedMockRequest from '@port/in/request/security/externalPauses/mock/SetPausedMockRequest';
+import IsPausedMockRequest from '@port/in/request/security/externalPauses/mock/IsPausedMockRequest';
+import { GetExternalPausesCountQuery } from '@query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery';
+import { GetExternalPausesMembersQuery } from '@query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery';
+import { IsExternalPauseQuery } from '@query/security/externalPauses/isExternalPause/IsExternalPauseQuery';
+import { IsPausedMockQuery } from '@query/security/externalPauses/mock/isPaused/IsPausedMockQuery';
 
 export const AddExternalPauseCommandFixture =
   createFixture<AddExternalPauseCommand>((command) => {

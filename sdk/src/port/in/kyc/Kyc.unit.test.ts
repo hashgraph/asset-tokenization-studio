@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   ActivateInternalKycRequest,
   DeactivateInternalKycRequest,
@@ -216,11 +216,11 @@ import {
   IsInternalKycActivatedRequest,
   RevokeKycRequest,
 } from '../request';
-import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
 import {
   ActivateInternalKycRequestFixture,
   DeactivateInternalKycRequestFixture,
@@ -233,17 +233,17 @@ import {
   KycAccountDataFixture,
   KycFixture,
   RevokeKycRequestFixture,
-} from '../../../../__tests__/fixtures/kyc/KycFixture';
+} from '@test/fixtures/kyc/KycFixture';
 import Kyc from './Kyc';
-import { ActivateInternalKycCommand } from '../../../app/usecase/command/security/kyc/activateInternalKyc/ActivateInternalKycCommand';
-import { DeactivateInternalKycCommand } from '../../../app/usecase/command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommand';
-import { IsInternalKycActivatedQuery } from '../../../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
-import { GrantKycCommand } from '../../../app/usecase/command/security/kyc/grantKyc/GrantKycCommand';
-import { RevokeKycCommand } from '../../../app/usecase/command/security/kyc/revokeKyc/RevokeKycCommand';
-import { GetKycForQuery } from '../../../app/usecase/query/security/kyc/getKycFor/GetKycForQuery';
-import { GetKycAccountsCountQuery } from '../../../app/usecase/query/security/kyc/getKycAccountsCount/GetKycAccountsCountQuery';
-import { GetKycAccountsDataQuery } from '../../../app/usecase/query/security/kyc/getKycAccountsData/GetKycAccountsDataQuery';
-import { GetKycStatusForQuery } from '../../../app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
+import { ActivateInternalKycCommand } from '@command/security/kyc/activateInternalKyc/ActivateInternalKycCommand';
+import { DeactivateInternalKycCommand } from '@command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommand';
+import { IsInternalKycActivatedQuery } from '@query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
+import { GrantKycCommand } from '@command/security/kyc/grantKyc/GrantKycCommand';
+import { RevokeKycCommand } from '@command/security/kyc/revokeKyc/RevokeKycCommand';
+import { GetKycForQuery } from '@query/security/kyc/getKycFor/GetKycForQuery';
+import { GetKycAccountsCountQuery } from '@query/security/kyc/getKycAccountsCount/GetKycAccountsCountQuery';
+import { GetKycAccountsDataQuery } from '@query/security/kyc/getKycAccountsData/GetKycAccountsDataQuery';
+import { GetKycStatusForQuery } from '@query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
 describe('Kyc', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;

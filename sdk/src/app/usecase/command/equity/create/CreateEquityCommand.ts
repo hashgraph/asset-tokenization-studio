@@ -203,11 +203,11 @@
 
 */
 
-import { Command } from '@core/command/Command.js';
-import { CommandResponse } from '@core/command/CommandResponse.js';
-import ContractId from '@domain/context/contract/ContractId.js';
-import { DividendType } from '@domain/context/equity/DividendType.js';
-import { SecurityProps } from '@domain/context/security/Security.js';
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
+import ContractId from '@domain/context/contract/ContractId';
+import { DividendType } from '@domain/context/equity/DividendType';
+import { SecurityProps } from '@domain/context/security/Security';
 
 export class CreateEquityCommandResponse implements CommandResponse {
   public readonly securityId: ContractId;
