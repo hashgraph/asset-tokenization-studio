@@ -209,6 +209,13 @@ import {
   ActivateClearingRequest,
   ApproveClearingOperationByPartitionRequest,
   BurnRequest,
+  BatchBurnRequest,
+  BatchForcedTransferRequest,
+  BatchFreezePartialTokensRequest,
+  BatchMintRequest,
+  BatchSetAddressFrozenRequest,
+  BatchTransferRequest,
+  BatchUnfreezePartialTokensRequest,
   CancelClearingOperationByPartitionRequest,
   ClearingCreateHoldByPartitionRequest,
   ClearingCreateHoldFromByPartitionRequest,
@@ -281,7 +288,10 @@ import {
   TransferRequest,
   UnfreezePartialTokensRequest,
 } from '../request';
-import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
+import {
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '../../../../__tests__/fixtures/shared/DataFixture';
 import LogService from '../../../app/service/log/LogService';
 import { QueryBus } from '../../../core/query/QueryBus';
 import ValidatedRequest from '../../../core/validation/ValidatedArgs';
@@ -479,22 +489,59 @@ import { SetComplianceCommand } from '../../../app/usecase/command/security/comp
 import { IdentityRegistryQuery } from '../../../app/usecase/query/security/identityRegistry/IdentityRegistryQuery';
 import { ComplianceQuery } from '../../../app/usecase/query/security/compliance/compliance/ComplianceQuery';
 import { OnchainIDQuery } from '../../../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
-import FreezePartialTokensRequest from '../request/security/operations/erc3643/FreezePartialTokensRequest';
+import FreezePartialTokensRequest from '../request/security/operations/freeze/FreezePartialTokensRequest';
 import {
-  FreezePartialTokensRequestFixture,
-  GetFrozenPartialTokensQueryFixture,
-  UnfreezePartialTokensRequestFixture,
-} from '../../../../__tests__/fixtures/erc3643/ERC3643Fixture';
+  BatchBurnRequestFixture,
+  BatchForcedTransferRequestFixture,
+  BatchFreezePartialTokensRequestFixture,
+  BatchMintRequestFixture,
+  BatchSetAddressFrozenRequestFixture,
+  BatchTransferRequestFixture,
+  BatchUnfreezePartialTokensRequestFixture,
+} from '../../../../__tests__/fixtures/batch/BatchFixture';
 import {
   FreezePartialTokensCommand,
   FreezePartialTokensResponse,
-} from '../../../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommand';
+} from '../../../app/usecase/command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand';
 import {
   UnfreezePartialTokensCommand,
   UnfreezePartialTokensResponse,
-} from '../../../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommand';
+} from '../../../app/usecase/command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand';
 
-import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
+import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
+import {
+  BatchTransferResponse,
+  BatchTransferCommand,
+} from '../../../app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommand';
+import {
+  BatchForcedTransferCommand,
+  BatchForcedTransferResponse,
+} from '../../../app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand';
+import {
+  BatchMintCommand,
+  BatchMintResponse,
+} from '../../../app/usecase/command/security/operations/batch/batchMint/BatchMintCommand';
+import {
+  BatchBurnResponse,
+  BatchBurnCommand,
+} from '../../../app/usecase/command/security/operations/batch/batchBurn/BatchBurnCommand';
+import {
+  BatchSetAddressFrozenResponse,
+  BatchSetAddressFrozenCommand,
+} from '../../../app/usecase/command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommand';
+import {
+  BatchFreezePartialTokensResponse,
+  BatchFreezePartialTokensCommand,
+} from '../../../app/usecase/command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommand';
+import {
+  BatchUnfreezePartialTokensResponse,
+  BatchUnfreezePartialTokensCommand,
+} from '../../../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand';
+import {
+  FreezePartialTokensRequestFixture,
+  UnfreezePartialTokensRequestFixture,
+  GetFrozenPartialTokensQueryFixture,
+} from '../../../../__tests__/fixtures/freeze/FreezeFixture';
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -575,6 +622,13 @@ describe('Security', () => {
   let freezePartialTokensRequest: FreezePartialTokensRequest;
   let unfreezePartialTokensRequest: UnfreezePartialTokensRequest;
   let getFrozenPartialTokensRequest: GetFrozenPartialTokensRequest;
+  let batchTransferRequest: BatchTransferRequest;
+  let batchMintRequest: BatchMintRequest;
+  let batchBurnRequest: BatchBurnRequest;
+  let batchSetAddressFrozenRequest: BatchSetAddressFrozenRequest;
+  let batchFreezePartialTokensRequest: BatchFreezePartialTokensRequest;
+  let batchForcedTransferRequest: BatchForcedTransferRequest;
+  let batchUnfreezePartialTokensRequest: BatchUnfreezePartialTokensRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -1385,7 +1439,7 @@ describe('Security', () => {
         new BurnCommand(
           burnRequest.sourceId,
           burnRequest.amount,
-          burnRequest.securityId
+          burnRequest.securityId,
         ),
       );
       expect(result).toEqual(expectedResponse);
@@ -7992,6 +8046,728 @@ describe('Security', () => {
 
       await expect(
         Security.getFrozenPartialTokens(getFrozenPartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('BatchTransfer', () => {
+    batchTransferRequest = new BatchTransferRequest(
+      BatchTransferRequestFixture.create(),
+    );
+    const expectedResponse = new BatchTransferResponse(true, transactionId);
+    it('should batch transfer sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.batchTransfer(batchTransferRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchTransferRequest',
+        batchTransferRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchTransferCommand(
+          batchTransferRequest.securityId,
+          batchTransferRequest.amountList,
+          batchTransferRequest.toList,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.batchTransfer(batchTransferRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchTransferRequest',
+        batchTransferRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchTransferCommand(
+          batchTransferRequest.securityId,
+          batchTransferRequest.amountList,
+          batchTransferRequest.toList,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      batchTransferRequest = new BatchTransferRequest({
+        ...BatchTransferRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.batchTransfer(batchTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if amountList is empty', async () => {
+      batchTransferRequest = new BatchTransferRequest({
+        ...BatchTransferRequestFixture.create({
+          amountList: [],
+        }),
+      });
+
+      await expect(
+        Security.batchTransfer(batchTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if toList is empty', async () => {
+      batchTransferRequest = new BatchTransferRequest({
+        ...BatchTransferRequestFixture.create({
+          toList: [],
+        }),
+      });
+
+      await expect(
+        Security.batchTransfer(batchTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if list lengths are not equal', async () => {
+      batchTransferRequest = new BatchTransferRequest({
+        ...BatchTransferRequestFixture.create({
+          toList: [
+            HederaIdPropsFixture.create().value,
+            HederaIdPropsFixture.create().value,
+          ],
+        }),
+      });
+
+      await expect(
+        Security.batchTransfer(batchTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('BatchForcedTransfer', () => {
+    batchForcedTransferRequest = new BatchForcedTransferRequest(
+      BatchForcedTransferRequestFixture.create(),
+    );
+    const expectedResponse = new BatchForcedTransferResponse(
+      true,
+      transactionId,
+    );
+    it('should batch forced transfer sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.batchForcedTransfer(
+        batchForcedTransferRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchForcedTransferRequest',
+        batchForcedTransferRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchForcedTransferCommand(
+          batchForcedTransferRequest.securityId,
+          batchForcedTransferRequest.amountList,
+          batchForcedTransferRequest.fromList,
+          batchForcedTransferRequest.toList,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.batchForcedTransfer(batchForcedTransferRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchForcedTransferRequest',
+        batchForcedTransferRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchForcedTransferCommand(
+          batchForcedTransferRequest.securityId,
+          batchForcedTransferRequest.amountList,
+          batchForcedTransferRequest.fromList,
+          batchForcedTransferRequest.toList,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      batchForcedTransferRequest = new BatchForcedTransferRequest({
+        ...BatchForcedTransferRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.batchForcedTransfer(batchForcedTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if amountList is empty', async () => {
+      batchForcedTransferRequest = new BatchForcedTransferRequest({
+        ...BatchForcedTransferRequestFixture.create({
+          amountList: [],
+        }),
+      });
+
+      await expect(
+        Security.batchForcedTransfer(batchForcedTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if toList is empty', async () => {
+      batchForcedTransferRequest = new BatchForcedTransferRequest({
+        ...BatchForcedTransferRequestFixture.create({
+          toList: [],
+        }),
+      });
+
+      await expect(
+        Security.batchForcedTransfer(batchForcedTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if fromList is empty', async () => {
+      batchForcedTransferRequest = new BatchForcedTransferRequest({
+        ...BatchForcedTransferRequestFixture.create({
+          fromList: [],
+        }),
+      });
+
+      await expect(
+        Security.batchForcedTransfer(batchForcedTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if list lengths are not equal', async () => {
+      batchForcedTransferRequest = new BatchForcedTransferRequest({
+        ...BatchForcedTransferRequestFixture.create({
+          toList: [
+            HederaIdPropsFixture.create().value,
+            HederaIdPropsFixture.create().value,
+          ],
+        }),
+      });
+
+      await expect(
+        Security.batchForcedTransfer(batchForcedTransferRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('BatchMint', () => {
+    batchMintRequest = new BatchMintRequest(BatchMintRequestFixture.create());
+    const expectedResponse = new BatchMintResponse(true, transactionId);
+    it('should batch mint sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.batchMint(batchMintRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchMintRequest',
+        batchMintRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchMintCommand(
+          batchMintRequest.securityId,
+          batchMintRequest.amountList,
+          batchMintRequest.toList,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.batchMint(batchMintRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchMintRequest',
+        batchMintRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchMintCommand(
+          batchMintRequest.securityId,
+          batchMintRequest.amountList,
+          batchMintRequest.toList,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      batchMintRequest = new BatchMintRequest({
+        ...BatchMintRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.batchMint(batchMintRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if amountList is empty', async () => {
+      batchMintRequest = new BatchMintRequest({
+        ...BatchMintRequestFixture.create({
+          amountList: [],
+        }),
+      });
+
+      await expect(Security.batchMint(batchMintRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+    it('should throw error if toList is empty', async () => {
+      batchMintRequest = new BatchMintRequest({
+        ...BatchMintRequestFixture.create({
+          toList: [],
+        }),
+      });
+
+      await expect(Security.batchMint(batchMintRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if list lengths are not equal', async () => {
+      batchMintRequest = new BatchMintRequest({
+        ...BatchMintRequestFixture.create({
+          toList: [
+            HederaIdPropsFixture.create().value,
+            HederaIdPropsFixture.create().value,
+          ],
+        }),
+      });
+
+      await expect(Security.batchMint(batchMintRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('BatchBurn', () => {
+    batchBurnRequest = new BatchBurnRequest(BatchBurnRequestFixture.create());
+    const expectedResponse = new BatchBurnResponse(true, transactionId);
+    it('should batch burn sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.batchBurn(batchBurnRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchBurnRequest',
+        batchBurnRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchBurnCommand(
+          batchBurnRequest.securityId,
+          batchBurnRequest.amountList,
+          batchBurnRequest.targetList,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.batchBurn(batchBurnRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchBurnRequest',
+        batchBurnRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchBurnCommand(
+          batchBurnRequest.securityId,
+          batchBurnRequest.amountList,
+          batchBurnRequest.targetList,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      batchBurnRequest = new BatchBurnRequest({
+        ...BatchBurnRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.batchBurn(batchBurnRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if amountList is empty', async () => {
+      batchBurnRequest = new BatchBurnRequest({
+        ...BatchBurnRequestFixture.create({
+          amountList: [],
+        }),
+      });
+
+      await expect(Security.batchBurn(batchBurnRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+    it('should throw error if targetList is empty', async () => {
+      batchBurnRequest = new BatchBurnRequest({
+        ...BatchBurnRequestFixture.create({
+          targetList: [],
+        }),
+      });
+
+      await expect(Security.batchBurn(batchBurnRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if list lengths are not equal', async () => {
+      batchBurnRequest = new BatchBurnRequest({
+        ...BatchBurnRequestFixture.create({
+          targetList: [
+            HederaIdPropsFixture.create().value,
+            HederaIdPropsFixture.create().value,
+          ],
+        }),
+      });
+
+      await expect(Security.batchBurn(batchBurnRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('BatchSetAddressFrozen', () => {
+    batchSetAddressFrozenRequest = new BatchSetAddressFrozenRequest(
+      BatchSetAddressFrozenRequestFixture.create(),
+    );
+    const expectedResponse = new BatchSetAddressFrozenResponse(
+      true,
+      transactionId,
+    );
+    it('should batch set address frozen sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.batchSetAddressFrozen(
+        batchSetAddressFrozenRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchSetAddressFrozenRequest',
+        batchSetAddressFrozenRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchSetAddressFrozenCommand(
+          batchSetAddressFrozenRequest.securityId,
+          batchSetAddressFrozenRequest.freezeList,
+          batchSetAddressFrozenRequest.targetList,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.batchSetAddressFrozen(batchSetAddressFrozenRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchSetAddressFrozenRequest',
+        batchSetAddressFrozenRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchSetAddressFrozenCommand(
+          batchSetAddressFrozenRequest.securityId,
+          batchSetAddressFrozenRequest.freezeList,
+          batchSetAddressFrozenRequest.targetList,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      batchSetAddressFrozenRequest = new BatchSetAddressFrozenRequest({
+        ...BatchSetAddressFrozenRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.batchSetAddressFrozen(batchSetAddressFrozenRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if freezeList is empty', async () => {
+      batchSetAddressFrozenRequest = new BatchSetAddressFrozenRequest({
+        ...BatchSetAddressFrozenRequestFixture.create({
+          freezeList: [],
+        }),
+      });
+
+      await expect(
+        Security.batchSetAddressFrozen(batchSetAddressFrozenRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if targetList is empty', async () => {
+      batchSetAddressFrozenRequest = new BatchSetAddressFrozenRequest({
+        ...BatchSetAddressFrozenRequestFixture.create({
+          targetList: [],
+        }),
+      });
+
+      await expect(
+        Security.batchSetAddressFrozen(batchSetAddressFrozenRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if list lengths are not equal', async () => {
+      batchSetAddressFrozenRequest = new BatchSetAddressFrozenRequest({
+        ...BatchSetAddressFrozenRequestFixture.create({
+          targetList: [
+            HederaIdPropsFixture.create().value,
+            HederaIdPropsFixture.create().value,
+          ],
+        }),
+      });
+
+      await expect(
+        Security.batchSetAddressFrozen(batchSetAddressFrozenRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('BatchFreezePartialTokens', () => {
+    batchFreezePartialTokensRequest = new BatchFreezePartialTokensRequest(
+      BatchFreezePartialTokensRequestFixture.create(),
+    );
+    const expectedResponse = new BatchFreezePartialTokensResponse(
+      true,
+      transactionId,
+    );
+    it('should batch freeze partial tokens sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.batchFreezePartialTokens(
+        batchFreezePartialTokensRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchFreezePartialTokensRequest',
+        batchFreezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchFreezePartialTokensCommand(
+          batchFreezePartialTokensRequest.securityId,
+          batchFreezePartialTokensRequest.amountList,
+          batchFreezePartialTokensRequest.targetList,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.batchFreezePartialTokens(batchFreezePartialTokensRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchFreezePartialTokensRequest',
+        batchFreezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchFreezePartialTokensCommand(
+          batchFreezePartialTokensRequest.securityId,
+          batchFreezePartialTokensRequest.amountList,
+          batchFreezePartialTokensRequest.targetList,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      batchFreezePartialTokensRequest = new BatchFreezePartialTokensRequest({
+        ...BatchFreezePartialTokensRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.batchFreezePartialTokens(batchFreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if amountList is empty', async () => {
+      batchFreezePartialTokensRequest = new BatchFreezePartialTokensRequest({
+        ...BatchFreezePartialTokensRequestFixture.create({
+          amountList: [],
+        }),
+      });
+
+      await expect(
+        Security.batchFreezePartialTokens(batchFreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if targetList is empty', async () => {
+      batchFreezePartialTokensRequest = new BatchFreezePartialTokensRequest({
+        ...BatchFreezePartialTokensRequestFixture.create({
+          targetList: [],
+        }),
+      });
+
+      await expect(
+        Security.batchFreezePartialTokens(batchFreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if list lengths are not equal', async () => {
+      batchFreezePartialTokensRequest = new BatchFreezePartialTokensRequest({
+        ...BatchFreezePartialTokensRequestFixture.create({
+          targetList: [
+            HederaIdPropsFixture.create().value,
+            HederaIdPropsFixture.create().value,
+          ],
+        }),
+      });
+
+      await expect(
+        Security.batchFreezePartialTokens(batchFreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('BatchUnfreezePartialTokens', () => {
+    batchUnfreezePartialTokensRequest = new BatchUnfreezePartialTokensRequest(
+      BatchUnfreezePartialTokensRequestFixture.create(),
+    );
+    const expectedResponse = new BatchUnfreezePartialTokensResponse(
+      true,
+      transactionId,
+    );
+    it('should batch freeze partial tokens sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.batchUnfreezePartialTokens(
+        batchUnfreezePartialTokensRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchUnfreezePartialTokensRequest',
+        batchUnfreezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchUnfreezePartialTokensCommand(
+          batchUnfreezePartialTokensRequest.securityId,
+          batchUnfreezePartialTokensRequest.amountList,
+          batchUnfreezePartialTokensRequest.targetList,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.batchUnfreezePartialTokens(batchUnfreezePartialTokensRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchUnfreezePartialTokensRequest',
+        batchUnfreezePartialTokensRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchUnfreezePartialTokensCommand(
+          batchUnfreezePartialTokensRequest.securityId,
+          batchUnfreezePartialTokensRequest.amountList,
+          batchUnfreezePartialTokensRequest.targetList,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      batchUnfreezePartialTokensRequest = new BatchUnfreezePartialTokensRequest(
+        {
+          ...BatchUnfreezePartialTokensRequestFixture.create({
+            securityId: 'invalid',
+          }),
+        },
+      );
+
+      await expect(
+        Security.batchUnfreezePartialTokens(batchUnfreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if amountList is empty', async () => {
+      batchUnfreezePartialTokensRequest = new BatchUnfreezePartialTokensRequest(
+        {
+          ...BatchUnfreezePartialTokensRequestFixture.create({
+            amountList: [],
+          }),
+        },
+      );
+
+      await expect(
+        Security.batchUnfreezePartialTokens(batchUnfreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if targetList is empty', async () => {
+      batchUnfreezePartialTokensRequest = new BatchUnfreezePartialTokensRequest(
+        {
+          ...BatchUnfreezePartialTokensRequestFixture.create({
+            targetList: [],
+          }),
+        },
+      );
+
+      await expect(
+        Security.batchUnfreezePartialTokens(batchUnfreezePartialTokensRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if list lengths are not equal', async () => {
+      batchUnfreezePartialTokensRequest = new BatchUnfreezePartialTokensRequest(
+        {
+          ...BatchUnfreezePartialTokensRequestFixture.create({
+            targetList: [
+              HederaIdPropsFixture.create().value,
+              HederaIdPropsFixture.create().value,
+            ],
+          }),
+        },
+      );
+
+      await expect(
+        Security.batchUnfreezePartialTokens(batchUnfreezePartialTokensRequest),
       ).rejects.toThrow(ValidationError);
     });
   });

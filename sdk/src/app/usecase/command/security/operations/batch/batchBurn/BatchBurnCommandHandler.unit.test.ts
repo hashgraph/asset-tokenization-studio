@@ -216,24 +216,21 @@ import ContractService from '../../../../../../service/contract/ContractService.
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../../service/validation/ValidationService.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 
 import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import { UnfreezePartialTokensCommandError } from './error/UnfreezePartialTokensCommandError.js';
-import {
-  UnfreezePartialTokensCommand,
-  UnfreezePartialTokensResponse,
-} from './UnfreezePartialTokensCommand.js';
-import { UnfreezePartialTokensCommandHandler } from './UnfreezePartialTokensCommandHandler.js';
-import { UnfreezePartialTokensCommandFixture } from '../../../../../../../../__tests__/fixtures/erc3643/ERC3643Fixture.js';
+import { BatchBurnCommandError } from './error/BatchBurnCommandError.js';
+import { BatchBurnCommand, BatchBurnResponse } from './BatchBurnCommand.js';
+import { BatchBurnCommandHandler } from './BatchBurnCommandHandler.js';
+
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import SecurityService from '../../../../../../service/security/SecurityService.js';
 import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
 import { Security } from '../../../../../../../domain/context/security/Security.js';
+import { BatchBurnCommandFixture } from '../../../../../../../../__tests__/fixtures/batch/BatchFixture.js';
 
-describe('UnfreezePartialTokensCommandHandler', () => {
-  let handler: UnfreezePartialTokensCommandHandler;
-  let command: UnfreezePartialTokensCommand;
+describe('BatchBurnCommandHandler', () => {
+  let handler: BatchBurnCommandHandler;
+  let command: BatchBurnCommand;
 
   const transactionServiceMock = createMock<TransactionService>();
   const validationServiceMock = createMock<ValidationService>();
@@ -251,14 +248,14 @@ describe('UnfreezePartialTokensCommandHandler', () => {
   const security = new Security(SecurityPropsFixture.create());
 
   beforeEach(() => {
-    handler = new UnfreezePartialTokensCommandHandler(
+    handler = new BatchBurnCommandHandler(
       securityServiceMock,
       accountServiceMock,
       transactionServiceMock,
       validationServiceMock,
       contractServiceMock,
     );
-    command = UnfreezePartialTokensCommandFixture.create();
+    command = BatchBurnCommandFixture.create();
   });
 
   afterEach(() => {
@@ -266,43 +263,41 @@ describe('UnfreezePartialTokensCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('throws UnfreezePartialTokensCommandError when command fails with uncaught error', async () => {
+    it('throws BatchBurnCommandError when command fails with uncaught error', async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
       const resultPromise = handler.execute(command);
 
-      await expect(resultPromise).rejects.toBeInstanceOf(
-        UnfreezePartialTokensCommandError,
-      );
+      await expect(resultPromise).rejects.toBeInstanceOf(BatchBurnCommandError);
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
-          `An error occurred while unfreeze partial tokens: ${errorMsg}`,
+          `An error occurred while batch burn: ${errorMsg}`,
         ),
         errorCode: ErrorCode.UncaughtCommandError,
       });
     });
 
-    it('should successfully Unfreeze amount of tokens', async () => {
+    it('should successfully batch burn', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,
       );
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(evmAddress);
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
       validationServiceMock.checkPause.mockResolvedValue(undefined);
-      validationServiceMock.checkRole.mockResolvedValue(undefined);
+      validationServiceMock.checkClearingDeactivated.mockResolvedValue(
+        undefined,
+      );
       validationServiceMock.checkDecimals.mockResolvedValue(undefined);
       securityServiceMock.get.mockResolvedValue(security);
-      transactionServiceMock
-        .getHandler()
-        .unfreezePartialTokens.mockResolvedValue({
-          id: transactionId,
-        });
+      transactionServiceMock.getHandler().batchBurn.mockResolvedValue({
+        id: transactionId,
+      });
 
       const result = await handler.execute(command);
 
-      expect(result).toBeInstanceOf(UnfreezePartialTokensResponse);
+      expect(result).toBeInstanceOf(BatchBurnResponse);
       expect(result.payload).toBe(true);
       expect(result.transactionId).toBe(transactionId);
 
@@ -310,18 +305,15 @@ describe('UnfreezePartialTokensCommandHandler', () => {
         1,
       );
       expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+      expect(
+        validationServiceMock.checkClearingDeactivated,
+      ).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
       expect(
-        transactionServiceMock.getHandler().unfreezePartialTokens,
+        transactionServiceMock.getHandler().batchBurn,
       ).toHaveBeenCalledTimes(1);
 
       expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-        command.securityId,
-      );
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._FREEZE_MANAGER_ROLE,
-        account.id.toString(),
         command.securityId,
       );
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
@@ -329,11 +321,11 @@ describe('UnfreezePartialTokensCommandHandler', () => {
       );
 
       expect(
-        transactionServiceMock.getHandler().unfreezePartialTokens,
+        transactionServiceMock.getHandler().batchBurn,
       ).toHaveBeenCalledWith(
         evmAddress,
-        BigDecimal.fromString(command.amount, security.decimals),
-        evmAddress,
+        [BigDecimal.fromString(command.amountList[0], security.decimals)],
+        [evmAddress],
         command.securityId,
       );
     });

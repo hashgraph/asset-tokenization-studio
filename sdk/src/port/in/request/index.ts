@@ -364,9 +364,16 @@ import ComplianceRequest from './security/compliance/ComplianceRequest.js';
 import SetIdentityRegistryRequest from './security/identityRegistry/SetIdentityRegistryRequest.js';
 import IdentityRegistryRequest from './security/identityRegistry/IdentityRegistryRequest.js';
 import OnchainIDRequest from './security/operations/tokeMetadata/OnchainIDRequest.js';
-import FreezePartialTokensRequest from './security/operations/erc3643/FreezePartialTokensRequest.js';
-import GetFrozenPartialTokensRequest from './security/operations/erc3643/GetFrozenPartialTokensRequest.js';
-import UnfreezePartialTokensRequest from './security/operations/erc3643/UnfreezePartialTokensRequest.js';
+import FreezePartialTokensRequest from './security/operations/freeze/FreezePartialTokensRequest.js';
+import GetFrozenPartialTokensRequest from './security/operations/freeze/GetFrozenPartialTokensRequest.js';
+import UnfreezePartialTokensRequest from './security/operations/freeze/UnfreezePartialTokensRequest.js';
+import BatchBurnRequest from './security/operations/batch/BatchBurnRequest.js';
+import BatchForcedTransferRequest from './security/operations/batch/BatchForcedTransferRequest.js';
+import BatchFreezePartialTokensRequest from './security/operations/batch/BatchFreezePartialTokensRequest.js';
+import BatchMintRequest from './security/operations/batch/BatchMintRequest.js';
+import BatchSetAddressFrozenRequest from './security/operations/batch/BatchSetAddressFrozenRequest.js';
+import BatchTransferRequest from './security/operations/batch/BatchTransferRequest.js';
+import BatchUnfreezePartialTokensRequest from './security/operations/batch/BatchUnfreezePartialTokensRequest.js';
 
 export {
   CreateEquityRequest,
@@ -532,4 +539,11 @@ export {
   FreezePartialTokensRequest,
   GetFrozenPartialTokensRequest,
   UnfreezePartialTokensRequest,
+  BatchBurnRequest,
+  BatchForcedTransferRequest,
+  BatchFreezePartialTokensRequest,
+  BatchMintRequest,
+  BatchSetAddressFrozenRequest,
+  BatchTransferRequest,
+  BatchUnfreezePartialTokensRequest,
 };
