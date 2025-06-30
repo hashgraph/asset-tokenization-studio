@@ -286,14 +286,14 @@ export const IsIssuerRequestFixture = createFixture<IsIssuerRequest>(
 );
 
 export const AddIssuerCommandFixture = createFixture<AddIssuerCommand>(
-    (command) => {
-        command.securityId.as(() => HederaIdPropsFixture.create().value);
-        command.issuerId.as(() => HederaIdPropsFixture.create().value);
-    },
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.issuerId.as(() => HederaIdPropsFixture.create().value);
+  },
 );
 
 export const SetRevocationRegistryAddressCommandFixture =
-    createFixture<SetRevocationRegistryAddressCommand>((command) => {
-        command.securityId.as(() => HederaIdPropsFixture.create().value);
-        command.revocationRegistryId.as(() => HederaIdPropsFixture.create().value);
-    });
+  createFixture<SetRevocationRegistryAddressCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.revocationRegistryId.as(() => HederaIdPropsFixture.create().value);
+  });

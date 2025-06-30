@@ -217,9 +217,9 @@ export const IssueCommandFixture = createFixture<IssueCommand>((command) => {
 });
 
 export const IssueRequestFixture = createFixture<IssueRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-        faker.number.int({ min: 1, max: 10 }).toString(),
-    );
+  request.securityId.as(() => HederaIdPropsFixture.create().value);
+  request.targetId.as(() => HederaIdPropsFixture.create().value);
+  request.amount.faker((faker) =>
+    faker.number.int({ min: 1, max: 10 }).toString(),
+  );
 });

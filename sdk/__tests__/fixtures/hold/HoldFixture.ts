@@ -416,19 +416,6 @@ export const GetHoldsIdForByPartitionQueryFixture =
     query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   });
 
-export const HoldDetailsFixture = createFixture<HoldDetails>((props) => {
-  props.amount.faker(
-    (faker) =>
-      new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()),
-  );
-  props.expirationTimeStamp.faker((faker) => faker.date.future());
-  props.escrowAddress.as(() => HederaIdPropsFixture.create().value);
-  props.tokenHolderAddress.as(() => HederaIdPropsFixture.create().value);
-  props.destinationAddress.as(() => HederaIdPropsFixture.create().value);
-  props.data.faker((faker) => faker.lorem.words());
-  props.operatorData.faker((faker) => faker.lorem.words());
-});
-
 export const CreateHoldCommandFixture =
   createFixture<ProtectedCreateHoldByPartitionCommand>((command) => {
     command.securityId.as(() => HederaIdPropsFixture.create().value);
