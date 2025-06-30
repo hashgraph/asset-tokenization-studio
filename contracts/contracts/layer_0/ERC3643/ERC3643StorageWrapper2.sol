@@ -205,10 +205,14 @@
 
 pragma solidity 0.8.18;
 
-import {_DEFAULT_PARTITION} from "../constants/values.sol";
-import {SnapshotsStorageWrapper2} from "../snapshots/SnapshotsStorageWrapper2.sol";
-import {IERC3643} from "../../layer_1/interfaces/ERC3643/IERC3643.sol";
-import {IERC3643StorageWrapper} from "../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol";
+import {_DEFAULT_PARTITION} from '../constants/values.sol';
+import {
+    SnapshotsStorageWrapper2
+} from '../snapshots/SnapshotsStorageWrapper2.sol';
+import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {
+    IERC3643StorageWrapper
+} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 

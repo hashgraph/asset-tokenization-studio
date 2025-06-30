@@ -206,16 +206,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from "../common/Common.sol";
-import {IERC3643} from "../interfaces/ERC3643/IERC3643.sol";
-import {ICompliance} from "../interfaces/ERC3643/ICompliance.sol";
-import {IIdentityRegistry} from "../interfaces/ERC3643/IIdentityRegistry.sol";
-import {IStaticFunctionSelectors} from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import {_ERC3643_RESOLVER_KEY} from "../constants/resolverKeys.sol";
-import {_DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _ISSUER_ROLE, _FREEZE_MANAGER_ROLE, _AGENT_ROLE} from "../constants/roles.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {IKyc} from "../interfaces/kyc/IKyc.sol";
-import {_DEFAULT_PARTITION} from "../../layer_0/constants/values.sol";
+import {Common} from '../common/Common.sol';
+import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {
+    _DEFAULT_ADMIN_ROLE,
+    _CONTROLLER_ROLE,
+    _ISSUER_ROLE,
+    _FREEZE_MANAGER_ROLE,
+    _AGENT_ROLE
+} from '../constants/roles.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     using Strings for uint256;
@@ -223,10 +231,6 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     address private constant _ONCHAIN_ID = address(0);
 
     // ====== External functions (state-changing) ======
-    /**
-     * @notice Sets the name of the token.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
     function setName(
         string calldata _name
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
@@ -509,13 +513,13 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     function setAddressFrozen(
         address _userAddress,
         bool _freezStatus
-    )
-        public
-        override
-        onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
-        validateAddress(_userAddress)
-    {
+    ) public override onlyUnpaused validateAddress(_userAddress) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         _setAddressFrozen(_userAddress, _freezStatus);
         emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
     }
@@ -535,11 +539,11 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     {
         {
             bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _ISSUER_ROLE;
+            roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        _controllerRedeem(_userAddress, _amount, "", "");
+        _controllerRedeem(_userAddress, _amount, '', '');
     }
 
     function mint(
@@ -560,7 +564,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        _issue(_to, _amount, "");
+        _issue(_to, _amount, '');
     }
 
     function forcedTransfer(
@@ -586,7 +590,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        _controllerTransfer(_from, _to, _amount, "", "");
+        _controllerTransfer(_from, _to, _amount, '', '');
         return true;
     }
 

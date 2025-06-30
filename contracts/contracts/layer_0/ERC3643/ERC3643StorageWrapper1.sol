@@ -213,7 +213,7 @@ import {_AGENT_ROLE} from '../constants/roles.sol';
 import {
     IAccessControl
 } from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
-import '@openzeppelin/contracts/utils/Strings.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {
     IDiamondCut

@@ -230,6 +230,7 @@ import {
     Lock,
     Hold,
     ProtectedPartitions,
+    DiamondFacet,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -318,13 +319,13 @@ describe('ERC3643 Tests', () => {
     let clearingFacet: Contract
     let holdFacet: Hold
     let protectedPartitionsFacet: ProtectedPartitions
+    let diamondFacet: DiamondFacet
 
     describe('single partition', () => {
         let erc3643Issuer: ERC3643
         let erc3643Transferor: ERC3643
         let erc1410SnapshotFacet: ERC1410Snapshot
         let erc20Facet: ERC20
-        let erc3643Approved: ERC3643
 
         before(async () => {
             // mute | mock console.log
@@ -439,7 +440,6 @@ describe('ERC3643 Tests', () => {
 
             erc3643Issuer = erc3643Facet.connect(signer_C)
             erc3643Transferor = erc3643Facet.connect(signer_E)
-            erc3643Approved = erc3643Facet.connect(signer_D)
 
             erc20Facet = await ethers.getContractAt(
                 'ERC20',
@@ -539,6 +539,10 @@ describe('ERC3643 Tests', () => {
             )
             protectedPartitionsFacet = await ethers.getContractAt(
                 'ProtectedPartitions',
+                diamond.address
+            )
+            diamondFacet = await ethers.getContractAt(
+                'DiamondFacet',
                 diamond.address
             )
 
@@ -653,13 +657,7 @@ describe('ERC3643 Tests', () => {
                 //happy path
                 await erc3643Facet.mint(account_E, AMOUNT)
 
-                erc20Facet = erc20Facet.connect(signer_E)
-
-                await erc20Facet.approve(account_D, AMOUNT / 2)
-
-                erc3643Approved = erc3643Approved.connect(signer_D)
-
-                expect(await erc3643Approved.burn(account_E, AMOUNT / 2))
+                expect(await erc3643Facet.burn(account_E, AMOUNT / 2))
                     .to.emit(erc3643Facet, 'Redeemed')
                     .withArgs(account_D, account_E, AMOUNT / 2)
 
@@ -827,10 +825,10 @@ describe('ERC3643 Tests', () => {
                 ).to.be.rejectedWith('TokenIsPaused')
             })
             it('GIVEN an account without CONTROLLER_ROLE WHEN forcedTransfer is called THEN transaction fails with AccountHasNoRole', async () => {
-                erc3643Facet = erc3643Facet.connect(signer_C)
+                erc3643Facet = erc3643Facet.connect(signer_B)
 
                 await expect(
-                    erc3643Facet.forcedTransfer(account_C, account_B, AMOUNT)
+                    erc3643Facet.forcedTransfer(account_D, account_E, AMOUNT)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
             it('GIVEN non kyc account (from) WHEN forcedTransfer THEN transaction reverts with InvalidKycStatus', async () => {
@@ -1074,8 +1072,16 @@ describe('ERC3643 Tests', () => {
         })
 
         it('GIVEN an initialized token WHEN retrieving the version THEN returns the right version', async () => {
-            const retrieved_version = await erc3643Facet.version()
-            expect(retrieved_version).to.equal('0')
+            const full = await erc3643Facet.version()
+            const [configResolver, configId, configVersion] =
+                await diamondFacet.getConfigInfo()
+            const parts = full.split(', ')
+            expect(parts).to.have.length(3)
+            expect(parts[0]).to.equal(
+                `Resolver: ${configResolver.toLowerCase()}`
+            )
+            expect(parts[1]).to.equal(`Config ID: ${configId.toLowerCase()}`)
+            expect(parts[2]).to.equal(`Version: ${configVersion}`)
         })
 
         it('GIVEN an initialized token WHEN updating the onChanId THEN UpdatedTokenInformation emits OnchainIDUpdated with updated onchainId and current metadata', async () => {
@@ -1442,7 +1448,7 @@ describe('ERC3643 Tests', () => {
                         )
                     ).to.be.revertedWithCustomError(
                         erc3643Facet,
-                        'AccountHasNoRole'
+                        'AccountHasNoRoles'
                     )
                 })
 
@@ -1649,6 +1655,50 @@ describe('ERC3643 Tests', () => {
                         '0x'
                     )
                 ).to.emit(erc1410Facet, 'TransferByPartition')
+            })
+
+            it('GIVEN a user with the agent role WHEN performing actions using ERC-3643 methods succeeds', async () => {
+                await accessControlFacet.grantRole(AGENT_ROLE, account_B)
+                erc3643Facet = erc3643Facet.connect(signer_B)
+                const amount = 1000
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: '0x',
+                })
+                await expect(
+                    erc3643Facet.freezePartialTokens(account_E, amount)
+                )
+                    .to.emit(erc3643Facet, 'TokensFrozen')
+                    .withArgs(account_E, amount, DEFAULT_PARTITION)
+                await expect(
+                    erc3643Facet.unfreezePartialTokens(account_E, amount)
+                )
+                    .to.emit(erc3643Facet, 'TokensUnfrozen')
+                    .withArgs(account_E, amount, DEFAULT_PARTITION)
+                await expect(
+                    erc3643Facet.forcedTransfer(account_E, account_D, amount)
+                )
+                    .to.emit(erc3643Facet, 'TransferByPartition')
+                    .withArgs(
+                        DEFAULT_PARTITION,
+                        ADDRESS_ZERO,
+                        account_E,
+                        account_D,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
+                await expect(erc3643Facet.mint(account_E, amount))
+                    .to.emit(erc3643Facet, 'Issued')
+                    .withArgs(account_B, account_E, amount, '0x')
+                await expect(erc3643Facet.burn(account_E, amount))
+                    .to.emit(erc3643Facet, 'Transfer')
+                    .withArgs(account_E, ADDRESS_ZERO, amount)
+                await expect(erc3643Facet.setAddressFrozen(account_E, true))
+                    .to.emit(erc3643Facet, 'AddressFrozen')
+                    .withArgs(account_E, true, account_B)
             })
         })
 

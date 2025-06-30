@@ -206,12 +206,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IStaticFunctionSelectors} from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import {_ERC1594_RESOLVER_KEY} from "../../constants/resolverKeys.sol";
-import {_ISSUER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
-import {IERC1594} from "../../interfaces/ERC1400/IERC1594.sol";
-import {IKyc} from "../../../layer_1/interfaces/kyc/IKyc.sol";
-import {Common} from "../../common/Common.sol";
+import {
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
+import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {Common} from '../../common/Common.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase

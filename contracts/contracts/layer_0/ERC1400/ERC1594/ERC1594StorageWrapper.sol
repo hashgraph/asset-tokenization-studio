@@ -206,13 +206,29 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC1594_STORAGE_POSITION} from "../../constants/storagePositions.sol";
-import {IERC1594StorageWrapper} from "../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol";
-import {_IS_PAUSED_ERROR_ID, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, _FROM_ACCOUNT_BLOCKED_ERROR_ID, _FROM_ACCOUNT_NULL_ERROR_ID, _TO_ACCOUNT_BLOCKED_ERROR_ID, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, _TO_ACCOUNT_NULL_ERROR_ID, _ALLOWANCE_REACHED_ERROR_ID, _SUCCESS, _FROM_ACCOUNT_KYC_ERROR_ID, _TO_ACCOUNT_KYC_ERROR_ID, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID} from "../../constants/values.sol";
-import {Common} from "../../../layer_1/common/Common.sol";
-import {IKyc} from "../../../layer_1/interfaces/kyc/IKyc.sol";
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
-import {CapStorageWrapper2} from "../../cap/CapStorageWrapper2.sol";
+import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {
+    IERC1594StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol';
+import {
+    _IS_PAUSED_ERROR_ID,
+    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_NULL_ERROR_ID,
+    _TO_ACCOUNT_BLOCKED_ERROR_ID,
+    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    _TO_ACCOUNT_NULL_ERROR_ID,
+    _ALLOWANCE_REACHED_ERROR_ID,
+    _SUCCESS,
+    _FROM_ACCOUNT_KYC_ERROR_ID,
+    _TO_ACCOUNT_KYC_ERROR_ID,
+    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+    _ADDRESS_RECOVERED_FROM_ERROR_ID,
+    _ADDRESS_RECOVERED_TO_ERROR_ID
+} from '../../constants/values.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {CapStorageWrapper2} from '../../cap/CapStorageWrapper2.sol';
 
 abstract contract ERC1594StorageWrapper is
     IERC1594StorageWrapper,
@@ -311,6 +327,9 @@ abstract contract ERC1594StorageWrapper is
         if (_isRecovered(_msgSender())) {
             return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
         }
+        if (_isRecovered(_to)) {
+            return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
+        }
         if (!_isAbleToAccess(_msgSender())) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
@@ -336,6 +355,12 @@ abstract contract ERC1594StorageWrapper is
         uint256 _value,
         bytes calldata /*_data*/
     ) internal view returns (bool, bytes1, bytes32) {
+        if (_isRecovered(_msgSender())) {
+            return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
+        }
+        if (_isRecovered(_to)) {
+            return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
+        }
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
@@ -361,12 +386,8 @@ abstract contract ERC1594StorageWrapper is
             if (_allowanceAdjusted(_from, _msgSender()) < _value) {
                 return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
             }
-            if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-                    bytes32(0)
-                );
+            if (_isRecovered(_from)) {
+                return (false, _ADDRESS_RECOVERED_FROM_ERROR_ID, bytes32(0));
             }
         }
         if (_balanceOfAdjusted(_from) < _value) {
