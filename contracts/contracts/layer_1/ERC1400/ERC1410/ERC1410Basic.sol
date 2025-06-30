@@ -244,6 +244,7 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
     {
         {
             _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_basicTransferInfo.to);
         }
         // Add a function to verify the `_data` parameter
         // TODO: Need to create the bytes division of the `_partition` so it can be easily findout in which receiver's
