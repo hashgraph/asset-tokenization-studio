@@ -269,7 +269,7 @@ export class MintCommandHandler implements ICommandHandler<MintCommand> {
       await this.validationService.checkIssuable(security);
 
       await this.validationService.checkAnyRole(
-        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
+        [SecurityRole._ISSUER_ROLE, SecurityRole._AGENT_ROLE],
         account.id.toString(),
         securityId,
       );

@@ -284,14 +284,6 @@ describe('MintCommandHandler', () => {
         targetEvmAddress,
       );
 
-      validationServiceMock.checkDecimals.mockResolvedValue(undefined);
-      validationServiceMock.checkMaxSupply.mockResolvedValue(undefined);
-      validationServiceMock.checkControlList.mockResolvedValue(undefined);
-      validationServiceMock.checkKycAddresses.mockResolvedValue(undefined);
-      validationServiceMock.checkRole.mockResolvedValue(undefined);
-      validationServiceMock.checkMultiPartition.mockResolvedValue(undefined);
-      validationServiceMock.checkIssuable.mockResolvedValue(undefined);
-
       const result = await handler.execute(command);
 
       expect(result).toBeInstanceOf(MintCommandResponse);
