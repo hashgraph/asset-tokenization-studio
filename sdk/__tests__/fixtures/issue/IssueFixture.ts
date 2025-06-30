@@ -203,6 +203,7 @@
 
 */
 
+import IssueRequest from '../../../src/port/in/request/security/operations/issue/IssueRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { IssueCommand } from '../../../src/app/usecase/command/security/operations/issue/IssueCommand';
@@ -213,4 +214,12 @@ export const IssueCommandFixture = createFixture<IssueCommand>((command) => {
   );
   command.targetId.as(() => HederaIdPropsFixture.create().value);
   command.securityId.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const IssueRequestFixture = createFixture<IssueRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.amount.faker((faker) =>
+        faker.number.int({ min: 1, max: 10 }).toString(),
+    );
 });

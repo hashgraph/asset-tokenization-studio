@@ -220,7 +220,6 @@ import {
 } from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
 import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 
-// solhint-disable no-unused-vars, custom-errors
 abstract contract SnapshotsStorageWrapper1 is
     ISnapshotsStorageWrapper,
     CorporateActionsStorageWrapper1
@@ -375,4 +374,3 @@ abstract contract SnapshotsStorageWrapper1 is
         }
     }
 }
-// solhint-enable no-unused-vars, custom-errors

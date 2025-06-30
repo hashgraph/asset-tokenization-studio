@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-dapp",
-  "version": "1.13.0",
+  "version": "1.14.1",
   "license": "Apache-2.0",
   "scripts": {
     "clean:node": "npx --yes rimraf node_modules",

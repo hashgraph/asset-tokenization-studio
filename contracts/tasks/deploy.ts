@@ -212,12 +212,6 @@ task(
     'deployAll',
     'Deploy new factory, new facet implementation, new resolver and initialize it with the new facet implementations'
 )
-    .addOptionalPositionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
-        types.string
-    )
     .addOptionalParam(
         'useDeployed',
         'Use already deployed contracts',
@@ -298,6 +292,7 @@ task(
             externalPauseManagement,
             externalControlListManagement,
             externalKycListManagement,
+            protectedPartitions,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -350,6 +345,7 @@ task(
                 externalControlListManagement.address,
             'External Kyc List Management Facet':
                 externalKycListManagement.address,
+            'Protected Partitions': protectedPartitions.address,
         }
 
         const contractAddress = []

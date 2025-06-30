@@ -218,9 +218,6 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
-    // solhint-disable func-name-mixedcase
-    // solhint-disable-next-line private-vars-leading-underscore
-
     function setCoupon(
         Coupon calldata _newCoupon
     )
@@ -319,6 +316,7 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         return _getCouponCount();
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_bond(
         BondDetailsData calldata _bondDetailsData,
         CouponDetailsData calldata _couponDetailsData

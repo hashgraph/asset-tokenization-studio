@@ -217,7 +217,6 @@ import {_CLEARING_ACTIONS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {IKyc} from '../interfaces/kyc/IKyc.sol';
 import {_CLEARING_ROLE} from '../constants/roles.sol';
 
-// solhint-disable no-unused-vars, custom-errors
 contract ClearingActionsFacet is
     IStaticFunctionSelectors,
     IClearingActions,
@@ -395,4 +394,3 @@ contract ClearingActionsFacet is
         staticInterfaceIds_[selectorsIndex++] = type(IClearing).interfaceId;
     }
 }
-// solhint-enable no-unused-vars, custom-errors
