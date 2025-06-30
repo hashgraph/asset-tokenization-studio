@@ -206,11 +206,12 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {CapStorageWrapper2} from '../../layer_0/cap/CapStorageWrapper2.sol';
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {IClearing} from '../interfaces/clearing/IClearing.sol';
+import {CapStorageWrapper2} from "../../layer_0/cap/CapStorageWrapper2.sol";
+import {_WILD_CARD_ROLE} from "../constants/roles.sol";
+import {IClearing} from "../interfaces/clearing/IClearing.sol";
+import {ERC1594StorageWrapper} from "../../layer_0/ERC1400/ERC1594/ERC1594StorageWrapper.sol";
 
-abstract contract Common is CapStorageWrapper2 {
+abstract contract Common is ERC1594StorageWrapper {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();
 

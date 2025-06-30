@@ -206,8 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ICompliance} from './ICompliance.sol';
-import {IIdentityRegistry} from './IIdentityRegistry.sol';
+import {ICompliance} from "./ICompliance.sol";
+import {IIdentityRegistry} from "./IIdentityRegistry.sol";
 
 interface IERC3643 {
     struct ERC3643Storage {
@@ -219,6 +219,9 @@ interface IERC3643 {
         mapping(address => bool) addressRecovered;
     }
 
+    /**
+     *  @notice This event is emitted when the token information is updated.
+     */
     event UpdatedTokenInformation(
         string indexed newName,
         string indexed newSymbol,
@@ -227,16 +230,28 @@ interface IERC3643 {
         address indexed newOnchainID
     );
 
+    /**
+     *  @notice This event is emitted when the IdentityRegistry has been set for the token
+     */
     event IdentityRegistryAdded(address indexed identityRegistry);
 
+    /**
+     *  @notice This event is emitted when the Compliance has been set for the token
+     */
     event ComplianceAdded(address indexed compliance);
 
+    /**
+     *  @notice This event is emitted when a certain amount of tokens is frozen on a wallet
+     */
     event TokensFrozen(
         address indexed account,
         uint256 amount,
         bytes32 partition
     );
 
+    /**
+     *  @notice This event is emitted when a certain amount of tokens is unfrozen on a wallet
+     */
     event TokensUnfrozen(
         address indexed account,
         uint256 amount,
@@ -281,13 +296,6 @@ interface IERC3643 {
         address _lostWallet,
         address _newWallet,
         address _investorOnchainID
-    );
-
-    error InsufficientFrozenBalance(
-        address user,
-        uint256 requestedUnfreeze,
-        uint256 availableFrozen,
-        bytes32 partition
     );
 
     /**
@@ -453,7 +461,8 @@ interface IERC3643 {
     function compliance() external view returns (ICompliance);
 
     /**
-     * @dev Returns the version of the token.
+     * @notice Retrieves the latest version of the contract.
+     * @dev The version is represented as a string.
      */
     function version() external view returns (string memory);
 

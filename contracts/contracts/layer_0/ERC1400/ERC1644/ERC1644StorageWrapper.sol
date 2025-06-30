@@ -247,8 +247,8 @@ abstract contract ERC1644StorageWrapper is
     function _controllerRedeem(
         address _tokenHolder,
         uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
+        bytes memory _data,
+        bytes memory _operatorData
     ) internal {
         _burn(_tokenHolder, _value);
         emit ControllerRedemption(

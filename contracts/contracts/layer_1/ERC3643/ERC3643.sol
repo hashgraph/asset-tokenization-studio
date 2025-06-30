@@ -206,37 +206,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC1594StorageWrapper
-} from '../ERC1400/ERC1594/ERC1594StorageWrapper.sol';
-import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
-import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
-import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    _DEFAULT_ADMIN_ROLE,
-    _CONTROLLER_ROLE,
-    _ISSUER_ROLE,
-    _FREEZE_MANAGER_ROLE,
-    _AGENT_ROLE
-} from '../constants/roles.sol';
-import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {Common} from "../common/Common.sol";
+import {IERC3643} from "../interfaces/ERC3643/IERC3643.sol";
+import {ICompliance} from "../interfaces/ERC3643/ICompliance.sol";
+import {IIdentityRegistry} from "../interfaces/ERC3643/IIdentityRegistry.sol";
+import {IStaticFunctionSelectors} from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import {_ERC3643_RESOLVER_KEY} from "../constants/resolverKeys.sol";
+import {_DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _ISSUER_ROLE, _FREEZE_MANAGER_ROLE, _AGENT_ROLE} from "../constants/roles.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {IKyc} from "../interfaces/kyc/IKyc.sol";
+import {_DEFAULT_PARTITION} from "../../layer_0/constants/values.sol";
 
-contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
+contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     using Strings for uint256;
 
     address private constant _ONCHAIN_ID = address(0);
 
     // ====== External functions (state-changing) ======
-    /**
-     * @notice Sets the name of the token.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
     function setName(
         string calldata _name
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
@@ -246,15 +232,11 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             erc20Storage.name,
             erc20Storage.symbol,
             erc20Storage.decimals,
-            _getLatestVersion().toString(),
+            _version(),
             _erc3643Storage().onchainID
         );
     }
 
-    /**
-     * @notice Sets the symbol of the token.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
     function setSymbol(
         string calldata _symbol
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
@@ -264,15 +246,11 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             erc20Storage.name,
             erc20Storage.symbol,
             erc20Storage.decimals,
-            _getLatestVersion().toString(),
+            _version(),
             _erc3643Storage().onchainID
         );
     }
 
-    /**
-     * @notice Sets the onchainID address for the token.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
     function setOnchainID(
         address _onchainID
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
@@ -283,30 +261,22 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             erc20Storage.name,
             erc20Storage.symbol,
             erc20Storage.decimals,
-            _getLatestVersion().toString(),
+            _version(),
             _onchainID
         );
     }
 
-    /**
-     * @notice Sets the identity registry contract address.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
     function setIdentityRegistry(
         address _identityRegistry
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
-        _erc3643Storage().identityRegistry = _identityRegistry;
+        _setIdentityRegistry(_identityRegistry);
         emit IdentityRegistryAdded(_identityRegistry);
     }
 
-    /**
-     * @notice Sets the compliance contract address.
-     * @dev Can only be called by the token `owner/issuer`.
-     */
     function setCompliance(
         address _compliance
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
-        _erc3643Storage().compliance = _compliance;
+        _setCompliance(_compliance);
         emit ComplianceAdded(_compliance);
     }
 
@@ -317,10 +287,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit AgentAdded(_agent);
     }
 
-    /**
-     * @notice Revokes an account the agent role
-     * @dev Can only be called by the role admin
-     */
     function removeAgent(
         address _agent
     ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
@@ -332,9 +298,9 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         address _lostWallet,
         address _newWallet,
         address _investorOnchainID
-    ) external onlyRole(_AGENT_ROLE) returns (bool) {
+    ) external onlyRole(_AGENT_ROLE) returns (bool success_) {
+        success_ = _recoveryAddress(_lostWallet, _newWallet);
         emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
-        return _recoveryAddress(_lostWallet, _newWallet);
     }
 
     function batchTransfer(
@@ -409,46 +375,33 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         return _getFrozenAmountForAdjusted(_userAddress);
     }
 
-    /**
-     * @dev Checks if an account has the agent role
-     */
     function isAgent(address _agent) external view returns (bool) {
         return _hasRole(_AGENT_ROLE, _agent);
     }
 
-    /**
-     * @notice Retrieves the latest version of the contract.
-     * @dev The version is represented as a string.
-     */
-    function version() external view returns (string memory) {
-        return Strings.toString(_getLatestVersion());
-    }
-
-    /**
-     * @notice Retrieves the identity registry contract address.
-     */
     function identityRegistry()
         external
         view
         override
         returns (IIdentityRegistry)
     {
-        return IIdentityRegistry(_erc3643Storage().identityRegistry);
+        return _getIdentityRegistry();
     }
 
-    /**
-     * @notice Retrieves the onchainID address associated with the token.
-     */
     function onchainID() external view override returns (address) {
-        return _erc3643Storage().onchainID;
+        return _getOnchainID();
     }
 
     function compliance() external view override returns (ICompliance) {
-        return ICompliance(_erc3643Storage().compliance);
+        return _getCompliance();
     }
 
     function isAddressRecovered(address _wallet) external view returns (bool) {
         return _isRecovered(_wallet);
+    }
+
+    function version() external view returns (string memory) {
+        return _version();
     }
 
     function getStaticResolverKey()
@@ -466,9 +419,7 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](
-            30 // Total number of selectors defined below
-        );
+        staticFunctionSelectors_ = new bytes4[](30);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
@@ -532,9 +483,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
             .selector;
     }
 
-    /**
-     * @notice Retrieves the identity registry contract address.
-     */
     function getStaticInterfaceIds()
         external
         pure
@@ -562,12 +510,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
     }
 
-    /**
-     * @notice Burns a specified amount of tokens from a user address.
-     * @dev Can only be called by the token `owner/issuer` or `controller`.
-     * @param _userAddress The address from which the tokens will be burned.
-     * @param _amount The amount of tokens to burn.
-     */
     function burn(
         address _userAddress,
         uint256 _amount
@@ -581,15 +523,15 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
     {
-        _redeemFrom(_userAddress, _amount, '');
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _ISSUER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _controllerRedeem(_userAddress, _amount, "", "");
     }
 
-    /**
-     * @notice Mints a specified amount of tokens to a user address.
-     * @dev Can only be called by the token `owner/issuer`.
-     * @param _to The address to which the tokens will be minted.
-     * @param _amount The amount of tokens to mint.
-     */
     function mint(
         address _to,
         uint256 _amount
@@ -597,22 +539,20 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         public
         onlyUnpaused
         onlyWithinMaxSupply(_amount)
-        onlyRole(_ISSUER_ROLE)
         onlyListedAllowed(_to)
         onlyWithoutMultiPartition
         onlyIssuable
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
     {
-        _issue(_to, _amount, '');
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _ISSUER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _issue(_to, _amount, "");
     }
 
-    /**
-     * @notice Transfers tokens from one address to another.
-     * @dev Can only be called by the token `owner/issuer` or `controller`.
-     * @param _from The address from which the tokens will be transferred.
-     * @param _to The address to which the tokens will be transferred.
-     * @param _amount The amount of tokens to transfer.
-     */
     function forcedTransfer(
         address _from,
         address _to,
@@ -620,7 +560,6 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
     )
         public
         onlyWithoutMultiPartition
-        onlyRole(_CONTROLLER_ROLE)
         onlyControllable
         onlyUnpaused
         onlyClearingDisabled
@@ -631,7 +570,13 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool)
     {
-        _controllerTransfer(_from, _to, _amount, '', '');
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _CONTROLLER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _controllerTransfer(_from, _to, _amount, "", "");
         return true;
     }
 
@@ -642,10 +587,15 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         public
         override
         onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
         onlyWithoutMultiPartition
     {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         _freezeTokens(_userAddress, _amount);
         emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
@@ -657,18 +607,22 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         public
         override
         onlyUnpaused
-        onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
         onlyWithoutMultiPartition
     {
-        _checkUnfreezeAmount(_DEFAULT_PARTITION, _userAddress, _amount);
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         _unfreezeTokens(_userAddress, _amount);
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
     // ====== Private/Internal functions ======
 
-    //! @dev Internal copy of ERC20.transfer(address,uint256) to allow ERC3643.batchTransfer() in this facet
+    /// @dev Internal copy of ERC20.transfer(address,uint256) to allow ERC3643.batchTransfer() in this facet
     function _transferForBatch(
         address to,
         uint256 value
@@ -685,24 +639,5 @@ contract ERC3643 is IERC3643, ERC1594StorageWrapper, IStaticFunctionSelectors {
         returns (bool)
     {
         return _transfer(_msgSender(), to, value);
-    }
-
-    function _checkUnfreezeAmount(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    ) private view {
-        uint256 frozenAmount = _getFrozenAmountForByPartitionAdjusted(
-            _partition,
-            _userAddress
-        );
-        if (frozenAmount < _amount) {
-            revert InsufficientFrozenBalance(
-                _userAddress,
-                _amount,
-                frozenAmount,
-                _partition
-            );
-        }
     }
 }

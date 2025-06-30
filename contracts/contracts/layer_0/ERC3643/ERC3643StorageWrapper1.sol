@@ -213,6 +213,14 @@ import {_AGENT_ROLE} from '../constants/roles.sol';
 import {
     IAccessControl
 } from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
+import '@openzeppelin/contracts/utils/Strings.sol';
+import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {
+    IDiamondCut
+} from '../../interfaces/resolver/resolverProxy/IDiamondCut.sol';
+import {
+    IIdentityRegistry
+} from '../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol';
 
 abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
     modifier checkRecoveredAddress(address _sender) {
@@ -247,6 +255,14 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
         }
     }
 
+    function _setCompliance(address _compliance) internal {
+        _erc3643Storage().compliance = _compliance;
+    }
+
+    function _setIdentityRegistry(address _identityRegistry) internal {
+        _erc3643Storage().identityRegistry = _identityRegistry;
+    }
+
     function _getFrozenAmountFor(
         address _userAddress
     ) internal view returns (uint256) {
@@ -268,6 +284,41 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
 
     function _isRecovered(address _sender) internal view returns (bool) {
         return _erc3643Storage().addressRecovered[_sender];
+    }
+
+    function _version() internal view returns (string memory) {
+        bytes memory payload = abi.encodeWithSelector(
+            IDiamondCut.getConfigInfo.selector
+        );
+        // Use staticcall since diamond facet is not in the hierarchy
+        (, bytes memory data) = address(this).staticcall(payload);
+
+        (address resolver, bytes32 configurationId, uint256 versionNum) = abi
+            .decode(data, (address, bytes32, uint256));
+
+        return
+            string(
+                abi.encodePacked(
+                    'Resolver: ',
+                    Strings.toHexString(uint160(resolver), 20),
+                    ', Config ID: ',
+                    Strings.toHexString(uint256(configurationId), 32),
+                    ', Version: ',
+                    Strings.toString(versionNum)
+                )
+            );
+    }
+
+    function _getCompliance() internal view returns (ICompliance) {
+        return ICompliance(_erc3643Storage().compliance);
+    }
+
+    function _getIdentityRegistry() internal view returns (IIdentityRegistry) {
+        return IIdentityRegistry(_erc3643Storage().identityRegistry);
+    }
+
+    function _getOnchainID() internal view returns (address) {
+        return _erc3643Storage().onchainID;
     }
 
     function _erc3643Storage()

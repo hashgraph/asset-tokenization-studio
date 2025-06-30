@@ -1915,6 +1915,22 @@ describe('ERC3643 Tests', () => {
         })
 
         describe('Recovery', () => {
+            it('GIVEN lost wallet WHEN recovering to a lost wallet THEN transaction fails with ', async () => {
+                await erc3643Facet.recoveryAddress(
+                    account_C,
+                    account_B,
+                    ADDRESS_ZERO
+                )
+                await erc3643Facet.recoveryAddress(
+                    account_B,
+                    account_C,
+                    ADDRESS_ZERO
+                )
+                const isRecoveredC =
+                    await erc3643Facet.isAddressRecovered(account_C)
+                expect(isRecoveredC).to.equal(false)
+            })
+
             it('GIVEN lost wallet WHEN calling recoveryAddress THEN normal balance and freeze balance and status is successfully transferred', async () => {
                 const amount = 1000
                 await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)

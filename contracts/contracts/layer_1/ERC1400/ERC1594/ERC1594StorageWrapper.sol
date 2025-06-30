@@ -227,8 +227,12 @@ import {
 import {Common} from '../../common/Common.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {CapStorageWrapper2} from '../../../layer_0/cap/CapStorageWrapper2.sol';
 
-abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
+abstract contract ERC1594StorageWrapper is
+    IERC1594StorageWrapper,
+    CapStorageWrapper2
+{
     struct ERC1594Storage {
         bool issuance;
         bool initialized;

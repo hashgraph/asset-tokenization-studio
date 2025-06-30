@@ -210,10 +210,16 @@ import {
     SnapshotsStorageWrapper2
 } from '../snapshots/SnapshotsStorageWrapper2.sol';
 import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {
+    IERC3643StorageWrapper
+} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
+abstract contract ERC3643StorageWrapper2 is
+    IERC3643StorageWrapper,
+    SnapshotsStorageWrapper2
+{
     function _setName(
         string calldata _name
     ) internal returns (ERC20Storage storage erc20Storage_) {
@@ -233,6 +239,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     }
 
     function _unfreezeTokens(address _account, uint256 _amount) internal {
+        _checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount);
         _unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
     }
 
@@ -387,5 +394,24 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         );
         return
             _getFrozenAmountForByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _checkUnfreezeAmount(
+        bytes32 _partition,
+        address _userAddress,
+        uint256 _amount
+    ) private view {
+        uint256 frozenAmount = _getFrozenAmountForByPartitionAdjusted(
+            _partition,
+            _userAddress
+        );
+        if (frozenAmount < _amount) {
+            revert InsufficientFrozenBalance(
+                _userAddress,
+                _amount,
+                frozenAmount,
+                _partition
+            );
+        }
     }
 }

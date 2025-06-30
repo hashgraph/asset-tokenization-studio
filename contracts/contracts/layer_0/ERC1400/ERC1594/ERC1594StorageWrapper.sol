@@ -206,65 +206,32 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IStaticFunctionSelectors} from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import {_ERC1594_RESOLVER_KEY} from "../../constants/resolverKeys.sol";
-import {_ISSUER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
-import {IERC1594} from "../../interfaces/ERC1400/IERC1594.sol";
+import {_ERC1594_STORAGE_POSITION} from "../../constants/storagePositions.sol";
+import {IERC1594StorageWrapper} from "../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol";
+import {_IS_PAUSED_ERROR_ID, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, _FROM_ACCOUNT_BLOCKED_ERROR_ID, _FROM_ACCOUNT_NULL_ERROR_ID, _TO_ACCOUNT_BLOCKED_ERROR_ID, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, _TO_ACCOUNT_NULL_ERROR_ID, _ALLOWANCE_REACHED_ERROR_ID, _SUCCESS, _FROM_ACCOUNT_KYC_ERROR_ID, _TO_ACCOUNT_KYC_ERROR_ID, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID} from "../../constants/values.sol";
+import {Common} from "../../../layer_1/common/Common.sol";
 import {IKyc} from "../../../layer_1/interfaces/kyc/IKyc.sol";
-import {Common} from "../../common/Common.sol";
+import {_CONTROLLER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
+import {CapStorageWrapper2} from "../../cap/CapStorageWrapper2.sol";
 
-contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
+abstract contract ERC1594StorageWrapper is
+    IERC1594StorageWrapper,
+    CapStorageWrapper2
+{
+    struct ERC1594Storage {
+        bool issuance;
+        bool initialized;
+    }
+
+    modifier onlyIssuable() {
+        _checkIssuable();
+        _;
+    }
+
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594()
-        external
-        override
-        onlyUninitialized(_erc1594Storage().initialized)
-    {
-        super._initialize_ERC1594();
-    }
-
-    function transferWithData(
-        address _to,
-        uint256 _value,
-        bytes calldata /*_data*/
-    )
-        external
-        override
-        onlyUnpaused
-        onlyClearingDisabled
-        checkRecoveredAddress(_msgSender())
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_to)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-    {
-        // Add a function to validate the `_data` parameter
-        _transfer(_msgSender(), _to, _value);
-    }
-
-    function transferFromWithData(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata /*_data*/
-    )
-        external
-        override
-        onlyUnpaused
-        onlyClearingDisabled
-        checkRecoveredAddress(_msgSender())
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_to)
-        onlyListedAllowed(_from)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-    {
-        // Add a function to validate the `_data` parameter
-        _transferFrom(_msgSender(), _from, _to, _value);
+    function _initialize_ERC1594() internal {
+        _erc1594Storage().issuance = true;
+        _erc1594Storage().initialized = true;
     }
 
     /**
@@ -276,28 +243,15 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
      * @param _value The amount of tokens need to be issued
      * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
      */
-    function issue(
+    // TODO: In this case are able to perform that operation another role?
+    function _issue(
         address _tokenHolder,
         uint256 _value,
-        bytes calldata _data
-    )
-        external
-        override
-        checkRecoveredAddress(_tokenHolder)
-        onlyWithinMaxSupply(_value)
-        onlyUnpaused
-        onlyListedAllowed(_tokenHolder)
-        onlyWithoutMultiPartition
-        onlyIssuable
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _ISSUER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _issue(_tokenHolder, _value, _data);
+        bytes memory _data
+    ) internal {
+        // Add a function to validate the `_data` parameter
+        _mint(_tokenHolder, _value);
+        emit Issued(_msgSender(), _tokenHolder, _value, _data);
     }
 
     /**
@@ -307,21 +261,10 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
      * @param _value The amount of tokens need to be redeemed
      * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
      */
-    function redeem(
-        uint256 _value,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyUnpaused
-        onlyClearingDisabled
-        checkRecoveredAddress(_msgSender())
-        onlyListedAllowed(_msgSender())
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-    {
-        _redeem(_value, _data);
+    function _redeem(uint256 _value, bytes calldata _data) internal {
+        // Add a function to validate the `_data` parameter
+        _burn(_msgSender(), _value);
+        emit Redeemed(address(0), _msgSender(), _value, _data);
     }
 
     /**
@@ -333,23 +276,14 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
      * @param _value The amount of tokens need to be redeemed
      * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
      */
-    function redeemFrom(
+    function _redeemFrom(
         address _tokenHolder,
         uint256 _value,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_tokenHolder)
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_tokenHolder)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-    {
-        _redeemFrom(_tokenHolder, _value, _data);
+        bytes memory _data
+    ) internal {
+        // Add a function to validate the `_data` parameter
+        _burnFrom(_tokenHolder, _value);
+        emit Redeemed(_msgSender(), _tokenHolder, _value, _data);
     }
 
     /**
@@ -359,106 +293,108 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
      * If a token returns FALSE for `isIssuable()` then it MUST never allow additional tokens to be issued.
      * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
      */
-    function isIssuable() external view override returns (bool) {
-        return _isIssuable();
+    function _isIssuable() internal view returns (bool) {
+        return _erc1594Storage().issuance;
     }
 
-    /**
-     * @notice Transfers of securities may fail for a number of reasons. So this function will used to understand the
-     * cause of failure by getting the byte value. Which will be the ESC that follows the EIP 1066. ESC can be mapped
-     * with a reson string to understand the failure cause, table of Ethereum status code will always reside off-chain
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     * @return bool It signifies whether the transaction will be executed or not.
-     * @return byte Ethereum status code (ESC)
-     * @return bytes32 Application specific reason code
-     */
-    function canTransfer(
+    function _canTransfer(
         address _to,
         uint256 _value,
-        bytes calldata _data
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
-    {
-        return _canTransfer(_to, _value, _data);
+        bytes calldata /*_data*/
+    ) internal view returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
+        if (_to == address(0)) {
+            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (_isRecovered(_msgSender())) {
+            return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
+        }
+        if (!_isAbleToAccess(_msgSender())) {
+            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_isAbleToAccess(_to)) {
+            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (_balanceOfAdjusted(_msgSender()) < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+
+        return (true, _SUCCESS, bytes32(0));
     }
 
-    /**
-     * @notice Transfers of securities may fail for a number of reasons. So this function will used to understand the
-     * cause of failure by getting the byte value. Which will be the ESC that follows the EIP 1066. ESC can be mapped
-     * with a reson string to understand the failure cause, table of Ethereum status code will always reside off-chain
-     * @param _from address The address which you want to send tokens from
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     * @return bool It signifies whether the transaction will be executed or not.
-     * @return byte Ethereum status code (ESC)
-     * @return bytes32 Application specific reason code
-     */
-    function canTransferFrom(
+    function _canTransferFrom(
         address _from,
         address _to,
         uint256 _value,
-        bytes calldata _data
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
-    {
-        return _canTransferFrom(_from, _to, _value, _data);
+        bytes calldata /*_data*/
+    ) internal view returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
+        if (_to == address(0)) {
+            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (_from == address(0)) {
+            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (!_isAbleToAccess(_msgSender())) {
+            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_isAbleToAccess(_from)) {
+            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_isAbleToAccess(_to)) {
+            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _CONTROLLER_ROLE;
+        roles[1] = _AGENT_ROLE;
+        if (_from != _msgSender() && !_hasAnyRole(roles, _msgSender())) {
+            if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+                return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
+            }
+            if (_isRecovered(_msgSender())) {
+                return (
+                    false,
+                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+                    bytes32(0)
+                );
+            }
+        }
+        if (_balanceOfAdjusted(_from) < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+
+        return (true, _SUCCESS, bytes32(0));
     }
 
-    function getStaticResolverKey()
-        external
+    function _erc1594Storage()
+        internal
         pure
-        override
-        returns (bytes32 staticResolverKey_)
+        returns (ERC1594Storage storage erc1594Storage_)
     {
-        staticResolverKey_ = _ERC1594_RESOLVER_KEY;
+        bytes32 position = _ERC1594_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1594Storage_.slot := position
+        }
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](9);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC1594
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .transferWithData
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .transferFromWithData
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.isIssuable.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.issue.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.redeem.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.redeemFrom.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.canTransfer.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .canTransferFrom
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC1594).interfaceId;
+    function _checkIssuable() private view {
+        if (!_isIssuable()) revert IssuanceIsClosed();
     }
 }
