@@ -205,10 +205,10 @@
 
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
-import UpdateConfigVersionRequest from '../../../src/port/in/request/management/UpdateConfigVersionRequest';
-import UpdateConfigRequest from '../../../src/port/in/request/management/UpdateConfigRequest';
-import UpdateResolverRequest from '../../../src/port/in/request/management/UpdateResolverRequest';
-import GetConfigInfoRequest from '../../../src/port/in/request/management/GetConfigInfoRequest';
+import UpdateConfigVersionRequest from '@port/in/request/management/UpdateConfigVersionRequest';
+import UpdateConfigRequest from '@port/in/request/management/UpdateConfigRequest';
+import UpdateResolverRequest from '@port/in/request/management/UpdateResolverRequest';
+import GetConfigInfoRequest from '@port/in/request/management/GetConfigInfoRequest';
 
 export const UpdateConfigVersionRequestFixture =
   createFixture<UpdateConfigVersionRequest>((request) => {

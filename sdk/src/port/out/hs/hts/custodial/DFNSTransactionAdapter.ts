@@ -208,11 +208,11 @@ import {
   DFNSConfig,
 } from '@hashgraph/hedera-custodians-integration';
 import { singleton } from 'tsyringe';
-import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
-import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
+import { WalletEvents } from '@service/event/WalletEvent';
+import { SupportedWallets } from '@domain/context/network/Wallet';
 import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
-import LogService from '../../../../../app/service/log/LogService';
-import DfnsSettings from '../../../../../core/settings/custodialWalletSettings/DfnsSettings';
+import LogService from '@service/log/LogService';
+import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
 
 @singleton()
 export class DFNSTransactionAdapter extends CustodialTransactionAdapter {

@@ -203,10 +203,10 @@
 
 */
 
-import { ClearingOperationType } from '../../../../../../domain/context/security/Clearing.js';
-import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import { ClearingOperationType } from '@domain/context/security/Clearing';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
-import FormatValidation from '../../../FormatValidation.js';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 export default class ReclaimClearingOperationByPartitionRequest extends ValidatedRequest<ReclaimClearingOperationByPartitionRequest> {
   securityId: string;

@@ -203,8 +203,8 @@
 
 */
 
-import ContractId from './ContractId.js';
-import { InvalidEvmAddress } from './error/InvalidEvmAddress.js';
+import ContractId from './ContractId';
+import { InvalidEvmAddress } from './error/InvalidEvmAddress';
 
 export default class EvmAddress {
   public readonly value: string;

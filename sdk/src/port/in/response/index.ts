@@ -203,31 +203,31 @@
 
 */
 
-import AccountViewModel from './AccountViewModel.js';
-import BalanceViewModel from './BalanceViewModel.js';
-import ContractViewModel from './ContractViewModel.js';
-import DividendsForViewModel from './DividendsForViewModel.js';
-import DividendsViewModel from './DividendsViewModel.js';
-import CouponForViewModel from './CouponForViewModel.js';
-import CouponViewModel from './CouponViewModel.js';
-import SecurityViewModel from './SecurityViewModel.js';
-import TransactionResultViewModel from './TransactionResultViewModel.js';
-import BondDetailsViewModel from './BondDetailsViewModel.js';
-import EquityDetailsViewModel from './EquityDetailsViewModel.js';
-import CouponDetailsViewModel from './CouponDetailsViewModel.js';
-import MaxSupplyViewModel from './MaxSupplyViewModel.js';
-import VotingRightsForViewModel from './VotingRightsForViewModel.js';
-import VotingRightsViewModel from './VotingRightsViewModel.js';
-import RegulationViewModel from './RegulationViewModel.js';
-import LockViewModel from './LockViewModel.js';
-import ConfigInfoViewModel from './ConfigInfoViewModel.js';
-import ScheduledBalanceAdjustmentViewModel from './ScheduledBalanceAdjustmentViewModel.js';
-import HoldViewModel from './HoldViewModel.js';
-import KycViewModel from './KycViewModel.js';
-import KycAccountDataViewModel from './KycAccountDataViewModel.js';
-import ClearingCreateHoldViewModel from './ClearingCreateHoldViewModel.js';
-import ClearingRedeemViewModel from './ClearingRedeemViewModel.js';
-import ClearingTransferViewModel from './ClearingTransferViewModel.js';
+import AccountViewModel from './AccountViewModel';
+import BalanceViewModel from './BalanceViewModel';
+import ContractViewModel from './ContractViewModel';
+import DividendsForViewModel from './DividendsForViewModel';
+import DividendsViewModel from './DividendsViewModel';
+import CouponForViewModel from './CouponForViewModel';
+import CouponViewModel from './CouponViewModel';
+import SecurityViewModel from './SecurityViewModel';
+import TransactionResultViewModel from './TransactionResultViewModel';
+import BondDetailsViewModel from './BondDetailsViewModel';
+import EquityDetailsViewModel from './EquityDetailsViewModel';
+import CouponDetailsViewModel from './CouponDetailsViewModel';
+import MaxSupplyViewModel from './MaxSupplyViewModel';
+import VotingRightsForViewModel from './VotingRightsForViewModel';
+import VotingRightsViewModel from './VotingRightsViewModel';
+import RegulationViewModel from './RegulationViewModel';
+import LockViewModel from './LockViewModel';
+import ConfigInfoViewModel from './ConfigInfoViewModel';
+import ScheduledBalanceAdjustmentViewModel from './ScheduledBalanceAdjustmentViewModel';
+import HoldViewModel from './HoldViewModel';
+import KycViewModel from './KycViewModel';
+import KycAccountDataViewModel from './KycAccountDataViewModel';
+import ClearingCreateHoldViewModel from './ClearingCreateHoldViewModel';
+import ClearingRedeemViewModel from './ClearingRedeemViewModel';
+import ClearingTransferViewModel from './ClearingTransferViewModel';
 
 export {
   AccountViewModel,

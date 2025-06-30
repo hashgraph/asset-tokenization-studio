@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import { ClearingHoldCreation } from '../../../../../../domain/context/security/Clearing.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
+import { ClearingHoldCreation } from '@domain/context/security/Clearing';
 
 export class GetClearingCreateHoldForByPartitionQueryResponse
   implements QueryResponse

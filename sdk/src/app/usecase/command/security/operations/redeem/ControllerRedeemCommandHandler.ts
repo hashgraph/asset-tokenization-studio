@@ -203,22 +203,22 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import AccountService from '@service/account/AccountService';
+import SecurityService from '@service/security/SecurityService';
 import {
   ControllerRedeemCommand,
   ControllerRedeemCommandResponse,
-} from './ControllerRedeemCommand.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { ControllerRedeemCommandError } from './error/ControllerRedeemCommandError.js';
+} from './ControllerRedeemCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { _PARTITION_ID_1 } from '@core/Constants';
+import ContractService from '@service/contract/ContractService';
+import { ControllerRedeemCommandError } from './error/ControllerRedeemCommandError';
 
 @CommandHandler(ControllerRedeemCommand)
 export class ControllerRedeemCommandHandler

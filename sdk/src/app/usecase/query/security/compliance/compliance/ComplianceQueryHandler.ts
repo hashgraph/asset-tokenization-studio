@@ -203,14 +203,14 @@
 
 */
 
-import { ComplianceQuery, ComplianceQueryResponse } from './ComplianceQuery.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { ComplianceQueryError } from './error/ComplianceQueryError.js';
+import { ComplianceQuery, ComplianceQueryResponse } from './ComplianceQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { ComplianceQueryError } from './error/ComplianceQueryError';
 
 @QueryHandler(ComplianceQuery)
 export class ComplianceQueryHandler implements IQueryHandler<ComplianceQuery> {

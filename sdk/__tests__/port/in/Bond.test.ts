@@ -219,30 +219,30 @@ import {
   RoleRequest,
   SetCouponRequest,
   UpdateMaturityDateRequest,
-} from '../../../src/index.js';
+} from '@port/in';
 import {
   CLIENT_ACCOUNT_ECDSA,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
-} from '../../config.js';
-import ConnectRequest from '../../../src/port/in/request/network/ConnectRequest.js';
-import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
-import NetworkService from '../../../src/app/service/network/NetworkService.js';
-import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
-import Injectable from '../../../src/core/Injectable.js';
-import { SecurityRole } from '../../../src/domain/context/security/SecurityRole.js';
+} from '@test/config';
+import ConnectRequest from '@port/in/request/network/ConnectRequest';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import NetworkService from '@service/network/NetworkService';
+import SecurityViewModel from '@port/in/response/SecurityViewModel';
+import Injectable from '@core/Injectable';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType.js';
-import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
-import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter.js';
-import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter.js';
+} from '@domain/context/factory/RegulationType';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
 import { Wallet, ethers } from 'ethers';
-import BaseError from '../../../src/core/error/BaseError.js';
+import BaseError from '@core/error/BaseError';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 

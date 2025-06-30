@@ -203,9 +203,9 @@
 
 */
 
-import { BaseArgs as BaseRequest } from '../../../core/validation/BaseArgs';
+import { BaseArgs as BaseRequest } from '@core/validation/BaseArgs';
 
-export { BaseArgs as BaseRequest } from '../../../core/validation/BaseArgs';
+export { BaseArgs as BaseRequest } from '@core/validation/BaseArgs';
 
 export interface RequestAccount {
   accountId: string;

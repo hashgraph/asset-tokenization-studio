@@ -203,8 +203,8 @@
 
 */
 
-import { CommandResponse } from '../../../../../../core/command/CommandResponse';
-import { Command } from '../../../../../../core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
+import { Command } from '@core/command/Command';
 
 export class ProtectedRedeemFromByPartitionCommandResponse
   implements CommandResponse

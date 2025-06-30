@@ -203,19 +203,19 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
-import { MintCommand, MintCommandResponse } from './MintCommand.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import AccountService from '@service/account/AccountService';
+import SecurityService from '@service/security/SecurityService';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import ContractService from '@service/contract/ContractService';
+import { KycStatus } from '@domain/context/kyc/Kyc';
+import { MintCommand, MintCommandResponse } from './MintCommand';
 import { MintCommandError } from './error/MintCommandError';
 
 @CommandHandler(MintCommand)

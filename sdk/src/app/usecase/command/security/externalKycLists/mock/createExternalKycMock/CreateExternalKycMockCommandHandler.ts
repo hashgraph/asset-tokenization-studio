@@ -203,17 +203,17 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import {
   CreateExternalKycListMockCommand,
   CreateExternalKycListMockCommandResponse,
 } from './CreateExternalKycMockCommand';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../service/transaction/TransactionService';
-import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import TransactionService from '@service/transaction/TransactionService';
+import { EmptyResponse } from '@service/transaction/error/EmptyResponse';
+import { InvalidResponse } from '@core/error/InvalidResponse';
 
 @CommandHandler(CreateExternalKycListMockCommand)
 export class CreateExternalKycListMockCommandHandler

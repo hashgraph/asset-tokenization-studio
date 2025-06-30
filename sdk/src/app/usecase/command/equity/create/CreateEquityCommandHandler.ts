@@ -206,23 +206,23 @@
 import {
   CreateEquityCommand,
   CreateEquityCommandResponse,
-} from './CreateEquityCommand.js';
-import { InvalidRequest } from '../../error/InvalidRequest.js';
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { Security } from '../../../../../domain/context/security/Security.js';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import NetworkService from '../../../../service/network/NetworkService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { EquityDetails } from '../../../../../domain/context/equity/EquityDetails.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import { Response } from '../../../../../domain/context/transaction/Response';
-import { CreateEquityCommandError } from './error/CreateEquityCommandError.js';
+} from './CreateEquityCommand';
+import { InvalidRequest } from '@command/error/InvalidRequest';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import ContractId from '@domain/context/contract/ContractId';
+import { Security } from '@domain/context/security/Security';
+import TransactionService from '@service/transaction/TransactionService';
+import NetworkService from '@service/network/NetworkService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { Response } from '@domain/context/transaction/Response';
+import { CreateEquityCommandError } from './error/CreateEquityCommandError';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler

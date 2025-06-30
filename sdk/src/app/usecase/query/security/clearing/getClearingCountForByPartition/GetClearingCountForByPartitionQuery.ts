@@ -203,9 +203,9 @@
 
 */
 
-import { ClearingOperationType } from '../../../../../../domain/context/security/Clearing.js';
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { ClearingOperationType } from '@domain/context/security/Clearing';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
 
 export class GetClearingCountForByPartitionQueryResponse
   implements QueryResponse

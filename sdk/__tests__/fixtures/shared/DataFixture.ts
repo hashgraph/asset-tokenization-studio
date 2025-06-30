@@ -204,9 +204,9 @@
 */
 
 import { createFixture } from '../config';
-import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
-import TransactionResponse from '../../../src/domain/context/transaction/TransactionResponse';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
 
 export const EvmAddressPropsFixture = createFixture<{ value: string }>(
   (props) => {

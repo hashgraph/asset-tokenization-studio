@@ -203,18 +203,18 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import {
   GetVotingForQuery,
   GetVotingForQueryResponse,
-} from './GetVotingForQuery.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { GetVotingForQueryError } from './error/GetVotingForQueryError.js';
+} from './GetVotingForQuery';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetVotingForQueryError } from './error/GetVotingForQueryError';
 
 @QueryHandler(GetVotingForQuery)
 export class GetVotingForQueryHandler

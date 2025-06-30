@@ -205,11 +205,11 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import TransferRequest from '../../../src/port/in/request/security/operations/transfer/TransferRequest';
-import TransferAndLockRequest from '../../../src/port/in/request/security/operations/transfer/TransferAndLockRequest';
-import ForceTransferRequest from '../../../src/port/in/request/security/operations/transfer/ForceTransferRequest';
-import { ForcedTransferRequest } from '../../../src';
-import { ForcedTransferCommand } from '../../../src/app/usecase/command/security/operations/transfer/ForcedTransferCommand';
+import TransferRequest from '@port/in/request/security/operations/transfer/TransferRequest';
+import TransferAndLockRequest from '@port/in/request/security/operations/transfer/TransferAndLockRequest';
+import ForceTransferRequest from '@port/in/request/security/operations/transfer/ForceTransferRequest';
+import { ForcedTransferCommand } from '@command/security/operations/transfer/ForcedTransferCommand';
+import ForcedTransferRequest from '@port/in/request/security/operations/transfer/ForcedTransferRequest';
 
 export const TransferRequestFixture = createFixture<TransferRequest>(
   (request) => {

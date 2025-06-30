@@ -203,16 +203,16 @@
 
 */
 
-import { Command } from '../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
-import Account from '../../../../../domain/context/account/Account.js';
-import { Environment } from '../../../../../domain/context/network/Environment.js';
-import { SupportedWallets } from '../../../../../domain/context/network/Wallet.js';
-import { InitializationData } from '../../../../../port/out/TransactionAdapter.js';
-import HWCSettings from '../../../../../core/settings/walletConnect/HWCSettings.js';
-import DfnsSettings from '../../../../../core/settings/custodialWalletSettings/DfnsSettings.js';
-import FireblocksSettings from '../../../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../../../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
+import Account from '@domain/context/account/Account';
+import { Environment } from '@domain/context/network/Environment';
+import { SupportedWallets } from '@domain/context/network/Wallet';
+import { InitializationData } from '@port/out/TransactionAdapter';
+import HWCSettings from '@core/settings/walletConnect/HWCSettings';
+import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
+import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
+import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
 
 export class ConnectCommandResponse implements CommandResponse {
   constructor(

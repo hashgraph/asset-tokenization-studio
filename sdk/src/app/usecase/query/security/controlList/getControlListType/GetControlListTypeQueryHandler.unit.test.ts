@@ -207,19 +207,19 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import { GetControlListTypeQueryFixture } from '../../../../../../../__tests__/fixtures/controlList/ControlListFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetControlListTypeQueryFixture } from '@test/fixtures/controlList/ControlListFixture';
 import {
   GetControlListTypeQuery,
   GetControlListTypeQueryResponse,
-} from './GetControlListTypeQuery.js';
-import { GetControlListTypeQueryHandler } from './GetControlListTypeQueryHandler.js';
-import { GetControlListTypeQueryError } from './error/GetControlListTypeQueryError.js';
-import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
+} from './GetControlListTypeQuery';
+import { GetControlListTypeQueryHandler } from './GetControlListTypeQueryHandler';
+import { GetControlListTypeQueryError } from './error/GetControlListTypeQueryError';
+import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
 
 describe('GetControlListTypeQueryHandler', () => {
   let handler: GetControlListTypeQueryHandler;

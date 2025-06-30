@@ -204,9 +204,9 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import Injectable from '../../../core/Injectable.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import Injectable from '@core/Injectable';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   AddExternalKycListRequest,
   RemoveExternalKycListRequest,
@@ -218,20 +218,20 @@ import {
   GrantKycMockRequest,
   RevokeKycMockRequest,
   GetKycStatusMockRequest,
-} from '../request/index.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
-import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand.js';
-import { AddExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand.js';
-import { RemoveExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand.js';
-import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery.js';
-import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery.js';
-import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery.js';
-import { GetExternalKycListsMembersQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery.js';
-import { GrantKycMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommand.js';
-import { RevokeKycMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommand.js';
-import { GetKycStatusMockQuery } from '../../../app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQuery.js';
-import { CreateExternalKycListMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommand.js';
+} from '../request/index';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { UpdateExternalKycListsCommand } from '@command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
+import { AddExternalKycListCommand } from '@command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand';
+import { RemoveExternalKycListCommand } from '@command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand';
+import { IsExternallyGrantedQuery } from '@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
+import { IsExternalKycListQuery } from '@query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
+import { GetExternalKycListsCountQuery } from '@query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
+import { GetExternalKycListsMembersQuery } from '@query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery';
+import { GrantKycMockCommand } from '@command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommand';
+import { RevokeKycMockCommand } from '@command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommand';
+import { GetKycStatusMockQuery } from '@query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQuery';
+import { CreateExternalKycListMockCommand } from '@command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommand';
 
 interface IExternalKycListsInPort {
   updateExternalKycLists(

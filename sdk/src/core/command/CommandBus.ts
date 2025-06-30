@@ -205,15 +205,15 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { injectable } from 'tsyringe';
-import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from '../Constants.js';
-import { CommandMetadata } from '../decorator/CommandMetadata.js';
-import Injectable from '../Injectable.js';
-import { Type } from '../Type.js';
-import { Command } from './Command.js';
-import { ICommandHandler } from './CommandHandler.js';
-import { CommandResponse } from './CommandResponse.js';
-import { CommandHandlerNotFoundException } from './error/CommandHandlerNotFoundException.js';
-import { InvalidCommandHandlerException } from './error/InvalidCommandHandlerException.js';
+import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from '@core/Constants';
+import { CommandMetadata } from '@core/decorator/CommandMetadata';
+import Injectable from '@core/Injectable';
+import { Type } from '@core/Type';
+import { Command } from './Command';
+import { ICommandHandler } from './CommandHandler';
+import { CommandResponse } from './CommandResponse';
+import { CommandHandlerNotFoundException } from './error/CommandHandlerNotFoundException';
+import { InvalidCommandHandlerException } from './error/InvalidCommandHandlerException';
 
 export type CommandHandlerType = ICommandHandler<Command<CommandResponse>>;
 

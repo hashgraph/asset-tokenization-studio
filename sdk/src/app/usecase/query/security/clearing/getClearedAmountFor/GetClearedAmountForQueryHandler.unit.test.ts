@@ -207,19 +207,19 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import { GetClearedAmountForQueryHandler } from './GetClearedAmountForQueryHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetClearedAmountForQueryHandler } from './GetClearedAmountForQueryHandler';
 import {
   GetClearedAmountForQuery,
   GetClearedAmountForQueryResponse,
-} from './GetClearedAmountForQuery.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetClearedAmountForQueryFixture } from '../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
-import { GetClearedAmountForQueryError } from './error/GetClearedAmountForQueryError.js';
+} from './GetClearedAmountForQuery';
+import AccountService from '@service/account/AccountService';
+import { GetClearedAmountForQueryFixture } from '@test/fixtures/clearing/ClearingFixture';
+import { GetClearedAmountForQueryError } from './error/GetClearedAmountForQueryError';
 
 describe('GetClearedAmountForQueryHandler', () => {
   let handler: GetClearedAmountForQueryHandler;

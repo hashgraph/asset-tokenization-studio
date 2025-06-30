@@ -204,9 +204,9 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import Injectable from '../../../core/Injectable';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import Injectable from '@core/Injectable';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   AddExternalControlListRequest,
   RemoveExternalControlListRequest,
@@ -220,23 +220,23 @@ import {
   RemoveFromWhiteListMockRequest,
   IsAuthorizedBlackListMockRequest,
   IsAuthorizedWhiteListMockRequest,
-} from '../request/index.js';
-import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand.js';
-import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand.js';
-import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import { IsExternalControlListQuery } from '../../../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery.js';
-import { GetExternalControlListsCountQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery.js';
-import { GetExternalControlListsMembersQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery.js';
-import { AddToBlackListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/addToBlackListMock/AddToBlackListMockCommand.js';
-import { AddToWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/addToWhiteListMock/AddToWhiteListMockCommand.js';
-import { RemoveFromBlackListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommand.js';
-import { RemoveFromWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommand.js';
-import { CreateExternalBlackListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/createExternalBlackListMock/CreateExternalBlackListMockCommand.js';
-import { CreateExternalWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/createExternalWhiteListMock/CreateExternalWhiteListMockCommand.js';
-import { IsAuthorizedBlackListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery.js';
-import { IsAuthorizedWhiteListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
+} from '../request/index';
+import { UpdateExternalControlListsCommand } from '@command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
+import { AddExternalControlListCommand } from '@command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
+import { RemoveExternalControlListCommand } from '@command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
+import { QueryBus } from '@core/query/QueryBus';
+import { IsExternalControlListQuery } from '@query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery';
+import { GetExternalControlListsCountQuery } from '@query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery';
+import { GetExternalControlListsMembersQuery } from '@query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery';
+import { AddToBlackListMockCommand } from '@command/security/externalControlLists/mock/addToBlackListMock/AddToBlackListMockCommand';
+import { AddToWhiteListMockCommand } from '@command/security/externalControlLists/mock/addToWhiteListMock/AddToWhiteListMockCommand';
+import { RemoveFromBlackListMockCommand } from '@command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommand';
+import { RemoveFromWhiteListMockCommand } from '@command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommand';
+import { CreateExternalBlackListMockCommand } from '@command/security/externalControlLists/mock/createExternalBlackListMock/CreateExternalBlackListMockCommand';
+import { CreateExternalWhiteListMockCommand } from '@command/security/externalControlLists/mock/createExternalWhiteListMock/CreateExternalWhiteListMockCommand';
+import { IsAuthorizedBlackListMockQuery } from '@query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery';
+import { IsAuthorizedWhiteListMockQuery } from '@query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
 interface IExternalControlListsInPort {
   updateExternalControlLists(

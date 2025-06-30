@@ -203,22 +203,22 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import AccountService from '@service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   ApproveClearingOperationByPartitionCommand,
   ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import { ApproveClearingOperationByPartitionCommandError } from './error/ApproveClearingOperationByPartitionCommandError.js';
-import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
+} from './ApproveClearingOperationByPartitionCommand';
+import ValidationService from '@service/validation/ValidationService';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import SecurityService from '@service/security/SecurityService';
+import ContractService from '@service/contract/ContractService';
+import { ApproveClearingOperationByPartitionCommandError } from './error/ApproveClearingOperationByPartitionCommandError';
+import { KycStatus } from '@domain/context/kyc/Kyc';
 
 @CommandHandler(ApproveClearingOperationByPartitionCommand)
 export class ApproveClearingOperationByPartitionCommandHandler

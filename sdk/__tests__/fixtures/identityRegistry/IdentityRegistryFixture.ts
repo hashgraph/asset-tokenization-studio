@@ -205,10 +205,10 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetIdentityRegistryCommand } from '../../../src/app/usecase/command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommand';
-import { IdentityRegistryQuery } from '../../../src/app/usecase/query/security/identityRegistry/IdentityRegistryQuery';
-import SetIdentityRegistryRequest from '../../../src/port/in/request/security/identityRegistry/SetIdentityRegistryRequest';
-import IdentityRegistryRequest from '../../../src/port/in/request/security/identityRegistry/IdentityRegistryRequest';
+import { SetIdentityRegistryCommand } from '@command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommand';
+import { IdentityRegistryQuery } from '@query/security/identityRegistry/IdentityRegistryQuery';
+import SetIdentityRegistryRequest from '@port/in/request/security/identityRegistry/SetIdentityRegistryRequest';
+import IdentityRegistryRequest from '@port/in/request/security/identityRegistry/IdentityRegistryRequest';
 
 export const SetIdentityRegistryCommandFixture =
   createFixture<SetIdentityRegistryCommand>((command) => {

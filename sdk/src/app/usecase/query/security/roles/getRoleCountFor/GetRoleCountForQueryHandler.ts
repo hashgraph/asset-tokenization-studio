@@ -203,18 +203,18 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import {
   GetRoleCountForQuery,
   GetRoleCountForQueryResponse,
-} from './GetRoleCountForQuery.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/account/AccountService';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { GetRoleCountForQueryError } from './error/GetRoleCountForQueryError.js';
+} from './GetRoleCountForQuery';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import { GetRoleCountForQueryError } from './error/GetRoleCountForQueryError';
 
 @QueryHandler(GetRoleCountForQuery)
 export class GetRoleCountForQueryHandler

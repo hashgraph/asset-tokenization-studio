@@ -203,15 +203,15 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { HasRoleQuery, HasRoleQueryResponse } from './HasRoleQuery.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import AccountService from '../../../../../service/account/AccountService';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { HasRoleQueryError } from './error/HasRoleQueryError.js';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { HasRoleQuery, HasRoleQueryResponse } from './HasRoleQuery';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { HasRoleQueryError } from './error/HasRoleQueryError';
 
 @QueryHandler(HasRoleQuery)
 export class HasRoleQueryHandler implements IQueryHandler<HasRoleQuery> {

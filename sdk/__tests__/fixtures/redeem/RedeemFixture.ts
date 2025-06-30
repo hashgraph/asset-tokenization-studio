@@ -205,8 +205,8 @@
 
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
-import RedeemRequest from '../../../src/port/in/request/security/operations/redeem/RedeemRequest';
-import ForceRedeemRequest from '../../../src/port/in/request/security/operations/redeem/ForceRedeemRequest';
+import RedeemRequest from '@port/in/request/security/operations/redeem/RedeemRequest';
+import ForceRedeemRequest from '@port/in/request/security/operations/redeem/ForceRedeemRequest';
 
 export const RedeemRequestFixture = createFixture<RedeemRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);

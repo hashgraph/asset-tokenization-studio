@@ -203,19 +203,19 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
-import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
-import { CreateExternalPauseMockCommandHandler } from './CreateExternalPauseMockCommandHandler.js';
-import { CreateExternalPauseMockCommandResponse } from './CreateExternalPauseMockCommand.js';
+} from '@test/fixtures/shared/DataFixture';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Account from '@domain/context/account/Account';
+import { EmptyResponse } from '@service/transaction/error/EmptyResponse';
+import { InvalidResponse } from '@core/error/InvalidResponse';
+import { CreateExternalPauseMockCommandHandler } from './CreateExternalPauseMockCommandHandler';
+import { CreateExternalPauseMockCommandResponse } from './CreateExternalPauseMockCommand';
 
 describe('CreateExternalPauseMockCommandHandler', () => {
   let handler: CreateExternalPauseMockCommandHandler;

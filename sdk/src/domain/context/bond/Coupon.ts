@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
-import BigDecimal from '../shared/BigDecimal.js';
-import { SecurityDate } from '../shared/SecurityDate.js';
+import ValidatedDomain from '@core/validation/ValidatedArgs';
+import BigDecimal from '../shared/BigDecimal';
+import { SecurityDate } from '../shared/SecurityDate';
 
 export class Coupon extends ValidatedDomain<Coupon> {
   recordTimeStamp: number;

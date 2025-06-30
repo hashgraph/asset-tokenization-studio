@@ -204,19 +204,20 @@
 */
 
 import { singleton } from 'tsyringe';
-import Injectable from '../../../core/Injectable.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import Account from '../../../domain/context/account/Account.js';
-import { AccountIdNotValid } from '../../../domain/context/account/error/AccountIdNotValid.js';
-import { HederaId } from '../../../domain/context/shared/HederaId.js';
-import { GetAccountInfoQuery } from '../../usecase/query/account/info/GetAccountInfoQuery.js';
-import NetworkService from '../network/NetworkService.js';
-import Service from '../Service.js';
-import TransactionService from '../transaction/TransactionService.js';
-import EvmAddress from '../../../domain/context/contract/EvmAddress';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../domain/context/shared/HederaId';
-import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter';
-import { EVM_ZERO_ADDRESS } from '../../../core/Constants.js';
+import Injectable from '@core/Injectable';
+import { QueryBus } from '@core/query/QueryBus';
+import Account from '@domain/context/account/Account';
+import { AccountIdNotValid } from '@domain/context/account/error/AccountIdNotValid';
+import { HederaId } from '@domain/context/shared/HederaId';
+import { GetAccountInfoQuery } from '@query/account/info/GetAccountInfoQuery';
+
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '@domain/context/shared/HederaId';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { EVM_ZERO_ADDRESS } from '@core/Constants';
+import Service from '@service/Service';
+import NetworkService from '@service/network/NetworkService';
+import TransactionService from '@service/transaction/TransactionService';
 @singleton()
 export default class AccountService extends Service {
   queryBus: QueryBus;

@@ -204,32 +204,32 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { RequestAccount, RequestPublicKey } from './BaseRequest.js';
-import { EmptyValue } from '../../../core/error/EmptyValue.js';
-import { InvalidLength } from './error/InvalidLength.js';
-import { InvalidRange } from './error/InvalidRange.js';
-import { InvalidFormatHedera as InvalidIdFormatHedera } from '../../../domain/context/shared/error/InvalidFormatHedera.js';
-import { InvalidType } from './error/InvalidType.js';
-import BaseError from '../../../core/error/BaseError.js';
-import PublicKey from '../../../domain/context/account/PublicKey.js';
-import CheckStrings from '../../../core/checks/strings/CheckStrings.js';
-import CheckNums from '../../../core/checks/numbers/CheckNums.js';
-import { AccountIdNotValid } from '../../../domain/context/account/error/AccountIdNotValid.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import Account from '../../../domain/context/account/Account.js';
-import ContractId from '../../../domain/context/contract/ContractId.js';
-import InvalidDecimalRange from '../../../domain/context/security/error/values/InvalidDecimalRange.js';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
-import { InvalidRole } from '../../../domain/context/security/error/values/InvalidRole.js';
-import { EVM_ZERO_ADDRESS } from '../../../core/Constants.js';
-import { InvalidEvmAddress } from '../../../domain/context/contract/error/InvalidEvmAddress.js';
-import { InvalidFormatHederaIdOrEvmAddress } from '../../../domain/context/shared/error/InvalidFormatHederaIdOrEvmAddress.js';
-import { InvalidBytes32 } from './error/InvalidBytes32.js';
-import { InvalidBytes3 } from './error/InvalidBytes3.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../domain/context/shared/HederaId.js';
-import { InvalidBytes } from './error/InvalidBytes.js';
-import { InvalidBase64 } from './error/InvalidBase64.js';
-import { InvalidValue } from './error/InvalidValue.js';
+import { RequestAccount, RequestPublicKey } from './BaseRequest';
+import { EmptyValue } from '@core/error/EmptyValue';
+import { InvalidLength } from './error/InvalidLength';
+import { InvalidRange } from './error/InvalidRange';
+import { InvalidFormatHedera as InvalidIdFormatHedera } from '@domain/context/shared/error/InvalidFormatHedera';
+import { InvalidType } from './error/InvalidType';
+import BaseError from '@core/error/BaseError';
+import PublicKey from '@domain/context/account/PublicKey';
+import CheckStrings from '@core/checks/strings/CheckStrings';
+import CheckNums from '@core/checks/numbers/CheckNums';
+import { AccountIdNotValid } from '@domain/context/account/error/AccountIdNotValid';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import Account from '@domain/context/account/Account';
+import ContractId from '@domain/context/contract/ContractId';
+import InvalidDecimalRange from '@domain/context/security/error/values/InvalidDecimalRange';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { InvalidRole } from '@domain/context/security/error/values/InvalidRole';
+import { EVM_ZERO_ADDRESS } from '@core/Constants';
+import { InvalidEvmAddress } from '@domain/context/contract/error/InvalidEvmAddress';
+import { InvalidFormatHederaIdOrEvmAddress } from '@domain/context/shared/error/InvalidFormatHederaIdOrEvmAddress';
+import { InvalidBytes32 } from './error/InvalidBytes32';
+import { InvalidBytes3 } from './error/InvalidBytes3';
+import { HEDERA_FORMAT_ID_REGEX } from '@domain/context/shared/HederaId';
+import { InvalidBytes } from './error/InvalidBytes';
+import { InvalidBase64 } from './error/InvalidBase64';
+import { InvalidValue } from './error/InvalidValue';
 
 export default class FormatValidation {
   public static checkPublicKey = () => {

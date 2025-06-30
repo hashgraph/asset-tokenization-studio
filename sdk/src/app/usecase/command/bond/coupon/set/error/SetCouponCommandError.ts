@@ -203,8 +203,8 @@
 
 */
 
-import BaseError from '../../../../../../../core/error/BaseError';
-import { CommandError } from '../../../../error/CommandError';
+import { CommandError } from '@command/error/CommandError';
+import BaseError from '@core/error/BaseError';
 
 export class SetCouponCommandError extends CommandError {
   constructor(error: Error) {
