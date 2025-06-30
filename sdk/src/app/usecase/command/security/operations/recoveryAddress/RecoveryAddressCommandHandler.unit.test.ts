@@ -2,17 +2,12 @@
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
-
    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
    1. Definitions.
-
       "License" shall mean the terms and conditions for use, reproduction,
       and distribution as defined by Sections 1 through 9 of this document.
-
       "Licensor" shall mean the copyright owner or entity authorized by
       the copyright owner that is granting the License.
-
       "Legal Entity" shall mean the union of the acting entity and all
       other entities that control, are controlled by, or are under common
       control with that entity. For the purposes of this definition,
@@ -20,24 +15,19 @@
       direction or management of such entity, whether by contract or
       otherwise, or (ii) ownership of fifty percent (50%) or more of the
       outstanding shares, or (iii) beneficial ownership of such entity.
-
       "You" (or "Your") shall mean an individual or Legal Entity
       exercising permissions granted by this License.
-
       "Source" form shall mean the preferred form for making modifications,
       including but not limited to software source code, documentation
       source, and configuration files.
-
       "Object" form shall mean any form resulting from mechanical
       transformation or translation of a Source form, including but
       not limited to compiled object code, generated documentation,
       and conversions to other media types.
-
       "Work" shall mean the work of authorship, whether in Source or
       Object form, made available under the License, as indicated by a
       copyright notice that is included in or attached to the work
       (an example is provided in the Appendix below).
-
       "Derivative Works" shall mean any work, whether in Source or Object
       form, that is based on (or derived from) the Work and for which the
       editorial revisions, annotations, elaborations, or other modifications
@@ -45,7 +35,6 @@
       of this License, Derivative Works shall not include works that remain
       separable from, or merely link (or bind by name) to the interfaces of,
       the Work and Derivative Works thereof.
-
       "Contribution" shall mean any work of authorship, including
       the original version of the Work and any modifications or additions
       to that Work or Derivative Works thereof, that is intentionally
@@ -59,18 +48,15 @@
       Licensor for the purpose of discussing and improving the Work, but
       excluding communication that is conspicuously marked or otherwise
       designated in writing by the copyright owner as "Not a Contribution."
-
       "Contributor" shall mean Licensor and any individual or Legal Entity
       on behalf of whom a Contribution has been received by Licensor and
       subsequently incorporated within the Work.
-
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
       copyright license to reproduce, prepare Derivative Works of,
       publicly display, publicly perform, sublicense, and distribute the
       Work and such Derivative Works in Source or Object form.
-
    3. Grant of Patent License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
@@ -86,24 +72,19 @@
       or contributory patent infringement, then any patent licenses
       granted to You under this License for that Work shall terminate
       as of the date such litigation is filed.
-
    4. Redistribution. You may reproduce and distribute copies of the
       Work or Derivative Works thereof in any medium, with or without
       modifications, and in Source or Object form, provided that You
       meet the following conditions:
-
       (a) You must give any other recipients of the Work or
           Derivative Works a copy of this License; and
-
       (b) You must cause any modified files to carry prominent notices
           stating that You changed the files; and
-
       (c) You must retain, in the Source form of any Derivative Works
           that You distribute, all copyright, patent, trademark, and
           attribution notices from the Source form of the Work,
           excluding those notices that do not pertain to any part of
           the Derivative Works; and
-
       (d) If the Work includes a "NOTICE" text file as part of its
           distribution, then any Derivative Works that You distribute must
           include a readable copy of the attribution notices contained
@@ -120,14 +101,12 @@
           or as an addendum to the NOTICE text from the Work, provided
           that such additional attribution notices cannot be construed
           as modifying the License.
-
       You may add Your own copyright statement to Your modifications and
       may provide additional or different license terms and conditions
       for use, reproduction, or distribution of Your modifications, or
       for any such Derivative Works as a whole, provided Your use,
       reproduction, and distribution of the Work otherwise complies with
       the conditions stated in this License.
-
    5. Submission of Contributions. Unless You explicitly state otherwise,
       any Contribution intentionally submitted for inclusion in the Work
       by You to the Licensor shall be under the terms and conditions of
@@ -135,12 +114,10 @@
       Notwithstanding the above, nothing herein shall supersede or modify
       the terms of any separate license agreement you may have executed
       with Licensor regarding such Contributions.
-
    6. Trademarks. This License does not grant permission to use the trade
       names, trademarks, service marks, or product names of the Licensor,
       except as required for reasonable and customary use in describing the
       origin of the Work and reproducing the content of the NOTICE file.
-
    7. Disclaimer of Warranty. Unless required by applicable law or
       agreed to in writing, Licensor provides the Work (and each
       Contributor provides its Contributions) on an "AS IS" BASIS,
@@ -150,7 +127,6 @@
       PARTICULAR PURPOSE. You are solely responsible for determining the
       appropriateness of using or redistributing the Work and assume any
       risks associated with Your exercise of permissions under this License.
-
    8. Limitation of Liability. In no event and under no legal theory,
       whether in tort (including negligence), contract, or otherwise,
       unless required by applicable law (such as deliberate and grossly
@@ -162,7 +138,6 @@
       work stoppage, computer failure or malfunction, or any and all
       other commercial damages or losses), even if such Contributor
       has been advised of the possibility of such damages.
-
    9. Accepting Warranty or Additional Liability. While redistributing
       the Work or Derivative Works thereof, You may choose to offer,
       and charge a fee for, acceptance of support, warranty, indemnity,
@@ -173,11 +148,8 @@
       defend, and hold each Contributor harmless for any liability
       incurred by, or claims asserted against, such Contributor by reason
       of your accepting any such warranty or additional liability.
-
    END OF TERMS AND CONDITIONS
-
    APPENDIX: How to apply the Apache License to your work.
-
       To apply the Apache License to your work, attach the following
       boilerplate notice, with the fields enclosed by brackets "[]"
       replaced with your own identifying information. (Don't include
@@ -186,286 +158,147 @@
       file or class name and description of purpose be included on the
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
-
    Copyright [yyyy] [name of copyright owner]
-
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
        http://www.apache.org/licenses/LICENSE-2.0
-
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/account/AccountService.js';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import {
+  RecoveryAddressCommand,
+  RecoveryAddressCommandResponse,
+} from './RecoveryAddressCommand.js';
+import { RecoveryAddressCommandHandler } from './RecoveryAddressCommandHandler.js';
+import { RecoveryAddressCommandFixture } from '../../../../../../../__tests__/fixtures/recovery/RecoveryFixture.js';
+import { RecoveryAddressCommandError } from './error/RecoveryAddressCommandError.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/account/AccountFixture.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import ContractService from 'app/service/contract/ContractService.js';
 
-import {ICompliance} from './ICompliance.sol';
-import {IIdentityRegistry} from './IIdentityRegistry.sol';
+describe('RecoveryAddressCommandHandler', () => {
+  let handler: RecoveryAddressCommandHandler;
+  let command: RecoveryAddressCommand;
 
-interface IERC3643 {
-    struct ERC3643Storage {
-        address onchainID;
-        address identityRegistry;
-        address compliance;
-        mapping(address => uint256) frozenTokens;
-        mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
-        mapping(address => bool) addressRecovered;
-    }
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-    event UpdatedTokenInformation(
-        string indexed newName,
-        string indexed newSymbol,
-        uint8 newDecimals,
-        string newVersion,
-        address indexed newOnchainID
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const account = new Account(AccountPropsFixture.create());
+
+  beforeEach(() => {
+    handler = new RecoveryAddressCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+      contractServiceMock,
     );
+    command = RecoveryAddressCommandFixture.create();
+  });
 
-    event IdentityRegistryAdded(address indexed identityRegistry);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    event ComplianceAdded(address indexed compliance);
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws RecoveryAddressCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-    event TokensFrozen(
-        address indexed account,
-        uint256 amount,
-        bytes32 partition
-    );
+        accountServiceMock.getAccountEvmAddress.mockRejectedValue(fakeError);
 
-    event TokensUnfrozen(
-        address indexed account,
-        uint256 amount,
-        bytes32 partition
-    );
+        const resultPromise = handler.execute(command);
 
-    /**
-     * @dev Emitted when the agent role is granted
-     *
-     * @param _agent Address of the agent that has been added
-     */
-    event AgentAdded(address indexed _agent);
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          RecoveryAddressCommandError,
+        );
 
-    /**
-     * @dev Emitted when the agent role is revoked
-     *
-     * @param _agent Address of the agent that has been removed
-     */
-    event AgentRemoved(address indexed _agent);
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while recovering address: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully recover address', async () => {
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
 
-    /**
-     *  @dev This event is emitted when the wallet of an investor is frozen or unfrozen
-     *  @dev The event is emitted by setAddressFrozen and batchSetAddressFrozen functions
-     *  @param userAddress Is the wallet of the investor that is concerned by the freezing status
-     *  @param isFrozen Is the freezing status of the wallet
-     *  @param owner Is the address of the agent who called the function to freeze the wallet
-     */
-    event AddressFrozen(
-        address indexed userAddress,
-        bool indexed isFrozen,
-        address indexed owner
-    );
+        transactionServiceMock.getHandler().recoveryAddress.mockResolvedValue({
+          id: transactionId,
+        });
 
-    /**
-     * @dev Emitted when a wallet is recovered
-     *
-     * @param _lostWallet Address of the lost wallet
-     * @param _newWallet Address of the new wallet
-     * @param _investorOnchainID OnchainID
-     */
-    event RecoverySuccess(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    );
+        const result = await handler.execute(command);
 
-    error InsufficientFrozenBalance(
-        address user,
-        uint256 requestedUnfreeze,
-        uint256 availableFrozen,
-        bytes32 partition
-    );
+        expect(result).toBeInstanceOf(RecoveryAddressCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
 
-    /**
-     * @notice Thrown when calling from a recovered wallet
-     */
-    error WalletRecovered();
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          contractServiceMock.getContractEvmAddress,
+        ).toHaveBeenNthCalledWith(1, command.securityId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+          1,
+          command.lostWalletId,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+          2,
+          command.newWalletId,
+        );
 
-    /**
-     * @notice Thrown when attempting to recover a wallet with pending locks, holds or clearings
-     */
-    error CannotRecoverWallet();
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._AGENT_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
 
-    /**
-     * @dev Sets the name of the token to `_name`.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setName(string calldata _name) external;
-
-    /**
-     * @dev Sets the symbol of the token to `_symbol`.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setSymbol(string calldata _symbol) external;
-
-    /**
-     * @dev Sets the onchainID of the token to `_onchainID`.
-     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
-     *
-     * This function should only be callable by an authorized entities
-     *
-     * Returns `true` if the transfer was successful.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setOnchainID(address _onchainID) external;
-
-    /**
-     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
-     * @dev This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the transfer was successful.
-     *
-     * Emits a ControllerTransfer event.
-     */
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external returns (bool);
-
-    /**
-     * @dev Sets the identity registry contract address.
-     * @dev Mints `_amount` tokens to the address `_to`.
-     *
-     * Emits an IdentityRegistryAdded event.
-     */
-    function setIdentityRegistry(address _identityRegistry) external;
-
-    /**
-     * @dev Mints `_amount` tokens to the address `_to`.
-     *
-     * This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the minting was successful.
-     *
-     * Emits a Issued event.
-     */
-    function mint(address _to, uint256 _amount) external;
-
-    /**
-     * @dev Sets the compliance contract address.
-     * @dev Burns `_amount` tokens from the address `_userAddress`.
-     *
-     * Reduces total supply.
-     *
-     * Emits a ComplianceAdded event.
-     */
-    function setCompliance(address _compliance) external;
-
-    /**
-     * @dev Burns `_amount` tokens from the address `_userAddress`.
-     *
-     * This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the burn was successful.
-     *
-     * Emits a redeem event.
-     */
-    function burn(address _userAddress, uint256 _amount) external;
-
-    /*
-     * @dev Freezes a partial amount of the user's tokens across all partitions.
-     * Emits a TokensFrozen event.
-     */
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Unfreezes a partial amount of the user's previously frozen tokens across all partitions.
-     * Emits a TokensUnfrozen event.
-     */
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Freezes the user's address entirely, disabling all token operations.
-     * Emits a TokensFrozen event.
-     */
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezeStatus
-    ) external;
-
-    /**
-     * @notice Gives an account the agent role
-     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
-     * @dev Can only be called by the role admin
-     */
-    function addAgent(address _agent) external;
-
-    /**
-     * @notice Revokes an account the agent role
-     * @dev Can only be called by the role admin
-     */
-    function removeAgent(address _agent) external;
-
-    /**
-     * @notice Transfers the status of a lost wallet to a new wallet
-     * @dev Can only be called by the agent
-     */
-    function recoveryAddress(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    ) external returns (bool);
-
-    /**
-     * @notice Retrieves recovery status of a wallet
-     */
-    function isAddressRecovered(address _wallet) external returns (bool);
-
-    /**
-     * @dev Checks if an account has the agent role
-     */
-    function isAgent(address _agent) external view returns (bool);
-
-    /**
-     * @dev Returns the onchainID address associated with the token.
-     */
-    function onchainID() external view returns (address);
-
-    /**
-     * @dev Returns the address of the identity registry contract.
-     * @dev Returns the version of the contract as a string.
-     *
-     */
-    function identityRegistry() external view returns (IIdentityRegistry);
-
-    /**
-     * @dev Returns the address of the compliance contract.
-     */
-    function compliance() external view returns (ICompliance);
-
-    /**
-     * @dev Returns the version of the token.
-     */
-    function version() external view returns (string memory);
-
-    /*
-     * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.
-     */
-    function getFrozenTokens(
-        address _userAddress
-    ) external view returns (uint256);
-}
+        expect(
+          transactionServiceMock.getHandler().recoveryAddress,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().recoveryAddress,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          evmAddress,
+          evmAddress,
+          command.securityId,
+        );
+      });
+    });
+  });
+});

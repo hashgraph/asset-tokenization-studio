@@ -203,269 +203,101 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import { createMock } from '@golevelup/ts-jest';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { ErrorCode } from '../../../../../core/error/BaseError.js';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../service/contract/ContractService.js';
+import {
+  IsAddressRecoveredQuery,
+  IsAddressRecoveredQueryResponse,
+} from './IsAddressRecoveredQuery.js';
+import { IsAddressRecoveredQueryHandler } from './IsAddressRecoveredQueryHandler.js';
+import AccountService from '../../../../service/account/AccountService.js';
+import { IsAddressRecoveredQueryError } from './error/IsAddressRecoveredQueryError.js';
+import { IsAddressRecoveredQueryFixture } from '../../../../../../__tests__/fixtures/recovery/RecoveryFixture.js';
 
-import {ICompliance} from './ICompliance.sol';
-import {IIdentityRegistry} from './IIdentityRegistry.sol';
+describe('IsAddressRecoveredQueryHandler', () => {
+  let handler: IsAddressRecoveredQueryHandler;
+  let query: IsAddressRecoveredQuery;
 
-interface IERC3643 {
-    struct ERC3643Storage {
-        address onchainID;
-        address identityRegistry;
-        address compliance;
-        mapping(address => uint256) frozenTokens;
-        mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
-        mapping(address => bool) addressRecovered;
-    }
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-    event UpdatedTokenInformation(
-        string indexed newName,
-        string indexed newSymbol,
-        uint8 newDecimals,
-        string newVersion,
-        address indexed newOnchainID
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const targetEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const errorMsg = ErrorMsgFixture.create().msg;
+
+  beforeEach(() => {
+    handler = new IsAddressRecoveredQueryHandler(
+      queryAdapterServiceMock,
+      accountServiceMock,
+      contractServiceMock,
     );
+    query = IsAddressRecoveredQueryFixture.create();
+  });
 
-    event IdentityRegistryAdded(address indexed identityRegistry);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    event ComplianceAdded(address indexed compliance);
+  describe('execute', () => {
+    it('throws IsAddressRecoveredQueryError when query fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
 
-    event TokensFrozen(
-        address indexed account,
-        uint256 amount,
-        bytes32 partition
-    );
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
-    event TokensUnfrozen(
-        address indexed account,
-        uint256 amount,
-        bytes32 partition
-    );
+      const resultPromise = handler.execute(query);
 
-    /**
-     * @dev Emitted when the agent role is granted
-     *
-     * @param _agent Address of the agent that has been added
-     */
-    event AgentAdded(address indexed _agent);
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        IsAddressRecoveredQueryError,
+      );
 
-    /**
-     * @dev Emitted when the agent role is revoked
-     *
-     * @param _agent Address of the agent that has been removed
-     */
-    event AgentRemoved(address indexed _agent);
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while querying recovery status: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtQueryError,
+      });
+    });
 
-    /**
-     *  @dev This event is emitted when the wallet of an investor is frozen or unfrozen
-     *  @dev The event is emitted by setAddressFrozen and batchSetAddressFrozen functions
-     *  @param userAddress Is the wallet of the investor that is concerned by the freezing status
-     *  @param isFrozen Is the freezing status of the wallet
-     *  @param owner Is the address of the agent who called the function to freeze the wallet
-     */
-    event AddressFrozen(
-        address indexed userAddress,
-        bool indexed isFrozen,
-        address indexed owner
-    );
+    it('should successfully get recovery status', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        targetEvmAddress,
+      );
 
-    /**
-     * @dev Emitted when a wallet is recovered
-     *
-     * @param _lostWallet Address of the lost wallet
-     * @param _newWallet Address of the new wallet
-     * @param _investorOnchainID OnchainID
-     */
-    event RecoverySuccess(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    );
+      queryAdapterServiceMock.isAddressRecovered.mockResolvedValueOnce(true);
 
-    error InsufficientFrozenBalance(
-        address user,
-        uint256 requestedUnfreeze,
-        uint256 availableFrozen,
-        bytes32 partition
-    );
+      const result = await handler.execute(query);
 
-    /**
-     * @notice Thrown when calling from a recovered wallet
-     */
-    error WalletRecovered();
+      expect(result).toBeInstanceOf(IsAddressRecoveredQueryResponse);
+      expect(result.payload).toBe(true);
 
-    /**
-     * @notice Thrown when attempting to recover a wallet with pending locks, holds or clearings
-     */
-    error CannotRecoverWallet();
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+        query.targetId,
+      );
 
-    /**
-     * @dev Sets the name of the token to `_name`.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setName(string calldata _name) external;
-
-    /**
-     * @dev Sets the symbol of the token to `_symbol`.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setSymbol(string calldata _symbol) external;
-
-    /**
-     * @dev Sets the onchainID of the token to `_onchainID`.
-     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
-     *
-     * This function should only be callable by an authorized entities
-     *
-     * Returns `true` if the transfer was successful.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setOnchainID(address _onchainID) external;
-
-    /**
-     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
-     * @dev This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the transfer was successful.
-     *
-     * Emits a ControllerTransfer event.
-     */
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external returns (bool);
-
-    /**
-     * @dev Sets the identity registry contract address.
-     * @dev Mints `_amount` tokens to the address `_to`.
-     *
-     * Emits an IdentityRegistryAdded event.
-     */
-    function setIdentityRegistry(address _identityRegistry) external;
-
-    /**
-     * @dev Mints `_amount` tokens to the address `_to`.
-     *
-     * This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the minting was successful.
-     *
-     * Emits a Issued event.
-     */
-    function mint(address _to, uint256 _amount) external;
-
-    /**
-     * @dev Sets the compliance contract address.
-     * @dev Burns `_amount` tokens from the address `_userAddress`.
-     *
-     * Reduces total supply.
-     *
-     * Emits a ComplianceAdded event.
-     */
-    function setCompliance(address _compliance) external;
-
-    /**
-     * @dev Burns `_amount` tokens from the address `_userAddress`.
-     *
-     * This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the burn was successful.
-     *
-     * Emits a redeem event.
-     */
-    function burn(address _userAddress, uint256 _amount) external;
-
-    /*
-     * @dev Freezes a partial amount of the user's tokens across all partitions.
-     * Emits a TokensFrozen event.
-     */
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Unfreezes a partial amount of the user's previously frozen tokens across all partitions.
-     * Emits a TokensUnfrozen event.
-     */
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Freezes the user's address entirely, disabling all token operations.
-     * Emits a TokensFrozen event.
-     */
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezeStatus
-    ) external;
-
-    /**
-     * @notice Gives an account the agent role
-     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
-     * @dev Can only be called by the role admin
-     */
-    function addAgent(address _agent) external;
-
-    /**
-     * @notice Revokes an account the agent role
-     * @dev Can only be called by the role admin
-     */
-    function removeAgent(address _agent) external;
-
-    /**
-     * @notice Transfers the status of a lost wallet to a new wallet
-     * @dev Can only be called by the agent
-     */
-    function recoveryAddress(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    ) external returns (bool);
-
-    /**
-     * @notice Retrieves recovery status of a wallet
-     */
-    function isAddressRecovered(address _wallet) external returns (bool);
-
-    /**
-     * @dev Checks if an account has the agent role
-     */
-    function isAgent(address _agent) external view returns (bool);
-
-    /**
-     * @dev Returns the onchainID address associated with the token.
-     */
-    function onchainID() external view returns (address);
-
-    /**
-     * @dev Returns the address of the identity registry contract.
-     * @dev Returns the version of the contract as a string.
-     *
-     */
-    function identityRegistry() external view returns (IIdentityRegistry);
-
-    /**
-     * @dev Returns the address of the compliance contract.
-     */
-    function compliance() external view returns (ICompliance);
-
-    /**
-     * @dev Returns the version of the token.
-     */
-    function version() external view returns (string memory);
-
-    /*
-     * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.
-     */
-    function getFrozenTokens(
-        address _userAddress
-    ) external view returns (uint256);
-}
+      expect(queryAdapterServiceMock.isAddressRecovered).toHaveBeenCalledWith(
+        evmAddress,
+        targetEvmAddress,
+      );
+    });
+  });
+});

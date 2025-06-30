@@ -247,14 +247,6 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
         }
     }
 
-    function _checkRecoveredAddress(address _sender) internal view {
-        if (_isRecovered(_sender)) revert IERC3643.WalletRecovered();
-    }
-
-    function _isRecovered(address _sender) internal view returns (bool) {
-        return _erc3643Storage().addressRecovered[_sender];
-    }
-
     function _getFrozenAmountFor(
         address _userAddress
     ) internal view returns (uint256) {
@@ -268,6 +260,14 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
     ) internal view returns (uint256) {
         IERC3643.ERC3643Storage storage st = _erc3643Storage();
         return st.frozenTokensByPartition[_userAddress][_partition];
+    }
+
+    function _checkRecoveredAddress(address _sender) internal view {
+        if (_isRecovered(_sender)) revert IERC3643.WalletRecovered();
+    }
+
+    function _isRecovered(address _sender) internal view returns (bool) {
+        return _erc3643Storage().addressRecovered[_sender];
     }
 
     function _erc3643Storage()

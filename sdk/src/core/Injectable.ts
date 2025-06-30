@@ -411,6 +411,8 @@ import { SetOnchainIDCommandHandler } from '../app/usecase/command/security/oper
 import { FreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommandHandler.js';
 import { UnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommandHandler.js';
 import { GetFrozenPartialTokensQueryHandler } from '../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQueryHandler.js';
+import { RecoveryAddressCommandHandler } from '../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommandHandler.js';
+import { IsAddressRecoveredQueryHandler } from '../app/usecase/query/security/recovery/IsAddressRecoveredQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -593,6 +595,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: RevokeKycCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RecoveryAddressCommandHandler,
   },
 
   // Bond Operations
@@ -1161,6 +1167,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetFrozenPartialTokensQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsAddressRecoveredQueryHandler,
   },
 ];
 

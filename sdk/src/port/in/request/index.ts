@@ -367,6 +367,8 @@ import OnchainIDRequest from './security/operations/tokeMetadata/OnchainIDReques
 import FreezePartialTokensRequest from './security/operations/erc3643/FreezePartialTokensRequest.js';
 import GetFrozenPartialTokensRequest from './security/operations/erc3643/GetFrozenPartialTokensRequest.js';
 import UnfreezePartialTokensRequest from './security/operations/erc3643/UnfreezePartialTokensRequest.js';
+import RecoveryAddressRequest from './security/operations/recovery/RecoveryAddressRequest.js';
+import IsAddressRecoveredRequest from './security/operations/recovery/IsAddressRecoveredRequest.js';
 
 export {
   CreateEquityRequest,
@@ -532,4 +534,6 @@ export {
   FreezePartialTokensRequest,
   GetFrozenPartialTokensRequest,
   UnfreezePartialTokensRequest,
+  RecoveryAddressRequest,
+  IsAddressRecoveredRequest,
 };
