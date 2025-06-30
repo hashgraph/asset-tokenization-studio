@@ -379,6 +379,7 @@ export default class ValidationService extends Service {
     accountId: string,
     securityId: string,
   ): Promise<void> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const roleChecks = roles.map((r) =>
       this.queryBus.execute(new HasRoleQuery(r, accountId, securityId)),
     );
