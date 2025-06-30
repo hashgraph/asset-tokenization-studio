@@ -690,38 +690,6 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.burn(account_A, AMOUNT)
                 ).to.be.rejectedWith('TokenIsPaused')
             })
-            it('GIVEN a token with clearing mode activated token WHEN attempting to burn ClearingIsActivated error', async () => {
-                await clearingActionsFacet.activateClearing()
-
-                // Using account C (with role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc3643Facet.burn(account_D, AMOUNT)
-                ).to.be.rejectedWith('ClearingIsActivated')
-            })
-            it('GIVEN blocked accounts WHEN burn THEN transaction fails with AccountIsBlocked', async () => {
-                // Blacklisting accounts
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
-
-                // Using account C (with role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
-                // redeem with data fails
-                await expect(
-                    erc3643Facet.burn(account_C, AMOUNT)
-                ).to.be.rejectedWith('AccountIsBlocked')
-            })
-            it('GIVEN non kyc account WHEN burn THEN transaction reverts with InvalidKycStatus', async () => {
-                await kycFacet.revokeKyc(account_E)
-                await expect(
-                    erc3643Facet.connect(signer_E).burn(account_E, AMOUNT)
-                ).to.revertedWithCustomError(erc3643Facet, 'InvalidKycStatus')
-            })
         })
 
         describe('ForcedTransfer', () => {
@@ -774,44 +742,6 @@ describe('ERC3643 Tests', () => {
                     )
                 ).to.be.equal(AMOUNT)
             })
-            it('GIVEN blocked account (from) USING WHITELIST WHEN forcedTransfer THEN transaction fails with AccountIsBlocked', async () => {
-                // Blacklisting accounts
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
-                // Adding transfer controller role
-                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C)
-
-                // Using account C (with role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
-                // fails
-                await expect(
-                    erc3643Facet.forcedTransfer(account_C, account_E, AMOUNT)
-                ).to.be.revertedWithCustomError(
-                    erc3643Facet,
-                    'AccountIsBlocked'
-                )
-            })
-            it('GIVEN blocked account (to) USING WHITELIST WHEN forcedTransfer THEN transaction fails with AccountIsBlocked', async () => {
-                // Blacklisting accounts
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
-
-                // Using account A (with role)
-                erc3643Facet = erc3643Facet.connect(signer_A)
-
-                // fails
-                await expect(
-                    erc3643Facet.forcedTransfer(account_A, account_C, AMOUNT)
-                ).to.be.revertedWithCustomError(
-                    erc3643Facet,
-                    'AccountIsBlocked'
-                )
-            })
             it('GIVEN a paused token WHEN attempting to forcedTransfer TokenIsPaused error', async () => {
                 pauseFacet = pauseFacet.connect(signer_B)
                 await pauseFacet.pause()
@@ -830,33 +760,6 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     erc3643Facet.forcedTransfer(account_D, account_E, AMOUNT)
                 ).to.be.rejectedWith('AccountHasNoRole')
-            })
-            it('GIVEN non kyc account (from) WHEN forcedTransfer THEN transaction reverts with InvalidKycStatus', async () => {
-                // non kyc'd sender
-                await expect(
-                    erc3643Facet
-                        .connect(signer_A)
-                        .forcedTransfer(account_A, account_D, AMOUNT)
-                ).to.revertedWithCustomError(erc3643Facet, 'InvalidKycStatus')
-            })
-            it('GIVEN non kyc account (to) WHEN forcedTransfer THEN transaction reverts with InvalidKycStatus', async () => {
-                await kycFacet.revokeKyc(account_E)
-
-                await expect(
-                    erc3643Facet
-                        .connect(signer_A)
-                        .forcedTransfer(account_A, account_E, AMOUNT)
-                ).to.revertedWithCustomError(erc3643Facet, 'InvalidKycStatus')
-            })
-            it('GIVEN a token with clearing mode activated token WHEN attempting to forcedTransfer ClearingIsActivated error', async () => {
-                await clearingActionsFacet.activateClearing()
-
-                erc3643Facet = erc3643Facet.connect(signer_A)
-
-                // transfer with data fails
-                await expect(
-                    erc3643Facet.forcedTransfer(account_A, account_D, AMOUNT)
-                ).to.be.rejectedWith('ClearingIsActivated')
             })
         })
 
@@ -2241,6 +2144,11 @@ describe('ERC3643 Tests', () => {
                             EMPTY_HEX_BYTES
                         )
                 ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await expect(
+                    erc3643Facet
+                        .connect(signer_C)
+                        .batchTransfer([account_D], [amount])
+                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
                 // 2 - From
                 operatorTransferData.from = account_C
                 await expect(
@@ -2313,6 +2221,9 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
+                await expect(
+                    erc3643Facet.batchTransfer([account_C], [amount])
+                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
                 // Allowance
                 // 1 - Operator
                 await expect(
@@ -2422,6 +2333,12 @@ describe('ERC3643 Tests', () => {
                         data: EMPTY_HEX_BYTES,
                     })
                 ).to.be.rejectedWith('WalletRecovered')
+                await expect(
+                    erc3643Facet.mint(account_C, amount)
+                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                await expect(
+                    erc3643Facet.batchMint([account_C], [amount])
+                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
                 // Locks
                 await expect(
                     lockFacet.lock(amount, account_C, MAX_UINT256)
@@ -2847,6 +2764,10 @@ describe('ERC3643 Tests', () => {
                 expect(canRedeemByPartition[1]).to.equal(
                     ADDRESS_RECOVERED_FROM_ERROR_ID
                 )
+                // Freeze
+                await expect(
+                    erc3643Facet.freezePartialTokens(account_C, amount)
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
             })
         })
     })

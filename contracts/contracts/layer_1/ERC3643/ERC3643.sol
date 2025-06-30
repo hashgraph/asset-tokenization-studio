@@ -527,16 +527,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     function burn(
         address _userAddress,
         uint256 _amount
-    )
-        public
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_userAddress)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _userAddress)
-    {
+    ) public onlyUnpaused onlyControllable onlyWithoutMultiPartition {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -552,6 +543,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     )
         public
         onlyUnpaused
+        checkRecoveredAddress(_to)
         onlyWithinMaxSupply(_amount)
         onlyListedAllowed(_to)
         onlyWithoutMultiPartition
@@ -576,12 +568,6 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         onlyWithoutMultiPartition
         onlyControllable
         onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_from)
-        onlyListedAllowed(_to)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool)
     {
         {
@@ -601,6 +587,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         public
         override
         onlyUnpaused
+        checkRecoveredAddress(_userAddress)
         validateAddress(_userAddress)
         onlyWithoutMultiPartition
     {
@@ -643,6 +630,8 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     )
         internal
         onlyUnpaused
+        checkRecoveredAddress(_msgSender())
+        checkRecoveredAddress(to)
         onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(to)
