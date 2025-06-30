@@ -310,7 +310,7 @@ describe('UnfreezePartialTokensCommandHandler', () => {
         1,
       );
       expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-      expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+      expect(validationServiceMock.checkAnyRole).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
       expect(
         transactionServiceMock.getHandler().unfreezePartialTokens,
@@ -319,8 +319,8 @@ describe('UnfreezePartialTokensCommandHandler', () => {
       expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
         command.securityId,
       );
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._FREEZE_MANAGER_ROLE,
+      expect(validationServiceMock.checkAnyRole).toHaveBeenCalledWith(
+        [SecurityRole._FREEZE_MANAGER_ROLE, SecurityRole._AGENT_ROLE],
         account.id.toString(),
         command.securityId,
       );

@@ -264,8 +264,8 @@ export class ControllerTransferCommandHandler
         account.id.toString(),
       );
 
-      await this.validationService.checkRole(
-        SecurityRole._CONTROLLER_ROLE,
+      await this.validationService.checkAnyRole(
+        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
         account.id.toString(),
         securityId,
       );

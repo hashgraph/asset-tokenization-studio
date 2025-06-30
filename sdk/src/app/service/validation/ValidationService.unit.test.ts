@@ -538,6 +538,33 @@ describe('ValidationService', () => {
     });
   });
 
+  describe('checkAnyRole', () => {
+    it('should return void when any role is valid via HasRoleQuery', async () => {
+      queryBusMock.execute.mockResolvedValueOnce({ payload: true });
+
+      await expect(
+        service.checkAnyRole(
+          [role.value, role.value],
+          targetId.value,
+          securityId.value,
+        ),
+      ).resolves.toBeUndefined();
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new HasRoleQuery(role.value, targetId.value, securityId.value),
+      );
+    });
+
+    it('should throw NotGrantedRole when no role is not granted', async () => {
+      queryBusMock.execute.mockResolvedValueOnce({ payload: false });
+
+      await expect(
+        service.checkAnyRole([role.value], targetId.value, securityId.value),
+      ).rejects.toThrow(NotGrantedRole);
+    });
+  });
+
   describe('checkPause', () => {
     it('should return void when pause via IsPausedQuery', async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: false });

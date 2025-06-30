@@ -252,8 +252,8 @@ export class UnfreezePartialTokensCommandHandler
       const security = await this.securityService.get(securityId);
       await this.validationService.checkDecimals(security, amount);
 
-      await this.validationService.checkRole(
-        SecurityRole._FREEZE_MANAGER_ROLE,
+      await this.validationService.checkAnyRole(
+        [SecurityRole._FREEZE_MANAGER_ROLE, SecurityRole._AGENT_ROLE],
         account.id.toString(),
         securityId,
       );
