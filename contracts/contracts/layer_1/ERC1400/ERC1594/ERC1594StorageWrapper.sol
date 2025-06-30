@@ -222,7 +222,9 @@ import {
     _SUCCESS,
     _FROM_ACCOUNT_KYC_ERROR_ID,
     _TO_ACCOUNT_KYC_ERROR_ID,
-    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+    _ADDRESS_RECOVERED_TO_ERROR_ID,
+    _ADDRESS_RECOVERED_FROM_ERROR_ID
 } from '../../constants/values.sol';
 import {Common} from '../../common/Common.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
@@ -326,6 +328,9 @@ abstract contract ERC1594StorageWrapper is
         if (_isRecovered(_msgSender())) {
             return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
         }
+        if (_isRecovered(_to)) {
+            return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
+        }
         if (!_isAbleToAccess(_msgSender())) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
@@ -351,6 +356,12 @@ abstract contract ERC1594StorageWrapper is
         uint256 _value,
         bytes calldata /*_data*/
     ) internal view returns (bool, bytes1, bytes32) {
+        if (_isRecovered(_msgSender())) {
+            return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
+        }
+        if (_isRecovered(_to)) {
+            return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
+        }
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
@@ -376,12 +387,8 @@ abstract contract ERC1594StorageWrapper is
             if (_allowanceAdjusted(_from, _msgSender()) < _value) {
                 return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
             }
-            if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-                    bytes32(0)
-                );
+            if (_isRecovered(_from)) {
+                return (false, _ADDRESS_RECOVERED_FROM_ERROR_ID, bytes32(0));
             }
         }
         if (_balanceOfAdjusted(_from) < _value) {

@@ -223,6 +223,10 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     address private constant _ONCHAIN_ID = address(0);
 
     // ====== External functions (state-changing) ======
+    /**
+     * @notice Sets the name of the token.
+     * @dev Can only be called by the token `owner/issuer`.
+     */
     function setName(
         string calldata _name
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
@@ -298,7 +302,13 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         address _lostWallet,
         address _newWallet,
         address _investorOnchainID
-    ) external onlyRole(_AGENT_ROLE) returns (bool success_) {
+    )
+        external
+        checkRecoveredAddress(_lostWallet)
+        onlyRole(_AGENT_ROLE)
+        canRecover(_lostWallet)
+        returns (bool success_)
+    {
         success_ = _recoveryAddress(_lostWallet, _newWallet);
         emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
     }
@@ -506,7 +516,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         onlyRole(_FREEZE_MANAGER_ROLE)
         validateAddress(_userAddress)
     {
-        _setAddresFrozen(_userAddress, _freezStatus);
+        _setAddressFrozen(_userAddress, _freezStatus);
         emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
     }
 

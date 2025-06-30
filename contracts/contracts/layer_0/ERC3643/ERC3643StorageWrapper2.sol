@@ -205,14 +205,10 @@
 
 pragma solidity 0.8.18;
 
-import {_DEFAULT_PARTITION} from '../constants/values.sol';
-import {
-    SnapshotsStorageWrapper2
-} from '../snapshots/SnapshotsStorageWrapper2.sol';
-import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import {
-    IERC3643StorageWrapper
-} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
+import {_DEFAULT_PARTITION} from "../constants/values.sol";
+import {SnapshotsStorageWrapper2} from "../snapshots/SnapshotsStorageWrapper2.sol";
+import {IERC3643} from "../../layer_1/interfaces/ERC3643/IERC3643.sol";
+import {IERC3643StorageWrapper} from "../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol";
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -220,6 +216,11 @@ abstract contract ERC3643StorageWrapper2 is
     IERC3643StorageWrapper,
     SnapshotsStorageWrapper2
 {
+    modifier canRecover(address _tokenHolder) {
+        if (!_canRecover(_tokenHolder)) revert IERC3643.CannotRecoverWallet();
+        _;
+    }
+
     function _setName(
         string calldata _name
     ) internal returns (ERC20Storage storage erc20Storage_) {
@@ -354,13 +355,13 @@ abstract contract ERC3643StorageWrapper2 is
         address _lostWallet,
         address _newWallet
     ) internal returns (bool) {
-        uint256 balance = _balanceOfAdjusted(_lostWallet);
         uint256 frozenBalance = _getFrozenAmountForAdjusted(_lostWallet);
         if (frozenBalance > 0) {
             _unfreezeTokens(_lostWallet, frozenBalance);
         }
+        uint256 balance = _balanceOfAdjusted(_lostWallet);
         if (balance + frozenBalance > 0) {
-            _transfer(_lostWallet, _newWallet, balance + frozenBalance);
+            _transfer(_lostWallet, _newWallet, balance);
         }
         if (frozenBalance > 0) {
             _freezeTokens(_newWallet, frozenBalance);
@@ -394,6 +395,16 @@ abstract contract ERC3643StorageWrapper2 is
         );
         return
             _getFrozenAmountForByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _canRecover(
+        address _tokenHolder
+    ) internal view returns (bool isEmpty_) {
+        isEmpty_ =
+            _getLockedAmountFor(_tokenHolder) +
+                _getHeldAmountFor(_tokenHolder) +
+                _getClearedAmountFor(_tokenHolder) ==
+            0;
     }
 
     function _checkUnfreezeAmount(

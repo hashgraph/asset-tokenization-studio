@@ -238,6 +238,7 @@ abstract contract ERC1410ProtectedPartitions is
     {
         {
             _checkRecoveredAddress(_from);
+            _checkRecoveredAddress(_to);
         }
         _protectedTransferFromByPartition(
             _partition,

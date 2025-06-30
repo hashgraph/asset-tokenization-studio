@@ -374,6 +374,23 @@ export default class ValidationService extends Service {
     }
   }
 
+  async checkAnyRole(
+    roles: string[],
+    accountId: string,
+    securityId: string,
+  ): Promise<void> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const roleChecks = roles.map((r) =>
+      this.queryBus.execute(new HasRoleQuery(r, accountId, securityId)),
+    );
+    const results = await Promise.all(roleChecks);
+
+    const granted = results.some((r) => r.payload === true);
+    if (!granted) {
+      throw new NotGrantedRole(`any of [${roles.join(', ')}]`);
+    }
+  }
+
   async checkPause(securityId: string): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(new IsPausedQuery(securityId));

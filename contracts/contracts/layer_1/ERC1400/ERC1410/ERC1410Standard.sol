@@ -294,6 +294,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     {
         {
             _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_tokenHolder);
         }
         _redeemByPartition(
             _partition,

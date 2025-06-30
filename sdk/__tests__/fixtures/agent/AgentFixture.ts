@@ -203,207 +203,35 @@
 
 */
 
-pragma solidity 0.8.18;
+import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { createFixture } from '../config';
+import { AddAgentCommand } from '../../../src/app/usecase/command/security/operations/agent/addAgent/AddAgentCommand';
+import { RemoveAgentCommand } from '../../../src/app/usecase/command/security/operations/agent/removeAgent/RemoveAgentCommand';
+import { AddAgentRequest, RemoveAgentRequest } from 'index';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from '../common/Common.sol';
-import {IClearingRedeem} from '../interfaces/clearing/IClearingRedeem.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CLEARING_REDEEM_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+export const AddAgentCommandFixture = createFixture<AddAgentCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.agentId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
 
-contract ClearingRedeemFacet is
-    IStaticFunctionSelectors,
-    IClearingRedeem,
-    Common
-{
-    function clearingRedeemByPartition(
-        ClearingOperation calldata _clearingOperation,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        checkRecoveredAddress(_msgSender())
-        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
-        onlyClearingActivated
-        returns (bool success_, uint256 clearingId_)
-    {
-        (success_, clearingId_) = _clearingRedeemCreation(
-            _clearingOperation,
-            _amount,
-            _msgSender(),
-            '',
-            ThirdPartyType.NULL
-        );
-    }
+export const RemoveAgentCommandFixture = createFixture<RemoveAgentCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.agentId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
 
-    function clearingRedeemFromByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        checkRecoveredAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
-        checkRecoveredAddress(_msgSender())
-        validateAddress(_clearingOperationFrom.from)
-        onlyClearingActivated
-        returns (bool success_, uint256 clearingId_)
-    {
-        (success_, clearingId_) = _clearingRedeemCreation(
-            _clearingOperationFrom.clearingOperation,
-            _amount,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.operatorData,
-            ThirdPartyType.AUTHORIZED
-        );
-        _decreaseAllowedBalanceForClearing(
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            ClearingOperationType.Redeem,
-            _clearingOperationFrom.from,
-            _amount
-        );
-    }
-
-    function operatorClearingRedeemByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        checkRecoveredAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
-        validateAddress(_clearingOperationFrom.from)
-        checkRecoveredAddress(_msgSender())
-        onlyClearingActivated
-        returns (bool success_, uint256 clearingId_)
-    {
-        {
-            _checkOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
-        }
-
-        (success_, clearingId_) = _clearingRedeemCreation(
-            _clearingOperationFrom.clearingOperation,
-            _amount,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.operatorData,
-            ThirdPartyType.OPERATOR
-        );
-    }
-
-    function protectedClearingRedeemByPartition(
-        ProtectedClearingOperation calldata _protectedClearingOperation,
-        uint256 _amount,
-        bytes calldata _signature
-    )
-        external
-        override
-        onlyUnpaused
-        onlyProtectedPartitions
-        validateAddress(_protectedClearingOperation.from)
-        onlyWithValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        )
-        onlyRole(
-            _protectedPartitionsRole(
-                _protectedClearingOperation.clearingOperation.partition
-            )
-        )
-        onlyClearingActivated
-        checkRecoveredAddress(_protectedClearingOperation.from)
-        returns (bool success_, uint256 clearingId_)
-    {
-        (success_, clearingId_) = _protectedClearingRedeemByPartition(
-            _protectedClearingOperation,
-            _amount,
-            _signature
-        );
-    }
-
-    function getClearingRedeemForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId
-    )
-        external
-        view
-        override
-        returns (ClearingRedeemData memory clearingRedeemData_)
-    {
-        return
-            _getClearingRedeemForByPartitionAdjusted(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _CLEARING_REDEEM_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingRedeemFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorClearingRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedClearingRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingRedeemForByPartition
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IClearingRedeem)
-            .interfaceId;
-    }
-}
+export const AddAgentRequestFixture = createFixture<AddAgentRequest>(
+  (request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.agentId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+export const RemoveAgentRequestFixture = createFixture<RemoveAgentRequest>(
+  (request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.agentId.as(() => HederaIdPropsFixture.create().value);
+  },
+);

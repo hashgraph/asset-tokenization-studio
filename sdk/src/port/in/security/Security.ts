@@ -385,6 +385,10 @@ import RecoveryAddressRequest from '../request/security/operations/recovery/Reco
 import { RecoveryAddressCommand } from '../../../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand.js';
 import IsAddressRecoveredRequest from '../request/security/operations/recovery/IsAddressRecoveredRequest.js';
 import { IsAddressRecoveredQuery } from '../../../app/usecase/query/security/recovery/IsAddressRecoveredQuery.js';
+import AddAgentRequest from '../request/security/operations/agent/AddAgentRequest.js';
+import RemoveAgentRequest from '../request/security/operations/agent/RemoveAgentRequest.js';
+import { AddAgentCommand } from '../../../app/usecase/command/security/operations/agent/addAgent/AddAgentCommand.js';
+import { RemoveAgentCommand } from '../../../app/usecase/command/security/operations/agent/removeAgent/RemoveAgentCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -585,6 +589,12 @@ interface ISecurityInPort {
     request: RecoveryAddressRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   isAddressRecovered(request: IsAddressRecoveredRequest): Promise<boolean>;
+  addAgent(
+    request: AddAgentRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeAgent(
+    request: RemoveAgentRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -2069,6 +2079,26 @@ class SecurityInPort implements ISecurityInPort {
         new IsAddressRecoveredQuery(request.securityId, request.targetId),
       )
     ).payload;
+  }
+
+  @LogError
+  async addAgent(
+    request: AddAgentRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(AddAgentRequest.name, request);
+    return await this.commandBus.execute(
+      new AddAgentCommand(request.securityId, request.agentId),
+    );
+  }
+
+  @LogError
+  async removeAgent(
+    request: RemoveAgentRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(RemoveAgentRequest.name, request);
+    return await this.commandBus.execute(
+      new RemoveAgentCommand(request.securityId, request.agentId),
+    );
   }
 }
 
