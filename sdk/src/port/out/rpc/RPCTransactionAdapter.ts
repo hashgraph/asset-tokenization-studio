@@ -359,6 +359,8 @@ import {
   UNFREEZE_PARTIAL_TOKENS_GAS,
   EVM_ZERO_ADDRESS,
   RECOVERY_ADDRESS_GAS,
+  ADD_AGENT_GAS,
+  REMOVE_AGENT_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -3470,6 +3472,40 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: RECOVERY_ADDRESS_GAS,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async addAgent(
+    security: EvmAddress,
+    agentId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Granting agent role to ${agentId.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addAgent(agentId.toString(), {
+        gasLimit: ADD_AGENT_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeAgent(
+    security: EvmAddress,
+    agentId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Revoking agent role from ${agentId.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeAgent(agentId.toString(), {
+        gasLimit: REMOVE_AGENT_GAS,
+      }),
       this.networkService.environment,
     );
   }

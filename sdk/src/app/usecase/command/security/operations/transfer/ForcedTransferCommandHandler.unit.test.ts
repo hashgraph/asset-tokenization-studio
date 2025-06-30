@@ -325,8 +325,8 @@ describe('ForcedTransferCommandHandler', () => {
         account.id.toString(),
       );
 
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._CONTROLLER_ROLE,
+      expect(validationServiceMock.checkAnyRole).toHaveBeenCalledWith(
+        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
         account.id.toString(),
         command.securityId,
       );

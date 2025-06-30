@@ -284,14 +284,6 @@ describe('MintCommandHandler', () => {
         targetEvmAddress,
       );
 
-      validationServiceMock.checkDecimals.mockResolvedValue(undefined);
-      validationServiceMock.checkMaxSupply.mockResolvedValue(undefined);
-      validationServiceMock.checkControlList.mockResolvedValue(undefined);
-      validationServiceMock.checkKycAddresses.mockResolvedValue(undefined);
-      validationServiceMock.checkRole.mockResolvedValue(undefined);
-      validationServiceMock.checkMultiPartition.mockResolvedValue(undefined);
-      validationServiceMock.checkIssuable.mockResolvedValue(undefined);
-
       const result = await handler.execute(command);
 
       expect(result).toBeInstanceOf(MintCommandResponse);
@@ -326,8 +318,8 @@ describe('MintCommandHandler', () => {
         [command.targetId],
         KycStatus.GRANTED,
       );
-      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._ISSUER_ROLE,
+      expect(validationServiceMock.checkAnyRole).toHaveBeenCalledWith(
+        [SecurityRole._ISSUER_ROLE, SecurityRole._AGENT_ROLE],
         account.id.toString(),
         command.securityId,
       );

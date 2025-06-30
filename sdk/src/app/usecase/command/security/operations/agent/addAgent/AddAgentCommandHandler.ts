@@ -203,26 +203,23 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { IssueCommand, IssueCommandResponse } from './IssueCommand.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { IssueCommandError } from './error/IssueCommandError.js';
-import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
+import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import { AddAgentCommand, AddAgentCommandResponse } from './AddAgentCommand';
+import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
+import AccountService from '../../../../../../service/account/AccountService';
+import TransactionService from '../../../../../../service/transaction/TransactionService';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress';
+import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole';
+import ValidationService from '../../../../../../service/validation/ValidationService';
+import { AddAgentCommandError } from './error/AddAgentCommandError';
+import ContractService from '../../../../../../service/contract/ContractService';
 
-@CommandHandler(IssueCommand)
-export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
+@CommandHandler(AddAgentCommand)
+export class AddAgentCommandHandler
+  implements ICommandHandler<AddAgentCommand>
+{
   constructor(
-    @lazyInject(SecurityService)
-    private readonly securityService: SecurityService,
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
     @lazyInject(TransactionService)
@@ -233,60 +230,34 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(command: IssueCommand): Promise<IssueCommandResponse> {
+  async execute(command: AddAgentCommand): Promise<AddAgentCommandResponse> {
     try {
-      const { securityId, targetId, amount } = command;
-
+      const { securityId, agentId } = command;
       const handler = this.transactionService.getHandler();
-      const security = await this.securityService.get(securityId);
       const account = this.accountService.getCurrentAccount();
-
-      const amountBd = BigDecimal.fromString(amount, security.decimals);
-
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const agentEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(agentId);
 
-      await this.validationService.checkDecimals(security, amount);
+      await this.validationService.checkPause(securityId);
 
-      await this.validationService.checkMaxSupply(
-        securityId,
-        amountBd,
-        security,
-      );
-
-      await this.validationService.checkControlList(securityId, targetId);
-
-      await this.validationService.checkKycAddresses(
-        securityId,
-        [targetId],
-        KycStatus.GRANTED,
-      );
-
-      await this.validationService.checkAnyRole(
-        [SecurityRole._ISSUER_ROLE, SecurityRole._AGENT_ROLE],
+      await this.validationService.checkRole(
+        SecurityRole._DEFAULT_ADMIN_ROLE,
         account.id.toString(),
         securityId,
       );
 
-      await this.validationService.checkMultiPartition(security);
-
-      await this.validationService.checkIssuable(security);
-
-      // Check that the amount to issue + total supply is not greater than max supply
-
-      const res = await handler.issue(
+      const res = await handler.addAgent(
         securityEvmAddress,
-        targetEvmAddress,
-        amountBd,
+        agentEvmAddress,
         securityId,
       );
       return Promise.resolve(
-        new IssueCommandResponse(res.error === undefined, res.id!),
+        new AddAgentCommandResponse(res.error === undefined, res.id!),
       );
     } catch (error) {
-      throw new IssueCommandError(error as Error);
+      throw new AddAgentCommandError(error as Error);
     }
   }
 }

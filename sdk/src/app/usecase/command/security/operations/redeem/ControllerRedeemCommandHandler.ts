@@ -219,6 +219,7 @@ import ValidationService from '../../../../../service/validation/ValidationServi
 import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import { ControllerRedeemCommandError } from './error/ControllerRedeemCommandError.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 
 @CommandHandler(ControllerRedeemCommand)
 export class ControllerRedeemCommandHandler
@@ -259,6 +260,12 @@ export class ControllerRedeemCommandHandler
         amount,
         _PARTITION_ID_1,
         account.id.toString(),
+      );
+
+      await this.validationService.checkAnyRole(
+        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
+        account.id.toString(),
+        securityId,
       );
 
       await this.validationService.checkDecimals(security, amount);

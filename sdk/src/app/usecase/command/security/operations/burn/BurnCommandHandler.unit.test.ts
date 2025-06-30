@@ -225,6 +225,7 @@ import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
 import { BurnCommandError } from './error/BurnCommandError';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import TransactionAdapter from '../../../../../../port/out/TransactionAdapter';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 
 describe('BurnCommandHandler', () => {
   let handler: BurnCommandHandler;
@@ -312,6 +313,11 @@ describe('BurnCommandHandler', () => {
       expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
         security,
         command.amount,
+      );
+      expect(validationServiceMock.checkAnyRole).toHaveBeenCalledWith(
+        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
+        account.id.toString(),
+        command.securityId,
       );
 
       const expectedAmountBd = BigDecimal.fromString(

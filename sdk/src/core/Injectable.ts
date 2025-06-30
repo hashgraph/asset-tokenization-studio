@@ -413,6 +413,8 @@ import { UnfreezePartialTokensCommandHandler } from '../app/usecase/command/secu
 import { GetFrozenPartialTokensQueryHandler } from '../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQueryHandler.js';
 import { RecoveryAddressCommandHandler } from '../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommandHandler.js';
 import { IsAddressRecoveredQueryHandler } from '../app/usecase/query/security/recovery/IsAddressRecoveredQueryHandler.js';
+import { AddAgentCommandHandler } from '../app/usecase/command/security/operations/agent/addAgent/AddAgentCommandHandler.js';
+import { RemoveAgentCommandHandler } from '../app/usecase/command/security/operations/agent/removeAgent/RemoveAgentCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -820,6 +822,14 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: UnfreezePartialTokensCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddAgentCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveAgentCommandHandler,
   },
 ];
 
