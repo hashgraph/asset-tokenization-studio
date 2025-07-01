@@ -7919,6 +7919,18 @@ describe('Security', () => {
         Security.setAddressFrozen(setAddressFrozenRequest),
       ).rejects.toThrow(ValidationError);
     });
+
+    it('should throw error if status is string', async () => {
+      setAddressFrozenRequest = new SetAddressFrozenRequest({
+        ...SetAddressFrozenRequestFixture.create({
+          status: '' as unknown as boolean,
+        }),
+      });
+
+      await expect(
+        Security.setAddressFrozen(setAddressFrozenRequest),
+      ).rejects.toThrow(ValidationError);
+    });
   });
 
   describe('FreezePartialTokens', () => {
