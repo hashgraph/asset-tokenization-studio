@@ -984,7 +984,7 @@ interface IIdentityRegistryTransactionAdapter {
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
-interface IERC3643Adapter {
+interface IFreezeAdapter {
   freezePartialTokens(
     security: EvmAddress,
     amount: BigDecimal,
@@ -995,6 +995,51 @@ interface IERC3643Adapter {
     security: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+interface IBatchAdapter {
+  batchTransfer(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  batchForcedTransfer(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    fromList: EvmAddress[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  batchMint(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  batchBurn(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  batchSetAddressFrozen(
+    security: EvmAddress,
+    freezeList: boolean[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  batchFreezePartialTokens(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  batchUnfreezePartialTokens(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
@@ -1042,7 +1087,8 @@ export default abstract class TransactionAdapter
     IComplianceTransactionAdapter,
     IIdentityRegistryTransactionAdapter,
     ITokenMetadataTransactionAdapter,
-    IERC3643Adapter,
+    IFreezeAdapter,
+    IBatchAdapter,
     IAgent
 {
   triggerPendingScheduledSnapshots(
@@ -2004,6 +2050,64 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
+  batchTransfer(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  batchForcedTransfer(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    fromList: EvmAddress[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  batchMint(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  batchBurn(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  batchSetAddressFrozen(
+    security: EvmAddress,
+    freezeList: boolean[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  batchFreezePartialTokens(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  batchUnfreezePartialTokens(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+
   recoveryAddress(
     security: EvmAddress,
     lostWallet: EvmAddress,

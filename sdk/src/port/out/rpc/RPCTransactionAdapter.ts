@@ -357,6 +357,13 @@ import {
   SET_COMPLIANCE_GAS,
   FREEZE_PARTIAL_TOKENS_GAS,
   UNFREEZE_PARTIAL_TOKENS_GAS,
+  BATCH_TRANSFER_GAS,
+  BATCH_FORCED_TRANSFER_GAS,
+  BATCH_MINT_GAS,
+  BATCH_BURN_GAS,
+  BATCH_SET_ADDRESS_FROZEN_GAS,
+  BATCH_FREEZE_PARTIAL_TOKENS_GAS,
+  BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
   EVM_ZERO_ADDRESS,
   RECOVERY_ADDRESS_GAS,
   ADD_AGENT_GAS,
@@ -3507,6 +3514,204 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       ).removeAgent(agentId.toString(), {
         gasLimit: REMOVE_AGENT_GAS,
       }),
+      this.networkService.environment,
+    );
+  }
+
+  async batchTransfer(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch transferring ${amountList.length} token amounts from ${security.toString()} to ${toList.map((item) => item.toString()).join(', ')}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchTransfer(
+      toList.map((account) => account.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_TRANSFER_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchForcedTransfer(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    fromList: EvmAddress[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch forced transferring ${amountList.length} token amounts from ${fromList.map((item) => item.toString())} to ${toList.map((item) => item.toString())}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchForcedTransfer(
+      fromList.map((item) => item.toString()),
+      toList.map((item) => item.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_FORCED_TRANSFER_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchMint(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch minting ${amountList.length} token amounts on ${security.toString()} to ${toList.map((item) => item.toString())}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchMint(
+      toList.map((item) => item.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_MINT_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchBurn(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch burning ${amountList.length} token amounts from ${targetList.map((item) => item.toString())}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchBurn(
+      targetList.map((item) => item.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_BURN_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchSetAddressFrozen(
+    security: EvmAddress,
+    freezeList: boolean[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch setting address frozen status on ${targetList.length} addresses from ${security.toString()}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchSetAddressFrozen(
+      targetList.map((item) => item.toString()),
+      freezeList,
+      {
+        gasLimit: BATCH_SET_ADDRESS_FROZEN_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchFreezePartialTokens(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch freezing partial tokens (${amountList.length}) on ${security.toString()} for targets ${targetList.map((item) => item.toString())}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchFreezePartialTokens(
+      targetList.map((item) => item.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_FREEZE_PARTIAL_TOKENS_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchUnfreezePartialTokens(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch unfreezing partial tokens (${amountList.length}) on ${security.toString()} for targets ${targetList.map((item) => item.toString())}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchUnfreezePartialTokens(
+      targetList.map((item) => item.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
       this.networkService.environment,
     );
   }
