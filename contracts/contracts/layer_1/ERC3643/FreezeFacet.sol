@@ -213,7 +213,6 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_FREEZE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
 contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {

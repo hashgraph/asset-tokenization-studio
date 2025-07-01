@@ -218,11 +218,9 @@ import {
     _DEFAULT_ADMIN_ROLE,
     _CONTROLLER_ROLE,
     _ISSUER_ROLE,
-    _FREEZE_MANAGER_ROLE,
     _AGENT_ROLE
 } from '../constants/roles.sol';
 import {IKyc} from '../interfaces/kyc/IKyc.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     address private constant _ONCHAIN_ID = address(0);
