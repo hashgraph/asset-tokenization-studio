@@ -258,7 +258,10 @@ export class ProtectPartitionsCommandHandler
 
       await this.validationService.checkUnprotectedPartitions(security);
 
-      const res = await handler.protectPartitions(securityEvmAddress);
+      const res = await handler.protectPartitions(
+        securityEvmAddress,
+        command.securityId,
+      );
       return Promise.resolve(
         new ProtectPartitionsCommandResponse(res.error === undefined, res.id!),
       );

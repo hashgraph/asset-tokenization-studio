@@ -203,12 +203,201 @@
 
 */
 
-import { CommandError } from '../../../../error/CommandError';
-import BaseError from '../../../../../../../core/error/BaseError';
+import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../service/account/AccountService.js';
+import {
+  AccountPropsFixture,
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../service/validation/ValidationService.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import { TransferAndLockCommandFixture } from '../../../../../../../__tests__/fixtures/transfer/TransferFixture.js';
+import { ProtectedTransferAndLockByPartitionCommandHandler } from './ProtectedTransferAndLockByPartitionCommandHandler.js';
+import {
+  ProtectedTransferAndLockByPartitionCommand,
+  ProtectedTransferAndLockByPartitionCommandResponse,
+} from './ProtectedTransferAndLockByPartitionCommand.js';
+import SecurityService from 'app/service/security/SecurityService.js';
+import { ProtectedTransferAndLockByPartitionCommandError } from './error/ProtectedTransferAndLockByPartitionCommandError.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { Security } from '../../../../../../domain/context/security/Security.js';
+import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { faker } from '@faker-js/faker/.';
 
-export class AddToControlListCommandError extends CommandError {
-  constructor(error: Error) {
-    const msg = `An error occurred while adding user to control list: ${error.message}`;
-    super(msg, error instanceof BaseError ? error.errorCode : undefined);
-  }
-}
+describe('RemoveFromControlListCommandHandler', () => {
+  let handler: ProtectedTransferAndLockByPartitionCommandHandler;
+  let command: ProtectedTransferAndLockByPartitionCommand;
+
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+  const securityServiceMock = createMock<SecurityService>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const account = new Account(AccountPropsFixture.create());
+  const security = new Security(SecurityPropsFixture.create());
+
+  const lockId = faker.string.hexadecimal({
+    length: 64,
+    prefix: '0x',
+  });
+
+  beforeEach(() => {
+    handler = new ProtectedTransferAndLockByPartitionCommandHandler(
+      securityServiceMock,
+      transactionServiceMock,
+      accountServiceMock,
+      validationServiceMock,
+      contractServiceMock,
+    );
+    command = TransferAndLockCommandFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws ProtectedTransferAndLockByPartitionCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          ProtectedTransferAndLockByPartitionCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while protected transferring and locking tokens: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully protected transfer and lock', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+        securityServiceMock.get.mockResolvedValue(security);
+
+        transactionServiceMock
+          .getHandler()
+          .protectedTransferAndLockByPartition.mockResolvedValue({
+            id: transactionId,
+          });
+        transactionServiceMock.getTransactionResult.mockResolvedValue(lockId);
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(
+          ProtectedTransferAndLockByPartitionCommandResponse,
+        );
+        expect(result.payload).toBe(parseInt(lockId, 16));
+        expect(result.transactionId).toBe(transactionId);
+
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+          1,
+          command.targetId,
+        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+          2,
+          command.sourceId,
+        );
+
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
+          security,
+          command.amount,
+        );
+        expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledWith(
+          command.securityId,
+          [command.sourceId, command.targetId],
+          KycStatus.GRANTED,
+        );
+        expect(validationServiceMock.checkControlList).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkControlList).toHaveBeenCalledWith(
+          command.securityId,
+          evmAddress.toString(),
+          evmAddress.toString(),
+        );
+
+        expect(validationServiceMock.checkBalance).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkBalance).toHaveBeenCalledWith(
+          command.securityId,
+          command.sourceId,
+          BigDecimal.fromString(command.amount, security.decimals),
+        );
+
+        expect(validationServiceMock.checkValidNounce).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkValidNounce).toHaveBeenCalledWith(
+          command.securityId,
+          command.sourceId,
+          command.nounce,
+        );
+
+        expect(
+          transactionServiceMock.getHandler()
+            .protectedTransferAndLockByPartition,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(
+          transactionServiceMock.getHandler()
+            .protectedTransferAndLockByPartition,
+        ).toHaveBeenCalledWith(
+          evmAddress,
+          command.partitionId,
+          BigDecimal.fromString(command.amount, security.decimals),
+          evmAddress,
+          evmAddress,
+          BigDecimal.fromString(command.expirationDate.substring(0, 10)),
+          BigDecimal.fromString(command.deadline.substring(0, 10)),
+          BigDecimal.fromString(command.nounce.toString()),
+          command.signature,
+          command.securityId,
+        );
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith({
+          res: { id: transactionId },
+          className: ProtectedTransferAndLockByPartitionCommandHandler.name,
+          position: 1,
+          numberOfResultsItems: 2,
+        });
+      });
+    });
+  });
+});

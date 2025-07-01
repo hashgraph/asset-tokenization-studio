@@ -207,6 +207,7 @@ import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
 import { IsPausedQuery } from '../../../src/app/usecase/query/security/isPaused/IsPausedQuery';
 import PauseRequest from '../../../src/port/in/request/security/operations/pause/PauseRequest';
+import { PauseCommand } from '../../../src/app/usecase/command/security/operations/pause/PauseCommand';
 
 export const PauseRequestFixture = createFixture<PauseRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -214,4 +215,8 @@ export const PauseRequestFixture = createFixture<PauseRequest>((request) => {
 
 export const IsPausedQueryFixture = createFixture<IsPausedQuery>((query) => {
   query.securityId.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const PauseCommandFixture = createFixture<PauseCommand>((command) => {
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
 });

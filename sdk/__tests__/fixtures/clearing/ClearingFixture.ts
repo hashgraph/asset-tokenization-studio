@@ -249,6 +249,12 @@ import { GetClearingRedeemForByPartitionQuery } from '../../../src/app/usecase/q
 import { GetClearingsIdForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery';
 import { GetClearingTransferForByPartitionQuery } from '../../../src/app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery';
 import { IsClearingActivatedQuery } from '../../../src/app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
+import { ActivateClearingCommand } from '../../../src/app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommand';
+import { ApproveClearingOperationByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
+import { DeactivateClearingCommand } from '../../../src/app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand';
+import { ProtectedClearingCreateHoldByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand';
+import { ProtectedClearingTransferByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
+import { ProtectedClearingRedeemByPartitionCommand } from '../../../src/app/usecase/command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand';
 
 export const ActivateClearingRequestFixture =
   createFixture<ActivateClearingRequest>((request) => {
@@ -627,6 +633,102 @@ export const GetClearingsIdForByPartitionQueryFixture =
     );
     query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
     query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const SwitchClearingModeCommandFixture = createFixture<
+  ActivateClearingCommand | DeactivateClearingCommand
+>((command) => {
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const HandleClearingOperationByPartitionCommandFixture =
+  createFixture<ApproveClearingOperationByPartitionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.clearingId.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }),
+    );
+    command.clearingOperationType.faker((faker) => {
+      const values = Object.values(ClearingOperationType).filter(
+        (v) => typeof v === 'number',
+      ) as number[];
+      return faker.helpers.arrayElement(values);
+    });
+  });
+
+export const ClearingCreateHoldByPartitionCommandFixture =
+  createFixture<ProtectedClearingCreateHoldByPartitionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.escrow.as(() => HederaIdPropsFixture.create().value);
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    let clearingExpirationDate: Date;
+    command.clearingExpirationDate.faker((faker) => {
+      clearingExpirationDate = faker.date.future();
+      return clearingExpirationDate.getTime().toString();
+    });
+    command.holdExpirationDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.deadline.faker((faker) => faker.date.future().getTime().toString());
+    command.nonce.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.signature.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
+    );
+  });
+
+export const ClearingRedeemByPartitionCommandFixture =
+  createFixture<ProtectedClearingRedeemByPartitionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.expirationDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.deadline.faker((faker) => faker.date.future().getTime().toString());
+    command.nonce.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.signature.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
+    );
+  });
+
+export const ClearingTransferByPartitionCommandFixture =
+  createFixture<ProtectedClearingTransferByPartitionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.expirationDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.deadline.faker((faker) => faker.date.future().getTime().toString());
+    command.nonce.faker((faker) =>
+      faker.number.int({ min: 0, max: 1000 }).toString(),
+    );
+    command.signature.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
+    );
   });
 
 export const ClearingHoldCreationFixture = createFixture<ClearingHoldCreation>(

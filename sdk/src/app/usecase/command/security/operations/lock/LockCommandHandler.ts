@@ -260,7 +260,8 @@ export class LockCommandHandler implements ICommandHandler<LockCommand> {
         securityEvmAddress,
         sourceEvmAddress,
         amountBd,
-        BigDecimal.fromString(expirationDate),
+        BigDecimal.fromString(expirationDate.substring(0, 10)),
+        command.securityId,
       );
 
       return Promise.resolve(

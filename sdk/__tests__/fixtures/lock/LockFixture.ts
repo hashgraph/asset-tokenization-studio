@@ -204,12 +204,9 @@
 */
 
 import { createFixture } from '../config';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { GetLockQuery } from '../../../src/app/usecase/query/security/getLock/GetLockQuery';
 import { LockCountQuery } from '../../../src/app/usecase/query/security/lockCount/LockCountQuery';
-import { LockedBalanceOfQuery } from 'app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
-import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
 import LockRequest from '../../../src/port/in/request/security/operations/lock/LockRequest';
 import ReleaseRequest from '../../../src/port/in/request/security/operations/release/ReleaseRequest';
 import GetLockedBalanceRequest from '../../../src/port/in/request/security/operations/lock/GetLockedBalanceRequest';
@@ -219,6 +216,11 @@ import GetLockRequest from '../../../src/port/in/request/security/operations/loc
 import { Lock } from '../../../src/domain/context/security/Lock';
 import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
+import { LockCommand } from '../../../src/app/usecase/command/security/operations/lock/LockCommand';
+import { LocksIdQuery } from 'app/usecase/query/security/locksId/LocksIdQuery';
+import { HederaId } from '../../../src/domain/context/shared/HederaId';
+import { ReleaseCommand } from '../../../src/app/usecase/command/security/operations/release/ReleaseCommand';
+import { LockedBalanceOfQuery } from '../../../src/app/usecase/query/security/lockedBalanceOf/LockedBalanceOfQuery';
 
 export const GetLockQueryFixture = createFixture<GetLockQuery>((query) => {
   query.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -244,6 +246,25 @@ export const LocksIdQueryFixture = createFixture<LocksIdQuery>((query) => {
   query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
 });
+
+export const LockCommandFixture = createFixture<LockCommand>((command) => {
+  command.amount.faker((faker) =>
+    faker.number.int({ min: 1, max: 1000 }).toString(),
+  );
+  command.sourceId.as(() => HederaIdPropsFixture.create().value);
+  command.expirationDate.faker((faker) =>
+    faker.date.future().getTime().toString(),
+  );
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const ReleaseCommandFixture = createFixture<ReleaseCommand>(
+  (command) => {
+    command.lockId.faker((faker) => faker.number.int({ min: 1, max: 1000 }));
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
 
 export const LockRequestFixture = createFixture<LockRequest>((request) => {
   request.securityId.as(

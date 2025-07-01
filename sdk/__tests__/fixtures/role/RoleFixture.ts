@@ -204,7 +204,6 @@
 */
 
 import { GetRoleCountForQuery } from '../../../src/app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery';
-import RoleRequest from '../../../src/port/in/request/security/roles/RoleRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { GetRoleMemberCountQuery } from '../../../src/app/usecase/query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery';
@@ -217,6 +216,9 @@ import GetRoleMemberCountRequest from '../../../src/port/in/request/security/rol
 import GetRoleMembersRequest from '../../../src/port/in/request/security/roles/GetRoleMembersRequest';
 import ApplyRolesRequest from '../../../src/port/in/request/security/roles/ApplyRolesRequest';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
+import { ApplyRolesCommand } from '../../../src/app/usecase/command/security/roles/applyRoles/ApplyRolesCommand';
+import { GrantRoleCommand } from '../../../src/app/usecase/command/security/roles/grantRole/GrantRoleCommand';
+import { RoleRequest } from '../../../src';
 
 export const GetRoleCountForQueryFixture = createFixture<GetRoleCountForQuery>(
   (query) => {
@@ -304,5 +306,30 @@ export const ApplyRolesRequestFixture = createFixture<ApplyRolesRequest>(
       faker.helpers.arrayElement(Object.values(SecurityRole)),
     ]);
     request.actives.faker((faker) => [faker.datatype.boolean()]);
+  },
+);
+
+export const ApplyRolesCommandFixture = createFixture<ApplyRolesCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.roles.faker((faker) =>
+      Array.from({ length: 3 }, () =>
+        faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' }),
+      ),
+    );
+    command.actives.faker((faker) =>
+      Array.from({ length: 3 }, () => faker.datatype.boolean()),
+    );
+  },
+);
+
+export const GrantRoleCommandFixture = createFixture<GrantRoleCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command.role.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' }),
+    );
   },
 );

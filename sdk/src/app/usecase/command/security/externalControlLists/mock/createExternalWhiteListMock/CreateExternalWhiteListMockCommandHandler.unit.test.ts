@@ -206,16 +206,17 @@
 import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { CreateExternalWhiteListMockCommandHandler } from './CreateExternalWhiteListMockCommandHandler.js';
-import { CreateExternalWhiteListMockCommandResponse } from './CreateExternalWhiteListMockCommand.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import Account from '../../../../../../../domain/context/account/Account.js';
-import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
+import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+import { CreateExternalWhiteListMockCommandHandler } from './CreateExternalWhiteListMockCommandHandler.js';
+import { CreateExternalWhiteListMockCommandError } from './error/CreateExternalWhiteListMockCommandError.js';
+import { CreateExternalWhiteListMockCommandResponse } from './CreateExternalWhiteListMockCommand.js';
 
 describe('CreateExternalWhiteListMockCommandHandler', () => {
   let handler: CreateExternalWhiteListMockCommandHandler;
@@ -228,6 +229,7 @@ describe('CreateExternalWhiteListMockCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new CreateExternalWhiteListMockCommandHandler(
@@ -241,78 +243,100 @@ describe('CreateExternalWhiteListMockCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully create white list mock if return an Id', async () => {
-      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+    describe('error cases', () => {
+      it('throws CreateExternalWhiteListMockCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      transactionServiceMock
-        .getHandler()
-        .createExternalWhiteListMock.mockResolvedValue(transactionId);
+        transactionServiceMock
+          .getHandler()
+          .createExternalWhiteListMock.mockRejectedValue(fakeError);
 
-      const result = await handler.execute();
+        const resultPromise = handler.execute();
 
-      expect(result).toBeInstanceOf(CreateExternalWhiteListMockCommandResponse);
-      expect(result.payload).toBe(account.id.toString());
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          CreateExternalWhiteListMockCommandError,
+        );
 
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().createExternalWhiteListMock,
-      ).toHaveBeenCalledTimes(1);
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
-        transactionId,
-      );
-      expect(
-        transactionServiceMock.getHandler().createExternalWhiteListMock,
-      ).toHaveBeenCalledWith();
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating external whitelist: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
     });
+    describe('success cases', () => {
+      it('should successfully create white list mock if return an Id', async () => {
+        mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
 
-    it('should successfully create white list mock if return an address', async () => {
-      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+        transactionServiceMock
+          .getHandler()
+          .createExternalWhiteListMock.mockResolvedValue({
+            id: transactionId,
+          });
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          account.evmAddress!,
+        );
 
-      transactionServiceMock
-        .getHandler()
-        .createExternalWhiteListMock.mockResolvedValue(transactionId);
+        const result = await handler.execute();
 
-      const result = await handler.execute();
+        expect(result).toBeInstanceOf(
+          CreateExternalWhiteListMockCommandResponse,
+        );
+        expect(result.payload).toBe(account.id.toString());
 
-      expect(result).toBeInstanceOf(CreateExternalWhiteListMockCommandResponse);
-      expect(result.payload).toBe(account.id.toString());
-
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().createExternalWhiteListMock,
-      ).toHaveBeenCalledTimes(1);
-
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
-        transactionId,
-      );
-
-      expect(
-        transactionServiceMock.getHandler().createExternalWhiteListMock,
-      ).toHaveBeenCalledWith();
-    });
-
-    it('throws error when transaction response id is missing', async () => {
-      transactionServiceMock
-        .getHandler()
-        .createExternalWhiteListMock.mockResolvedValue({ id: undefined });
-
-      await expect(handler.execute()).rejects.toThrow(EmptyResponse);
-    });
-
-    it('throws error when result length is different', async () => {
-      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
-      mirrorNodeAdapterMock.getContractResults.mockResolvedValueOnce([
-        account.id.toString(),
-        account.id.toString(),
-      ]);
-
-      transactionServiceMock
-        .getHandler()
-        .createExternalWhiteListMock.mockResolvedValue({
-          id: transactionId,
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith({
+          res: { id: transactionId },
+          className: CreateExternalWhiteListMockCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
+          isContractCreation: true,
         });
 
-      await expect(handler.execute()).rejects.toThrow(InvalidResponse);
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createExternalWhiteListMock,
+        ).toHaveBeenCalledTimes(1);
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
+          account.evmAddress,
+        );
+        expect(
+          transactionServiceMock.getHandler().createExternalWhiteListMock,
+        ).toHaveBeenCalledWith();
+      });
+
+      it('should successfully create white list mock if return an address', async () => {
+        mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+
+        transactionServiceMock
+          .getHandler()
+          .createExternalWhiteListMock.mockResolvedValue(account.evmAddress!);
+
+        const result = await handler.execute();
+
+        expect(result).toBeInstanceOf(
+          CreateExternalWhiteListMockCommandResponse,
+        );
+        expect(result.payload).toBe(account.id.toString());
+
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createExternalWhiteListMock,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
+          account.evmAddress,
+        );
+
+        expect(
+          transactionServiceMock.getHandler().createExternalWhiteListMock,
+        ).toHaveBeenCalledWith();
+      });
     });
   });
 });

@@ -241,14 +241,16 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
       const security = await this.securityService.get(securityId);
       const account = this.accountService.getCurrentAccount();
 
-      const amountBd = BigDecimal.fromString(amount, security.decimals);
-
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
       const targetEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(targetId);
 
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
+
       await this.validationService.checkDecimals(security, amount);
+
+      await this.validationService.checkPause(securityId);
 
       await this.validationService.checkMaxSupply(
         securityId,

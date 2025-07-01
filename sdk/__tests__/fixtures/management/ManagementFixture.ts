@@ -204,11 +204,49 @@
 */
 
 import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { UpdateConfigCommand } from '../../../src/app/usecase/command/management/updateConfig/updateConfigCommand';
 import { createFixture } from '../config';
-import UpdateConfigVersionRequest from '../../../src/port/in/request/management/UpdateConfigVersionRequest';
-import UpdateConfigRequest from '../../../src/port/in/request/management/UpdateConfigRequest';
-import UpdateResolverRequest from '../../../src/port/in/request/management/UpdateResolverRequest';
-import GetConfigInfoRequest from '../../../src/port/in/request/management/GetConfigInfoRequest';
+import { UpdateConfigVersionCommand } from '../../../src/app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
+import { UpdateResolverCommand } from '../../../src/app/usecase/command/management/updateResolver/updateResolverCommand';
+import ContractId from '../../../src/domain/context/contract/ContractId.js';
+import {
+  GetConfigInfoRequest,
+  UpdateConfigRequest,
+  UpdateConfigVersionRequest,
+  UpdateResolverRequest,
+} from '../../../src';
+
+export const UpdateConfigCommandFixture = createFixture<UpdateConfigCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.configVersion.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
+    command.configId.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
+    );
+  },
+);
+export const UpdateConfigVersionCommandFixture =
+  createFixture<UpdateConfigVersionCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.configVersion.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
+  });
+export const UpdateResolverCommandFixture =
+  createFixture<UpdateResolverCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.configVersion.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
+    command.configId.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
+    );
+    command.resolver.as(
+      () => new ContractId(HederaIdPropsFixture.create().value),
+    );
+  });
 
 export const UpdateConfigVersionRequestFixture =
   createFixture<UpdateConfigVersionRequest>((request) => {

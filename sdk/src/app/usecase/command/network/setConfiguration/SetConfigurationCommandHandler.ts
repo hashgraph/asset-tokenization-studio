@@ -206,7 +206,6 @@
 import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import NetworkService from '../../../../service/network/NetworkService.js';
 import { SetConfigurationCommandError } from './error/SetConfigurationCommandError.js';
 import {
@@ -221,8 +220,6 @@ export class SetConfigurationCommandHandler
   constructor(
     @lazyInject(NetworkService)
     private readonly networkService: NetworkService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
   ) {}
 
   async execute(

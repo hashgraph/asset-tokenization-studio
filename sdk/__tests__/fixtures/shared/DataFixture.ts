@@ -207,6 +207,8 @@ import { createFixture } from '../config';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
 import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
 import TransactionResponse from '../../../src/domain/context/transaction/TransactionResponse';
+import { AccountProps } from '../../../src/domain/context/account/Account';
+import { HederaId } from '../../../src/domain/context/shared/HederaId';
 
 export const EvmAddressPropsFixture = createFixture<{ value: string }>(
   (props) => {
@@ -223,6 +225,11 @@ export const HederaIdPropsFixture = createFixture<{ value: string }>(
     );
   },
 );
+
+export const AccountPropsFixture = createFixture<AccountProps>((account) => {
+  account.id.as(() => new HederaId(HederaIdPropsFixture.create().value));
+  account.evmAddress?.as(() => EvmAddressPropsFixture.create().value);
+});
 
 export const HederaIdZeroAddressFixture = createFixture<{ address: string }>(
   (props) => {
