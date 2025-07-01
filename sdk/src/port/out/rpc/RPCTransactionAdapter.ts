@@ -3642,7 +3642,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Batch setting address frozen status on ${targetList.length} addresses from ${security.toString()}`,
     );
 
-    const contract = ERC3643__factory.connect(
+    const contract = FreezeFacet__factory.connect(
       security.toString(),
       this.signerOrProvider,
     );
@@ -3670,7 +3670,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Batch freezing partial tokens (${amountList.length}) on ${security.toString()} for targets ${targetList.map((item) => item.toString())}`,
     );
 
-    const contract = ERC3643__factory.connect(
+    const contract = FreezeFacet__factory.connect(
       security.toString(),
       this.signerOrProvider,
     );
@@ -3698,7 +3698,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Batch unfreezing partial tokens (${amountList.length}) on ${security.toString()} for targets ${targetList.map((item) => item.toString())}`,
     );
 
-    const contract = ERC3643__factory.connect(
+    const contract = FreezeFacet__factory.connect(
       security.toString(),
       this.signerOrProvider,
     );

@@ -4219,7 +4219,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Batch setting freeze status for ${targetList.length} addresses`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
+    const factoryInstance = new FreezeFacet__factory().attach(
+      security.toString(),
+    );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -4248,7 +4250,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Batch freezing partial tokens for ${targetList.length} addresses`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
+    const factoryInstance = new FreezeFacet__factory().attach(
+      security.toString(),
+    );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -4280,7 +4284,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Batch unfreezing partial tokens for ${targetList.length} addresses`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
+    const factoryInstance = new FreezeFacet__factory().attach(
+      security.toString(),
+    );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
