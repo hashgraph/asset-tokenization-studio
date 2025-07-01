@@ -245,6 +245,7 @@ import {
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
   ERC3643__factory,
+  FreezeFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -3939,7 +3940,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(
       `Freezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
     );
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
+    const factoryInstance = new FreezeFacet__factory().attach(
+      security.toString(),
+    );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -3967,7 +3970,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(
       `Unfreezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
     );
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
+    const factoryInstance = new FreezeFacet__factory().attach(
+      security.toString(),
+    );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,

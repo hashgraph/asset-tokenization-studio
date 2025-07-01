@@ -405,6 +405,7 @@ import {
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
   ERC3643__factory,
+  FreezeFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -3421,7 +3422,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Freezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
     );
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await FreezeFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).freezePartialTokens(targetId.toString(), amount.toBigNumber(), {
@@ -3441,7 +3442,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Unfreezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
     );
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await FreezeFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).unfreezePartialTokens(targetId.toString(), amount.toBigNumber(), {
