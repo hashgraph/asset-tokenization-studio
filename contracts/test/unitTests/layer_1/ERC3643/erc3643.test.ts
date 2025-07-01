@@ -1075,6 +1075,16 @@ describe('ERC3643 Tests', () => {
                         erc3643Facet.batchMint(toList, amounts)
                     ).to.be.rejectedWith('AccountHasNoRole')
                 })
+
+                it('GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch', async () => {
+                    const mintAmount = AMOUNT / 2
+                    const toList = [account_D]
+                    const amounts = [mintAmount, mintAmount]
+
+                    await expect(
+                        erc3643Facet.batchMint(toList, amounts)
+                    ).to.be.rejectedWith('InputAmountsArrayLengthMismatch')
+                })
             })
 
             describe('batchTransfer', () => {
@@ -1132,6 +1142,16 @@ describe('ERC3643 Tests', () => {
                         erc3643Facet,
                         'InvalidPartition'
                     )
+                })
+
+                it('GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch', async () => {
+                    const mintAmount = AMOUNT / 2
+                    const toList = [account_D]
+                    const amounts = [mintAmount, mintAmount]
+
+                    await expect(
+                        erc3643Facet.batchTransfer(toList, amounts)
+                    ).to.be.rejectedWith('InputAmountsArrayLengthMismatch')
                 })
             })
 
@@ -1201,6 +1221,21 @@ describe('ERC3643 Tests', () => {
                         )
                     ).to.be.rejectedWith('AccountHasNoRole')
                 })
+
+                it('GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch', async () => {
+                    const mintAmount = AMOUNT / 2
+                    const toList = [account_D]
+                    const fromList = [account_F, account_D]
+                    const amounts = [mintAmount, mintAmount]
+
+                    await expect(
+                        erc3643Facet.batchForcedTransfer(
+                            fromList,
+                            toList,
+                            amounts
+                        )
+                    ).to.be.rejectedWith('InputAmountsArrayLengthMismatch')
+                })
             })
 
             describe('batchBurn', () => {
@@ -1249,6 +1284,16 @@ describe('ERC3643 Tests', () => {
                     expect(finalTotalSupply).to.equal(
                         initialTotalSupply.sub(burnAmount * 2)
                     )
+                })
+
+                it('GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch', async () => {
+                    const mintAmount = AMOUNT / 2
+                    const toList = [account_D]
+                    const amounts = [mintAmount, mintAmount]
+
+                    await expect(
+                        erc3643Facet.batchTransfer(toList, amounts)
+                    ).to.be.rejectedWith('InputAmountsArrayLengthMismatch')
                 })
             })
 
@@ -1355,18 +1400,13 @@ describe('ERC3643 Tests', () => {
                     )
                 })
 
-                it('GIVEN mismatched array lengths WHEN batchSetAddressFrozen THEN transaction reverts', async () => {
-                    const userAddresses = [account_D, account_E]
-                    const freezeFlags = [true]
-
-                    erc3643Facet = erc3643Facet.connect(signer_A)
+                it('GIVEN an invalid input boolean array THEN transaction fails with InputBoolArrayLengthMismatch', async () => {
+                    const toList = [account_D]
+                    const status = [true, true]
 
                     await expect(
-                        erc3643Facet.batchSetAddressFrozen(
-                            userAddresses,
-                            freezeFlags
-                        )
-                    ).to.be.reverted
+                        erc3643Facet.batchSetAddressFrozen(toList, status)
+                    ).to.be.rejectedWith('InputBoolArrayLengthMismatch')
                 })
             })
 
@@ -1405,6 +1445,16 @@ describe('ERC3643 Tests', () => {
                     expect(finalFrozenE).to.equal(
                         initialFrozenE.add(freezeAmount)
                     )
+                })
+
+                it('GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch', async () => {
+                    const mintAmount = AMOUNT / 2
+                    const toList = [account_D]
+                    const amounts = [mintAmount, mintAmount]
+
+                    await expect(
+                        erc3643Facet.batchFreezePartialTokens(toList, amounts)
+                    ).to.be.rejectedWith('InputAmountsArrayLengthMismatch')
                 })
             })
 
@@ -1470,6 +1520,16 @@ describe('ERC3643 Tests', () => {
                         erc3643Facet,
                         'InsufficientFrozenBalance'
                     )
+                })
+
+                it('GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch', async () => {
+                    const mintAmount = AMOUNT / 2
+                    const toList = [account_D]
+                    const amounts = [mintAmount, mintAmount]
+
+                    await expect(
+                        erc3643Facet.batchUnfreezePartialTokens(toList, amounts)
+                    ).to.be.rejectedWith('InputAmountsArrayLengthMismatch')
                 })
             })
         })

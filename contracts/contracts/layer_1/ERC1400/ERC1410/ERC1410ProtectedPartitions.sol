@@ -262,7 +262,7 @@ abstract contract ERC1410ProtectedPartitions is
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_from)
+        onlyUnrecoveredAddress(_from)
         onlyClearingDisabled
         onlyRole(_protectedPartitionsRole(_partition))
         onlyListedAllowed(_from)

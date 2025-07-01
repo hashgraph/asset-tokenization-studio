@@ -308,21 +308,148 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         address _investorOnchainID
     )
         external
-        checkRecoveredAddress(_lostWallet)
+        onlyUnrecoveredAddress(_lostWallet)
         onlyRole(_AGENT_ROLE)
-        canRecover(_lostWallet)
+        onlyEmptyWallet(_lostWallet)
+        onlyWithoutMultiPartition
         returns (bool success_)
     {
         success_ = _recoveryAddress(_lostWallet, _newWallet);
         emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
     }
 
+    function setAddressFrozen(
+        address _userAddress,
+        bool _freezStatus
+    ) external override onlyUnpaused validateAddress(_userAddress) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _setAddressFrozen(_userAddress, _freezStatus);
+        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
+    }
+
+    function burn(
+        address _userAddress,
+        uint256 _amount
+    ) external onlyUnpaused onlyControllable onlyWithoutMultiPartition {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _CONTROLLER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _controllerRedeem(_userAddress, _amount, '', '');
+    }
+
+    function mint(
+        address _to,
+        uint256 _amount
+    )
+        external
+        onlyUnpaused
+        onlyUnrecoveredAddress(_to)
+        onlyWithinMaxSupply(_amount)
+        onlyListedAllowed(_to)
+        onlyWithoutMultiPartition
+        onlyIssuable
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _ISSUER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _issue(_to, _amount, '');
+    }
+
+    function forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    )
+        external
+        onlyWithoutMultiPartition
+        onlyControllable
+        onlyUnpaused
+        returns (bool)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _CONTROLLER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _controllerTransfer(_from, _to, _amount, '', '');
+        return true;
+    }
+
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(_userAddress)
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _freezeTokens(_userAddress, _amount);
+        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _unfreezeTokens(_userAddress, _amount);
+        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
     function batchTransfer(
         address[] calldata _toList,
         uint256[] calldata _amounts
-    ) external {
+    )
+        external
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_toList, _amounts)
+        onlyClearingDisabled
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyListedAllowed(_msgSender())
+    {
         for (uint256 i = 0; i < _toList.length; i++) {
-            _transferForBatch(_toList[i], _amounts[i]);
+            _checkRecoveredAddress(_toList[i]);
+            _checkControlList(_toList[i]);
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _toList[i]);
+        }
+        for (uint256 i = 0; i < _toList.length; i++) {
+            _transfer(_msgSender(), _toList[i], _amounts[i]);
         }
     }
 
@@ -330,54 +457,140 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         address[] calldata _fromList,
         address[] calldata _toList,
         uint256[] calldata _amounts
-    ) external {
+    )
+        external
+        onlyWithoutMultiPartition
+        onlyControllable
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_fromList, _amounts)
+        onlyValidInputAmountsArrayLength(_toList, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _CONTROLLER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         for (uint256 i = 0; i < _fromList.length; i++) {
-            forcedTransfer(_fromList[i], _toList[i], _amounts[i]);
+            _controllerTransfer(_fromList[i], _toList[i], _amounts[i], '', '');
         }
     }
 
     function batchMint(
         address[] calldata _toList,
         uint256[] calldata _amounts
-    ) external {
+    )
+        external
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_toList, _amounts)
+        onlyWithoutMultiPartition
+        onlyIssuable
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _ISSUER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         for (uint256 i = 0; i < _toList.length; i++) {
-            mint(_toList[i], _amounts[i]);
+            _checkRecoveredAddress(_toList[i]);
+            _checkControlList(_toList[i]);
+            _checkWithinMaxSupply(_amounts[i]);
+            _checkControlList(_toList[i]);
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _toList[i]);
+        }
+        for (uint256 i = 0; i < _toList.length; i++) {
+            _issue(_toList[i], _amounts[i], '');
         }
     }
 
     function batchBurn(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external {
+    )
+        external
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyControllable
+        onlyWithoutMultiPartition
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _CONTROLLER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
-            burn(_userAddresses[i], _amounts[i]);
+            _controllerRedeem(_userAddresses[i], _amounts[i], '', '');
         }
     }
 
     function batchSetAddressFrozen(
         address[] calldata _userAddresses,
         bool[] calldata _freeze
-    ) external {
+    ) external onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
-            setAddressFrozen(_userAddresses[i], _freeze[i]);
+            _setAddressFrozen(_userAddresses[i], _freeze[i]);
+            emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
         }
     }
 
     function batchFreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external {
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
-            freezePartialTokens(_userAddresses[i], _amounts[i]);
+            _checkRecoveredAddress(_userAddresses[i]);
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _freezeTokens(_userAddresses[i], _amounts[i]);
+            emit TokensFrozen(
+                _userAddresses[i],
+                _amounts[i],
+                _DEFAULT_PARTITION
+            );
         }
     }
 
     function batchUnfreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external {
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
-            unfreezePartialTokens(_userAddresses[i], _amounts[i]);
+            _unfreezeTokens(_userAddresses[i], _amounts[i]);
+            emit TokensUnfrozen(
+                _userAddresses[i],
+                _amounts[i],
+                _DEFAULT_PARTITION
+            );
         }
     }
 
@@ -506,141 +719,5 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;
-    }
-
-    // ====== Public functions ======
-
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezStatus
-    ) public override onlyUnpaused validateAddress(_userAddress) {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _setAddressFrozen(_userAddress, _freezStatus);
-        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
-    }
-
-    function burn(
-        address _userAddress,
-        uint256 _amount
-    ) public onlyUnpaused onlyControllable onlyWithoutMultiPartition {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _controllerRedeem(_userAddress, _amount, '', '');
-    }
-
-    function mint(
-        address _to,
-        uint256 _amount
-    )
-        public
-        onlyUnpaused
-        checkRecoveredAddress(_to)
-        onlyWithinMaxSupply(_amount)
-        onlyListedAllowed(_to)
-        onlyWithoutMultiPartition
-        onlyIssuable
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _ISSUER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _issue(_to, _amount, '');
-    }
-
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    )
-        public
-        onlyWithoutMultiPartition
-        onlyControllable
-        onlyUnpaused
-        returns (bool)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _controllerTransfer(_from, _to, _amount, '', '');
-        return true;
-    }
-
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        public
-        override
-        onlyUnpaused
-        checkRecoveredAddress(_userAddress)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        public
-        override
-        onlyUnpaused
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
-    // ====== Private/Internal functions ======
-
-    /// @dev Internal copy of ERC20.transfer(address,uint256) to allow ERC3643.batchTransfer() in this facet
-    function _transferForBatch(
-        address to,
-        uint256 value
-    )
-        internal
-        onlyUnpaused
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(to)
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(to)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
-        returns (bool)
-    {
-        return _transfer(_msgSender(), to, value);
     }
 }

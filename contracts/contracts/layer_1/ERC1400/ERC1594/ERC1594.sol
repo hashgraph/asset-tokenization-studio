@@ -234,8 +234,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         onlyClearingDisabled
-        checkRecoveredAddress(_to)
-        checkRecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_to)
+        onlyUnrecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
         onlyWithoutMultiPartition
@@ -290,7 +290,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     )
         external
         override
-        checkRecoveredAddress(_tokenHolder)
+        onlyUnrecoveredAddress(_tokenHolder)
         onlyWithinMaxSupply(_value)
         onlyUnpaused
         onlyListedAllowed(_tokenHolder)
@@ -322,7 +322,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         onlyClearingDisabled
-        checkRecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -355,8 +355,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(_tokenHolder)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_tokenHolder)
     {
         _redeemFrom(_tokenHolder, _value, _data);
     }

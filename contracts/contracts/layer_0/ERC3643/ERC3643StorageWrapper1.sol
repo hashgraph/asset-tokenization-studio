@@ -223,8 +223,24 @@ import {
 } from '../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol';
 
 abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
-    modifier checkRecoveredAddress(address _account) {
+    modifier onlyUnrecoveredAddress(address _account) {
         _checkRecoveredAddress(_account);
+        _;
+    }
+
+    modifier onlyValidInputAmountsArrayLength(
+        address[] memory _addresses,
+        uint256[] memory _amounts
+    ) {
+        _checkInputAmountsArrayLength(_addresses, _amounts);
+        _;
+    }
+
+    modifier onlyValidInputBoolArrayLength(
+        address[] memory _addresses,
+        bool[] memory _status
+    ) {
+        _checkInputBoolArrayLength(_addresses, _status);
         _;
     }
 
@@ -319,6 +335,24 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
 
     function _getOnchainID() internal view returns (address) {
         return _erc3643Storage().onchainID;
+    }
+
+    function _checkInputAmountsArrayLength(
+        address[] memory _addresses,
+        uint256[] memory _amounts
+    ) internal pure {
+        if (_addresses.length != _amounts.length) {
+            revert IERC3643.InputAmountsArrayLengthMismatch();
+        }
+    }
+
+    function _checkInputBoolArrayLength(
+        address[] memory _addresses,
+        bool[] memory _status
+    ) internal pure {
+        if (_addresses.length != _status.length) {
+            revert IERC3643.InputBoolArrayLengthMismatch();
+        }
     }
 
     function _erc3643Storage()

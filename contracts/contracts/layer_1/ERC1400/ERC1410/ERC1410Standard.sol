@@ -218,7 +218,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     )
         external
         override
-        checkRecoveredAddress(_issueData.tokenHolder)
+        onlyUnrecoveredAddress(_issueData.tokenHolder)
         onlyWithinMaxSupply(_issueData.value)
         onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
         validateAddress(_issueData.tokenHolder)
@@ -251,7 +251,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyListedAllowed(_msgSender())
-        checkRecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_msgSender())
         onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())

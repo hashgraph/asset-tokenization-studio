@@ -220,7 +220,7 @@ abstract contract ERC3643StorageWrapper2 is
     IERC3643StorageWrapper,
     SnapshotsStorageWrapper2
 {
-    modifier canRecover(address _tokenHolder) {
+    modifier onlyEmptyWallet(address _tokenHolder) {
         if (!_canRecover(_tokenHolder)) revert IERC3643.CannotRecoverWallet();
         _;
     }

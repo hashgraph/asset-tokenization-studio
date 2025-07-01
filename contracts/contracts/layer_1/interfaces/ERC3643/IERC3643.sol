@@ -309,6 +309,16 @@ interface IERC3643 {
     error CannotRecoverWallet();
 
     /**
+     * @notice Thrown in batch operations when input amount arrays length is different
+     */
+    error InputAmountsArrayLengthMismatch();
+
+    /**
+     * @notice Thrown in batch operations when input boolean arrays length is different
+     */
+    error InputBoolArrayLengthMismatch();
+
+    /**
      * @dev Sets the name of the token to `_name`.
      *
      * Emits an UpdatedTokenInformation event.

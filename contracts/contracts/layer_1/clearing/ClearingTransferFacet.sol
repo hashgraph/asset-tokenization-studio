@@ -231,8 +231,8 @@ contract ClearingTransferFacet is
         onlyUnProtectedPartitionsOrWildCardRole
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         validateAddress(_to)
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(_to)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_to)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -340,8 +340,8 @@ contract ClearingTransferFacet is
         onlyProtectedPartitions
         validateAddress(_protectedClearingOperation.from)
         validateAddress(_to)
-        checkRecoveredAddress(_protectedClearingOperation.from)
-        checkRecoveredAddress(_to)
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_to)
         onlyWithValidExpirationTimestamp(
             _protectedClearingOperation.clearingOperation.expirationTimestamp
         )
