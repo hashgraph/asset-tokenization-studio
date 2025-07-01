@@ -206,8 +206,9 @@
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
 import { GetControlListCountQuery } from '../../../src/app/usecase/query/security/controlList/getControlListCount/GetControlListCountQuery';
-import { GetControlListMembersQuery } from 'app/usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery';
-import { GetControlListTypeQuery } from 'app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery';
+import { GetControlListMembersQuery } from '../../../src/app/usecase/query/security/controlList/getControlListMembers/GetControlListMembersQuery';
+import { GetControlListTypeQuery } from '../../../src/app/usecase/query/security/controlList/getControlListType/GetControlListTypeQuery';
+import { AddToControlListCommand } from '../../../src/app/usecase/command/security/operations/addToControlList/AddToControlListCommand';
 import ControlListRequest from '../../../src/port/in/request/security/operations/controlList/ControlListRequest';
 import GetControlListCountRequest from '../../../src/port/in/request/security/operations/controlList/GetControlListCountRequest';
 import GetControlListMembersRequest from '../../../src/port/in/request/security/operations/controlList/GetControlListMembersRequest';
@@ -252,4 +253,10 @@ export const GetControlListMembersRequestFixture =
 export const GetControlListTypeRequestFixture =
   createFixture<GetControlListTypeRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const AddToControlListCommandFixture =
+  createFixture<AddToControlListCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.targetId.as(() => HederaIdPropsFixture.create().value);
   });
