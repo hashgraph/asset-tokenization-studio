@@ -222,7 +222,6 @@ import {
     Kyc,
     SsiManagement,
     Hold,
-    ERC3643,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -494,7 +493,6 @@ describe('ProtectedPartitions Tests', () => {
             address
         )
         erc1594Facet = await ethers.getContractAt('ERC1594', address)
-        erc3643Facet = await ethers.getContractAt('ERC3643', address)
         erc20Facet = await ethers.getContractAt('ERC20', address)
         transferAndLockFacet = await ethers.getContractAt(
             'TransferAndLock',
