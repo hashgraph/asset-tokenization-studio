@@ -408,13 +408,20 @@ import { OnchainIDQueryHandler } from '../app/usecase/query/security/tokenMetada
 import { IdentityRegistryQueryHandler } from '../app/usecase/query/security/identityRegistry/IdentityRegistryQueryHandler.js';
 import { ComplianceQueryHandler } from '../app/usecase/query/security/compliance/compliance/ComplianceQueryHandler.js';
 import { SetOnchainIDCommandHandler } from '../app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommandHandler.js';
-import { FreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/freezePartialTokens/FreezePartialTokensCommandHandler.js';
-import { UnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/erc3643/unfreezePartialTokens/UnfreezePartialTokensCommandHandler.js';
-import { GetFrozenPartialTokensQueryHandler } from '../app/usecase/query/security/erc3643/getFrozenPartialTokens/GetFrozenPartialTokensQueryHandler.js';
 import { RecoveryAddressCommandHandler } from '../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommandHandler.js';
 import { IsAddressRecoveredQueryHandler } from '../app/usecase/query/security/recovery/IsAddressRecoveredQueryHandler.js';
 import { AddAgentCommandHandler } from '../app/usecase/command/security/operations/agent/addAgent/AddAgentCommandHandler.js';
 import { RemoveAgentCommandHandler } from '../app/usecase/command/security/operations/agent/removeAgent/RemoveAgentCommandHandler.js';
+import { FreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommandHandler.js';
+import { UnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommandHandler.js';
+import { GetFrozenPartialTokensQueryHandler } from '../app/usecase/query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQueryHandler.js';
+import { BatchBurnCommandHandler } from '../app/usecase/command/security/operations/batch/batchBurn/BatchBurnCommandHandler.js';
+import { BatchForcedTransferCommandHandler } from '../app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommandHandler.js';
+import { BatchFreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommandHandler.js';
+import { BatchMintCommandHandler } from '../app/usecase/command/security/operations/batch/batchMint/BatchMintCommandHandler.js';
+import { BatchSetAddressFrozenCommandHandler } from '../app/usecase/command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommandHandler.js';
+import { BatchTransferCommandHandler } from '../app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommandHandler.js';
+import { BatchUnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -830,6 +837,34 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: RemoveAgentCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchBurnCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchForcedTransferCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchFreezePartialTokensCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchMintCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchSetAddressFrozenCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchTransferCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: BatchUnfreezePartialTokensCommandHandler,
   },
 ];
 
