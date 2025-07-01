@@ -203,273 +203,201 @@
 
 */
 
-import dotenv from 'dotenv'
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
 
-// Load the `.env` file
-dotenv.config()
+import {Common} from '../common/Common.sol';
+import {IFreeze} from '../interfaces/ERC3643/IFreeze.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_FREEZE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
-const EMPTY_STRING = ''
-export const NETWORKS = [
-    'hardhat',
-    'local',
-    'previewnet',
-    'testnet',
-    'mainnet',
-] as const
-export type Network = (typeof NETWORKS)[number]
+contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
+    // ====== External functions (state-changing) ======
 
-export const DEPLOY_TYPES = ['proxy', 'direct'] as const
-export type DeployType = (typeof DEPLOY_TYPES)[number]
-
-export const CONTRACT_NAMES = [
-    'TransparentUpgradeableProxy',
-    'ProxyAdmin',
-    'Factory',
-    'BusinessLogicResolver',
-    'AccessControlFacet',
-    'Cap',
-    'ControlList',
-    'PauseFacet',
-    'ERC20',
-    'ERC1410ScheduledTasks',
-    'ERC1594',
-    'ERC1643',
-    'ERC1644',
-    'DiamondFacet',
-    'EquityUSA',
-    'BondUSA',
-    'ScheduledSnapshots',
-    'ScheduledBalanceAdjustments',
-    'ScheduledTasks',
-    'Snapshots',
-    'CorporateActions',
-    'TransferAndLock',
-    'Lock',
-    'AdjustBalances',
-    'ProtectedPartitions',
-    'Hold',
-    'TimeTravel',
-    'Kyc',
-    'SsiManagement',
-    'ClearingHoldCreationFacet',
-    'ClearingRedeemFacet',
-    'ClearingTransferFacet',
-    'ClearingReadFacet',
-    'ClearingActionsFacet',
-    'ExternalPauseManagement',
-    'ExternalControlListManagement',
-    'ExternalKycListManagement',
-    'ERC3643',
-    'FreezeFacet',
-] as const
-export type ContractName = (typeof CONTRACT_NAMES)[number]
-export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
-
-export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
-    (name) => `${name}__factory`
-)
-export type ContractFactoryName = (typeof CONTRACT_FACTORY_NAMES)[number]
-
-export interface Endpoints {
-    jsonRpc: string
-    mirror: string
-}
-
-export interface DeployedContract {
-    address: string
-    proxyAddress?: string
-    proxyAdminAddress?: string
-}
-
-export interface ContractConfig {
-    name: ContractName
-    factoryName: ContractFactoryName
-    deployType: DeployType
-    addresses?: Record<Network, DeployedContract>
-}
-
-export default class Configuration {
-    // private _privateKeys: Record<Network, string[]>;
-    // private _endpoints: Record<Network, Endpoints>;
-    // private _contracts: Record<ContractName, ContractConfig>;
-    /**
-     * Determines whether the contract sizer should run on compile.
-     *
-     * @returns {boolean} True if the contract sizer should run on compile, false otherwise.
-     */
-    public static get contractSizerRunOnCompile(): boolean {
-        return (
-            Configuration._getEnvironmentVariable({
-                name: 'CONTRACT_SIZER_RUN_ON_COMPILE',
-                defaultValue: 'true',
-            }).toLowerCase() === 'true'
-        )
-    }
-
-    /**
-     * Determines whether gas reporting is enabled.
-     *
-     * @returns {boolean} True if gas reporting is enabled, false otherwise.
-     */
-    public static get reportGas(): boolean {
-        return (
-            Configuration._getEnvironmentVariable({
-                name: 'REPORT_GAS',
-                defaultValue: 'true',
-            }).toLowerCase() === 'true'
-        )
-    }
-
-    public static get privateKeys(): Record<Network, string[]> {
-        return NETWORKS.reduce(
-            (result, network) => {
-                result[network] = Configuration._getEnvironmentVariableList({
-                    name: `${network.toUpperCase()}_PRIVATE_KEY_#`,
-                })
-                return result
-            },
-            {} as Record<Network, string[]>
-        )
-    }
-
-    public static get endpoints(): Record<Network, Endpoints> {
-        return NETWORKS.reduce(
-            (result, network) => {
-                result[network] = {
-                    jsonRpc: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_JSON_RPC_ENDPOINT`,
-                        defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:7546'
-                                : `https://${network}.hash.io/api`,
-                    }),
-                    mirror: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_MIRROR_NODE_ENDPOINT`,
-                        defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:5551'
-                                : `https://${network}.mirrornode.hedera.com`,
-                    }),
-                }
-                return result
-            },
-            {} as Record<Network, Endpoints>
-        )
-    }
-
-    public static get contracts(): Record<ContractName, ContractConfig> {
-        const contracts: Record<ContractName, ContractConfig> = {} as Record<
-            ContractName,
-            ContractConfig
-        >
-        CONTRACT_NAMES.forEach((contractName) => {
-            contracts[contractName] = {
-                name: contractName,
-                factoryName: `${contractName}__factory`,
-                deployType: CONTRACT_NAMES_WITH_PROXY.includes(contractName)
-                    ? 'proxy'
-                    : 'direct',
-                addresses: Configuration._getDeployedAddresses({
-                    contractName,
-                }),
-            }
-        })
-        return contracts
-    }
-
-    // * Private methods
-
-    /**
-     * Retrieves the deployed contract addresses for a given contract name across different networks.
-     *
-     * @param {Object} params - The parameters object.
-     * @param {ContractName} params.contractName - The name of the contract to get deployed addresses for.
-     * @returns {Record<Network, DeployedContract>} An object mapping each network to its deployed contract details.
-     *
-     * The function iterates over all available networks and fetches the contract address, proxy address,
-     * and proxy admin address from environment variables. If the contract address is found, it adds the
-     * details to the returned object.
-     */
-    private static _getDeployedAddresses({
-        contractName,
-    }: {
-        contractName: ContractName
-    }): Record<Network, DeployedContract> {
-        const deployedAddresses: Record<Network, DeployedContract> =
-            {} as Record<Network, DeployedContract>
-
-        NETWORKS.forEach((network) => {
-            const address = Configuration._getEnvironmentVariable({
-                name: `${network.toUpperCase()}_${contractName.toUpperCase()}`,
-                defaultValue: EMPTY_STRING,
-            })
-
-            if (address !== EMPTY_STRING) {
-                const proxyAddress = Configuration._getEnvironmentVariable({
-                    name: `${network.toUpperCase()}_${contractName}_PROXY`,
-                    defaultValue: EMPTY_STRING,
-                })
-                const proxyAdminAddress = Configuration._getEnvironmentVariable(
-                    {
-                        name: `${network.toUpperCase()}_${contractName}_PROXY_ADMIN`,
-                        defaultValue: EMPTY_STRING,
-                    }
-                )
-
-                deployedAddresses[network] = {
-                    address,
-                    ...(proxyAddress !== EMPTY_STRING && { proxyAddress }),
-                    ...(proxyAdminAddress !== EMPTY_STRING && {
-                        proxyAdminAddress,
-                    }),
-                }
-            }
-        })
-
-        return deployedAddresses
-    }
-
-    private static _getEnvironmentVariableList({
-        name,
-        indexChar = '#',
-    }: {
-        name: string
-        indexChar?: string
-    }): string[] {
-        const resultList: string[] = []
-        let index = 0
-        do {
-            const env = Configuration._getEnvironmentVariable({
-                name: name.replace(indexChar, `${index}`),
-                defaultValue: EMPTY_STRING,
-            })
-            if (env !== EMPTY_STRING) {
-                resultList.push(env)
-            }
-            index++
-        } while (resultList.length === index)
-        return resultList
-    }
-
-    private static _getEnvironmentVariable({
-        name,
-        defaultValue,
-    }: {
-        name: string
-        defaultValue?: string
-    }): string {
-        const value = process.env?.[name]
-        if (value) {
-            return value
+    function setAddressFrozen(
+        address _userAddress,
+        bool _freezStatus
+    ) external override onlyUnpaused validateAddress(_userAddress) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
         }
-        if (defaultValue !== undefined) {
-            // console.warn(
-            //     `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
-            // )
-            return defaultValue
+        _setAddressFrozen(_userAddress, _freezStatus);
+        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
+    }
+
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(_userAddress)
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
         }
-        throw new Error(
-            `Environment variable "${name}" is not defined. Please set the "${name}" environment variable.`
-        )
+        _freezeTokens(_userAddress, _amount);
+        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _unfreezeTokens(_userAddress, _amount);
+        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function batchSetAddressFrozen(
+        address[] calldata _userAddresses,
+        bool[] calldata _freeze
+    ) external onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _setAddressFrozen(_userAddresses[i], _freeze[i]);
+            emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
+        }
+    }
+
+    function batchFreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _checkRecoveredAddress(_userAddresses[i]);
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _freezeTokens(_userAddresses[i], _amounts[i]);
+            emit TokensFrozen(
+                _userAddresses[i],
+                _amounts[i],
+                _DEFAULT_PARTITION
+            );
+        }
+    }
+
+    function batchUnfreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _unfreezeTokens(_userAddresses[i], _amounts[i]);
+            emit TokensUnfrozen(
+                _userAddresses[i],
+                _amounts[i],
+                _DEFAULT_PARTITION
+            );
+        }
+    }
+
+    // ====== External functions (view/pure) ======
+
+    function getFrozenTokens(
+        address _userAddress
+    ) external view override returns (uint256) {
+        return _getFrozenAmountForAdjusted(_userAddress);
+    }
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _FREEZE_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](7);
+        uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .freezePartialTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .unfreezePartialTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .getFrozenTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setAddressFrozen
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchSetAddressFrozen
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchFreezePartialTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchUnfreezePartialTokens
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IFreeze).interfaceId;
     }
 }

@@ -241,24 +241,6 @@ interface IERC3643 {
     event ComplianceAdded(address indexed compliance);
 
     /**
-     *  @notice This event is emitted when a certain amount of tokens is frozen on a wallet
-     */
-    event TokensFrozen(
-        address indexed account,
-        uint256 amount,
-        bytes32 partition
-    );
-
-    /**
-     *  @notice This event is emitted when a certain amount of tokens is unfrozen on a wallet
-     */
-    event TokensUnfrozen(
-        address indexed account,
-        uint256 amount,
-        bytes32 partition
-    );
-
-    /**
      * @dev Emitted when the agent role is granted
      *
      * @param _agent Address of the agent that has been added
@@ -271,19 +253,6 @@ interface IERC3643 {
      * @param _agent Address of the agent that has been removed
      */
     event AgentRemoved(address indexed _agent);
-
-    /**
-     *  @dev This event is emitted when the wallet of an investor is frozen or unfrozen
-     *  @dev The event is emitted by setAddressFrozen and batchSetAddressFrozen functions
-     *  @param userAddress Is the wallet of the investor that is concerned by the freezing status
-     *  @param isFrozen Is the freezing status of the wallet
-     *  @param owner Is the address of the agent who called the function to freeze the wallet
-     */
-    event AddressFrozen(
-        address indexed userAddress,
-        bool indexed isFrozen,
-        address indexed owner
-    );
 
     /**
      * @dev Emitted when a wallet is recovered
@@ -398,33 +367,6 @@ interface IERC3643 {
      */
     function burn(address _userAddress, uint256 _amount) external;
 
-    /*
-     * @dev Freezes a partial amount of the user's tokens across all partitions.
-     * Emits a TokensFrozen event.
-     */
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Unfreezes a partial amount of the user's previously frozen tokens across all partitions.
-     * Emits a TokensUnfrozen event.
-     */
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Freezes the user's address entirely, disabling all token operations.
-     * Emits a TokensFrozen event.
-     */
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezeStatus
-    ) external;
-
     /**
      * @notice Gives an account the agent role
      * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
@@ -480,11 +422,4 @@ interface IERC3643 {
      * @dev The version is represented as a string.
      */
     function version() external view returns (string memory);
-
-    /*
-     * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.
-     */
-    function getFrozenTokens(
-        address _userAddress
-    ) external view returns (uint256);
 }

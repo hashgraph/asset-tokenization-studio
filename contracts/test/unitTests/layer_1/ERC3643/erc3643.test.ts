@@ -231,6 +231,7 @@ import {
     Hold,
     ProtectedPartitions,
     DiamondFacet,
+    FreezeFacet,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -320,6 +321,7 @@ describe('ERC3643 Tests', () => {
     let holdFacet: Hold
     let protectedPartitionsFacet: ProtectedPartitions
     let diamondFacet: DiamondFacet
+    let freezeFacet: FreezeFacet
 
     describe('single partition', () => {
         let erc3643Issuer: ERC3643
@@ -543,6 +545,10 @@ describe('ERC3643 Tests', () => {
             )
             diamondFacet = await ethers.getContractAt(
                 'DiamondFacet',
+                diamond.address
+            )
+            freezeFacet = await ethers.getContractAt(
+                'FreezeFacet',
                 diamond.address
             )
 
@@ -794,20 +800,20 @@ describe('ERC3643 Tests', () => {
         describe('Freeze', () => {
             it('GIVEN a invalid address WHEN attempting to setAddressFrozen THEN transactions revert with ZeroAddressNotAllowed error', async () => {
                 await expect(
-                    erc3643Facet.setAddressFrozen(ADDRESS_ZERO, true)
+                    freezeFacet.setAddressFrozen(ADDRESS_ZERO, true)
                 ).to.be.rejectedWith('ZeroAddressNotAllowed')
             })
 
             it('GIVEN a valid address WHEN setAddressFrozen AND blacklist THEN address should be added (freeze) and removed (unfreeze) from control list', async () => {
-                await expect(erc3643Facet.setAddressFrozen(account_B, true))
-                    .to.emit(erc3643Facet, 'AddressFrozen')
+                await expect(freezeFacet.setAddressFrozen(account_B, true))
+                    .to.emit(freezeFacet, 'AddressFrozen')
                     .withArgs(account_B, true, account_A)
 
                 let isInControlList =
                     await controlList.isInControlList(account_B)
                 expect(isInControlList).to.equal(true)
-                await expect(erc3643Facet.setAddressFrozen(account_B, false))
-                    .to.emit(erc3643Facet, 'AddressFrozen')
+                await expect(freezeFacet.setAddressFrozen(account_B, false))
+                    .to.emit(freezeFacet, 'AddressFrozen')
                     .withArgs(account_B, false, account_A)
                 isInControlList = await controlList.isInControlList(account_B)
                 expect(isInControlList).to.equal(false)
@@ -855,8 +861,8 @@ describe('ERC3643 Tests', () => {
                     factory,
                     businessLogicResolver: businessLogicResolver.address,
                 })
-                erc3643Facet = await ethers.getContractAt(
-                    'ERC3643',
+                freezeFacet = await ethers.getContractAt(
+                    'FreezeFacet',
                     newDiamond.address
                 )
                 controlList = await ethers.getContractAt(
@@ -864,15 +870,15 @@ describe('ERC3643 Tests', () => {
                     newDiamond.address
                 )
                 await controlList.addToControlList(account_B)
-                await expect(erc3643Facet.setAddressFrozen(account_B, true))
-                    .to.emit(erc3643Facet, 'AddressFrozen')
+                await expect(freezeFacet.setAddressFrozen(account_B, true))
+                    .to.emit(freezeFacet, 'AddressFrozen')
                     .withArgs(account_B, true, account_A)
 
                 let isInControlList =
                     await controlList.isInControlList(account_B)
                 expect(isInControlList).to.equal(false)
-                await expect(erc3643Facet.setAddressFrozen(account_B, false))
-                    .to.emit(erc3643Facet, 'AddressFrozen')
+                await expect(freezeFacet.setAddressFrozen(account_B, false))
+                    .to.emit(freezeFacet, 'AddressFrozen')
                     .withArgs(account_B, false, account_A)
                 isInControlList = await controlList.isInControlList(account_B)
                 expect(isInControlList).to.equal(true)
@@ -880,7 +886,7 @@ describe('ERC3643 Tests', () => {
 
             it('GIVEN a invalid address WHEN attempting to freezePartialTokens THEN transactions revert with ZeroAddressNotAllowed error', async () => {
                 await expect(
-                    erc3643Facet.freezePartialTokens(ADDRESS_ZERO, 10)
+                    freezeFacet.freezePartialTokens(ADDRESS_ZERO, 10)
                 ).to.be.rejectedWith('ZeroAddressNotAllowed')
             })
 
@@ -893,13 +899,11 @@ describe('ERC3643 Tests', () => {
                     value: amount,
                     data: '0x',
                 })
-                await expect(
-                    erc3643Facet.freezePartialTokens(account_E, amount)
-                )
-                    .to.emit(erc3643Facet, 'TokensFrozen')
+                await expect(freezeFacet.freezePartialTokens(account_E, amount))
+                    .to.emit(freezeFacet, 'TokensFrozen')
                     .withArgs(account_E, amount, DEFAULT_PARTITION)
                 expect(
-                    await erc3643Facet.getFrozenTokens(account_E)
+                    await freezeFacet.getFrozenTokens(account_E)
                 ).to.be.equal(amount)
                 expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(0)
             })
@@ -913,7 +917,7 @@ describe('ERC3643 Tests', () => {
                     data: '0x',
                 })
                 await expect(
-                    erc3643Facet.freezePartialTokens(account_E, amount + 1)
+                    freezeFacet.freezePartialTokens(account_E, amount + 1)
                 ).to.be.revertedWithCustomError(
                     erc3643Facet,
                     'InsufficientBalance'
@@ -922,7 +926,7 @@ describe('ERC3643 Tests', () => {
 
             it('GIVEN a invalid address WHEN attempting to unfreezePartialTokens THEN transactions revert with ZeroAddressNotAllowed error', async () => {
                 await expect(
-                    erc3643Facet.unfreezePartialTokens(ADDRESS_ZERO, 10)
+                    freezeFacet.unfreezePartialTokens(ADDRESS_ZERO, 10)
                 ).to.be.rejectedWith('ZeroAddressNotAllowed')
             })
 
@@ -934,20 +938,20 @@ describe('ERC3643 Tests', () => {
                     value: amount,
                     data: '0x',
                 })
-                await erc3643Facet.freezePartialTokens(account_E, amount)
+                await freezeFacet.freezePartialTokens(account_E, amount)
 
                 expect(
-                    await erc3643Facet.getFrozenTokens(account_E)
+                    await freezeFacet.getFrozenTokens(account_E)
                 ).to.be.equal(amount)
                 expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(0)
 
                 await expect(
-                    erc3643Facet.unfreezePartialTokens(account_E, amount)
+                    freezeFacet.unfreezePartialTokens(account_E, amount)
                 )
-                    .to.emit(erc3643Facet, 'TokensUnfrozen')
+                    .to.emit(freezeFacet, 'TokensUnfrozen')
                     .withArgs(account_E, amount, DEFAULT_PARTITION)
                 expect(
-                    await erc3643Facet.getFrozenTokens(account_E)
+                    await freezeFacet.getFrozenTokens(account_E)
                 ).to.be.equal(0)
                 expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(
                     amount
@@ -962,9 +966,9 @@ describe('ERC3643 Tests', () => {
                     value: amount,
                     data: '0x',
                 })
-                await erc3643Facet.freezePartialTokens(account_E, amount)
+                await freezeFacet.freezePartialTokens(account_E, amount)
                 await expect(
-                    erc3643Facet.unfreezePartialTokens(account_E, amount + 1)
+                    freezeFacet.unfreezePartialTokens(account_E, amount + 1)
                 )
                     .to.be.revertedWithCustomError(
                         erc3643Facet,
@@ -1314,7 +1318,7 @@ describe('ERC3643 Tests', () => {
                     // Freeze accounts
                     erc3643Facet = erc3643Facet.connect(signer_A)
                     await expect(
-                        erc3643Facet.batchSetAddressFrozen(
+                        freezeFacet.batchSetAddressFrozen(
                             userAddresses,
                             freezeFlags
                         )
@@ -1351,14 +1355,14 @@ describe('ERC3643 Tests', () => {
                     )
 
                     // First, freeze the addresses
-                    await erc3643Facet.batchSetAddressFrozen(userAddresses, [
+                    await freezeFacet.batchSetAddressFrozen(userAddresses, [
                         true,
                         true,
                     ])
 
                     // Now, unfreeze them in a batch
                     await expect(
-                        erc3643Facet.batchSetAddressFrozen(userAddresses, [
+                        freezeFacet.batchSetAddressFrozen(userAddresses, [
                             false,
                             false,
                         ])
@@ -1387,10 +1391,10 @@ describe('ERC3643 Tests', () => {
                     const userAddresses = [account_D, account_E]
                     const freezeFlags = [true, true]
 
-                    erc3643Facet = erc3643Facet.connect(signer_F)
+                    freezeFacet = freezeFacet.connect(signer_F)
 
                     await expect(
-                        erc3643Facet.batchSetAddressFrozen(
+                        freezeFacet.batchSetAddressFrozen(
                             userAddresses,
                             freezeFlags
                         )
@@ -1405,7 +1409,7 @@ describe('ERC3643 Tests', () => {
                     const status = [true, true]
 
                     await expect(
-                        erc3643Facet.batchSetAddressFrozen(toList, status)
+                        freezeFacet.batchSetAddressFrozen(toList, status)
                     ).to.be.rejectedWith('InputBoolArrayLengthMismatch')
                 })
             })
@@ -1422,22 +1426,22 @@ describe('ERC3643 Tests', () => {
                     const amounts = [freezeAmount, freezeAmount]
 
                     const initialFrozenD =
-                        await erc3643Facet.getFrozenTokens(account_D)
+                        await freezeFacet.getFrozenTokens(account_D)
                     const initialFrozenE =
-                        await erc3643Facet.getFrozenTokens(account_E)
+                        await freezeFacet.getFrozenTokens(account_E)
 
                     erc3643Facet = erc3643Facet.connect(signer_A) // signer_A has FREEZE_MANAGER_ROLE
                     await expect(
-                        erc3643Facet.batchFreezePartialTokens(
+                        freezeFacet.batchFreezePartialTokens(
                             userAddresses,
                             amounts
                         )
                     ).to.not.be.reverted
 
                     const finalFrozenD =
-                        await erc3643Facet.getFrozenTokens(account_D)
+                        await freezeFacet.getFrozenTokens(account_D)
                     const finalFrozenE =
-                        await erc3643Facet.getFrozenTokens(account_E)
+                        await freezeFacet.getFrozenTokens(account_E)
 
                     expect(finalFrozenD).to.equal(
                         initialFrozenD.add(freezeAmount)
@@ -1453,7 +1457,7 @@ describe('ERC3643 Tests', () => {
                     const amounts = [mintAmount, mintAmount]
 
                     await expect(
-                        erc3643Facet.batchFreezePartialTokens(toList, amounts)
+                        freezeFacet.batchFreezePartialTokens(toList, amounts)
                     ).to.be.rejectedWith('InputAmountsArrayLengthMismatch')
                 })
             })
@@ -1467,11 +1471,11 @@ describe('ERC3643 Tests', () => {
                     await erc3643Issuer.mint(account_E, totalAmount)
 
                     erc3643Facet = erc3643Facet.connect(signer_A) // signer_A has FREEZE_MANAGER_ROLE
-                    await erc3643Facet.freezePartialTokens(
+                    await freezeFacet.freezePartialTokens(
                         account_D,
                         totalAmount
                     )
-                    await erc3643Facet.freezePartialTokens(
+                    await freezeFacet.freezePartialTokens(
                         account_E,
                         totalAmount
                     )
@@ -1482,21 +1486,21 @@ describe('ERC3643 Tests', () => {
                     const amounts = [unfreezeAmount, unfreezeAmount]
 
                     const initialFrozenD =
-                        await erc3643Facet.getFrozenTokens(account_D)
+                        await freezeFacet.getFrozenTokens(account_D)
                     const initialFrozenE =
-                        await erc3643Facet.getFrozenTokens(account_E)
+                        await freezeFacet.getFrozenTokens(account_E)
 
                     await expect(
-                        erc3643Facet.batchUnfreezePartialTokens(
+                        freezeFacet.batchUnfreezePartialTokens(
                             userAddresses,
                             amounts
                         )
                     ).to.not.be.reverted
 
                     const finalFrozenD =
-                        await erc3643Facet.getFrozenTokens(account_D)
+                        await freezeFacet.getFrozenTokens(account_D)
                     const finalFrozenE =
-                        await erc3643Facet.getFrozenTokens(account_E)
+                        await freezeFacet.getFrozenTokens(account_E)
 
                     expect(finalFrozenD).to.equal(
                         initialFrozenD.sub(unfreezeAmount)
@@ -1512,7 +1516,7 @@ describe('ERC3643 Tests', () => {
                     const amounts = [totalAmount + 1, unfreezeAmount]
 
                     await expect(
-                        erc3643Facet.batchUnfreezePartialTokens(
+                        freezeFacet.batchUnfreezePartialTokens(
                             userAddresses,
                             amounts
                         )
@@ -1528,7 +1532,7 @@ describe('ERC3643 Tests', () => {
                     const amounts = [mintAmount, mintAmount]
 
                     await expect(
-                        erc3643Facet.batchUnfreezePartialTokens(toList, amounts)
+                        freezeFacet.batchUnfreezePartialTokens(toList, amounts)
                     ).to.be.rejectedWith('InputAmountsArrayLengthMismatch')
                 })
             })
@@ -1622,6 +1626,7 @@ describe('ERC3643 Tests', () => {
 
             it('GIVEN a user with the agent role WHEN performing actions using ERC-3643 methods succeeds', async () => {
                 await accessControlFacet.grantRole(AGENT_ROLE, account_B)
+                freezeFacet = freezeFacet.connect(signer_B)
                 erc3643Facet = erc3643Facet.connect(signer_B)
                 const amount = 1000
                 await erc1410Facet.issueByPartition({
@@ -1630,15 +1635,13 @@ describe('ERC3643 Tests', () => {
                     value: amount,
                     data: '0x',
                 })
-                await expect(
-                    erc3643Facet.freezePartialTokens(account_E, amount)
-                )
-                    .to.emit(erc3643Facet, 'TokensFrozen')
+                await expect(freezeFacet.freezePartialTokens(account_E, amount))
+                    .to.emit(freezeFacet, 'TokensFrozen')
                     .withArgs(account_E, amount, DEFAULT_PARTITION)
                 await expect(
-                    erc3643Facet.unfreezePartialTokens(account_E, amount)
+                    freezeFacet.unfreezePartialTokens(account_E, amount)
                 )
-                    .to.emit(erc3643Facet, 'TokensUnfrozen')
+                    .to.emit(freezeFacet, 'TokensUnfrozen')
                     .withArgs(account_E, amount, DEFAULT_PARTITION)
                 await expect(
                     erc3643Facet.forcedTransfer(account_E, account_D, amount)
@@ -1659,8 +1662,8 @@ describe('ERC3643 Tests', () => {
                 await expect(erc3643Facet.burn(account_E, amount))
                     .to.emit(erc3643Facet, 'Transfer')
                     .withArgs(account_E, ADDRESS_ZERO, amount)
-                await expect(erc3643Facet.setAddressFrozen(account_E, true))
-                    .to.emit(erc3643Facet, 'AddressFrozen')
+                await expect(freezeFacet.setAddressFrozen(account_E, true))
+                    .to.emit(freezeFacet, 'AddressFrozen')
                     .withArgs(account_E, true, account_B)
             })
         })
@@ -1713,26 +1716,26 @@ describe('ERC3643 Tests', () => {
             })
 
             it('GIVEN an account without FREEZE MANAGER role WHEN freezePartialTokens THEN transaction fails with AccountHasNoRole', async () => {
-                erc3643Facet = erc3643Facet.connect(signer_C)
+                freezeFacet = freezeFacet.connect(signer_C)
 
                 await expect(
-                    erc3643Facet.freezePartialTokens(account_A, 10)
+                    freezeFacet.freezePartialTokens(account_A, 10)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
             it('GIVEN an account without FREEZE MANAGER role WHEN unfreezePartialTokens THEN transaction fails with AccountHasNoRole', async () => {
-                erc3643Facet = erc3643Facet.connect(signer_C)
+                freezeFacet = freezeFacet.connect(signer_C)
 
                 await expect(
-                    erc3643Facet.unfreezePartialTokens(account_A, 10)
+                    freezeFacet.unfreezePartialTokens(account_A, 10)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
             it('GIVEN an account without FREEZE MANAGER role WHEN setAddressFrozen THEN transaction fails with AccountHasNoRole', async () => {
-                erc3643Facet = erc3643Facet.connect(signer_C)
+                freezeFacet = freezeFacet.connect(signer_C)
 
                 await expect(
-                    erc3643Facet.setAddressFrozen(account_A, true)
+                    freezeFacet.setAddressFrozen(account_A, true)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
@@ -1758,19 +1761,19 @@ describe('ERC3643 Tests', () => {
             })
             it('GIVEN a paused token WHEN freezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
-                    erc3643Facet.freezePartialTokens(account_A, 10)
+                    freezeFacet.freezePartialTokens(account_A, 10)
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused token WHEN unfreezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
-                    erc3643Facet.unfreezePartialTokens(account_A, 10)
+                    freezeFacet.unfreezePartialTokens(account_A, 10)
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused token WHEN setAddressFrozen THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
-                    erc3643Facet.setAddressFrozen(account_A, true)
+                    freezeFacet.setAddressFrozen(account_A, true)
                 ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
             })
 
@@ -1853,12 +1856,12 @@ describe('ERC3643 Tests', () => {
                 // HOLD
                 erc3643Facet = erc3643Facet.connect(signer_A)
 
-                await erc3643Facet.freezePartialTokens(account_E, _AMOUNT)
+                await freezeFacet.freezePartialTokens(account_E, _AMOUNT)
 
                 const frozen_TotalAmount_Before =
-                    await erc3643Facet.getFrozenTokens(account_E)
+                    await freezeFacet.getFrozenTokens(account_E)
                 const frozen_TotalAmount_Before_Partition_1 =
-                    await erc3643Facet.getFrozenTokens(account_E)
+                    await freezeFacet.getFrozenTokens(account_E)
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -1897,9 +1900,9 @@ describe('ERC3643 Tests', () => {
                 )
 
                 const frozen_TotalAmount_After =
-                    await erc3643Facet.getFrozenTokens(account_E)
+                    await freezeFacet.getFrozenTokens(account_E)
                 const frozen_TotalAmount_After_Partition_1 =
-                    await erc3643Facet.getFrozenTokens(account_E)
+                    await freezeFacet.getFrozenTokens(account_E)
 
                 const balance_After = await erc1410Facet.balanceOf(account_E)
                 const balance_After_Partition_1 =
@@ -2031,7 +2034,7 @@ describe('ERC3643 Tests', () => {
                     value: amount,
                     data: '0x',
                 })
-                await erc3643Facet.freezePartialTokens(account_E, amount / 2)
+                await freezeFacet.freezePartialTokens(account_E, amount / 2)
                 await controlList.addToControlList(account_E)
                 expect(
                     await erc3643Facet.recoveryAddress(
@@ -2045,9 +2048,9 @@ describe('ERC3643 Tests', () => {
                 const balanceE = await erc1410Facet.balanceOf(account_E)
                 const balanceB = await erc1410Facet.balanceOf(account_B)
                 const frozenBalanceE =
-                    await erc3643Facet.getFrozenTokens(account_E)
+                    await freezeFacet.getFrozenTokens(account_E)
                 const frozenBalanceB =
-                    await erc3643Facet.getFrozenTokens(account_B)
+                    await freezeFacet.getFrozenTokens(account_B)
                 const controlListStatusE =
                     await controlList.isInControlList(account_E)
                 const controlListStatusB =
@@ -2826,7 +2829,7 @@ describe('ERC3643 Tests', () => {
                 )
                 // Freeze
                 await expect(
-                    erc3643Facet.freezePartialTokens(account_C, amount)
+                    freezeFacet.freezePartialTokens(account_C, amount)
                 ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
             })
         })
@@ -2924,6 +2927,10 @@ describe('ERC3643 Tests', () => {
                 diamond.address,
                 signer_B
             )
+            freezeFacet = await ethers.getContractAt(
+                'FreezeFacet',
+                diamond.address
+            )
 
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
@@ -2969,6 +2976,105 @@ describe('ERC3643 Tests', () => {
                 erc3643Facet,
                 'NotAllowedInMultiPartitionMode'
             )
+        })
+
+        it('GIVEN an single partition token WHEN recoveryAddress THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
+            await accessControlFacet.grantRole(AGENT_ROLE, account_A)
+            await expect(
+                erc3643Facet.recoveryAddress(account_C, account_D, ADDRESS_ZERO)
+            ).to.be.revertedWithCustomError(
+                erc3643Facet,
+                'NotAllowedInMultiPartitionMode'
+            )
+        })
+
+        describe('Batch operations', () => {
+            it('GIVEN an single partition token WHEN batchTransfer THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
+                await expect(
+                    erc3643Facet.batchTransfer([account_A], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'NotAllowedInMultiPartitionMode'
+                )
+            })
+            it('GIVEN an single partition token WHEN batchForcedTransfer THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
+                await expect(
+                    erc3643Facet.batchForcedTransfer(
+                        [account_A],
+                        [account_A],
+                        [AMOUNT]
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'NotAllowedInMultiPartitionMode'
+                )
+            })
+            it('GIVEN an single partition token WHEN batchMint THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
+                await expect(
+                    erc3643Facet.batchMint([account_A], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'NotAllowedInMultiPartitionMode'
+                )
+            })
+            it('GIVEN an single partition token WHEN batchBurn THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
+                await expect(
+                    erc3643Facet.batchBurn([account_A], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'NotAllowedInMultiPartitionMode'
+                )
+            })
+        })
+
+        describe('Freeze', () => {
+            it('GIVEN an account with FREEZE_MANAGER_ROLE WHEN freezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
+                await expect(
+                    freezeFacet.freezePartialTokens(account_A, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'NotAllowedInMultiPartitionMode'
+                )
+            })
+
+            it('GIVEN an account with FREEZE_MANAGER_ROLE WHEN unfreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
+                await expect(
+                    freezeFacet.unfreezePartialTokens(account_A, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'NotAllowedInMultiPartitionMode'
+                )
+            })
+
+            it('GIVEN an account with FREEZE_MANAGER_ROLE WHEN unfreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
+                await expect(
+                    freezeFacet.unfreezePartialTokens(account_A, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'NotAllowedInMultiPartitionMode'
+                )
+            })
+
+            it('GIVEN an account with FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
+                await expect(
+                    freezeFacet.batchFreezePartialTokens([account_A], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'NotAllowedInMultiPartitionMode'
+                )
+            })
+
+            it('GIVEN an account with FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
+                await expect(
+                    freezeFacet.batchUnfreezePartialTokens(
+                        [account_A],
+                        [AMOUNT]
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'NotAllowedInMultiPartitionMode'
+                )
+            })
         })
     })
 })

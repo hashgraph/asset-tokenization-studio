@@ -221,13 +221,10 @@ import {
     _FREEZE_MANAGER_ROLE,
     _AGENT_ROLE
 } from '../constants/roles.sol';
-import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {IKyc} from '../interfaces/kyc/IKyc.sol';
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
-    using Strings for uint256;
-
     address private constant _ONCHAIN_ID = address(0);
 
     // ====== External functions (state-changing) ======
@@ -318,20 +315,6 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
     }
 
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezStatus
-    ) external override onlyUnpaused validateAddress(_userAddress) {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _setAddressFrozen(_userAddress, _freezStatus);
-        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
-    }
-
     function burn(
         address _userAddress,
         uint256 _amount
@@ -386,47 +369,6 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         }
         _controllerTransfer(_from, _to, _amount, '', '');
         return true;
-    }
-
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyUnrecoveredAddress(_userAddress)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
     function batchTransfer(
@@ -525,82 +467,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         }
     }
 
-    function batchSetAddressFrozen(
-        address[] calldata _userAddresses,
-        bool[] calldata _freeze
-    ) external onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _setAddressFrozen(_userAddresses[i], _freeze[i]);
-            emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
-        }
-    }
-
-    function batchFreezePartialTokens(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _checkRecoveredAddress(_userAddresses[i]);
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _freezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensFrozen(
-                _userAddresses[i],
-                _amounts[i],
-                _DEFAULT_PARTITION
-            );
-        }
-    }
-
-    function batchUnfreezePartialTokens(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _unfreezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensUnfrozen(
-                _userAddresses[i],
-                _amounts[i],
-                _DEFAULT_PARTITION
-            );
-        }
-    }
-
     // ====== External functions (view/pure) ======
-
-    function getFrozenTokens(
-        address _userAddress
-    ) external view override returns (uint256) {
-        return _getFrozenAmountForAdjusted(_userAddress);
-    }
 
     function isAgent(address _agent) external view returns (bool) {
         return _hasRole(_AGENT_ROLE, _agent);
@@ -646,7 +513,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](30);
+        staticFunctionSelectors_ = new bytes4[](23);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
@@ -664,18 +531,6 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .freezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .unfreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getFrozenTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setAddressFrozen
-            .selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .setIdentityRegistry
             .selector;
@@ -699,15 +554,6 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchSetAddressFrozen
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchFreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchUnfreezePartialTokens
-            .selector;
     }
 
     function getStaticInterfaceIds()
