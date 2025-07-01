@@ -202,69 +202,32 @@
    limitations under the License.
 
 */
-import { FreezePartialTokensCommand } from 'app/usecase/command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand';
-import { UnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand';
-import { GetFrozenPartialTokensQuery } from 'app/usecase/query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
-import {
-  FreezePartialTokensRequest,
-  SetAddressFrozenRequest,
-  UnfreezePartialTokensRequest,
-} from 'index';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetAddressFrozenCommand } from 'app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand';
 
-export const SetAddressFrozenCommandFixture =
-  createFixture<SetAddressFrozenCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.status.faker((faker) => faker.datatype.boolean());
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-export const SetAddressFrozenRequestFixture =
-  createFixture<SetAddressFrozenRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.status.faker((faker) => faker.datatype.boolean());
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
 
-export const FreezePartialTokensCommandFixture =
-  createFixture<FreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+import FormatValidation from '../../../FormatValidation.js';
 
-export const FreezePartialTokensRequestFixture =
-  createFixture<FreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+export default class SetAddressFrozenRequest extends ValidatedRequest<SetAddressFrozenRequest> {
+  securityId: string;
+  targetId: string;
+  status: boolean;
 
-export const UnfreezePartialTokensCommandFixture =
-  createFixture<UnfreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const UnfreezePartialTokensRequestFixture =
-  createFixture<UnfreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-
-export const GetFrozenPartialTokensQueryFixture =
-  createFixture<GetFrozenPartialTokensQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+  constructor({
+    securityId,
+    targetId,
+    status,
+  }: {
+    securityId: string;
+    status: boolean;
+    targetId: string;
+  }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      status: FormatValidation.checkBoolean(),
+      targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+    });
+    this.securityId = securityId;
+    this.status = status;
+    this.targetId = targetId;
+  }
+}

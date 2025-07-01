@@ -422,6 +422,7 @@ import { BatchMintCommandHandler } from '../app/usecase/command/security/operati
 import { BatchSetAddressFrozenCommandHandler } from '../app/usecase/command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommandHandler.js';
 import { BatchTransferCommandHandler } from '../app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommandHandler.js';
 import { BatchUnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommandHandler.js';
+import { SetAddressFrozenCommandHandler } from '../app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -821,6 +822,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetOnchainIDCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetAddressFrozenCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,

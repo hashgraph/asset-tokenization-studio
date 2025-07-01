@@ -357,6 +357,7 @@ import {
   RECOVERY_ADDRESS_GAS,
   EVM_ZERO_ADDRESS,
   ADD_AGENT_GAS,
+  SET_ADDRESS_FROZEN_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -4302,6 +4303,35 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(BATCH_UNFREEZE_PARTIAL_TOKENS_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async setAddressFrozen(
+    security: EvmAddress,
+    status: boolean,
+    target: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'setAddressFrozen';
+    LogService.logTrace(`Freezing address ${target.toString()}`);
+
+    const factoryInstance = new FreezeFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [target.toString(), status],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(SET_ADDRESS_FROZEN_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
