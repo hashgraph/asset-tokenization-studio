@@ -208,7 +208,10 @@ pragma solidity 0.8.18;
 
 import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
-import {_ERC3643_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {
+    _ERC3643_STORAGE_POSITION,
+    _RESOLVER_PROXY_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
 import {_AGENT_ROLE} from '../constants/roles.sol';
 import {
     IAccessControl
@@ -216,11 +219,11 @@ import {
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {
-    IDiamondCut
-} from '../../interfaces/resolver/resolverProxy/IDiamondCut.sol';
-import {
     IIdentityRegistry
 } from '../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol';
+import {
+    ResolverProxyUnstructured
+} from '../../resolver/resolverProxy/unstructured/ResolverProxyUnstructured.sol';
 
 abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
     modifier onlyUnrecoveredAddress(address _account) {
@@ -303,24 +306,28 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
     }
 
     function _version() internal view returns (string memory) {
-        bytes memory payload = abi.encodeWithSelector(
-            IDiamondCut.getConfigInfo.selector
-        );
-        // Use staticcall since diamond facet is not in the hierarchy
-        (, bytes memory data) = address(this).staticcall(payload);
-
-        (address resolver, bytes32 configurationId, uint256 versionNum) = abi
-            .decode(data, (address, bytes32, uint256));
-
         return
             string(
                 abi.encodePacked(
-                    'Resolver: ',
-                    Strings.toHexString(uint160(resolver), 20),
-                    ', Config ID: ',
-                    Strings.toHexString(uint256(configurationId), 32),
-                    ', Version: ',
-                    Strings.toString(versionNum)
+                    '{',
+                    '"Resolver": "',
+                    Strings.toHexString(
+                        uint160(address(_resolverProxyStorage().resolver)),
+                        20
+                    ),
+                    '", ',
+                    '"Config ID": "',
+                    Strings.toHexString(
+                        uint256(
+                            _resolverProxyStorage().resolverProxyConfigurationId
+                        ),
+                        32
+                    ),
+                    '", ',
+                    '"Version": "',
+                    Strings.toString(_resolverProxyStorage().version),
+                    '"',
+                    '}'
                 )
             );
     }
@@ -364,6 +371,22 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             erc3643Storage_.slot := position
+        }
+    }
+
+    /**
+     * @dev This belongs to the ResolverProxyUnstructured contract.
+     * Since it is not in the common inheritance chain we redeclare it here
+     */
+    function _resolverProxyStorage()
+        internal
+        pure
+        returns (ResolverProxyUnstructured.ResolverProxyStorage storage ds)
+    {
+        bytes32 position = _RESOLVER_PROXY_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ds.slot := position
         }
     }
 }

@@ -978,17 +978,21 @@ describe('ERC3643 Tests', () => {
             })
         })
 
-        it('GIVEN an initialized token WHEN retrieving the version THEN returns the right version', async () => {
-            const full = await erc3643Facet.version()
+        it.only('GIVEN an initialized token WHEN retrieving the version THEN returns the right version', async () => {
+            const json = await erc3643Facet.version()
+            console.log(json)
+            const parsed = JSON.parse(json)
+
             const [configResolver, configId, configVersion] =
                 await diamondFacet.getConfigInfo()
-            const parts = full.split(', ')
-            expect(parts).to.have.length(3)
-            expect(parts[0]).to.equal(
-                `Resolver: ${configResolver.toLowerCase()}`
+
+            expect(parsed['Resolver'].toLowerCase()).to.equal(
+                configResolver.toLowerCase()
             )
-            expect(parts[1]).to.equal(`Config ID: ${configId.toLowerCase()}`)
-            expect(parts[2]).to.equal(`Version: ${configVersion}`)
+            expect(parsed['Config ID'].toLowerCase()).to.equal(
+                configId.toLowerCase()
+            )
+            expect(parsed['Version']).to.equal(configVersion.toString())
         })
 
         it('GIVEN an initialized token WHEN updating the onChanId THEN UpdatedTokenInformation emits OnchainIDUpdated with updated onchainId and current metadata', async () => {

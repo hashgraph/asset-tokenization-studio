@@ -285,3 +285,6 @@ bytes32 constant _KYC_MANAGEMENT_STORAGE_POSITION = 0x57364604d3fde2768df7beea76
 
 // keccak256('security.token.standard.erc3643.storage');
 bytes32 constant _ERC3643_STORAGE_POSITION = 0xba82ce8c38a926a01a84988222ab779cf1852f228ccaafd725c8d06d090d0906;
+
+// keccak256('security.token.standard.resolverProxy.storage');
+bytes32 constant _RESOLVER_PROXY_STORAGE_POSITION = 0x4833864335c8f29dd85e3f7a36869cb90d5dc7167ae5000f7e1ce4d7c15d14ad;
