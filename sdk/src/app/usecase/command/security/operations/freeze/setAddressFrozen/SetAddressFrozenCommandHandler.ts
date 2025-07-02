@@ -202,69 +202,68 @@
    limitations under the License.
 
 */
-import { FreezePartialTokensCommand } from 'app/usecase/command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand';
-import { UnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand';
-import { GetFrozenPartialTokensQuery } from 'app/usecase/query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
+
+import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
+import AccountService from '../../../../../../service/account/AccountService.js';
+import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import { SetAddressFrozenCommandError } from './error/SetAddressFrozenCommandError.js';
 import {
-  FreezePartialTokensRequest,
-  SetAddressFrozenRequest,
-  UnfreezePartialTokensRequest,
-} from 'index';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetAddressFrozenCommand } from 'app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand';
+  SetAddressFrozenCommand,
+  SetAddressFrozenCommandResponse,
+} from './SetAddressFrozenCommand.js';
 
-export const SetAddressFrozenCommandFixture =
-  createFixture<SetAddressFrozenCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.status.faker((faker) => faker.datatype.boolean());
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-export const SetAddressFrozenRequestFixture =
-  createFixture<SetAddressFrozenRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.status.faker((faker) => faker.datatype.boolean());
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+@CommandHandler(SetAddressFrozenCommand)
+export class SetAddressFrozenCommandHandler
+  implements ICommandHandler<SetAddressFrozenCommand>
+{
+  constructor(
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    private readonly transactionService: TransactionService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+  ) {}
 
-export const FreezePartialTokensCommandFixture =
-  createFixture<FreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+  async execute(
+    command: SetAddressFrozenCommand,
+  ): Promise<SetAddressFrozenCommandResponse> {
+    try {
+      const { securityId, status, targetId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-export const FreezePartialTokensRequestFixture =
-  createFixture<FreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-export const UnfreezePartialTokensCommandFixture =
-  createFixture<UnfreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+      await this.validationService.checkPause(securityId);
 
-export const UnfreezePartialTokensRequestFixture =
-  createFixture<UnfreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+      await this.validationService.checkAnyRole(
+        [SecurityRole._FREEZE_MANAGER_ROLE, SecurityRole._AGENT_ROLE],
+        account.id.toString(),
+        securityId,
+      );
 
-export const GetFrozenPartialTokensQueryFixture =
-  createFixture<GetFrozenPartialTokensQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+      const res = await handler.setAddressFrozen(
+        securityEvmAddress,
+        status,
+        await this.accountService.getAccountEvmAddress(targetId),
+        securityId,
+      );
+
+      return Promise.resolve(
+        new SetAddressFrozenCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new SetAddressFrozenCommandError(error as Error);
+    }
+  }
+}

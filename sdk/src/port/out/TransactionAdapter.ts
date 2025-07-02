@@ -985,6 +985,12 @@ interface IIdentityRegistryTransactionAdapter {
   ): Promise<TransactionResponse>;
 }
 interface IFreezeAdapter {
+  setAddressFrozen(
+    security: EvmAddress,
+    status: boolean,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   freezePartialTokens(
     security: EvmAddress,
     amount: BigDecimal,
@@ -2000,6 +2006,14 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
+  setAddressFrozen(
+    security: EvmAddress,
+    status: boolean,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
   freezePartialTokens(
     security: EvmAddress,
     amount: BigDecimal,
@@ -2008,7 +2022,6 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
-
   unfreezePartialTokens(
     security: EvmAddress,
     amount: BigDecimal,
@@ -2107,7 +2120,6 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
-
   recoveryAddress(
     security: EvmAddress,
     lostWallet: EvmAddress,

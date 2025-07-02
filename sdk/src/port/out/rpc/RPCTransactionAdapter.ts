@@ -368,6 +368,7 @@ import {
   RECOVERY_ADDRESS_GAS,
   ADD_AGENT_GAS,
   REMOVE_AGENT_GAS,
+  SET_ADDRESS_FROZEN_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -3709,6 +3710,28 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         gasLimit: BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
       },
     );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async setAddressFrozen(
+    security: EvmAddress,
+    status: boolean,
+    target: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Freezing address ${target.toString()}`);
+
+    const contract = FreezeFacet__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.setAddressFrozen(target.toString(), status, {
+      gasLimit: SET_ADDRESS_FROZEN_GAS,
+    });
 
     return RPCTransactionResponseAdapter.manageResponse(
       tx,

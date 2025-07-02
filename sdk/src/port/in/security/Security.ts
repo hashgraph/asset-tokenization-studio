@@ -362,6 +362,7 @@ import {
   ComplianceRequest,
   IdentityRegistryRequest,
   OnchainIDRequest,
+  SetAddressFrozenRequest,
   SetComplianceRequest,
   SetIdentityRegistryRequest,
   SetNameRequest,
@@ -403,6 +404,7 @@ import { BatchSetAddressFrozenCommand } from '../../../app/usecase/command/secur
 import { BatchFreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommand.js';
 import { BatchForcedTransferCommand } from '../../../app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand.js';
 import { BatchUnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand.js';
+import { SetAddressFrozenCommand } from '../../../app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -2152,6 +2154,17 @@ class SecurityInPort implements ISecurityInPort {
 
     return (await this.queryBus.execute(new OnchainIDQuery(securityId)))
       .payload;
+  }
+
+  @LogError
+  async setAddressFrozen(
+    request: SetAddressFrozenRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(SetAddressFrozenRequest.name, request);
+    const { securityId, status, targetId } = request;
+    return await this.commandBus.execute(
+      new SetAddressFrozenCommand(securityId, status, targetId),
+    );
   }
 
   @LogError

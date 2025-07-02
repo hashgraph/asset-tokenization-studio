@@ -378,6 +378,7 @@ import BatchMintRequest from './security/operations/batch/BatchMintRequest.js';
 import BatchSetAddressFrozenRequest from './security/operations/batch/BatchSetAddressFrozenRequest.js';
 import BatchTransferRequest from './security/operations/batch/BatchTransferRequest.js';
 import BatchUnfreezePartialTokensRequest from './security/operations/batch/BatchUnfreezePartialTokensRequest.js';
+import SetAddressFrozenRequest from './security/operations/freeze/SetAddressFrozenRequest.js';
 
 export {
   CreateEquityRequest,
@@ -554,4 +555,5 @@ export {
   BatchSetAddressFrozenRequest,
   BatchTransferRequest,
   BatchUnfreezePartialTokensRequest,
+  SetAddressFrozenRequest,
 };

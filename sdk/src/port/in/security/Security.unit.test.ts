@@ -291,6 +291,7 @@ import {
   TransferAndLockRequest,
   TransferRequest,
   UnfreezePartialTokensRequest,
+  SetAddressFrozenRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
@@ -557,7 +558,12 @@ import {
   FreezePartialTokensRequestFixture,
   UnfreezePartialTokensRequestFixture,
   GetFrozenPartialTokensQueryFixture,
+  SetAddressFrozenRequestFixture,
 } from '../../../../__tests__/fixtures/freeze/FreezeFixture';
+import {
+  SetAddressFrozenCommand,
+  SetAddressFrozenCommandResponse,
+} from '../../../app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand';
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -635,6 +641,7 @@ describe('Security', () => {
   let complianceRequest: ComplianceRequest;
   let identityRegistryRequest: IdentityRegistryRequest;
   let onchainIDRequest: OnchainIDRequest;
+  let setAddressFrozenRequest: SetAddressFrozenRequest;
   let freezePartialTokensRequest: FreezePartialTokensRequest;
   let unfreezePartialTokensRequest: UnfreezePartialTokensRequest;
   let getFrozenPartialTokensRequest: GetFrozenPartialTokensRequest;
@@ -7838,6 +7845,94 @@ describe('Security', () => {
       );
     });
   });
+
+  describe('SetAddressFrozen', () => {
+    setAddressFrozenRequest = new SetAddressFrozenRequest(
+      SetAddressFrozenRequestFixture.create(),
+    );
+    const expectedResponse = new SetAddressFrozenCommandResponse(
+      true,
+      transactionId,
+    );
+    it('should freeze address sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setAddressFrozen(setAddressFrozenRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetAddressFrozenRequest',
+        setAddressFrozenRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetAddressFrozenCommand(
+          setAddressFrozenRequest.securityId,
+          setAddressFrozenRequest.status,
+          setAddressFrozenRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.setAddressFrozen(setAddressFrozenRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetAddressFrozenRequest',
+        setAddressFrozenRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetAddressFrozenCommand(
+          setAddressFrozenRequest.securityId,
+          setAddressFrozenRequest.status,
+          setAddressFrozenRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setAddressFrozenRequest = new SetAddressFrozenRequest({
+        ...SetAddressFrozenRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.setAddressFrozen(setAddressFrozenRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is empty', async () => {
+      setAddressFrozenRequest = new SetAddressFrozenRequest({
+        ...SetAddressFrozenRequestFixture.create({
+          targetId: '',
+        }),
+      });
+
+      await expect(
+        Security.setAddressFrozen(setAddressFrozenRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if status is string', async () => {
+      setAddressFrozenRequest = new SetAddressFrozenRequest({
+        ...SetAddressFrozenRequestFixture.create({
+          status: '' as unknown as boolean,
+        }),
+      });
+
+      await expect(
+        Security.setAddressFrozen(setAddressFrozenRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
   describe('FreezePartialTokens', () => {
     freezePartialTokensRequest = new FreezePartialTokensRequest(
       FreezePartialTokensRequestFixture.create(),

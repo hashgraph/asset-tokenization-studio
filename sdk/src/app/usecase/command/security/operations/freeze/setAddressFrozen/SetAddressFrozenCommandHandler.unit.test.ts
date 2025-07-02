@@ -202,69 +202,133 @@
    limitations under the License.
 
 */
-import { FreezePartialTokensCommand } from 'app/usecase/command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand';
-import { UnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand';
-import { GetFrozenPartialTokensQuery } from 'app/usecase/query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
+
+import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../../service/account/AccountService.js';
 import {
-  FreezePartialTokensRequest,
-  SetAddressFrozenRequest,
-  UnfreezePartialTokensRequest,
-} from 'index';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetAddressFrozenCommand } from 'app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand';
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import Account from '../../../../../../../domain/context/account/Account.js';
+import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 
-export const SetAddressFrozenCommandFixture =
-  createFixture<SetAddressFrozenCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.status.faker((faker) => faker.datatype.boolean());
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
-export const SetAddressFrozenRequestFixture =
-  createFixture<SetAddressFrozenRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.status.faker((faker) => faker.datatype.boolean());
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+import { SetAddressFrozenCommandError } from './error/SetAddressFrozenCommandError.js';
+import {
+  SetAddressFrozenCommand,
+  SetAddressFrozenCommandResponse,
+} from './SetAddressFrozenCommand.js';
+import { SetAddressFrozenCommandHandler } from './SetAddressFrozenCommandHandler.js';
+import { SetAddressFrozenCommandFixture } from '../../../../../../../../__tests__/fixtures/freeze/FreezeFixture.js';
 
-export const FreezePartialTokensCommandFixture =
-  createFixture<FreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
+describe('SetAddressFrozenCommandHandler', () => {
+  let handler: SetAddressFrozenCommandHandler;
+  let command: SetAddressFrozenCommand;
+
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const account = new Account({
+    id: HederaIdPropsFixture.create().value,
+    evmAddress: EvmAddressPropsFixture.create().value,
+  });
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+
+  beforeEach(() => {
+    handler = new SetAddressFrozenCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+      contractServiceMock,
     );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
+    command = SetAddressFrozenCommandFixture.create();
   });
 
-export const FreezePartialTokensRequestFixture =
-  createFixture<FreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
-export const UnfreezePartialTokensCommandFixture =
-  createFixture<UnfreezePartialTokensCommand>((command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    command.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+  describe('execute', () => {
+    it('throws SetAddressFrozenCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
 
-export const UnfreezePartialTokensRequestFixture =
-  createFixture<UnfreezePartialTokensRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-  });
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
-export const GetFrozenPartialTokensQueryFixture =
-  createFixture<GetFrozenPartialTokensQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.targetId.as(() => HederaIdPropsFixture.create().value);
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        SetAddressFrozenCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while freezing address: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
+    it('should successfully freeze user', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(evmAddress);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+
+      transactionServiceMock.getHandler().setAddressFrozen.mockResolvedValue({
+        id: transactionId,
+      });
+
+      const result = await handler.execute(command);
+
+      expect(result).toBeInstanceOf(SetAddressFrozenCommandResponse);
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
+
+      expect(
+        transactionServiceMock.getHandler().setAddressFrozen,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        command.securityId,
+      );
+
+      expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        command.securityId,
+      );
+      expect(validationServiceMock.checkAnyRole).toHaveBeenCalledTimes(1);
+      expect(validationServiceMock.checkAnyRole).toHaveBeenCalledWith(
+        [SecurityRole._FREEZE_MANAGER_ROLE, SecurityRole._AGENT_ROLE],
+        account.id.toString(),
+        command.securityId,
+      );
+
+      expect(
+        transactionServiceMock.getHandler().setAddressFrozen,
+      ).toHaveBeenCalledWith(
+        evmAddress,
+        command.status,
+        evmAddress,
+        command.securityId,
+      );
+    });
   });
+});
