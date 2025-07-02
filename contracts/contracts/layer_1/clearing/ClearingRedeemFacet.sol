@@ -226,7 +226,7 @@ contract ClearingRedeemFacet is
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_msgSender())
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
@@ -249,7 +249,7 @@ contract ClearingRedeemFacet is
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_clearingOperationFrom.from)
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
@@ -257,7 +257,7 @@ contract ClearingRedeemFacet is
         onlyWithValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         )
-        checkRecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_msgSender())
         validateAddress(_clearingOperationFrom.from)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
@@ -285,7 +285,7 @@ contract ClearingRedeemFacet is
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_clearingOperationFrom.from)
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
@@ -294,7 +294,7 @@ contract ClearingRedeemFacet is
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         )
         validateAddress(_clearingOperationFrom.from)
-        checkRecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_msgSender())
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -333,7 +333,7 @@ contract ClearingRedeemFacet is
             )
         )
         onlyClearingActivated
-        checkRecoveredAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
         returns (bool success_, uint256 clearingId_)
     {
         (success_, clearingId_) = _protectedClearingRedeemByPartition(

@@ -206,93 +206,197 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {Common} from '../common/Common.sol';
+import {IFreeze} from '../interfaces/ERC3643/IFreeze.sol';
 import {
-    IERC1644StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
-import {ERC3643StorageWrapper2} from '../../ERC3643/ERC3643StorageWrapper2.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_FREEZE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
-abstract contract ERC1644StorageWrapper is
-    IERC1644StorageWrapper,
-    ERC3643StorageWrapper2
-{
-    struct ERC1644Storage {
-        bool isControllable;
-        bool initialized;
+contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
+    // ====== External functions (state-changing) ======
+
+    function setAddressFrozen(
+        address _userAddress,
+        bool _freezStatus
+    ) external override onlyUnpaused validateAddress(_userAddress) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _setAddressFrozen(_userAddress, _freezStatus);
+        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
     }
 
-    modifier onlyControllable() {
-        _checkControllable();
-        _;
-    }
-
-    function _controllerTransfer(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) internal {
-        _transfer(_from, _to, _value);
-        emit ControllerTransfer(
-            msg.sender,
-            _from,
-            _to,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    function _controllerRedeem(
-        address _tokenHolder,
-        uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) internal {
-        _burn(_tokenHolder, _value);
-        emit ControllerRedemption(
-            msg.sender,
-            _tokenHolder,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    /**
-     * @notice It is used to end the controller feature from the token
-     * @dev It only be called by the `owner/issuer` of the token
-     */
-    function _finalizeControllable() internal {
-        if (!_erc1644Storage().isControllable) return;
-
-        _erc1644Storage().isControllable = false;
-        emit FinalizedControllerFeature(_msgSender());
-    }
-
-    /**
-     * @notice Internal function to know whether the controller functionality
-     * allowed or not.
-     * @return bool `true` when controller address is non-zero otherwise return `false`.
-     */
-    function _isControllable() internal view returns (bool) {
-        return _erc1644Storage().isControllable;
-    }
-
-    function _erc1644Storage()
-        internal
-        pure
-        returns (ERC1644Storage storage erc1644Storage_)
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(_userAddress)
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
     {
-        bytes32 position = _ERC1644_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1644Storage_.slot := position
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _freezeTokens(_userAddress, _amount);
+        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _unfreezeTokens(_userAddress, _amount);
+        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function batchSetAddressFrozen(
+        address[] calldata _userAddresses,
+        bool[] calldata _freeze
+    ) external onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _setAddressFrozen(_userAddresses[i], _freeze[i]);
+            emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
         }
     }
 
-    function _checkControllable() private view {
-        if (!_isControllable()) revert TokenIsNotControllable();
+    function batchFreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _checkRecoveredAddress(_userAddresses[i]);
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _freezeTokens(_userAddresses[i], _amounts[i]);
+            emit TokensFrozen(
+                _userAddresses[i],
+                _amounts[i],
+                _DEFAULT_PARTITION
+            );
+        }
+    }
+
+    function batchUnfreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _unfreezeTokens(_userAddresses[i], _amounts[i]);
+            emit TokensUnfrozen(
+                _userAddresses[i],
+                _amounts[i],
+                _DEFAULT_PARTITION
+            );
+        }
+    }
+
+    // ====== External functions (view/pure) ======
+
+    function getFrozenTokens(
+        address _userAddress
+    ) external view override returns (uint256) {
+        return _getFrozenAmountForAdjusted(_userAddress);
+    }
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _FREEZE_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](7);
+        uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .freezePartialTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .unfreezePartialTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .getFrozenTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setAddressFrozen
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchSetAddressFrozen
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchFreezePartialTokens
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchUnfreezePartialTokens
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IFreeze).interfaceId;
     }
 }

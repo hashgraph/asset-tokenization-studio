@@ -210,12 +210,12 @@ import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
 import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {Common} from '../../common/Common.sol';
 
-contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
+contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594()
         external
@@ -234,8 +234,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
-        checkRecoveredAddress(_to)
-        checkRecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_to)
+        onlyUnrecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
         onlyWithoutMultiPartition
@@ -290,7 +290,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     )
         external
         override
-        checkRecoveredAddress(_tokenHolder)
+        onlyUnrecoveredAddress(_tokenHolder)
         onlyWithinMaxSupply(_value)
         onlyUnpaused
         onlyListedAllowed(_tokenHolder)
@@ -322,7 +322,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
-        checkRecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -355,8 +355,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(_tokenHolder)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_tokenHolder)
     {
         _redeemFrom(_tokenHolder, _value, _data);
     }

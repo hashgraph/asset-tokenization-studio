@@ -231,8 +231,8 @@ contract ClearingHoldCreationFacet is
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(_hold.to)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_hold.to)
         validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
@@ -257,9 +257,9 @@ contract ClearingHoldCreationFacet is
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(_hold.to)
-        checkRecoveredAddress(_clearingOperationFrom.from)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_hold.to)
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
         validateAddress(_hold.escrow)
         validateAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(
@@ -300,9 +300,9 @@ contract ClearingHoldCreationFacet is
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(_clearingOperationFrom.from)
-        checkRecoveredAddress(_hold.to)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        onlyUnrecoveredAddress(_hold.to)
         validateAddress(_hold.escrow)
         validateAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(
@@ -340,8 +340,8 @@ contract ClearingHoldCreationFacet is
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_protectedClearingOperation.from)
-        checkRecoveredAddress(_hold.to)
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_hold.to)
         onlyProtectedPartitions
         validateAddress(_protectedClearingOperation.from)
         onlyWithValidExpirationTimestamp(

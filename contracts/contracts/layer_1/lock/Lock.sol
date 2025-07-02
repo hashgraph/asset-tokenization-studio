@@ -226,7 +226,7 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_tokenHolder)
+        onlyUnrecoveredAddress(_tokenHolder)
         onlyRole(_LOCKER_ROLE)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
@@ -279,7 +279,7 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_tokenHolder)
+        onlyUnrecoveredAddress(_tokenHolder)
         onlyRole(_LOCKER_ROLE)
         onlyWithoutMultiPartition
         onlyWithValidExpirationTimestamp(_expirationTimestamp)

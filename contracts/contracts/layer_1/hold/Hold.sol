@@ -226,8 +226,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         validateAddress(_hold.escrow)
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(_hold.to)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_hold.to)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
@@ -387,8 +387,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_protectedHold.hold.escrow)
-        checkRecoveredAddress(_from)
-        checkRecoveredAddress(_protectedHold.hold.to)
+        onlyUnrecoveredAddress(_from)
+        onlyUnrecoveredAddress(_protectedHold.hold.to)
         onlyRole(_protectedPartitionsRole(_partition))
         onlyWithValidExpirationTimestamp(
             _protectedHold.hold.expirationTimestamp
@@ -421,7 +421,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        checkRecoveredAddress(_to)
+        onlyUnrecoveredAddress(_to)
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyWithValidHoldId(_holdIdentifier)
         onlyListedAllowed(_to)

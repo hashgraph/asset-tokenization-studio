@@ -219,6 +219,9 @@ interface IERC3643 {
         mapping(address => bool) addressRecovered;
     }
 
+    /**
+     *  @notice This event is emitted when the token information is updated.
+     */
     event UpdatedTokenInformation(
         string indexed newName,
         string indexed newSymbol,
@@ -227,21 +230,15 @@ interface IERC3643 {
         address indexed newOnchainID
     );
 
+    /**
+     *  @notice This event is emitted when the IdentityRegistry has been set for the token
+     */
     event IdentityRegistryAdded(address indexed identityRegistry);
 
+    /**
+     *  @notice This event is emitted when the Compliance has been set for the token
+     */
     event ComplianceAdded(address indexed compliance);
-
-    event TokensFrozen(
-        address indexed account,
-        uint256 amount,
-        bytes32 partition
-    );
-
-    event TokensUnfrozen(
-        address indexed account,
-        uint256 amount,
-        bytes32 partition
-    );
 
     /**
      * @dev Emitted when the agent role is granted
@@ -258,19 +255,6 @@ interface IERC3643 {
     event AgentRemoved(address indexed _agent);
 
     /**
-     *  @dev This event is emitted when the wallet of an investor is frozen or unfrozen
-     *  @dev The event is emitted by setAddressFrozen and batchSetAddressFrozen functions
-     *  @param userAddress Is the wallet of the investor that is concerned by the freezing status
-     *  @param isFrozen Is the freezing status of the wallet
-     *  @param owner Is the address of the agent who called the function to freeze the wallet
-     */
-    event AddressFrozen(
-        address indexed userAddress,
-        bool indexed isFrozen,
-        address indexed owner
-    );
-
-    /**
      * @dev Emitted when a wallet is recovered
      *
      * @param _lostWallet Address of the lost wallet
@@ -283,13 +267,6 @@ interface IERC3643 {
         address _investorOnchainID
     );
 
-    error InsufficientFrozenBalance(
-        address user,
-        uint256 requestedUnfreeze,
-        uint256 availableFrozen,
-        bytes32 partition
-    );
-
     /**
      * @notice Thrown when calling from a recovered wallet
      */
@@ -299,6 +276,16 @@ interface IERC3643 {
      * @notice Thrown when attempting to recover a wallet with pending locks, holds or clearings
      */
     error CannotRecoverWallet();
+
+    /**
+     * @notice Thrown in batch operations when input amount arrays length is different
+     */
+    error InputAmountsArrayLengthMismatch();
+
+    /**
+     * @notice Thrown in batch operations when input boolean arrays length is different
+     */
+    error InputBoolArrayLengthMismatch();
 
     /**
      * @dev Sets the name of the token to `_name`.
@@ -380,33 +367,6 @@ interface IERC3643 {
      */
     function burn(address _userAddress, uint256 _amount) external;
 
-    /*
-     * @dev Freezes a partial amount of the user's tokens across all partitions.
-     * Emits a TokensFrozen event.
-     */
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Unfreezes a partial amount of the user's previously frozen tokens across all partitions.
-     * Emits a TokensUnfrozen event.
-     */
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    ) external;
-
-    /*
-     * @dev Freezes the user's address entirely, disabling all token operations.
-     * Emits a TokensFrozen event.
-     */
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezeStatus
-    ) external;
-
     /**
      * @notice Gives an account the agent role
      * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
@@ -458,14 +418,8 @@ interface IERC3643 {
     function compliance() external view returns (ICompliance);
 
     /**
-     * @dev Returns the version of the token.
+     * @notice Retrieves the latest version of the contract.
+     * @dev The version is represented as a string.
      */
     function version() external view returns (string memory);
-
-    /*
-     * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.
-     */
-    function getFrozenTokens(
-        address _userAddress
-    ) external view returns (uint256);
 }

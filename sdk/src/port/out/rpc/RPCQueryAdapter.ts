@@ -257,6 +257,7 @@ import {
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
   ERC3643__factory,
+  FreezeFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1848,7 +1849,7 @@ export class RPCQueryAdapter {
     );
 
     const frozenTokens = await this.connect(
-      ERC3643__factory,
+      FreezeFacet__factory,
       address.toString(),
     ).getFrozenTokens(targetId.toString());
 

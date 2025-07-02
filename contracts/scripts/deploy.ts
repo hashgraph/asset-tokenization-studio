@@ -281,6 +281,8 @@ import {
     ExternalKycListManagementTimeTravel__factory,
     ERC3643__factory,
     ERC3643TimeTravel__factory,
+    FreezeFacet__factory,
+    FreezeFacetTimeTravel__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -820,6 +822,17 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        freeze: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new FreezeFacet__factory(),
+                new FreezeFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.FreezeFacet.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
         timeTravel:
             timeTravelEnabled == true
                 ? new DeployContractWithFactoryCommand({
@@ -1059,6 +1072,12 @@ export async function deployAtsContracts({
             erc3643: await deployContractWithFactory(commands.erc3643).then(
                 (result) => {
                     console.log('ERC3643 has been deployed successfully')
+                    return result
+                }
+            ),
+            freeze: await deployContractWithFactory(commands.freeze).then(
+                (result) => {
+                    console.log('Freeze has been deployed successfully')
                     return result
                 }
             ),

@@ -240,6 +240,7 @@ import {
     TimeTravel,
     ExternalKycListManagement,
     ERC3643,
+    FreezeFacet,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -278,6 +279,7 @@ export interface DeployAtsContractsResultParams {
     externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
     erc3643: DeployContractWithFactoryResult<ERC3643>
+    freeze: DeployContractWithFactoryResult<FreezeFacet>
     timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     deployer?: Signer
 }
@@ -317,6 +319,7 @@ export default class DeployAtsContractsResult {
     public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     public readonly externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
     public readonly erc3643: DeployContractWithFactoryResult<ERC3643>
+    public readonly freeze: DeployContractWithFactoryResult<FreezeFacet>
     public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     public readonly deployer?: Signer
 
@@ -355,6 +358,7 @@ export default class DeployAtsContractsResult {
         externalControlListManagement,
         externalKycListManagement,
         erc3643,
+        freeze,
         timeTravel,
         deployer,
     }: DeployAtsContractsResultParams) {
@@ -392,6 +396,7 @@ export default class DeployAtsContractsResult {
         this.externalControlListManagement = externalControlListManagement
         this.externalKycListManagement = externalKycListManagement
         this.erc3643 = erc3643
+        this.freeze = freeze
         this.timeTravel = timeTravel
         // Deployer
         this.deployer = deployer

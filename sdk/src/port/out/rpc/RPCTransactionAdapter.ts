@@ -412,6 +412,7 @@ import {
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
   ERC3643__factory,
+  FreezeFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -3428,7 +3429,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Freezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
     );
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await FreezeFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).freezePartialTokens(targetId.toString(), amount.toBigNumber(), {
@@ -3448,7 +3449,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Unfreezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
     );
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await FreezeFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).unfreezePartialTokens(targetId.toString(), amount.toBigNumber(), {
@@ -3641,7 +3642,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Batch setting address frozen status on ${targetList.length} addresses from ${security.toString()}`,
     );
 
-    const contract = ERC3643__factory.connect(
+    const contract = FreezeFacet__factory.connect(
       security.toString(),
       this.signerOrProvider,
     );
@@ -3669,7 +3670,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Batch freezing partial tokens (${amountList.length}) on ${security.toString()} for targets ${targetList.map((item) => item.toString())}`,
     );
 
-    const contract = ERC3643__factory.connect(
+    const contract = FreezeFacet__factory.connect(
       security.toString(),
       this.signerOrProvider,
     );
@@ -3697,7 +3698,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Batch unfreezing partial tokens (${amountList.length}) on ${security.toString()} for targets ${targetList.map((item) => item.toString())}`,
     );
 
-    const contract = ERC3643__factory.connect(
+    const contract = FreezeFacet__factory.connect(
       security.toString(),
       this.signerOrProvider,
     );

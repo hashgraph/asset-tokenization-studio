@@ -238,8 +238,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyUnpaused
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(spender)
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(spender)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(spender)
         onlyWithoutMultiPartition
         returns (bool)
     {
@@ -254,8 +254,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         onlyClearingDisabled
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(to)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(to)
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(to)
         onlyWithoutMultiPartition
@@ -278,9 +278,9 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(from)
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(from)
-        checkRecoveredAddress(to)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(from)
+        onlyUnrecoveredAddress(to)
         onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -298,8 +298,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         onlyUnpaused
         onlyListedAllowed(_msgSender())
-        checkRecoveredAddress(_msgSender())
-        checkRecoveredAddress(spender)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(spender)
         onlyListedAllowed(spender)
         onlyWithoutMultiPartition
         returns (bool)
@@ -316,7 +316,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(spender)
         onlyWithoutMultiPartition
-        checkRecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_msgSender())
         returns (bool)
     {
         return _decreaseAllowance(spender, subtractedValue);

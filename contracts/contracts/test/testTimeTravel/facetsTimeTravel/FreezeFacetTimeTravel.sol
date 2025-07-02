@@ -204,95 +204,23 @@
 */
 
 // SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
-import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {FreezeFacet} from '../../../layer_1/ERC3643/FreezeFacet.sol';
 import {
-    IERC1644StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
-import {ERC3643StorageWrapper2} from '../../ERC3643/ERC3643StorageWrapper2.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-abstract contract ERC1644StorageWrapper is
-    IERC1644StorageWrapper,
-    ERC3643StorageWrapper2
-{
-    struct ERC1644Storage {
-        bool isControllable;
-        bool initialized;
-    }
-
-    modifier onlyControllable() {
-        _checkControllable();
-        _;
-    }
-
-    function _controllerTransfer(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) internal {
-        _transfer(_from, _to, _value);
-        emit ControllerTransfer(
-            msg.sender,
-            _from,
-            _to,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    function _controllerRedeem(
-        address _tokenHolder,
-        uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) internal {
-        _burn(_tokenHolder, _value);
-        emit ControllerRedemption(
-            msg.sender,
-            _tokenHolder,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    /**
-     * @notice It is used to end the controller feature from the token
-     * @dev It only be called by the `owner/issuer` of the token
-     */
-    function _finalizeControllable() internal {
-        if (!_erc1644Storage().isControllable) return;
-
-        _erc1644Storage().isControllable = false;
-        emit FinalizedControllerFeature(_msgSender());
-    }
-
-    /**
-     * @notice Internal function to know whether the controller functionality
-     * allowed or not.
-     * @return bool `true` when controller address is non-zero otherwise return `false`.
-     */
-    function _isControllable() internal view returns (bool) {
-        return _erc1644Storage().isControllable;
-    }
-
-    function _erc1644Storage()
+contract FreezeFacetTimeTravel is FreezeFacet, TimeTravelStorageWrapper {
+    function _blockTimestamp()
         internal
-        pure
-        returns (ERC1644Storage storage erc1644Storage_)
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        bytes32 position = _ERC1644_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1644Storage_.slot := position
-        }
-    }
-
-    function _checkControllable() private view {
-        if (!_isControllable()) revert TokenIsNotControllable();
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }
