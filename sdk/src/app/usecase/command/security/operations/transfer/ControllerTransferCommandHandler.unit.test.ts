@@ -269,7 +269,7 @@ describe('ControllerTransferCommandHandler', () => {
       it('throws ControllerTransferCommandError when command fails with uncaught error', async () => {
         const fakeError = new Error(errorMsg);
 
-        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+        securityServiceMock.get.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
@@ -279,7 +279,7 @@ describe('ControllerTransferCommandHandler', () => {
 
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `An error occurred while force transferring tokens: ${errorMsg}`,
+            `An error occurred while controller transferring tokens: ${errorMsg}`,
           ),
           errorCode: ErrorCode.UncaughtCommandError,
         });
