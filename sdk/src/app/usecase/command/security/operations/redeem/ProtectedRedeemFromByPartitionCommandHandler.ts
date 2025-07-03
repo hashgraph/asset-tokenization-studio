@@ -218,7 +218,6 @@ import {
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import { ProtectedRedeemFromByPartitionCommandError } from './error/ProtectedRedeemFromByPartitionCommandError.js';
-import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 
 @CommandHandler(ProtectedRedeemFromByPartitionCommand)
 export class ProtectedRedeemFromByPartitionCommandHandler
@@ -251,13 +250,6 @@ export class ProtectedRedeemFromByPartitionCommandHandler
         signature,
       } = command;
 
-      await this.validationService.checkClearingDeactivated(securityId);
-      await this.validationService.checkKycAddresses(
-        securityId,
-        [sourceId],
-        KycStatus.GRANTED,
-      );
-
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
       const security = await this.securityService.get(securityId);
@@ -268,14 +260,6 @@ export class ProtectedRedeemFromByPartitionCommandHandler
         await this.accountService.getAccountEvmAddress(sourceId);
 
       const amountBd = BigDecimal.fromString(amount, security.decimals);
-
-      await this.validationService.checkProtectedPartitions(security);
-
-      await this.validationService.checkProtectedPartitionRole(
-        partitionId,
-        account.id.toString(),
-        securityId,
-      );
 
       await this.validationService.checkCanRedeem(
         securityId,
@@ -298,9 +282,10 @@ export class ProtectedRedeemFromByPartitionCommandHandler
         partitionId,
         sourceEvmAddress,
         amountBd,
-        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(deadline.substring(0, 10)),
         BigDecimal.fromString(nounce.toString()),
         signature,
+        command.securityId,
       );
       return Promise.resolve(
         new ProtectedRedeemFromByPartitionCommandResponse(

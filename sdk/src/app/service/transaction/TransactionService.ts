@@ -285,22 +285,35 @@ export default class TransactionService extends Service {
     className,
     position,
     numberOfResultsItems,
+    isContractCreation,
   }: {
     res: TransactionResponse;
     result?: Response;
     className: string;
     position: number;
     numberOfResultsItems: number;
+    isContractCreation?: boolean;
   }): Promise<string> {
     if (!res.id) throw new EmptyResponse(className);
 
-    if (res.response && result) {
+    if (result) {
       return result;
     }
-    const results = await this.mirrorNodeAdapter.getContractResults(
-      res.id.toString(),
-      numberOfResultsItems,
-    );
+
+    let results;
+
+    if (isContractCreation) {
+      results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+        true,
+      );
+    } else {
+      results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
+    }
 
     if (!results || results.length !== numberOfResultsItems) {
       throw new InvalidResponse(results);

@@ -267,7 +267,7 @@ export class TransferAndLockCommandHandler
         securityEvmAddress,
         targetEvmAddress,
         amountBd,
-        BigDecimal.fromString(expirationDate),
+        BigDecimal.fromString(expirationDate.substring(0, 10)),
         securityId,
       );
 

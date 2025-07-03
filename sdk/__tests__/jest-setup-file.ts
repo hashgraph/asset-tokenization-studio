@@ -249,7 +249,7 @@ import {
 import { HoldDetails } from '../src/domain/context/security/Hold.js';
 
 //* Mock console.log() method
-global.console.log = jest.fn();
+// global.console.log = jest.fn();
 //* Mock isWeb() method
 Injectable.isWeb = jest.fn(() => true);
 
@@ -649,7 +649,7 @@ const createClearing = async (
   clearings.set(target.toString(), accountClearings);
 
   increaseClearedBalance(target, amount);
-  decreaseBalance(currentAccount, amount);
+  decreaseBalance(target, amount);
 
   return { status: 'success', id: transactionId } as TransactionResponse;
 };
@@ -2565,8 +2565,9 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     async (
       address: EvmAddress,
       partitionId: string,
-      escrow: EvmAddress,
       amount: BigDecimal,
+      escrow: EvmAddress,
+      sourceId: EvmAddress,
       targetId: EvmAddress,
       clearingExpirationDate: BigDecimal,
       holdExpirationDate: BigDecimal,
@@ -2578,7 +2579,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
         clearingExpirationDate,
         amount,
         ClearingOperationType.HoldCreation,
-        targetId,
+        sourceId,
         escrow,
         holdExpirationDate,
       ),
@@ -2671,7 +2672,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
         expirationDate,
         amount,
         ClearingOperationType.Transfer,
-        targetId,
+        sourceId,
       ),
   );
 

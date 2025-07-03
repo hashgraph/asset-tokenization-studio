@@ -203,6 +203,7 @@
 
 */
 
+import { ProtectPartitionsCommand } from '../../../src/app/usecase/command/security/operations/protectPartitions/ProtectPartitionsCommand';
 import { GetNounceQuery } from '../../../src/app/usecase/query/security/protectedPartitions/getNounce/GetNounceQuery';
 import {
   HederaIdPropsFixture,
@@ -282,4 +283,9 @@ export const ProtectedTransferAndLockByPartitionRequestFixture =
     request.signature.faker((faker) =>
       faker.string.hexadecimal({ length: 64, prefix: '0x' }),
     );
+  });
+
+export const ProtectPartitionsCommandFixture =
+  createFixture<ProtectPartitionsCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
   });

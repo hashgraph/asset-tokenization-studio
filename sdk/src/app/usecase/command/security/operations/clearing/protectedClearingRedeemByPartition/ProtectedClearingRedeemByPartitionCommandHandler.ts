@@ -211,7 +211,6 @@ import TransactionService from '../../../../../../service/transaction/Transactio
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   ProtectedClearingRedeemByPartitionCommand,
   ProtectedClearingRedeemByPartitionCommandResponse,
@@ -232,8 +231,6 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
     private readonly accountService: AccountService,
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(ContractService)
@@ -303,8 +300,8 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
         partitionId,
         amountBd,
         sourceEvmAddress,
-        BigDecimal.fromString(expirationDate),
-        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(expirationDate.substring(0, 10)),
+        BigDecimal.fromString(deadline.substring(0, 10)),
         BigDecimal.fromString(nonce.toString()),
         signature,
         securityId,
