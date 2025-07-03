@@ -218,6 +218,7 @@ import EvmAddress from '@domain/context/contract/EvmAddress';
 import ValidationService from '@service/validation/ValidationService';
 import ContractService from '@service/contract/ContractService';
 import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 
 @CommandHandler(ControllerTransferCommand)
 export class ControllerTransferCommandHandler
