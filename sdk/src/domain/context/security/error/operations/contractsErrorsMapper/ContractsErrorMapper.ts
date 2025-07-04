@@ -203,20 +203,18 @@
 
 */
 
-import BaseError, {
-  ErrorCode,
-} from '../../../../../../core/error/BaseError.js';
-import { AccountNotKycd } from '../AccountNotKycd.js';
-import { ClearingActivated } from '../ClearingActivated.js';
-import { InsufficientAllowance } from '../InsufficientAllowance.js';
-import { InvalidPartition } from '../InvalidPartition.js';
-import { AccountIsNotOperator } from '../AccountIsNotOperator.js';
-import { InsufficientBalance } from '../InsufficientBalance.js';
-import { InvalidFromAccount } from '../InvalidFromAccount.js';
-import { InvalidDestinationAccount } from '../InvalidDestinationAccount.js';
-import { AccountNotInControlList } from '../AccountNotInControlList.js';
-import { SecurityPaused } from '../SecurityPaused.js';
-import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
+import { AccountNotKycd } from '../AccountNotKycd';
+import { ClearingActivated } from '../ClearingActivated';
+import { InsufficientAllowance } from '../InsufficientAllowance';
+import { InvalidPartition } from '../InvalidPartition';
+import { AccountIsNotOperator } from '../AccountIsNotOperator';
+import { InsufficientBalance } from '../InsufficientBalance';
+import { InvalidFromAccount } from '../InvalidFromAccount';
+import { InvalidDestinationAccount } from '../InvalidDestinationAccount';
+import { AccountNotInControlList } from '../AccountNotInControlList';
+import { SecurityPaused } from '../SecurityPaused';
+import { KycStatus } from '@domain/context/kyc/Kyc';
 
 export class ContractsErrorMapper {
   static mapError(

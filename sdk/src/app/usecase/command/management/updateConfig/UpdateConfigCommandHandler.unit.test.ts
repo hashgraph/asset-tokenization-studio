@@ -204,22 +204,22 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { UpdateConfigCommandHandler } from './updateConfigCommandHandler.js';
+import { UpdateConfigCommandHandler } from './updateConfigCommandHandler';
 import {
   UpdateConfigCommand,
   UpdateConfigCommandResponse,
-} from './updateConfigCommand.js';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../service/contract/ContractService.js';
+} from './updateConfigCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import ContractService from '@service/contract/ContractService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { UpdateConfigCommandFixture } from '../../../../../../__tests__/fixtures/management/ManagementFixture.js';
-import { UpdateConfigCommandError } from './error/UpdateConfigCommandError.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
+} from '@test/fixtures/shared/DataFixture';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { UpdateConfigCommandFixture } from '@test/fixtures/management/ManagementFixture';
+import { UpdateConfigCommandError } from './error/UpdateConfigCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('UpdateConfigCommandHandler', () => {
   let handler: UpdateConfigCommandHandler;

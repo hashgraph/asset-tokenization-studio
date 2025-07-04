@@ -205,11 +205,9 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import EventInPort from './Event';
-import NetworkService from '../../../app/service/network/NetworkService';
-import WalletEvent, {
-  WalletEvents,
-} from '../../../app/service/event/WalletEvent';
-import LogService from '../../../app/service/log/LogService';
+import NetworkService from '@service/network/NetworkService';
+import WalletEvent, { WalletEvents } from '@service/event/WalletEvent';
+import LogService from '@service/log/LogService';
 
 interface MockEventService {
   on: <T extends keyof WalletEvent>(

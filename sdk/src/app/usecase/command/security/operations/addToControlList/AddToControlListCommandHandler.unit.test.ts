@@ -203,25 +203,25 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { AddToControlListCommandHandler } from './AddToControlListCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { AddToControlListCommandHandler } from './AddToControlListCommandHandler';
 import {
   AddToControlListCommand,
   AddToControlListCommandResponse,
-} from './AddToControlListCommand.js';
-import { AddToControlListCommandFixture } from '../../../../../../../__tests__/fixtures/controlList/ControlListFixture.js';
-import { AddToControlListCommandError } from './error/AddToControlListCommandError.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+} from './AddToControlListCommand';
+import { AddToControlListCommandFixture } from '@test/fixtures/controlList/ControlListFixture';
+import { AddToControlListCommandError } from './error/AddToControlListCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('AddToControlListCommandHandler', () => {
   let handler: AddToControlListCommandHandler;

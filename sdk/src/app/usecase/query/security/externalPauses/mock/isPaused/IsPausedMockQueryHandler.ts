@@ -206,12 +206,12 @@
 import {
   IsPausedMockQuery,
   IsPausedMockQueryResponse,
-} from './IsPausedMockQuery.js';
-import { QueryHandler } from '../../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractService from '../../../../../../../app/service/contract/ContractService.js';
+} from './IsPausedMockQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import ContractService from '@service/contract/ContractService';
 
 @QueryHandler(IsPausedMockQuery)
 export class IsPausedMockQueryHandler

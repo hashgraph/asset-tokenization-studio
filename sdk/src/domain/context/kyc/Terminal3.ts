@@ -204,12 +204,12 @@
 */
 
 import { SignedCredential } from '@terminal3/vc_core';
-import BigDecimal from '../shared/BigDecimal.js';
-import { InvalidVcFormat } from './error/InvalidVcFormat.js';
-import { ErrorDecodingVc } from './error/ErrorDecodingVc.js';
-import { InvalidVcDates } from './error/InvalidVcDates.js';
-import { MissingVcHolder } from './error/MissingVcHolder.js';
-import { MissingVcIssuer } from './error/MissingVcIssuer.js';
+import BigDecimal from '../shared/BigDecimal';
+import { InvalidVcFormat } from './error/InvalidVcFormat';
+import { ErrorDecodingVc } from './error/ErrorDecodingVc';
+import { InvalidVcDates } from './error/InvalidVcDates';
+import { MissingVcHolder } from './error/MissingVcHolder';
+import { MissingVcIssuer } from './error/MissingVcIssuer';
 
 export class Terminal3Vc {
   public static vcFromBase64(base64: string): SignedCredential {

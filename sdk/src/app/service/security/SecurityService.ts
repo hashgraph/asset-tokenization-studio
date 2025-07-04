@@ -204,12 +204,12 @@
 */
 
 import { singleton } from 'tsyringe';
-import Injectable from '../../../core/Injectable.js';
-import Service from '../Service.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import { Security } from '../../../domain/context/security/Security.js';
-import { GetSecurityQuery } from '../../usecase/query/security/get/GetSecurityQuery.js';
-import { SecurityNotFound } from './error/SecurityNotFound.js';
+import Injectable from '@core/Injectable';
+import Service from '@service/Service';
+import { QueryBus } from '@core/query/QueryBus';
+import { Security } from '@domain/context/security/Security';
+import { GetSecurityQuery } from '@query/security/get/GetSecurityQuery';
+import { SecurityNotFound } from './error/SecurityNotFound';
 
 @singleton()
 export default class SecurityService extends Service {

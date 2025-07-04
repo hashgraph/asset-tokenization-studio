@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   CreateEquityRequest,
   GetEquityDetailsRequest,
@@ -224,21 +224,21 @@ import {
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
-import NetworkService from '../../../app/service/network/NetworkService';
-import { SecurityPropsFixture } from '../../../../__tests__/fixtures/shared/SecurityFixture';
-import { Security } from '../../../domain/context/security/Security';
-import ContractId from '../../../domain/context/contract/ContractId';
+} from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import NetworkService from '@service/network/NetworkService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import ContractId from '@domain/context/contract/ContractId';
 import {
   CastRegulationSubType,
   CastRegulationType,
-} from '../../../domain/context/factory/RegulationType';
-import BigDecimal from '../../../domain/context/shared/BigDecimal';
-import { ONE_THOUSAND } from '../../../domain/context/shared/SecurityDate';
+} from '@domain/context/factory/RegulationType';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
 import { BigNumber } from 'ethers';
 import EquityToken from './Equity';
 import {
@@ -260,21 +260,21 @@ import {
   SetScheduledBalanceAdjustmentRequestFixture,
   SetVotingRightsRequestFixture,
   VotingRightsFixture,
-} from '../../../../__tests__/fixtures/equity/EquityFixture';
-import { CreateEquityCommand } from '../../../app/usecase/command/equity/create/CreateEquityCommand';
-import { CastDividendType } from '../../../domain/context/equity/DividendType';
-import { GetEquityDetailsQuery } from '../../../app/usecase/query/equity/get/getEquityDetails/GetEquityDetailsQuery';
-import { SetVotingRightsCommand } from '../../../app/usecase/command/equity/votingRights/set/SetVotingRightsCommand';
-import { GetVotingForQuery } from '../../../app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery';
-import { GetVotingQuery } from '../../../app/usecase/query/equity/votingRights/getVoting/GetVotingQuery';
-import { GetVotingCountQuery } from '../../../app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery';
-import { SetDividendsCommand } from '../../../app/usecase/command/equity/dividends/set/SetDividendsCommand';
-import { GetDividendsForQuery } from '../../../app/usecase/query/equity/dividends/getDividendsFor/GetDividendsForQuery';
-import { GetDividendsQuery } from '../../../app/usecase/query/equity/dividends/getDividends/GetDividendsQuery';
-import { GetDividendsCountQuery } from '../../../app/usecase/query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
-import { SetScheduledBalanceAdjustmentCommand } from '../../../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
-import { GetScheduledBalanceAdjustmentQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
-import { GetScheduledBalanceAdjustmentCountQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
+} from '@test/fixtures/equity/EquityFixture';
+import { CreateEquityCommand } from '@command/equity/create/CreateEquityCommand';
+import { CastDividendType } from '@domain/context/equity/DividendType';
+import { GetEquityDetailsQuery } from '@query/equity/get/getEquityDetails/GetEquityDetailsQuery';
+import { SetVotingRightsCommand } from '@command/equity/votingRights/set/SetVotingRightsCommand';
+import { GetVotingForQuery } from '@query/equity/votingRights/getVotingFor/GetVotingForQuery';
+import { GetVotingQuery } from '@query/equity/votingRights/getVoting/GetVotingQuery';
+import { GetVotingCountQuery } from '@query/equity/votingRights/getVotingCount/GetVotingCountQuery';
+import { SetDividendsCommand } from '@command/equity/dividends/set/SetDividendsCommand';
+import { GetDividendsForQuery } from '@query/equity/dividends/getDividendsFor/GetDividendsForQuery';
+import { GetDividendsQuery } from '@query/equity/dividends/getDividends/GetDividendsQuery';
+import { GetDividendsCountQuery } from '@query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
+import { SetScheduledBalanceAdjustmentCommand } from '@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
+import { GetScheduledBalanceAdjustmentQuery } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
+import { GetScheduledBalanceAdjustmentCountQuery } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
 
 describe('Equity', () => {
   let commandBusMock: jest.Mocked<CommandBus>;

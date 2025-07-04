@@ -203,22 +203,22 @@
 
 */
 
-import { GetRoleCountForQuery } from '../../../src/app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery';
+import { GetRoleCountForQuery } from '@query/security/roles/getRoleCountFor/GetRoleCountForQuery';
+import RoleRequest from '@port/in/request/security/roles/RoleRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetRoleMemberCountQuery } from '../../../src/app/usecase/query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery';
-import { GetRoleMembersQuery } from '../../../src/app/usecase/query/security/roles/getRoleMembers/GetRoleMembersQuery';
-import { GetRolesForQuery } from '../../../src/app/usecase/query/security/roles/getRolesFor/GetRolesForQuery';
-import { HasRoleQuery } from '../../../src/app/usecase/query/security/roles/hasRole/HasRoleQuery';
-import GetRoleCountForRequest from '../../../src/port/in/request/security/roles/GetRoleCountForRequest';
-import GetRolesForRequest from '../../../src/port/in/request/security/roles/GetRolesForRequest';
-import GetRoleMemberCountRequest from '../../../src/port/in/request/security/roles/GetRoleMemberCountRequest';
-import GetRoleMembersRequest from '../../../src/port/in/request/security/roles/GetRoleMembersRequest';
-import ApplyRolesRequest from '../../../src/port/in/request/security/roles/ApplyRolesRequest';
-import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
-import { ApplyRolesCommand } from '../../../src/app/usecase/command/security/roles/applyRoles/ApplyRolesCommand';
-import { GrantRoleCommand } from '../../../src/app/usecase/command/security/roles/grantRole/GrantRoleCommand';
-import { RoleRequest } from '../../../src';
+import { GetRoleMemberCountQuery } from '@query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery';
+import { GetRoleMembersQuery } from '@query/security/roles/getRoleMembers/GetRoleMembersQuery';
+import { GetRolesForQuery } from '@query/security/roles/getRolesFor/GetRolesForQuery';
+import { HasRoleQuery } from '@query/security/roles/hasRole/HasRoleQuery';
+import GetRoleCountForRequest from '@port/in/request/security/roles/GetRoleCountForRequest';
+import GetRolesForRequest from '@port/in/request/security/roles/GetRolesForRequest';
+import GetRoleMemberCountRequest from '@port/in/request/security/roles/GetRoleMemberCountRequest';
+import GetRoleMembersRequest from '@port/in/request/security/roles/GetRoleMembersRequest';
+import ApplyRolesRequest from '@port/in/request/security/roles/ApplyRolesRequest';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { ApplyRolesCommand } from '@command/security/roles/applyRoles/ApplyRolesCommand';
+import { GrantRoleCommand } from '@command/security/roles/grantRole/GrantRoleCommand';
 
 export const GetRoleCountForQueryFixture = createFixture<GetRoleCountForQuery>(
   (query) => {

@@ -170,19 +170,19 @@
    limitations under the License.
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   ReclaimHoldByPartitionCommand,
   ReclaimHoldByPartitionCommandResponse,
-} from './ReclaimHoldByPartitionCommand.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import { ReclaimHoldByPartitionCommandError } from './error/ReclaimHoldByPartitionCommandError.js';
+} from './ReclaimHoldByPartitionCommand';
+import ValidationService from '@service/validation/ValidationService';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import { ReclaimHoldByPartitionCommandError } from './error/ReclaimHoldByPartitionCommandError';
 
 @CommandHandler(ReclaimHoldByPartitionCommand)
 export class ReclaimHoldByPartitionCommandHandler

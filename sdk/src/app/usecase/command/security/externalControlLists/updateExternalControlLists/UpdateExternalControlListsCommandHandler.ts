@@ -203,19 +203,19 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import AccountService from '../../../../../service/account/AccountService';
-import ValidationService from '../../../../../service/validation/ValidationService';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import AccountService from '@service/account/AccountService';
+import ValidationService from '@service/validation/ValidationService';
 import {
   UpdateExternalControlListsCommand,
   UpdateExternalControlListsCommandResponse,
 } from './UpdateExternalControlListsCommand';
-import TransactionService from '../../../../../service/transaction/TransactionService';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import ContractService from '../../../../../service/contract/ContractService';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import ContractService from '@service/contract/ContractService';
 
 @CommandHandler(UpdateExternalControlListsCommand)
 export class UpdateExternalControlListsCommandHandler

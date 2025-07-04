@@ -204,13 +204,13 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import TransactionAdapter from '../../../../../port/out/TransactionAdapter.js';
-import { DisconnectCommandHandler } from './DisconnectCommandHandler.js';
-import { DisconnectCommandResponse } from './DisconnectCommand.js';
-import Injectable from '../../../../../core/Injectable.js';
-import { ErrorMsgFixture } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { DisconnectCommandError } from './error/DisconnectCommandError.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
+import TransactionAdapter from '@port/out/TransactionAdapter';
+import { DisconnectCommandHandler } from './DisconnectCommandHandler';
+import { DisconnectCommandResponse } from './DisconnectCommand';
+import Injectable from '@core/Injectable';
+import { ErrorMsgFixture } from '@test/fixtures/shared/DataFixture';
+import { DisconnectCommandError } from './error/DisconnectCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('DisconnectCommandHandler', () => {
   let handler: DisconnectCommandHandler;

@@ -207,25 +207,25 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import SecurityService from '../../../../../../app/service/security/SecurityService.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
+import SecurityService from '@service/security/SecurityService';
+import { Security } from '@domain/context/security/Security';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import {
   GetHoldForByPartitionQuery,
   GetHoldForByPartitionQueryResponse,
-} from './GetHoldForByPartitionQuery.js';
-import { GetHoldForByPartitionQueryHandler } from './GetHoldForByPartitionQueryHandler.js';
+} from './GetHoldForByPartitionQuery';
+import { GetHoldForByPartitionQueryHandler } from './GetHoldForByPartitionQueryHandler';
 import {
   GetHoldForByPartitionQueryFixture,
   HoldDetailsFixture,
-} from '../../../../../../../__tests__/fixtures/hold/HoldFixture.js';
-import { GetHoldForByPartitionQueryError } from './error/GetHoldForByPartitionQueryError.js';
+} from '@test/fixtures/hold/HoldFixture';
+import { GetHoldForByPartitionQueryError } from './error/GetHoldForByPartitionQueryError';
 
 describe('GetHoldForByPartitionQueryHandler', () => {
   let handler: GetHoldForByPartitionQueryHandler;

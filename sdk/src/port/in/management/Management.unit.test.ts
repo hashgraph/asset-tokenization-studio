@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   GetConfigInfoRequest,
   UpdateConfigRequest,
@@ -215,25 +215,25 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
+} from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
 import Management from './Management';
 import {
   GetConfigInfoRequestFixture,
   UpdateConfigRequestFixture,
   UpdateConfigVersionRequestFixture,
   UpdateResolverRequestFixture,
-} from '../../../../__tests__/fixtures/management/ManagementFixture';
-import { UpdateConfigVersionCommand } from '../../../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
-import { UpdateConfigCommand } from '../../../app/usecase/command/management/updateConfig/updateConfigCommand';
-import { UpdateResolverCommand } from '../../../app/usecase/command/management/updateResolver/updateResolverCommand';
-import ContractId from '../../../domain/context/contract/ContractId';
-import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter';
-import { DiamondConfiguration } from '../../../domain/context/security/DiamondConfiguration';
-import { GetConfigInfoQuery } from '../../../app/usecase/query/management/GetConfigInfoQuery';
+} from '@test/fixtures/management/ManagementFixture';
+import { UpdateConfigVersionCommand } from '@command/management/updateConfigVersion/updateConfigVersionCommand';
+import { UpdateConfigCommand } from '@command/management/updateConfig/updateConfigCommand';
+import { UpdateResolverCommand } from '@command/management/updateResolver/updateResolverCommand';
+import ContractId from '@domain/context/contract/ContractId';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { DiamondConfiguration } from '@domain/context/security/DiamondConfiguration';
+import { GetConfigInfoQuery } from '@query/management/GetConfigInfoQuery';
 describe('Management', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;

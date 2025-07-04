@@ -205,14 +205,14 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetNameCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand';
-import { SetSymbolCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
-import SetNameRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetNameRequest';
-import SetSymbolRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetSymbolRequest';
-import { SetOnchainIDCommand } from '../../../src/app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
-import { OnchainIDQuery } from '../../../src/app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery';
-import SetOnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/SetOnchainIDRequest';
-import OnchainIDRequest from '../../../src/port/in/request/security/operations/tokeMetadata/OnchainIDRequest';
+import { SetNameCommand } from '@command/security/operations/tokenMetadata/setName/SetNameCommand';
+import { SetSymbolCommand } from '@command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
+import SetNameRequest from '@port/in/request/security/operations/tokeMetadata/SetNameRequest';
+import SetSymbolRequest from '@port/in/request/security/operations/tokeMetadata/SetSymbolRequest';
+import { SetOnchainIDCommand } from '@command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
+import { OnchainIDQuery } from '@query/security/tokenMetadata/onchainId/OnchainIDQuery';
+import SetOnchainIDRequest from '@port/in/request/security/operations/tokeMetadata/SetOnchainIDRequest';
+import OnchainIDRequest from '@port/in/request/security/operations/tokeMetadata/OnchainIDRequest';
 
 export const SetNameCommandFixture = createFixture<SetNameCommand>(
   (command) => {

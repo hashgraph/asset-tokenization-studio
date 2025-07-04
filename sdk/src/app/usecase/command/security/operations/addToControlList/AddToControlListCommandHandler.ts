@@ -203,19 +203,19 @@
 
 */
 
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
 import {
   AddToControlListCommand,
   AddToControlListCommandResponse,
-} from './AddToControlListCommand.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { AddToControlListCommandError } from './error/AddToControlListCommandError.js';
+} from './AddToControlListCommand';
+import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService';
+import { AddToControlListCommandError } from './error/AddToControlListCommandError';
 
 @CommandHandler(AddToControlListCommand)
 export class AddToControlListCommandHandler

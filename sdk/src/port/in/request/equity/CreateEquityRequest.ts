@@ -203,13 +203,13 @@
 
 */
 
-import { OptionalField } from '../../../../core/decorator/OptionalDecorator.js';
-import { Equity } from '../../../../domain/context/equity/Equity.js';
-import { Security } from '../../../../domain/context/security/Security.js';
-import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../FormatValidation.js';
+import { OptionalField } from '@core/decorator/OptionalDecorator';
+import { Equity } from '@domain/context/equity/Equity';
+import { Security } from '@domain/context/security/Security';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
-import { Factory } from '../../../../domain/context/factory/Factories.js';
+import { Factory } from '@domain/context/factory/Factories';
 
 export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRequest> {
   name: string;

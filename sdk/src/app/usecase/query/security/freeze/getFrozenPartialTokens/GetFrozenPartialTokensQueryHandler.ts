@@ -206,18 +206,18 @@
 import {
   GetFrozenPartialTokensQuery,
   GetFrozenPartialTokensQueryResponse,
-} from './GetFrozenPartialTokensQuery.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { GetFrozenPartialTokensQueryError } from './error/GetFrozenPartialTokensQueryError.js';
+} from './GetFrozenPartialTokensQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetFrozenPartialTokensQueryError } from './error/GetFrozenPartialTokensQueryError';
 
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import SecurityService from '@service/security/SecurityService';
 
 @QueryHandler(GetFrozenPartialTokensQuery)
 export class GetFrozenPartialTokensQueryHandler

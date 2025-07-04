@@ -205,19 +205,19 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetIssuerListCountQuery } from '../../../src/app/usecase/query/security/ssi/getIssuerListCount/GetIssuerListCountQuery';
-import { GetIssuerListMembersQuery } from '../../../src/app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery';
-import { GetRevocationRegistryAddressQuery } from '../../../src/app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery';
-import { IsIssuerQuery } from '../../../src/app/usecase/query/security/ssi/isIssuer/IsIssuerQuery';
-import { AddIssuerCommand } from '../../../src/app/usecase/command/security/ssi/addIssuer/AddIssuerCommand';
-import { SetRevocationRegistryAddressCommand } from '../../../src/app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand';
-import AddIssuerRequest from '../../../src/port/in/request/security/ssi/AddIssuerRequest';
-import SetRevocationRegistryAddressRequest from '../../../src/port/in/request/security/ssi/SetRevocationRegistryAddressRequest';
-import RemoveIssuerRequest from '../../../src/port/in/request/security/operations/issue/RemoveIssuerRequest';
-import GetRevocationRegistryAddressRequest from '../../../src/port/in/request/security/ssi/GetRevocationRegistryAddressRequest';
-import GetIssuerListCountRequest from '../../../src/port/in/request/security/ssi/GetIssuerListCountRequest';
-import GetIssuerListMembersRequest from '../../../src/port/in/request/security/ssi/GetIssuerListMembersRequest';
-import IsIssuerRequest from '../../../src/port/in/request/security/operations/issue/IsIssuerRequest';
+import { GetIssuerListCountQuery } from '@query/security/ssi/getIssuerListCount/GetIssuerListCountQuery';
+import { GetIssuerListMembersQuery } from '@query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery';
+import { GetRevocationRegistryAddressQuery } from '@query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery';
+import { IsIssuerQuery } from '@query/security/ssi/isIssuer/IsIssuerQuery';
+import AddIssuerRequest from '@port/in/request/security/ssi/AddIssuerRequest';
+import SetRevocationRegistryAddressRequest from '@port/in/request/security/ssi/SetRevocationRegistryAddressRequest';
+import RemoveIssuerRequest from '@port/in/request/security/operations/issue/RemoveIssuerRequest';
+import GetRevocationRegistryAddressRequest from '@port/in/request/security/ssi/GetRevocationRegistryAddressRequest';
+import GetIssuerListCountRequest from '@port/in/request/security/ssi/GetIssuerListCountRequest';
+import GetIssuerListMembersRequest from '@port/in/request/security/ssi/GetIssuerListMembersRequest';
+import IsIssuerRequest from '@port/in/request/security/operations/issue/IsIssuerRequest';
+import { AddIssuerCommand } from '@command/security/ssi/addIssuer/AddIssuerCommand';
+import { SetRevocationRegistryAddressCommand } from '@command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand';
 
 export const AddIssuerRequestFixture = createFixture<AddIssuerRequest>(
   (request) => {

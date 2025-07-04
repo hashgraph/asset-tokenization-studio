@@ -203,15 +203,15 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import {
   SetPausedMockCommand,
   SetPausedMockCommandResponse,
 } from './SetPausedMockCommand';
-import TransactionService from '../../../../../../service/transaction/TransactionService';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import ContractService from '../../../../../../../app/service/contract/ContractService';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import ContractService from '@service/contract/ContractService';
 
 @CommandHandler(SetPausedMockCommand)
 export class SetPausedMockCommandHandler

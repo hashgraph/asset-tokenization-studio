@@ -204,7 +204,7 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Constructor } from '../Type.js';
+import { Constructor } from '@core/Type';
 import { inject, delay } from 'tsyringe';
 
 /**

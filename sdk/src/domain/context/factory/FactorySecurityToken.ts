@@ -203,11 +203,11 @@
 
 */
 
-import { BondDetailsData } from './BondDetailsData.js';
-import { CouponDetailsData } from './CouponDetailsData.js';
-import { SecurityData } from './SecurityData.js';
-import { EquityDetailsData } from './EquityDetailsData.js';
-import { AdditionalSecurityData } from './AdditionalSecurityData.js';
+import { BondDetailsData } from './BondDetailsData';
+import { CouponDetailsData } from './CouponDetailsData';
+import { SecurityData } from './SecurityData';
+import { EquityDetailsData } from './EquityDetailsData';
+import { AdditionalSecurityData } from './AdditionalSecurityData';
 
 export class FactoryEquityToken {
   public security: SecurityData;

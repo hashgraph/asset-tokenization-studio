@@ -203,30 +203,30 @@
 
 */
 
-import GetSecurityDetailsRequest from 'port/in/request/security/GetSecurityDetailsRequest';
+import GetSecurityDetailsRequest from '@port/in/request/security/GetSecurityDetailsRequest';
 import { createFixture } from '../config';
 import {
   HederaIdPropsFixture,
   PartitionIdFixture,
 } from '../shared/DataFixture';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
-import { BalanceOfQuery } from '../../../src/app/usecase/query/security/balanceof/BalanceOfQuery';
-import { CanRedeemByPartitionQuery } from '../../../src/app/usecase/query/security/canRedeemByPartition/CanRedeemByPartitionQuery';
-import { CanTransferQuery } from '../../../src/app/usecase/query/security/canTransfer/CanTransferQuery';
-import { CanTransferByPartitionQuery } from '../../../src/app/usecase/query/security/canTransferByPartition/CanTransferByPartitionQuery';
-import { GetMaxSupplyQuery } from '../../../src/app/usecase/query/security/cap/getMaxSupply/GetMaxSupplyQuery';
-import { GetMaxSupplyByPartitionQuery } from '../../../src/app/usecase/query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQuery';
-import { GetTotalSupplyByPartitionQuery } from '../../../src/app/usecase/query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery';
-import { IsOperatorQuery } from '../../../src/app/usecase/query/security/operator/isOperator/IsOperatorQuery';
-import { IsOperatorForPartitionQuery } from '../../../src/app/usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQuery';
+import { HederaId } from '@domain/context/shared/HederaId';
+import { BalanceOfQuery } from '@query/security/balanceof/BalanceOfQuery';
+import { CanRedeemByPartitionQuery } from '@query/security/canRedeemByPartition/CanRedeemByPartitionQuery';
+import { CanTransferQuery } from '@query/security/canTransfer/CanTransferQuery';
+import { CanTransferByPartitionQuery } from '@query/security/canTransferByPartition/CanTransferByPartitionQuery';
+import { GetMaxSupplyQuery } from '@query/security/cap/getMaxSupply/GetMaxSupplyQuery';
+import { GetMaxSupplyByPartitionQuery } from '@query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQuery';
+import { GetTotalSupplyByPartitionQuery } from '@query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery';
+import { IsOperatorQuery } from '@query/security/operator/isOperator/IsOperatorQuery';
+import { IsOperatorForPartitionQuery } from '@query/security/operator/isOperatorForPartition/IsOperatorForPartitionQuery';
 
 export const BalanceOfQueryFixture = createFixture<BalanceOfQuery>((query) => {
   query.securityId.as(() => new HederaId(HederaIdPropsFixture.create().value));
   query.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
 });
-import GetAccountBalanceRequest from '../../../src/port/in/request/account/GetAccountBalanceRequest';
-import SetMaxSupplyRequest from '../../../src/port/in/request/security/operations/cap/SetMaxSupplyRequest';
-import GetMaxSupplyRequest from '../../../src/port/in/request/security/operations/cap/GetMaxSupplyRequest';
+import GetAccountBalanceRequest from '@port/in/request/account/GetAccountBalanceRequest';
+import SetMaxSupplyRequest from '@port/in/request/security/operations/cap/SetMaxSupplyRequest';
+import GetMaxSupplyRequest from '@port/in/request/security/operations/cap/GetMaxSupplyRequest';
 
 export const GetSecurityDetailsRequestFixture =
   createFixture<GetSecurityDetailsRequest>((request) => {

@@ -203,22 +203,22 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import AccountService from '@service/account/AccountService';
+import SecurityService from '@service/security/SecurityService';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   ProtectedClearingTransferByPartitionCommand,
   ProtectedClearingTransferByPartitionCommandResponse,
-} from './ProtectedClearingTransferByPartitionCommand.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import { ProtectedClearingTransferByPartitionCommandError } from './error/ProtectedClearingTransferByPartitionCommandError.js';
-import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
+} from './ProtectedClearingTransferByPartitionCommand';
+import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService';
+import { ProtectedClearingTransferByPartitionCommandError } from './error/ProtectedClearingTransferByPartitionCommandError';
+import { KycStatus } from '@domain/context/kyc/Kyc';
 
 @CommandHandler(ProtectedClearingTransferByPartitionCommand)
 export class ProtectedClearingTransferByPartitionCommandHandler

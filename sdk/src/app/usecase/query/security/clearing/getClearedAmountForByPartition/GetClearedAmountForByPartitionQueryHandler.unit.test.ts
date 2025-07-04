@@ -207,19 +207,19 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetClearedAmountForByPartitionQueryFixture } from '../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
-import { GetClearedAmountForByPartitionQueryHandler } from './GetClearedAmountForByPartitionQueryHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
+import { GetClearedAmountForByPartitionQueryFixture } from '@test/fixtures/clearing/ClearingFixture';
+import { GetClearedAmountForByPartitionQueryHandler } from './GetClearedAmountForByPartitionQueryHandler';
 import {
   GetClearedAmountForByPartitionQuery,
   GetClearedAmountForByPartitionQueryResponse,
-} from './GetClearedAmountForByPartitionQuery.js';
-import { GetClearedAmountForByPartitionQueryError } from './error/GetClearedAmountForByPartitionQueryError.js';
+} from './GetClearedAmountForByPartitionQuery';
+import { GetClearedAmountForByPartitionQueryError } from './error/GetClearedAmountForByPartitionQueryError';
 
 describe('GetClearedAmountForByPartitionQueryHandler', () => {
   let handler: GetClearedAmountForByPartitionQueryHandler;

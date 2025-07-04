@@ -203,7 +203,7 @@
 
 */
 
-import ValidatedRequest from '../../../../../core/validation/ValidatedArgs';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 import FormatValidation from '../../FormatValidation';
 
 export default class GetExternalKycListsCountRequest extends ValidatedRequest<GetExternalKycListsCountRequest> {

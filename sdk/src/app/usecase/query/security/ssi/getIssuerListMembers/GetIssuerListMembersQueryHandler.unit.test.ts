@@ -207,21 +207,21 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
 import {
   GetIssuerListMembersQuery,
   GetIssuerListMembersQueryResponse,
-} from './GetIssuerListMembersQuery.js';
-import { GetIssuerListMembersQueryHandler } from './GetIssuerListMembersQueryHandler.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetIssuerListMembersQueryFixture } from '../../../../../../../__tests__/fixtures/ssi/SsiFixture.js';
-import { GetIssuerListMembersQueryError } from './error/GetIssuerListMembersQueryError.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/account/AccountFixture.js';
+} from './GetIssuerListMembersQuery';
+import { GetIssuerListMembersQueryHandler } from './GetIssuerListMembersQueryHandler';
+import AccountService from '@service/account/AccountService';
+import { GetIssuerListMembersQueryFixture } from '@test/fixtures/ssi/SsiFixture';
+import { GetIssuerListMembersQueryError } from './error/GetIssuerListMembersQueryError';
+import Account from '@domain/context/account/Account';
+import { AccountPropsFixture } from '@test/fixtures/account/AccountFixture';
 
 describe('GetIssuerListMembersQueryHandler', () => {
   let handler: GetIssuerListMembersQueryHandler;

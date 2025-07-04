@@ -203,10 +203,10 @@
 
 */
 
-import { Query } from '../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../core/query/QueryResponse.js';
-import Account from '../../../../../domain/context/account/Account.js';
-import { HederaId } from '../../../../../domain/context/shared/HederaId.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
+import Account from '@domain/context/account/Account';
+import { HederaId } from '@domain/context/shared/HederaId';
 
 export class GetAccountInfoQueryResponse implements QueryResponse {
   constructor(public readonly account: Account) {}
