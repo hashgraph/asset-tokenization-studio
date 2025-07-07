@@ -203,114 +203,84 @@
 
 */
 
-import { DeployContractWithFactoryResult } from '@scripts'
-import { BusinessLogicResolver, Factory } from '@typechain'
-import DeployAtsContractsResult from './results/DeployAtsContractsResult'
-import DeployAtsFullInfrastructureResult from './results/DeployAtsFullInfrastructureResult'
+import axios from 'axios'
+import Configuration, { Network } from '@configuration'
+import { ADDRESS_ZERO } from './constants'
+import { delay } from './index'
 
-interface NewEnvironmentParams {
-    commonFacetIdList?: string[]
-    equityFacetIdList?: string[]
-    bondFacetIdList?: string[]
-    equityFacetVersionList?: number[]
-    bondFacetVersionList?: number[]
-    businessLogicResolver?: BusinessLogicResolver
-    factory?: Factory
-    deployedContracts?: DeployAtsContractsResult
+interface IAccount {
+    evm_address: string
+    key: IKey
+    account: string
 }
 
-export default class Environment {
-    public commonFacetIdList?: string[]
-    public equityFacetIdList?: string[]
-    public bondFacetIdList?: string[]
-    public equityFacetVersionList?: number[]
-    public bondFacetVersionList?: number[]
-    public businessLogicResolver?: BusinessLogicResolver
-    public factory?: Factory
-    public deployedContracts?: DeployAtsContractsResult
+interface IKey {
+    _type: string
+    key: string
+}
 
-    constructor({
-        commonFacetIdList,
-        equityFacetIdList,
-        bondFacetIdList,
-        equityFacetVersionList,
-        bondFacetVersionList,
-        businessLogicResolver,
-        factory,
-        deployedContracts,
-    }: NewEnvironmentParams) {
-        this.commonFacetIdList = commonFacetIdList
-        this.equityFacetIdList = equityFacetIdList
-        this.bondFacetIdList = bondFacetIdList
-        this.equityFacetVersionList = equityFacetVersionList
-        this.bondFacetVersionList = bondFacetVersionList
-        this.businessLogicResolver = businessLogicResolver
-        this.factory = factory
-        this.deployedContracts = deployedContracts
+export async function addressListToHederaIdList({
+    addressList,
+    network,
+}: {
+    addressList: string[]
+    network: Network
+}): Promise<string[]> {
+    return Promise.all(
+        addressList.map((address) => addresstoHederaId({ address, network }))
+    )
+}
+
+export async function addresstoHederaId({
+    address: address,
+    network,
+}: {
+    address: string
+    network: Network
+}): Promise<string> {
+    if (address === ADDRESS_ZERO) {
+        return '0.0.0'
     }
 
-    public static empty(): Environment {
-        return new Environment({})
+    const url = `accounts/${address}`
+    const res = await getFromMirrorNode<IAccount>({
+        url,
+        network,
+    })
+    if (!res) {
+        throw new Error(`Error retrieving account information for ${address}`)
     }
+    return res.account
+}
 
-    public toDeployAtsFullInfrastructureResult(): DeployAtsFullInfrastructureResult {
-        const {
-            commonFacetIdList,
-            equityFacetIdList,
-            bondFacetIdList,
-            equityFacetVersionList,
-            bondFacetVersionList,
-            factory,
-            deployedContracts,
-        } = this._validateInitialization()
-
-        return new DeployAtsFullInfrastructureResult({
-            facetLists: {
-                commonFacetIdList,
-                equityFacetIdList,
-                bondFacetIdList,
-                equityFacetVersionList,
-                bondFacetVersionList,
-            },
-            factory: new DeployContractWithFactoryResult({
-                address: factory.address,
-                contract: factory,
-            }),
-            ...deployedContracts,
-        })
-    }
-
-    public get initialized(): boolean {
+async function getFromMirrorNode<T>({
+    url,
+    network,
+    timeBetweenRetries = 1,
+    timeout = 10,
+}: {
+    url: string
+    network: Network
+    timeBetweenRetries?: number
+    timeout?: number
+}): Promise<T | undefined> {
+    const mirrorUrl = `${Configuration.endpoints[network].mirror}/api/v1/${
+        url.startsWith('/') ? url.slice(1) : url
+    }`
+    let timePassed = 0
+    while (timePassed <= timeout) {
         try {
-            this._validateInitialization()
-            return true
-        } catch {
-            return false
+            const res = await axios.get<T>(mirrorUrl)
+            if (res.status === 200) {
+                return res.data
+            }
+        } catch (error) {
+            console.error(
+                `Error retrieving data from Mirror Node: ${(error as Error).message}`
+            )
         }
+        await delay({ time: timeBetweenRetries, unit: 'seconds' })
+        timePassed += timeBetweenRetries
     }
-
-    private _validateInitialization() {
-        if (
-            !this.commonFacetIdList ||
-            !this.equityFacetIdList ||
-            !this.bondFacetIdList ||
-            !this.equityFacetVersionList ||
-            !this.bondFacetVersionList ||
-            !this.businessLogicResolver ||
-            !this.factory ||
-            !this.deployedContracts
-        ) {
-            throw new Error('Environment must be initialized')
-        }
-        return {
-            commonFacetIdList: this.commonFacetIdList,
-            equityFacetIdList: this.equityFacetIdList,
-            bondFacetIdList: this.bondFacetIdList,
-            equityFacetVersionList: this.equityFacetVersionList,
-            bondFacetVersionList: this.bondFacetVersionList,
-            businessLogicResolver: this.businessLogicResolver,
-            factory: this.factory,
-            deployedContracts: this.deployedContracts,
-        }
-    }
+    return undefined
 }

@@ -203,78 +203,146 @@
 
 */
 
-import { Result } from 'ethers/lib/utils'
-import { CallContractCommand } from '@scripts'
+import { task, types } from 'hardhat/config'
 import {
-    TransactionReceipt,
-    TransactionResponse,
-} from '@ethersproject/providers'
+    GetConfigurationInfoArgs,
+    GetResolverBusinessLogicsArgs,
+    GetSignerResult,
+    UpdateBusinessLogicKeysArgs,
+} from './index'
 
-// * External functions
-/**
- * Calls a read-only method on a smart contract.
- * @param {Object} params - The parameters for the contract call.
- * @param {Contract} params.contract - The smart contract instance.
- * @param {string} params.method - The name of the method to call.
- * @param {Array<any>} params.args - The arguments to pass to the method.
- * @param {Object} [params.overrides] - Optional overrides for the transaction.
- * @returns {Promise<Result>} The result of the contract call.
- */
-export async function callReadContract({
-    contract,
-    method,
-    args,
-    overrides,
-}: CallContractCommand): Promise<Result> {
-    const result: Result = await contract.callStatic[method](...args, {
-        ...overrides,
+task('getConfigurationInfo', 'Get all info for a given configuration')
+    .addPositionalParam(
+        'resolver',
+        'The resolver proxy admin address',
+        undefined,
+        types.string
+    )
+    .addPositionalParam(
+        'configurationId',
+        'The config ID',
+        undefined,
+        types.string
+    )
+    .setAction(async (args: GetConfigurationInfoArgs, hre) => {
+        console.log(`Executing getConfigurationInfo on ${hre.network.name} ...`)
+
+        const {
+            getFacetsByConfigurationIdAndVersion,
+            GetFacetsByConfigurationIdAndVersionQuery,
+        } = await import('@scripts')
+
+        const query = new GetFacetsByConfigurationIdAndVersionQuery({
+            businessLogicResolverAddress: args.resolver,
+            configurationId: args.configurationId,
+            provider: hre.ethers.provider,
+        })
+
+        const { facetListRecord } =
+            await getFacetsByConfigurationIdAndVersion(query)
+
+        Object.entries(facetListRecord).forEach(([version, facetList]) => {
+            console.log(
+                `Number of Facets for Config ${facetList[0].id} and Version ${version}: ${facetList.length}`
+            )
+            facetList.forEach((facet, index) => {
+                console.log(`Facet ${index + 1}:`)
+                console.log(`  ID: ${facet.id}`)
+                console.log(`  Address: ${facet.addr}`)
+                console.log(
+                    `  Selectors: ${JSON.stringify(facet.selectors, null, 2)}`
+                )
+                console.log(
+                    `  Interface IDs: ${JSON.stringify(facet.interfaceIds, null, 2)}`
+                )
+                console.log('-------------------------')
+            })
+        })
     })
-    return result
-}
 
-/**
- * Executes a write operation on a smart contract and waits for the transaction to be mined
- * @param {Object} params - The parameters for the contract call
- * @param {Contract} params.contract - The ethers Contract instance to interact with
- * @param {string} params.method - The name of the contract method to call
- * @param {any[]} params.args - The arguments to pass to the contract method
- * @param {Overrides} [params.overrides] - Optional transaction overrides (gas price, gas limit, etc.)
- * @returns {Promise<TransactionReceipt>} The transaction receipt after the transaction is mined
- * @throws {Error} If the transaction fails or is reverted
- */
-export async function callWriteContract({
-    contract,
-    method,
-    args,
-    overrides,
-}: CallContractCommand): Promise<TransactionReceipt> {
-    const command = new CallContractCommand({
-        contract,
-        method,
-        args,
-        overrides,
+task('getResolverBusinessLogics', 'Get business logics from resolver')
+    .addPositionalParam(
+        'resolver',
+        'The resolver proxy admin address',
+        undefined,
+        types.string
+    )
+    .setAction(async (args: GetResolverBusinessLogicsArgs, hre) => {
+        console.log(
+            `Executing getResolverBusinessLogics on ${hre.network.name} ...`
+        )
+        const { IBusinessLogicResolver__factory } = await import('@typechain')
+
+        // Fetch business logic keys
+        const businessLogicKeys = await IBusinessLogicResolver__factory.connect(
+            args.resolver,
+            hre.ethers.provider
+        ).getBusinessLogicKeys(0, 100)
+
+        // Log the business logic keys
+        console.log('Business Logic Keys:')
+        businessLogicKeys.forEach((key: string, index: number) => {
+            console.log(`  Key ${index + 1}: ${key}`)
+        })
     })
-    const response: TransactionResponse = (await callContract(
-        command
-    )) as TransactionResponse
-    return await response.wait()
-}
 
-// * Internal functions
-/**
- * Calls a smart contract method with provided arguments and overrides.
- * @param {Object} params - The parameters object
- * @param {Contract} params.contract - The ethers.js Contract instance to call
- * @param {string} params.method - The name of the contract method to call
- * @param {any[]} params.args - Array of arguments to pass to the contract method
- * @param {Overrides} params.overrides - Transaction overrides (e.g., gasLimit, value)
- * @returns {Promise<TransactionResponse | Result>} A promise that resolves to either a TransactionResponse (for write operations) or Result (for read operations)
- */
-function callContract({
-    contract,
-    method,
-    args,
-    overrides,
-}: CallContractCommand): Promise<TransactionResponse | Result> {
-    return contract[method](...args, { ...overrides })
-}
+task('updateBusinessLogicKeys', 'Update the address of a business logic key')
+    .addPositionalParam(
+        'resolverAddress',
+        'The BusinessLogicResolver Contract address',
+        undefined,
+        types.string
+    )
+    .addPositionalParam(
+        'implementationAddressList',
+        'The implementation contract list to update. List of comma separated contract addresses',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'privateKey',
+        'The private key of the account in raw hexadecimal format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
+    )
+    .setAction(async (args: UpdateBusinessLogicKeysArgs, hre) => {
+        // Inlined import due to circular dependency
+        const { registerBusinessLogics, RegisterBusinessLogicsCommand } =
+            await import('@scripts')
+        console.log(
+            `Executing updateBusinessLogicKeys on ${hre.network.name} ...`
+        )
+        const {
+            privateKey,
+            signerAddress,
+            signerPosition,
+            resolverAddress,
+            implementationAddressList,
+        } = args
+        const { signer }: GetSignerResult = await hre.run('getSigner', {
+            privateKey: privateKey,
+            signerAddress: signerAddress,
+            signerPosition: signerPosition,
+        })
+
+        const implementationList = implementationAddressList.split(',')
+        await registerBusinessLogics(
+            new RegisterBusinessLogicsCommand({
+                contractAddressList: implementationList,
+                businessLogicResolverProxyAddress: resolverAddress,
+                signer,
+            })
+        )
+    })

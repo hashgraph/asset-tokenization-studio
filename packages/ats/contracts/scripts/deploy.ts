@@ -305,7 +305,7 @@ import {
     RegisterDeployedContractBusinessLogicsCommand,
     registerDeployedContractBusinessLogics,
     CreateConfigurationsForDeployedContractsResult,
-} from '@scripts'
+} from './index'
 import Environment from './Environment'
 
 export let environment = Environment.empty()

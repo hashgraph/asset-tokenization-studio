@@ -226,7 +226,7 @@ import {
     RegisterDeployedContractBusinessLogicsCommand,
     validateTxResponse,
     ValidateTxResponseCommand,
-} from '@scripts'
+} from './index'
 import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, EVENTS } from './constants'
 import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
 import { FacetConfiguration } from './resolverDiamondCut'

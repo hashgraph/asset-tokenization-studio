@@ -203,122 +203,77 @@
 
 */
 
-import { subtask, task, types } from 'hardhat/config'
-import { Signer, Wallet } from 'ethers'
-import { ethers } from 'ethers'
-import { keccak256 } from 'ethers/lib/utils'
+import { ContractReceipt } from 'ethers'
 import {
-    GetSignerResult,
-    GetSignerArgs,
-    Keccak256Args,
-    CreateVcArgs,
-} from '@tasks'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { createEcdsaCredential, EthrDID } from '@terminal3/ecdsa_vc'
-import { DID, type VerificationOptions } from '@terminal3/vc_core'
+    ProxyAdmin__factory,
+    TransparentUpgradeableProxy__factory,
+} from '@typechain'
+import {
+    deployContractWithFactory,
+    DeployContractWithFactoryCommand,
+    DeployProxyAdminCommand,
+    DeployUpgradeableProxyCommand,
+    ProxyImplementationQuery,
+    UpgradeProxyImplementationCommand,
+    validateTxResponse,
+    ValidateTxResponseCommand,
+} from './index'
 
-subtask(
-    'getSigner',
-    'Retrieve the signer for deployment. Defaults to the primary signer if none is specified'
-)
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
-    .setAction(async (args: GetSignerArgs, hre) => {
-        console.log(`Executing getSigner on ${hre.network.name} ...`)
-        const { privateKey, signerAddress, signerPosition } = args
-        const signers = await hre.ethers.getSigners()
-
-        let signer: Signer | SignerWithAddress = signers[0]
-        if (privateKey) {
-            signer = new Wallet(privateKey, hre.ethers.provider)
-        } else if (signerPosition) {
-            signer = signers[signerPosition]
-        } else if (signerAddress) {
-            signer =
-                signers.find((signer) => {
-                    return (
-                        keccak256(signer.address) === keccak256(signerAddress)
-                    )
-                }) ?? signers[0]
-        }
-
-        return {
-            signer,
-            address: await signer.getAddress(),
-            privateKey: privateKey,
-        } as GetSignerResult
+export async function deployProxyAdmin({
+    signer,
+    overrides,
+}: DeployProxyAdminCommand) {
+    const deployCommand = new DeployContractWithFactoryCommand({
+        factory: new ProxyAdmin__factory(),
+        signer: signer,
+        overrides,
     })
-
-task('keccak256', 'Prints the keccak256 hash of a string')
-    .addPositionalParam(
-        'input',
-        'The string to be hashed',
-        undefined,
-        types.string
-    )
-    .setAction(async ({ input }: Keccak256Args) => {
-        const hash = keccak256(Buffer.from(input, 'utf-8'))
-        console.log(`The keccak256 hash of the input "${input}" is: ${hash}`)
+    return await deployContractWithFactory(deployCommand)
+}
+export async function deployTransparentProxy({
+    proxyAdminAddress,
+    implementationAddress,
+    signer,
+    overrides,
+}: DeployUpgradeableProxyCommand) {
+    const deployCommand = new DeployContractWithFactoryCommand({
+        factory: new TransparentUpgradeableProxy__factory(),
+        signer: signer,
+        args: [implementationAddress, proxyAdminAddress, '0x'],
+        overrides,
     })
+    return await deployContractWithFactory(deployCommand)
+}
 
-task('createVC', 'Prints the VC for a given issuer and holder')
-    .addOptionalParam(
-        'holder',
-        'The address to which the VC is granted',
-        undefined,
-        types.string
+export async function upgradeProxyImplementation({
+    proxyAdminAddress,
+    transparentProxyAddress,
+    newImplementationAddress,
+    signer,
+    overrides,
+}: UpgradeProxyImplementationCommand): Promise<ContractReceipt> {
+    const proxyAdmin = new ProxyAdmin__factory(signer).attach(proxyAdminAddress)
+    const txResponse = await proxyAdmin.upgrade(
+        transparentProxyAddress,
+        newImplementationAddress,
+        overrides
     )
-    .addOptionalParam(
-        'privatekey',
-        'The hexadecimal private key from the issuer of the VC',
-        undefined,
-        types.string
+    const { txReceipt } = await validateTxResponse(
+        new ValidateTxResponseCommand({ txResponse })
     )
-    .setAction(async (args: CreateVcArgs) => {
-        const issuer = new EthrDID(args.privatekey, 'polygon')
-        const holderDid = new DID('ethr', args.holder)
+    return txReceipt
+}
 
-        // Creating a credential with BBS+ signature
-        const claims = { kyc: 'passed' }
-        const revocationRegistryAddress =
-            '0x77Fb69B24e4C659CE03fB129c19Ad591374C349e'
-        const didRegistryAddress = '0x312C15922c22B60f5557bAa1A85F2CdA4891C39a'
-        const provider = new ethers.providers.JsonRpcProvider(
-            'https://testnet.hashio.io/api'
-        )
+// * Read functions
+export async function proxyImplementation({
+    proxyAdminAddress,
+    transparentProxyAddress,
+    overrides,
+}: ProxyImplementationQuery) {
+    const proxyAdmin = new ProxyAdmin__factory().attach(proxyAdminAddress)
 
-        const options = {
-            revocationRegistryAddress,
-            provider,
-            didRegistryAddress,
-        } as unknown as VerificationOptions
-
-        const vc = await createEcdsaCredential(
-            issuer,
-            holderDid,
-            claims,
-            ['KycCredential'],
-            undefined,
-            undefined,
-            options
-        )
-
-        const vcString = JSON.stringify(vc)
-        console.log(`The VC for the holder is: '${vcString}'`)
-    })
+    return await proxyAdmin.getProxyImplementation(
+        transparentProxyAddress,
+        overrides
+    )
+}

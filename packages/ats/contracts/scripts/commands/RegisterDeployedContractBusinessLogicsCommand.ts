@@ -203,23 +203,44 @@
 
 */
 
-import { MESSAGES } from '..'
+import {
+    DeployAtsContractsResult,
+    BusinessLogicResolverProxyNotFound,
+    BaseAtsContractListCommand,
+    BaseBlockchainCommandParams,
+} from '../index'
 
-interface TransactionReceiptErrorParams {
-    errorMessage?: string
-    txHash?: string
+interface RegisterDeployedContractBusinessLogicsCommandParams
+    extends BaseBlockchainCommandParams {
+    readonly deployedContractList: DeployAtsContractsResult
 }
 
-export default class TransactionReceiptError extends Error {
-    constructor({ errorMessage, txHash }: TransactionReceiptErrorParams) {
-        const baseMessage = MESSAGES.blockchain.validateTxResponse.error[0]
-        const hashMessage = txHash
-            ? `${MESSAGES.blockchain.validateTxResponse.error[1]}${txHash}`
-            : ''
-        const message = errorMessage
-            ? `${errorMessage}. ${baseMessage}`
-            : baseMessage
+export default class RegisterDeployedContractBusinessLogicsCommand extends BaseAtsContractListCommand {
+    constructor({
+        deployedContractList,
+        signer,
+        overrides,
+    }: RegisterDeployedContractBusinessLogicsCommandParams) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { deployer, businessLogicResolver, ...contractListToRegister } =
+            deployedContractList
+        const contractAddressList = Object.values(contractListToRegister).map(
+            (contract) => contract.address
+        )
 
-        super(`${message}${hashMessage}`)
+        if (!businessLogicResolver.proxyAddress) {
+            throw new BusinessLogicResolverProxyNotFound()
+        }
+
+        super({
+            contractAddressList,
+            businessLogicResolverProxyAddress:
+                businessLogicResolver.proxyAddress,
+            signer,
+            overrides,
+        })
+    }
+    get deployedContractAddressList() {
+        return this.contractAddressList
     }
 }
