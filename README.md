@@ -131,7 +131,7 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 
 The ATS project utilizes a `custodians` library to facilitate interactions with various external custody providers.
 
-The integration with custodian services is **available at the SDK level only**, that means that the current implementation does not support direct dApp integration workflows and is limited to SDK tests right now. You can use your custodian providers using the .env file ([.env.sample](./sdk/.env.sample)).
+The integration with custodian services is **available at the SDK level only**, that means that the current implementation does not support direct dApp integration workflows and is limited to SDK tests right now. You can use your custodian providers using the .env file ([.env.sample](packages/ats/sdk/.env.sample)).
 
 At the time the integration was first built, the SDKs provided by Dfns and Fireblocks did not yet support direct dApp integration workflows. Consequently, the current implementation focuses solely on SDK-based operations.
 
