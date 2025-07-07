@@ -206,10 +206,7 @@
 import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
 import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import {
-  GetRolesForQuery,
-  GetRolesForQueryResponse,
-} from './GetRolesForQuery';
+import { GetRolesForQuery, GetRolesForQueryResponse } from './GetRolesForQuery';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import AccountService from '../../../../../service/account/AccountService';

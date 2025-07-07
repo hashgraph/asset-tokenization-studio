@@ -217,10 +217,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import ValidationService from '../../../../../service/validation/ValidationService';
 import { ErrorCode } from '../../../../../../core/error/BaseError';
 import { AddIssuerCommandHandler } from './AddIssuerCommandHandler';
-import {
-  AddIssuerCommand,
-  AddIssuerCommandResponse,
-} from './AddIssuerCommand';
+import { AddIssuerCommand, AddIssuerCommandResponse } from './AddIssuerCommand';
 import { AddIssuerCommandFixture } from '../../../../../../../__tests__/fixtures/ssi/SsiFixture';
 import { AddIssuerCommandError } from './error/AddIssuerCommandError';
 import Account from '../../../../../../domain/context/account/Account';

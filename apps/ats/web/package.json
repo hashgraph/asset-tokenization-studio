@@ -21,7 +21,7 @@
     "@chakra-ui/react": "2.6.1",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@hashgraph/asset-tokenization-sdk": "1.14.1",
+    "@hashgraph/asset-tokenization-sdk": "*",
     "@tanstack/react-query": "^4.35.3",
     "framer-motion": "^10.16.4",
     "i18next": "23.5.1",

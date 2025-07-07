@@ -203,10 +203,7 @@
 
 */
 
-import {
-  CanTransferQuery,
-  CanTransferQueryResponse,
-} from './CanTransferQuery';
+import { CanTransferQuery, CanTransferQueryResponse } from './CanTransferQuery';
 import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator';
 import { IQueryHandler } from '../../../../../core/query/QueryHandler';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter';

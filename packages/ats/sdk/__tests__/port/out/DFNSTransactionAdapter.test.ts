@@ -212,11 +212,7 @@ import {
   Bond,
   InitializationRequest,
 } from '../../../src';
-import {
-  DFNS_SETTINGS,
-  FACTORY_ADDRESS,
-  RESOLVER_ADDRESS,
-} from '../../config';
+import { DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from '../../config';
 import ConnectRequest from '../../../src/port/in/request/network/ConnectRequest';
 import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';

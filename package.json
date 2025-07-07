@@ -6,8 +6,7 @@
   "private": true,
   "workspaces": [
     "apps/ats/*",
-    "contracts",
-    "sdk"
+    "packages/ats/*"
   ],
   "scripts": {
     "setup": "npm install && npm run install:web",
@@ -36,7 +35,8 @@
     "prettier:contracts": "cd packages/ats/contracts && npm run prettier",
     "pre-commit:contracts": "cd packages/ats/contracts && npm run pre-commit",
     "pre-commit:sdk": "cd packages/ats/sdk && npm run pre-commit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev:web": "npm run build:sdk && cd apps/ats/web && yarn dev"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",

@@ -203,10 +203,7 @@
 
 */
 
-import {
-  SetCouponCommand,
-  SetCouponCommandResponse,
-} from './SetCouponCommand';
+import { SetCouponCommand, SetCouponCommandResponse } from './SetCouponCommand';
 import { SetCouponCommandHandler } from './SetCouponCommandHandler';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
 import { SetCouponCommandFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture';

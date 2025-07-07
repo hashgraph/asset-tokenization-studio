@@ -216,10 +216,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import ValidationService from '../../../../../service/validation/ValidationService';
 import { ErrorCode } from '../../../../../../core/error/BaseError';
 import { GrantRoleCommandHandler } from './GrantRoleCommandHandler';
-import {
-  GrantRoleCommand,
-  GrantRoleCommandResponse,
-} from './GrantRoleCommand';
+import { GrantRoleCommand, GrantRoleCommandResponse } from './GrantRoleCommand';
 import { GrantRoleCommandError } from './error/GrantRoleCommandError';
 import { GrantRoleCommandFixture } from '../../../../../../../__tests__/fixtures/role/RoleFixture';
 

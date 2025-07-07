@@ -220,10 +220,7 @@ import { Security } from '../../../../../domain/context/security/Security';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal';
 import { EMPTY_BYTES } from '../../../../../core/Constants';
 import { CanTransferQueryHandler } from './CanTransferQueryHandler';
-import {
-  CanTransferQuery,
-  CanTransferQueryResponse,
-} from './CanTransferQuery';
+import { CanTransferQuery, CanTransferQueryResponse } from './CanTransferQuery';
 import ValidationService from '../../../../service/validation/ValidationService';
 import { CanTransferQueryError } from './error/CanTransferQueryError';
 

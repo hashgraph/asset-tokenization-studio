@@ -209,10 +209,7 @@ import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerD
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import AccountService from '../../../../../service/account/AccountService';
 import TransactionService from '../../../../../service/transaction/TransactionService';
-import {
-  GrantRoleCommand,
-  GrantRoleCommandResponse,
-} from './GrantRoleCommand';
+import { GrantRoleCommand, GrantRoleCommandResponse } from './GrantRoleCommand';
 import ValidationService from '../../../../../service/validation/ValidationService';
 import ContractService from '../../../../../service/contract/ContractService';
 import { GrantRoleCommandError } from './error/GrantRoleCommandError';

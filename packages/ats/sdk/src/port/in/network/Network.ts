@@ -206,10 +206,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Injectable from '../../../core/Injectable';
 import { CommandBus } from '../../../core/command/CommandBus';
-import {
-  InitializationData,
-  NetworkData,
-} from '../../out/TransactionAdapter';
+import { InitializationData, NetworkData } from '../../out/TransactionAdapter';
 import { ConnectCommand } from '../../../app/usecase/command/network/connect/ConnectCommand';
 import ConnectRequest, {
   AWSKMSConfigRequest,

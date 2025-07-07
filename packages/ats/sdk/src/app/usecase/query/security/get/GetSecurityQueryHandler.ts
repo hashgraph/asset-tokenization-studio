@@ -208,10 +208,7 @@ import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
 import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator';
 import { IQueryHandler } from '../../../../../core/query/QueryHandler';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter';
-import {
-  GetSecurityQuery,
-  GetSecurityQueryResponse,
-} from './GetSecurityQuery';
+import { GetSecurityQuery, GetSecurityQueryResponse } from './GetSecurityQuery';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
 import ContractService from '../../../../service/contract/ContractService';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal';

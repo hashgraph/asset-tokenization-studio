@@ -205,10 +205,7 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
-import {
-  SetCouponCommand,
-  SetCouponCommandResponse,
-} from './SetCouponCommand';
+import { SetCouponCommand, SetCouponCommandResponse } from './SetCouponCommand';
 import TransactionService from '../../../../../service/transaction/TransactionService';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';

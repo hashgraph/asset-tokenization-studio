@@ -207,7 +207,7 @@ import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
 import { AddAgentCommand } from '../../../src/app/usecase/command/security/operations/agent/addAgent/AddAgentCommand';
 import { RemoveAgentCommand } from '../../../src/app/usecase/command/security/operations/agent/removeAgent/RemoveAgentCommand';
-import { AddAgentRequest, RemoveAgentRequest } from 'packages/ats/sdk/src';
+import { AddAgentRequest, RemoveAgentRequest } from '../../../src';
 
 export const AddAgentCommandFixture = createFixture<AddAgentCommand>(
   (command) => {

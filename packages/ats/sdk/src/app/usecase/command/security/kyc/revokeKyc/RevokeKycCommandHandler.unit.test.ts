@@ -219,10 +219,7 @@ import Account from '../../../../../../domain/context/account/Account';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import { RevokeKycCommandFixture } from '../../../../../../../__tests__/fixtures/kyc/KycFixture';
 import { RevokeKycCommandHandler } from './RevokeKycCommandHandler';
-import {
-  RevokeKycCommand,
-  RevokeKycCommandResponse,
-} from './RevokeKycCommand';
+import { RevokeKycCommand, RevokeKycCommandResponse } from './RevokeKycCommand';
 import { RevokeKycCommandError } from './error/RevokeKycCommandError';
 import { ErrorCode } from '../../../../../../core/error/BaseError';
 

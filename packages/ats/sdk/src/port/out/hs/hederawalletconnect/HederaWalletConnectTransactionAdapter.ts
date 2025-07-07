@@ -457,6 +457,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       throw new AccountNotFound();
     }
 
+    // @ts-ignore
     this.signer = this.dAppConnector.getSigner(AccountId.fromString(accountId));
     LogService.logTrace('Signer set to:', this.signer);
 
@@ -563,6 +564,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
         );
       }
       const params: SignAndExecuteTransactionParams = {
+        // @ts-ignore
         transactionList: transactionToBase64String(transaction),
         signerAccountId: `${this.chainId}:${this.account.id.toString()}`,
       };
@@ -653,6 +655,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       const params: SignTransactionParams = {
         transactionBody: transactionBodyToBase64String(
           transactionToTransactionBody(
+            // @ts-ignore
             message,
             AccountId.fromString(this.networkService.consensusNodes[0]),
           ),

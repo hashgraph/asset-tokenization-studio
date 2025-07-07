@@ -209,7 +209,7 @@ import {
   FreezePartialTokensRequest,
   SetAddressFrozenRequest,
   UnfreezePartialTokensRequest,
-} from 'packages/ats/sdk/src';
+} from '../../../src';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { SetAddressFrozenCommand } from 'app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand';

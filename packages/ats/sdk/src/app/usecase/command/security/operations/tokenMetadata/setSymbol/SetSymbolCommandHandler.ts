@@ -212,10 +212,7 @@ import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress'
 import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole';
 import ValidationService from '../../../../../../service/validation/ValidationService';
 import ContractService from '../../../../../../service/contract/ContractService';
-import {
-  SetSymbolCommand,
-  SetSymbolCommandResponse,
-} from './SetSymbolCommand';
+import { SetSymbolCommand, SetSymbolCommandResponse } from './SetSymbolCommand';
 import { SetSymbolCommandError } from './error/SetSymbolCommandError';
 
 @CommandHandler(SetSymbolCommand)

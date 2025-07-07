@@ -214,7 +214,7 @@ import {
   BatchSetAddressFrozenRequest,
   BatchTransferRequest,
   BatchUnfreezePartialTokensRequest,
-} from 'packages/ats/sdk/src';
+} from '../../../src';
 import { BatchTransferCommand } from 'app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommand';
 import { BatchBurnCommand } from 'app/usecase/command/security/operations/batch/batchBurn/BatchBurnCommand';
 import { BatchForcedTransferCommand } from 'app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand';

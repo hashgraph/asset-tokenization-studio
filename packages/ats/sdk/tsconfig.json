@@ -15,7 +15,8 @@
     "strictPropertyInitialization": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": []
   },
   "exclude": ["build/**/*", "node_modules", "example/**/*"],
   "include": ["src/**/*", "__tests__/**/*"]

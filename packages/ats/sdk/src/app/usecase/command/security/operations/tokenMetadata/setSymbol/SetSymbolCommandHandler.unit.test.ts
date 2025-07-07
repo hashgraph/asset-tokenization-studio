@@ -220,10 +220,7 @@ import { SecurityRole } from '../../../../../../../domain/context/security/Secur
 import { SetSymbolCommandFixture } from '../../../../../../../../__tests__/fixtures/tokenMetadata/TokenMetadataFixture';
 import { ErrorCode } from '../../../../../../../core/error/BaseError';
 import { SetSymbolCommandHandler } from './SetSymbolCommandHandler';
-import {
-  SetSymbolCommand,
-  SetSymbolCommandResponse,
-} from './SetSymbolCommand';
+import { SetSymbolCommand, SetSymbolCommandResponse } from './SetSymbolCommand';
 import { SetSymbolCommandError } from './error/SetSymbolCommandError';
 
 describe('SetSymbolCommandHandler', () => {

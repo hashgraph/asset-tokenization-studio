@@ -203,9 +203,7 @@
 
 */
 
-import BaseError, {
-  ErrorCode,
-} from '../../../../../../core/error/BaseError';
+import BaseError, { ErrorCode } from '../../../../../../core/error/BaseError';
 import { AccountNotKycd } from '../AccountNotKycd';
 import { ClearingActivated } from '../ClearingActivated';
 import { InsufficientAllowance } from '../InsufficientAllowance';

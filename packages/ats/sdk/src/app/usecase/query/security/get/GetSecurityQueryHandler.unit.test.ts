@@ -213,10 +213,7 @@ import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
 import ContractService from '../../../../service/contract/ContractService';
 import { GetSecurityQueryHandler } from './GetSecurityQueryHandler';
-import {
-  GetSecurityQuery,
-  GetSecurityQueryResponse,
-} from './GetSecurityQuery';
+import { GetSecurityQuery, GetSecurityQueryResponse } from './GetSecurityQuery';
 import {
   GetSecurityQueryFixture,
   SecurityPropsFixture,

@@ -214,10 +214,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import ContractService from '../../../../../service/contract/ContractService';
 import AccountService from '../../../../../service/account/AccountService';
 import { GetRolesForQueryFixture } from '../../../../../../../__tests__/fixtures/role/RoleFixture';
-import {
-  GetRolesForQuery,
-  GetRolesForQueryResponse,
-} from './GetRolesForQuery';
+import { GetRolesForQuery, GetRolesForQueryResponse } from './GetRolesForQuery';
 import { GetRolesForQueryHandler } from './GetRolesForQueryHandler';
 import { GetRolesForQueryError } from './error/GetRolesForQueryError';
 
