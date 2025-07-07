@@ -2,7 +2,7 @@
 
 # Asset Tokenization Studio - Web
 
-[![License](https://img.shields.io/badge/license-apache2-blue.svg)](../LICENSE)
+[![License](https://img.shields.io/badge/license-apache2-blue.svg)](../../../LICENSE)
 
 </div>
 

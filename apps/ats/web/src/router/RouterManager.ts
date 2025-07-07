@@ -205,7 +205,7 @@
 
 import type { ReverseParams } from "named-urls";
 import { reverse } from "named-urls";
-import { router } from ".";
+import { router } from "./index";
 import { RouteName } from "./RouteName";
 import { RoutePath } from "./RoutePath";
 
