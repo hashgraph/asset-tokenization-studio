@@ -216,10 +216,8 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
 import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 
 @CommandHandler(ControllerTransferCommand)
 export class ControllerTransferCommandHandler
@@ -259,15 +257,8 @@ export class ControllerTransferCommandHandler
         securityId,
         targetId,
         amount,
+        account.id.toString(),
         sourceId,
-        _PARTITION_ID_1,
-        account.id.toString(),
-      );
-
-      await this.validationService.checkAnyRole(
-        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
-        account.id.toString(),
-        securityId,
       );
 
       await this.validationService.checkDecimals(security, amount);

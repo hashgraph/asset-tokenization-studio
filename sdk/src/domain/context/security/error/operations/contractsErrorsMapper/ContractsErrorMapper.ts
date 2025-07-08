@@ -217,13 +217,14 @@ import { InvalidDestinationAccount } from '../InvalidDestinationAccount.js';
 import { AccountNotInControlList } from '../AccountNotInControlList.js';
 import { SecurityPaused } from '../SecurityPaused.js';
 import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
+import { AddressRecovered } from '../AddressRecovered.js';
 
 export class ContractsErrorMapper {
   static mapError(
     errorCode: string,
+    operatorId: string,
     sourceId?: string,
     targetId?: string,
-    operatorId?: string,
   ): BaseError {
     const errorMappings: {
       [key: string]: (
@@ -248,6 +249,9 @@ export class ContractsErrorMapper {
       '0x51': (_1, targetId) =>
         new AccountNotKycd(targetId!, KycStatus.GRANTED),
       '0x52': () => new ClearingActivated(),
+      '0x53': (_1, _2, operatorId) => new AddressRecovered(operatorId!),
+      '0x54': (sourceId, _2, _3) => new AddressRecovered(sourceId!),
+      '0x55': (_1, targetId, _3) => new AddressRecovered(targetId!),
     };
 
     return (

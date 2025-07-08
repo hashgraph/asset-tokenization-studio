@@ -402,46 +402,53 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes calldata /*_data*/,
         bytes calldata /*_operatorData*/
     ) internal view returns (bool, bytes1, bytes32) {
-        if (_isRecovered(_msgSender())) {
-            return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
-        }
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_isClearingActivated()) {
-            return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _CONTROLLER_ROLE;
+        roles[1] = _AGENT_ROLE;
+        if (!_hasAnyRole(roles, _msgSender())) {
+            if (_isRecovered(_msgSender())) {
+                return (
+                    false,
+                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+                    bytes32(0)
+                );
+            }
+            if (_isPaused()) {
+                return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+            }
+            if (_isClearingActivated()) {
+                return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
+            }
+            if (_from == address(0)) {
+                return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+            }
+            if (!_isAbleToAccess(_msgSender())) {
+                return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+            }
+            if (!_isAbleToAccess(_from)) {
+                return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+            }
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+                return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+            }
+            if (_from != _msgSender()) {
+                if (!_isAuthorized(_partition, _msgSender(), _from)) {
+                    return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
+                }
+                if (_isRecovered(_from)) {
+                    return (
+                        false,
+                        _ADDRESS_RECOVERED_FROM_ERROR_ID,
+                        bytes32(0)
+                    );
+                }
+            }
         }
         if (!_validPartition(_partition, _from)) {
             return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
         }
-
-        uint256 balance = _balanceOfByPartition(_partition, _from);
-
-        if (balance < _value) {
+        if (_balanceOfByPartition(_partition, _from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        bytes32[] memory roles = new bytes32[](2);
-        roles[0] = _CONTROLLER_ROLE;
-        roles[1] = _AGENT_ROLE;
-        if (_from != _msgSender() && !_hasAnyRole(roles, _msgSender())) {
-            if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-            }
-            if (_isRecovered(_from)) {
-                return (false, _ADDRESS_RECOVERED_FROM_ERROR_ID, bytes32(0));
-            }
         }
         return (true, _SUCCESS, bytes32(0));
     }
