@@ -919,7 +919,7 @@ export class RPCQueryAdapter {
       data,
       operatorData,
       {
-        from: operator.toString(),
+        from: operatorId,
       },
     );
   }
