@@ -251,121 +251,12 @@ import BigDecimal from '@domain/context/shared/BigDecimal';
 import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter';
 import {
   _PARTITION_ID_1,
-  ADD_TO_CONTROL_LIST_GAS,
-  AUTHORIZE_OPERATOR_GAS,
-  CONTROLLER_REDEEM_GAS,
-  CONTROLLER_TRANSFER_GAS,
-  CREATE_BOND_ST_GAS,
-  CREATE_EQUITY_ST_GAS,
-  GRANT_ROLES_GAS,
-  ISSUE_GAS,
-  LOCK_GAS,
-  MAX_ROLES_GAS,
-  PAUSE_GAS,
-  REDEEM_GAS,
-  RELEASE_GAS,
-  REMOVE_DOCUMENT_GAS,
-  REMOVE_FROM_CONTROL_LIST_GAS,
-  RENOUNCE_ROLES_GAS,
-  REVOKE_OPERATOR_GAS,
-  SET_COUPON_EVENT,
-  SET_COUPON_GAS,
-  SET_DIVIDEND_EVENT,
-  SET_DIVIDENDS_GAS,
-  SET_DOCUMENT_GAS,
-  SET_MAX_SUPPLY_GAS,
-  SET_VOTING_RIGHTS_EVENT,
-  SET_VOTING_RIGHTS_GAS,
-  TAKE_SNAPSHOT_GAS,
-  TRANSFER_AND_LOCK_GAS,
-  TRANSFER_GAS,
-  TRANSFER_OPERATOR_GAS,
-  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
-  UNPAUSE_GAS,
-  UPDATE_CONFIG_GAS,
-  UPDATE_CONFIG_VERSION_GAS,
-  UPDATE_RESOLVER_GAS,
-  UPDATE_MATURITY_DATE_GAS,
-  SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
-  SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
-  PROTECT_PARTITION_GAS,
-  PROTECTED_TRANSFER_GAS,
-  PROTECTED_REDEEM_GAS,
-  UNPROTECT_PARTITION_GAS,
-  PROTECTED_TRANSFER_AND_LOCK_GAS,
-  CREATE_HOLD_GAS,
-  CREATE_HOLD_FROM_GAS,
-  CONTROLLER_CREATE_HOLD_GAS,
-  PROTECTED_CREATE_HOLD_GAS,
-  RELEASE_HOLD_GAS,
-  RECLAIM_HOLD_GAS,
-  EXECUTE_HOLD_BY_PARTITION_GAS,
-  ADD_ISSUER_GAS,
-  SET_REVOCATION_REGISTRY_GAS,
-  REMOVE_ISSUER_GAS,
-  GRANT_KYC_GAS,
-  REVOKE_KYC_GAS,
-  ACTIVATE_CLEARING_GAS,
-  DEACTIVATE_CLEARING_GAS,
-  CLEARING_TRANSFER_BY_PARTITION,
-  CLEARING_TRANSFER_FROM_BY_PARTITION,
-  PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
-  APPROVE_CLEARING_TRANSFER_BY_PARTITION,
-  CANCEL_CLEARING_TRANSFER_BY_PARTITION,
-  RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
-  CLEARING_REDEEM_BY_PARTITION,
-  CLEARING_REDEEM_FROM_BY_PARTITION,
-  PROTECTED_CLEARING_REDEEM_BY_PARTITION,
-  CLEARING_CREATE_HOLD_BY_PARTITION,
-  CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
-  PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
-  OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
-  OPERATOR_CLEARING_REDEEM_BY_PARTITION,
-  OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
-  UPDATE_EXTERNAL_PAUSES_GAS,
-  ADD_EXTERNAL_PAUSE_GAS,
-  REMOVE_EXTERNAL_PAUSE_GAS,
-  SET_PAUSED_MOCK_GAS,
-  CREATE_EXTERNAL_PAUSE_MOCK_GAS,
-  UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
-  ADD_EXTERNAL_CONTROL_LIST_GAS,
-  REMOVE_EXTERNAL_CONTROL_LIST_GAS,
-  ADD_TO_BLACK_LIST_MOCK_GAS,
-  ADD_TO_WHITE_LIST_MOCK_GAS,
-  REMOVE_FROM_BLACK_LIST_MOCK_GAS,
-  REMOVE_FROM_WHITE_LIST_MOCK_GAS,
-  CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
-  CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
-  UPDATE_EXTERNAL_KYC_LISTS_GAS,
-  ADD_EXTERNAL_KYC_LIST_GAS,
-  REMOVE_EXTERNAL_KYC_LIST_GAS,
-  GRANT_KYC_MOCK_GAS,
-  REVOKE_KYC_MOCK_GAS,
-  CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
-  ACTIVATE_INTERNAL_KYC_GAS,
-  DEACTIVATE_INTERNAL_KYC_GAS,
-  SET_NAME_GAS,
-  SET_SYMBOL_GAS,
-  BURN_GAS,
-  MINT_GAS,
-  FORCED_TRANSFER_GAS,
-  SET_ONCHAIN_ID_GAS,
-  SET_IDENTITY_REGISTRY_GAS,
-  SET_COMPLIANCE_GAS,
-  FREEZE_PARTIAL_TOKENS_GAS,
-  UNFREEZE_PARTIAL_TOKENS_GAS,
-  BATCH_TRANSFER_GAS,
-  BATCH_FORCED_TRANSFER_GAS,
-  BATCH_MINT_GAS,
-  BATCH_BURN_GAS,
-  BATCH_SET_ADDRESS_FROZEN_GAS,
-  BATCH_FREEZE_PARTIAL_TOKENS_GAS,
-  BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
   EVM_ZERO_ADDRESS,
-  RECOVERY_ADDRESS_GAS,
-  ADD_AGENT_GAS,
-  REMOVE_AGENT_GAS,
-  SET_ADDRESS_FROZEN_GAS,
+  GAS,
+  SET_COUPON_EVENT,
+  SET_DIVIDEND_EVENT,
+  SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+  SET_VOTING_RIGHTS_EVENT,
 } from '@core/Constants';
 import { Security } from '@domain/context/security/Security';
 import { Rbac } from '@domain/context/factory/Rbac';
@@ -596,7 +487,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         securityTokenToCreate,
         factoryRegulationData,
         {
-          gasLimit: CREATE_EQUITY_ST_GAS,
+          gasLimit: GAS.CREATE_EQUITY_ST,
         },
       );
 
@@ -717,7 +608,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         securityTokenToCreate,
         factoryRegulationData,
         {
-          gasLimit: CREATE_BOND_ST_GAS,
+          gasLimit: GAS.CREATE_BOND_ST,
         },
       );
 
@@ -1076,7 +967,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).transferByPartition(_PARTITION_ID_1, basicTransferInfo, '0x', {
-        gasLimit: TRANSFER_GAS,
+        gasLimit: GAS.TRANSFER,
       }),
       this.networkService.environment,
     );
@@ -1103,7 +994,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         '0x',
         expirationDate.toBigNumber(),
         {
-          gasLimit: TRANSFER_AND_LOCK_GAS,
+          gasLimit: GAS.TRANSFER_AND_LOCK,
         },
       ),
       this.networkService.environment,
@@ -1121,7 +1012,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).redeemByPartition(_PARTITION_ID_1, amount.toBigNumber(), '0x', {
-        gasLimit: REDEEM_GAS,
+        gasLimit: GAS.REDEEM,
       }),
       this.networkService.environment,
     );
@@ -1141,7 +1032,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).burn(source.toString(), amount.toBigNumber(), {
-        gasLimit: BURN_GAS,
+        gasLimit: GAS.BURN,
       }),
       this.networkService.environment,
     );
@@ -1154,7 +1045,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Pause__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).pause({ gasLimit: PAUSE_GAS }),
+      ).pause({ gasLimit: GAS.PAUSE }),
       this.networkService.environment,
     );
   }
@@ -1168,7 +1059,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Pause__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).unpause({ gasLimit: UNPAUSE_GAS }),
+      ).unpause({ gasLimit: GAS.UNPAUSE }),
       this.networkService.environment,
     );
   }
@@ -1186,7 +1077,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await AccessControl__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).grantRole(role, targetId.toString(), { gasLimit: GRANT_ROLES_GAS }),
+      ).grantRole(role, targetId.toString(), { gasLimit: GAS.GRANT_ROLES }),
       this.networkService.environment,
     );
   }
@@ -1197,8 +1088,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     roles: SecurityRole[],
     actives: boolean[],
   ): Promise<TransactionResponse<any, Error>> {
-    let gas = roles.length * GRANT_ROLES_GAS;
-    gas = gas > MAX_ROLES_GAS ? MAX_ROLES_GAS : gas;
+    let gas = roles.length * GAS.GRANT_ROLES;
+    gas = gas > GAS.MAX_ROLES ? GAS.MAX_ROLES : gas;
 
     return RPCTransactionResponseAdapter.manageResponse(
       await AccessControl__factory.connect(
@@ -1222,7 +1113,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await AccessControl__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).revokeRole(role, targetId.toString(), { gasLimit: GRANT_ROLES_GAS }),
+      ).revokeRole(role, targetId.toString(), { gasLimit: GAS.GRANT_ROLES }),
       this.networkService.environment,
     );
   }
@@ -1237,7 +1128,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await AccessControl__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).renounceRole(role, { gasLimit: RENOUNCE_ROLES_GAS }),
+      ).renounceRole(role, { gasLimit: GAS.RENOUNCE_ROLES }),
       this.networkService.environment,
     );
   }
@@ -1262,7 +1153,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).issueByPartition(issueData, { gasLimit: ISSUE_GAS }),
+      ).issueByPartition(issueData, { gasLimit: GAS.ISSUE }),
       this.networkService.environment,
     );
   }
@@ -1280,7 +1171,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await ERC3643__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).mint(target.toString(), amount.toBigNumber(), { gasLimit: MINT_GAS }),
+      ).mint(target.toString(), amount.toBigNumber(), { gasLimit: GAS.MINT }),
       this.networkService.environment,
     );
   }
@@ -1298,7 +1189,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).addToControlList(targetId.toString(), {
-        gasLimit: ADD_TO_CONTROL_LIST_GAS,
+        gasLimit: GAS.ADD_TO_CONTROL_LIST,
       }),
       this.networkService.environment,
     );
@@ -1317,7 +1208,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).removeFromControlList(targetId.toString(), {
-        gasLimit: REMOVE_FROM_CONTROL_LIST_GAS,
+        gasLimit: GAS.REMOVE_FROM_CONTROL_LIST,
       }),
       this.networkService.environment,
     );
@@ -1345,7 +1236,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         '0x',
         '0x',
         {
-          gasLimit: CONTROLLER_TRANSFER_GAS,
+          gasLimit: GAS.CONTROLLER_TRANSFER,
         },
       ),
       this.networkService.environment,
@@ -1371,7 +1262,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         target.toString(),
         amount.toBigNumber(),
         {
-          gasLimit: FORCED_TRANSFER_GAS,
+          gasLimit: GAS.FORCED_TRANSFER,
         },
       ),
       this.networkService.environment,
@@ -1398,7 +1289,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         '0x',
         '0x',
         {
-          gasLimit: CONTROLLER_REDEEM_GAS,
+          gasLimit: GAS.CONTROLLER_REDEEM,
         },
       ),
       this.networkService.environment,
@@ -1426,7 +1317,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Equity__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).setDividends(dividendStruct, { gasLimit: SET_DIVIDENDS_GAS }),
+      ).setDividends(dividendStruct, { gasLimit: GAS.SET_DIVIDENDS }),
       this.networkService.environment,
       SET_DIVIDEND_EVENT,
     );
@@ -1449,7 +1340,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Equity__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).setVoting(votingStruct, { gasLimit: SET_VOTING_RIGHTS_GAS }),
+      ).setVoting(votingStruct, { gasLimit: GAS.SET_VOTING_RIGHTS }),
       this.networkService.environment,
       SET_VOTING_RIGHTS_EVENT,
     );
@@ -1476,7 +1367,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Bond__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).setCoupon(couponStruct, { gasLimit: SET_COUPON_GAS }),
+      ).setCoupon(couponStruct, { gasLimit: GAS.SET_COUPON }),
       this.networkService.environment,
       SET_COUPON_EVENT,
     );
@@ -1491,7 +1382,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Snapshots__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).takeSnapshot({ gasLimit: TAKE_SNAPSHOT_GAS }),
+      ).takeSnapshot({ gasLimit: GAS.TAKE_SNAPSHOT }),
       this.networkService.environment,
     );
   }
@@ -1510,7 +1401,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await ERC1643__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).setDocument(name, uri, hash, { gasLimit: SET_DOCUMENT_GAS }),
+      ).setDocument(name, uri, hash, { gasLimit: GAS.SET_DOCUMENT }),
       this.networkService.environment,
     );
   }
@@ -1527,7 +1418,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await ERC1643__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).removeDocument(name, { gasLimit: REMOVE_DOCUMENT_GAS }),
+      ).removeDocument(name, { gasLimit: GAS.REMOVE_DOCUMENT }),
       this.networkService.environment,
     );
   }
@@ -1545,7 +1436,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).authorizeOperator(targetId.toString(), {
-        gasLimit: AUTHORIZE_OPERATOR_GAS,
+        gasLimit: GAS.AUTHORIZE_OPERATOR,
       }),
       this.networkService.environment,
     );
@@ -1562,7 +1453,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).revokeOperator(targetId.toString(), { gasLimit: REVOKE_OPERATOR_GAS }),
+      ).revokeOperator(targetId.toString(), { gasLimit: GAS.REVOKE_OPERATOR }),
       this.networkService.environment,
     );
   }
@@ -1580,7 +1471,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).authorizeOperatorByPartition(partitionId, targetId.toString(), {
-        gasLimit: AUTHORIZE_OPERATOR_GAS,
+        gasLimit: GAS.AUTHORIZE_OPERATOR,
       }),
       this.networkService.environment,
     );
@@ -1599,7 +1490,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).revokeOperatorByPartition(partitionId, targetId.toString(), {
-        gasLimit: REVOKE_OPERATOR_GAS,
+        gasLimit: GAS.REVOKE_OPERATOR,
       }),
       this.networkService.environment,
     );
@@ -1629,7 +1520,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).operatorTransferByPartition(operatorTransferData, {
-        gasLimit: TRANSFER_OPERATOR_GAS,
+        gasLimit: GAS.TRANSFER_OPERATOR,
       }),
       this.networkService.environment,
     );
@@ -1647,7 +1538,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Cap__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).setMaxSupply(maxSupply.toBigNumber(), { gasLimit: SET_MAX_SUPPLY_GAS }),
+      ).setMaxSupply(maxSupply.toBigNumber(), { gasLimit: GAS.SET_MAX_SUPPLY }),
       this.networkService.environment,
     );
   }
@@ -1664,7 +1555,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).triggerPendingScheduledTasks({
-        gasLimit: TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
+        gasLimit: GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
       }),
       this.networkService.environment,
     );
@@ -1682,7 +1573,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).triggerScheduledTasks(max.toBigNumber(), {
-        gasLimit: TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
+        gasLimit: GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
       }),
       this.networkService.environment,
     );
@@ -1708,7 +1599,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         sourceId.toString(),
         expirationDate.toBigNumber(),
         {
-          gasLimit: LOCK_GAS,
+          gasLimit: GAS.LOCK,
         },
       ),
       this.networkService.environment,
@@ -1733,7 +1624,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         lockId.toBigNumber(),
         sourceId.toString(),
         {
-          gasLimit: RELEASE_GAS,
+          gasLimit: GAS.RELEASE,
         },
       ),
       this.networkService.environment,
@@ -1753,7 +1644,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).updateConfigVersion(configVersion, {
-        gasLimit: UPDATE_CONFIG_VERSION_GAS,
+        gasLimit: GAS.UPDATE_CONFIG_VERSION,
       }),
       this.networkService.environment,
     );
@@ -1773,7 +1664,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).updateConfig(configId, configVersion, {
-        gasLimit: UPDATE_CONFIG_GAS,
+        gasLimit: GAS.UPDATE_CONFIG,
       }),
       this.networkService.environment,
     );
@@ -1794,7 +1685,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).updateResolver(resolver.toString(), configId, configVersion, {
-        gasLimit: UPDATE_RESOLVER_GAS,
+        gasLimit: GAS.UPDATE_RESOLVER,
       }),
       this.networkService.environment,
     );
@@ -1813,7 +1704,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).updateMaturityDate(maturityDate, {
-        gasLimit: UPDATE_MATURITY_DATE_GAS,
+        gasLimit: GAS.UPDATE_MATURITY_DATE,
       }),
       this.networkService.environment,
     );
@@ -1842,7 +1733,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).setScheduledBalanceAdjustment(scheduledBalanceAdjustmentStruct, {
-        gasLimit: SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
+        gasLimit: GAS.SET_SCHEDULED_BALANCE_ADJUSTMENT,
       }),
       this.networkService.environment,
       SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
@@ -1860,7 +1751,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await ProtectedPartitions__factory.connect(
         address.toString(),
         this.signerOrProvider,
-      ).protectPartitions({ gasLimit: PROTECT_PARTITION_GAS }),
+      ).protectPartitions({ gasLimit: GAS.PROTECT_PARTITION }),
       this.networkService.environment,
     );
   }
@@ -1890,7 +1781,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         nounce.toBigNumber(),
         signature,
         {
-          gasLimit: PROTECTED_REDEEM_GAS,
+          gasLimit: GAS.PROTECTED_REDEEM,
         },
       ),
       this.networkService.environment,
@@ -1908,7 +1799,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await ProtectedPartitions__factory.connect(
         address.toString(),
         this.signerOrProvider,
-      ).unprotectPartitions({ gasLimit: UNPROTECT_PARTITION_GAS }),
+      ).unprotectPartitions({ gasLimit: GAS.UNPROTECT_PARTITION }),
       this.networkService.environment,
     );
   }
@@ -1947,7 +1838,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         nounce.toBigNumber(),
         signature,
         {
-          gasLimit: PROTECTED_TRANSFER_AND_LOCK_GAS,
+          gasLimit: GAS.PROTECTED_TRANSFER_AND_LOCK,
         },
       ),
       this.networkService.environment,
@@ -1981,7 +1872,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         nounce.toBigNumber(),
         signature,
         {
-          gasLimit: PROTECTED_TRANSFER_GAS,
+          gasLimit: GAS.PROTECTED_TRANSFER,
         },
       ),
       this.networkService.environment,
@@ -2012,7 +1903,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).createHoldByPartition(partitionId, hold, {
-        gasLimit: CREATE_HOLD_GAS,
+        gasLimit: GAS.CREATE_HOLD,
       }),
       this.networkService.environment,
     );
@@ -2048,7 +1939,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         hold,
         '0x',
         {
-          gasLimit: CREATE_HOLD_FROM_GAS,
+          gasLimit: GAS.CREATE_HOLD_FROM,
         },
       ),
       this.networkService.environment,
@@ -2085,7 +1976,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         hold,
         '0x',
         {
-          gasLimit: CONTROLLER_CREATE_HOLD_GAS,
+          gasLimit: GAS.CONTROLLER_CREATE_HOLD,
         },
       ),
       this.networkService.environment,
@@ -2131,7 +2022,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         protectedHold,
         signature,
         {
-          gasLimit: PROTECTED_CREATE_HOLD_GAS,
+          gasLimit: GAS.PROTECTED_CREATE_HOLD,
         },
       ),
       this.networkService.environment,
@@ -2160,7 +2051,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).releaseHoldByPartition(holdIdentifier, amount.toBigNumber(), {
-        gasLimit: RELEASE_HOLD_GAS,
+        gasLimit: GAS.RELEASE_HOLD,
       }),
       this.networkService.environment,
     );
@@ -2187,7 +2078,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).reclaimHoldByPartition(holdIdentifier, {
-        gasLimit: RECLAIM_HOLD_GAS,
+        gasLimit: GAS.RECLAIM_HOLD,
       }),
       this.networkService.environment,
     );
@@ -2220,7 +2111,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         targetId.toString(),
         amount.toBigNumber(),
         {
-          gasLimit: EXECUTE_HOLD_BY_PARTITION_GAS,
+          gasLimit: GAS.EXECUTE_HOLD_BY_PARTITION,
         },
       ),
       this.networkService.environment,
@@ -2240,7 +2131,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).setRevocationRegistryAddress(revocationRegistry.toString(), {
-        gasLimit: SET_REVOCATION_REGISTRY_GAS,
+        gasLimit: GAS.SET_REVOCATION_REGISTRY,
       }),
       this.networkService.environment,
     );
@@ -2257,7 +2148,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).addIssuer(issuer.toString(), {
-        gasLimit: ADD_ISSUER_GAS,
+        gasLimit: GAS.ADD_ISSUER,
       }),
       this.networkService.environment,
     );
@@ -2274,7 +2165,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).removeIssuer(issuer.toString(), {
-        gasLimit: REMOVE_ISSUER_GAS,
+        gasLimit: GAS.REMOVE_ISSUER,
       }),
       this.networkService.environment,
     );
@@ -2303,7 +2194,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         validTo.toBigNumber(),
         issuer.toString(),
         {
-          gasLimit: GRANT_KYC_GAS,
+          gasLimit: GAS.GRANT_KYC,
         },
       ),
       this.networkService.environment,
@@ -2321,7 +2212,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).revokeKyc(targetId.toString(), {
-        gasLimit: REVOKE_KYC_GAS,
+        gasLimit: GAS.REVOKE_KYC,
       }),
       this.networkService.environment,
     );
@@ -2337,7 +2228,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).activateClearing({
-        gasLimit: ACTIVATE_CLEARING_GAS,
+        gasLimit: GAS.ACTIVATE_CLEARING,
       }),
       this.networkService.environment,
     );
@@ -2353,7 +2244,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).deactivateClearing({
-        gasLimit: DEACTIVATE_CLEARING_GAS,
+        gasLimit: GAS.DEACTIVATE_CLEARING,
       }),
       this.networkService.environment,
     );
@@ -2385,7 +2276,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         amount.toBigNumber(),
         targetId.toString(),
         {
-          gasLimit: CLEARING_TRANSFER_BY_PARTITION,
+          gasLimit: GAS.CLEARING_TRANSFER_BY_PARTITION,
         },
       ),
       this.networkService.environment,
@@ -2423,7 +2314,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         amount.toBigNumber(),
         targetId.toString(),
         {
-          gasLimit: CLEARING_TRANSFER_FROM_BY_PARTITION,
+          gasLimit: GAS.CLEARING_TRANSFER_FROM_BY_PARTITION,
         },
       ),
       this.networkService.environment,
@@ -2466,7 +2357,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         targetId.toString(),
         signature,
         {
-          gasLimit: PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
+          gasLimit: GAS.PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
         },
       ),
       this.networkService.environment,
@@ -2498,7 +2389,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).approveClearingOperationByPartition(clearingOperationIdentifier, {
-        gasLimit: APPROVE_CLEARING_TRANSFER_BY_PARTITION,
+        gasLimit: GAS.APPROVE_CLEARING_TRANSFER_BY_PARTITION,
       }),
       this.networkService.environment,
     );
@@ -2529,7 +2420,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).cancelClearingOperationByPartition(clearingOperationIdentifier, {
-        gasLimit: CANCEL_CLEARING_TRANSFER_BY_PARTITION,
+        gasLimit: GAS.CANCEL_CLEARING_TRANSFER_BY_PARTITION,
       }),
       this.networkService.environment,
     );
@@ -2560,7 +2451,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).reclaimClearingOperationByPartition(clearingOperationIdentifier, {
-        gasLimit: RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
+        gasLimit: GAS.RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
       }),
       this.networkService.environment,
     );
@@ -2587,7 +2478,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).clearingRedeemByPartition(clearingOperation, amount.toBigNumber(), {
-        gasLimit: CLEARING_REDEEM_BY_PARTITION,
+        gasLimit: GAS.CLEARING_REDEEM_BY_PARTITION,
       }),
       this.networkService.environment,
     );
@@ -2622,7 +2513,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         clearingOperationFrom,
         amount.toBigNumber(),
         {
-          gasLimit: CLEARING_REDEEM_FROM_BY_PARTITION,
+          gasLimit: GAS.CLEARING_REDEEM_FROM_BY_PARTITION,
         },
       ),
       this.networkService.environment,
@@ -2663,7 +2554,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         amount.toBigNumber(),
         signature,
         {
-          gasLimit: PROTECTED_CLEARING_REDEEM_BY_PARTITION,
+          gasLimit: GAS.PROTECTED_CLEARING_REDEEM_BY_PARTITION,
         },
       ),
       this.networkService.environment,
@@ -2702,7 +2593,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).clearingCreateHoldByPartition(clearingOperation, hold, {
-        gasLimit: CLEARING_CREATE_HOLD_BY_PARTITION,
+        gasLimit: GAS.CLEARING_CREATE_HOLD_BY_PARTITION,
       }),
       this.networkService.environment,
     );
@@ -2745,7 +2636,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).clearingCreateHoldFromByPartition(clearingOperationFrom, hold, {
-        gasLimit: CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
+        gasLimit: GAS.CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
       }),
       this.networkService.environment,
     );
@@ -2796,7 +2687,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         hold,
         signature,
         {
-          gasLimit: PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
+          gasLimit: GAS.PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
         },
       ),
       this.networkService.environment,
@@ -2840,7 +2731,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold, {
-        gasLimit: OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
+        gasLimit: GAS.OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
       }),
       this.networkService.environment,
     );
@@ -2875,7 +2766,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         clearingOperationFrom,
         amount.toBigNumber(),
         {
-          gasLimit: OPERATOR_CLEARING_REDEEM_BY_PARTITION,
+          gasLimit: GAS.OPERATOR_CLEARING_REDEEM_BY_PARTITION,
         },
       ),
       this.networkService.environment,
@@ -2913,7 +2804,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         amount.toBigNumber(),
         targetId.toString(),
         {
-          gasLimit: OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
+          gasLimit: GAS.OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
         },
       ),
       this.networkService.environment,
@@ -2937,7 +2828,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         externalPausesAddresses.map((address) => address.toString()),
         actives,
         {
-          gasLimit: UPDATE_EXTERNAL_PAUSES_GAS,
+          gasLimit: GAS.UPDATE_EXTERNAL_PAUSES,
         },
       ),
       this.networkService.environment,
@@ -2957,7 +2848,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).addExternalPause(externalPauseAddress.toString(), {
-        gasLimit: ADD_EXTERNAL_PAUSE_GAS,
+        gasLimit: GAS.ADD_EXTERNAL_PAUSE,
       }),
       this.networkService.environment,
     );
@@ -2976,7 +2867,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).removeExternalPause(externalPauseAddress.toString(), {
-        gasLimit: REMOVE_EXTERNAL_PAUSE_GAS,
+        gasLimit: GAS.REMOVE_EXTERNAL_PAUSE,
       }),
       this.networkService.environment,
     );
@@ -2995,7 +2886,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         contract.toString(),
         this.signerOrProvider,
       ).setPaused(paused, {
-        gasLimit: SET_PAUSED_MOCK_GAS,
+        gasLimit: GAS.SET_PAUSED_MOCK,
       }),
       this.networkService.environment,
     );
@@ -3009,7 +2900,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const contract = await factory.deploy({
-      gasLimit: CREATE_EXTERNAL_PAUSE_MOCK_GAS,
+      gasLimit: GAS.CREATE_EXTERNAL_PAUSE_MOCK,
     });
     await contract.deployed();
 
@@ -3033,7 +2924,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         externalControlListsAddresses.map((address) => address.toString()),
         actives,
         {
-          gasLimit: UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
+          gasLimit: GAS.UPDATE_EXTERNAL_CONTROL_LISTS,
         },
       ),
       this.networkService.environment,
@@ -3053,7 +2944,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).addExternalControlList(externalControlListAddress.toString(), {
-        gasLimit: ADD_EXTERNAL_CONTROL_LIST_GAS,
+        gasLimit: GAS.ADD_EXTERNAL_CONTROL_LIST,
       }),
       this.networkService.environment,
     );
@@ -3072,7 +2963,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).removeExternalControlList(externalControlListAddress.toString(), {
-        gasLimit: REMOVE_EXTERNAL_CONTROL_LIST_GAS,
+        gasLimit: GAS.REMOVE_EXTERNAL_CONTROL_LIST,
       }),
       this.networkService.environment,
     );
@@ -3091,7 +2982,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         contract.toString(),
         this.signerOrProvider,
       ).addToBlacklist(targetId.toString(), {
-        gasLimit: ADD_TO_BLACK_LIST_MOCK_GAS,
+        gasLimit: GAS.ADD_TO_BLACK_LIST_MOCK,
       }),
       this.networkService.environment,
     );
@@ -3110,7 +3001,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         contract.toString(),
         this.signerOrProvider,
       ).addToWhitelist(targetId.toString(), {
-        gasLimit: ADD_TO_WHITE_LIST_MOCK_GAS,
+        gasLimit: GAS.ADD_TO_WHITE_LIST_MOCK,
       }),
       this.networkService.environment,
     );
@@ -3129,7 +3020,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         contract.toString(),
         this.signerOrProvider,
       ).removeFromBlacklist(targetId.toString(), {
-        gasLimit: REMOVE_FROM_BLACK_LIST_MOCK_GAS,
+        gasLimit: GAS.REMOVE_FROM_BLACK_LIST_MOCK,
       }),
       this.networkService.environment,
     );
@@ -3148,7 +3039,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         contract.toString(),
         this.signerOrProvider,
       ).removeFromWhitelist(targetId.toString(), {
-        gasLimit: REMOVE_FROM_WHITE_LIST_MOCK_GAS,
+        gasLimit: GAS.REMOVE_FROM_WHITE_LIST_MOCK,
       }),
       this.networkService.environment,
     );
@@ -3162,7 +3053,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const contract = await factory.deploy({
-      gasLimit: CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
+      gasLimit: GAS.CREATE_EXTERNAL_BLACK_LIST_MOCK,
     });
     await contract.deployed();
 
@@ -3177,7 +3068,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const contract = await factory.deploy({
-      gasLimit: CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
+      gasLimit: GAS.CREATE_EXTERNAL_WHITE_LIST_MOCK,
     });
     await contract.deployed();
 
@@ -3201,7 +3092,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         externalKycListsAddresses.map((address) => address.toString()),
         actives,
         {
-          gasLimit: UPDATE_EXTERNAL_KYC_LISTS_GAS,
+          gasLimit: GAS.UPDATE_EXTERNAL_KYC_LISTS,
         },
       ),
       this.networkService.environment,
@@ -3221,7 +3112,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).addExternalKycList(externalKycListAddress.toString(), {
-        gasLimit: ADD_EXTERNAL_KYC_LIST_GAS,
+        gasLimit: GAS.ADD_EXTERNAL_KYC_LIST,
       }),
       this.networkService.environment,
     );
@@ -3240,7 +3131,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).removeExternalKycList(externalKycListAddress.toString(), {
-        gasLimit: REMOVE_EXTERNAL_KYC_LIST_GAS,
+        gasLimit: GAS.REMOVE_EXTERNAL_KYC_LIST,
       }),
       this.networkService.environment,
     );
@@ -3259,7 +3150,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         contract.toString(),
         this.signerOrProvider,
       ).grantKyc(targetId.toString(), {
-        gasLimit: GRANT_KYC_MOCK_GAS,
+        gasLimit: GAS.GRANT_KYC_MOCK,
       }),
       this.networkService.environment,
     );
@@ -3278,7 +3169,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         contract.toString(),
         this.signerOrProvider,
       ).revokeKyc(targetId.toString(), {
-        gasLimit: REVOKE_KYC_MOCK_GAS,
+        gasLimit: GAS.REVOKE_KYC_MOCK,
       }),
       this.networkService.environment,
     );
@@ -3292,7 +3183,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const contract = await factory.deploy({
-      gasLimit: CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
+      gasLimit: GAS.CREATE_EXTERNAL_KYC_LIST_MOCK,
     });
     await contract.deployed();
 
@@ -3311,7 +3202,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).activateInternalKyc({
-        gasLimit: ACTIVATE_INTERNAL_KYC_GAS,
+        gasLimit: GAS.ACTIVATE_INTERNAL_KYC,
       }),
       this.networkService.environment,
     );
@@ -3329,7 +3220,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).deactivateInternalKyc({
-        gasLimit: DEACTIVATE_INTERNAL_KYC_GAS,
+        gasLimit: GAS.DEACTIVATE_INTERNAL_KYC,
       }),
       this.networkService.environment,
     );
@@ -3345,7 +3236,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).setName(name, {
-        gasLimit: SET_NAME_GAS,
+        gasLimit: GAS.SET_NAME,
       }),
       this.networkService.environment,
     );
@@ -3360,7 +3251,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).setName(symbol, {
-        gasLimit: SET_SYMBOL_GAS,
+        gasLimit: GAS.SET_SYMBOL,
       }),
       this.networkService.environment,
     );
@@ -3377,7 +3268,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).setOnchainID(onchainID.toString(), {
-        gasLimit: SET_ONCHAIN_ID_GAS,
+        gasLimit: GAS.SET_ONCHAIN_ID,
       }),
       this.networkService.environment,
     );
@@ -3394,7 +3285,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).setIdentityRegistry(identityRegistry.toString(), {
-        gasLimit: SET_IDENTITY_REGISTRY_GAS,
+        gasLimit: GAS.SET_IDENTITY_REGISTRY,
       }),
       this.networkService.environment,
     );
@@ -3411,7 +3302,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).setCompliance(compliance.toString(), {
-        gasLimit: SET_COMPLIANCE_GAS,
+        gasLimit: GAS.SET_COMPLIANCE,
       }),
       this.networkService.environment,
     );
@@ -3431,7 +3322,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).freezePartialTokens(targetId.toString(), amount.toBigNumber(), {
-        gasLimit: FREEZE_PARTIAL_TOKENS_GAS,
+        gasLimit: GAS.FREEZE_PARTIAL_TOKENS,
       }),
       this.networkService.environment,
     );
@@ -3451,7 +3342,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).unfreezePartialTokens(targetId.toString(), amount.toBigNumber(), {
-        gasLimit: UNFREEZE_PARTIAL_TOKENS_GAS,
+        gasLimit: GAS.UNFREEZE_PARTIAL_TOKENS,
       }),
       this.networkService.environment,
     );
@@ -3475,7 +3366,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         newWallet.toString(),
         EVM_ZERO_ADDRESS,
         {
-          gasLimit: RECOVERY_ADDRESS_GAS,
+          gasLimit: GAS.RECOVERY_ADDRESS,
         },
       ),
       this.networkService.environment,
@@ -3493,7 +3384,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).addAgent(agentId.toString(), {
-        gasLimit: ADD_AGENT_GAS,
+        gasLimit: GAS.ADD_AGENT,
       }),
       this.networkService.environment,
     );
@@ -3510,7 +3401,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).removeAgent(agentId.toString(), {
-        gasLimit: REMOVE_AGENT_GAS,
+        gasLimit: GAS.REMOVE_AGENT,
       }),
       this.networkService.environment,
     );
@@ -3534,7 +3425,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       toList.map((account) => account.toString()),
       amountList.map((item) => item.toBigNumber()),
       {
-        gasLimit: BATCH_TRANSFER_GAS,
+        gasLimit: GAS.BATCH_TRANSFER,
       },
     );
 
@@ -3564,7 +3455,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       toList.map((item) => item.toString()),
       amountList.map((item) => item.toBigNumber()),
       {
-        gasLimit: BATCH_FORCED_TRANSFER_GAS,
+        gasLimit: GAS.BATCH_FORCED_TRANSFER,
       },
     );
 
@@ -3592,7 +3483,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       toList.map((item) => item.toString()),
       amountList.map((item) => item.toBigNumber()),
       {
-        gasLimit: BATCH_MINT_GAS,
+        gasLimit: GAS.BATCH_MINT,
       },
     );
 
@@ -3620,7 +3511,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       targetList.map((item) => item.toString()),
       amountList.map((item) => item.toBigNumber()),
       {
-        gasLimit: BATCH_BURN_GAS,
+        gasLimit: GAS.BATCH_BURN,
       },
     );
 
@@ -3648,7 +3539,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       targetList.map((item) => item.toString()),
       freezeList,
       {
-        gasLimit: BATCH_SET_ADDRESS_FROZEN_GAS,
+        gasLimit: GAS.BATCH_SET_ADDRESS_FROZEN,
       },
     );
 
@@ -3676,7 +3567,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       targetList.map((item) => item.toString()),
       amountList.map((item) => item.toBigNumber()),
       {
-        gasLimit: BATCH_FREEZE_PARTIAL_TOKENS_GAS,
+        gasLimit: GAS.BATCH_FREEZE_PARTIAL_TOKENS,
       },
     );
 
@@ -3704,7 +3595,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       targetList.map((item) => item.toString()),
       amountList.map((item) => item.toBigNumber()),
       {
-        gasLimit: BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
+        gasLimit: GAS.BATCH_UNFREEZE_PARTIAL_TOKENS,
       },
     );
 
@@ -3727,7 +3618,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       this.signerOrProvider,
     );
     const tx = await contract.setAddressFrozen(target.toString(), status, {
-      gasLimit: SET_ADDRESS_FROZEN_GAS,
+      gasLimit: GAS.SET_ADDRESS_FROZEN,
     });
 
     return RPCTransactionResponseAdapter.manageResponse(

@@ -247,118 +247,7 @@ import {
   ERC3643__factory,
   FreezeFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
-import {
-  _PARTITION_ID_1,
-  ADD_ISSUER_GAS,
-  ADD_TO_CONTROL_LIST_GAS,
-  AUTHORIZE_OPERATOR_GAS,
-  CONTROLLER_CREATE_HOLD_GAS,
-  CONTROLLER_REDEEM_GAS,
-  CONTROLLER_TRANSFER_GAS,
-  CREATE_BOND_ST_GAS,
-  CREATE_EQUITY_ST_GAS,
-  CREATE_HOLD_FROM_GAS,
-  CREATE_HOLD_GAS,
-  GRANT_ROLES_GAS,
-  ISSUE_GAS,
-  LOCK_GAS,
-  MAX_ROLES_GAS,
-  PAUSE_GAS,
-  PROTECT_PARTITION_GAS,
-  PROTECTED_CREATE_HOLD_GAS,
-  PROTECTED_REDEEM_GAS,
-  PROTECTED_TRANSFER_AND_LOCK_GAS,
-  PROTECTED_TRANSFER_GAS,
-  RECLAIM_HOLD_GAS,
-  REDEEM_GAS,
-  RELEASE_GAS,
-  RELEASE_HOLD_GAS,
-  REMOVE_DOCUMENT_GAS,
-  REMOVE_FROM_CONTROL_LIST_GAS,
-  REMOVE_ISSUER_GAS,
-  RENOUNCE_ROLES_GAS,
-  REVOKE_OPERATOR_GAS,
-  SET_COUPON_GAS,
-  SET_DIVIDENDS_GAS,
-  SET_DOCUMENT_GAS,
-  SET_MAX_SUPPLY_GAS,
-  SET_REVOCATION_REGISTRY_GAS,
-  SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
-  SET_VOTING_RIGHTS_GAS,
-  TAKE_SNAPSHOT_GAS,
-  TRANSFER_AND_LOCK_GAS,
-  TRANSFER_GAS,
-  TRANSFER_OPERATOR_GAS,
-  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
-  UNPAUSE_GAS,
-  UNPROTECT_PARTITION_GAS,
-  UPDATE_CONFIG_GAS,
-  UPDATE_CONFIG_VERSION_GAS,
-  UPDATE_MATURITY_DATE_GAS,
-  UPDATE_RESOLVER_GAS,
-  EXECUTE_HOLD_BY_PARTITION_GAS,
-  GRANT_KYC_GAS,
-  REVOKE_KYC_GAS,
-  ACTIVATE_CLEARING_GAS,
-  CLEARING_TRANSFER_FROM_BY_PARTITION,
-  CLEARING_TRANSFER_BY_PARTITION,
-  PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
-  APPROVE_CLEARING_TRANSFER_BY_PARTITION,
-  RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
-  CANCEL_CLEARING_TRANSFER_BY_PARTITION,
-  CLEARING_REDEEM_BY_PARTITION,
-  CLEARING_REDEEM_FROM_BY_PARTITION,
-  PROTECTED_CLEARING_REDEEM_BY_PARTITION,
-  CLEARING_CREATE_HOLD_BY_PARTITION,
-  CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
-  PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
-  OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
-  OPERATOR_CLEARING_REDEEM_BY_PARTITION,
-  OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
-  UPDATE_EXTERNAL_PAUSES_GAS,
-  REMOVE_EXTERNAL_PAUSE_GAS,
-  ADD_EXTERNAL_PAUSE_GAS,
-  CREATE_EXTERNAL_PAUSE_MOCK_GAS,
-  SET_PAUSED_MOCK_GAS,
-  UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
-  ADD_EXTERNAL_CONTROL_LIST_GAS,
-  REMOVE_EXTERNAL_CONTROL_LIST_GAS,
-  ADD_TO_BLACK_LIST_MOCK_GAS,
-  ADD_TO_WHITE_LIST_MOCK_GAS,
-  REMOVE_FROM_BLACK_LIST_MOCK_GAS,
-  REMOVE_FROM_WHITE_LIST_MOCK_GAS,
-  CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
-  CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
-  UPDATE_EXTERNAL_KYC_LISTS_GAS,
-  REMOVE_EXTERNAL_KYC_LIST_GAS,
-  ADD_EXTERNAL_KYC_LIST_GAS,
-  GRANT_KYC_MOCK_GAS,
-  REVOKE_KYC_MOCK_GAS,
-  CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
-  ACTIVATE_INTERNAL_KYC_GAS,
-  DEACTIVATE_INTERNAL_KYC_GAS,
-  SET_NAME_GAS,
-  SET_SYMBOL_GAS,
-  BURN_GAS,
-  MINT_GAS,
-  FORCED_TRANSFER_GAS,
-  UNFREEZE_PARTIAL_TOKENS_GAS,
-  FREEZE_PARTIAL_TOKENS_GAS,
-  SET_ONCHAIN_ID_GAS,
-  SET_IDENTITY_REGISTRY_GAS,
-  SET_COMPLIANCE_GAS,
-  EVM_ZERO_ADDRESS,
-  RECOVERY_ADDRESS_GAS,
-  ADD_AGENT_GAS,
-  SET_ADDRESS_FROZEN_GAS,
-  BATCH_BURN_GAS,
-  BATCH_FORCED_TRANSFER_GAS,
-  BATCH_FREEZE_PARTIAL_TOKENS_GAS,
-  BATCH_MINT_GAS,
-  BATCH_SET_ADDRESS_FROZEN_GAS,
-  BATCH_TRANSFER_GAS,
-  BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
-} from '@core/Constants';
+import { _PARTITION_ID_1, EVM_ZERO_ADDRESS, GAS } from '@core/Constants';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter';
 import { SigningError } from '../error/SigningError';
@@ -580,7 +469,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       );
       const transaction = new ContractExecuteTransaction()
         .setContractId(factoryId!)
-        .setGas(CREATE_EQUITY_ST_GAS)
+        .setGas(GAS.CREATE_EQUITY_ST)
         .setFunctionParameters(functionDataEncoded);
 
       return this.signAndSendTransaction(transaction);
@@ -702,7 +591,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       );
       const transaction = new ContractExecuteTransaction()
         .setContractId(factoryId!)
-        .setGas(CREATE_BOND_ST_GAS)
+        .setGas(GAS.CREATE_BOND_ST)
         .setFunctionParameters(functionDataEncoded);
 
       return this.signAndSendTransaction(transaction);
@@ -743,7 +632,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(TRANSFER_GAS)
+      .setGas(GAS.TRANSFER)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -779,7 +668,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(TRANSFER_AND_LOCK_GAS)
+      .setGas(GAS.TRANSFER_AND_LOCK)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -807,7 +696,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(REDEEM_GAS)
+      .setGas(GAS.REDEEM)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -834,7 +723,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(BURN_GAS)
+      .setGas(GAS.BURN)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -851,7 +740,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const functionParameters = new ContractFunctionParameters();
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(PAUSE_GAS)
+      .setGas(GAS.PAUSE)
       .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
@@ -868,7 +757,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const functionParameters = new ContractFunctionParameters();
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(UNPAUSE_GAS)
+      .setGas(GAS.UNPAUSE)
       .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
@@ -894,7 +783,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(GRANT_ROLES_GAS)
+      .setGas(GAS.GRANT_ROLES)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -908,8 +797,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'applyRoles';
-    let gas = roles.length * GRANT_ROLES_GAS;
-    gas = gas > MAX_ROLES_GAS ? MAX_ROLES_GAS : gas;
+    let gas = roles.length * GAS.GRANT_ROLES;
+    gas = gas > GAS.MAX_ROLES ? GAS.MAX_ROLES : gas;
 
     const functionDataEncodedHex = new Interface(
       AccessControl__factory.abi,
@@ -946,7 +835,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(GRANT_ROLES_GAS)
+      .setGas(GAS.GRANT_ROLES)
       .setFunctionParameters(functionDataEncoded);
     return this.signAndSendTransaction(transaction);
   }
@@ -968,7 +857,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(RENOUNCE_ROLES_GAS)
+      .setGas(GAS.RENOUNCE_ROLES)
       .setFunctionParameters(functionDataEncoded);
     return this.signAndSendTransaction(transaction);
   }
@@ -1004,7 +893,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ISSUE_GAS)
+      .setGas(GAS.ISSUE)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1032,7 +921,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(MINT_GAS)
+      .setGas(GAS.MINT)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1060,7 +949,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ADD_TO_CONTROL_LIST_GAS)
+      .setGas(GAS.ADD_TO_CONTROL_LIST)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1088,7 +977,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(REMOVE_FROM_CONTROL_LIST_GAS)
+      .setGas(GAS.REMOVE_FROM_CONTROL_LIST)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1125,7 +1014,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CONTROLLER_TRANSFER_GAS)
+      .setGas(GAS.CONTROLLER_TRANSFER)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1154,7 +1043,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(FORCED_TRANSFER_GAS)
+      .setGas(GAS.FORCED_TRANSFER)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1183,7 +1072,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CONTROLLER_REDEEM_GAS)
+      .setGas(GAS.CONTROLLER_REDEEM)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1218,7 +1107,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_DIVIDENDS_GAS)
+      .setGas(GAS.SET_DIVIDENDS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1249,7 +1138,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_VOTING_RIGHTS_GAS)
+      .setGas(GAS.SET_VOTING_RIGHTS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1284,7 +1173,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_COUPON_GAS)
+      .setGas(GAS.SET_COUPON)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1310,7 +1199,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(TAKE_SNAPSHOT_GAS)
+      .setGas(GAS.TAKE_SNAPSHOT)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1341,7 +1230,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_DOCUMENT_GAS)
+      .setGas(GAS.SET_DOCUMENT)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1370,7 +1259,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(REMOVE_DOCUMENT_GAS)
+      .setGas(GAS.REMOVE_DOCUMENT)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1401,7 +1290,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(AUTHORIZE_OPERATOR_GAS)
+      .setGas(GAS.AUTHORIZE_OPERATOR)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1432,7 +1321,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(REVOKE_OPERATOR_GAS)
+      .setGas(GAS.REVOKE_OPERATOR)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1464,7 +1353,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(AUTHORIZE_OPERATOR_GAS)
+      .setGas(GAS.AUTHORIZE_OPERATOR)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1496,7 +1385,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(REVOKE_OPERATOR_GAS)
+      .setGas(GAS.REVOKE_OPERATOR)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1539,7 +1428,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(TRANSFER_OPERATOR_GAS)
+      .setGas(GAS.TRANSFER_OPERATOR)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1568,7 +1457,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_MAX_SUPPLY_GAS)
+      .setGas(GAS.SET_MAX_SUPPLY)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1596,7 +1485,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS)
+      .setGas(GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1627,7 +1516,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS)
+      .setGas(GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1663,7 +1552,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(LOCK_GAS)
+      .setGas(GAS.LOCK)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1693,7 +1582,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(RELEASE_GAS)
+      .setGas(GAS.RELEASE)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1722,7 +1611,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(UPDATE_CONFIG_VERSION_GAS)
+      .setGas(GAS.UPDATE_CONFIG_VERSION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1753,7 +1642,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(UPDATE_CONFIG_GAS)
+      .setGas(GAS.UPDATE_CONFIG)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1786,7 +1675,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(UPDATE_RESOLVER_GAS)
+      .setGas(GAS.UPDATE_RESOLVER)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1811,7 +1700,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(UPDATE_MATURITY_DATE_GAS)
+      .setGas(GAS.UPDATE_MATURITY_DATE)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1846,7 +1735,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS)
+      .setGas(GAS.SET_SCHEDULED_BALANCE_ADJUSTMENT)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1865,7 +1754,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(PROTECT_PARTITION_GAS)
+      .setGas(GAS.PROTECT_PARTITION)
       .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
@@ -1884,7 +1773,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(UNPROTECT_PARTITION_GAS)
+      .setGas(GAS.UNPROTECT_PARTITION)
       .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
@@ -1927,7 +1816,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(PROTECTED_REDEEM_GAS)
+      .setGas(GAS.PROTECTED_REDEEM)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -1972,7 +1861,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(PROTECTED_TRANSFER_GAS)
+      .setGas(GAS.PROTECTED_TRANSFER)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2022,7 +1911,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(PROTECTED_TRANSFER_AND_LOCK_GAS)
+      .setGas(GAS.PROTECTED_TRANSFER_AND_LOCK)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2062,7 +1951,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CREATE_HOLD_GAS)
+      .setGas(GAS.CREATE_HOLD)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2103,7 +1992,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CREATE_HOLD_FROM_GAS)
+      .setGas(GAS.CREATE_HOLD_FROM)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2144,7 +2033,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CONTROLLER_CREATE_HOLD_GAS)
+      .setGas(GAS.CONTROLLER_CREATE_HOLD)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2194,7 +2083,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(PROTECTED_CREATE_HOLD_GAS)
+      .setGas(GAS.PROTECTED_CREATE_HOLD)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2231,7 +2120,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(RELEASE_HOLD_GAS)
+      .setGas(GAS.RELEASE_HOLD)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2265,7 +2154,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(RECLAIM_HOLD_GAS)
+      .setGas(GAS.RECLAIM_HOLD)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2304,7 +2193,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(EXECUTE_HOLD_BY_PARTITION_GAS)
+      .setGas(GAS.EXECUTE_HOLD_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2333,7 +2222,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ADD_ISSUER_GAS)
+      .setGas(GAS.ADD_ISSUER)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2364,7 +2253,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_REVOCATION_REGISTRY_GAS)
+      .setGas(GAS.SET_REVOCATION_REGISTRY)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2393,7 +2282,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(REMOVE_ISSUER_GAS)
+      .setGas(GAS.REMOVE_ISSUER)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2432,7 +2321,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(GRANT_KYC_GAS)
+      .setGas(GAS.GRANT_KYC)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2459,7 +2348,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(REVOKE_KYC_GAS)
+      .setGas(GAS.REVOKE_KYC)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2476,7 +2365,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ACTIVATE_CLEARING_GAS)
+      .setGas(GAS.ACTIVATE_CLEARING)
       .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
@@ -2495,7 +2384,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ACTIVATE_CLEARING_GAS)
+      .setGas(GAS.ACTIVATE_CLEARING)
       .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
@@ -2535,7 +2424,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CLEARING_TRANSFER_BY_PARTITION)
+      .setGas(GAS.CLEARING_TRANSFER_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2580,7 +2469,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CLEARING_TRANSFER_FROM_BY_PARTITION)
+      .setGas(GAS.CLEARING_TRANSFER_FROM_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2634,7 +2523,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(PROTECTED_CLEARING_TRANSFER_BY_PARTITION)
+      .setGas(GAS.PROTECTED_CLEARING_TRANSFER_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2677,7 +2566,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(APPROVE_CLEARING_TRANSFER_BY_PARTITION)
+      .setGas(GAS.APPROVE_CLEARING_TRANSFER_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2720,7 +2609,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CANCEL_CLEARING_TRANSFER_BY_PARTITION)
+      .setGas(GAS.CANCEL_CLEARING_TRANSFER_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2763,7 +2652,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(RECLAIM_CLEARING_TRANSFER_BY_PARTITION)
+      .setGas(GAS.RECLAIM_CLEARING_TRANSFER_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2802,7 +2691,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CLEARING_REDEEM_BY_PARTITION)
+      .setGas(GAS.CLEARING_REDEEM_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2846,7 +2735,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CLEARING_REDEEM_FROM_BY_PARTITION)
+      .setGas(GAS.CLEARING_REDEEM_FROM_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2894,7 +2783,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(PROTECTED_CLEARING_REDEEM_BY_PARTITION)
+      .setGas(GAS.PROTECTED_CLEARING_REDEEM_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2944,7 +2833,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CLEARING_CREATE_HOLD_BY_PARTITION)
+      .setGas(GAS.CLEARING_CREATE_HOLD_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -2999,7 +2888,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(CLEARING_CREATE_HOLD_FROM_BY_PARTITION)
+      .setGas(GAS.CLEARING_CREATE_HOLD_FROM_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3058,7 +2947,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION)
+      .setGas(GAS.PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3113,7 +3002,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION)
+      .setGas(GAS.OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3157,7 +3046,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(OPERATOR_CLEARING_REDEEM_BY_PARTITION)
+      .setGas(GAS.OPERATOR_CLEARING_REDEEM_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3202,7 +3091,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(OPERATOR_CLEARING_TRANSFER_BY_PARTITION)
+      .setGas(GAS.OPERATOR_CLEARING_TRANSFER_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3234,7 +3123,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(UPDATE_EXTERNAL_PAUSES_GAS)
+      .setGas(GAS.UPDATE_EXTERNAL_PAUSES)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3265,7 +3154,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ADD_EXTERNAL_PAUSE_GAS)
+      .setGas(GAS.ADD_EXTERNAL_PAUSE)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3296,7 +3185,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(REMOVE_EXTERNAL_PAUSE_GAS)
+      .setGas(GAS.REMOVE_EXTERNAL_PAUSE)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3327,7 +3216,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(contractId)
-      .setGas(SET_PAUSED_MOCK_GAS)
+      .setGas(GAS.SET_PAUSED_MOCK)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3343,7 +3232,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const contractCreate = new ContractCreateTransaction()
       .setBytecode(bytecode)
-      .setGas(CREATE_EXTERNAL_PAUSE_MOCK_GAS);
+      .setGas(GAS.CREATE_EXTERNAL_PAUSE_MOCK);
 
     return this.signAndSendTransaction(contractCreate);
   }
@@ -3377,7 +3266,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(UPDATE_EXTERNAL_CONTROL_LISTS_GAS)
+      .setGas(GAS.UPDATE_EXTERNAL_CONTROL_LISTS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3408,7 +3297,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ADD_EXTERNAL_CONTROL_LIST_GAS)
+      .setGas(GAS.ADD_EXTERNAL_CONTROL_LIST)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3439,7 +3328,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(REMOVE_EXTERNAL_CONTROL_LIST_GAS)
+      .setGas(GAS.REMOVE_EXTERNAL_CONTROL_LIST)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3470,7 +3359,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(contractId)
-      .setGas(ADD_TO_BLACK_LIST_MOCK_GAS)
+      .setGas(GAS.ADD_TO_BLACK_LIST_MOCK)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3501,7 +3390,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(contractId)
-      .setGas(ADD_TO_WHITE_LIST_MOCK_GAS)
+      .setGas(GAS.ADD_TO_WHITE_LIST_MOCK)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3532,7 +3421,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(contractId)
-      .setGas(REMOVE_FROM_BLACK_LIST_MOCK_GAS)
+      .setGas(GAS.REMOVE_FROM_BLACK_LIST_MOCK)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3563,7 +3452,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(contractId)
-      .setGas(REMOVE_FROM_WHITE_LIST_MOCK_GAS)
+      .setGas(GAS.REMOVE_FROM_WHITE_LIST_MOCK)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3579,7 +3468,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const contractCreate = new ContractCreateTransaction()
       .setBytecode(bytecode)
-      .setGas(CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS);
+      .setGas(GAS.CREATE_EXTERNAL_BLACK_LIST_MOCK);
 
     return this.signAndSendTransaction(contractCreate);
   }
@@ -3594,7 +3483,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const contractCreate = new ContractCreateTransaction()
       .setBytecode(bytecode)
-      .setGas(CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS);
+      .setGas(GAS.CREATE_EXTERNAL_WHITE_LIST_MOCK);
 
     return this.signAndSendTransaction(contractCreate);
   }
@@ -3625,7 +3514,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(UPDATE_EXTERNAL_KYC_LISTS_GAS)
+      .setGas(GAS.UPDATE_EXTERNAL_KYC_LISTS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3656,7 +3545,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ADD_EXTERNAL_KYC_LIST_GAS)
+      .setGas(GAS.ADD_EXTERNAL_KYC_LIST)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3687,7 +3576,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(REMOVE_EXTERNAL_KYC_LIST_GAS)
+      .setGas(GAS.REMOVE_EXTERNAL_KYC_LIST)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3718,7 +3607,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(contractId)
-      .setGas(GRANT_KYC_MOCK_GAS)
+      .setGas(GAS.GRANT_KYC_MOCK)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3749,7 +3638,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(contractId)
-      .setGas(REVOKE_KYC_MOCK_GAS)
+      .setGas(GAS.REVOKE_KYC_MOCK)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3765,7 +3654,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const contractCreate = new ContractCreateTransaction()
       .setBytecode(bytecode)
-      .setGas(CREATE_EXTERNAL_KYC_LIST_MOCK_GAS);
+      .setGas(GAS.CREATE_EXTERNAL_KYC_LIST_MOCK);
 
     return this.signAndSendTransaction(contractCreate);
   }
@@ -3783,7 +3672,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ACTIVATE_INTERNAL_KYC_GAS)
+      .setGas(GAS.ACTIVATE_INTERNAL_KYC)
       .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
@@ -3802,7 +3691,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(DEACTIVATE_INTERNAL_KYC_GAS)
+      .setGas(GAS.DEACTIVATE_INTERNAL_KYC)
       .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
@@ -3827,7 +3716,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_NAME_GAS)
+      .setGas(GAS.SET_NAME)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3851,7 +3740,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_SYMBOL_GAS)
+      .setGas(GAS.SET_SYMBOL)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3878,7 +3767,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_ONCHAIN_ID_GAS)
+      .setGas(GAS.SET_ONCHAIN_ID)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3905,7 +3794,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_IDENTITY_REGISTRY_GAS)
+      .setGas(GAS.SET_IDENTITY_REGISTRY)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3932,7 +3821,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_COMPLIANCE_GAS)
+      .setGas(GAS.SET_COMPLIANCE)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3962,7 +3851,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(FREEZE_PARTIAL_TOKENS_GAS)
+      .setGas(GAS.FREEZE_PARTIAL_TOKENS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -3992,7 +3881,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(UNFREEZE_PARTIAL_TOKENS_GAS)
+      .setGas(GAS.UNFREEZE_PARTIAL_TOKENS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4021,7 +3910,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(RECOVERY_ADDRESS_GAS)
+      .setGas(GAS.RECOVERY_ADDRESS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4047,7 +3936,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ADD_AGENT_GAS)
+      .setGas(GAS.ADD_AGENT)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4073,7 +3962,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(ADD_AGENT_GAS)
+      .setGas(GAS.ADD_AGENT)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4105,7 +3994,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(BATCH_TRANSFER_GAS)
+      .setGas(GAS.BATCH_TRANSFER)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4139,7 +4028,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(BATCH_FORCED_TRANSFER_GAS)
+      .setGas(GAS.BATCH_FORCED_TRANSFER)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4171,7 +4060,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(BATCH_MINT_GAS)
+      .setGas(GAS.BATCH_MINT)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4203,7 +4092,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(BATCH_BURN_GAS)
+      .setGas(GAS.BATCH_BURN)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4234,7 +4123,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(BATCH_SET_ADDRESS_FROZEN_GAS)
+      .setGas(GAS.BATCH_SET_ADDRESS_FROZEN)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4268,7 +4157,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(BATCH_FREEZE_PARTIAL_TOKENS_GAS)
+      .setGas(GAS.BATCH_FREEZE_PARTIAL_TOKENS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4302,7 +4191,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(BATCH_UNFREEZE_PARTIAL_TOKENS_GAS)
+      .setGas(GAS.BATCH_UNFREEZE_PARTIAL_TOKENS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
@@ -4331,7 +4220,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_ADDRESS_FROZEN_GAS)
+      .setGas(GAS.SET_ADDRESS_FROZEN)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
