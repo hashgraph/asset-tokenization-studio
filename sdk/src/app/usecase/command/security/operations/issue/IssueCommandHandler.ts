@@ -258,7 +258,10 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
         security,
       );
 
-      await this.validationService.checkControlList(securityId, targetId);
+      await this.validationService.checkControlList(
+        securityId,
+        targetEvmAddress.toString(),
+      );
 
       await this.validationService.checkKycAddresses(
         securityId,
