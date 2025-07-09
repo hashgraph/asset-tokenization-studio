@@ -206,18 +206,21 @@
 import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
+} from '@test/fixtures/shared/DataFixture.js';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { AddToWhiteListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
+import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import { AddToWhiteListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture.js';
 import {
   AddToWhiteListMockCommand,
   AddToWhiteListMockCommandResponse,
-} from './AddToWhiteListMockCommand';
-import { AddToWhiteListMockCommandHandler } from './AddToWhiteListMockCommandHandler';
-import AccountService from '@service/account/AccountService';
+} from './AddToWhiteListMockCommand.js';
+import { AddToWhiteListMockCommandHandler } from './AddToWhiteListMockCommandHandler.js';
+import AccountService from '@service/account/AccountService.js';
+import { ErrorCode } from '@core/error/BaseError.js';
+import { AddToWhiteListMockCommandError } from './error/AddToWhiteListMockCommandError.js';
 
 describe('AddToWhiteListMockCommandHandler', () => {
   let handler: AddToWhiteListMockCommandHandler;
@@ -233,6 +236,7 @@ describe('AddToWhiteListMockCommandHandler', () => {
   const targetEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
   );
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   const transactionId = TransactionIdFixture.create().id;
 
@@ -250,6 +254,24 @@ describe('AddToWhiteListMockCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws AddToWhiteListMockCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        AddToWhiteListMockCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while adding to whitelist: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully add to white list mock', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         contractEvmAddress,

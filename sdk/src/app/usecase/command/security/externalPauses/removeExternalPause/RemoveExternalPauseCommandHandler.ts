@@ -205,16 +205,17 @@
 
 import { ICommandHandler } from '@core/command/CommandHandler';
 import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
+import AccountService from '@service/account/AccountService.js';
 import {
   RemoveExternalPauseCommand,
   RemoveExternalPauseCommandResponse,
 } from './RemoveExternalPauseCommand';
-import TransactionService from '@service/transaction/TransactionService';
+import TransactionService from '@service/transaction/TransactionService.js';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ContractService from '@service/contract/ContractService';
-import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService.js';
+import ValidationService from '@service/validation/ValidationService.js';
+import { RemoveExternalPauseCommandError } from './error/RemoveExternalPauseCommandError';
 
 @CommandHandler(RemoveExternalPauseCommand)
 export class RemoveExternalPauseCommandHandler
@@ -234,32 +235,39 @@ export class RemoveExternalPauseCommandHandler
   async execute(
     command: RemoveExternalPauseCommand,
   ): Promise<RemoveExternalPauseCommandResponse> {
-    const { securityId, externalPauseAddress } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId, externalPauseAddress } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._PAUSE_MANAGER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._PAUSE_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const externalPausesEvmAddress =
-      await this.contractService.getContractEvmAddress(externalPauseAddress);
+      const externalPausesEvmAddress =
+        await this.contractService.getContractEvmAddress(externalPauseAddress);
 
-    const res = await handler.removeExternalPause(
-      securityEvmAddress,
-      externalPausesEvmAddress,
-      securityId,
-    );
+      const res = await handler.removeExternalPause(
+        securityEvmAddress,
+        externalPausesEvmAddress,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new RemoveExternalPauseCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new RemoveExternalPauseCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new RemoveExternalPauseCommandError(error as Error);
+    }
   }
 }

@@ -205,16 +205,17 @@
 
 import { ICommandHandler } from '@core/command/CommandHandler';
 import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
+import AccountService from '@service/account/AccountService.js';
 import {
   DeactivateInternalKycCommand,
   DeactivateInternalKycCommandResponse,
 } from './DeactivateInternalKycCommand';
-import TransactionService from '@service/transaction/TransactionService';
+import TransactionService from '@service/transaction/TransactionService.js';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ContractService from '@service/contract/ContractService';
-import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService.js';
+import ValidationService from '@service/validation/ValidationService.js';
+import { DeactivateInternalKycCommandError } from './error/DeactivateInternalKycCommandError';
 
 @CommandHandler(DeactivateInternalKycCommand)
 export class DeactivateInternalKycCommandHandler
@@ -234,31 +235,35 @@ export class DeactivateInternalKycCommandHandler
   async execute(
     command: DeactivateInternalKycCommand,
   ): Promise<DeactivateInternalKycCommandResponse> {
-    const { securityId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._INTERNAL_KYC_MANAGER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._INTERNAL_KYC_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const res = await handler.deactivateInternalKyc(
-      securityEvmAddress,
-      securityId,
-    );
+      const res = await handler.deactivateInternalKyc(
+        securityEvmAddress,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new DeactivateInternalKycCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new DeactivateInternalKycCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new DeactivateInternalKycCommandError(error as Error);
+    }
   }
 }

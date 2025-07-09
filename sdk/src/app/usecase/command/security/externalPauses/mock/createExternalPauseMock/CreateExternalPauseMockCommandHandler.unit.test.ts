@@ -210,13 +210,13 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Account from '@domain/context/account/Account';
-import { CreateExternalPauseMockCommandHandler } from './CreateExternalPauseMockCommandHandler';
-import { CreateExternalPauseMockCommandResponse } from './CreateExternalPauseMockCommand';
-import { ErrorCode } from '@core/error/BaseError';
-import { CreateExternalPauseMockCommandError } from './error/CreateExternalPauseMockCommandError';
+} from '@test/fixtures/shared/DataFixture.js';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter.js';
+import Account from '@domain/context/account/Account.js';
+import { ErrorCode } from '@core/error/BaseError.js';
+import { CreateExternalPauseMockCommandHandler } from './CreateExternalPauseMockCommandHandler.js';
+import { CreateExternalPauseMockCommandError } from './error/CreateExternalPauseMockCommandError.js';
+import { CreateExternalPauseMockCommandResponse } from './CreateExternalPauseMockCommand.js';
 
 describe('CreateExternalPauseMockCommandHandler', () => {
   let handler: CreateExternalPauseMockCommandHandler;

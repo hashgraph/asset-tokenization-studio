@@ -210,18 +210,18 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
+} from '@test/fixtures/shared/DataFixture.js';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
+import EvmAddress from '@domain/context/contract/EvmAddress.js';
 import ValidationService from '@service/validation/ValidationService';
-import Account from '@domain/context/account/Account';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { UpdateExternalPausesCommandHandler } from './UpdateExternalPausesCommandHandler';
+import Account from '@domain/context/account/Account.js';
+import { SecurityRole } from '@domain/context/security/SecurityRole.js';
+import { UpdateExternalPausesCommandHandler } from './UpdateExternalPausesCommandHandler.js';
 import {
   UpdateExternalPausesCommand,
   UpdateExternalPausesCommandResponse,
-} from './UpdateExternalPausesCommand';
-import { UpdateExternalPausesCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
+} from './UpdateExternalPausesCommand.js';
+import { UpdateExternalPausesCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture.js';
 
 describe('UpdateExternalPausesCommandHandler', () => {
   let handler: UpdateExternalPausesCommandHandler;

@@ -206,18 +206,21 @@
 import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
+} from '@test/fixtures/shared/DataFixture.js';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { RemoveFromBlackListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
+import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import { RemoveFromBlackListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture.js';
 import {
   RemoveFromBlackListMockCommand,
   RemoveFromBlackListMockCommandResponse,
-} from './RemoveFromBlackListMockCommand';
-import { RemoveFromBlackListMockCommandHandler } from './RemoveFromBlackListMockCommandHandler';
-import AccountService from '@service/account/AccountService';
+} from './RemoveFromBlackListMockCommand.js';
+import { RemoveFromBlackListMockCommandHandler } from './RemoveFromBlackListMockCommandHandler.js';
+import AccountService from '@service/account/AccountService.js';
+import { RemoveFromBlackListMockCommandError } from './error/RemoveFromBlackListMockCommandError.js';
+import { ErrorCode } from '@core/error/BaseError.js';
 
 describe('RemoveFromBlackListMockCommandHandler', () => {
   let handler: RemoveFromBlackListMockCommandHandler;
@@ -233,8 +236,8 @@ describe('RemoveFromBlackListMockCommandHandler', () => {
   const targetEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
   );
-
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new RemoveFromBlackListMockCommandHandler(
@@ -250,6 +253,24 @@ describe('RemoveFromBlackListMockCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws RemoveFromBlackListMockCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        RemoveFromBlackListMockCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while removing from blacklist: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully remove from black list mock', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         contractEvmAddress,

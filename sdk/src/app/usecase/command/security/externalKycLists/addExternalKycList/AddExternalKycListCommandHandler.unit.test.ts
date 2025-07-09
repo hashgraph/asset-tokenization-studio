@@ -207,21 +207,24 @@ import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import AccountService from '@service/account/AccountService';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
+} from '@test/fixtures/shared/DataFixture.js';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
+import EvmAddress from '@domain/context/contract/EvmAddress.js';
 import ValidationService from '@service/validation/ValidationService';
-import Account from '@domain/context/account/Account';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { AddExternalKycListCommandHandler } from './AddExternalKycListCommandHandler';
+import Account from '@domain/context/account/Account.js';
+import { SecurityRole } from '@domain/context/security/SecurityRole.js';
+import { AddExternalKycListCommandHandler } from './AddExternalKycListCommandHandler.js';
 import {
   AddExternalKycListCommand,
   AddExternalKycListCommandResponse,
-} from './AddExternalKycListCommand';
-import { AddExternalKycListCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
+} from './AddExternalKycListCommand.js';
+import { AddExternalKycListCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture.js';
+import { AddExternalKycListCommandError } from './error/AddExternalKycListCommandError.js';
+import { ErrorCode } from '@core/error/BaseError.js';
 
 describe('AddExternalKycListCommandHandler', () => {
   let handler: AddExternalKycListCommandHandler;
@@ -241,6 +244,7 @@ describe('AddExternalKycListCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new AddExternalKycListCommandHandler(
@@ -257,6 +261,24 @@ describe('AddExternalKycListCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws AddExternalKycListCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        AddExternalKycListCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while adding external KYC list: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully add external kyc list', async () => {
       contractServiceMock.getContractEvmAddress
         .mockResolvedValueOnce(evmAddress)

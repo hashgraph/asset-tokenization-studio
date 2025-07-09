@@ -207,21 +207,24 @@ import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import AccountService from '@service/account/AccountService';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
+} from '@test/fixtures/shared/DataFixture.js';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
+import EvmAddress from '@domain/context/contract/EvmAddress.js';
 import ValidationService from '@service/validation/ValidationService';
-import Account from '@domain/context/account/Account';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { ActivateInternalKycCommandHandler } from './ActivateInternalKycCommandHandler';
+import Account from '@domain/context/account/Account.js';
+import { SecurityRole } from '@domain/context/security/SecurityRole.js';
+import { ActivateInternalKycCommandHandler } from './ActivateInternalKycCommandHandler.js';
 import {
   ActivateInternalKycCommand,
   ActivateInternalKycCommandResponse,
-} from './ActivateInternalKycCommand';
-import { ActivateInternalKycCommandFixture } from '@test/fixtures/kyc/KycFixture';
+} from './ActivateInternalKycCommand.js';
+import { ActivateInternalKycCommandFixture } from '@test/fixtures/kyc/KycFixture.js';
+import { ActivateInternalKycCommandError } from './error/ActivateInternalKycCommandError.js';
+import { ErrorCode } from '@core/error/BaseError.js';
 
 describe('ActivateInternalKycCommandHandler', () => {
   let handler: ActivateInternalKycCommandHandler;
@@ -238,6 +241,7 @@ describe('ActivateInternalKycCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new ActivateInternalKycCommandHandler(
@@ -254,6 +258,24 @@ describe('ActivateInternalKycCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws ActivateInternalKycCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        ActivateInternalKycCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while activating internal KYC: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully activate internal kyc', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,

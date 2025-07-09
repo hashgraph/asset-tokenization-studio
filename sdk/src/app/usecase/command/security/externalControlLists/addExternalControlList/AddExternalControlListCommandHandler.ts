@@ -205,16 +205,17 @@
 
 import { ICommandHandler } from '@core/command/CommandHandler';
 import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
+import AccountService from '@service/account/AccountService.js';
 import {
   AddExternalControlListCommand,
   AddExternalControlListCommandResponse,
 } from './AddExternalControlListCommand';
-import TransactionService from '@service/transaction/TransactionService';
+import TransactionService from '@service/transaction/TransactionService.js';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
 import ContractService from '@service/contract/ContractService';
 import ValidationService from '@service/validation/ValidationService';
+import { AddExternalControlListCommandError } from './error/AddExternalControlListCommandError';
 
 @CommandHandler(AddExternalControlListCommand)
 export class AddExternalControlListCommandHandler
@@ -234,37 +235,41 @@ export class AddExternalControlListCommandHandler
   async execute(
     command: AddExternalControlListCommand,
   ): Promise<AddExternalControlListCommandResponse> {
-    const { securityId, externalControlListAddress } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId, externalControlListAddress } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._CONTROL_LIST_MANAGER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
-
-    const externalControlListEvmAddresses =
-      await this.contractService.getContractEvmAddress(
-        externalControlListAddress,
+      await this.validationService.checkRole(
+        SecurityRole._CONTROL_LIST_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
       );
 
-    const res = await handler.addExternalControlList(
-      securityEvmAddress,
-      externalControlListEvmAddresses,
-      securityId,
-    );
+      const externalControlListEvmAddresses =
+        await this.contractService.getContractEvmAddress(
+          externalControlListAddress,
+        );
 
-    return Promise.resolve(
-      new AddExternalControlListCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      const res = await handler.addExternalControlList(
+        securityEvmAddress,
+        externalControlListEvmAddresses,
+        securityId,
+      );
+
+      return Promise.resolve(
+        new AddExternalControlListCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new AddExternalControlListCommandError(error as Error);
+    }
   }
 }

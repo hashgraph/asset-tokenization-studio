@@ -205,17 +205,18 @@
 
 import { ICommandHandler } from '@core/command/CommandHandler';
 import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import ValidationService from '@service/validation/ValidationService';
+import AccountService from '@service/account/AccountService.js';
+import ValidationService from '@service/validation/ValidationService.js';
 import {
   UpdateExternalKycListsCommand,
   UpdateExternalKycListsCommandResponse,
 } from './UpdateExternalKycListsCommand';
-import TransactionService from '@service/transaction/TransactionService';
+import TransactionService from '@service/transaction/TransactionService.js';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ContractService from '@service/contract/ContractService';
+import ContractService from '@service/contract/ContractService.js';
+import { UpdateExternalKycListsCommandError } from './error/UpdateExternalKycListsCommandError';
 
 @CommandHandler(UpdateExternalKycListsCommand)
 export class UpdateExternalKycListsCommandHandler
@@ -235,40 +236,44 @@ export class UpdateExternalKycListsCommandHandler
   async execute(
     command: UpdateExternalKycListsCommand,
   ): Promise<UpdateExternalKycListsCommandResponse> {
-    const { securityId, externalKycListsAddresses, actives } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId, externalKycListsAddresses, actives } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress: EvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._KYC_MANAGER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._KYC_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const externalKycListsEvmAddresses = await Promise.all(
-      externalKycListsAddresses.map(
-        async (address) =>
-          await this.contractService.getContractEvmAddress(address),
-      ),
-    );
+      const externalKycListsEvmAddresses = await Promise.all(
+        externalKycListsAddresses.map(
+          async (address) =>
+            await this.contractService.getContractEvmAddress(address),
+        ),
+      );
 
-    const res = await handler.updateExternalKycLists(
-      securityEvmAddress,
-      externalKycListsEvmAddresses,
-      actives,
-      securityId,
-    );
+      const res = await handler.updateExternalKycLists(
+        securityEvmAddress,
+        externalKycListsEvmAddresses,
+        actives,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new UpdateExternalKycListsCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
-    );
+      return Promise.resolve(
+        new UpdateExternalKycListsCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new UpdateExternalKycListsCommandError(error as Error);
+    }
   }
 }

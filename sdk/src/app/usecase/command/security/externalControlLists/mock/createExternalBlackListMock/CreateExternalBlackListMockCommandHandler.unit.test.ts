@@ -210,13 +210,13 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import { CreateExternalBlackListMockCommandHandler } from './CreateExternalBlackListMockCommandHandler';
-import { CreateExternalBlackListMockCommandResponse } from './CreateExternalBlackListMockCommand';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Account from '@domain/context/account/Account';
-import { ErrorCode } from '@core/error/BaseError';
-import { CreateExternalBlackListMockCommandError } from './error/CreateExternalBlackListMockCommandError';
+} from '@test/fixtures/shared/DataFixture.js';
+import { CreateExternalBlackListMockCommandHandler } from './CreateExternalBlackListMockCommandHandler.js';
+import { CreateExternalBlackListMockCommandResponse } from './CreateExternalBlackListMockCommand.js';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter.js';
+import Account from '@domain/context/account/Account.js';
+import { CreateExternalBlackListMockCommandError } from './error/CreateExternalBlackListMockCommandError.js';
+import { ErrorCode } from '@core/error/BaseError.js';
 
 describe('CreateExternalBlackListMockCommandHandler', () => {
   let handler: CreateExternalBlackListMockCommandHandler;

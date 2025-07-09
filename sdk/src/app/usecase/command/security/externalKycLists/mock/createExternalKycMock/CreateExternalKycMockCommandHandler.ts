@@ -211,9 +211,8 @@ import {
 } from './CreateExternalKycMockCommand';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '@service/transaction/TransactionService';
-import { EmptyResponse } from '@service/transaction/error/EmptyResponse';
-import { InvalidResponse } from '@core/error/InvalidResponse';
+import TransactionService from '@service/transaction/TransactionService.js';
+import { CreateExternalKycMockCommandError } from './error/CreateExternalKycMockCommandError';
 
 @CommandHandler(CreateExternalKycListMockCommand)
 export class CreateExternalKycListMockCommandHandler
@@ -227,36 +226,34 @@ export class CreateExternalKycListMockCommandHandler
   ) {}
 
   async execute(): Promise<CreateExternalKycListMockCommandResponse> {
-    const handler = this.transactionService.getHandler();
+    try {
+      const handler = this.transactionService.getHandler();
 
-    const res = await handler.createExternalKycListMock();
+      const res = await handler.createExternalKycListMock();
 
-    let contractAddress: string;
+      let contractAddress: string;
 
-    if (typeof res === 'string') {
-      contractAddress = res;
-    } else {
-      if (!res.id)
-        throw new EmptyResponse(CreateExternalKycListMockCommandHandler.name);
-
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        1,
-        true,
-      );
-
-      if (!results || results.length !== 1) {
-        throw new InvalidResponse(results);
+      if (typeof res === 'string') {
+        contractAddress = res;
+      } else {
+        contractAddress = await this.transactionService.getTransactionResult({
+          res,
+          className: CreateExternalKycListMockCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
+          isContractCreation: true,
+        });
       }
-      contractAddress = results[0];
+
+      const address = (
+        await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
+      ).id.toString();
+
+      return Promise.resolve(
+        new CreateExternalKycListMockCommandResponse(address),
+      );
+    } catch (error) {
+      throw new CreateExternalKycMockCommandError(error as Error);
     }
-
-    const address = (
-      await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-    ).id.toString();
-
-    return Promise.resolve(
-      new CreateExternalKycListMockCommandResponse(address),
-    );
   }
 }
