@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "setup": "npm install && npm run install:web",
-    "install:web": "cd apps/ats/web && yarn install --frozen-lockfile",
+    "install:web": "cd apps/ats/web && yarn install",
+    "install:web:old": "cd apps/ats/web && yarn install --frozen-lockfile",
     "build:contracts": "cd packages/ats/contracts && npm run compile:force",
     "build:sdk": "cd packages/ats/sdk && npm run build",
     "build:web": "cd apps/ats/web && yarn build",
@@ -35,8 +36,7 @@
     "prettier:contracts": "cd packages/ats/contracts && npm run prettier",
     "pre-commit:contracts": "cd packages/ats/contracts && npm run pre-commit",
     "pre-commit:sdk": "cd packages/ats/sdk && npm run pre-commit",
-    "prepare": "husky",
-    "dev:web": "npm run build:sdk && cd apps/ats/web && yarn dev"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",

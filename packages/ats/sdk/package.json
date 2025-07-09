@@ -29,7 +29,7 @@
     "prettier:check": "prettier --config .prettierrc --check",
     "prettier": "prettier --config .prettierrc --write .",
     "prebuild": "npm run lint && npm run prettier",
-    "build": "rimraf build && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
+    "build": "rimraf build && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
     "prepack": "npm run build",
     "test:local": "npx --yes jest --forceExit",
     "test": "NODE_OPTIONS=--max-old-space-size=16384 npx jest --ci --runInBand --detectOpenHandles --forceExit",
