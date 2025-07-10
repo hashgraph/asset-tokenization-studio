@@ -211,7 +211,7 @@ import {
 } from './CreateExternalKycMockCommand';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '@service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { CreateExternalKycMockCommandError } from './error/CreateExternalKycMockCommandError';
 
 @CommandHandler(CreateExternalKycListMockCommand)

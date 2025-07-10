@@ -210,10 +210,10 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter.js';
-import Account from '@domain/context/account/Account.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+} from '@test/fixtures/shared/DataFixture';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Account from '@domain/context/account/Account';
+import { ErrorCode } from '@core/error/BaseError';
 import { CreateExternalKycMockCommandError } from './error/CreateExternalKycMockCommandError.js';
 import { CreateExternalKycListMockCommandHandler } from './CreateExternalKycMockCommandHandler.js';
 import { CreateExternalKycListMockCommandResponse } from './CreateExternalKycMockCommand.js';

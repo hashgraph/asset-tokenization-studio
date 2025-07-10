@@ -219,7 +219,7 @@ import {
   UpdateExternalControlListsCommand,
   UpdateExternalControlListsCommandResponse,
 } from './UpdateExternalControlListsCommand.js';
-import ValidationService from '@service/validation/ValidationService.js';
+import ValidationService from '@service/validation/ValidationService';
 import { UpdateExternalControlListsCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture.js';
 import Account from '@domain/context/account/Account.js';
 import { SecurityRole } from '@domain/context/security/SecurityRole.js';

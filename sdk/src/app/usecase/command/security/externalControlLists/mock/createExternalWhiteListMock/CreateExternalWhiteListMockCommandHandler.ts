@@ -211,7 +211,7 @@ import {
 } from './CreateExternalWhiteListMockCommand';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '@service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { CreateExternalWhiteListMockCommandError } from './error/CreateExternalWhiteListMockCommandError';
 
 @CommandHandler(CreateExternalWhiteListMockCommand)

@@ -209,17 +209,17 @@ import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   RevokeKycMockCommand,
   RevokeKycMockCommandResponse,
 } from './RevokeKycMockCommand.js';
 import { RevokeKycMockCommandHandler } from './RevokeKycMockCommandHandler.js';
 import AccountService from '@service/account/AccountService';
-import { RevokeKycMockCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { RevokeKycMockCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
+import { ErrorCode } from '@core/error/BaseError';
 import { RevokeKycMockCommandError } from './error/RevokeKycMockCommandError.js';
 
 describe('RevokeKycMockCommandHandler', () => {

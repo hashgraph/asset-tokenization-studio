@@ -218,7 +218,7 @@ import {
   RemoveFromBlackListMockCommandResponse,
 } from './RemoveFromBlackListMockCommand.js';
 import { RemoveFromBlackListMockCommandHandler } from './RemoveFromBlackListMockCommandHandler.js';
-import AccountService from '@service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import { RemoveFromBlackListMockCommandError } from './error/RemoveFromBlackListMockCommandError.js';
 import { ErrorCode } from '@core/error/BaseError.js';
 

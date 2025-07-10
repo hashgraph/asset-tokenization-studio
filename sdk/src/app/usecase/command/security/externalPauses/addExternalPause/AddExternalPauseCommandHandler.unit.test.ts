@@ -211,19 +211,19 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import ValidationService from '@service/validation/ValidationService';
-import Account from '@domain/context/account/Account.js';
-import { SecurityRole } from '@domain/context/security/SecurityRole.js';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 import { AddExternalPauseCommandHandler } from './AddExternalPauseCommandHandler.js';
 import {
   AddExternalPauseCommand,
   AddExternalPauseCommandResponse,
 } from './AddExternalPauseCommand.js';
-import { AddExternalPauseCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { AddExternalPauseCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
+import { ErrorCode } from '@core/error/BaseError';
 import { AddExternalPauseCommandError } from './error/AddExternalPauseCommandError.js';
 
 describe('AddExternalPauseCommandHandler', () => {

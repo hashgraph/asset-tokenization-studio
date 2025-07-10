@@ -209,15 +209,15 @@ import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   SetPausedMockCommand,
   SetPausedMockCommandResponse,
 } from './SetPausedMockCommand.js';
 import { SetPausedMockCommandHandler } from './SetPausedMockCommandHandler.js';
-import { SetPausedMockCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture.js';
+import { SetPausedMockCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
 import { SetPausedMockCommandError } from './error/SetPausedMockCommandError.js';
 import { ErrorCode } from '@core/error/BaseError.js';
 

@@ -213,7 +213,7 @@ import {
 import ContractService from '@service/contract/ContractService';
 import EvmAddress from '@domain/context/contract/EvmAddress.js';
 import { RemoveFromWhiteListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import AccountService from '@service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   RemoveFromWhiteListMockCommand,
   RemoveFromWhiteListMockCommandResponse,

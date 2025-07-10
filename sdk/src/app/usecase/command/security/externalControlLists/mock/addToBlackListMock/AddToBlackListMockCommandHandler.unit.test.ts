@@ -218,7 +218,7 @@ import {
   AddToBlackListMockCommandResponse,
 } from './AddToBlackListMockCommand.js';
 import { AddToBlackListMockCommandHandler } from './AddToBlackListMockCommandHandler.js';
-import AccountService from '@service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import { ErrorCode } from '@core/error/BaseError.js';
 import { AddToBlackListMockCommandError } from './error/AddToBlackListMockCommandError.js';
 

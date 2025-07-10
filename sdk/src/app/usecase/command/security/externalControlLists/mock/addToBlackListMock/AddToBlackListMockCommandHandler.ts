@@ -209,7 +209,7 @@ import {
   AddToBlackListMockCommand,
   AddToBlackListMockCommandResponse,
 } from './AddToBlackListMockCommand';
-import TransactionService from '@service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import ContractService from '@service/contract/ContractService';
 import AccountService from '@service/account/AccountService';

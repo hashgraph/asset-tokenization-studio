@@ -211,20 +211,20 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import ValidationService from '@service/validation/ValidationService';
-import Account from '@domain/context/account/Account.js';
-import { SecurityRole } from '@domain/context/security/SecurityRole.js';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 import { RemoveExternalKycListCommandHandler } from './RemoveExternalKycListCommandHandler.js';
 import {
   RemoveExternalKycListCommand,
   RemoveExternalKycListCommandResponse,
 } from './RemoveExternalKycListCommand.js';
-import { RemoveExternalKycListCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture.js';
+import { RemoveExternalKycListCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
 import { RemoveExternalKycListCommandError } from './error/RemoveExternalKycListCommandError.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('RemoveExternalKycListCommandHandler', () => {
   let handler: RemoveExternalKycListCommandHandler;

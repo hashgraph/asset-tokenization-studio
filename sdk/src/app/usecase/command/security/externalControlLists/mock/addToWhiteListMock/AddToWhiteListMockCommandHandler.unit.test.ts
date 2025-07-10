@@ -218,7 +218,7 @@ import {
   AddToWhiteListMockCommandResponse,
 } from './AddToWhiteListMockCommand.js';
 import { AddToWhiteListMockCommandHandler } from './AddToWhiteListMockCommandHandler.js';
-import AccountService from '@service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import { ErrorCode } from '@core/error/BaseError.js';
 import { AddToWhiteListMockCommandError } from './error/AddToWhiteListMockCommandError.js';
 

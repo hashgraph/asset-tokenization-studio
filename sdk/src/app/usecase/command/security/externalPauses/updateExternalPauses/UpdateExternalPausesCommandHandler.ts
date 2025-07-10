@@ -205,17 +205,17 @@
 
 import { ICommandHandler } from '@core/command/CommandHandler';
 import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   UpdateExternalPausesCommand,
   UpdateExternalPausesCommandResponse,
 } from './UpdateExternalPausesCommand';
-import TransactionService from '@service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ValidationService from '@service/validation/ValidationService.js';
-import ContractService from '@service/contract/ContractService.js';
+import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService';
 import { UpdateExternalPausesCommandError } from './error/UpdateExternalPausesCommandError';
 
 @CommandHandler(UpdateExternalPausesCommand)

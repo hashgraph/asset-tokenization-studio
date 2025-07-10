@@ -209,17 +209,17 @@ import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   GrantKycMockCommand,
   GrantKycMockCommandResponse,
 } from './GrantKycMockCommand.js';
 import { GrantKycMockCommandHandler } from './GrantKycMockCommandHandler.js';
 import AccountService from '@service/account/AccountService';
-import { GrantKycMockCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { GrantKycMockCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
+import { ErrorCode } from '@core/error/BaseError';
 import { GrantKycMockCommandError } from './error/GrantKycMockCommandError.js';
 
 describe('GrantKycMockCommandHandler', () => {

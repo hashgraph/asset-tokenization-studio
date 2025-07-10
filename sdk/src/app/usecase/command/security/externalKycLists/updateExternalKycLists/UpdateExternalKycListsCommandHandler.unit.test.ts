@@ -211,19 +211,19 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import { UpdateExternalKycListsCommandHandler } from './UpdateExternalKycListsCommandHandler.js';
 import {
   UpdateExternalKycListsCommand,
   UpdateExternalKycListsCommandResponse,
 } from './UpdateExternalKycListsCommand.js';
 import ValidationService from '@service/validation/ValidationService';
-import Account from '@domain/context/account/Account.js';
-import { SecurityRole } from '@domain/context/security/SecurityRole.js';
-import { UpdateExternalKycListsCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { UpdateExternalKycListsCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
+import { ErrorCode } from '@core/error/BaseError';
 import { UpdateExternalKycListsCommandError } from './error/UpdateExternalKycListsCommandError.js';
 
 describe('UpdateExternalKycListCommandHandler', () => {

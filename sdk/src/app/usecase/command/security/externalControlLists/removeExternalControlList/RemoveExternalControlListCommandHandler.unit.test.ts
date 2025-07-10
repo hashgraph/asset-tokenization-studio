@@ -211,14 +211,14 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import ValidationService from '@service/validation/ValidationService';
-import { RemoveExternalControlListCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import Account from '@domain/context/account/Account.js';
-import { SecurityRole } from '@domain/context/security/SecurityRole.js';
-import { RemoveExternalControlListCommandHandler } from './RemoveExternalControlListCommandHandler.js';
+import { RemoveExternalControlListCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { RemoveExternalControlListCommandHandler } from './RemoveExternalControlListCommandHandler';
 import {
   RemoveExternalControlListCommand,
   RemoveExternalControlListCommandResponse,

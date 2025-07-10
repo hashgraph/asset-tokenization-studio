@@ -209,10 +209,10 @@ import {
   GrantKycMockCommand,
   GrantKycMockCommandResponse,
 } from './GrantKycMockCommand';
-import TransactionService from '@service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import ContractService from '@service/contract/ContractService.js';
-import AccountService from '@service/account/AccountService.js';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
 import { GrantKycMockCommandError } from './error/GrantKycMockCommandError';
 
 @CommandHandler(GrantKycMockCommand)
