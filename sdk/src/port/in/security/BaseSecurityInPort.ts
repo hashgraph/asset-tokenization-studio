@@ -203,105 +203,12 @@
 
 */
 
-import SecurityViewModel from '../response/SecurityViewModel';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Injectable from '@core/Injectable';
-import { QueryBus } from '@core/query/QueryBus';
 import { CommandBus } from '@core/command/CommandBus';
-import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
-import { ISecurityInPortAgent, SecurityInPortAgent } from './Agent';
-import { ISecurityInPortPause, SecurityInPortPause } from './Pause';
-import {
-  ISecurityInPortControlList,
-  SecurityInPortControlList,
-} from './ControlList';
-import { ISecurityInPortBalance, SecurityInPortBalance } from './Balance';
-import { ISecurityInPortLock, SecurityInPortLock } from './Lock';
-import { applyMixins } from '../utils';
-import { ISecurityInPortClearing, SecurityInPortClearing } from './Clearing';
-import {
-  ISecurityInPortCompliance,
-  SecurityInPortCompliance,
-} from './Compliance';
-import { ISecurityInPortFreeze, SecurityInPortFreeze } from './Freeze';
-import { ISecurityInPortHold, SecurityInPortHold } from './Hold';
-import { ISecurityInPortIdentity, SecurityInPortIdentity } from './Identity';
-import { ISecurityInPortInfo, SecurityInPortInfo } from './Info';
-import { ISecurityInPortIssue, SecurityInPortIssue } from './Issue';
-import { ISecurityInPortNounce, SecurityInPortNounce } from './Nounce';
-import {
-  ISecurityInPortProtectedPartitions,
-  SecurityInPortProtectedPartitions,
-} from './ProtectedPartitions';
-import { ISecurityInPortRecovery, SecurityInPortRecovery } from './Recovery';
-import { ISecurityInPortRedeem, SecurityInPortRedeem } from './Redeem';
-import { ISecurityInPortSupply, SecurityInPortSupply } from './Supply';
-import {
-  ISecurityInPortTokenMetadata,
-  SecurityInPortTokenMetadata,
-} from './TokenMetadata';
-import { ISecurityInPortTransfer, SecurityInPortTransfer } from './Transfer';
-import { BaseSecurityInPort } from './BaseSecurityInPort';
+import { QueryBus } from '@core/query/QueryBus';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 
-export { SecurityViewModel, SecurityControlListType };
-
-interface SecurityMixins
-  extends ISecurityInPortAgent,
-    ISecurityInPortBalance,
-    ISecurityInPortClearing,
-    ISecurityInPortCompliance,
-    ISecurityInPortControlList,
-    ISecurityInPortFreeze,
-    ISecurityInPortHold,
-    ISecurityInPortIdentity,
-    ISecurityInPortInfo,
-    ISecurityInPortIssue,
-    ISecurityInPortLock,
-    ISecurityInPortNounce,
-    ISecurityInPortPause,
-    ISecurityInPortProtectedPartitions,
-    ISecurityInPortRecovery,
-    ISecurityInPortRedeem,
-    ISecurityInPortSupply,
-    ISecurityInPortTokenMetadata,
-    ISecurityInPortTransfer {}
-
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-interface SecurityInPort extends SecurityMixins {}
-
-class SecurityInPort extends BaseSecurityInPort {
-  constructor(
-    queryBus: QueryBus = Injectable.resolve(QueryBus),
-    commandBus: CommandBus = Injectable.resolve(CommandBus),
-    mirrorNode: MirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter),
-  ) {
-    super();
-    this.queryBus = queryBus;
-    this.commandBus = commandBus;
-    this.mirrorNode = mirrorNode;
-  }
+export abstract class BaseSecurityInPort {
+  protected commandBus!: CommandBus;
+  protected queryBus!: QueryBus;
+  protected mirrorNode!: MirrorNodeAdapter;
 }
-
-applyMixins(SecurityInPort, [
-  SecurityInPortAgent,
-  SecurityInPortBalance,
-  SecurityInPortClearing,
-  SecurityInPortCompliance,
-  SecurityInPortControlList,
-  SecurityInPortFreeze,
-  SecurityInPortHold,
-  SecurityInPortIdentity,
-  SecurityInPortInfo,
-  SecurityInPortIssue,
-  SecurityInPortLock,
-  SecurityInPortNounce,
-  SecurityInPortPause,
-  SecurityInPortProtectedPartitions,
-  SecurityInPortRecovery,
-  SecurityInPortRedeem,
-  SecurityInPortSupply,
-  SecurityInPortTokenMetadata,
-  SecurityInPortTransfer,
-]);
-
-export default new SecurityInPort();
