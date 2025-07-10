@@ -244,9 +244,9 @@ export class CanTransferByPartitionQueryHandler
         await this.contractService.getContractEvmAddress(securityId);
       const sourceEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(sourceId);
-
       const targetEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(targetId);
+      const account = this.accountService.getCurrentAccount();
 
       const security = await this.securityService.get(securityId);
 
@@ -260,6 +260,7 @@ export class CanTransferByPartitionQueryHandler
         partitionId,
         EMPTY_BYTES,
         EMPTY_BYTES,
+        account.evmAddress!,
       );
 
       return new CanTransferByPartitionQueryResponse(res);

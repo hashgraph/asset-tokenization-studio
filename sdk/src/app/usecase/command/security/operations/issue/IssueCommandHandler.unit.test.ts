@@ -330,7 +330,7 @@ describe('IssueCommandHandler', () => {
         expect(validationServiceMock.checkControlList).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkControlList).toHaveBeenCalledWith(
           command.securityId,
-          command.targetId,
+          evmAddress.toString(),
         );
         expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledTimes(
           1,

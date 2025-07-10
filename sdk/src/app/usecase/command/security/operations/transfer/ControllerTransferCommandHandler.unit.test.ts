@@ -228,7 +228,6 @@ import {
   ControllerTransferCommandResponse,
 } from './ControllerTransferCommand.js';
 import { ControllerTransferCommandError } from './error/ControllerTransferCommandError.js';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 
 describe('ControllerTransferCommandHandler', () => {
   let handler: ControllerTransferCommandHandler;
@@ -327,9 +326,8 @@ describe('ControllerTransferCommandHandler', () => {
           command.securityId,
           command.targetId,
           command.amount,
-          command.sourceId,
-          _PARTITION_ID_1,
           account.id.toString(),
+          command.sourceId,
         );
 
         expect(

@@ -240,11 +240,11 @@ export class CanRedeemByPartitionQueryHandler
     try {
       const { securityId, sourceId, partitionId, amount } = query;
 
+      const account = await this.accountService.getCurrentAccount();
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
       const sourceEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(sourceId);
-
       const security = await this.securityService.get(securityId);
 
       const amountBd = BigDecimal.fromString(amount, security.decimals);
@@ -256,6 +256,7 @@ export class CanRedeemByPartitionQueryHandler
         partitionId,
         EMPTY_BYTES,
         EMPTY_BYTES,
+        account.evmAddress!,
       );
 
       return new CanRedeemByPartitionQueryResponse(res);

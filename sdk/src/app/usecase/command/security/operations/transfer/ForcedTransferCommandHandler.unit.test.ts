@@ -224,11 +224,9 @@ import {
 import Account from '../../../../../../domain/context/account/Account';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import TransactionAdapter from '../../../../../../port/out/TransactionAdapter';
 import { Security } from '../../../../../../domain/context/security/Security';
 import { FocedTransferCommandFixture } from '../../../../../../../__tests__/fixtures/transfer/TransferFixture';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants';
 import { ForcedTransferCommandError } from './error/ForcedTransferCommandError';
 
 describe('ForcedTransferCommandHandler', () => {
@@ -291,10 +289,6 @@ describe('ForcedTransferCommandHandler', () => {
         targetEvmAddress,
       );
 
-      validationServiceMock.checkCanTransfer.mockResolvedValue(undefined);
-      validationServiceMock.checkRole.mockResolvedValue(undefined);
-      validationServiceMock.checkDecimals.mockResolvedValue(undefined);
-
       const result = await handler.execute(command);
 
       expect(result).toBeInstanceOf(ForcedTransferCommandResponse);
@@ -320,15 +314,8 @@ describe('ForcedTransferCommandHandler', () => {
         command.securityId,
         command.targetId,
         command.amount,
+        account.id.toString(),
         command.sourceId,
-        _PARTITION_ID_1,
-        account.id.toString(),
-      );
-
-      expect(validationServiceMock.checkAnyRole).toHaveBeenCalledWith(
-        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
-        account.id.toString(),
-        command.securityId,
       );
 
       expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
