@@ -1197,8 +1197,10 @@ export default class Injectable {
 
   static registerTransactionAdapterInstances(): TransactionAdapter[] {
     const adapters: TransactionAdapter[] = [];
+    if (this.isWeb()) {
+      adapters.push(Injectable.resolve(RPCTransactionAdapter));
+    }
     adapters.push(
-      Injectable.resolve(RPCTransactionAdapter),
       Injectable.resolve(HederaWalletConnectTransactionAdapter),
       Injectable.resolve(DFNSTransactionAdapter),
       Injectable.resolve(FireblocksTransactionAdapter),
