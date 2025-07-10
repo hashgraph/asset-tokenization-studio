@@ -209,17 +209,17 @@ import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
-import { AddToBlackListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { AddToBlackListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
 import {
   AddToBlackListMockCommand,
   AddToBlackListMockCommandResponse,
 } from './AddToBlackListMockCommand.js';
 import { AddToBlackListMockCommandHandler } from './AddToBlackListMockCommandHandler.js';
 import AccountService from '@service/account/AccountService';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { ErrorCode } from '@core/error/BaseError';
 import { AddToBlackListMockCommandError } from './error/AddToBlackListMockCommandError.js';
 
 describe('AddToBlackListMockCommandHandler', () => {

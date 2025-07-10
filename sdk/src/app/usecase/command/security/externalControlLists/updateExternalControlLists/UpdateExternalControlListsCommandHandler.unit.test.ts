@@ -211,20 +211,20 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import { UpdateExternalControlListsCommandHandler } from './UpdateExternalControlListsCommandHandler.js';
 import {
   UpdateExternalControlListsCommand,
   UpdateExternalControlListsCommandResponse,
 } from './UpdateExternalControlListsCommand.js';
 import ValidationService from '@service/validation/ValidationService';
-import { UpdateExternalControlListsCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import Account from '@domain/context/account/Account.js';
-import { SecurityRole } from '@domain/context/security/SecurityRole.js';
+import { UpdateExternalControlListsCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 import { UpdateExternalControlListsCommandError } from './error/UpdateExternalControlListsCommandError.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('UpdateExternalControlListCommandHandler', () => {
   let handler: UpdateExternalControlListsCommandHandler;

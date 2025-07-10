@@ -211,20 +211,20 @@ import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import ValidationService from '@service/validation/ValidationService';
-import Account from '@domain/context/account/Account.js';
-import { SecurityRole } from '@domain/context/security/SecurityRole.js';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 import { ActivateInternalKycCommandHandler } from './ActivateInternalKycCommandHandler.js';
 import {
   ActivateInternalKycCommand,
   ActivateInternalKycCommandResponse,
 } from './ActivateInternalKycCommand.js';
-import { ActivateInternalKycCommandFixture } from '@test/fixtures/kyc/KycFixture.js';
+import { ActivateInternalKycCommandFixture } from '@test/fixtures/kyc/KycFixture';
 import { ActivateInternalKycCommandError } from './error/ActivateInternalKycCommandError.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('ActivateInternalKycCommandHandler', () => {
   let handler: ActivateInternalKycCommandHandler;

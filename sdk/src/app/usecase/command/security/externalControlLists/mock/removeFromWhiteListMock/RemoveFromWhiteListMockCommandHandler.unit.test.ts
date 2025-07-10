@@ -209,10 +209,10 @@ import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress.js';
-import { RemoveFromWhiteListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { RemoveFromWhiteListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
 import AccountService from '@service/account/AccountService';
 import {
   RemoveFromWhiteListMockCommand,
@@ -220,7 +220,7 @@ import {
 } from './RemoveFromWhiteListMockCommand.js';
 import { RemoveFromWhiteListMockCommandHandler } from './RemoveFromWhiteListMockCommandHandler.js';
 import { RemoveFromWhiteListMockCommandError } from './error/RemoveFromWhiteListMockCommandError.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('RemoveFromWhiteListMockCommandHandler', () => {
   let handler: RemoveFromWhiteListMockCommandHandler;

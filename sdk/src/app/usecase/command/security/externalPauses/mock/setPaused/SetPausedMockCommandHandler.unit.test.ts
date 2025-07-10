@@ -219,7 +219,7 @@ import {
 import { SetPausedMockCommandHandler } from './SetPausedMockCommandHandler.js';
 import { SetPausedMockCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
 import { SetPausedMockCommandError } from './error/SetPausedMockCommandError.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('SetPausedMockCommandHandler', () => {
   let handler: SetPausedMockCommandHandler;

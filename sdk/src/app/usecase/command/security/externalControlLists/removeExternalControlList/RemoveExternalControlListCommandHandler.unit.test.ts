@@ -224,7 +224,7 @@ import {
   RemoveExternalControlListCommandResponse,
 } from './RemoveExternalControlListCommand.js';
 import { RemoveExternalControlListCommandError } from './error/RemoveExternalControlListCommandError.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('RemoveExternalControlListCommandHandler', () => {
   let handler: RemoveExternalControlListCommandHandler;

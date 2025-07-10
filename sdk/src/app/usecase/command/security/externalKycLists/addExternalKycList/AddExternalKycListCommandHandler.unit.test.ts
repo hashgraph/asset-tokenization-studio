@@ -224,7 +224,7 @@ import {
 } from './AddExternalKycListCommand.js';
 import { AddExternalKycListCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
 import { AddExternalKycListCommandError } from './error/AddExternalKycListCommandError.js';
-import { ErrorCode } from '@core/error/BaseError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('AddExternalKycListCommandHandler', () => {
   let handler: AddExternalKycListCommandHandler;
