@@ -262,12 +262,6 @@ export class ControllerRedeemCommandHandler
         account.id.toString(),
       );
 
-      await this.validationService.checkAnyRole(
-        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
-        account.id.toString(),
-        securityId,
-      );
-
       await this.validationService.checkDecimals(security, amount);
 
       const res = await handler.controllerRedeem(

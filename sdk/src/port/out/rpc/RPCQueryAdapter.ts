@@ -904,6 +904,7 @@ export class RPCQueryAdapter {
     partitionId: string,
     data: string,
     operatorData: string,
+    operatorId: string,
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer by partition`);
 
@@ -917,6 +918,9 @@ export class RPCQueryAdapter {
       amount.toBigNumber(),
       data,
       operatorData,
+      {
+        from: operatorId,
+      },
     );
   }
 
@@ -925,6 +929,7 @@ export class RPCQueryAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     data: string,
+    operatorId: string,
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer`);
 
@@ -932,6 +937,9 @@ export class RPCQueryAdapter {
       targetId.toString(),
       amount.toBigNumber(),
       data,
+      {
+        from: operatorId,
+      },
     );
   }
 
@@ -942,6 +950,7 @@ export class RPCQueryAdapter {
     partitionId: string,
     data: string,
     operatorData: string,
+    operatorId: string,
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can redeem`);
 
@@ -954,6 +963,9 @@ export class RPCQueryAdapter {
       amount.toBigNumber(),
       data,
       operatorData,
+      {
+        from: operatorId,
+      },
     );
   }
 

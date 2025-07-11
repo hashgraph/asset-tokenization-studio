@@ -1229,7 +1229,7 @@ describe('ERC1594 Tests', () => {
             ])
         })
 
-        it('GIVEN a non funds account WHEN canTransfer & canTransferFrom THEN responds _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID', async () => {
+        it('GIVEN a non funds account WHEN canTransfer & canTransferFrom THEN responds NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID', async () => {
             expect(
                 await erc1594Facet.canTransfer(account_D, AMOUNT, DATA)
             ).to.be.deep.equal([
@@ -1238,6 +1238,13 @@ describe('ERC1594 Tests', () => {
                 ethers.constants.HashZero,
             ])
 
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
             await erc20Facet.connect(signer_C).approve(account_A, AMOUNT)
             expect(
                 await erc1594Facet.canTransferFrom(

@@ -423,34 +423,28 @@ export default class ValidationService extends Service {
     securityId: string,
     targetId: string,
     amount: string,
+    operatorId: string,
     sourceId?: string,
     partitionId?: string,
-    operatorId?: string,
   ): Promise<void> {
-    let res;
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    if (operatorId) {
-      res = await this.queryBus.execute(
-        new CanTransferByPartitionQuery(
-          securityId,
-          sourceId!,
-          targetId,
-          partitionId!,
-          amount,
-        ),
-      );
-    } else {
-      res = await this.queryBus.execute(
-        new CanTransferQuery(securityId, targetId, amount),
-      );
-    }
+
+    const res = await this.queryBus.execute(
+      new CanTransferByPartitionQuery(
+        securityId,
+        sourceId ?? operatorId,
+        targetId,
+        partitionId ?? _PARTITION_ID_1,
+        amount,
+      ),
+    );
 
     if (res.payload != '0x00') {
       throw ContractsErrorMapper.mapError(
         res.payload,
+        operatorId,
         sourceId,
         targetId,
-        operatorId,
       );
     }
   }
@@ -460,7 +454,7 @@ export default class ValidationService extends Service {
     sourceId: string,
     amount: string,
     partitionId: string,
-    operatorId?: string,
+    operatorId: string,
   ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
@@ -470,9 +464,9 @@ export default class ValidationService extends Service {
     if (res.payload != '0x00') {
       throw ContractsErrorMapper.mapError(
         res.payload,
+        operatorId,
         sourceId,
         undefined,
-        operatorId,
       );
     }
   }

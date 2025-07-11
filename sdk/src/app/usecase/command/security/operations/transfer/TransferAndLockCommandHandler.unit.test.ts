@@ -326,6 +326,7 @@ describe('TransferAndLockCommandHandler', () => {
           command.securityId,
           command.targetId,
           command.amount,
+          account.id.toString(),
         );
 
         expect(

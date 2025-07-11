@@ -205,6 +205,7 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import {
+  AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
 } from '@test/fixtures/shared/DataFixture';
@@ -243,7 +244,7 @@ describe('CanTransferByPartitionQueryHandler', () => {
     EvmAddressPropsFixture.create().value,
   );
   const security = new Security(SecurityPropsFixture.create());
-
+  const account = new Account(AccountPropsFixture.create());
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
@@ -288,6 +289,7 @@ describe('CanTransferByPartitionQueryHandler', () => {
       accountServiceMock.getAccountEvmAddress
         .mockResolvedValueOnce(sourceEvmAddress)
         .mockResolvedValueOnce(targetEvmAddress);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
       queryAdapterServiceMock.canTransferByPartition.mockResolvedValueOnce([
         true,
         'test',
@@ -302,6 +304,7 @@ describe('CanTransferByPartitionQueryHandler', () => {
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
         1,
       );
+      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(2);
       expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
@@ -325,6 +328,7 @@ describe('CanTransferByPartitionQueryHandler', () => {
         query.partitionId,
         EMPTY_BYTES,
         EMPTY_BYTES,
+        account.evmAddress,
       );
     });
   });

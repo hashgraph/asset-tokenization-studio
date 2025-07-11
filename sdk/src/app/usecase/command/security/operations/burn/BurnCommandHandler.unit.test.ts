@@ -302,9 +302,10 @@ describe('BurnCommandHandler', () => {
       ).toHaveBeenCalledWith(command.securityId);
       expect(validationServiceMock.checkCanRedeem).toHaveBeenCalledWith(
         command.securityId,
-        account.id.toString(),
+        command.sourceId,
         command.amount,
         _PARTITION_ID_1,
+        account.id.toString(),
       );
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
         command.sourceId,

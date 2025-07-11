@@ -259,15 +259,8 @@ export class ControllerTransferCommandHandler
         securityId,
         targetId,
         amount,
+        account.id.toString(),
         sourceId,
-        _PARTITION_ID_1,
-        account.id.toString(),
-      );
-
-      await this.validationService.checkAnyRole(
-        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
-        account.id.toString(),
-        securityId,
       );
 
       await this.validationService.checkDecimals(security, amount);

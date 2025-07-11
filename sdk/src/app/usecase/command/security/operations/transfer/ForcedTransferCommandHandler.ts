@@ -251,7 +251,6 @@ export class ForcedTransferCommandHandler
         await this.contractService.getContractEvmAddress(securityId);
       const sourceEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(sourceId);
-
       const targetEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(targetId);
 
@@ -259,15 +258,8 @@ export class ForcedTransferCommandHandler
         securityId,
         targetId,
         amount,
+        account.id.toString(),
         sourceId,
-        _PARTITION_ID_1,
-        account.id.toString(),
-      );
-
-      await this.validationService.checkAnyRole(
-        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
-        account.id.toString(),
-        securityId,
       );
 
       await this.validationService.checkDecimals(security, amount);

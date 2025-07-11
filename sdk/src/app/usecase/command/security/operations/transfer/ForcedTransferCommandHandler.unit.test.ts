@@ -291,10 +291,6 @@ describe('ForcedTransferCommandHandler', () => {
         targetEvmAddress,
       );
 
-      validationServiceMock.checkCanTransfer.mockResolvedValue(undefined);
-      validationServiceMock.checkRole.mockResolvedValue(undefined);
-      validationServiceMock.checkDecimals.mockResolvedValue(undefined);
-
       const result = await handler.execute(command);
 
       expect(result).toBeInstanceOf(ForcedTransferCommandResponse);
@@ -320,15 +316,8 @@ describe('ForcedTransferCommandHandler', () => {
         command.securityId,
         command.targetId,
         command.amount,
+        account.id.toString(),
         command.sourceId,
-        _PARTITION_ID_1,
-        account.id.toString(),
-      );
-
-      expect(validationServiceMock.checkAnyRole).toHaveBeenCalledWith(
-        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
-        account.id.toString(),
-        command.securityId,
       );
 
       expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(

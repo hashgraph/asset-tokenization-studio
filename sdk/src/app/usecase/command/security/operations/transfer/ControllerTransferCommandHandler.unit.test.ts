@@ -327,9 +327,8 @@ describe('ControllerTransferCommandHandler', () => {
           command.securityId,
           command.targetId,
           command.amount,
-          command.sourceId,
-          _PARTITION_ID_1,
           account.id.toString(),
+          command.sourceId,
         );
 
         expect(
