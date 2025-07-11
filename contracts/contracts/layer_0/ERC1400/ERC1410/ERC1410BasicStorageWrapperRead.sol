@@ -215,6 +215,7 @@ import {
 } from '../../constants/storagePositions.sol';
 import {_DEFAULT_PARTITION} from '../../constants/values.sol';
 import {LockStorageWrapper1} from '../../lock/LockStorageWrapper1.sol';
+import {LibCommon} from '../../../layer_0/common/libraries/LibCommon.sol';
 
 abstract contract ERC1410BasicStorageWrapperRead is
     IERC1410StorageWrapper,
@@ -388,6 +389,30 @@ abstract contract ERC1410BasicStorageWrapperRead is
 
         basicStorage.tokenHolderIndex[tokenHolder] = 0;
         basicStorage.totalTokenHolders--;
+    }
+
+    function _getTokenHolders(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory holders_) {
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
+            _pageIndex,
+            _pageLength
+        );
+
+        holders_ = new address[](
+            LibCommon.getSize(start, end, _getTotalTokenHolders())
+        );
+
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
+
+        for (uint256 i = 0; i < holders_.length; i++) {
+            holders_[i] = erc1410Storage.tokenHolders[start + i];
+        }
+    }
+
+    function _getTotalTokenHolders() internal view returns (uint256) {
+        return _erc1410BasicStorage().totalTokenHolders;
     }
 
     function _totalSupply() internal view returns (uint256) {
