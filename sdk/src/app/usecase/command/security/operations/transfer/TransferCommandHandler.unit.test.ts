@@ -207,6 +207,7 @@ import TransactionService from '../../../../../service/transaction/TransactionSe
 import { createMock } from '@golevelup/ts-jest';
 import AccountService from '../../../../../service/account/AccountService.js';
 import {
+  AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
@@ -216,13 +217,14 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import ValidationService from '../../../../../service/validation/ValidationService.js';
 import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { TransferCommandFixture } from '../../../../../../../__tests__/fixtures/transfer/TransferFixture.js';
-import SecurityService from 'app/service/security/SecurityService.js';
+import SecurityService from '../../../../../service/security/SecurityService.js';
 import { Security } from '../../../../../../domain/context/security/Security.js';
 import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { TransferCommandHandler } from './TransferCommandHandler.js';
 import { TransferCommand, TransferCommandResponse } from './TransferCommand.js';
 import { TransferCommandError } from './error/TransferCommandError.js';
+import Account from '../../../../../../domain/context/account/Account.js';
 
 describe('TransferCommandHandler', () => {
   let handler: TransferCommandHandler;
@@ -238,6 +240,7 @@ describe('TransferCommandHandler', () => {
   const transactionId = TransactionIdFixture.create().id;
   const errorMsg = ErrorMsgFixture.create().msg;
   const security = new Security(SecurityPropsFixture.create());
+  const account = new Account(AccountPropsFixture.create());
 
   beforeEach(() => {
     handler = new TransferCommandHandler(
@@ -283,6 +286,7 @@ describe('TransferCommandHandler', () => {
       it('should successfully transfer', async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
         securityServiceMock.get.mockResolvedValue(security);
 
         transactionServiceMock.getHandler().transfer.mockResolvedValue({
@@ -313,6 +317,7 @@ describe('TransferCommandHandler', () => {
           command.securityId,
           command.targetId,
           command.amount,
+          account.id.toString(),
         );
 
         expect(

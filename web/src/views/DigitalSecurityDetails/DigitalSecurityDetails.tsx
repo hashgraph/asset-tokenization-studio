@@ -399,6 +399,8 @@ export const DigitalSecurityDetails = () => {
       showKYC: !isSecurityPaused && hasRole(roles, SecurityRole._KYC_ROLE),
       showSSIManager:
         !isSecurityPaused && hasRole(roles, SecurityRole._SSI_MANAGER_ROLE),
+      showFreeze:
+        !isSecurityPaused && hasRole(roles, SecurityRole._FREEZE_MANAGER_ROLE),
     };
 
     const managementConfig = {

@@ -208,7 +208,7 @@ import BaseError from '../../../../../../../core/error/BaseError';
 
 export class ControllerTransferCommandError extends CommandError {
   constructor(error: Error) {
-    const msg = `An error occurred while force transferring tokens: ${error.message}`;
+    const msg = `An error occurred while controller transferring tokens: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

@@ -351,6 +351,60 @@ import ClearingTransferViewModel from '../response/ClearingTransferViewModel.js'
 import { GetClearingCreateHoldForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery.js';
 import { GetClearingRedeemForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery.js';
 import { GetClearingTransferForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery.js';
+import {
+  BatchBurnRequest,
+  BatchForcedTransferRequest,
+  BatchFreezePartialTokensRequest,
+  BatchMintRequest,
+  BatchSetAddressFrozenRequest,
+  BatchTransferRequest,
+  BatchUnfreezePartialTokensRequest,
+  ComplianceRequest,
+  IdentityRegistryRequest,
+  OnchainIDRequest,
+  SetAddressFrozenRequest,
+  SetComplianceRequest,
+  SetIdentityRegistryRequest,
+  SetNameRequest,
+  SetOnchainIDRequest,
+  SetSymbolRequest,
+} from '../request/index.js';
+import { SetNameCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setName/SetNameCommand.js';
+import { SetSymbolCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand.js';
+import { BurnRequest } from '../request';
+import { BurnCommand } from '../../../app/usecase/command/security/operations/burn/BurnCommand';
+import MintRequest from '../request/security/operations/mint/MintRequest';
+import { MintCommand } from '../../../app/usecase/command/security/operations/mint/MintCommand';
+import { ForcedTransferCommand } from '../../../app/usecase/command/security/operations/transfer/ForcedTransferCommand';
+import ForcedTransferRequest from '../request/security/operations/transfer/ForcedTransferRequest.js';
+import { SetOnchainIDCommand } from '../../../app/usecase/command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand.js';
+import { SetIdentityRegistryCommand } from '../../../app/usecase/command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommand.js';
+import { SetComplianceCommand } from '../../../app/usecase/command/security/compliance/setCompliance/SetComplianceCommand.js';
+import { IdentityRegistryQuery } from '../../../app/usecase/query/security/identityRegistry/IdentityRegistryQuery.js';
+import { ComplianceQuery } from '../../../app/usecase/query/security/compliance/compliance/ComplianceQuery.js';
+import { OnchainIDQuery } from '../../../app/usecase/query/security/tokenMetadata/onchainId/OnchainIDQuery.js';
+import FreezePartialTokensRequest from '../request/security/operations/freeze/FreezePartialTokensRequest.js';
+import GetFrozenPartialTokensRequest from '../request/security/operations/freeze/GetFrozenPartialTokensRequest.js';
+import UnfreezePartialTokensRequest from '../request/security/operations/freeze/UnfreezePartialTokensRequest.js';
+import { FreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand.js';
+import { UnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand.js';
+import { GetFrozenPartialTokensQuery } from '../../../app/usecase/query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery.js';
+import RecoveryAddressRequest from '../request/security/operations/recovery/RecoveryAddressRequest.js';
+import { RecoveryAddressCommand } from '../../../app/usecase/command/security/operations/recoveryAddress/RecoveryAddressCommand.js';
+import IsAddressRecoveredRequest from '../request/security/operations/recovery/IsAddressRecoveredRequest.js';
+import { IsAddressRecoveredQuery } from '../../../app/usecase/query/security/recovery/IsAddressRecoveredQuery.js';
+import AddAgentRequest from '../request/security/operations/agent/AddAgentRequest.js';
+import RemoveAgentRequest from '../request/security/operations/agent/RemoveAgentRequest.js';
+import { AddAgentCommand } from '../../../app/usecase/command/security/operations/agent/addAgent/AddAgentCommand.js';
+import { RemoveAgentCommand } from '../../../app/usecase/command/security/operations/agent/removeAgent/RemoveAgentCommand.js';
+import { BatchTransferCommand } from '../../../app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommand.js';
+import { BatchMintCommand } from '../../../app/usecase/command/security/operations/batch/batchMint/BatchMintCommand.js';
+import { BatchBurnCommand } from '../../../app/usecase/command/security/operations/batch/batchBurn/BatchBurnCommand.js';
+import { BatchSetAddressFrozenCommand } from '../../../app/usecase/command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommand.js';
+import { BatchFreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommand.js';
+import { BatchForcedTransferCommand } from '../../../app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand.js';
+import { BatchUnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand.js';
+import { SetAddressFrozenCommand } from '../../../app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -361,6 +415,9 @@ interface ISecurityInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   redeem(
     request: RedeemRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  burn(
+    request: BurnRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   controllerRedeem(
     request: ForceRedeemRequest,
@@ -395,6 +452,9 @@ interface ISecurityInPort {
   ): Promise<{ payload: number; transactionId: string }>;
   controllerTransfer(
     request: ForceTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  forcedTransfer(
+    request: ForcedTransferRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   setMaxSupply(
     request: SetMaxSupplyRequest,
@@ -514,6 +574,64 @@ interface ISecurityInPort {
   operatorClearingTransferByPartition(
     request: OperatorClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }>;
+  setName(
+    request: SetNameRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  setSymbol(
+    request: SetSymbolRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  setOnchainID(
+    request: SetOnchainIDRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  setIdentityRegistry(
+    request: SetIdentityRegistryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  setCompliance(
+    request: SetComplianceRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  compliance(request: ComplianceRequest): Promise<string>;
+  identityRegistry(request: IdentityRegistryRequest): Promise<string>;
+  onchainID(request: OnchainIDRequest): Promise<string>;
+  freezePartialTokens(
+    request: FreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  unfreezePartialTokens(
+    request: UnfreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  getFrozenPartialTokens(
+    request: GetFrozenPartialTokensRequest,
+  ): Promise<BalanceViewModel>;
+  recoveryAddress(
+    request: RecoveryAddressRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  isAddressRecovered(request: IsAddressRecoveredRequest): Promise<boolean>;
+  addAgent(
+    request: AddAgentRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeAgent(
+    request: RemoveAgentRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchTransfer(
+    request: BatchTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchForcedTransfer(
+    request: BatchForcedTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchMint(
+    request: BatchMintRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchBurn(
+    request: BatchBurnRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchSetAddressFrozen(
+    request: BatchSetAddressFrozenRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchFreezePartialTokens(
+    request: BatchFreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  batchUnfreezePartialTokens(
+    request: BatchUnfreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -524,6 +642,105 @@ class SecurityInPort implements ISecurityInPort {
       MirrorNodeAdapter,
     ),
   ) {}
+
+  @LogError
+  async batchTransfer(
+    request: BatchTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('BatchTransferRequest', request);
+    return await this.commandBus.execute(
+      new BatchTransferCommand(
+        request.securityId,
+        request.amountList,
+        request.toList,
+      ),
+    );
+  }
+  @LogError
+  async batchForcedTransfer(
+    request: BatchForcedTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('BatchForcedTransferRequest', request);
+    return await this.commandBus.execute(
+      new BatchForcedTransferCommand(
+        request.securityId,
+        request.amountList,
+        request.fromList,
+        request.toList,
+      ),
+    );
+  }
+  @LogError
+  async batchMint(
+    request: BatchMintRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('BatchMintRequest', request);
+    return await this.commandBus.execute(
+      new BatchMintCommand(
+        request.securityId,
+        request.amountList,
+        request.toList,
+      ),
+    );
+  }
+  @LogError
+  async batchBurn(
+    request: BatchBurnRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('BatchBurnRequest', request);
+    return await this.commandBus.execute(
+      new BatchBurnCommand(
+        request.securityId,
+        request.amountList,
+        request.targetList,
+      ),
+    );
+  }
+  @LogError
+  async batchSetAddressFrozen(
+    request: BatchSetAddressFrozenRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('BatchSetAddressFrozenRequest', request);
+    return await this.commandBus.execute(
+      new BatchSetAddressFrozenCommand(
+        request.securityId,
+        request.freezeList,
+        request.targetList,
+      ),
+    );
+  }
+  @LogError
+  async batchFreezePartialTokens(
+    request: BatchFreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(
+      'BatchFreezePartialTokensRequest',
+      request,
+    );
+    return await this.commandBus.execute(
+      new BatchFreezePartialTokensCommand(
+        request.securityId,
+        request.amountList,
+        request.targetList,
+      ),
+    );
+  }
+  @LogError
+  async batchUnfreezePartialTokens(
+    request: BatchUnfreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(
+      'BatchUnfreezePartialTokensRequest',
+      request,
+    );
+    return await this.commandBus.execute(
+      new BatchUnfreezePartialTokensCommand(
+        request.securityId,
+        request.amountList,
+        request.targetList,
+      ),
+    );
+  }
 
   @LogError
   async lock(
@@ -658,6 +875,18 @@ class SecurityInPort implements ISecurityInPort {
   }
 
   @LogError
+  async mint(
+    request: MintRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, amount, targetId } = request;
+    ValidatedRequest.handleValidation('MintRequest', request);
+
+    return await this.commandBus.execute(
+      new MintCommand(securityId, targetId, amount),
+    );
+  }
+
+  @LogError
   async redeem(
     request: RedeemRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
@@ -665,6 +894,18 @@ class SecurityInPort implements ISecurityInPort {
     ValidatedRequest.handleValidation('RedeemRequest', request);
 
     return await this.commandBus.execute(new RedeemCommand(amount, securityId));
+  }
+
+  @LogError
+  async burn(
+    request: BurnRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, sourceId, amount } = request;
+    ValidatedRequest.handleValidation('BurnRequest', request);
+
+    return await this.commandBus.execute(
+      new BurnCommand(sourceId, amount, securityId),
+    );
   }
 
   @LogError
@@ -818,6 +1059,18 @@ class SecurityInPort implements ISecurityInPort {
 
     return await this.commandBus.execute(
       new ControllerTransferCommand(amount, sourceId, targetId, securityId),
+    );
+  }
+
+  @LogError
+  async forcedTransfer(
+    request: ForcedTransferRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, amount, targetId, sourceId } = request;
+    ValidatedRequest.handleValidation('ForcedTransferRequest', request);
+
+    return await this.commandBus.execute(
+      new ForcedTransferCommand(sourceId, targetId, amount, securityId),
     );
   }
 
@@ -1815,6 +2068,183 @@ class SecurityInPort implements ISecurityInPort {
         request.targetId,
         request.expirationDate,
       ),
+    );
+  }
+
+  @LogError
+  async setName(
+    request: SetNameRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, name } = request;
+    ValidatedRequest.handleValidation('SetNameRequest', request);
+
+    return await this.commandBus.execute(new SetNameCommand(securityId, name));
+  }
+
+  @LogError
+  async setSymbol(
+    request: SetSymbolRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, symbol } = request;
+    ValidatedRequest.handleValidation('SetSymbolRequest', request);
+
+    return await this.commandBus.execute(
+      new SetSymbolCommand(securityId, symbol),
+    );
+  }
+
+  @LogError
+  async setOnchainID(
+    request: SetOnchainIDRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, onchainID } = request;
+    ValidatedRequest.handleValidation('SetOnchainIDRequest', request);
+
+    return await this.commandBus.execute(
+      new SetOnchainIDCommand(securityId, onchainID),
+    );
+  }
+
+  @LogError
+  async setIdentityRegistry(
+    request: SetIdentityRegistryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, identityRegistry } = request;
+    ValidatedRequest.handleValidation('SetIdentityRegistryRequest', request);
+
+    return await this.commandBus.execute(
+      new SetIdentityRegistryCommand(securityId, identityRegistry),
+    );
+  }
+
+  @LogError
+  async setCompliance(
+    request: SetComplianceRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, compliance } = request;
+    ValidatedRequest.handleValidation('SetComplianceRequest', request);
+
+    return await this.commandBus.execute(
+      new SetComplianceCommand(securityId, compliance),
+    );
+  }
+
+  @LogError
+  async identityRegistry(request: IdentityRegistryRequest): Promise<string> {
+    const { securityId } = request;
+    ValidatedRequest.handleValidation('IdentityRegistryRequest', request);
+
+    return (await this.queryBus.execute(new IdentityRegistryQuery(securityId)))
+      .payload;
+  }
+
+  @LogError
+  async compliance(request: ComplianceRequest): Promise<string> {
+    const { securityId } = request;
+    ValidatedRequest.handleValidation('ComplianceRequest', request);
+
+    return (await this.queryBus.execute(new ComplianceQuery(securityId)))
+      .payload;
+  }
+
+  @LogError
+  async onchainID(request: OnchainIDRequest): Promise<string> {
+    const { securityId } = request;
+    ValidatedRequest.handleValidation('OnchainIDRequest', request);
+
+    return (await this.queryBus.execute(new OnchainIDQuery(securityId)))
+      .payload;
+  }
+
+  @LogError
+  async setAddressFrozen(
+    request: SetAddressFrozenRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(SetAddressFrozenRequest.name, request);
+    const { securityId, status, targetId } = request;
+    return await this.commandBus.execute(
+      new SetAddressFrozenCommand(securityId, status, targetId),
+    );
+  }
+
+  @LogError
+  async freezePartialTokens(
+    request: FreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('FreezePartialTokensRequest', request);
+    const { securityId, amount, targetId } = request;
+    return await this.commandBus.execute(
+      new FreezePartialTokensCommand(securityId, amount, targetId),
+    );
+  }
+
+  @LogError
+  async unfreezePartialTokens(
+    request: UnfreezePartialTokensRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation('UnfreezePartialTokensRequest', request);
+    const { securityId, amount, targetId } = request;
+    return await this.commandBus.execute(
+      new UnfreezePartialTokensCommand(securityId, amount, targetId),
+    );
+  }
+
+  @LogError
+  async getFrozenPartialTokens(
+    request: GetFrozenPartialTokensRequest,
+  ): Promise<BalanceViewModel> {
+    ValidatedRequest.handleValidation('GetFrozenPartialTokensRequest', request);
+    const res = await this.queryBus.execute(
+      new GetFrozenPartialTokensQuery(request.securityId, request.targetId),
+    );
+
+    const balance: BalanceViewModel = { value: res.payload.toString() };
+    return balance;
+  }
+
+  @LogError
+  async recoveryAddress(
+    request: RecoveryAddressRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(RecoveryAddressRequest.name, request);
+    return await this.commandBus.execute(
+      new RecoveryAddressCommand(
+        request.securityId,
+        request.lostWalletId,
+        request.newWalletId,
+      ),
+    );
+  }
+
+  @LogError
+  async isAddressRecovered(
+    request: IsAddressRecoveredRequest,
+  ): Promise<boolean> {
+    ValidatedRequest.handleValidation(IsAddressRecoveredRequest.name, request);
+    return (
+      await this.queryBus.execute(
+        new IsAddressRecoveredQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async addAgent(
+    request: AddAgentRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(AddAgentRequest.name, request);
+    return await this.commandBus.execute(
+      new AddAgentCommand(request.securityId, request.agentId),
+    );
+  }
+
+  @LogError
+  async removeAgent(
+    request: RemoveAgentRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(RemoveAgentRequest.name, request);
+    return await this.commandBus.execute(
+      new RemoveAgentCommand(request.securityId, request.agentId),
     );
   }
 }

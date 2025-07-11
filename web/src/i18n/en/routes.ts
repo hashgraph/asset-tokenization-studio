@@ -226,6 +226,7 @@ export default {
   [RouteName.DigitalSecuritiesList]: "All digital securities",
   [RouteName.DigitalSecurityDetails]: "Digital security details",
   [RouteName.DigitalSecurityMint]: "Mint digital security",
+  [RouteName.DigitalSecurityFreeze]: "Freeze digital security",
   [RouteName.DigitalSecurityTransfer]: "Transfer digital security",
   [RouteName.DigitalSecurityForceTransfer]: "Force Transfer digital security",
   [RouteName.DigitalSecurityRedeem]: "Redeem digital security",
