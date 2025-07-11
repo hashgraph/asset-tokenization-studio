@@ -362,6 +362,28 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }
 
+    function _getCouponHolders(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory holders_) {
+        uint256 snapshotId = _getSnapshotID(
+            COUPON_CORPORATE_ACTION_TYPE,
+            _couponID
+        );
+        return _tokenHoldersAt(snapshotId, _pageIndex, _pageLength);
+    }
+
+    function _getTotalCouponHolders(
+        uint256 _couponID
+    ) internal view returns (uint256) {
+        uint256 snapshotId = _getSnapshotID(
+            COUPON_CORPORATE_ACTION_TYPE,
+            _couponID
+        );
+        return _totalTokenHoldersAt(snapshotId);
+    }
+
     function _bondStorage()
         internal
         pure
