@@ -207,21 +207,24 @@ import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import AccountService from '@service/account/AccountService';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
 import EvmAddress from '@domain/context/contract/EvmAddress';
-import { UpdateExternalKycListsCommandHandler } from './UpdateExternalKycListsCommandHandler';
+import { UpdateExternalKycListsCommandHandler } from './UpdateExternalKycListsCommandHandler.js';
 import {
   UpdateExternalKycListsCommand,
   UpdateExternalKycListsCommandResponse,
-} from './UpdateExternalKycListsCommand';
+} from './UpdateExternalKycListsCommand.js';
 import ValidationService from '@service/validation/ValidationService';
 import Account from '@domain/context/account/Account';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
 import { UpdateExternalKycListsCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { UpdateExternalKycListsCommandError } from './error/UpdateExternalKycListsCommandError.js';
 
 describe('UpdateExternalKycListCommandHandler', () => {
   let handler: UpdateExternalKycListsCommandHandler;
@@ -241,6 +244,7 @@ describe('UpdateExternalKycListCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new UpdateExternalKycListsCommandHandler(
@@ -257,6 +261,24 @@ describe('UpdateExternalKycListCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws UpdateExternalKycListsCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        UpdateExternalKycListsCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while updating external KYC: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully update external kyc lists', async () => {
       contractServiceMock.getContractEvmAddress
         .mockResolvedValueOnce(evmAddress)

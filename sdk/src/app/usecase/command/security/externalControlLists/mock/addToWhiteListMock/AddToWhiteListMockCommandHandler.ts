@@ -213,6 +213,7 @@ import TransactionService from '@service/transaction/TransactionService';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import ContractService from '@service/contract/ContractService';
 import AccountService from '@service/account/AccountService';
+import { AddToWhiteListMockCommandError } from './error/AddToWhiteListMockCommandError';
 
 @CommandHandler(AddToWhiteListMockCommand)
 export class AddToWhiteListMockCommandHandler
@@ -230,23 +231,27 @@ export class AddToWhiteListMockCommandHandler
   async execute(
     command: AddToWhiteListMockCommand,
   ): Promise<AddToWhiteListMockCommandResponse> {
-    const { contractId, targetId } = command;
-    const handler = this.transactionService.getHandler();
+    try {
+      const { contractId, targetId } = command;
+      const handler = this.transactionService.getHandler();
 
-    const contractEvmAddress =
-      await this.contractService.getContractEvmAddress(contractId);
+      const contractEvmAddress =
+        await this.contractService.getContractEvmAddress(contractId);
 
-    const targetEvmAddress =
-      await this.accountService.getAccountEvmAddress(targetId);
+      const targetEvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    const res = await handler.addToWhiteListMock(
-      contractEvmAddress,
-      targetEvmAddress,
-      contractId,
-    );
+      const res = await handler.addToWhiteListMock(
+        contractEvmAddress,
+        targetEvmAddress,
+        contractId,
+      );
 
-    return Promise.resolve(
-      new AddToWhiteListMockCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new AddToWhiteListMockCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new AddToWhiteListMockCommandError(error as Error);
+    }
   }
 }

@@ -211,12 +211,12 @@ import {
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '@test/fixtures/shared/DataFixture';
-import { CreateExternalBlackListMockCommandHandler } from './CreateExternalBlackListMockCommandHandler';
-import { CreateExternalBlackListMockCommandResponse } from './CreateExternalBlackListMockCommand';
+import { CreateExternalBlackListMockCommandHandler } from './CreateExternalBlackListMockCommandHandler.js';
+import { CreateExternalBlackListMockCommandResponse } from './CreateExternalBlackListMockCommand.js';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import Account from '@domain/context/account/Account';
+import { CreateExternalBlackListMockCommandError } from './error/CreateExternalBlackListMockCommandError.js';
 import { ErrorCode } from '@core/error/BaseError';
-import { CreateExternalBlackListMockCommandError } from './error/CreateExternalBlackListMockCommandError';
 
 describe('CreateExternalBlackListMockCommandHandler', () => {
   let handler: CreateExternalBlackListMockCommandHandler;

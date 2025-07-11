@@ -206,6 +206,7 @@
 import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '@test/fixtures/shared/DataFixture';
@@ -215,9 +216,11 @@ import { AddToBlackListMockCommandFixture } from '@test/fixtures/externalControl
 import {
   AddToBlackListMockCommand,
   AddToBlackListMockCommandResponse,
-} from './AddToBlackListMockCommand';
-import { AddToBlackListMockCommandHandler } from './AddToBlackListMockCommandHandler';
+} from './AddToBlackListMockCommand.js';
+import { AddToBlackListMockCommandHandler } from './AddToBlackListMockCommandHandler.js';
 import AccountService from '@service/account/AccountService';
+import { ErrorCode } from '@core/error/BaseError';
+import { AddToBlackListMockCommandError } from './error/AddToBlackListMockCommandError.js';
 
 describe('AddToBlackListMockCommandHandler', () => {
   let handler: AddToBlackListMockCommandHandler;
@@ -233,6 +236,7 @@ describe('AddToBlackListMockCommandHandler', () => {
   const targetEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
   );
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   const transactionId = TransactionIdFixture.create().id;
 
@@ -250,6 +254,24 @@ describe('AddToBlackListMockCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws AddToBlackListMockCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        AddToBlackListMockCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while adding to blacklist: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully add to black list mock', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         contractEvmAddress,

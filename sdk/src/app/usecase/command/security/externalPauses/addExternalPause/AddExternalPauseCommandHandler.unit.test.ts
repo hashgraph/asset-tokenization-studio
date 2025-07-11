@@ -207,6 +207,7 @@ import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import AccountService from '@service/account/AccountService';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
@@ -216,12 +217,14 @@ import EvmAddress from '@domain/context/contract/EvmAddress';
 import ValidationService from '@service/validation/ValidationService';
 import Account from '@domain/context/account/Account';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { AddExternalPauseCommandHandler } from './AddExternalPauseCommandHandler';
+import { AddExternalPauseCommandHandler } from './AddExternalPauseCommandHandler.js';
 import {
   AddExternalPauseCommand,
   AddExternalPauseCommandResponse,
-} from './AddExternalPauseCommand';
+} from './AddExternalPauseCommand.js';
 import { AddExternalPauseCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { AddExternalPauseCommandError } from './error/AddExternalPauseCommandError.js';
 
 describe('AddExternalPauseCommandHandler', () => {
   let handler: AddExternalPauseCommandHandler;
@@ -241,6 +244,7 @@ describe('AddExternalPauseCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new AddExternalPauseCommandHandler(
@@ -257,6 +261,24 @@ describe('AddExternalPauseCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws AddExternalPauseCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        AddExternalPauseCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while adding external pause: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully add external pause', async () => {
       contractServiceMock.getContractEvmAddress
         .mockResolvedValueOnce(evmAddress)

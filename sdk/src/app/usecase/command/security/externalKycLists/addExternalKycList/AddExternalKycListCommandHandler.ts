@@ -215,6 +215,7 @@ import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
 import ContractService from '@service/contract/ContractService';
 import ValidationService from '@service/validation/ValidationService';
+import { AddExternalKycListCommandError } from './error/AddExternalKycListCommandError';
 
 @CommandHandler(AddExternalKycListCommand)
 export class AddExternalKycListCommandHandler
@@ -234,32 +235,38 @@ export class AddExternalKycListCommandHandler
   async execute(
     command: AddExternalKycListCommand,
   ): Promise<AddExternalKycListCommandResponse> {
-    const { securityId, externalKycListAddress } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId, externalKycListAddress } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._KYC_MANAGER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._KYC_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const externalKycListEvmAddresses =
-      await this.contractService.getContractEvmAddress(externalKycListAddress);
+      const externalKycListEvmAddresses =
+        await this.contractService.getContractEvmAddress(
+          externalKycListAddress,
+        );
 
-    const res = await handler.addExternalKycList(
-      securityEvmAddress,
-      externalKycListEvmAddresses,
-      securityId,
-    );
+      const res = await handler.addExternalKycList(
+        securityEvmAddress,
+        externalKycListEvmAddresses,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new AddExternalKycListCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new AddExternalKycListCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new AddExternalKycListCommandError(error as Error);
+    }
   }
 }

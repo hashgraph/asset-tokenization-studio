@@ -207,21 +207,24 @@ import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import AccountService from '@service/account/AccountService';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '@test/fixtures/shared/DataFixture';
 import ContractService from '@service/contract/ContractService';
 import EvmAddress from '@domain/context/contract/EvmAddress';
-import { UpdateExternalControlListsCommandHandler } from './UpdateExternalControlListsCommandHandler';
+import { UpdateExternalControlListsCommandHandler } from './UpdateExternalControlListsCommandHandler.js';
 import {
   UpdateExternalControlListsCommand,
   UpdateExternalControlListsCommandResponse,
-} from './UpdateExternalControlListsCommand';
+} from './UpdateExternalControlListsCommand.js';
 import ValidationService from '@service/validation/ValidationService';
 import { UpdateExternalControlListsCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
 import Account from '@domain/context/account/Account';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { UpdateExternalControlListsCommandError } from './error/UpdateExternalControlListsCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('UpdateExternalControlListCommandHandler', () => {
   let handler: UpdateExternalControlListsCommandHandler;
@@ -241,6 +244,7 @@ describe('UpdateExternalControlListCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new UpdateExternalControlListsCommandHandler(
@@ -257,6 +261,24 @@ describe('UpdateExternalControlListCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws UpdateExternalControlListsCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        UpdateExternalControlListsCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while updating external control list: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully update external control lists', async () => {
       contractServiceMock.getContractEvmAddress
         .mockResolvedValueOnce(evmAddress)
