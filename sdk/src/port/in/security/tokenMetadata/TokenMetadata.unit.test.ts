@@ -203,115 +203,184 @@
 
 */
 
-import SecurityViewModel from '../response/SecurityViewModel';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Injectable from '@core/Injectable';
-import { QueryBus } from '@core/query/QueryBus';
+import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '@core/command/CommandBus';
-import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
-import { ISecurityInPortAgent, SecurityInPortAgent } from './agent/Agent';
-import { ISecurityInPortPause, SecurityInPortPause } from './pause/Pause';
+import { SetNameRequest, SetSymbolRequest } from '../../request';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
 import {
-  ISecurityInPortControlList,
-  SecurityInPortControlList,
-} from './controlList/ControlList';
-import {
-  ISecurityInPortBalance,
-  SecurityInPortBalance,
-} from './balance/Balance';
-import { ISecurityInPortLock, SecurityInPortLock } from './lock/Lock';
-import { applyMixins } from '../utils';
-import {
-  ISecurityInPortClearing,
-  SecurityInPortClearing,
-} from './clearing/Clearing';
-import {
-  ISecurityInPortCompliance,
-  SecurityInPortCompliance,
-} from './compliance/Compliance';
-import { ISecurityInPortFreeze, SecurityInPortFreeze } from './freeze/Freeze';
-import { ISecurityInPortHold, SecurityInPortHold } from './hold/Hold';
-import {
-  ISecurityInPortIdentity,
-  SecurityInPortIdentity,
-} from './identity/Identity';
-import { ISecurityInPortInfo, SecurityInPortInfo } from './info/Info';
-import { ISecurityInPortIssue, SecurityInPortIssue } from './issue/Issue';
-import {
-  ISecurityInPortProtectedPartitions,
-  SecurityInPortProtectedPartitions,
-} from './protectedPartitions/ProtectedPartitions';
-import {
-  ISecurityInPortRecovery,
-  SecurityInPortRecovery,
-} from './recovery/Recovery';
-import { ISecurityInPortRedeem, SecurityInPortRedeem } from './redeem/Redeem';
-import { ISecurityInPortSupply, SecurityInPortSupply } from './supply/Supply';
-import {
-  ISecurityInPortTokenMetadata,
-  SecurityInPortTokenMetadata,
-} from './tokenMetadata/TokenMetadata';
-import {
-  ISecurityInPortTransfer,
-  SecurityInPortTransfer,
-} from './transfer/Transfer';
-import { BaseSecurityInPort } from './BaseSecurityInPort';
+  SetNameRequestFixture,
+  SetSymbolRequestFixture,
+} from '@test/fixtures/tokenMetadata/TokenMetadataFixture';
+import { SetNameCommand } from '@command/security/operations/tokenMetadata/setName/SetNameCommand';
+import { SetSymbolCommand } from '@command/security/operations/tokenMetadata/setSymbol/SetSymbolCommand';
 
-export { SecurityViewModel, SecurityControlListType };
+describe('Token Metadata', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-interface SecurityInPort
-  extends ISecurityInPortAgent,
-    ISecurityInPortBalance,
-    ISecurityInPortClearing,
-    ISecurityInPortCompliance,
-    ISecurityInPortControlList,
-    ISecurityInPortFreeze,
-    ISecurityInPortHold,
-    ISecurityInPortIdentity,
-    ISecurityInPortInfo,
-    ISecurityInPortIssue,
-    ISecurityInPortLock,
-    ISecurityInPortPause,
-    ISecurityInPortProtectedPartitions,
-    ISecurityInPortRecovery,
-    ISecurityInPortRedeem,
-    ISecurityInPortSupply,
-    ISecurityInPortTokenMetadata,
-    ISecurityInPortTransfer {}
+  let setNameRequest: SetNameRequest;
+  let setSymbolRequest: SetSymbolRequest;
 
-class SecurityInPort extends BaseSecurityInPort {
-  constructor(
-    queryBus: QueryBus = Injectable.resolve(QueryBus),
-    commandBus: CommandBus = Injectable.resolve(CommandBus),
-    mirrorNode: MirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter),
-  ) {
-    super();
-    this.queryBus = queryBus;
-    this.commandBus = commandBus;
-    this.mirrorNode = mirrorNode;
-  }
-}
+  let handleValidationSpy: jest.SpyInstance;
 
-applyMixins(SecurityInPort, [
-  SecurityInPortAgent,
-  SecurityInPortBalance,
-  SecurityInPortClearing,
-  SecurityInPortCompliance,
-  SecurityInPortControlList,
-  SecurityInPortFreeze,
-  SecurityInPortHold,
-  SecurityInPortIdentity,
-  SecurityInPortInfo,
-  SecurityInPortIssue,
-  SecurityInPortLock,
-  SecurityInPortPause,
-  SecurityInPortProtectedPartitions,
-  SecurityInPortRecovery,
-  SecurityInPortRedeem,
-  SecurityInPortSupply,
-  SecurityInPortTokenMetadata,
-  SecurityInPortTransfer,
-]);
+  const transactionId = TransactionIdFixture.create().id;
 
-export default new SecurityInPort();
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
+
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('SetName', () => {
+    setNameRequest = new SetNameRequest(SetNameRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set name successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setName(setNameRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetNameRequest',
+        setNameRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetNameCommand(setNameRequest.securityId, setNameRequest.name),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.setName(setNameRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetNameRequest',
+        setNameRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetNameCommand(setNameRequest.securityId, setNameRequest.name),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setNameRequest = new SetNameRequest({
+        ...SetNameRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.setName(setNameRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if name is empty', async () => {
+      setNameRequest = new SetNameRequest({
+        ...SetNameRequestFixture.create({
+          name: '',
+        }),
+      });
+
+      await expect(Security.setName(setNameRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('SetSymbol', () => {
+    setSymbolRequest = new SetSymbolRequest(SetSymbolRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set symbol successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setSymbol(setSymbolRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetSymbolRequest',
+        setSymbolRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetSymbolCommand(
+          setSymbolRequest.securityId,
+          setSymbolRequest.symbol,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.setSymbol(setSymbolRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetSymbolRequest',
+        setSymbolRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetSymbolCommand(
+          setSymbolRequest.securityId,
+          setSymbolRequest.symbol,
+        ),
+      );
+    });
+    it('should throw error if securityId is invalid', async () => {
+      setSymbolRequest = new SetSymbolRequest({
+        ...SetSymbolRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+      await expect(Security.setSymbol(setSymbolRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if symbol is empty', async () => {
+      setSymbolRequest = new SetSymbolRequest({
+        ...SetSymbolRequestFixture.create({
+          symbol: '',
+        }),
+      });
+
+      await expect(Security.setSymbol(setSymbolRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+});

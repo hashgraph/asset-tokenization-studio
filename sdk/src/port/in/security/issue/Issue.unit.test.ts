@@ -203,115 +203,314 @@
 
 */
 
-import SecurityViewModel from '../response/SecurityViewModel';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Injectable from '@core/Injectable';
-import { QueryBus } from '@core/query/QueryBus';
+import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '@core/command/CommandBus';
-import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
-import { ISecurityInPortAgent, SecurityInPortAgent } from './agent/Agent';
-import { ISecurityInPortPause, SecurityInPortPause } from './pause/Pause';
+import { BatchMintRequest, IssueRequest, MintRequest } from '../../request';
 import {
-  ISecurityInPortControlList,
-  SecurityInPortControlList,
-} from './controlList/ControlList';
+  HederaIdPropsFixture,
+  TransactionIdFixture,
+} from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
+import { IssueRequestFixture } from '@test/fixtures/issue/IssueFixture';
+import { IssueCommand } from '@command/security/operations/issue/IssueCommand';
 import {
-  ISecurityInPortBalance,
-  SecurityInPortBalance,
-} from './balance/Balance';
-import { ISecurityInPortLock, SecurityInPortLock } from './lock/Lock';
-import { applyMixins } from '../utils';
-import {
-  ISecurityInPortClearing,
-  SecurityInPortClearing,
-} from './clearing/Clearing';
-import {
-  ISecurityInPortCompliance,
-  SecurityInPortCompliance,
-} from './compliance/Compliance';
-import { ISecurityInPortFreeze, SecurityInPortFreeze } from './freeze/Freeze';
-import { ISecurityInPortHold, SecurityInPortHold } from './hold/Hold';
-import {
-  ISecurityInPortIdentity,
-  SecurityInPortIdentity,
-} from './identity/Identity';
-import { ISecurityInPortInfo, SecurityInPortInfo } from './info/Info';
-import { ISecurityInPortIssue, SecurityInPortIssue } from './issue/Issue';
-import {
-  ISecurityInPortProtectedPartitions,
-  SecurityInPortProtectedPartitions,
-} from './protectedPartitions/ProtectedPartitions';
-import {
-  ISecurityInPortRecovery,
-  SecurityInPortRecovery,
-} from './recovery/Recovery';
-import { ISecurityInPortRedeem, SecurityInPortRedeem } from './redeem/Redeem';
-import { ISecurityInPortSupply, SecurityInPortSupply } from './supply/Supply';
-import {
-  ISecurityInPortTokenMetadata,
-  SecurityInPortTokenMetadata,
-} from './tokenMetadata/TokenMetadata';
-import {
-  ISecurityInPortTransfer,
-  SecurityInPortTransfer,
-} from './transfer/Transfer';
-import { BaseSecurityInPort } from './BaseSecurityInPort';
+  BatchMintResponse,
+  BatchMintCommand,
+} from '@command/security/operations/batch/batchMint/BatchMintCommand';
+import { MintCommand } from '@command/security/operations/mint/MintCommand';
+import { BatchMintRequestFixture } from '@test/fixtures/batch/BatchFixture';
+import { MintRequestFixture } from '@test/fixtures/mint/MintFixture';
 
-export { SecurityViewModel, SecurityControlListType };
+describe('Issue', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-interface SecurityInPort
-  extends ISecurityInPortAgent,
-    ISecurityInPortBalance,
-    ISecurityInPortClearing,
-    ISecurityInPortCompliance,
-    ISecurityInPortControlList,
-    ISecurityInPortFreeze,
-    ISecurityInPortHold,
-    ISecurityInPortIdentity,
-    ISecurityInPortInfo,
-    ISecurityInPortIssue,
-    ISecurityInPortLock,
-    ISecurityInPortPause,
-    ISecurityInPortProtectedPartitions,
-    ISecurityInPortRecovery,
-    ISecurityInPortRedeem,
-    ISecurityInPortSupply,
-    ISecurityInPortTokenMetadata,
-    ISecurityInPortTransfer {}
+  let issueRequest: IssueRequest;
+  let mintRequest: MintRequest;
+  let batchMintRequest: BatchMintRequest;
 
-class SecurityInPort extends BaseSecurityInPort {
-  constructor(
-    queryBus: QueryBus = Injectable.resolve(QueryBus),
-    commandBus: CommandBus = Injectable.resolve(CommandBus),
-    mirrorNode: MirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter),
-  ) {
-    super();
-    this.queryBus = queryBus;
-    this.commandBus = commandBus;
-    this.mirrorNode = mirrorNode;
-  }
-}
+  let handleValidationSpy: jest.SpyInstance;
 
-applyMixins(SecurityInPort, [
-  SecurityInPortAgent,
-  SecurityInPortBalance,
-  SecurityInPortClearing,
-  SecurityInPortCompliance,
-  SecurityInPortControlList,
-  SecurityInPortFreeze,
-  SecurityInPortHold,
-  SecurityInPortIdentity,
-  SecurityInPortInfo,
-  SecurityInPortIssue,
-  SecurityInPortLock,
-  SecurityInPortPause,
-  SecurityInPortProtectedPartitions,
-  SecurityInPortRecovery,
-  SecurityInPortRedeem,
-  SecurityInPortSupply,
-  SecurityInPortTokenMetadata,
-  SecurityInPortTransfer,
-]);
+  const transactionId = TransactionIdFixture.create().id;
 
-export default new SecurityInPort();
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
+
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('issue', () => {
+    issueRequest = new IssueRequest(IssueRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should issue successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.issue(issueRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IssueRequest',
+        issueRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new IssueCommand(
+          issueRequest.amount,
+          issueRequest.targetId,
+          issueRequest.securityId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.issue(issueRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IssueRequest',
+        issueRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new IssueCommand(
+          issueRequest.amount,
+          issueRequest.targetId,
+          issueRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      issueRequest = new IssueRequest({
+        ...IssueRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.issue(issueRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+    it('should throw error if targetId is invalid', async () => {
+      issueRequest = new IssueRequest({
+        ...IssueRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(Security.issue(issueRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+    it('should throw error if amount is invalid', async () => {
+      issueRequest = new IssueRequest({
+        ...IssueRequestFixture.create({
+          amount: 'invalid',
+        }),
+      });
+
+      await expect(Security.issue(issueRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('mint', () => {
+    mintRequest = new MintRequest(MintRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should mint successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.mint(mintRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'MintRequest',
+        mintRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new MintCommand(
+          mintRequest.securityId,
+          mintRequest.targetId,
+          mintRequest.amount,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.mint(mintRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'MintRequest',
+        mintRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new MintCommand(
+          mintRequest.securityId,
+          mintRequest.targetId,
+          mintRequest.amount,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      mintRequest = new MintRequest({
+        ...MintRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.mint(mintRequest)).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if targetId is invalid', async () => {
+      mintRequest = new MintRequest({
+        ...MintRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(Security.mint(mintRequest)).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if amount is invalid', async () => {
+      mintRequest = new MintRequest({
+        ...MintRequestFixture.create({
+          amount: 'invalid',
+        }),
+      });
+
+      await expect(Security.mint(mintRequest)).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('BatchMint', () => {
+    batchMintRequest = new BatchMintRequest(BatchMintRequestFixture.create());
+    const expectedResponse = new BatchMintResponse(true, transactionId);
+    it('should batch mint sucessfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.batchMint(batchMintRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchMintRequest',
+        batchMintRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchMintCommand(
+          batchMintRequest.securityId,
+          batchMintRequest.amountList,
+          batchMintRequest.toList,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.batchMint(batchMintRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'BatchMintRequest',
+        batchMintRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new BatchMintCommand(
+          batchMintRequest.securityId,
+          batchMintRequest.amountList,
+          batchMintRequest.toList,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      batchMintRequest = new BatchMintRequest({
+        ...BatchMintRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.batchMint(batchMintRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if amountList is empty', async () => {
+      batchMintRequest = new BatchMintRequest({
+        ...BatchMintRequestFixture.create({
+          amountList: [],
+        }),
+      });
+
+      await expect(Security.batchMint(batchMintRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+    it('should throw error if toList is empty', async () => {
+      batchMintRequest = new BatchMintRequest({
+        ...BatchMintRequestFixture.create({
+          toList: [],
+        }),
+      });
+
+      await expect(Security.batchMint(batchMintRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if list lengths are not equal', async () => {
+      batchMintRequest = new BatchMintRequest({
+        ...BatchMintRequestFixture.create({
+          toList: [
+            HederaIdPropsFixture.create().value,
+            HederaIdPropsFixture.create().value,
+          ],
+        }),
+      });
+
+      await expect(Security.batchMint(batchMintRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+});

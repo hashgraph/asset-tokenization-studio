@@ -203,115 +203,183 @@
 
 */
 
-import SecurityViewModel from '../response/SecurityViewModel';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Injectable from '@core/Injectable';
-import { QueryBus } from '@core/query/QueryBus';
+import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '@core/command/CommandBus';
-import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
-import { ISecurityInPortAgent, SecurityInPortAgent } from './agent/Agent';
-import { ISecurityInPortPause, SecurityInPortPause } from './pause/Pause';
+import { GetMaxSupplyRequest, SetMaxSupplyRequest } from '../../request';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { BigNumber } from 'ethers';
 import {
-  ISecurityInPortControlList,
-  SecurityInPortControlList,
-} from './controlList/ControlList';
-import {
-  ISecurityInPortBalance,
-  SecurityInPortBalance,
-} from './balance/Balance';
-import { ISecurityInPortLock, SecurityInPortLock } from './lock/Lock';
-import { applyMixins } from '../utils';
-import {
-  ISecurityInPortClearing,
-  SecurityInPortClearing,
-} from './clearing/Clearing';
-import {
-  ISecurityInPortCompliance,
-  SecurityInPortCompliance,
-} from './compliance/Compliance';
-import { ISecurityInPortFreeze, SecurityInPortFreeze } from './freeze/Freeze';
-import { ISecurityInPortHold, SecurityInPortHold } from './hold/Hold';
-import {
-  ISecurityInPortIdentity,
-  SecurityInPortIdentity,
-} from './identity/Identity';
-import { ISecurityInPortInfo, SecurityInPortInfo } from './info/Info';
-import { ISecurityInPortIssue, SecurityInPortIssue } from './issue/Issue';
-import {
-  ISecurityInPortProtectedPartitions,
-  SecurityInPortProtectedPartitions,
-} from './protectedPartitions/ProtectedPartitions';
-import {
-  ISecurityInPortRecovery,
-  SecurityInPortRecovery,
-} from './recovery/Recovery';
-import { ISecurityInPortRedeem, SecurityInPortRedeem } from './redeem/Redeem';
-import { ISecurityInPortSupply, SecurityInPortSupply } from './supply/Supply';
-import {
-  ISecurityInPortTokenMetadata,
-  SecurityInPortTokenMetadata,
-} from './tokenMetadata/TokenMetadata';
-import {
-  ISecurityInPortTransfer,
-  SecurityInPortTransfer,
-} from './transfer/Transfer';
-import { BaseSecurityInPort } from './BaseSecurityInPort';
+  GetMaxSupplyRequestFixture,
+  SetMaxSupplyRequestFixture,
+} from '@test/fixtures/erc1400/ERC1400Fixture';
+import { SetMaxSupplyCommand } from '@command/security/operations/cap/SetMaxSupplyCommand';
+import { GetMaxSupplyQuery } from '@query/security/cap/getMaxSupply/GetMaxSupplyQuery';
 
-export { SecurityViewModel, SecurityControlListType };
+describe('Supply', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-interface SecurityInPort
-  extends ISecurityInPortAgent,
-    ISecurityInPortBalance,
-    ISecurityInPortClearing,
-    ISecurityInPortCompliance,
-    ISecurityInPortControlList,
-    ISecurityInPortFreeze,
-    ISecurityInPortHold,
-    ISecurityInPortIdentity,
-    ISecurityInPortInfo,
-    ISecurityInPortIssue,
-    ISecurityInPortLock,
-    ISecurityInPortPause,
-    ISecurityInPortProtectedPartitions,
-    ISecurityInPortRecovery,
-    ISecurityInPortRedeem,
-    ISecurityInPortSupply,
-    ISecurityInPortTokenMetadata,
-    ISecurityInPortTransfer {}
+  let setMaxSupplyRequest: SetMaxSupplyRequest;
+  let getMaxSupplyRequest: GetMaxSupplyRequest;
 
-class SecurityInPort extends BaseSecurityInPort {
-  constructor(
-    queryBus: QueryBus = Injectable.resolve(QueryBus),
-    commandBus: CommandBus = Injectable.resolve(CommandBus),
-    mirrorNode: MirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter),
-  ) {
-    super();
-    this.queryBus = queryBus;
-    this.commandBus = commandBus;
-    this.mirrorNode = mirrorNode;
-  }
-}
+  let handleValidationSpy: jest.SpyInstance;
 
-applyMixins(SecurityInPort, [
-  SecurityInPortAgent,
-  SecurityInPortBalance,
-  SecurityInPortClearing,
-  SecurityInPortCompliance,
-  SecurityInPortControlList,
-  SecurityInPortFreeze,
-  SecurityInPortHold,
-  SecurityInPortIdentity,
-  SecurityInPortInfo,
-  SecurityInPortIssue,
-  SecurityInPortLock,
-  SecurityInPortPause,
-  SecurityInPortProtectedPartitions,
-  SecurityInPortRecovery,
-  SecurityInPortRedeem,
-  SecurityInPortSupply,
-  SecurityInPortTokenMetadata,
-  SecurityInPortTransfer,
-]);
+  const transactionId = TransactionIdFixture.create().id;
 
-export default new SecurityInPort();
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
+
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('setMaxSupply', () => {
+    setMaxSupplyRequest = new SetMaxSupplyRequest(
+      SetMaxSupplyRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set max supply successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setMaxSupply(setMaxSupplyRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetMaxSupplyRequest',
+        setMaxSupplyRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetMaxSupplyCommand(
+          setMaxSupplyRequest.maxSupply,
+          setMaxSupplyRequest.securityId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.setMaxSupply(setMaxSupplyRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetMaxSupplyRequest',
+        setMaxSupplyRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetMaxSupplyCommand(
+          setMaxSupplyRequest.maxSupply,
+          setMaxSupplyRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setMaxSupplyRequest = new SetMaxSupplyRequest({
+        ...SetMaxSupplyRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.setMaxSupply(setMaxSupplyRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+    it('should throw error if maxSupply is invalid', async () => {
+      setMaxSupplyRequest = new SetMaxSupplyRequest({
+        ...SetMaxSupplyRequestFixture.create({
+          maxSupply: 'invalid',
+        }),
+      });
+
+      await expect(Security.setMaxSupply(setMaxSupplyRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('getMaxSupply', () => {
+    getMaxSupplyRequest = new GetMaxSupplyRequest(
+      GetMaxSupplyRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: new BigDecimal(BigNumber.from(1)),
+    };
+    it('should get max supply successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.getMaxSupply(getMaxSupplyRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetMaxSupplyRequest',
+        getMaxSupplyRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetMaxSupplyQuery(getMaxSupplyRequest.securityId),
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          value: expectedResponse.payload.toString(),
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.getMaxSupply(getMaxSupplyRequest)).rejects.toThrow(
+        'Query execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetMaxSupplyRequest',
+        getMaxSupplyRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetMaxSupplyQuery(getMaxSupplyRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getMaxSupplyRequest = new GetMaxSupplyRequest({
+        ...GetMaxSupplyRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.getMaxSupply(getMaxSupplyRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+});

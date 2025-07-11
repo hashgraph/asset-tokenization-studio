@@ -203,115 +203,320 @@
 
 */
 
-import SecurityViewModel from '../response/SecurityViewModel';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Injectable from '@core/Injectable';
-import { QueryBus } from '@core/query/QueryBus';
+import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '@core/command/CommandBus';
-import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
-import { ISecurityInPortAgent, SecurityInPortAgent } from './agent/Agent';
-import { ISecurityInPortPause, SecurityInPortPause } from './pause/Pause';
 import {
-  ISecurityInPortControlList,
-  SecurityInPortControlList,
-} from './controlList/ControlList';
+  IdentityRegistryRequest,
+  OnchainIDRequest,
+  SetIdentityRegistryRequest,
+  SetOnchainIDRequest,
+} from '../../request';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
 import {
-  ISecurityInPortBalance,
-  SecurityInPortBalance,
-} from './balance/Balance';
-import { ISecurityInPortLock, SecurityInPortLock } from './lock/Lock';
-import { applyMixins } from '../utils';
+  OnchainIDRequestFixture,
+  SetOnchainIDRequestFixture,
+} from '@test/fixtures/tokenMetadata/TokenMetadataFixture';
+import { SetOnchainIDCommand } from '@command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommand';
 import {
-  ISecurityInPortClearing,
-  SecurityInPortClearing,
-} from './clearing/Clearing';
-import {
-  ISecurityInPortCompliance,
-  SecurityInPortCompliance,
-} from './compliance/Compliance';
-import { ISecurityInPortFreeze, SecurityInPortFreeze } from './freeze/Freeze';
-import { ISecurityInPortHold, SecurityInPortHold } from './hold/Hold';
-import {
-  ISecurityInPortIdentity,
-  SecurityInPortIdentity,
-} from './identity/Identity';
-import { ISecurityInPortInfo, SecurityInPortInfo } from './info/Info';
-import { ISecurityInPortIssue, SecurityInPortIssue } from './issue/Issue';
-import {
-  ISecurityInPortProtectedPartitions,
-  SecurityInPortProtectedPartitions,
-} from './protectedPartitions/ProtectedPartitions';
-import {
-  ISecurityInPortRecovery,
-  SecurityInPortRecovery,
-} from './recovery/Recovery';
-import { ISecurityInPortRedeem, SecurityInPortRedeem } from './redeem/Redeem';
-import { ISecurityInPortSupply, SecurityInPortSupply } from './supply/Supply';
-import {
-  ISecurityInPortTokenMetadata,
-  SecurityInPortTokenMetadata,
-} from './tokenMetadata/TokenMetadata';
-import {
-  ISecurityInPortTransfer,
-  SecurityInPortTransfer,
-} from './transfer/Transfer';
-import { BaseSecurityInPort } from './BaseSecurityInPort';
+  IdentityRegistryQueryFixture,
+  SetIdentityRegistryRequestFixture,
+} from '@test/fixtures/identityRegistry/IdentityRegistryFixture';
+import { SetIdentityRegistryCommand } from '@command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommand';
+import { IdentityRegistryQuery } from '@query/security/identityRegistry/IdentityRegistryQuery';
+import { OnchainIDQuery } from '@query/security/tokenMetadata/onchainId/OnchainIDQuery';
 
-export { SecurityViewModel, SecurityControlListType };
+describe('Identity', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-interface SecurityInPort
-  extends ISecurityInPortAgent,
-    ISecurityInPortBalance,
-    ISecurityInPortClearing,
-    ISecurityInPortCompliance,
-    ISecurityInPortControlList,
-    ISecurityInPortFreeze,
-    ISecurityInPortHold,
-    ISecurityInPortIdentity,
-    ISecurityInPortInfo,
-    ISecurityInPortIssue,
-    ISecurityInPortLock,
-    ISecurityInPortPause,
-    ISecurityInPortProtectedPartitions,
-    ISecurityInPortRecovery,
-    ISecurityInPortRedeem,
-    ISecurityInPortSupply,
-    ISecurityInPortTokenMetadata,
-    ISecurityInPortTransfer {}
+  let setOnchainIDRequest: SetOnchainIDRequest;
+  let setIdentityRegistryRequest: SetIdentityRegistryRequest;
+  let identityRegistryRequest: IdentityRegistryRequest;
+  let onchainIDRequest: OnchainIDRequest;
 
-class SecurityInPort extends BaseSecurityInPort {
-  constructor(
-    queryBus: QueryBus = Injectable.resolve(QueryBus),
-    commandBus: CommandBus = Injectable.resolve(CommandBus),
-    mirrorNode: MirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter),
-  ) {
-    super();
-    this.queryBus = queryBus;
-    this.commandBus = commandBus;
-    this.mirrorNode = mirrorNode;
-  }
-}
+  let handleValidationSpy: jest.SpyInstance;
 
-applyMixins(SecurityInPort, [
-  SecurityInPortAgent,
-  SecurityInPortBalance,
-  SecurityInPortClearing,
-  SecurityInPortCompliance,
-  SecurityInPortControlList,
-  SecurityInPortFreeze,
-  SecurityInPortHold,
-  SecurityInPortIdentity,
-  SecurityInPortInfo,
-  SecurityInPortIssue,
-  SecurityInPortLock,
-  SecurityInPortPause,
-  SecurityInPortProtectedPartitions,
-  SecurityInPortRecovery,
-  SecurityInPortRedeem,
-  SecurityInPortSupply,
-  SecurityInPortTokenMetadata,
-  SecurityInPortTransfer,
-]);
+  const transactionId = TransactionIdFixture.create().id;
 
-export default new SecurityInPort();
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
+
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('SetOnchainID', () => {
+    setOnchainIDRequest = new SetOnchainIDRequest(
+      SetOnchainIDRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set onchainID successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setOnchainID(setOnchainIDRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetOnchainIDRequest',
+        setOnchainIDRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetOnchainIDCommand(
+          setOnchainIDRequest.securityId,
+          setOnchainIDRequest.onchainID,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.setOnchainID(setOnchainIDRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetOnchainIDRequest',
+        setOnchainIDRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetOnchainIDCommand(
+          setOnchainIDRequest.securityId,
+          setOnchainIDRequest.onchainID,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setOnchainIDRequest = new SetOnchainIDRequest({
+        ...SetOnchainIDRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.setOnchainID(setOnchainIDRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it('should throw error if onchainID is invalid', async () => {
+      setOnchainIDRequest = new SetOnchainIDRequest({
+        ...SetOnchainIDRequestFixture.create({
+          onchainID: 'invalid',
+        }),
+      });
+
+      await expect(Security.setOnchainID(setOnchainIDRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('SetIdentityRegistry', () => {
+    setIdentityRegistryRequest = new SetIdentityRegistryRequest(
+      SetIdentityRegistryRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set identity registry successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setIdentityRegistry(
+        setIdentityRegistryRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetIdentityRegistryRequest',
+        setIdentityRegistryRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetIdentityRegistryCommand(
+          setIdentityRegistryRequest.securityId,
+          setIdentityRegistryRequest.identityRegistry,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.setIdentityRegistry(setIdentityRegistryRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetIdentityRegistryRequest',
+        setIdentityRegistryRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetIdentityRegistryCommand(
+          setIdentityRegistryRequest.securityId,
+          setIdentityRegistryRequest.identityRegistry,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setIdentityRegistryRequest = new SetIdentityRegistryRequest({
+        ...SetIdentityRegistryRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.setIdentityRegistry(setIdentityRegistryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if identityRegistry is invalid', async () => {
+      setIdentityRegistryRequest = new SetIdentityRegistryRequest({
+        ...SetIdentityRegistryRequestFixture.create({
+          identityRegistry: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.setIdentityRegistry(setIdentityRegistryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('Identity Registry', () => {
+    identityRegistryRequest = new IdentityRegistryRequest(
+      IdentityRegistryQueryFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: transactionId,
+    };
+    it('should get identity registry successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.identityRegistry(identityRegistryRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IdentityRegistryRequest',
+        identityRegistryRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IdentityRegistryQuery(identityRegistryRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.identityRegistry(identityRegistryRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IdentityRegistryRequest',
+        identityRegistryRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IdentityRegistryQuery(identityRegistryRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      identityRegistryRequest = new IdentityRegistryRequest({
+        ...IdentityRegistryQueryFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.identityRegistry(identityRegistryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('OnchainID', () => {
+    onchainIDRequest = new OnchainIDRequest(OnchainIDRequestFixture.create());
+
+    const expectedResponse = {
+      payload: transactionId,
+    };
+    it('should get onchanID successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.onchainID(onchainIDRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'OnchainIDRequest',
+        onchainIDRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new OnchainIDQuery(onchainIDRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.onchainID(onchainIDRequest)).rejects.toThrow(
+        'Query execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'OnchainIDRequest',
+        onchainIDRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new OnchainIDQuery(onchainIDRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      onchainIDRequest = new OnchainIDRequest({
+        ...OnchainIDRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.onchainID(onchainIDRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+});
