@@ -203,112 +203,183 @@
 
 */
 
-import { createFixture } from '../config';
-import { ConnectCommand } from '@command/network/connect/ConnectCommand';
-import { SupportedWallets } from '@domain/context/network/Wallet';
-import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
-import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
-import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import HWCSettings from '@core/settings/walletConnect/HWCSettings';
-import { SetConfigurationCommand } from '@command/network/setConfiguration/SetConfigurationCommand';
-import { SetNetworkCommand } from '@command/network/setNetwork/SetNetworkCommand';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import { createMock } from '@golevelup/ts-jest';
+import { CommandBus } from '@core/command/CommandBus';
+import { GetMaxSupplyRequest, SetMaxSupplyRequest } from '../request';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { BigNumber } from 'ethers';
+import {
+  GetMaxSupplyRequestFixture,
+  SetMaxSupplyRequestFixture,
+} from '@test/fixtures/erc1400/ERC1400Fixture';
+import { SetMaxSupplyCommand } from '@command/security/operations/cap/SetMaxSupplyCommand';
+import { GetMaxSupplyQuery } from '@query/security/cap/getMaxSupply/GetMaxSupplyQuery';
 
-export const DfnsSettingsFixture = createFixture<DfnsSettings>((settings) => {
-  settings.serviceAccountSecretKey.faker((faker) => faker.string.uuid()),
-    settings.serviceAccountCredentialId.faker((faker) => faker.string.uuid()),
-    settings.serviceAccountAuthToken.faker((faker) => faker.string.uuid()),
-    settings.appOrigin.faker((faker) => faker.internet.url()),
-    settings.appId.faker((faker) => faker.string.uuid()),
-    settings.baseUrl.faker((faker) => faker.internet.url()),
-    settings.walletId.faker((faker) => faker.string.uuid()),
-    settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value),
-    settings.publicKey.faker((faker) =>
-      faker.string.hexadecimal({ length: 40, casing: 'lower', prefix: '0x' }),
-    );
-});
+describe('Supply', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-export const FireblocksSettingsFixture = createFixture<FireblocksSettings>(
-  (settings) => {
-    settings.apiKey.faker((faker) => faker.string.uuid()),
-      settings.apiSecretKey.faker((faker) => faker.string.alphanumeric(32)),
-      settings.baseUrl.faker((faker) => faker.internet.url()),
-      settings.assetId.faker((faker) => faker.string.alphanumeric(8)),
-      settings.vaultAccountId.faker((faker) => faker.string.numeric(6)),
-      settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  let setMaxSupplyRequest: SetMaxSupplyRequest;
+  let getMaxSupplyRequest: GetMaxSupplyRequest;
 
-export const AWSKMSSettingsFixture = createFixture<AWSKMSSettings>(
-  (settings) => {
-    settings.awsAccessKeyId.faker((faker) => faker.string.alphanumeric(20)),
-      settings.awsSecretAccessKey.faker((faker) =>
-        faker.string.alphanumeric(40),
-      ),
-      settings.awsRegion.faker((faker) =>
-        faker.helpers.arrayElement(['us-east-1', 'us-west-2', 'eu-west-1']),
-      ),
-      settings.awsKmsKeyId.faker((faker) => faker.string.uuid()),
-      settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  let handleValidationSpy: jest.SpyInstance;
 
-export const HWCSettingsFixture = createFixture<HWCSettings>((settings) => {
-  settings.projectId.faker((faker) => faker.string.uuid()),
-    settings.dappName.faker((faker) => faker.company.name()),
-    settings.dappDescription.faker((faker) => faker.lorem.sentence()),
-    settings.dappURL.faker((faker) => faker.internet.url()),
-    settings.dappIcons.faker((faker) => [faker.image.url(), faker.image.url()]);
-});
+  const transactionId = TransactionIdFixture.create().id;
 
-export const ConnectCommandFixture = createFixture<ConnectCommand>(
-  (command) => {
-    command.environment.faker((faker) =>
-      faker.helpers.arrayElement(['testnet', 'previewnet', 'mainnet', 'local']),
-    ),
-      command.wallet.faker((faker) =>
-        faker.helpers.arrayElement(Object.values(SupportedWallets)),
-      ),
-      command.HWCSettings?.as(() => HWCSettingsFixture.create()),
-      command.custodialSettings?.faker((faker) =>
-        faker.helpers.arrayElement([
-          DfnsSettingsFixture.create(),
-          FireblocksSettingsFixture.create(),
-          AWSKMSSettingsFixture.create(),
-        ]),
-      );
-  },
-);
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
 
-export const SetConfigurationCommandFixture =
-  createFixture<SetConfigurationCommand>((command) => {
-    command.factoryAddress.as(() => HederaIdPropsFixture.create().value),
-      command.resolverAddress.as(() => HederaIdPropsFixture.create().value);
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
   });
 
-export const MirrorNodeFixture = createFixture<MirrorNode>((node) => {
-  node.baseUrl.faker((faker) => faker.internet.url()),
-    node.name?.faker((faker) => faker.company.name()),
-    node.apiKey?.faker((faker) => faker.string.alphanumeric(32)),
-    node.headerName?.faker((faker) => faker.string.alpha({ length: 10 }));
-});
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
 
-export const JsonRpcRelayFixture = createFixture<JsonRpcRelay>((relay) => {
-  relay.baseUrl.faker((faker) => faker.internet.url()),
-    relay.name?.faker((faker) => faker.company.name()),
-    relay.apiKey?.faker((faker) => faker.string.alphanumeric(32)),
-    relay.headerName?.faker((faker) => faker.string.alpha({ length: 10 }));
-});
+  describe('setMaxSupply', () => {
+    setMaxSupplyRequest = new SetMaxSupplyRequest(
+      SetMaxSupplyRequestFixture.create(),
+    );
 
-export const SetNetworkCommandFixture = createFixture<SetNetworkCommand>(
-  (command) => {
-    command.environment.faker((faker) =>
-      faker.helpers.arrayElement(['testnet', 'previewnet', 'mainnet', 'local']),
-    ),
-      command.mirrorNode.as(() => MirrorNodeFixture.create()),
-      command.rpcNode.as(() => JsonRpcRelayFixture.create()),
-      command.consensusNodes?.faker((faker) => faker.internet.url());
-  },
-);
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set max supply successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setMaxSupply(setMaxSupplyRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetMaxSupplyRequest',
+        setMaxSupplyRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetMaxSupplyCommand(
+          setMaxSupplyRequest.maxSupply,
+          setMaxSupplyRequest.securityId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.setMaxSupply(setMaxSupplyRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetMaxSupplyRequest',
+        setMaxSupplyRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetMaxSupplyCommand(
+          setMaxSupplyRequest.maxSupply,
+          setMaxSupplyRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setMaxSupplyRequest = new SetMaxSupplyRequest({
+        ...SetMaxSupplyRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.setMaxSupply(setMaxSupplyRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+    it('should throw error if maxSupply is invalid', async () => {
+      setMaxSupplyRequest = new SetMaxSupplyRequest({
+        ...SetMaxSupplyRequestFixture.create({
+          maxSupply: 'invalid',
+        }),
+      });
+
+      await expect(Security.setMaxSupply(setMaxSupplyRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('getMaxSupply', () => {
+    getMaxSupplyRequest = new GetMaxSupplyRequest(
+      GetMaxSupplyRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: new BigDecimal(BigNumber.from(1)),
+    };
+    it('should get max supply successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.getMaxSupply(getMaxSupplyRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetMaxSupplyRequest',
+        getMaxSupplyRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetMaxSupplyQuery(getMaxSupplyRequest.securityId),
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          value: expectedResponse.payload.toString(),
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.getMaxSupply(getMaxSupplyRequest)).rejects.toThrow(
+        'Query execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetMaxSupplyRequest',
+        getMaxSupplyRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetMaxSupplyQuery(getMaxSupplyRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getMaxSupplyRequest = new GetMaxSupplyRequest({
+        ...GetMaxSupplyRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.getMaxSupply(getMaxSupplyRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+});

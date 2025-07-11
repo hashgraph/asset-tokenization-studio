@@ -203,112 +203,119 @@
 
 */
 
-import { createFixture } from '../config';
-import { ConnectCommand } from '@command/network/connect/ConnectCommand';
-import { SupportedWallets } from '@domain/context/network/Wallet';
-import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
-import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
-import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import HWCSettings from '@core/settings/walletConnect/HWCSettings';
-import { SetConfigurationCommand } from '@command/network/setConfiguration/SetConfigurationCommand';
-import { SetNetworkCommand } from '@command/network/setNetwork/SetNetworkCommand';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import { createMock } from '@golevelup/ts-jest';
+import { CommandBus } from '@core/command/CommandBus';
+import { GetSecurityDetailsRequest } from '../request';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
+import { GetSecurityDetailsRequestFixture } from '@test/fixtures/erc1400/ERC1400Fixture';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { GetSecurityQuery } from '@query/security/get/GetSecurityQuery';
 
-export const DfnsSettingsFixture = createFixture<DfnsSettings>((settings) => {
-  settings.serviceAccountSecretKey.faker((faker) => faker.string.uuid()),
-    settings.serviceAccountCredentialId.faker((faker) => faker.string.uuid()),
-    settings.serviceAccountAuthToken.faker((faker) => faker.string.uuid()),
-    settings.appOrigin.faker((faker) => faker.internet.url()),
-    settings.appId.faker((faker) => faker.string.uuid()),
-    settings.baseUrl.faker((faker) => faker.internet.url()),
-    settings.walletId.faker((faker) => faker.string.uuid()),
-    settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value),
-    settings.publicKey.faker((faker) =>
-      faker.string.hexadecimal({ length: 40, casing: 'lower', prefix: '0x' }),
-    );
-});
+describe('Info', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-export const FireblocksSettingsFixture = createFixture<FireblocksSettings>(
-  (settings) => {
-    settings.apiKey.faker((faker) => faker.string.uuid()),
-      settings.apiSecretKey.faker((faker) => faker.string.alphanumeric(32)),
-      settings.baseUrl.faker((faker) => faker.internet.url()),
-      settings.assetId.faker((faker) => faker.string.alphanumeric(8)),
-      settings.vaultAccountId.faker((faker) => faker.string.numeric(6)),
-      settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  let getSecurityDetailsRequest: GetSecurityDetailsRequest;
 
-export const AWSKMSSettingsFixture = createFixture<AWSKMSSettings>(
-  (settings) => {
-    settings.awsAccessKeyId.faker((faker) => faker.string.alphanumeric(20)),
-      settings.awsSecretAccessKey.faker((faker) =>
-        faker.string.alphanumeric(40),
-      ),
-      settings.awsRegion.faker((faker) =>
-        faker.helpers.arrayElement(['us-east-1', 'us-west-2', 'eu-west-1']),
-      ),
-      settings.awsKmsKeyId.faker((faker) => faker.string.uuid()),
-      settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  let handleValidationSpy: jest.SpyInstance;
 
-export const HWCSettingsFixture = createFixture<HWCSettings>((settings) => {
-  settings.projectId.faker((faker) => faker.string.uuid()),
-    settings.dappName.faker((faker) => faker.company.name()),
-    settings.dappDescription.faker((faker) => faker.lorem.sentence()),
-    settings.dappURL.faker((faker) => faker.internet.url()),
-    settings.dappIcons.faker((faker) => [faker.image.url(), faker.image.url()]);
-});
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
 
-export const ConnectCommandFixture = createFixture<ConnectCommand>(
-  (command) => {
-    command.environment.faker((faker) =>
-      faker.helpers.arrayElement(['testnet', 'previewnet', 'mainnet', 'local']),
-    ),
-      command.wallet.faker((faker) =>
-        faker.helpers.arrayElement(Object.values(SupportedWallets)),
-      ),
-      command.HWCSettings?.as(() => HWCSettingsFixture.create()),
-      command.custodialSettings?.faker((faker) =>
-        faker.helpers.arrayElement([
-          DfnsSettingsFixture.create(),
-          FireblocksSettingsFixture.create(),
-          AWSKMSSettingsFixture.create(),
-        ]),
-      );
-  },
-);
-
-export const SetConfigurationCommandFixture =
-  createFixture<SetConfigurationCommand>((command) => {
-    command.factoryAddress.as(() => HederaIdPropsFixture.create().value),
-      command.resolverAddress.as(() => HederaIdPropsFixture.create().value);
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
   });
 
-export const MirrorNodeFixture = createFixture<MirrorNode>((node) => {
-  node.baseUrl.faker((faker) => faker.internet.url()),
-    node.name?.faker((faker) => faker.company.name()),
-    node.apiKey?.faker((faker) => faker.string.alphanumeric(32)),
-    node.headerName?.faker((faker) => faker.string.alpha({ length: 10 }));
-});
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
 
-export const JsonRpcRelayFixture = createFixture<JsonRpcRelay>((relay) => {
-  relay.baseUrl.faker((faker) => faker.internet.url()),
-    relay.name?.faker((faker) => faker.company.name()),
-    relay.apiKey?.faker((faker) => faker.string.alphanumeric(32)),
-    relay.headerName?.faker((faker) => faker.string.alpha({ length: 10 }));
-});
+  describe('getInfo', () => {
+    getSecurityDetailsRequest = new GetSecurityDetailsRequest(
+      GetSecurityDetailsRequestFixture.create(),
+    );
 
-export const SetNetworkCommandFixture = createFixture<SetNetworkCommand>(
-  (command) => {
-    command.environment.faker((faker) =>
-      faker.helpers.arrayElement(['testnet', 'previewnet', 'mainnet', 'local']),
-    ),
-      command.mirrorNode.as(() => MirrorNodeFixture.create()),
-      command.rpcNode.as(() => JsonRpcRelayFixture.create()),
-      command.consensusNodes?.faker((faker) => faker.internet.url());
-  },
-);
+    const expectedResponse = {
+      security: SecurityPropsFixture.create(),
+    };
+    it('should get security info successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.getInfo(getSecurityDetailsRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetSecurityDetailsRequest',
+        getSecurityDetailsRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetSecurityQuery(getSecurityDetailsRequest.securityId),
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          name: expectedResponse.security.name,
+          symbol: expectedResponse.security.symbol,
+          isin: expectedResponse.security.isin,
+          type: expectedResponse.security.type,
+          decimals: expectedResponse.security.decimals,
+          isWhiteList: expectedResponse.security.isWhiteList,
+          isControllable: expectedResponse.security.isControllable,
+          isMultiPartition: expectedResponse.security.isMultiPartition,
+          totalSupply: expectedResponse.security.totalSupply?.toString(),
+          maxSupply: expectedResponse.security.maxSupply?.toString(),
+          diamondAddress: expectedResponse.security.diamondAddress?.toString(),
+          evmDiamondAddress:
+            expectedResponse.security.evmDiamondAddress?.toString(),
+          paused: expectedResponse.security.paused,
+          regulation: expectedResponse.security.regulation,
+          isCountryControlListWhiteList:
+            expectedResponse.security.isCountryControlListWhiteList,
+          countries: expectedResponse.security.countries,
+          info: expectedResponse.security.info,
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.getInfo(getSecurityDetailsRequest)).rejects.toThrow(
+        'Query execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetSecurityDetailsRequest',
+        getSecurityDetailsRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetSecurityQuery(getSecurityDetailsRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getSecurityDetailsRequest = new GetSecurityDetailsRequest({
+        ...GetSecurityDetailsRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.getInfo(getSecurityDetailsRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+});

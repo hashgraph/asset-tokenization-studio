@@ -245,7 +245,8 @@ import { BaseSecurityInPort } from './BaseSecurityInPort';
 
 export { SecurityViewModel, SecurityControlListType };
 
-interface SecurityMixins
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+interface SecurityInPort
   extends ISecurityInPortAgent,
     ISecurityInPortBalance,
     ISecurityInPortClearing,
@@ -265,9 +266,6 @@ interface SecurityMixins
     ISecurityInPortSupply,
     ISecurityInPortTokenMetadata,
     ISecurityInPortTransfer {}
-
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-interface SecurityInPort extends SecurityMixins {}
 
 class SecurityInPort extends BaseSecurityInPort {
   constructor(

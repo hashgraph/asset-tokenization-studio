@@ -203,112 +203,212 @@
 
 */
 
-import { createFixture } from '../config';
-import { ConnectCommand } from '@command/network/connect/ConnectCommand';
-import { SupportedWallets } from '@domain/context/network/Wallet';
-import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
-import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
-import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import HWCSettings from '@core/settings/walletConnect/HWCSettings';
-import { SetConfigurationCommand } from '@command/network/setConfiguration/SetConfigurationCommand';
-import { SetNetworkCommand } from '@command/network/setNetwork/SetNetworkCommand';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import { createMock } from '@golevelup/ts-jest';
+import { CommandBus } from '@core/command/CommandBus';
+import { IsAddressRecoveredRequest, RecoveryAddressRequest } from '../request';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
+import { RecoveryAddressCommand } from '@command/security/operations/recoveryAddress/RecoveryAddressCommand';
+import { IsAddressRecoveredQuery } from '@query/security/recovery/IsAddressRecoveredQuery';
+import {
+  IsAddressRecoveredRequestFixture,
+  RecoveryAddressRequestFixture,
+} from '@test/fixtures/recovery/RecoveryFixture';
 
-export const DfnsSettingsFixture = createFixture<DfnsSettings>((settings) => {
-  settings.serviceAccountSecretKey.faker((faker) => faker.string.uuid()),
-    settings.serviceAccountCredentialId.faker((faker) => faker.string.uuid()),
-    settings.serviceAccountAuthToken.faker((faker) => faker.string.uuid()),
-    settings.appOrigin.faker((faker) => faker.internet.url()),
-    settings.appId.faker((faker) => faker.string.uuid()),
-    settings.baseUrl.faker((faker) => faker.internet.url()),
-    settings.walletId.faker((faker) => faker.string.uuid()),
-    settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value),
-    settings.publicKey.faker((faker) =>
-      faker.string.hexadecimal({ length: 40, casing: 'lower', prefix: '0x' }),
-    );
-});
+describe('Recovery', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-export const FireblocksSettingsFixture = createFixture<FireblocksSettings>(
-  (settings) => {
-    settings.apiKey.faker((faker) => faker.string.uuid()),
-      settings.apiSecretKey.faker((faker) => faker.string.alphanumeric(32)),
-      settings.baseUrl.faker((faker) => faker.internet.url()),
-      settings.assetId.faker((faker) => faker.string.alphanumeric(8)),
-      settings.vaultAccountId.faker((faker) => faker.string.numeric(6)),
-      settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  let recoveryAddressRequest: RecoveryAddressRequest;
+  let isAddressRecoveredRequest: IsAddressRecoveredRequest;
 
-export const AWSKMSSettingsFixture = createFixture<AWSKMSSettings>(
-  (settings) => {
-    settings.awsAccessKeyId.faker((faker) => faker.string.alphanumeric(20)),
-      settings.awsSecretAccessKey.faker((faker) =>
-        faker.string.alphanumeric(40),
-      ),
-      settings.awsRegion.faker((faker) =>
-        faker.helpers.arrayElement(['us-east-1', 'us-west-2', 'eu-west-1']),
-      ),
-      settings.awsKmsKeyId.faker((faker) => faker.string.uuid()),
-      settings.hederaAccountId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  let handleValidationSpy: jest.SpyInstance;
 
-export const HWCSettingsFixture = createFixture<HWCSettings>((settings) => {
-  settings.projectId.faker((faker) => faker.string.uuid()),
-    settings.dappName.faker((faker) => faker.company.name()),
-    settings.dappDescription.faker((faker) => faker.lorem.sentence()),
-    settings.dappURL.faker((faker) => faker.internet.url()),
-    settings.dappIcons.faker((faker) => [faker.image.url(), faker.image.url()]);
-});
+  const transactionId = TransactionIdFixture.create().id;
 
-export const ConnectCommandFixture = createFixture<ConnectCommand>(
-  (command) => {
-    command.environment.faker((faker) =>
-      faker.helpers.arrayElement(['testnet', 'previewnet', 'mainnet', 'local']),
-    ),
-      command.wallet.faker((faker) =>
-        faker.helpers.arrayElement(Object.values(SupportedWallets)),
-      ),
-      command.HWCSettings?.as(() => HWCSettingsFixture.create()),
-      command.custodialSettings?.faker((faker) =>
-        faker.helpers.arrayElement([
-          DfnsSettingsFixture.create(),
-          FireblocksSettingsFixture.create(),
-          AWSKMSSettingsFixture.create(),
-        ]),
-      );
-  },
-);
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
 
-export const SetConfigurationCommandFixture =
-  createFixture<SetConfigurationCommand>((command) => {
-    command.factoryAddress.as(() => HederaIdPropsFixture.create().value),
-      command.resolverAddress.as(() => HederaIdPropsFixture.create().value);
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
   });
 
-export const MirrorNodeFixture = createFixture<MirrorNode>((node) => {
-  node.baseUrl.faker((faker) => faker.internet.url()),
-    node.name?.faker((faker) => faker.company.name()),
-    node.apiKey?.faker((faker) => faker.string.alphanumeric(32)),
-    node.headerName?.faker((faker) => faker.string.alpha({ length: 10 }));
-});
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
 
-export const JsonRpcRelayFixture = createFixture<JsonRpcRelay>((relay) => {
-  relay.baseUrl.faker((faker) => faker.internet.url()),
-    relay.name?.faker((faker) => faker.company.name()),
-    relay.apiKey?.faker((faker) => faker.string.alphanumeric(32)),
-    relay.headerName?.faker((faker) => faker.string.alpha({ length: 10 }));
-});
+  describe('RecoveryAddress', () => {
+    recoveryAddressRequest = new RecoveryAddressRequest(
+      RecoveryAddressRequestFixture.create(),
+    );
 
-export const SetNetworkCommandFixture = createFixture<SetNetworkCommand>(
-  (command) => {
-    command.environment.faker((faker) =>
-      faker.helpers.arrayElement(['testnet', 'previewnet', 'mainnet', 'local']),
-    ),
-      command.mirrorNode.as(() => MirrorNodeFixture.create()),
-      command.rpcNode.as(() => JsonRpcRelayFixture.create()),
-      command.consensusNodes?.faker((faker) => faker.internet.url());
-  },
-);
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should recover address successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.recoveryAddress(recoveryAddressRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RecoveryAddressRequest',
+        recoveryAddressRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RecoveryAddressCommand(
+          recoveryAddressRequest.securityId,
+          recoveryAddressRequest.lostWalletId,
+          recoveryAddressRequest.newWalletId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.recoveryAddress(recoveryAddressRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RecoveryAddressRequest',
+        recoveryAddressRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RecoveryAddressCommand(
+          recoveryAddressRequest.securityId,
+          recoveryAddressRequest.lostWalletId,
+          recoveryAddressRequest.newWalletId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      recoveryAddressRequest = new RecoveryAddressRequest({
+        ...RecoveryAddressRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.recoveryAddress(recoveryAddressRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if lostWalletId is invalid', async () => {
+      recoveryAddressRequest = new RecoveryAddressRequest({
+        ...RecoveryAddressRequestFixture.create({
+          lostWalletId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.recoveryAddress(recoveryAddressRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if newWalletId is invalid', async () => {
+      recoveryAddressRequest = new RecoveryAddressRequest({
+        ...RecoveryAddressRequestFixture.create({
+          newWalletId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.recoveryAddress(recoveryAddressRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('IsAddressRecovered', () => {
+    isAddressRecoveredRequest = new IsAddressRecoveredRequest(
+      IsAddressRecoveredRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+    };
+    it('should get recovered status successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.isAddressRecovered(
+        isAddressRecoveredRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsAddressRecoveredRequest',
+        isAddressRecoveredRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsAddressRecoveredQuery(
+          isAddressRecoveredRequest.securityId,
+          isAddressRecoveredRequest.targetId,
+        ),
+      );
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.isAddressRecovered(isAddressRecoveredRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsAddressRecoveredRequest',
+        isAddressRecoveredRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsAddressRecoveredQuery(
+          isAddressRecoveredRequest.securityId,
+          isAddressRecoveredRequest.targetId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      isAddressRecoveredRequest = new IsAddressRecoveredRequest({
+        ...IsAddressRecoveredRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.isAddressRecovered(isAddressRecoveredRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      isAddressRecoveredRequest = new IsAddressRecoveredRequest({
+        ...IsAddressRecoveredRequestFixture.create({
+          targetId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.isAddressRecovered(isAddressRecoveredRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+});
