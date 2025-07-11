@@ -240,7 +240,9 @@ import LogService from '@service/log/LogService';
 import { Signer, ethers } from 'ethers';
 import type { Provider } from '@ethersproject/providers';
 import Injectable from '@core/Injectable';
-import TransactionAdapter, { InitializationData } from '@port/out/TransactionAdapter';
+import TransactionAdapter, {
+  InitializationData,
+} from '@port/out/TransactionAdapter';
 import NetworkService from '@service/network/NetworkService';
 import { singleton } from 'tsyringe';
 import Service from '@service/Service';
