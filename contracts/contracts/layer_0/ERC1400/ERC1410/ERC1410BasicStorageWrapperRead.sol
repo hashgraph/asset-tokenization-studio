@@ -411,6 +411,10 @@ abstract contract ERC1410BasicStorageWrapperRead is
         }
     }
 
+    function _getTokenHolder(uint256 _index) internal view returns (address) {
+        return _erc1410BasicStorage().tokenHolders[_index];
+    }
+
     function _getTotalTokenHolders() internal view returns (uint256) {
         return _erc1410BasicStorage().totalTokenHolders;
     }
