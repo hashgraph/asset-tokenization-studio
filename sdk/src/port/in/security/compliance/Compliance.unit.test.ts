@@ -203,115 +203,176 @@
 
 */
 
-import SecurityViewModel from '../response/SecurityViewModel';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Injectable from '@core/Injectable';
-import { QueryBus } from '@core/query/QueryBus';
+import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '@core/command/CommandBus';
-import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
-import { ISecurityInPortAgent, SecurityInPortAgent } from './agent/Agent';
-import { ISecurityInPortPause, SecurityInPortPause } from './pause/Pause';
+import { ComplianceRequest, SetComplianceRequest } from '../../request';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
 import {
-  ISecurityInPortControlList,
-  SecurityInPortControlList,
-} from './controlList/ControlList';
-import {
-  ISecurityInPortBalance,
-  SecurityInPortBalance,
-} from './balance/Balance';
-import { ISecurityInPortLock, SecurityInPortLock } from './lock/Lock';
-import { applyMixins } from '../utils';
-import {
-  ISecurityInPortClearing,
-  SecurityInPortClearing,
-} from './clearing/Clearing';
-import {
-  ISecurityInPortCompliance,
-  SecurityInPortCompliance,
-} from './compliance/Compliance';
-import { ISecurityInPortFreeze, SecurityInPortFreeze } from './freeze/Freeze';
-import { ISecurityInPortHold, SecurityInPortHold } from './hold/Hold';
-import {
-  ISecurityInPortIdentity,
-  SecurityInPortIdentity,
-} from './identity/Identity';
-import { ISecurityInPortInfo, SecurityInPortInfo } from './info/Info';
-import { ISecurityInPortIssue, SecurityInPortIssue } from './issue/Issue';
-import {
-  ISecurityInPortProtectedPartitions,
-  SecurityInPortProtectedPartitions,
-} from './protectedPartitions/ProtectedPartitions';
-import {
-  ISecurityInPortRecovery,
-  SecurityInPortRecovery,
-} from './recovery/Recovery';
-import { ISecurityInPortRedeem, SecurityInPortRedeem } from './redeem/Redeem';
-import { ISecurityInPortSupply, SecurityInPortSupply } from './supply/Supply';
-import {
-  ISecurityInPortTokenMetadata,
-  SecurityInPortTokenMetadata,
-} from './tokenMetadata/TokenMetadata';
-import {
-  ISecurityInPortTransfer,
-  SecurityInPortTransfer,
-} from './transfer/Transfer';
-import { BaseSecurityInPort } from './BaseSecurityInPort';
+  ComplianceQueryFixture,
+  SetComplianceCommandFixture,
+} from '@test/fixtures/compliance/ComplianceFixture';
+import { SetComplianceCommand } from '@command/security/compliance/setCompliance/SetComplianceCommand';
+import { ComplianceQuery } from '@query/security/compliance/compliance/ComplianceQuery';
 
-export { SecurityViewModel, SecurityControlListType };
+describe('Compliance', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-interface SecurityInPort
-  extends ISecurityInPortAgent,
-    ISecurityInPortBalance,
-    ISecurityInPortClearing,
-    ISecurityInPortCompliance,
-    ISecurityInPortControlList,
-    ISecurityInPortFreeze,
-    ISecurityInPortHold,
-    ISecurityInPortIdentity,
-    ISecurityInPortInfo,
-    ISecurityInPortIssue,
-    ISecurityInPortLock,
-    ISecurityInPortPause,
-    ISecurityInPortProtectedPartitions,
-    ISecurityInPortRecovery,
-    ISecurityInPortRedeem,
-    ISecurityInPortSupply,
-    ISecurityInPortTokenMetadata,
-    ISecurityInPortTransfer {}
+  let setComplianceRequest: SetComplianceRequest;
+  let complianceRequest: ComplianceRequest;
 
-class SecurityInPort extends BaseSecurityInPort {
-  constructor(
-    queryBus: QueryBus = Injectable.resolve(QueryBus),
-    commandBus: CommandBus = Injectable.resolve(CommandBus),
-    mirrorNode: MirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter),
-  ) {
-    super();
-    this.queryBus = queryBus;
-    this.commandBus = commandBus;
-    this.mirrorNode = mirrorNode;
-  }
-}
+  let handleValidationSpy: jest.SpyInstance;
 
-applyMixins(SecurityInPort, [
-  SecurityInPortAgent,
-  SecurityInPortBalance,
-  SecurityInPortClearing,
-  SecurityInPortCompliance,
-  SecurityInPortControlList,
-  SecurityInPortFreeze,
-  SecurityInPortHold,
-  SecurityInPortIdentity,
-  SecurityInPortInfo,
-  SecurityInPortIssue,
-  SecurityInPortLock,
-  SecurityInPortPause,
-  SecurityInPortProtectedPartitions,
-  SecurityInPortRecovery,
-  SecurityInPortRedeem,
-  SecurityInPortSupply,
-  SecurityInPortTokenMetadata,
-  SecurityInPortTransfer,
-]);
+  const transactionId = TransactionIdFixture.create().id;
 
-export default new SecurityInPort();
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
+
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('SetCompliance', () => {
+    setComplianceRequest = new SetComplianceRequest(
+      SetComplianceCommandFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should set compliance successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.setCompliance(setComplianceRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetComplianceRequest',
+        setComplianceRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetComplianceCommand(
+          setComplianceRequest.securityId,
+          setComplianceRequest.compliance,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.setCompliance(setComplianceRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'SetComplianceRequest',
+        setComplianceRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetComplianceCommand(
+          setComplianceRequest.securityId,
+          setComplianceRequest.compliance,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setComplianceRequest = new SetComplianceRequest({
+        ...SetComplianceCommandFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.setCompliance(setComplianceRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if compliance is invalid', async () => {
+      setComplianceRequest = new SetComplianceRequest({
+        ...SetComplianceCommandFixture.create({
+          compliance: 'invalid',
+        }),
+      });
+
+      await expect(
+        Security.setCompliance(setComplianceRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('Compliance', () => {
+    complianceRequest = new ComplianceRequest(ComplianceQueryFixture.create());
+
+    const expectedResponse = {
+      payload: transactionId,
+    };
+    it('should get compliance successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.compliance(complianceRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'ComplianceRequest',
+        complianceRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new ComplianceQuery(complianceRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.compliance(complianceRequest)).rejects.toThrow(
+        'Query execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'ComplianceRequest',
+        complianceRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new ComplianceQuery(complianceRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      complianceRequest = new ComplianceRequest({
+        ...ComplianceQueryFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.compliance(complianceRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+});

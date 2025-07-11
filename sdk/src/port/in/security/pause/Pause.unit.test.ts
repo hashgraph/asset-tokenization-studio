@@ -203,115 +203,204 @@
 
 */
 
-import SecurityViewModel from '../response/SecurityViewModel';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Injectable from '@core/Injectable';
-import { QueryBus } from '@core/query/QueryBus';
+import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '@core/command/CommandBus';
-import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
-import { ISecurityInPortAgent, SecurityInPortAgent } from './agent/Agent';
-import { ISecurityInPortPause, SecurityInPortPause } from './pause/Pause';
-import {
-  ISecurityInPortControlList,
-  SecurityInPortControlList,
-} from './controlList/ControlList';
-import {
-  ISecurityInPortBalance,
-  SecurityInPortBalance,
-} from './balance/Balance';
-import { ISecurityInPortLock, SecurityInPortLock } from './lock/Lock';
-import { applyMixins } from '../utils';
-import {
-  ISecurityInPortClearing,
-  SecurityInPortClearing,
-} from './clearing/Clearing';
-import {
-  ISecurityInPortCompliance,
-  SecurityInPortCompliance,
-} from './compliance/Compliance';
-import { ISecurityInPortFreeze, SecurityInPortFreeze } from './freeze/Freeze';
-import { ISecurityInPortHold, SecurityInPortHold } from './hold/Hold';
-import {
-  ISecurityInPortIdentity,
-  SecurityInPortIdentity,
-} from './identity/Identity';
-import { ISecurityInPortInfo, SecurityInPortInfo } from './info/Info';
-import { ISecurityInPortIssue, SecurityInPortIssue } from './issue/Issue';
-import {
-  ISecurityInPortProtectedPartitions,
-  SecurityInPortProtectedPartitions,
-} from './protectedPartitions/ProtectedPartitions';
-import {
-  ISecurityInPortRecovery,
-  SecurityInPortRecovery,
-} from './recovery/Recovery';
-import { ISecurityInPortRedeem, SecurityInPortRedeem } from './redeem/Redeem';
-import { ISecurityInPortSupply, SecurityInPortSupply } from './supply/Supply';
-import {
-  ISecurityInPortTokenMetadata,
-  SecurityInPortTokenMetadata,
-} from './tokenMetadata/TokenMetadata';
-import {
-  ISecurityInPortTransfer,
-  SecurityInPortTransfer,
-} from './transfer/Transfer';
-import { BaseSecurityInPort } from './BaseSecurityInPort';
+import { PauseRequest } from '../../request';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
+import { PauseRequestFixture } from '@test/fixtures/pause/PauseFixture';
+import { PauseCommand } from '@command/security/operations/pause/PauseCommand';
+import { IsPausedQuery } from '@query/security/isPaused/IsPausedQuery';
 
-export { SecurityViewModel, SecurityControlListType };
+describe('Pause', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-interface SecurityInPort
-  extends ISecurityInPortAgent,
-    ISecurityInPortBalance,
-    ISecurityInPortClearing,
-    ISecurityInPortCompliance,
-    ISecurityInPortControlList,
-    ISecurityInPortFreeze,
-    ISecurityInPortHold,
-    ISecurityInPortIdentity,
-    ISecurityInPortInfo,
-    ISecurityInPortIssue,
-    ISecurityInPortLock,
-    ISecurityInPortPause,
-    ISecurityInPortProtectedPartitions,
-    ISecurityInPortRecovery,
-    ISecurityInPortRedeem,
-    ISecurityInPortSupply,
-    ISecurityInPortTokenMetadata,
-    ISecurityInPortTransfer {}
+  let handleValidationSpy: jest.SpyInstance;
 
-class SecurityInPort extends BaseSecurityInPort {
-  constructor(
-    queryBus: QueryBus = Injectable.resolve(QueryBus),
-    commandBus: CommandBus = Injectable.resolve(CommandBus),
-    mirrorNode: MirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter),
-  ) {
-    super();
-    this.queryBus = queryBus;
-    this.commandBus = commandBus;
-    this.mirrorNode = mirrorNode;
-  }
-}
+  const transactionId = TransactionIdFixture.create().id;
 
-applyMixins(SecurityInPort, [
-  SecurityInPortAgent,
-  SecurityInPortBalance,
-  SecurityInPortClearing,
-  SecurityInPortCompliance,
-  SecurityInPortControlList,
-  SecurityInPortFreeze,
-  SecurityInPortHold,
-  SecurityInPortIdentity,
-  SecurityInPortInfo,
-  SecurityInPortIssue,
-  SecurityInPortLock,
-  SecurityInPortPause,
-  SecurityInPortProtectedPartitions,
-  SecurityInPortRecovery,
-  SecurityInPortRedeem,
-  SecurityInPortSupply,
-  SecurityInPortTokenMetadata,
-  SecurityInPortTransfer,
-]);
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
 
-export default new SecurityInPort();
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('pause', () => {
+    const pauseRequest = new PauseRequest(PauseRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should pause successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.pause(pauseRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'PauseRequest',
+        pauseRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new PauseCommand(pauseRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.pause(pauseRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'PauseRequest',
+        pauseRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new PauseCommand(pauseRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      const pauseRequest = new PauseRequest({
+        ...PauseRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.pause(pauseRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('unpause', () => {
+    const pauseRequest = new PauseRequest(PauseRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should unpause successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.unpause(pauseRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'PauseRequest',
+        pauseRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new PauseCommand(pauseRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.unpause(pauseRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'PauseRequest',
+        pauseRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new PauseCommand(pauseRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      const pauseRequest = new PauseRequest({
+        ...PauseRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.unpause(pauseRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe('isPaused', () => {
+    const pauseRequest = new PauseRequest(PauseRequestFixture.create());
+
+    const expectedResponse = {
+      payload: true,
+    };
+    it('should isPaused successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.isPaused(pauseRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'PauseRequest',
+        pauseRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsPausedQuery(pauseRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.isPaused(pauseRequest)).rejects.toThrow(
+        'Query execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'PauseRequest',
+        pauseRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsPausedQuery(pauseRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      const pauseRequest = new PauseRequest({
+        ...PauseRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.isPaused(pauseRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+});

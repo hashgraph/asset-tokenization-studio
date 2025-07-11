@@ -203,115 +203,119 @@
 
 */
 
-import SecurityViewModel from '../response/SecurityViewModel';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Injectable from '@core/Injectable';
-import { QueryBus } from '@core/query/QueryBus';
+import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '@core/command/CommandBus';
-import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
-import { ISecurityInPortAgent, SecurityInPortAgent } from './agent/Agent';
-import { ISecurityInPortPause, SecurityInPortPause } from './pause/Pause';
-import {
-  ISecurityInPortControlList,
-  SecurityInPortControlList,
-} from './controlList/ControlList';
-import {
-  ISecurityInPortBalance,
-  SecurityInPortBalance,
-} from './balance/Balance';
-import { ISecurityInPortLock, SecurityInPortLock } from './lock/Lock';
-import { applyMixins } from '../utils';
-import {
-  ISecurityInPortClearing,
-  SecurityInPortClearing,
-} from './clearing/Clearing';
-import {
-  ISecurityInPortCompliance,
-  SecurityInPortCompliance,
-} from './compliance/Compliance';
-import { ISecurityInPortFreeze, SecurityInPortFreeze } from './freeze/Freeze';
-import { ISecurityInPortHold, SecurityInPortHold } from './hold/Hold';
-import {
-  ISecurityInPortIdentity,
-  SecurityInPortIdentity,
-} from './identity/Identity';
-import { ISecurityInPortInfo, SecurityInPortInfo } from './info/Info';
-import { ISecurityInPortIssue, SecurityInPortIssue } from './issue/Issue';
-import {
-  ISecurityInPortProtectedPartitions,
-  SecurityInPortProtectedPartitions,
-} from './protectedPartitions/ProtectedPartitions';
-import {
-  ISecurityInPortRecovery,
-  SecurityInPortRecovery,
-} from './recovery/Recovery';
-import { ISecurityInPortRedeem, SecurityInPortRedeem } from './redeem/Redeem';
-import { ISecurityInPortSupply, SecurityInPortSupply } from './supply/Supply';
-import {
-  ISecurityInPortTokenMetadata,
-  SecurityInPortTokenMetadata,
-} from './tokenMetadata/TokenMetadata';
-import {
-  ISecurityInPortTransfer,
-  SecurityInPortTransfer,
-} from './transfer/Transfer';
-import { BaseSecurityInPort } from './BaseSecurityInPort';
+import { GetSecurityDetailsRequest } from '../../request';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
+import { GetSecurityDetailsRequestFixture } from '@test/fixtures/erc1400/ERC1400Fixture';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { GetSecurityQuery } from '@query/security/get/GetSecurityQuery';
 
-export { SecurityViewModel, SecurityControlListType };
+describe('Info', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-interface SecurityInPort
-  extends ISecurityInPortAgent,
-    ISecurityInPortBalance,
-    ISecurityInPortClearing,
-    ISecurityInPortCompliance,
-    ISecurityInPortControlList,
-    ISecurityInPortFreeze,
-    ISecurityInPortHold,
-    ISecurityInPortIdentity,
-    ISecurityInPortInfo,
-    ISecurityInPortIssue,
-    ISecurityInPortLock,
-    ISecurityInPortPause,
-    ISecurityInPortProtectedPartitions,
-    ISecurityInPortRecovery,
-    ISecurityInPortRedeem,
-    ISecurityInPortSupply,
-    ISecurityInPortTokenMetadata,
-    ISecurityInPortTransfer {}
+  let getSecurityDetailsRequest: GetSecurityDetailsRequest;
 
-class SecurityInPort extends BaseSecurityInPort {
-  constructor(
-    queryBus: QueryBus = Injectable.resolve(QueryBus),
-    commandBus: CommandBus = Injectable.resolve(CommandBus),
-    mirrorNode: MirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter),
-  ) {
-    super();
-    this.queryBus = queryBus;
-    this.commandBus = commandBus;
-    this.mirrorNode = mirrorNode;
-  }
-}
+  let handleValidationSpy: jest.SpyInstance;
 
-applyMixins(SecurityInPort, [
-  SecurityInPortAgent,
-  SecurityInPortBalance,
-  SecurityInPortClearing,
-  SecurityInPortCompliance,
-  SecurityInPortControlList,
-  SecurityInPortFreeze,
-  SecurityInPortHold,
-  SecurityInPortIdentity,
-  SecurityInPortInfo,
-  SecurityInPortIssue,
-  SecurityInPortLock,
-  SecurityInPortPause,
-  SecurityInPortProtectedPartitions,
-  SecurityInPortRecovery,
-  SecurityInPortRedeem,
-  SecurityInPortSupply,
-  SecurityInPortTokenMetadata,
-  SecurityInPortTransfer,
-]);
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
 
-export default new SecurityInPort();
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('getInfo', () => {
+    getSecurityDetailsRequest = new GetSecurityDetailsRequest(
+      GetSecurityDetailsRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      security: SecurityPropsFixture.create(),
+    };
+    it('should get security info successfully', async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.getInfo(getSecurityDetailsRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetSecurityDetailsRequest',
+        getSecurityDetailsRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetSecurityQuery(getSecurityDetailsRequest.securityId),
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          name: expectedResponse.security.name,
+          symbol: expectedResponse.security.symbol,
+          isin: expectedResponse.security.isin,
+          type: expectedResponse.security.type,
+          decimals: expectedResponse.security.decimals,
+          isWhiteList: expectedResponse.security.isWhiteList,
+          isControllable: expectedResponse.security.isControllable,
+          isMultiPartition: expectedResponse.security.isMultiPartition,
+          totalSupply: expectedResponse.security.totalSupply?.toString(),
+          maxSupply: expectedResponse.security.maxSupply?.toString(),
+          diamondAddress: expectedResponse.security.diamondAddress?.toString(),
+          evmDiamondAddress:
+            expectedResponse.security.evmDiamondAddress?.toString(),
+          paused: expectedResponse.security.paused,
+          regulation: expectedResponse.security.regulation,
+          isCountryControlListWhiteList:
+            expectedResponse.security.isCountryControlListWhiteList,
+          countries: expectedResponse.security.countries,
+          info: expectedResponse.security.info,
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.getInfo(getSecurityDetailsRequest)).rejects.toThrow(
+        'Query execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetSecurityDetailsRequest',
+        getSecurityDetailsRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetSecurityQuery(getSecurityDetailsRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getSecurityDetailsRequest = new GetSecurityDetailsRequest({
+        ...GetSecurityDetailsRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.getInfo(getSecurityDetailsRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+});
