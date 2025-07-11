@@ -237,7 +237,7 @@ export class SetVotingRightsCommandHandler
         await this.contractService.getContractEvmAddress(address);
       const res = await handler.setVotingRights(
         securityEvmAddress,
-        BigDecimal.fromString(recordDate),
+        BigDecimal.fromString(recordDate.substring(0, 10)),
         data,
         address,
       );

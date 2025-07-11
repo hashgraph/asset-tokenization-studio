@@ -465,4 +465,13 @@ export default class FormatValidation {
 
     return errors;
   }
+  public static checkBoolean = () => {
+    return (val: any): BaseError[] => {
+      const err: BaseError[] = [];
+      if (typeof val !== 'boolean') {
+        err.push(new InvalidType(val));
+      }
+      return err;
+    };
+  };
 }

@@ -241,14 +241,16 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
       const security = await this.securityService.get(securityId);
       const account = this.accountService.getCurrentAccount();
 
-      const amountBd = BigDecimal.fromString(amount, security.decimals);
-
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
       const targetEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(targetId);
 
+      const amountBd = BigDecimal.fromString(amount, security.decimals);
+
       await this.validationService.checkDecimals(security, amount);
+
+      await this.validationService.checkPause(securityId);
 
       await this.validationService.checkMaxSupply(
         securityId,
@@ -256,7 +258,10 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
         security,
       );
 
-      await this.validationService.checkControlList(securityId, targetId);
+      await this.validationService.checkControlList(
+        securityId,
+        targetEvmAddress.toString(),
+      );
 
       await this.validationService.checkKycAddresses(
         securityId,
@@ -264,8 +269,8 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
         KycStatus.GRANTED,
       );
 
-      await this.validationService.checkRole(
-        SecurityRole._ISSUER_ROLE,
+      await this.validationService.checkAnyRole(
+        [SecurityRole._ISSUER_ROLE, SecurityRole._AGENT_ROLE],
         account.id.toString(),
         securityId,
       );

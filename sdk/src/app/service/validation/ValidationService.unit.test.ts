@@ -228,7 +228,6 @@ import { PartitionsUnProtected } from '../../../domain/context/security/error/op
 import { PartitionsProtected } from '../../../domain/context/security/error/operations/PartitionsProtected';
 import { CanTransferByPartitionQuery } from '../../usecase/query/security/canTransferByPartition/CanTransferByPartitionQuery';
 import { ContractsErrorMapper } from '../../../domain/context/security/error/operations/contractsErrorsMapper/ContractsErrorMapper';
-import { CanTransferQuery } from '../../usecase/query/security/canTransfer/CanTransferQuery';
 import { CanRedeemByPartitionQuery } from '../../usecase/query/security/canRedeemByPartition/CanRedeemByPartitionQuery';
 import { GetMaxSupplyByPartitionQuery } from '../../usecase/query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQuery';
 import { GetTotalSupplyByPartitionQuery } from '../../usecase/query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery';
@@ -538,6 +537,33 @@ describe('ValidationService', () => {
     });
   });
 
+  describe('checkAnyRole', () => {
+    it('should return void when any role is valid via HasRoleQuery', async () => {
+      queryBusMock.execute.mockResolvedValueOnce({ payload: true });
+
+      await expect(
+        service.checkAnyRole(
+          [role.value, role.value],
+          targetId.value,
+          securityId.value,
+        ),
+      ).resolves.toBeUndefined();
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new HasRoleQuery(role.value, targetId.value, securityId.value),
+      );
+    });
+
+    it('should throw NotGrantedRole when no role is not granted', async () => {
+      queryBusMock.execute.mockResolvedValueOnce({ payload: false });
+
+      await expect(
+        service.checkAnyRole([role.value], targetId.value, securityId.value),
+      ).rejects.toThrow(NotGrantedRole);
+    });
+  });
+
   describe('checkPause', () => {
     it('should return void when pause via IsPausedQuery', async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: false });
@@ -629,7 +655,7 @@ describe('ValidationService', () => {
   });
 
   describe('checkCanTransfer', () => {
-    it('should work when transfer is possible with operator', async () => {
+    it('should work when transfer is possible', async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: '0x00' });
 
       await expect(
@@ -637,9 +663,9 @@ describe('ValidationService', () => {
           securityId.value,
           targetId.value,
           amount.value.toString(),
+          operatorId.value,
           sourceId.value,
           partitionId.value,
-          operatorId.value,
         ),
       ).resolves.toBeUndefined();
 
@@ -649,29 +675,6 @@ describe('ValidationService', () => {
           sourceId.value,
           targetId.value,
           partitionId.value,
-          amount.value.toString(),
-        ),
-      );
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-    });
-
-    it('should work when there is not operator', async () => {
-      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x00' });
-
-      await expect(
-        service.checkCanTransfer(
-          securityId.value,
-          targetId.value,
-          amount.value.toString(),
-          sourceId.value,
-          partitionId.value,
-        ),
-      ).resolves.toBeUndefined();
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new CanTransferQuery(
-          securityId.value,
-          targetId.value,
           amount.value.toString(),
         ),
       );
@@ -689,6 +692,9 @@ describe('ValidationService', () => {
           securityId.value,
           targetId.value,
           amount.value.toString(),
+          operatorId.value,
+          sourceId.value,
+          partitionId.value,
         ),
       ).rejects.toThrow('Transfer failed');
     });
@@ -704,6 +710,7 @@ describe('ValidationService', () => {
           sourceId.value,
           amount.value.toString(),
           partitionId.value,
+          operatorId.value,
         ),
       ).resolves.toBeUndefined();
 
@@ -730,6 +737,7 @@ describe('ValidationService', () => {
           sourceId.value,
           partitionId.value,
           amount.value.toString(),
+          operatorId.value,
         ),
       ).rejects.toThrow('Transfer failed');
     });

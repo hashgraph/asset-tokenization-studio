@@ -218,6 +218,7 @@ import pause from "./pause";
 import unpause from "./unpause";
 import regulation from "./regulation";
 import management from "./management";
+import freeze from "./freeze";
 
 export default {
   add,
@@ -226,6 +227,7 @@ export default {
   createBond,
   details,
   mint,
+  freeze,
   transfer,
   forceTransfer,
   redeem,

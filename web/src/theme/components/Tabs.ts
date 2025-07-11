@@ -246,7 +246,7 @@ export const Tabs: TabsThemeConfiguration = {
       tablist: {
         w: "full",
         borderBottom: "1px solid",
-        borderColor: "transparent",
+        borderColor: "neutral.400",
       },
       tab: {
         _focus: {
@@ -288,6 +288,7 @@ export const Tabs: TabsThemeConfiguration = {
         position: "relative",
         bgColor: "neutral.50",
         borderBottom: "1px solid",
+        borderColor: "neutral.400",
         "& button[aria-selected=true]": {
           borderColor: "none",
           mb: 0,

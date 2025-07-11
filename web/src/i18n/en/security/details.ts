@@ -253,6 +253,7 @@ export default {
     redeem: "Redeem",
     transfer: "Transfer",
     mint: "Mint",
+    freeze: "Freeze / Unfreeze",
     forceTransfer: "Force transfer",
     forceRedeem: "Force redeem",
     dangerZone: {
@@ -288,6 +289,7 @@ export default {
       lockBalance: "Lock balance",
       heldBalance: "Held balance",
       clearedBalance: "Cleared balance",
+      frozenBalance: "Frozen balance",
     },
     error: {
       targetId: "Sorry, there was an error. Probably wrong address",

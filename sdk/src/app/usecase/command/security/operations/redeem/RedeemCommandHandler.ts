@@ -239,8 +239,6 @@ export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      await this.validationService.checkClearingDeactivated(securityId);
-
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
       await this.validationService.checkCanRedeem(
@@ -248,6 +246,7 @@ export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
         account.id.toString(),
         amount,
         _PARTITION_ID_1,
+        account.id.toString(),
       );
 
       const security = await this.securityService.get(securityId);

@@ -303,10 +303,11 @@ export class ProtectedTransferAndLockByPartitionCommandHandler
         amountBd,
         sourceEvmAddress,
         targetEvmAddress,
-        BigDecimal.fromString(expirationDate),
-        BigDecimal.fromString(deadline),
+        BigDecimal.fromString(expirationDate.substring(0, 10)),
+        BigDecimal.fromString(deadline.substring(0, 10)),
         BigDecimal.fromString(nounce.toString()),
         signature,
+        command.securityId,
       );
 
       const lockId = await this.transactionService.getTransactionResult({
