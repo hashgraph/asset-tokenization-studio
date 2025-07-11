@@ -342,11 +342,6 @@ describe('🧪 Security tests', () => {
   const url = 'http://127.0.0.1:7546';
   const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
-  const wallet = new Wallet(
-    CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-    customHttpProvider,
-  );
-
   beforeAll(async () => {
     mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
     mirrorNodeAdapter.set(mirrorNode);
@@ -374,7 +369,12 @@ describe('🧪 Security tests', () => {
     });
     await th.register(account, true);
 
-    th.signerOrProvider = wallet;
+    th.setSignerOrProvider(
+      new Wallet(
+        CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+        customHttpProvider,
+      ),
+    );
 
     const requestST = new CreateEquityRequest({
       name: name,
