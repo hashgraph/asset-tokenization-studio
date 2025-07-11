@@ -1222,9 +1222,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async unprotectPartitions(
-    address: EvmAddress,
-  ): Promise<TransactionResponse> {
+  async unprotectPartitions(address: EvmAddress): Promise<TransactionResponse> {
     LogService.logTrace(
       `Unprotecting Partitions for security: ${address.toString()}`,
     );
