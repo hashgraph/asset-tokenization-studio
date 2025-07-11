@@ -246,7 +246,7 @@ contract BondUSA is IBondUSA, Bond, Security {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](11);
+        staticFunctionSelectors_ = new bytes4[](13);
         staticFunctionSelectors_[selectorIndex++] = this
             ._initialize_bondUSA
             .selector;
@@ -264,6 +264,12 @@ contract BondUSA is IBondUSA, Bond, Security {
         staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getCouponCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getCouponHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalCouponHolders
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getSecurityRegulationData
