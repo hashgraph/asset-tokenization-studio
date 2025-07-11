@@ -330,7 +330,7 @@ describe('IssueCommandHandler', () => {
         expect(validationServiceMock.checkControlList).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkControlList).toHaveBeenCalledWith(
           command.securityId,
-          command.targetId,
+          evmAddress.toString(),
         );
         expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledTimes(
           1,
@@ -340,9 +340,9 @@ describe('IssueCommandHandler', () => {
           [command.targetId],
           KycStatus.GRANTED,
         );
-        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-          SecurityRole._ISSUER_ROLE,
+        expect(validationServiceMock.checkAnyRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkAnyRole).toHaveBeenCalledWith(
+          [SecurityRole._ISSUER_ROLE, SecurityRole._AGENT_ROLE],
           account.id.toString(),
           command.securityId,
         );

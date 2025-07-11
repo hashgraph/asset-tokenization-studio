@@ -267,6 +267,7 @@ export interface DeployedBusinessLogics {
     externalPauseManagement: IStaticFunctionSelectors
     externalControlListManagement: IStaticFunctionSelectors
     externalKycListManagement: IStaticFunctionSelectors
+    ERC3643: IStaticFunctionSelectors
 }
 
 export let businessLogicResolver: IBusinessLogicResolver
@@ -292,7 +293,7 @@ export async function deployProxyForBusinessLogicResolver({
 
     const txResponse =
         await businessLogicResolver.initialize_BusinessLogicResolver({
-            gasLimit: GAS_LIMIT.initilize.businessLogicResolver,
+            gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
         })
     validateTxResponse(
         new ValidateTxResponseCommand({

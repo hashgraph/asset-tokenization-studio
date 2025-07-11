@@ -419,21 +419,32 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
     request.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
-    request.startingDate.faker((faker) =>
-      faker.date.recent().getTime().toString(),
-    );
-    request.maturityDate.faker((faker) =>
-      faker.date.future({ years: 2 }).getTime().toString(),
-    );
+    let startingDate: Date;
+    request.startingDate.faker((faker) => {
+      startingDate = faker.date.recent();
+      return startingDate.getTime().toString();
+    });
+    let maturityDate: Date;
+    request.maturityDate.faker((faker) => {
+      maturityDate = faker.date.future({ years: 2 });
+      return maturityDate.getTime().toString();
+    });
     request.couponFrequency.faker((faker) =>
       faker.number.int({ min: 1, max: 12 }).toString(),
     );
     request.couponRate.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
-    request.firstCouponDate.faker((faker) =>
-      faker.date.soon({ days: 30 }).getTime().toString(),
-    );
+    request.firstCouponDate.faker((faker) => {
+      return faker.date
+        .between({
+          from: startingDate,
+          to: maturityDate,
+        })
+        .getTime()
+        .toString();
+    });
+
     request.configId.faker(
       (faker) =>
         `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 1, max: 9 })}`,

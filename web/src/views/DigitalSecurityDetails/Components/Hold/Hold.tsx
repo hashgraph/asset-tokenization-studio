@@ -13,6 +13,7 @@ export const Hold = () => {
   return (
     <Stack w="full" h="full" layerStyle="container">
       <Tabs
+        variant="secondary"
         tabs={[
           {
             content: <HoldList />,

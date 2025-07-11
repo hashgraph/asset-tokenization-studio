@@ -272,6 +272,7 @@ export enum ErrorCode {
   OnlyDefaultPartitionAllowed = '20034',
   NotIssuable = '20035',
   InvalidSupply = '20036',
+  AddressRecovered = '20037',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',

@@ -212,6 +212,7 @@ import { isHederaValidAddress, required } from "../../../utils/rules";
 import {
   GetAccountBalanceRequest,
   GetClearedAmountForRequest,
+  GetFrozenPartialTokensRequest,
   GetHeldAmountForRequest,
   GetLocksIdRequest,
   SecurityViewModel,
@@ -222,6 +223,7 @@ import { useGetLockers } from "../../../hooks/queries/useGetLockers";
 import { useGetHeldAmountFor } from "../../../hooks/queries/useGetHolds";
 import { useSecurityStore } from "../../../store/securityStore";
 import { useGetClearedAmountFor } from "../../../hooks/queries/useClearingOperations";
+import { useGetFrozenTokens } from "../../../hooks/queries/useGetFreezers";
 
 interface BalanceProps {
   id?: string;
@@ -255,6 +257,7 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingLockers, setIsLoadingLockers] = useState<boolean>(false);
   const [isLoadingHolds, setIsLoadingHolds] = useState<boolean>(false);
+  const [isLoadingFreezed, setIsLoadingFreezed] = useState<boolean>(false);
   const [isLoadingCleared, setIsLoadingCleared] = useState<boolean>(false);
   const toast = useToast();
 
@@ -329,6 +332,29 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
     },
   );
 
+  const { data: frozenBalance, refetch: refetchFrozenBalance } =
+    useGetFrozenTokens(
+      new GetFrozenPartialTokensRequest({
+        securityId: id!,
+        targetId: targetId ?? "",
+      }),
+      {
+        enabled: !!targetId,
+        refetchOnWindowFocus: false,
+        onSuccess: () => {
+          setIsLoadingFreezed(false);
+        },
+        onError: () => {
+          setIsLoadingFreezed(false);
+          toast.show({
+            duration: 3000,
+            title: tError("targetId"),
+            status: "error",
+          });
+        },
+      },
+    );
+
   const { data: clearedBalance, refetch: refetchClearedBalance } =
     useGetClearedAmountFor(
       new GetClearedAmountForRequest({
@@ -365,13 +391,26 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
       refetchLockers();
       refetchHolds();
       refetchClearedBalance();
+      refetchFrozenBalance();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetId]);
 
   const isLoadingTotal = useMemo(() => {
-    return isLoading || isLoadingLockers || isLoadingHolds || isLoadingCleared;
-  }, [isLoading, isLoadingLockers, isLoadingHolds, isLoadingCleared]);
+    return (
+      isLoading ||
+      isLoadingLockers ||
+      isLoadingHolds ||
+      isLoadingCleared ||
+      isLoadingFreezed
+    );
+  }, [
+    isLoading,
+    isLoadingLockers,
+    isLoadingHolds,
+    isLoadingCleared,
+    isLoadingFreezed,
+  ]);
 
   const onSubmit = ({ search }: BalanceSearchFieldValue) => {
     setTargetId(search);
@@ -402,12 +441,16 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
       totalBalance += Number(heldBalance);
     }
 
+    if (Number(frozenBalance) > 0) {
+      totalBalance += Number(frozenBalance);
+    }
+
     if (Number(clearedBalance) > 0) {
       totalBalance += Number(clearedBalance);
     }
 
     return totalBalance;
-  }, [clearedBalance, heldBalance, lockBalance, balance]);
+  }, [clearedBalance, heldBalance, lockBalance, frozenBalance, balance]);
 
   return (
     <VStack gap={6}>
@@ -524,6 +567,18 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
                 </Text>
                 <Text textStyle="ElementsSemiboldSM">
                   {clearedBalance ?? "-"}{" "}
+                  {tProperties(detailsResponse.symbol ?? "")}
+                </Text>
+              </VStack>
+
+              <VStack w={"1px"} h={"40px"} bgColor={"gray.500"} />
+
+              <VStack alignItems={"flex-start"}>
+                <Text textStyle="ElementsRegularXS">
+                  {tDetails("frozenBalance")}
+                </Text>
+                <Text textStyle="ElementsSemiboldSM">
+                  {frozenBalance ?? "-"}{" "}
                   {tProperties(detailsResponse.symbol ?? "")}
                 </Text>
               </VStack>

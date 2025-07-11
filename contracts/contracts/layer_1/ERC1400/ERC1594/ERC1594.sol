@@ -210,12 +210,12 @@ import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
-import {_ISSUER_ROLE} from '../../constants/roles.sol';
+import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {Common} from '../../common/Common.sol';
 
-contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
+contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594()
         external
@@ -234,6 +234,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
+        onlyUnrecoveredAddress(_to)
+        onlyUnrecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_to)
         onlyWithoutMultiPartition
@@ -263,6 +265,11 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
     {
+        {
+            _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_to);
+            _checkRecoveredAddress(_from);
+        }
         // Add a function to validate the `_data` parameter
         _transferFrom(_msgSender(), _from, _to, _value);
     }
@@ -283,14 +290,20 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     )
         external
         override
+        onlyUnrecoveredAddress(_tokenHolder)
         onlyWithinMaxSupply(_value)
         onlyUnpaused
-        onlyRole(_ISSUER_ROLE)
         onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
         onlyIssuable
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _ISSUER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
         _issue(_tokenHolder, _value, _data);
     }
 
@@ -309,6 +322,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         onlyClearingDisabled
+        onlyUnrecoveredAddress(_msgSender())
         onlyListedAllowed(_msgSender())
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -334,12 +348,15 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
+        validateAddress(_tokenHolder)
         onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_tokenHolder)
     {
         _redeemFrom(_tokenHolder, _value, _data);
     }

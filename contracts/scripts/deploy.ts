@@ -279,6 +279,10 @@ import {
     ExternalControlListManagementTimeTravel__factory,
     ExternalKycListManagement__factory,
     ExternalKycListManagementTimeTravel__factory,
+    ERC3643__factory,
+    ERC3643TimeTravel__factory,
+    FreezeFacet__factory,
+    FreezeFacetTimeTravel__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -349,7 +353,7 @@ export async function deployAtsFullInfrastructure({
         console.log(MESSAGES.businessLogicResolver.info.initializing)
         const initResponse =
             await resolver.contract.initialize_BusinessLogicResolver({
-                gasLimit: GAS_LIMIT.initilize.businessLogicResolver,
+                gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
             })
         await validateTxResponse(
             new ValidateTxResponseCommand({
@@ -807,6 +811,28 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        erc3643: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC3643__factory(),
+                new ERC3643TimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC3643.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        freeze: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new FreezeFacet__factory(),
+                new FreezeFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.FreezeFacet.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
         timeTravel:
             timeTravelEnabled == true
                 ? new DeployContractWithFactoryCommand({
@@ -1043,6 +1069,18 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
+            erc3643: await deployContractWithFactory(commands.erc3643).then(
+                (result) => {
+                    console.log('ERC3643 has been deployed successfully')
+                    return result
+                }
+            ),
+            freeze: await deployContractWithFactory(commands.freeze).then(
+                (result) => {
+                    console.log('Freeze has been deployed successfully')
+                    return result
+                }
+            ),
             timeTravel: commands.timeTravel
                 ? await deployContractWithFactory(commands.timeTravel).then(
                       (result) => {
