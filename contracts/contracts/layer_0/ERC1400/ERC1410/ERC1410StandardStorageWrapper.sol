@@ -236,23 +236,48 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 partition,
         address from,
         address to,
-        uint256 /*amount*/
+        uint256 amount
     ) internal override {
         _triggerAndSyncAll(partition, from, to);
+
+        bool addTo;
+        bool removeFrom;
 
         if (from == address(0)) {
             // mint
             _updateAccountSnapshot(to, partition);
-            return _updateTotalSupplySnapshot(partition);
-        }
-        if (to == address(0)) {
+            _updateTotalSupplySnapshot(partition);
+            // _balanceOf instead of _balanceOfAdjusted because we are comparing it to 0
+            if (amount > 0 && _balanceOf(to) == 0) addTo = true;
+        } else if (to == address(0)) {
             // burn
             _updateAccountSnapshot(from, partition);
-            return _updateTotalSupplySnapshot(partition);
+            _updateTotalSupplySnapshot(partition);
+            if (amount > 0 && _balanceOfAdjusted(from) == amount)
+                removeFrom = true;
         }
         // transfer
-        _updateAccountSnapshot(from, partition);
-        _updateAccountSnapshot(to, partition);
+        else {
+            _updateAccountSnapshot(from, partition);
+            _updateAccountSnapshot(to, partition);
+            // _balanceOf instead of _balanceOfAdjusted because we are comparing it to 0
+            if (amount > 0 && _balanceOf(to) == 0) addTo = true;
+            if (amount > 0 && _balanceOfAdjusted(from) == amount)
+                removeFrom = true;
+        }
+
+        if (addTo && removeFrom) {
+            //_updateTokenHolderSnapshot(from);
+            _replaceTokenHolder(to, from);
+        } else if (addTo) {
+            //_updateTotalTokenHolderSnapshot();
+            _addNewTokenHolder(to);
+        } else if (removeFrom) {
+            //_updateTokenHolderSnapshot(from);
+            //_updateTokenHolderSnapshot(_tokenHolders[_totalTokenHolders]);
+            //_updateTotalTokenHolderSnapshot();
+            _removeTokenHolder(from);
+        }
     }
 
     function _triggerAndSyncAll(

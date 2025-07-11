@@ -238,6 +238,9 @@ abstract contract ERC1410BasicStorageWrapperRead is
         mapping(address => mapping(bytes32 => uint256)) partitionToIndex;
         bool multiPartition;
         bool initialized;
+        mapping(address => uint256) tokenHolderIndex;
+        mapping(uint256 => address) tokenHolders;
+        uint256 totalTokenHolders;
     }
 
     modifier onlyWithoutMultiPartition() {
@@ -343,6 +346,48 @@ abstract contract ERC1410BasicStorageWrapperRead is
         ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
         _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
         _adjustTotalBalanceFor(basicStorage, abaf, account);
+    }
+
+    function _replaceTokenHolder(
+        address newTokenHolder,
+        address oldTokenHolder
+    ) internal {
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
+
+        uint256 index = basicStorage.tokenHolderIndex[oldTokenHolder];
+        basicStorage.tokenHolderIndex[newTokenHolder] = index;
+        basicStorage.tokenHolders[index] = newTokenHolder;
+        basicStorage.tokenHolderIndex[oldTokenHolder] = 0;
+    }
+
+    function _addNewTokenHolder(address tokenHolder) internal {
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
+
+        uint256 nextIndex = ++basicStorage.totalTokenHolders;
+        basicStorage.tokenHolders[nextIndex] = tokenHolder;
+        basicStorage.tokenHolderIndex[tokenHolder] = nextIndex;
+    }
+
+    function _removeTokenHolder(address tokenHolder) internal {
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
+
+        uint256 lastIndex = basicStorage.totalTokenHolders;
+        if (lastIndex > 1) {
+            uint256 tokenHolderIndex = basicStorage.tokenHolderIndex[
+                tokenHolder
+            ];
+            if (tokenHolderIndex < lastIndex) {
+                address lastTokenHolder = basicStorage.tokenHolders[lastIndex];
+
+                basicStorage.tokenHolderIndex[
+                    lastTokenHolder
+                ] = tokenHolderIndex;
+                basicStorage.tokenHolders[tokenHolderIndex] = lastTokenHolder;
+            }
+        }
+
+        basicStorage.tokenHolderIndex[tokenHolder] = 0;
+        basicStorage.totalTokenHolders--;
     }
 
     function _totalSupply() internal view returns (uint256) {
