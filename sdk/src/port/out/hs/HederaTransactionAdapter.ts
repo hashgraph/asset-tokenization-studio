@@ -283,7 +283,6 @@ import { EquityDetailsData } from '@domain/context/factory/EquityDetailsData';
 import { SecurityData } from '@domain/context/factory/SecurityData';
 import { CastDividendType } from '@domain/context/equity/DividendType';
 import { AdditionalSecurityData } from '@domain/context/factory/AdditionalSecurityData';
-import { Interface } from 'ethers/lib/utils';
 import { ResolverProxyConfiguration } from '@domain/context/factory/ResolverProxyConfiguration';
 import { TransactionType } from '../TransactionResponseEnums';
 import { TransferAndLock } from '@domain/context/security/TransferAndLock';
@@ -307,6 +306,7 @@ import {
 } from '@domain/context/security/Clearing';
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
+import { BaseContract, Contract, ContractTransaction } from 'ethers';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -324,6 +324,61 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     protected readonly networkService: NetworkService,
   ) {
     super();
+  }
+
+  private async executeWithArgs<
+    C extends BaseContract,
+    F extends {
+      [K in keyof C]: C[K] extends (
+        ...args: any[]
+      ) => Promise<ContractTransaction>
+        ? K
+        : never;
+    }[keyof C] &
+      string,
+  >(
+    contractInstance: C,
+    functionName: F,
+    contractId: ContractId | string,
+    gas: number,
+    args: Parameters<
+      C[F] extends (...args: infer P) => any ? (...args: P) => any : never
+    >,
+  ): Promise<TransactionResponse<any, Error>> {
+    const encodedHex = contractInstance.interface.encodeFunctionData(
+      functionName,
+      args as any,
+    );
+    const encoded = new Uint8Array(Buffer.from(encodedHex.slice(2), 'hex'));
+
+    return this.buildAndSendTransaction(contractId, gas, (tx) => {
+      tx.setFunctionParameters(encoded);
+    });
+  }
+
+  private async executeWithParams(
+    contractId: ContractId | string,
+    gas: number,
+    functionName: string,
+    functionParameters: ContractFunctionParameters,
+  ): Promise<TransactionResponse<any, Error>> {
+    return this.buildAndSendTransaction(contractId, gas, (tx) => {
+      tx.setFunction(functionName, functionParameters);
+    });
+  }
+
+  private async buildAndSendTransaction(
+    contractId: ContractId | string,
+    gas: number,
+    setup: (tx: ContractExecuteTransaction) => void,
+  ): Promise<TransactionResponse<any, Error>> {
+    const tx = new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(gas);
+
+    setup(tx);
+
+    return this.signAndSendTransaction(tx);
   }
 
   // * Operations NOT Smart Contract related
@@ -372,7 +427,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'deployEquity';
     try {
       if (!securityInfo.regulationType) {
         throw new MissingRegulationType();
@@ -451,28 +505,19 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         additionalSecurityData,
       );
 
-      // Create and encode the function data
-      const factoryInstance = new Factory__factory().attach(factory.toString());
-      const functionDataEncodedHex =
-        factoryInstance.interface.encodeFunctionData(FUNCTION_NAME, [
-          securityTokenToCreate,
-          factoryRegulationData,
-        ]);
-      const functionDataEncoded = new Uint8Array(
-        Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-      );
-
       LogService.logTrace(
         `Deploying equity: ${{
           security: securityTokenToCreate,
         }}`,
       );
-      const transaction = new ContractExecuteTransaction()
-        .setContractId(factoryId!)
-        .setGas(GAS.CREATE_EQUITY_ST)
-        .setFunctionParameters(functionDataEncoded);
 
-      return this.signAndSendTransaction(transaction);
+      return this.executeWithArgs(
+        new Factory__factory().attach(factory.toString()),
+        'deployEquity',
+        factoryId!,
+        GAS.CREATE_EQUITY_ST,
+        [securityTokenToCreate, factoryRegulationData],
+      );
     } catch (error) {
       LogService.logError(error);
       throw new SigningError(
@@ -495,7 +540,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'deployBond';
     try {
       if (!securityInfo.regulationType) {
         throw new MissingRegulationType();
@@ -575,26 +619,19 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         additionalSecurityData,
       );
 
-      const factoryInstance = new Factory__factory().attach(factory.toString());
-      const functionDataEncodedHex =
-        factoryInstance.interface.encodeFunctionData(FUNCTION_NAME, [
-          securityTokenToCreate,
-          factoryRegulationData,
-        ]);
-      const functionDataEncoded = new Uint8Array(
-        Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-      );
       LogService.logTrace(
         `Deploying bond: ${{
           security: securityTokenToCreate,
         }}`,
       );
-      const transaction = new ContractExecuteTransaction()
-        .setContractId(factoryId!)
-        .setGas(GAS.CREATE_BOND_ST)
-        .setFunctionParameters(functionDataEncoded);
 
-      return this.signAndSendTransaction(transaction);
+      return this.executeWithArgs(
+        new Factory__factory().attach(factory.toString()),
+        'deployBond',
+        factoryId!,
+        GAS.CREATE_BOND_ST,
+        [securityTokenToCreate, factoryRegulationData],
+      );
     } catch (error) {
       LogService.logError(error);
       throw new SigningError(
@@ -609,13 +646,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'transferByPartition';
     LogService.logTrace(
       `Transfering ${amount} securities to account ${targetId.toString()}`,
-    );
-
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
     );
 
     const basicTransferInfo: BasicTransferInfo = {
@@ -623,19 +655,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       value: amount.toHexString(),
     };
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'transferByPartition',
+      securityId,
+      GAS.TRANSFER,
       [_PARTITION_ID_1, basicTransferInfo, '0x'],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.TRANSFER)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async transferAndLock(
@@ -645,16 +671,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'transferAndLockByPartition';
     LogService.logTrace(
       `Transfering ${amount} securities to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
     );
-
-    const factoryInstance = new TransferAndLock__factory().attach(
-      security.toString(),
-    );
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new TransferAndLock__factory().attach(security.toString()),
+      'transferAndLockByPartition',
+      securityId,
+      GAS.TRANSFER_AND_LOCK,
       [
         _PARTITION_ID_1,
         targetId.toString(),
@@ -663,15 +687,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         expirationDate.toHexString(),
       ],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.TRANSFER_AND_LOCK)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async redeem(
@@ -679,27 +694,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'redeemByPartition';
     LogService.logTrace(
       `Redeeming ${amount} securities from account ${security.toString()}`,
     );
-
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'redeemByPartition',
+      securityId,
+      GAS.REDEEM,
       [_PARTITION_ID_1, amount.toHexString(), '0x'],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.REDEEM)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async burn(
@@ -708,59 +712,44 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'burn';
     LogService.logTrace(
       `Burning ${amount} securities from account ${source.toString()}`,
     );
-
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'burn',
+      securityId,
+      GAS.BURN,
       [source.toString(), amount.toHexString()],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.BURN)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async pause(
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'pause';
     LogService.logTrace(`Pausing security: ${security.toString()}`);
 
-    // Create ContractFunctionParameters and add the parameters
-    const functionParameters = new ContractFunctionParameters();
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.PAUSE)
-      .setFunction(FUNCTION_NAME, functionParameters);
-
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithParams(
+      securityId,
+      GAS.PAUSE,
+      'pause',
+      new ContractFunctionParameters(),
+    );
   }
 
   async unpause(
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'unpause';
     LogService.logTrace(`Unpausing security: ${security.toString()}`);
 
-    // Create ContractFunctionParameters and add the parameters
-    const functionParameters = new ContractFunctionParameters();
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.UNPAUSE)
-      .setFunction(FUNCTION_NAME, functionParameters);
-
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithParams(
+      securityId,
+      GAS.PAUSE,
+      'unpause',
+      new ContractFunctionParameters(),
+    );
   }
 
   async grantRole(
@@ -769,24 +758,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     role: SecurityRole,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'grantRole';
     LogService.logTrace(
       `Granting role ${role.toString()} to account: ${targetId.toString()}`,
     );
 
-    const functionDataEncodedHex = new Interface(
+    const contract = new Contract(
+      security.toString(),
       AccessControl__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [role, targetId.toString()]);
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.GRANT_ROLES)
-      .setFunctionParameters(functionDataEncoded);
 
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithArgs(
+      contract,
+      'grantRole',
+      securityId,
+      GAS.GRANT_ROLES,
+      [targetId.toString(), role],
+    );
   }
 
   async applyRoles(
@@ -796,23 +783,18 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     actives: boolean[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'applyRoles';
     let gas = roles.length * GAS.GRANT_ROLES;
     gas = gas > GAS.MAX_ROLES ? GAS.MAX_ROLES : gas;
 
-    const functionDataEncodedHex = new Interface(
+    const contract = new Contract(
+      security.toString(),
       AccessControl__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [roles, actives, targetId.toString()]);
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(gas)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithArgs(contract, 'applyRoles', securityId, gas, [
+      roles,
+      actives,
+      targetId.toString(),
+    ]);
   }
 
   async revokeRole(
@@ -821,23 +803,21 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     role: SecurityRole,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'revokeRole';
     LogService.logTrace(
       `Revoking role ${role.toString()} to account: ${targetId.toString()}`,
     );
 
-    const functionDataEncodedHex = new Interface(
+    const contract = new Contract(
+      security.toString(),
       AccessControl__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [role, targetId.toString()]);
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.GRANT_ROLES)
-      .setFunctionParameters(functionDataEncoded);
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithArgs(
+      contract,
+      'revokeRole',
+      securityId,
+      GAS.GRANT_ROLES,
+      [role, targetId.toString()],
+    );
   }
 
   async renounceRole(
@@ -845,21 +825,19 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     role: SecurityRole,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'renounceRole';
     LogService.logTrace(`Renounce role ${role.toString()}`);
 
-    const functionDataEncodedHex = new Interface(
+    const contract = new Contract(
+      security.toString(),
       AccessControl__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [role]);
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.RENOUNCE_ROLES)
-      .setFunctionParameters(functionDataEncoded);
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithArgs(
+      contract,
+      'renounceRole',
+      securityId,
+      GAS.RENOUNCE_ROLES,
+      [role],
+    );
   }
 
   async issue(
@@ -868,35 +846,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'issueByPartition';
     LogService.logTrace(
       `Issue ${amount} ${security} to account: ${targetId.toString()}`,
     );
-
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-
     const issueData: IssueData = {
       partition: _PARTITION_ID_1,
       tokenHolder: targetId.toString(),
       value: amount.toHexString(),
       data: '0x',
     };
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'issueByPartition',
+      securityId,
+      GAS.ISSUE,
       [issueData],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ISSUE)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async mint(
@@ -905,26 +870,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'mint';
     LogService.logTrace(
       `Minting ${amount} ${security} to account: ${target.toString()}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'mint',
+      securityId,
+      GAS.MINT,
       [target.toString(), amount.toHexString()],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.MINT)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async addToControlList(
@@ -932,27 +888,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'addToControlList';
     LogService.logTrace(
       `Adding account ${targetId.toString()} to a control list`,
     );
-
-    const factoryInstance = new ControlList__factory().attach(
-      security.toString(),
-    );
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ControlList__factory().attach(security.toString()),
+      'addToControlList',
+      securityId,
+      GAS.ADD_TO_CONTROL_LIST,
       [targetId.toString()],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ADD_TO_CONTROL_LIST)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async removeFromControlList(
@@ -960,27 +905,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'removeFromControlList';
     LogService.logTrace(
       `Removing account ${targetId.toString()} from a control list`,
     );
-
-    const factoryInstance = new ControlList__factory().attach(
-      security.toString(),
-    );
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ControlList__factory().attach(security.toString()),
+      'removeFromControlList',
+      securityId,
+      GAS.REMOVE_FROM_CONTROL_LIST,
       [targetId.toString()],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.REMOVE_FROM_CONTROL_LIST)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async controllerTransfer(
@@ -990,16 +924,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'controllerTransferByPartition';
     LogService.logTrace(
       `Controller transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'controllerTransferByPartition',
+      securityId,
+      GAS.CONTROLLER_TRANSFER,
       [
         _PARTITION_ID_1,
         sourceId.toString(),
@@ -1009,15 +942,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         '0x',
       ],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CONTROLLER_TRANSFER)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async forcedTransfer(
@@ -1027,26 +951,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'forcedTransfer';
     LogService.logTrace(
       `Forced transfer ${amount} tokens from account ${source.toString()} to account ${target.toString()}`,
     );
-
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'forcedTransfer',
+      securityId,
+      GAS.FORCED_TRANSFER,
       [source.toString(), target.toString(), amount.toHexString()],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.FORCED_TRANSFER)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async controllerRedeem(
@@ -1055,27 +969,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'controllerRedeemByPartition';
     LogService.logTrace(
       `Force redeem ${amount} tokens from account ${sourceId.toString()}`,
     );
-
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'controllerRedeemByPartition',
+      securityId,
+      GAS.CONTROLLER_REDEEM,
       [_PARTITION_ID_1, sourceId.toString(), amount.toHexString(), '0x', '0x'],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CONTROLLER_REDEEM)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setDividends(
@@ -1085,7 +988,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'setDividends';
     LogService.logTrace(
       `equity: ${security} ,
       recordDate :${recordDate} , 
@@ -1098,19 +1000,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       executionDate: executionDate.toHexString(),
       amount: amount.toHexString(),
     };
-
-    const functionDataEncodedHex = new Interface(
-      EquityUSA__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [dividend]);
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    return this.executeWithArgs(
+      new EquityUSA__factory().attach(security.toString()),
+      'setDividends',
+      securityId,
+      GAS.SET_DIVIDENDS,
+      [dividend],
     );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_DIVIDENDS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setVotingRights(
@@ -1119,7 +1015,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     data: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'setVoting';
     LogService.logTrace(
       `equity: ${security} ,
       recordDate :${recordDate} , `,
@@ -1129,19 +1024,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       recordDate: recordDate.toHexString(),
       data: data,
     };
-
-    const functionDataEncodedHex = new Interface(
-      EquityUSA__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [voting]);
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    return this.executeWithArgs(
+      new EquityUSA__factory().attach(security.toString()),
+      'setVoting',
+      securityId,
+      GAS.SET_VOTING_RIGHTS,
+      [voting],
     );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_VOTING_RIGHTS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setCoupon(
@@ -1151,7 +1040,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     rate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'setCoupon';
     LogService.logTrace(
       `bond: ${security} ,
       recordDate :${recordDate} , 
@@ -1164,45 +1052,28 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       executionDate: executionDate.toHexString(),
       rate: rate.toHexString(),
     };
-
-    const functionDataEncodedHex = new Interface(
-      BondUSA__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [coupon]);
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    return this.executeWithArgs(
+      new BondUSA__factory().attach(security.toString()),
+      'setCoupon',
+      securityId,
+      GAS.SET_COUPON,
+      [coupon],
     );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_COUPON)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async takeSnapshot(
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'takeSnapshot';
     LogService.logTrace(`Take snapshot of: ${security.toString()}`);
 
-    const factoryInstance = new Snapshots__factory().attach(
-      security.toString(),
+    return this.executeWithArgs(
+      new Snapshots__factory().attach(security.toString()),
+      'takeSnapshot',
+      securityId,
+      GAS.TAKE_SNAPSHOT,
+      [],
     );
-
-    const functionDataEncodedHex =
-      factoryInstance.interface.encodeFunctionData(FUNCTION_NAME);
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.TAKE_SNAPSHOT)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setDocument(
@@ -1212,28 +1083,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     hash: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'setDocument';
     LogService.logTrace(
       `Setting document: ${name}, with ${uri}, and hash ${hash} for security ${security.toString()}`,
     );
-
-    const factoryInstance = new ERC1643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1643__factory().attach(security.toString()),
+      'setDocument',
+      securityId,
+      GAS.SET_DOCUMENT,
       [name, uri, hash],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_DOCUMENT)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async removeDocument(
@@ -1241,28 +1100,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     name: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'removeDocument';
     LogService.logTrace(
       `Removing document: ${name} for security ${security.toString()}`,
     );
-
-    const factoryInstance = new ERC1643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1643__factory().attach(security.toString()),
+      'removeDocument',
+      securityId,
+      GAS.REMOVE_DOCUMENT,
       [name],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.REMOVE_DOCUMENT)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async authorizeOperator(
@@ -1270,30 +1117,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'authorizeOperator';
     LogService.logTrace(
       `authorizing operator: ${targetId.toString()} for security ${security.toString()}`,
     );
-
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'authorizeOperator',
+      securityId,
+      GAS.AUTHORIZE_OPERATOR,
       [targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.AUTHORIZE_OPERATOR)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async revokeOperator(
@@ -1301,30 +1134,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'revokeOperator';
     LogService.logTrace(
       `revoking operator: ${targetId.toString()} for security ${security.toString()}`,
     );
-
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'revokeOperator',
+      securityId,
+      GAS.REVOKE_OPERATOR,
       [targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.REVOKE_OPERATOR)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async authorizeOperatorByPartition(
@@ -1333,30 +1152,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     partitionId: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'authorizeOperatorByPartition';
     LogService.logTrace(
       `authorizing operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
-
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'authorizeOperatorByPartition',
+      securityId,
+      GAS.AUTHORIZE_OPERATOR,
       [partitionId, targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.AUTHORIZE_OPERATOR)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async revokeOperatorByPartition(
@@ -1365,30 +1170,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     partitionId: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'revokeOperatorByPartition';
     LogService.logTrace(
       `revoking operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
-
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'revokeOperatorByPartition',
+      securityId,
+      GAS.REVOKE_OPERATOR,
       [partitionId, targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.REVOKE_OPERATOR)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async operatorTransferByPartition(
@@ -1399,13 +1190,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     partitionId: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'operatorTransferByPartition';
     LogService.logTrace(
       `Transfering ${amount} securities to account ${targetId.toString()} from account ${sourceId.toString()} on partition ${partitionId}`,
-    );
-
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
     );
 
     const operatorTransferData: OperatorTransferData = {
@@ -1416,22 +1202,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
       operatorData: '0x',
     };
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'operatorTransferByPartition',
+      securityId,
+      GAS.TRANSFER_OPERATOR,
       [operatorTransferData],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.TRANSFER_OPERATOR)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setMaxSupply(
@@ -1439,56 +1216,33 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     maxSupply: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'setMaxSupply';
     LogService.logTrace(
       `Setting max supply ${maxSupply} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new Cap__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Cap__factory().attach(security.toString()),
+      'setMaxSupply',
+      securityId,
+      GAS.SET_MAX_SUPPLY,
       [maxSupply.toHexString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_MAX_SUPPLY)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async triggerPendingScheduledSnapshots(
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'triggerPendingScheduledTasks';
     LogService.logTrace(
       `Triggering pending scheduled snapshots for ${security.toString()}`,
     );
-
-    const factoryInstance = new ScheduledTasks__factory().attach(
-      security.toString(),
+    return this.executeWithArgs(
+      new ScheduledTasks__factory().attach(security.toString()),
+      'triggerPendingScheduledTasks',
+      securityId,
+      GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
+      [],
     );
-
-    const functionDataEncodedHex =
-      factoryInstance.interface.encodeFunctionData(FUNCTION_NAME);
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async triggerScheduledSnapshots(
@@ -1496,30 +1250,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     max: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'triggerScheduledTasks';
     LogService.logTrace(
       `Triggering up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`,
     );
-
-    const factoryInstance = new ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ScheduledTasks__factory().attach(security.toString()),
+      'triggerScheduledTasks',
+      securityId,
+      GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
       [max.toHexString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async lock(
@@ -1529,15 +1269,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'lockByPartition';
     LogService.logTrace(
       `Locking ${amount} tokens from account ${sourceId.toString()} until ${expirationDate}`,
     );
-
-    const factoryInstance = new Lock__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Lock__factory().attach(security.toString()),
+      'lockByPartition',
+      securityId,
+      GAS.LOCK,
       [
         _PARTITION_ID_1,
         amount.toHexString(),
@@ -1545,17 +1284,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         expirationDate.toHexString(),
       ],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.LOCK)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async release(
@@ -1564,28 +1292,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     lockId: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'releaseByPartition';
     LogService.logTrace(
       `Releasing lock ${lockId} from account ${sourceId.toString()}`,
     );
-
-    const factoryInstance = new Lock__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Lock__factory().attach(security.toString()),
+      'releaseByPartition',
+      securityId,
+      GAS.RELEASE,
       [_PARTITION_ID_1, lockId.toHexString(), sourceId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.RELEASE)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async updateConfigVersion(
@@ -1593,28 +1309,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configVersion: number,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'updateConfigVersion';
     LogService.logTrace(`Updating config version`);
-
-    const resolverProxyFactory = new DiamondFacet__factory().attach(
-      security.toString(),
+    return this.executeWithArgs(
+      new DiamondFacet__factory().attach(security.toString()),
+      'updateConfigVersion',
+      securityId,
+      GAS.UPDATE_CONFIG_VERSION,
+      [configVersion],
     );
-
-    const functionDataEncodedHex =
-      resolverProxyFactory.interface.encodeFunctionData(FUNCTION_NAME, [
-        configVersion,
-      ]);
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.UPDATE_CONFIG_VERSION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async updateConfig(
@@ -1623,29 +1325,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configVersion: number,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'updateConfig';
     LogService.logTrace(`Updating config`);
-
-    const resolverProxyFactory = new DiamondFacet__factory().attach(
-      security.toString(),
+    return this.executeWithArgs(
+      new DiamondFacet__factory().attach(security.toString()),
+      'updateConfig',
+      securityId,
+      GAS.UPDATE_CONFIG,
+      [configId, configVersion],
     );
-
-    const functionDataEncodedHex =
-      resolverProxyFactory.interface.encodeFunctionData(FUNCTION_NAME, [
-        configId,
-        configVersion,
-      ]);
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.UPDATE_CONFIG)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async updateResolver(
@@ -1655,30 +1342,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configId: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'updateResolver';
     LogService.logTrace(`Updating Resolver`);
-
-    const diamondFacetInstance = new DiamondFacet__factory().attach(
-      security.toString(),
+    return this.executeWithArgs(
+      new DiamondFacet__factory().attach(security.toString()),
+      'updateResolver',
+      securityId,
+      GAS.UPDATE_RESOLVER,
+      [resolver.toString(), configId, configVersion],
     );
-
-    const functionDataEncodedHex =
-      diamondFacetInstance.interface.encodeFunctionData(FUNCTION_NAME, [
-        resolver.toString(),
-        configId,
-        configVersion,
-      ]);
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.UPDATE_RESOLVER)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async updateMaturityDate(
@@ -1686,24 +1357,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     maturityDate: number,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'updateMaturityDate';
     LogService.logTrace(
       `Updating bond maturity date ${maturityDate} for security ${security.toString()}`,
     );
-
-    const functionDataEncodedHex = new Interface(
-      Bond__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [maturityDate]);
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    const contract = new Contract(security.toString(), Bond__factory.abi);
+    return this.executeWithArgs(
+      contract,
+      'updateMaturityDate',
+      securityId,
+      GAS.UPDATE_MATURITY_DATE,
+      [maturityDate],
     );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.UPDATE_MATURITY_DATE)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setScheduledBalanceAdjustment(
@@ -1713,7 +1377,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     decimals: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'setScheduledBalanceAdjustment';
     LogService.logTrace(
       `equity: ${security} ,
       executionDate :${executionDate} , 
@@ -1726,57 +1389,43 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       factor: factor.toHexString(),
       decimals: decimals.toHexString(),
     };
-
-    const functionDataEncodedHex = new Interface(
-      EquityUSA__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [scheduleBalanceAdjustment]);
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    return this.executeWithArgs(
+      new EquityUSA__factory().attach(security.toString()),
+      'setScheduledBalanceAdjustment',
+      securityId,
+      GAS.SET_SCHEDULED_BALANCE_ADJUSTMENT,
+      [scheduleBalanceAdjustment],
     );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_SCHEDULED_BALANCE_ADJUSTMENT)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async protectPartitions(
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'protectPartitions';
     LogService.logTrace(
       `Protecting Partitions for security: ${security.toString()}`,
     );
-
-    const functionParameters = new ContractFunctionParameters();
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.PROTECT_PARTITION)
-      .setFunction(FUNCTION_NAME, functionParameters);
-
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithParams(
+      securityId,
+      GAS.PROTECT_PARTITION,
+      'protectPartitions',
+      new ContractFunctionParameters(),
+    );
   }
 
   async unprotectPartitions(
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'unprotectPartitions';
     LogService.logTrace(
       `Unprotecting Partitions for security: ${security.toString()}`,
     );
-
-    const functionParameters = new ContractFunctionParameters();
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.UNPROTECT_PARTITION)
-      .setFunction(FUNCTION_NAME, functionParameters);
-
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithParams(
+      securityId,
+      GAS.UNPROTECT_PARTITION,
+      'unprotectPartitions',
+      new ContractFunctionParameters(),
+    );
   }
 
   async protectedRedeemFromByPartition(
@@ -1789,17 +1438,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     signature: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'protectedRedeemFromByPartition';
     LogService.logTrace(
       `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'protectedRedeemFromByPartition',
+      securityId,
+      GAS.PROTECTED_REDEEM,
       [
         partitionId,
         sourceId.toString(),
@@ -1809,17 +1456,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         signature,
       ],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.PROTECTED_REDEEM)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async protectedTransferFromByPartition(
@@ -1833,17 +1469,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     signature: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'protectedTransferFromByPartition';
     LogService.logTrace(
       `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
-
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC1410ScheduledTasks__factory().attach(security.toString()),
+      'protectedTransferFromByPartition',
+      securityId,
+      GAS.PROTECTED_TRANSFER,
       [
         partitionId,
         sourceId.toString(),
@@ -1854,17 +1487,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         signature,
       ],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.PROTECTED_TRANSFER)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async protectedTransferAndLock(
@@ -1878,15 +1500,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     signature: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'protectedTransferAndLock';
     LogService.logTrace(
       `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
     );
-
-    const factoryInstance = new TransferAndLock__factory().attach(
-      security.toString(),
-    );
-
     const transferAndLockData: TransferAndLock = {
       from: sourceId.toString(),
       to: targetId.toString(),
@@ -1894,9 +1510,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
       expirationTimestamp: expirationDate.toBigNumber(),
     };
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new TransferAndLock__factory().attach(security.toString()),
+      'protectedTransferAndLock',
+      securityId,
+      GAS.PROTECTED_TRANSFER_AND_LOCK,
       [
         transferAndLockData,
         deadline.toBigNumber(),
@@ -1904,17 +1522,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         signature,
       ],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.PROTECTED_TRANSFER_AND_LOCK)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async createHoldByPartition(
@@ -1926,13 +1533,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'createHoldByPartition';
     LogService.logTrace(
       `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
-
-    const factoryInstance = new Hold__factory().attach(security.toString());
-
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: expirationDate.toBigNumber(),
@@ -1940,21 +1543,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Hold__factory().attach(security.toString()),
+      'createHoldByPartition',
+      securityId,
+      GAS.CREATE_HOLD,
       [partitionId, hold],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CREATE_HOLD)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async createHoldFromByPartition(
@@ -1967,12 +1562,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'createHoldFromByPartition';
     LogService.logTrace(
       `Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
-
-    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -1981,21 +1573,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Hold__factory().attach(security.toString()),
+      'createHoldFromByPartition',
+      securityId,
+      GAS.CREATE_HOLD_FROM,
       [partitionId, sourceId.toString(), hold, '0x'],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CREATE_HOLD_FROM)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async controllerCreateHoldByPartition(
@@ -2008,12 +1592,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'controllerCreateHoldByPartition';
     LogService.logTrace(
       `Controller Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
-
-    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -2022,21 +1603,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+
+    return this.executeWithArgs(
+      new Hold__factory().attach(security.toString()),
+      'controllerCreateHoldByPartition',
+      securityId,
+      GAS.CONTROLLER_CREATE_HOLD,
       [partitionId, sourceId.toString(), hold, '0x'],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CONTROLLER_CREATE_HOLD)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async protectedCreateHoldByPartition(
@@ -2052,12 +1626,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     signature: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'protectedCreateHoldByPartition';
     LogService.logTrace(
       `Protected Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
-
-    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -2072,21 +1643,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       nonce: nonce.toBigNumber(),
     };
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Hold__factory().attach(security.toString()),
+      'protectedCreateHoldByPartition',
+      securityId,
+      GAS.PROTECTED_CREATE_HOLD,
       [partitionId, sourceId.toString(), protectedHold, signature],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.PROTECTED_CREATE_HOLD)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async releaseHoldByPartition(
@@ -2097,11 +1660,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'releaseHoldByPartition';
     LogService.logTrace(
       `Releasing hold amount ${amount} from account ${targetId.toString()}}`,
     );
-    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const holdIdentifier: HoldIdentifier = {
       partition: partitionId,
@@ -2109,21 +1670,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       holdId,
     };
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Hold__factory().attach(security.toString()),
+      'releaseHoldByPartition',
+      securityId,
+      GAS.RELEASE_HOLD,
       [holdIdentifier, amount.toBigNumber()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.RELEASE_HOLD)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async reclaimHoldByPartition(
@@ -2133,9 +1686,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'reclaimHoldByPartition';
     LogService.logTrace(`Reclaiming hold from account ${targetId.toString()}}`);
-    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const holdIdentifier: HoldIdentifier = {
       partition: partitionId,
@@ -2143,21 +1694,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       holdId,
     };
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Hold__factory().attach(security.toString()),
+      'reclaimHoldByPartition',
+      securityId,
+      GAS.RECLAIM_HOLD,
       [holdIdentifier],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.RECLAIM_HOLD)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async executeHoldByPartition(
@@ -2169,12 +1712,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     holdId: number,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'executeHoldByPartition';
     LogService.logTrace(
       `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
-
-    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const holdIdentifier: HoldIdentifier = {
       partition: partitionId,
@@ -2182,21 +1722,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       holdId,
     };
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Hold__factory().attach(security.toString()),
+      'executeHoldByPartition',
+      securityId,
+      GAS.EXECUTE_HOLD_BY_PARTITION,
       [holdIdentifier, targetId.toString(), amount.toBigNumber()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.EXECUTE_HOLD_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async addIssuer(
@@ -2204,28 +1736,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     issuer: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'addIssuer';
     LogService.logTrace(`Adding issuer ${issuer}`);
 
-    const factoryInstance = new SsiManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new SsiManagement__factory().attach(security.toString()),
+      'addIssuer',
+      securityId,
+      GAS.ADD_ISSUER,
       [issuer.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ADD_ISSUER)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setRevocationRegistryAddress(
@@ -2233,30 +1752,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     revocationRegistry: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'setRevocationRegistryAddress';
     LogService.logTrace(
       `Setting revocation registry address ${revocationRegistry}`,
     );
-
-    const factoryInstance = new SsiManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new SsiManagement__factory().attach(security.toString()),
+      'setRevocationRegistryAddress',
+      securityId,
+      GAS.SET_REVOCATION_REGISTRY,
       [revocationRegistry.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_REVOCATION_REGISTRY)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async removeIssuer(
@@ -2264,28 +1769,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     issuer: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'removeIssuer';
     LogService.logTrace(`Removing issuer ${issuer}`);
 
-    const factoryInstance = new SsiManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new SsiManagement__factory().attach(security.toString()),
+      'removeIssuer',
+      securityId,
+      GAS.REMOVE_ISSUER,
       [issuer.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.REMOVE_ISSUER)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async grantKyc(
@@ -2297,15 +1789,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     issuer: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'grantKyc';
     LogService.logTrace(
       `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC ${vcBase64}`,
     );
 
-    const factoryInstance = new Kyc__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Kyc__factory().attach(security.toString()),
+      'grantKyc',
+      securityId,
+      GAS.GRANT_KYC,
       [
         targetId.toString(),
         vcBase64,
@@ -2314,17 +1806,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         issuer.toString(),
       ],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.GRANT_KYC)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async revokeKyc(
@@ -2332,62 +1813,44 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'revokeKyc';
     LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
 
-    const factoryInstance = new Kyc__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new Kyc__factory().attach(security.toString()),
+      'revokeKyc',
+      securityId,
+      GAS.REVOKE_KYC,
       [targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.REVOKE_KYC)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async activateClearing(
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'activateClearing';
     LogService.logTrace(`Activate Clearing to address ${security.toString()}`);
 
-    const functionParameters = new ContractFunctionParameters();
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ACTIVATE_CLEARING)
-      .setFunction(FUNCTION_NAME, functionParameters);
-
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithParams(
+      securityId,
+      GAS.ACTIVATE_CLEARING,
+      'activateClearing',
+      new ContractFunctionParameters(),
+    );
   }
 
   async deactivateClearing(
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'deactivateClearing';
     LogService.logTrace(
       `Deactivate Clearing to address ${security.toString()}`,
     );
-
-    const functionParameters = new ContractFunctionParameters();
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ACTIVATE_CLEARING)
-      .setFunction(FUNCTION_NAME, functionParameters);
-
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithParams(
+      securityId,
+      GAS.DEACTIVATE_CLEARING,
+      'deactivateClearing',
+      new ContractFunctionParameters(),
+    );
   }
 
   async clearingTransferByPartition(
@@ -2398,7 +1861,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'clearingTransferByPartition';
     LogService.logTrace(
       `Clearing Transfer By Partition to address ${security.toString()}`,
     );
@@ -2409,25 +1871,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingTransferFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingTransferFacet__factory().attach(security.toString()),
+      'clearingTransferByPartition',
+      securityId,
+      GAS.CLEARING_TRANSFER_BY_PARTITION,
       [clearingOperation, amount.toBigNumber(), targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CLEARING_TRANSFER_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async clearingTransferFromByPartition(
@@ -2439,7 +1889,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'clearingTransferFromByPartition';
     LogService.logTrace(
       `Clearing Transfer From By Partition to address ${security.toString()}`,
     );
@@ -2454,25 +1903,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    const factoryInstance = new ClearingTransferFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingTransferFacet__factory().attach(security.toString()),
+      'clearingTransferFromByPartition',
+      securityId,
+      GAS.CLEARING_TRANSFER_FROM_BY_PARTITION,
       [clearingOperationFrom, amount.toBigNumber(), targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CLEARING_TRANSFER_FROM_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async protectedClearingTransferByPartition(
@@ -2487,7 +1924,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     signature: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'protectedClearingTransferByPartition';
     LogService.logTrace(
       `Protected Clearing Transfer By Partition to address ${security.toString()}`,
     );
@@ -2503,12 +1939,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       nonce: nonce.toBigNumber(),
     };
 
-    const factoryInstance = new ClearingTransferFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingTransferFacet__factory().attach(security.toString()),
+      'protectedClearingTransferByPartition',
+      securityId,
+      GAS.PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
       [
         protectedClearingOperation,
         amount.toBigNumber(),
@@ -2516,17 +1951,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         signature,
       ],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.PROTECTED_CLEARING_TRANSFER_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async approveClearingOperationByPartition(
@@ -2537,7 +1961,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     clearingOperationType: ClearingOperationType,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'approveClearingOperationByPartition';
     LogService.logTrace(
       `Approve Clearing Operation By Partition to address ${security.toString()}`,
     );
@@ -2551,25 +1974,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       clearingId: clearingId,
     };
 
-    const factoryInstance = new ClearingActionsFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingActionsFacet__factory().attach(security.toString()),
+      'approveClearingOperationByPartition',
+      securityId,
+      GAS.APPROVE_CLEARING_TRANSFER_BY_PARTITION,
       [clearingOperationIdentifier],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.APPROVE_CLEARING_TRANSFER_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async cancelClearingOperationByPartition(
@@ -2580,7 +1991,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     clearingOperationType: ClearingOperationType,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'cancelClearingOperationByPartition';
     LogService.logTrace(
       `Cancel Clearing Operation By Partition to address ${security.toString()}`,
     );
@@ -2594,25 +2004,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       clearingId: clearingId,
     };
 
-    const factoryInstance = new ClearingActionsFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingActionsFacet__factory().attach(security.toString()),
+      'cancelClearingOperationByPartition',
+      securityId,
+      GAS.CANCEL_CLEARING_TRANSFER_BY_PARTITION,
       [clearingOperationIdentifier],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CANCEL_CLEARING_TRANSFER_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async reclaimClearingOperationByPartition(
@@ -2623,7 +2021,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     clearingOperationType: ClearingOperationType,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'reclaimClearingOperationByPartition';
     LogService.logTrace(
       `Reclaim Clearing Operation By Partition to address ${security.toString()}`,
     );
@@ -2637,25 +2034,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       clearingId: clearingId,
     };
 
-    const factoryInstance = new ClearingActionsFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingActionsFacet__factory().attach(security.toString()),
+      'reclaimClearingOperationByPartition',
+      securityId,
+      GAS.RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
       [clearingOperationIdentifier],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.RECLAIM_CLEARING_TRANSFER_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async clearingRedeemByPartition(
@@ -2665,7 +2050,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'clearingRedeemByPartition';
     LogService.logTrace(
       `Clearing Redeem By Partition to address ${security.toString()}`,
     );
@@ -2676,25 +2060,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingRedeemFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingRedeemFacet__factory().attach(security.toString()),
+      'clearingRedeemByPartition',
+      securityId,
+      GAS.CLEARING_REDEEM_BY_PARTITION,
       [clearingOperation, amount.toBigNumber()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CLEARING_REDEEM_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async clearingRedeemFromByPartition(
@@ -2705,7 +2077,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'clearingRedeemFromByPartition';
     LogService.logTrace(
       `Clearing Redeem From By Partition to address ${security.toString()}`,
     );
@@ -2720,25 +2091,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    const factoryInstance = new ClearingRedeemFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingRedeemFacet__factory().attach(security.toString()),
+      'clearingRedeemFromByPartition',
+      securityId,
+      GAS.CLEARING_REDEEM_FROM_BY_PARTITION,
       [clearingOperationFrom, amount.toBigNumber()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CLEARING_REDEEM_FROM_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async protectedClearingRedeemByPartition(
@@ -2752,7 +2111,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     signature: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'protectedClearingRedeemByPartition';
     LogService.logTrace(
       `Protected Clearing Redeem By Partition to address ${security.toString()}`,
     );
@@ -2768,25 +2126,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       nonce: nonce.toBigNumber(),
     };
 
-    const factoryInstance = new ClearingRedeemFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingRedeemFacet__factory().attach(security.toString()),
+      'protectedClearingRedeemByPartition',
+      securityId,
+      GAS.PROTECTED_CLEARING_REDEEM_BY_PARTITION,
       [protectedClearingOperation, amount.toBigNumber(), signature],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.PROTECTED_CLEARING_REDEEM_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async clearingCreateHoldByPartition(
@@ -2799,7 +2145,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     holdExpirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'clearingCreateHoldByPartition';
     LogService.logTrace(
       `Clearing Create Hold By Partition to address ${security.toString()}`,
     );
@@ -2818,25 +2163,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingHoldCreationFacet__factory().attach(security.toString()),
+      'clearingCreateHoldByPartition',
+      securityId,
+      GAS.CLEARING_CREATE_HOLD_BY_PARTITION,
       [clearingOperation, hold],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CLEARING_CREATE_HOLD_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async clearingCreateHoldFromByPartition(
@@ -2850,7 +2183,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     holdExpirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'clearingCreateHoldFromByPartition';
     LogService.logTrace(
       `Clearing Create Hold From By Partition to address ${security.toString()}`,
     );
@@ -2873,25 +2205,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingHoldCreationFacet__factory().attach(security.toString()),
+      'clearingCreateHoldFromByPartition',
+      securityId,
+      GAS.CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
       [clearingOperationFrom, hold],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.CLEARING_CREATE_HOLD_FROM_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async protectedClearingCreateHoldByPartition(
@@ -2908,7 +2228,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     signature: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'protectedClearingCreateHoldByPartition';
     LogService.logTrace(
       `Protected Clearing Create Hold By Partition to address ${security.toString()}`,
     );
@@ -2932,25 +2251,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingHoldCreationFacet__factory().attach(security.toString()),
+      'protectedClearingCreateHoldByPartition',
+      securityId,
+      GAS.PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
       [protectedClearingOperation, hold, signature],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async operatorClearingCreateHoldByPartition(
@@ -2964,7 +2271,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     holdExpirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'operatorClearingCreateHoldByPartition';
     LogService.logTrace(
       `Operator Clearing Create Hold By Partition to address ${security.toString()}`,
     );
@@ -2987,25 +2293,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    const factoryInstance = new ClearingHoldCreationFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingHoldCreationFacet__factory().attach(security.toString()),
+      'operatorClearingCreateHoldByPartition',
+      securityId,
+      GAS.OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
       [clearingOperationFrom, hold],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async operatorClearingRedeemByPartition(
@@ -3016,7 +2310,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'operatorClearingRedeemByPartition';
     LogService.logTrace(
       `Operator Clearing Redeem By Partition to address ${security.toString()}`,
     );
@@ -3031,25 +2324,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    const factoryInstance = new ClearingRedeemFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingRedeemFacet__factory().attach(security.toString()),
+      'operatorClearingRedeemByPartition',
+      securityId,
+      GAS.OPERATOR_CLEARING_REDEEM_BY_PARTITION,
       [clearingOperationFrom, amount.toBigNumber()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.OPERATOR_CLEARING_REDEEM_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async operatorClearingTransferByPartition(
@@ -3061,7 +2342,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'operatorClearingTransferByPartition';
     LogService.logTrace(
       `Operator Clearing Transfer By Partition to address ${security.toString()}`,
     );
@@ -3076,25 +2356,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    const factoryInstance = new ClearingTransferFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ClearingTransferFacet__factory().attach(security.toString()),
+      'operatorClearingTransferByPartition',
+      securityId,
+      GAS.OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
       [clearingOperationFrom, amount.toBigNumber(), targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.OPERATOR_CLEARING_TRANSFER_BY_PARTITION)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async updateExternalPauses(
@@ -3103,30 +2371,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     actives: boolean[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'updateExternalPauses';
     LogService.logTrace(
       `Updating External Pauses for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ExternalPauseManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ExternalPauseManagement__factory().attach(security.toString()),
+      'updateExternalPauses',
+      securityId,
+      GAS.UPDATE_EXTERNAL_PAUSES,
       [externalPausesAddresses.map((address) => address.toString()), actives],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.UPDATE_EXTERNAL_PAUSES)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async addExternalPause(
@@ -3134,30 +2389,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     externalPauseAddress: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'addExternalPause';
     LogService.logTrace(
       `Adding External Pause for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ExternalPauseManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ExternalPauseManagement__factory().attach(security.toString()),
+      'addExternalPause',
+      securityId,
+      GAS.ADD_EXTERNAL_PAUSE,
       [externalPauseAddress.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ADD_EXTERNAL_PAUSE)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async removeExternalPause(
@@ -3165,30 +2407,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     externalPauseAddress: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'removeExternalPause';
     LogService.logTrace(
       `Removing External Pause for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ExternalPauseManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ExternalPauseManagement__factory().attach(security.toString()),
+      'removeExternalPause',
+      securityId,
+      GAS.REMOVE_EXTERNAL_PAUSE,
       [externalPauseAddress.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.REMOVE_EXTERNAL_PAUSE)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setPausedMock(
@@ -3196,30 +2425,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     paused: boolean,
     contractId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'setPaused';
     LogService.logTrace(
       `Setting paused to external pause mock contract ${contract.toString()}`,
     );
 
-    const factoryInstance = new MockedExternalPause__factory().attach(
-      contract.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new MockedExternalPause__factory().attach(contract.toString()),
+      'setPaused',
+      contractId,
+      GAS.SET_PAUSED_MOCK,
       [paused],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(contractId)
-      .setGas(GAS.SET_PAUSED_MOCK)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async createExternalPauseMock(): Promise<TransactionResponse> {
@@ -3243,33 +2459,20 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     actives: boolean[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'updateExternalControlLists';
     LogService.logTrace(
       `Updating External Control Lists for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ExternalControlListManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ExternalControlListManagement__factory().attach(security.toString()),
+      'updateExternalControlLists',
+      securityId,
+      GAS.UPDATE_EXTERNAL_CONTROL_LISTS,
       [
         externalControlListsAddresses.map((address) => address.toString()),
         actives,
       ],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.UPDATE_EXTERNAL_CONTROL_LISTS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async addExternalControlList(
@@ -3277,30 +2480,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     externalControlListAddress: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'addExternalControlList';
     LogService.logTrace(
       `Adding External Control Lists for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ExternalControlListManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ExternalControlListManagement__factory().attach(security.toString()),
+      'addExternalControlList',
+      securityId,
+      GAS.ADD_EXTERNAL_CONTROL_LIST,
       [externalControlListAddress.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ADD_EXTERNAL_CONTROL_LIST)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async removeExternalControlList(
@@ -3308,30 +2498,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     externalControlListAddress: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'removeExternalControlList';
     LogService.logTrace(
       `Removing External Control Lists for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ExternalControlListManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ExternalControlListManagement__factory().attach(security.toString()),
+      'removeExternalControlList',
+      securityId,
+      GAS.REMOVE_EXTERNAL_CONTROL_LIST,
       [externalControlListAddress.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.REMOVE_EXTERNAL_CONTROL_LIST)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async addToBlackListMock(
@@ -3339,30 +2516,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     contractId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'addToBlacklist';
     LogService.logTrace(
       `Adding address ${targetId.toString()} to external Control black List mock ${contract.toString()}`,
     );
 
-    const factoryInstance = new MockedBlacklist__factory().attach(
-      contract.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new MockedBlacklist__factory().attach(contract.toString()),
+      'addToBlacklist',
+      contractId,
+      GAS.ADD_TO_BLACK_LIST_MOCK,
       [targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(contractId)
-      .setGas(GAS.ADD_TO_BLACK_LIST_MOCK)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async addToWhiteListMock(
@@ -3370,30 +2534,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     contractId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'addToWhitelist';
     LogService.logTrace(
       `Adding address ${targetId.toString()} to external Control white List mock ${contract.toString()}`,
     );
 
-    const factoryInstance = new MockedWhitelist__factory().attach(
-      contract.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new MockedWhitelist__factory().attach(contract.toString()),
+      'addToWhitelist',
+      contractId,
+      GAS.ADD_TO_WHITE_LIST_MOCK,
       [targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(contractId)
-      .setGas(GAS.ADD_TO_WHITE_LIST_MOCK)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async removeFromBlackListMock(
@@ -3401,30 +2552,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     contractId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'removeFromBlacklist';
     LogService.logTrace(
       `Removing address ${targetId.toString()} from external Control black List mock ${contract.toString()}`,
     );
 
-    const factoryInstance = new MockedBlacklist__factory().attach(
-      contract.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new MockedBlacklist__factory().attach(contract.toString()),
+      'removeFromBlacklist',
+      contractId,
+      GAS.REMOVE_FROM_BLACK_LIST_MOCK,
       [targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(contractId)
-      .setGas(GAS.REMOVE_FROM_BLACK_LIST_MOCK)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async removeFromWhiteListMock(
@@ -3432,30 +2570,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     contractId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'removeFromWhitelist';
     LogService.logTrace(
       `Removing address ${targetId.toString()} from external Control white List mock ${contract.toString()}`,
     );
 
-    const factoryInstance = new MockedWhitelist__factory().attach(
-      contract.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new MockedWhitelist__factory().attach(contract.toString()),
+      'removeFromWhitelist',
+      contractId,
+      GAS.REMOVE_FROM_WHITE_LIST_MOCK,
       [targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(contractId)
-      .setGas(GAS.REMOVE_FROM_WHITE_LIST_MOCK)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async createExternalBlackListMock(): Promise<TransactionResponse> {
@@ -3494,30 +2619,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     actives: boolean[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'updateExternalKycLists';
     LogService.logTrace(
       `Updating External Kyc Lists for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ExternalKycListManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ExternalKycListManagement__factory().attach(security.toString()),
+      'updateExternalKycLists',
+      securityId,
+      GAS.UPDATE_EXTERNAL_KYC_LISTS,
       [externalKycListsAddresses.map((address) => address.toString()), actives],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.UPDATE_EXTERNAL_KYC_LISTS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async addExternalKycList(
@@ -3525,30 +2637,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     externalKycListAddress: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'addExternalKycList';
     LogService.logTrace(
       `Adding External kyc Lists for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ExternalKycListManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ExternalKycListManagement__factory().attach(security.toString()),
+      'addExternalKycList',
+      securityId,
+      GAS.ADD_EXTERNAL_KYC_LIST,
       [externalKycListAddress.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ADD_EXTERNAL_KYC_LIST)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async removeExternalKycList(
@@ -3556,30 +2655,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     externalKycListAddress: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'removeExternalKycList';
     LogService.logTrace(
       `Removing External kyc Lists for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ExternalKycListManagement__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ExternalKycListManagement__factory().attach(security.toString()),
+      'removeExternalKycList',
+      securityId,
+      GAS.REMOVE_EXTERNAL_KYC_LIST,
       [externalKycListAddress.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.REMOVE_EXTERNAL_KYC_LIST)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async grantKycMock(
@@ -3587,30 +2673,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     contractId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'grantKyc';
     LogService.logTrace(
       `Grant kyc address ${targetId.toString()} to external kyc mock ${contract.toString()}`,
     );
 
-    const factoryInstance = new MockedExternalKycList__factory().attach(
-      contract.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new MockedExternalKycList__factory().attach(contract.toString()),
+      'grantKyc',
+      contractId,
+      GAS.GRANT_KYC_MOCK,
       [targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(contractId)
-      .setGas(GAS.GRANT_KYC_MOCK)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async revokeKycMock(
@@ -3618,30 +2691,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     contractId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'revokeKyc';
     LogService.logTrace(
       `Revoke kyc address ${targetId.toString()} to external kyc mock ${contract.toString()}`,
     );
 
-    const factoryInstance = new MockedExternalKycList__factory().attach(
-      contract.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new MockedExternalKycList__factory().attach(contract.toString()),
+      'revokeKyc',
+      contractId,
+      GAS.REVOKE_KYC_MOCK,
       [targetId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(contractId)
-      .setGas(GAS.REVOKE_KYC_MOCK)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async createExternalKycListMock(): Promise<TransactionResponse> {
@@ -3663,38 +2723,30 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'activateInternalKyc';
     LogService.logTrace(
       `Activate Internal Kyc to address ${security.toString()}`,
     );
-
-    const functionParameters = new ContractFunctionParameters();
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ACTIVATE_INTERNAL_KYC)
-      .setFunction(FUNCTION_NAME, functionParameters);
-
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithParams(
+      securityId,
+      GAS.ACTIVATE_INTERNAL_KYC,
+      'activateInternalKyc',
+      new ContractFunctionParameters(),
+    );
   }
 
   async deactivateInternalKyc(
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'deactivateInternalKyc';
     LogService.logTrace(
       `Deactivate Internal Kyc to address ${security.toString()}`,
     );
-
-    const functionParameters = new ContractFunctionParameters();
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.DEACTIVATE_INTERNAL_KYC)
-      .setFunction(FUNCTION_NAME, functionParameters);
-
-    return this.signAndSendTransaction(transaction);
+    return this.executeWithParams(
+      securityId,
+      GAS.DEACTIVATE_INTERNAL_KYC,
+      'deactivateInternalKyc',
+      new ContractFunctionParameters(),
+    );
   }
 
   async setName(
@@ -3702,24 +2754,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     name: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'setName';
     LogService.logTrace(`Setting name to ${security.toString()}`);
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'setName',
+      securityId,
+      GAS.SET_NAME,
       [name],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_NAME)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setSymbol(
@@ -3727,23 +2770,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     symbol: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'setSymbol';
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'setSymbol',
+      securityId,
+      GAS.SET_SYMBOL,
       [symbol],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_SYMBOL)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setOnchainID(
@@ -3751,26 +2786,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     onchainID: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'setOnchainID';
     LogService.logTrace(`Setting onchainID to ${security.toString()}`);
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'setOnchainID',
+      securityId,
+      GAS.SET_ONCHAIN_ID,
       [onchainID.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_ONCHAIN_ID)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setIdentityRegistry(
@@ -3778,26 +2802,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     identityRegistry: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'setIdentityRegistry';
     LogService.logTrace(`Setting identity registry to ${security.toString()}`);
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'setIdentityRegistry',
+      securityId,
+      GAS.SET_IDENTITY_REGISTRY,
       [identityRegistry.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_IDENTITY_REGISTRY)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setCompliance(
@@ -3805,26 +2818,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     compliance: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'setCompliance';
     LogService.logTrace(`Setting compliance to ${security.toString()}`);
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'setCompliance',
+      securityId,
+      GAS.SET_COMPLIANCE,
       [compliance.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_COMPLIANCE)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async freezePartialTokens(
@@ -3833,28 +2835,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'freezePartialTokens';
     LogService.logTrace(
       `Freezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
     );
-    const factoryInstance = new FreezeFacet__factory().attach(
-      security.toString(),
-    );
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new FreezeFacet__factory().attach(security.toString()),
+      'freezePartialTokens',
+      securityId,
+      GAS.FREEZE_PARTIAL_TOKENS,
       [targetId.toString(), amount.toBigNumber()],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.FREEZE_PARTIAL_TOKENS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async unfreezePartialTokens(
@@ -3863,28 +2854,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'unfreezePartialTokens';
     LogService.logTrace(
       `Unfreezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
     );
-    const factoryInstance = new FreezeFacet__factory().attach(
-      security.toString(),
-    );
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new FreezeFacet__factory().attach(security.toString()),
+      'unfreezePartialTokens',
+      securityId,
+      GAS.UNFREEZE_PARTIAL_TOKENS,
       [targetId.toString(), amount.toBigNumber()],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.UNFREEZE_PARTIAL_TOKENS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async recoveryAddress(
@@ -3893,27 +2873,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     newWalletId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'recoveryAddress';
     LogService.logTrace(
       `Recovering address ${lostWalletId.toString()} to ${newWalletId.toString()}`,
     );
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'recoveryAddress',
+      securityId,
+      GAS.RECOVERY_ADDRESS,
       [lostWalletId.toString(), newWalletId.toString(), EVM_ZERO_ADDRESS],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.RECOVERY_ADDRESS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async addAgent(
@@ -3921,25 +2891,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     agentId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'addAgent';
     LogService.logTrace(`Granting agent role to ${agentId.toString()}`);
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'addAgent',
+      securityId,
+      GAS.ADD_AGENT,
       [agentId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ADD_AGENT)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async removeAgent(
@@ -3947,25 +2907,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     agentId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'removeAgent';
     LogService.logTrace(`Revoking agent role from ${agentId.toString()}`);
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'removeAgent',
+      securityId,
+      GAS.REMOVE_AGENT,
       [agentId.toString()],
     );
-
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.ADD_AGENT)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async batchTransfer(
@@ -3974,30 +2924,20 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     toList: EvmAddress[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'batchTransfer';
     LogService.logTrace(
       `Batch transferring ${amountList.length} tokens from ${security.toString()} to ${toList.map((item) => item.toString())}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'batchTransfer',
+      securityId,
+      GAS.BATCH_TRANSFER,
       [
         toList.map((addr) => addr.toString()),
         amountList.map((amount) => amount.toBigNumber()),
       ],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.BATCH_TRANSFER)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async batchForcedTransfer(
@@ -4007,31 +2947,21 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     toList: EvmAddress[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'batchForcedTransfer';
     LogService.logTrace(
       `Batch forced transferring ${amountList.length} tokens from ${fromList.map((item) => item.toString())} to ${toList.map((item) => item.toString())}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'batchForcedTransfer',
+      securityId,
+      GAS.BATCH_FORCED_TRANSFER,
       [
         fromList.map((addr) => addr.toString()),
         toList.map((addr) => addr.toString()),
         amountList.map((amount) => amount.toBigNumber()),
       ],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.BATCH_FORCED_TRANSFER)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async batchMint(
@@ -4040,30 +2970,20 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     toList: EvmAddress[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'batchMint';
     LogService.logTrace(
       `Batch minting ${amountList.length} tokens to ${toList.map((item) => item.toString())}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'batchMint',
+      securityId,
+      GAS.BATCH_MINT,
       [
         toList.map((addr) => addr.toString()),
         amountList.map((amount) => amount.toBigNumber()),
       ],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.BATCH_MINT)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async batchBurn(
@@ -4072,30 +2992,20 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetList: EvmAddress[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'batchBurn';
     LogService.logTrace(
       `Batch burning ${amountList.length} tokens from ${targetList.map((item) => item.toString())}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new ERC3643__factory().attach(security.toString()),
+      'batchBurn',
+      securityId,
+      GAS.BATCH_BURN,
       [
         targetList.map((addr) => addr.toString()),
         amountList.map((amount) => amount.toBigNumber()),
       ],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.BATCH_BURN)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async batchSetAddressFrozen(
@@ -4104,29 +3014,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetList: EvmAddress[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'batchSetAddressFrozen';
     LogService.logTrace(
       `Batch setting freeze status for ${targetList.length} addresses`,
     );
 
-    const factoryInstance = new FreezeFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new FreezeFacet__factory().attach(security.toString()),
+      'batchSetAddressFrozen',
+      securityId,
+      GAS.BATCH_SET_ADDRESS_FROZEN,
       [targetList.map((addr) => addr.toString()), freezeList],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.BATCH_SET_ADDRESS_FROZEN)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async batchFreezePartialTokens(
@@ -4135,32 +3033,20 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetList: EvmAddress[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'batchFreezePartialTokens';
     LogService.logTrace(
       `Batch freezing partial tokens for ${targetList.length} addresses`,
     );
 
-    const factoryInstance = new FreezeFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new FreezeFacet__factory().attach(security.toString()),
+      'batchFreezePartialTokens',
+      securityId,
+      GAS.BATCH_FREEZE_PARTIAL_TOKENS,
       [
         targetList.map((addr) => addr.toString()),
         amountList.map((amount) => amount.toBigNumber()),
       ],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.BATCH_FREEZE_PARTIAL_TOKENS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async batchUnfreezePartialTokens(
@@ -4169,32 +3055,20 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetList: EvmAddress[],
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'batchUnfreezePartialTokens';
     LogService.logTrace(
       `Batch unfreezing partial tokens for ${targetList.length} addresses`,
     );
 
-    const factoryInstance = new FreezeFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new FreezeFacet__factory().attach(security.toString()),
+      'batchUnfreezePartialTokens',
+      securityId,
+      GAS.BATCH_UNFREEZE_PARTIAL_TOKENS,
       [
         targetList.map((addr) => addr.toString()),
         amountList.map((amount) => amount.toBigNumber()),
       ],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.BATCH_UNFREEZE_PARTIAL_TOKENS)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   async setAddressFrozen(
@@ -4203,27 +3077,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     target: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'setAddressFrozen';
     LogService.logTrace(`Freezing address ${target.toString()}`);
 
-    const factoryInstance = new FreezeFacet__factory().attach(
-      security.toString(),
-    );
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
+    return this.executeWithArgs(
+      new FreezeFacet__factory().attach(security.toString()),
+      'setAddressFrozen',
+      securityId,
+      GAS.SET_ADDRESS_FROZEN,
       [target.toString(), status],
     );
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
-    );
-
-    const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
-      .setGas(GAS.SET_ADDRESS_FROZEN)
-      .setFunctionParameters(functionDataEncoded);
-
-    return this.signAndSendTransaction(transaction);
   }
 
   // * Definition of the abstract methods

@@ -215,6 +215,7 @@ import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import ContractService from '@service/contract/ContractService';
 import ValidationService from '@service/validation/ValidationService';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { AddExternalPauseCommandError } from './error/AddExternalPauseCommandError';
 
 @CommandHandler(AddExternalPauseCommand)
 export class AddExternalPauseCommandHandler
@@ -234,32 +235,36 @@ export class AddExternalPauseCommandHandler
   async execute(
     command: AddExternalPauseCommand,
   ): Promise<AddExternalPauseCommandResponse> {
-    const { securityId, externalPauseAddress } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId, externalPauseAddress } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._PAUSE_MANAGER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._PAUSE_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const externalPausesEvmAddress =
-      await this.contractService.getContractEvmAddress(externalPauseAddress);
+      const externalPausesEvmAddress =
+        await this.contractService.getContractEvmAddress(externalPauseAddress);
 
-    const res = await handler.addExternalPause(
-      securityEvmAddress,
-      externalPausesEvmAddress,
-      securityId,
-    );
+      const res = await handler.addExternalPause(
+        securityEvmAddress,
+        externalPausesEvmAddress,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new AddExternalPauseCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new AddExternalPauseCommandResponse(res.error === undefined, res.id!),
+      );
+    } catch (error) {
+      throw new AddExternalPauseCommandError(error as Error);
+    }
   }
 }

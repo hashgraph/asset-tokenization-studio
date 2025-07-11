@@ -205,6 +205,7 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import {
+  AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
 } from '@test/fixtures/shared/DataFixture';
@@ -223,6 +224,7 @@ import { CanTransferQueryHandler } from './CanTransferQueryHandler';
 import { CanTransferQuery, CanTransferQueryResponse } from './CanTransferQuery';
 import ValidationService from '@service/validation/ValidationService';
 import { CanTransferQueryError } from './error/CanTransferQueryError';
+import Account from '@domain/context/account/Account';
 
 describe('CanTransferQueryHandler', () => {
   let handler: CanTransferQueryHandler;
@@ -239,6 +241,7 @@ describe('CanTransferQueryHandler', () => {
     EvmAddressPropsFixture.create().value,
   );
   const security = new Security(SecurityPropsFixture.create());
+  const account = new Account(AccountPropsFixture.create());
 
   const errorMsg = ErrorMsgFixture.create().msg;
 
@@ -280,9 +283,10 @@ describe('CanTransferQueryHandler', () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,
       );
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
-        targetEvmAddress,
-      );
+      accountServiceMock.getAccountEvmAddress
+        .mockResolvedValueOnce(targetEvmAddress)
+        .mockResolvedValueOnce(targetEvmAddress);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
       queryAdapterServiceMock.canTransfer.mockResolvedValueOnce([
         true,
         'test',
@@ -297,12 +301,14 @@ describe('CanTransferQueryHandler', () => {
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
         1,
       );
+      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.securityId,
       );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+        1,
         query.targetId,
       );
       expect(queryAdapterServiceMock.canTransfer).toHaveBeenCalledWith(
@@ -310,6 +316,7 @@ describe('CanTransferQueryHandler', () => {
         targetEvmAddress,
         BigDecimal.fromString(query.amount, security.decimals),
         EMPTY_BYTES,
+        account.evmAddress,
       );
     });
   });

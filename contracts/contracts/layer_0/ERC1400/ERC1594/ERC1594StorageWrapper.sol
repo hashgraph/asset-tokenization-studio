@@ -355,51 +355,60 @@ abstract contract ERC1594StorageWrapper is
         uint256 _value,
         bytes calldata /*_data*/
     ) internal view returns (bool, bytes1, bytes32) {
-        if (_isRecovered(_msgSender())) {
-            return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
-        }
-        if (_isRecovered(_to)) {
-            return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
-        }
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
-        if (_from != _msgSender() && !_hasAnyRole(roles, _msgSender())) {
-            if (_allowanceAdjusted(_from, _msgSender()) < _value) {
-                return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
+        if (!_hasAnyRole(roles, _msgSender())) {
+            if (_isRecovered(_msgSender())) {
+                return (
+                    false,
+                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+                    bytes32(0)
+                );
             }
-            if (_isRecovered(_from)) {
-                return (false, _ADDRESS_RECOVERED_FROM_ERROR_ID, bytes32(0));
+            if (_isRecovered(_to)) {
+                return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
+            }
+            if (_isPaused()) {
+                return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+            }
+            if (_to == address(0)) {
+                return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+            }
+            if (_from == address(0)) {
+                return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+            }
+            if (!_isAbleToAccess(_msgSender())) {
+                return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+            }
+            if (!_isAbleToAccess(_from)) {
+                return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+            }
+            if (!_isAbleToAccess(_to)) {
+                return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+            }
+            if (_from != _msgSender()) {
+                if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+                    return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
+                }
+                if (_isRecovered(_from)) {
+                    return (
+                        false,
+                        _ADDRESS_RECOVERED_FROM_ERROR_ID,
+                        bytes32(0)
+                    );
+                }
+            }
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+                return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+            }
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+                return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
             }
         }
         if (_balanceOfAdjusted(_from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
-            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
-
         return (true, _SUCCESS, bytes32(0));
     }
 

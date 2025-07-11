@@ -223,8 +223,6 @@ import BigDecimal from '@domain/context/shared/BigDecimal';
 import ContractService from '@service/contract/ContractService';
 import { CreateBondCommandError } from './error/CreateBondCommandError';
 import { Response } from '@domain/context/transaction/Response';
-import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
-import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
 
 @CommandHandler(CreateBondCommand)
 export class CreateBondCommandHandler
@@ -280,12 +278,6 @@ export class CreateBondCommandHandler
 
       if (configVersion === undefined) {
         throw new InvalidRequest('Config Version not found in request');
-      }
-      if (!security.regulationType) {
-        throw new MissingRegulationType();
-      }
-      if (!security.regulationsubType) {
-        throw new MissingRegulationSubType();
       }
 
       const diamondOwnerAccountEvmAddress: EvmAddress =

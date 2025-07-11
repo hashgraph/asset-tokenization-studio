@@ -978,7 +978,7 @@ describe('ERC3643 Tests', () => {
             })
         })
 
-        it.only('GIVEN an initialized token WHEN retrieving the version THEN returns the right version', async () => {
+        it('GIVEN an initialized token WHEN retrieving the version THEN returns the right version', async () => {
             const json = await erc3643Facet.version()
             console.log(json)
             const parsed = JSON.parse(json)
@@ -2774,8 +2774,9 @@ describe('ERC3643 Tests', () => {
                     ADDRESS_RECOVERED_FROM_ERROR_ID
                 )
                 // 3 - To
-                canTransferByPartition =
-                    await erc1410Facet.canTransferByPartition(
+                canTransferByPartition = await erc1410Facet
+                    .connect(signer_B)
+                    .canTransferByPartition(
                         account_A,
                         account_C,
                         DEFAULT_PARTITION,

@@ -242,6 +242,7 @@ export class CanTransferQueryHandler
         await this.contractService.getContractEvmAddress(securityId);
       const targetEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(targetId);
+      const account = this.accountService.getCurrentAccount();
 
       const security = await this.securityService.get(securityId);
 
@@ -254,6 +255,7 @@ export class CanTransferQueryHandler
         targetEvmAddress,
         amountBd,
         EMPTY_BYTES,
+        account.evmAddress!,
       );
 
       return new CanTransferQueryResponse(res);

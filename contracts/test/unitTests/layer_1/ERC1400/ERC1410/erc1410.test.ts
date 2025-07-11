@@ -1402,6 +1402,12 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN non Kyc account WHEN issue or redeem THEN transaction fails with InvalidKycStatus', async () => {
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_D,
+                value: amount,
+                data: data,
+            })
             await erc1410Facet.connect(signer_D).authorizeOperator(account_A)
             await kycFacet.revokeKyc(account_D)
             await expect(
@@ -1641,6 +1647,11 @@ describe('ERC1410 Tests', () => {
             )
 
             // transfer from with data fails
+            await erc1410Facet.authorizeOperatorByPartition(
+                _PARTITION_ID_1,
+                account_E
+            )
+            erc1410Facet = erc1410Facet.connect(signer_E)
             const canRedeem_2 = await erc1410Facet.canRedeemByPartition(
                 account_E,
                 _PARTITION_ID_1,
@@ -1648,11 +1659,6 @@ describe('ERC1410 Tests', () => {
                 data,
                 operatorData
             )
-            await erc1410Facet.authorizeOperatorByPartition(
-                _PARTITION_ID_1,
-                account_E
-            )
-            erc1410Facet = erc1410Facet.connect(signer_E)
             await expect(
                 erc1410Facet.operatorRedeemByPartition(
                     _PARTITION_ID_1,

@@ -245,9 +245,10 @@ export class BurnCommandHandler implements ICommandHandler<BurnCommand> {
         await this.contractService.getContractEvmAddress(securityId);
       await this.validationService.checkCanRedeem(
         securityId,
-        account.id.toString(),
+        sourceId,
         amount,
         _PARTITION_ID_1,
+        account.id.toString(),
       );
       const sourceEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(sourceId);

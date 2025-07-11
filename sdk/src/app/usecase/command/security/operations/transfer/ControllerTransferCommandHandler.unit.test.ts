@@ -227,7 +227,6 @@ import {
   ControllerTransferCommandResponse,
 } from './ControllerTransferCommand';
 import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
-import { _PARTITION_ID_1 } from '@core/Constants';
 import SecurityService from '@service/security/SecurityService';
 
 describe('ControllerTransferCommandHandler', () => {
@@ -327,9 +326,8 @@ describe('ControllerTransferCommandHandler', () => {
           command.securityId,
           command.targetId,
           command.amount,
-          command.sourceId,
-          _PARTITION_ID_1,
           account.id.toString(),
+          command.sourceId,
         );
 
         expect(

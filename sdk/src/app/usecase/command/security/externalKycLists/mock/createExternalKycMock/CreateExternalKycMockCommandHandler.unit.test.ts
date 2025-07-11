@@ -206,16 +206,17 @@
 import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
 } from '@test/fixtures/shared/DataFixture';
-import { CreateExternalKycListMockCommandHandler } from './CreateExternalKycMockCommandHandler';
-import { CreateExternalKycListMockCommandResponse } from './CreateExternalKycMockCommand';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import Account from '@domain/context/account/Account';
-import { EmptyResponse } from '@service/transaction/error/EmptyResponse';
-import { InvalidResponse } from '@core/error/InvalidResponse';
+import { ErrorCode } from '@core/error/BaseError';
+import { CreateExternalKycMockCommandError } from './error/CreateExternalKycMockCommandError.js';
+import { CreateExternalKycListMockCommandHandler } from './CreateExternalKycMockCommandHandler.js';
+import { CreateExternalKycListMockCommandResponse } from './CreateExternalKycMockCommand.js';
 
 describe('CreateExternalKycListMockCommandHandler', () => {
   let handler: CreateExternalKycListMockCommandHandler;
@@ -228,6 +229,7 @@ describe('CreateExternalKycListMockCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new CreateExternalKycListMockCommandHandler(
@@ -241,78 +243,94 @@ describe('CreateExternalKycListMockCommandHandler', () => {
   });
 
   describe('execute', () => {
-    it('should successfully create external kyc list mock if return an Id', async () => {
-      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+    describe('error cases', () => {
+      it('throws CreateExternalKycMockCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-      transactionServiceMock
-        .getHandler()
-        .createExternalKycListMock.mockResolvedValue(transactionId);
+        transactionServiceMock
+          .getHandler()
+          .createExternalKycListMock.mockRejectedValue(fakeError);
 
-      const result = await handler.execute();
+        const resultPromise = handler.execute();
 
-      expect(result).toBeInstanceOf(CreateExternalKycListMockCommandResponse);
-      expect(result.payload).toBe(account.id.toString());
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          CreateExternalKycMockCommandError,
+        );
 
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().createExternalKycListMock,
-      ).toHaveBeenCalledTimes(1);
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
-        transactionId,
-      );
-      expect(
-        transactionServiceMock.getHandler().createExternalKycListMock,
-      ).toHaveBeenCalledWith();
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating external KYC list: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
     });
+    describe('success cases', () => {
+      it('should successfully create kyc list if return an Id', async () => {
+        mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
 
-    it('should successfully create external kyc list if return an address', async () => {
-      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+        transactionServiceMock
+          .getHandler()
+          .createExternalKycListMock.mockResolvedValue({
+            id: transactionId,
+          });
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          account.evmAddress!,
+        );
 
-      transactionServiceMock
-        .getHandler()
-        .createExternalKycListMock.mockResolvedValue(transactionId);
+        const result = await handler.execute();
 
-      const result = await handler.execute();
+        expect(result).toBeInstanceOf(CreateExternalKycListMockCommandResponse);
+        expect(result.payload).toBe(account.id.toString());
 
-      expect(result).toBeInstanceOf(CreateExternalKycListMockCommandResponse);
-      expect(result.payload).toBe(account.id.toString());
-
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().createExternalKycListMock,
-      ).toHaveBeenCalledTimes(1);
-
-      expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
-        transactionId,
-      );
-
-      expect(
-        transactionServiceMock.getHandler().createExternalKycListMock,
-      ).toHaveBeenCalledWith();
-    });
-
-    it('throws error when transaction response id is missing', async () => {
-      transactionServiceMock
-        .getHandler()
-        .createExternalKycListMock.mockResolvedValue({ id: undefined });
-
-      await expect(handler.execute()).rejects.toThrow(EmptyResponse);
-    });
-
-    it('throws error when result length is different', async () => {
-      mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
-      mirrorNodeAdapterMock.getContractResults.mockResolvedValueOnce([
-        account.id.toString(),
-        account.id.toString(),
-      ]);
-
-      transactionServiceMock
-        .getHandler()
-        .createExternalKycListMock.mockResolvedValue({
-          id: transactionId,
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith({
+          res: { id: transactionId },
+          className: CreateExternalKycListMockCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
+          isContractCreation: true,
         });
 
-      await expect(handler.execute()).rejects.toThrow(InvalidResponse);
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createExternalKycListMock,
+        ).toHaveBeenCalledTimes(1);
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
+          account.evmAddress,
+        );
+        expect(
+          transactionServiceMock.getHandler().createExternalKycListMock,
+        ).toHaveBeenCalledWith();
+      });
+
+      it('should successfully create kyc list mock if return an address', async () => {
+        mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
+
+        transactionServiceMock
+          .getHandler()
+          .createExternalKycListMock.mockResolvedValue(account.evmAddress!);
+
+        const result = await handler.execute();
+
+        expect(result).toBeInstanceOf(CreateExternalKycListMockCommandResponse);
+        expect(result.payload).toBe(account.id.toString());
+
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createExternalKycListMock,
+        ).toHaveBeenCalledTimes(1);
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
+          account.evmAddress,
+        );
+        expect(
+          transactionServiceMock.getHandler().createExternalKycListMock,
+        ).toHaveBeenCalledWith();
+      });
     });
   });
 });

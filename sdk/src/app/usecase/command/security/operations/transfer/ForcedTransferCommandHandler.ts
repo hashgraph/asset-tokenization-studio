@@ -211,9 +211,7 @@ import TransactionService from '@service/transaction/TransactionService';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import EvmAddress from '@domain/context/contract/EvmAddress';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
 import ValidationService from '@service/validation/ValidationService';
-import { _PARTITION_ID_1 } from '@core/Constants';
 import ContractService from '@service/contract/ContractService';
 import {
   ForcedTransferCommand,
@@ -251,7 +249,6 @@ export class ForcedTransferCommandHandler
         await this.contractService.getContractEvmAddress(securityId);
       const sourceEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(sourceId);
-
       const targetEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(targetId);
 
@@ -259,15 +256,8 @@ export class ForcedTransferCommandHandler
         securityId,
         targetId,
         amount,
+        account.id.toString(),
         sourceId,
-        _PARTITION_ID_1,
-        account.id.toString(),
-      );
-
-      await this.validationService.checkAnyRole(
-        [SecurityRole._CONTROLLER_ROLE, SecurityRole._AGENT_ROLE],
-        account.id.toString(),
-        securityId,
       );
 
       await this.validationService.checkDecimals(security, amount);

@@ -216,11 +216,11 @@ import EvmAddress from '@domain/context/contract/EvmAddress';
 import ValidationService from '@service/validation/ValidationService';
 import Account from '@domain/context/account/Account';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { UpdateExternalPausesCommandHandler } from './UpdateExternalPausesCommandHandler';
+import { UpdateExternalPausesCommandHandler } from './UpdateExternalPausesCommandHandler.js';
 import {
   UpdateExternalPausesCommand,
   UpdateExternalPausesCommandResponse,
-} from './UpdateExternalPausesCommand';
+} from './UpdateExternalPausesCommand.js';
 import { UpdateExternalPausesCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
 
 describe('UpdateExternalPausesCommandHandler', () => {

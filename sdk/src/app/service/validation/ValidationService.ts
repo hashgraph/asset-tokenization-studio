@@ -225,7 +225,6 @@ import { DecimalsOverRange } from '@domain/context/security/error/operations/Dec
 import { PartitionsUnProtected } from '@domain/context/security/error/operations/PartitionsUnprotected';
 import { ContractsErrorMapper } from '@domain/context/security/error/operations/contractsErrorsMapper/ContractsErrorMapper';
 import { CanTransferByPartitionQuery } from '@query/security/canTransferByPartition/CanTransferByPartitionQuery';
-import { CanTransferQuery } from '@query/security/canTransfer/CanTransferQuery';
 import { Security } from '@domain/context/security/Security';
 import CheckNums from '@core/checks/numbers/CheckNums';
 import { getProtectedPartitionRole } from '@domain/context/security/SecurityRole';
@@ -423,34 +422,28 @@ export default class ValidationService extends Service {
     securityId: string,
     targetId: string,
     amount: string,
+    operatorId: string,
     sourceId?: string,
     partitionId?: string,
-    operatorId?: string,
   ): Promise<void> {
-    let res;
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    if (operatorId) {
-      res = await this.queryBus.execute(
-        new CanTransferByPartitionQuery(
-          securityId,
-          sourceId!,
-          targetId,
-          partitionId!,
-          amount,
-        ),
-      );
-    } else {
-      res = await this.queryBus.execute(
-        new CanTransferQuery(securityId, targetId, amount),
-      );
-    }
+
+    const res = await this.queryBus.execute(
+      new CanTransferByPartitionQuery(
+        securityId,
+        sourceId ?? operatorId,
+        targetId,
+        partitionId ?? _PARTITION_ID_1,
+        amount,
+      ),
+    );
 
     if (res.payload != '0x00') {
       throw ContractsErrorMapper.mapError(
         res.payload,
+        operatorId,
         sourceId,
         targetId,
-        operatorId,
       );
     }
   }
@@ -460,7 +453,7 @@ export default class ValidationService extends Service {
     sourceId: string,
     amount: string,
     partitionId: string,
-    operatorId?: string,
+    operatorId: string,
   ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
@@ -470,9 +463,9 @@ export default class ValidationService extends Service {
     if (res.payload != '0x00') {
       throw ContractsErrorMapper.mapError(
         res.payload,
+        operatorId,
         sourceId,
         undefined,
-        operatorId,
       );
     }
   }

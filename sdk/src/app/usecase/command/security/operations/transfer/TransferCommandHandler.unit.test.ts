@@ -207,6 +207,7 @@ import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import AccountService from '@service/account/AccountService';
 import {
+  AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
@@ -223,6 +224,7 @@ import { TransferCommandHandler } from './TransferCommandHandler';
 import { TransferCommand, TransferCommandResponse } from './TransferCommand';
 import { TransferCommandError } from './error/TransferCommandError';
 import SecurityService from '@service/security/SecurityService';
+import Account from '@domain/context/account/Account';
 
 describe('TransferCommandHandler', () => {
   let handler: TransferCommandHandler;
@@ -238,6 +240,7 @@ describe('TransferCommandHandler', () => {
   const transactionId = TransactionIdFixture.create().id;
   const errorMsg = ErrorMsgFixture.create().msg;
   const security = new Security(SecurityPropsFixture.create());
+  const account = new Account(AccountPropsFixture.create());
 
   beforeEach(() => {
     handler = new TransferCommandHandler(
@@ -283,6 +286,7 @@ describe('TransferCommandHandler', () => {
       it('should successfully transfer', async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
         securityServiceMock.get.mockResolvedValue(security);
 
         transactionServiceMock.getHandler().transfer.mockResolvedValue({
@@ -313,6 +317,7 @@ describe('TransferCommandHandler', () => {
           command.securityId,
           command.targetId,
           command.amount,
+          account.id.toString(),
         );
 
         expect(

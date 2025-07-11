@@ -215,6 +215,7 @@ import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
 import ContractService from '@service/contract/ContractService';
 import ValidationService from '@service/validation/ValidationService';
+import { ActivateInternalKycCommandError } from './error/ActivateInternalKycCommandError';
 
 @CommandHandler(ActivateInternalKycCommand)
 export class ActivateInternalKycCommandHandler
@@ -234,28 +235,35 @@ export class ActivateInternalKycCommandHandler
   async execute(
     command: ActivateInternalKycCommand,
   ): Promise<ActivateInternalKycCommandResponse> {
-    const { securityId } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    try {
+      const { securityId } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
-    const securityEvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-    await this.validationService.checkPause(securityId);
+      await this.validationService.checkPause(securityId);
 
-    await this.validationService.checkRole(
-      SecurityRole._INTERNAL_KYC_MANAGER_ROLE,
-      account.id.toString(),
-      securityId,
-    );
+      await this.validationService.checkRole(
+        SecurityRole._INTERNAL_KYC_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-    const res = await handler.activateInternalKyc(
-      securityEvmAddress,
-      securityId,
-    );
+      const res = await handler.activateInternalKyc(
+        securityEvmAddress,
+        securityId,
+      );
 
-    return Promise.resolve(
-      new ActivateInternalKycCommandResponse(res.error === undefined, res.id!),
-    );
+      return Promise.resolve(
+        new ActivateInternalKycCommandResponse(
+          res.error === undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new ActivateInternalKycCommandError(error as Error);
+    }
   }
 }

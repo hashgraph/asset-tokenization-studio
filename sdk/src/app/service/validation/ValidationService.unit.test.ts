@@ -228,7 +228,6 @@ import { PartitionsUnProtected } from '@domain/context/security/error/operations
 import { PartitionsProtected } from '@domain/context/security/error/operations/PartitionsProtected';
 import { CanTransferByPartitionQuery } from '@query/security/canTransferByPartition/CanTransferByPartitionQuery';
 import { ContractsErrorMapper } from '@domain/context/security/error/operations/contractsErrorsMapper/ContractsErrorMapper';
-import { CanTransferQuery } from '@query/security/canTransfer/CanTransferQuery';
 import { CanRedeemByPartitionQuery } from '@query/security/canRedeemByPartition/CanRedeemByPartitionQuery';
 import { GetMaxSupplyByPartitionQuery } from '@query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQuery';
 import { GetTotalSupplyByPartitionQuery } from '@query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery';
@@ -656,7 +655,7 @@ describe('ValidationService', () => {
   });
 
   describe('checkCanTransfer', () => {
-    it('should work when transfer is possible with operator', async () => {
+    it('should work when transfer is possible', async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: '0x00' });
 
       await expect(
@@ -664,9 +663,9 @@ describe('ValidationService', () => {
           securityId.value,
           targetId.value,
           amount.value.toString(),
+          operatorId.value,
           sourceId.value,
           partitionId.value,
-          operatorId.value,
         ),
       ).resolves.toBeUndefined();
 
@@ -676,29 +675,6 @@ describe('ValidationService', () => {
           sourceId.value,
           targetId.value,
           partitionId.value,
-          amount.value.toString(),
-        ),
-      );
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-    });
-
-    it('should work when there is not operator', async () => {
-      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x00' });
-
-      await expect(
-        service.checkCanTransfer(
-          securityId.value,
-          targetId.value,
-          amount.value.toString(),
-          sourceId.value,
-          partitionId.value,
-        ),
-      ).resolves.toBeUndefined();
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new CanTransferQuery(
-          securityId.value,
-          targetId.value,
           amount.value.toString(),
         ),
       );
@@ -716,6 +692,9 @@ describe('ValidationService', () => {
           securityId.value,
           targetId.value,
           amount.value.toString(),
+          operatorId.value,
+          sourceId.value,
+          partitionId.value,
         ),
       ).rejects.toThrow('Transfer failed');
     });
@@ -731,6 +710,7 @@ describe('ValidationService', () => {
           sourceId.value,
           amount.value.toString(),
           partitionId.value,
+          operatorId.value,
         ),
       ).resolves.toBeUndefined();
 
@@ -757,6 +737,7 @@ describe('ValidationService', () => {
           sourceId.value,
           partitionId.value,
           amount.value.toString(),
+          operatorId.value,
         ),
       ).rejects.toThrow('Transfer failed');
     });
