@@ -204,45 +204,39 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Injectable from '../../../core/Injectable.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import {
-  InitializationData,
-  NetworkData,
-} from '../../out/TransactionAdapter.js';
-import { ConnectCommand } from '../../../app/usecase/command/network/connect/ConnectCommand.js';
+import Injectable from '@core/Injectable';
+import { CommandBus } from '@core/command/CommandBus';
+import { InitializationData, NetworkData } from '@port/out/TransactionAdapter';
+import { ConnectCommand } from '@command/network/connect/ConnectCommand';
 import ConnectRequest, {
   AWSKMSConfigRequest,
   DFNSConfigRequest,
   FireblocksConfigRequest,
   SupportedWallets,
-} from '../request/network/ConnectRequest.js';
-import RequestMapper from '../request/mapping/RequestMapper.js';
-import TransactionService from '../../../app/service/transaction/TransactionService.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
-import SetNetworkRequest from '../request/network/SetNetworkRequest.js';
-import { SetNetworkCommand } from '../../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
-import { SetConfigurationCommand } from '../../../app/usecase/command/network/setConfiguration/SetConfigurationCommand.js';
-import {
-  Environment,
-  unrecognized,
-} from '../../../domain/context/network/Environment.js';
-import InitializationRequest from '../request/network/InitializationRequest.js';
-import Event from '../event/Event.js';
-import { RPCTransactionAdapter } from '../../out/rpc/RPCTransactionAdapter.js';
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import SetConfigurationRequest from '../request/management/SetConfigurationRequest.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
+} from '../request/network/ConnectRequest';
+import RequestMapper from '../request/mapping/RequestMapper';
+import TransactionService from '@service/transaction/TransactionService';
+import NetworkService from '@service/network/NetworkService';
+import SetNetworkRequest from '../request/network/SetNetworkRequest';
+import { SetNetworkCommand } from '@command/network/setNetwork/SetNetworkCommand';
+import { SetConfigurationCommand } from '@command/network/setConfiguration/SetConfigurationCommand';
+import { Environment, unrecognized } from '@domain/context/network/Environment';
+import InitializationRequest from '../request/network/InitializationRequest';
+import Event from '../event/Event';
+import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import SetConfigurationRequest from '../request/management/SetConfigurationRequest';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
-import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay.js';
-import { HederaWalletConnectTransactionAdapter } from '../../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.js';
-import { DFNSTransactionAdapter } from '../../out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import DfnsSettings from '../../../core/settings/custodialWalletSettings/DfnsSettings.js';
-import { FireblocksTransactionAdapter } from '../../out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import FireblocksSettings from '../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
-import { AWSKMSTransactionAdapter } from '../../out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
-import LogService from '../../../app/service/log/LogService.js';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
+import { DFNSTransactionAdapter } from '@port/out/hs/hts/custodial/DFNSTransactionAdapter';
+import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
+import { FireblocksTransactionAdapter } from '@port/out/hs/hts/custodial/FireblocksTransactionAdapter';
+import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
+import { AWSKMSTransactionAdapter } from '@port/out/hs/hts/custodial/AWSKMSTransactionAdapter';
+import LogService from '@service/log/LogService';
 
 export { InitializationData, NetworkData, SupportedWallets };
 

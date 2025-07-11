@@ -203,25 +203,22 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { GrantRoleCommandHandler } from './GrantRoleCommandHandler.js';
-import {
-  GrantRoleCommand,
-  GrantRoleCommandResponse,
-} from './GrantRoleCommand.js';
-import { GrantRoleCommandError } from './error/GrantRoleCommandError.js';
-import { GrantRoleCommandFixture } from '../../../../../../../__tests__/fixtures/role/RoleFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import { GrantRoleCommandHandler } from './GrantRoleCommandHandler';
+import { GrantRoleCommand, GrantRoleCommandResponse } from './GrantRoleCommand';
+import { GrantRoleCommandError } from './error/GrantRoleCommandError';
+import { GrantRoleCommandFixture } from '@test/fixtures/role/RoleFixture';
 
 describe('GrantRoleCommandHandler', () => {
   let handler: GrantRoleCommandHandler;

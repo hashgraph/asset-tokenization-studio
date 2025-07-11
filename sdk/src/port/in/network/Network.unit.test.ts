@@ -203,21 +203,21 @@
 
 */
 
-import NetworkService from '../../../app/service/network/NetworkService';
-import TransactionService from '../../../app/service/transaction/TransactionService';
-import { CommandBus } from '../../../core/command/CommandBus';
+import NetworkService from '@service/network/NetworkService';
+import TransactionService from '@service/transaction/TransactionService';
+import { CommandBus } from '@core/command/CommandBus';
 import SetNetworkRequest from '../request/network/SetNetworkRequest';
 import SetConfigurationRequest from '../request/management/SetConfigurationRequest';
 import { createMock } from '@golevelup/ts-jest';
-import LogService from '../../../app/service/log/LogService';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
+import LogService from '@service/log/LogService';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 import Network, { ConfigResponse, NetworkResponse } from './Network';
-import { SetConfigurationCommand } from '../../../app/usecase/command/network/setConfiguration/SetConfigurationCommand';
-import Configuration from '../../../domain/context/network/Configuration';
-import { SetNetworkCommand } from '../../../app/usecase/command/network/setNetwork/SetNetworkCommand';
-import { MirrorNode } from '../../../domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay';
-import { HederaIdPropsFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
+import { SetConfigurationCommand } from '@command/network/setConfiguration/SetConfigurationCommand';
+import Configuration from '@domain/context/network/Configuration';
+import { SetNetworkCommand } from '@command/network/setNetwork/SetNetworkCommand';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import { HederaIdPropsFixture } from '@test/fixtures/shared/DataFixture';
 
 describe('Network', () => {
   let commandBusMock: jest.Mocked<CommandBus>;

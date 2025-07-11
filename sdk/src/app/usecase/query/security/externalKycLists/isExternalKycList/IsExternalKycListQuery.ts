@@ -203,8 +203,8 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
 
 export class IsExternalKycListQueryResponse implements QueryResponse {
   constructor(public readonly payload: boolean) {}

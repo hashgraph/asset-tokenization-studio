@@ -209,7 +209,7 @@ import {
   FixedFormat,
   BigNumber,
 } from '@ethersproject/bignumber';
-import CheckNums from '../../../core/checks/numbers/CheckNums.js';
+import CheckNums from '@core/checks/numbers/CheckNums';
 import { Long } from '@hashgraph/sdk';
 
 export type BigDecimalFormat = string | number | FixedFormat | undefined;

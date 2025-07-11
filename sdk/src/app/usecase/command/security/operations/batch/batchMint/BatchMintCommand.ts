@@ -202,8 +202,8 @@
    limitations under the License.
 
 */
-import { Command } from '../../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
 
 export class BatchMintResponse implements CommandResponse {
   constructor(

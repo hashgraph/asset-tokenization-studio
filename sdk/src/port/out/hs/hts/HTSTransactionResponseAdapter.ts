@@ -212,10 +212,10 @@ import {
   TransactionRecord,
   TransactionId,
 } from '@hashgraph/sdk';
-import TransactionResponse from '../../../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from '../../error/TransactionResponseError.js';
-import { TransactionType } from '../../TransactionResponseEnums.js';
-import { TransactionResponseAdapter } from '../../TransactionResponseAdapter.js';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
+import { TransactionResponseError } from '@port/out/error/TransactionResponseError';
+import { TransactionResponseAdapter } from '@port/out/TransactionResponseAdapter';
+import { TransactionType } from '@port/out/TransactionResponseEnums';
 
 export class HTSTransactionResponseAdapter extends TransactionResponseAdapter {
   public static async manageResponse(

@@ -203,20 +203,20 @@
 
 */
 
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import {
   GetAccountBalanceQuery,
   GetAccountBalanceQueryResponse,
-} from './GetAccountBalanceQuery.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import SecurityService from '../../../../service/security/SecurityService.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import { GetAccountBalanceQueryError } from './error/GetAccountBalanceQueryError.js';
+} from './GetAccountBalanceQuery';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import SecurityService from '@service/security/SecurityService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import { GetAccountBalanceQueryError } from './error/GetAccountBalanceQueryError';
 
 @QueryHandler(GetAccountBalanceQuery)
 export class GetAccountBalanceQueryHandler

@@ -204,24 +204,24 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { SetDividendsCommandHandler } from './SetDividendsCommandHandler.js';
+import { SetDividendsCommandHandler } from './SetDividendsCommandHandler';
 import {
   SetDividendsCommand,
   SetDividendsCommandResponse,
-} from './SetDividendsCommand.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+} from './SetDividendsCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+} from '@test/fixtures/shared/DataFixture';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { faker } from '@faker-js/faker/.';
-import { SetDividendsCommandFixture } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
-import { SetDividendsCommandError } from './error/SetDividendsCommandError.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import { SetDividendsCommandFixture } from '@test/fixtures/equity/EquityFixture';
+import { SetDividendsCommandError } from './error/SetDividendsCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('SetDividendsCommandHandler', () => {
   let handler: SetDividendsCommandHandler;

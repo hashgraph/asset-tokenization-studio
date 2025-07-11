@@ -207,19 +207,19 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
 import {
   GetRoleCountForQuery,
   GetRoleCountForQueryResponse,
-} from './GetRoleCountForQuery.js';
-import { GetRoleCountForQueryHandler } from './GetRoleCountForQueryHandler.js';
-import { GetRoleCountForQueryFixture } from '../../../../../../../__tests__/fixtures/role/RoleFixture.js';
-import { GetRoleCountForQueryError } from './error/GetRoleCountForQueryError.js';
+} from './GetRoleCountForQuery';
+import { GetRoleCountForQueryHandler } from './GetRoleCountForQueryHandler';
+import { GetRoleCountForQueryFixture } from '@test/fixtures/role/RoleFixture';
+import { GetRoleCountForQueryError } from './error/GetRoleCountForQueryError';
 
 describe('GetRoleCountForQueryHandler', () => {
   let handler: GetRoleCountForQueryHandler;

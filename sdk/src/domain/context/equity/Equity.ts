@@ -203,10 +203,10 @@
 
 */
 
-import BaseError from '../../../core/error/BaseError.js';
-import { Security, SecurityProps } from '../security/Security.js';
-import { CastDividendType, DividendType } from './DividendType.js';
-import { InvalidDividendType } from './error/InvalidDividendType.js';
+import BaseError from '@core/error/BaseError';
+import { Security, SecurityProps } from '../security/Security';
+import { CastDividendType, DividendType } from './DividendType';
+import { InvalidDividendType } from './error/InvalidDividendType';
 
 export interface EquityProps extends SecurityProps {}
 

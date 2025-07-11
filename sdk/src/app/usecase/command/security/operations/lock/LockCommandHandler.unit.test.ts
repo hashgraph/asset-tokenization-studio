@@ -203,29 +203,29 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { LockCommandError } from './error/LockCommandError.js';
-import { LockCommandHandler } from './LockCommandHandler.js';
-import { LockCommand, LockCommandResponse } from './LockCommand.js';
-import { LockCommandFixture } from '../../../../../../../__tests__/fixtures/lock/LockFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import SecurityService from '@service/security/SecurityService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import Account from '@domain/context/account/Account';
+import { AccountPropsFixture } from '@test/fixtures/shared/DataFixture';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { LockCommandError } from './error/LockCommandError';
+import { LockCommandHandler } from './LockCommandHandler';
+import { LockCommand, LockCommandResponse } from './LockCommand';
+import { LockCommandFixture } from '@test/fixtures/lock/LockFixture';
 
 describe('IssueCommandHandler', () => {
   let handler: LockCommandHandler;

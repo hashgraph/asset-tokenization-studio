@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   AddIssuerRequest,
   GetIssuerListCountRequest,
@@ -214,11 +214,11 @@ import {
   RemoveIssuerRequest,
   SetRevocationRegistryAddressRequest,
 } from '../request';
-import { TransactionIdFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
 import SsiManagement from './SsiManagement';
 import {
   AddIssuerRequestFixture,
@@ -228,14 +228,14 @@ import {
   IsIssuerRequestFixture,
   RemoveIssuerRequestFixture,
   SetRevocationRegistryAddressRequestFixture,
-} from '../../../../__tests__/fixtures/ssi/SsiFixture';
-import { AddIssuerCommand } from '../../../app/usecase/command/security/ssi/addIssuer/AddIssuerCommand';
-import { SetRevocationRegistryAddressCommand } from '../../../app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand';
-import { RemoveIssuerCommand } from '../../../app/usecase/command/security/ssi/removeIssuer/RemoveIssuerCommand';
-import { GetRevocationRegistryAddressQuery } from '../../../app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery';
-import { GetIssuerListCountQuery } from '../../../app/usecase/query/security/ssi/getIssuerListCount/GetIssuerListCountQuery';
-import { GetIssuerListMembersQuery } from '../../../app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery';
-import { IsIssuerQuery } from '../../../app/usecase/query/security/ssi/isIssuer/IsIssuerQuery';
+} from '@test/fixtures/ssi/SsiFixture';
+import { AddIssuerCommand } from '@command/security/ssi/addIssuer/AddIssuerCommand';
+import { SetRevocationRegistryAddressCommand } from '@command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand';
+import { RemoveIssuerCommand } from '@command/security/ssi/removeIssuer/RemoveIssuerCommand';
+import { GetRevocationRegistryAddressQuery } from '@query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery';
+import { GetIssuerListCountQuery } from '@query/security/ssi/getIssuerListCount/GetIssuerListCountQuery';
+import { GetIssuerListMembersQuery } from '@query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery';
+import { IsIssuerQuery } from '@query/security/ssi/isIssuer/IsIssuerQuery';
 
 describe('Ssi Management', () => {
   let commandBusMock: jest.Mocked<CommandBus>;

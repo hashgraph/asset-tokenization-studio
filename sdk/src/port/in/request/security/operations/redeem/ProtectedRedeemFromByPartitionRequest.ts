@@ -203,9 +203,9 @@
 
 */
 
-import { SecurityDate } from '../../../../../../domain/context/shared/SecurityDate.js';
-import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../../FormatValidation.js';
+import { SecurityDate } from '@domain/context/shared/SecurityDate';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 export default class ProtectedRedeemFromByPartitionRequest extends ValidatedRequest<ProtectedRedeemFromByPartitionRequest> {
   securityId: string;

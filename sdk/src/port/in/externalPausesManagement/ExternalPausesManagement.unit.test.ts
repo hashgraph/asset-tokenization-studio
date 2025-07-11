@@ -204,13 +204,13 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
+} from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
 import ExternalPausesManagement from './ExternalPausesManagement';
 import {
   AddExternalPauseRequest,
@@ -231,18 +231,18 @@ import {
   RemoveExternalPauseRequestFixture,
   SetPausedMockCommandFixture,
   UpdateExternalPausesRequestFixture,
-} from '../../../../__tests__/fixtures/externalPauses/ExternalPausesFixture';
-import { UpdateExternalPausesCommand } from '../../../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
-import { AddExternalPauseCommand } from '../../../app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommand';
-import { RemoveExternalPauseCommand } from '../../../app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand';
-import { IsExternalPauseQuery } from '../../../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery';
-import { GetExternalPausesCountQuery } from '../../../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery';
-import { GetExternalPausesMembersQuery } from '../../../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery';
-import { SetPausedMockCommand } from '../../../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommand';
-import { CreateExternalPauseMockCommand } from '../../../app/usecase/command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommand';
-import { IsPausedMockQuery } from '../../../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
+} from '@test/fixtures/externalPauses/ExternalPausesFixture';
+import { UpdateExternalPausesCommand } from '@command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
+import { AddExternalPauseCommand } from '@command/security/externalPauses/addExternalPause/AddExternalPauseCommand';
+import { RemoveExternalPauseCommand } from '@command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand';
+import { IsExternalPauseQuery } from '@query/security/externalPauses/isExternalPause/IsExternalPauseQuery';
+import { GetExternalPausesCountQuery } from '@query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery';
+import { GetExternalPausesMembersQuery } from '@query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery';
+import { SetPausedMockCommand } from '@command/security/externalPauses/mock/setPaused/SetPausedMockCommand';
+import { CreateExternalPauseMockCommand } from '@command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommand';
+import { IsPausedMockQuery } from '@query/security/externalPauses/mock/isPaused/IsPausedMockQuery';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
 
 describe('ExternalPausesManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;

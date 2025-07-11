@@ -207,51 +207,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
 import TransactionAdapter, { InitializationData } from '../TransactionAdapter';
 import { ethers, Signer } from 'ethers';
 import { singleton } from 'tsyringe';
-import Injectable from '../../../core/Injectable.js';
+import Injectable from '@core/Injectable';
 import type { Provider } from '@ethersproject/providers';
 import detectEthereumProvider from '@metamask/detect-provider';
-import { RuntimeError } from '../../../core/error/RuntimeError.js';
-import Account from '../../../domain/context/account/Account.js';
-import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
-import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
+import { RuntimeError } from '@core/error/RuntimeError';
+import Account from '@domain/context/account/Account';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter';
+import NetworkService from '@service/network/NetworkService';
 import { MetaMaskInpageProvider } from '@metamask/providers';
-import { WalletConnectError } from '../../../domain/context/network/error/WalletConnectError.js';
-import EventService from '../../../app/service/event/EventService.js';
-import {
-  ConnectionState,
-  WalletEvents,
-} from '../../../app/service/event/WalletEvent.js';
-import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
-import LogService from '../../../app/service/log/LogService.js';
-import { WalletConnectRejectedError } from '../../../domain/context/network/error/WalletConnectRejectedError.js';
+import { WalletConnectError } from '@domain/context/network/error/WalletConnectError';
+import EventService from '@service/event/EventService';
+import { ConnectionState, WalletEvents } from '@service/event/WalletEvent';
+import { SupportedWallets } from '@domain/context/network/Wallet';
+import LogService from '@service/log/LogService';
+import { WalletConnectRejectedError } from '@domain/context/network/error/WalletConnectRejectedError';
 import {
   HederaNetworks,
   unrecognized,
-} from '../../../domain/context/network/Environment.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import { SetNetworkCommand } from '../../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
-import { SetConfigurationCommand } from '../../../app/usecase/command/network/setConfiguration/SetConfigurationCommand.js';
+} from '@domain/context/network/Environment';
+import { CommandBus } from '@core/command/CommandBus';
+import { SetNetworkCommand } from '@command/network/setNetwork/SetNetworkCommand';
+import { SetConfigurationCommand } from '@command/network/setConfiguration/SetConfigurationCommand';
 import {
   EnvironmentMirrorNode,
   MirrorNode,
   MirrorNodes,
-} from '../../../domain/context/network/MirrorNode.js';
+} from '@domain/context/network/MirrorNode';
 import {
   EnvironmentJsonRpcRelay,
   JsonRpcRelay,
   JsonRpcRelays,
-} from '../../../domain/context/network/JsonRpcRelay.js';
+} from '@domain/context/network/JsonRpcRelay';
 import {
   EnvironmentFactory,
   Factories,
-} from '../../../domain/context/factory/Factories.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter.js';
+} from '@domain/context/factory/Factories';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter';
 import {
   _PARTITION_ID_1,
   ADD_TO_CONTROL_LIST_GAS,
@@ -369,17 +366,17 @@ import {
   ADD_AGENT_GAS,
   REMOVE_AGENT_GAS,
   SET_ADDRESS_FROZEN_GAS,
-} from '../../../core/Constants.js';
-import { Security } from '../../../domain/context/security/Security.js';
-import { Rbac } from '../../../domain/context/factory/Rbac.js';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
+} from '@core/Constants';
+import { Security } from '@domain/context/security/Security';
+import { Rbac } from '@domain/context/factory/Rbac';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 import {
   FactoryBondToken,
   FactoryEquityToken,
   FactoryRegulationData,
-} from '../../../domain/context/factory/FactorySecurityToken.js';
-import { ERC20MetadataInfo } from '../../../domain/context/factory/ERC20Metadata.js';
-import { SigningError } from '../error/SigningError.js';
+} from '@domain/context/factory/FactorySecurityToken';
+import { ERC20MetadataInfo } from '@domain/context/factory/ERC20Metadata';
+import { SigningError } from '../error/SigningError';
 import {
   AccessControl__factory,
   Bond__factory,
@@ -418,33 +415,33 @@ import {
 import {
   EnvironmentResolver,
   Resolvers,
-} from '../../../domain/context/factory/Resolvers.js';
-import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
-import { BondDetailsData } from '../../../domain/context/factory/BondDetailsData.js';
-import { CouponDetailsData } from '../../../domain/context/factory/CouponDetailsData.js';
-import { EquityDetails } from '../../../domain/context/equity/EquityDetails.js';
-import { EquityDetailsData } from '../../../domain/context/factory/EquityDetailsData.js';
-import { SecurityData } from '../../../domain/context/factory/SecurityData.js';
-import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
-import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
+} from '@domain/context/factory/Resolvers';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import { BondDetailsData } from '@domain/context/factory/BondDetailsData';
+import { CouponDetailsData } from '@domain/context/factory/CouponDetailsData';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import { EquityDetailsData } from '@domain/context/factory/EquityDetailsData';
+import { SecurityData } from '@domain/context/factory/SecurityData';
+import { CastDividendType } from '@domain/context/equity/DividendType';
+import { AdditionalSecurityData } from '@domain/context/factory/AdditionalSecurityData';
 import {
   CastRegulationSubType,
   CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
-import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
+} from '@domain/context/factory/RegulationType';
+import { ResolverProxyConfiguration } from '@domain/context/factory/ResolverProxyConfiguration';
+import { TransferAndLock } from '@domain/context/security/TransferAndLock';
 import {
   Hold,
   HoldIdentifier,
   ProtectedHold,
-} from '../../../domain/context/security/Hold.js';
+} from '@domain/context/security/Hold';
 import {
   BasicTransferInfo,
   IssueData,
   OperatorTransferData,
-} from '../../../domain/context/factory/ERC1410Metadata.js';
+} from '@domain/context/factory/ERC1410Metadata';
 import {
   CastClearingOperationType,
   ClearingOperation,
@@ -452,9 +449,9 @@ import {
   ClearingOperationIdentifier,
   ClearingOperationType,
   ProtectedClearingOperation,
-} from '../../../domain/context/security/Clearing.js';
-import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
-import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
+} from '@domain/context/security/Clearing';
+import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
+import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { ContractId } from '@hashgraph/sdk';
 
 declare const ethereum: MetaMaskInpageProvider;

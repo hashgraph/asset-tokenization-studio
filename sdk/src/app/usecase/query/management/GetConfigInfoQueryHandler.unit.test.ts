@@ -207,19 +207,19 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../domain/context/contract/EvmAddress.js';
-import { GetConfigInfoQueryHandler } from './GetConfigInfoQueryHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { GetConfigInfoQueryHandler } from './GetConfigInfoQueryHandler';
 import {
   GetConfigInfoQuery,
   GetConfigInfoQueryResponse,
-} from './GetConfigInfoQuery.js';
-import { GetConfigInfoQueryError } from './error/GetConfigInfoQueryError.js';
-import ContractService from '../../../../app/service/contract/ContractService.js';
-import { DiamondConfiguration } from '../../../../domain/context/security/DiamondConfiguration.js';
-import { GetConfigInfoQueryFixture } from '../../../../../__tests__/fixtures/equity/EquityFixture.js';
+} from './GetConfigInfoQuery';
+import { GetConfigInfoQueryError } from './error/GetConfigInfoQueryError';
+import ContractService from '@service/contract/ContractService';
+import { DiamondConfiguration } from '@domain/context/security/DiamondConfiguration';
+import { GetConfigInfoQueryFixture } from '@test/fixtures/equity/EquityFixture';
 
 describe('GetConfigInfoQueryHandler', () => {
   let handler: GetConfigInfoQueryHandler;

@@ -203,11 +203,8 @@
 
 */
 
-import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
-import {
-  InitializationData,
-  NetworkData,
-} from '../../../port/out/TransactionAdapter.js';
+import { SupportedWallets } from '@domain/context/network/Wallet';
+import { InitializationData, NetworkData } from '@port/out/TransactionAdapter';
 
 export enum WalletEvents {
   walletInit = 'walletInit',

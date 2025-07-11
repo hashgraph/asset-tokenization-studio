@@ -204,7 +204,7 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Response } from './Response.js';
+import { Response } from './Response';
 
 export default class TransactionResponse<
   T extends Response = Response,

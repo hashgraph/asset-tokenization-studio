@@ -203,19 +203,19 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import {
   GetCouponForQuery,
   GetCouponForQueryResponse,
-} from './GetCouponForQuery.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import { GetCouponForQueryError } from './error/GetCouponForQueryError.js';
+} from './GetCouponForQuery';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import { GetCouponForQueryError } from './error/GetCouponForQueryError';
 
 @QueryHandler(GetCouponForQuery)
 export class GetCouponForQueryHandler

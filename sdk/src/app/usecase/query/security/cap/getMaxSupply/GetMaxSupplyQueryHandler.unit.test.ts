@@ -207,22 +207,22 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import SecurityService from '../../../../../../app/service/security/SecurityService.js';
-import { GetMaxSupplyQueryFixture } from '../../../../../../../__tests__/fixtures/erc1400/ERC1400Fixture.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { GetMaxSupplyQueryHandler } from './GetMaxSupplyQueryHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import SecurityService from '@service/security/SecurityService';
+import { GetMaxSupplyQueryFixture } from '@test/fixtures/erc1400/ERC1400Fixture';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { GetMaxSupplyQueryHandler } from './GetMaxSupplyQueryHandler';
 import {
   GetMaxSupplyQuery,
   GetMaxSupplyQueryResponse,
-} from './GetMaxSupplyQuery.js';
-import { GetMaxSupplyQueryError } from './error/GetMaxSupplyQueryError.js';
+} from './GetMaxSupplyQuery';
+import { GetMaxSupplyQueryError } from './error/GetMaxSupplyQueryError';
 import { BigNumber } from 'ethers';
 
 describe('GetMaxSupplyQueryHandler', () => {

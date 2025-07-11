@@ -204,22 +204,22 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../service/contract/ContractService.js';
+import TransactionService from '@service/transaction/TransactionService';
+import ContractService from '@service/contract/ContractService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { UpdateResolverCommandFixture } from '../../../../../../__tests__/fixtures/management/ManagementFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { UpdateResolverCommandFixture } from '@test/fixtures/management/ManagementFixture';
 import {
   UpdateResolverCommand,
   UpdateResolverCommandResponse,
-} from './updateResolverCommand.js';
-import { UpdateResolverCommandHandler } from './updateResolverCommandHandler.js';
-import { UpdateResolverCommandError } from './error/UpdateResolverCommandError.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
+} from './updateResolverCommand';
+import { UpdateResolverCommandHandler } from './updateResolverCommandHandler';
+import { UpdateResolverCommandError } from './error/UpdateResolverCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('UpdateResolverCommandHandler', () => {
   let handler: UpdateResolverCommandHandler;

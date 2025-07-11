@@ -204,19 +204,19 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import NetworkService from '../../../../service/network/NetworkService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { SetNetworkCommandFixture } from '../../../../../../__tests__/fixtures/network/NetworkFixture.js';
-import { SetNetworkCommandHandler } from './SetNetworkCommandHandler.js';
+import NetworkService from '@service/network/NetworkService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { SetNetworkCommandFixture } from '@test/fixtures/network/NetworkFixture';
+import { SetNetworkCommandHandler } from './SetNetworkCommandHandler';
 import {
   SetNetworkCommand,
   SetNetworkCommandResponse,
-} from './SetNetworkCommand.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import Injectable from '../../../../../core/Injectable.js';
-import { ErrorMsgFixture } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { SetNetworkCommandError } from './error/SetNetworkCommandError.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
+} from './SetNetworkCommand';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import Injectable from '@core/Injectable';
+import { ErrorMsgFixture } from '@test/fixtures/shared/DataFixture';
+import { SetNetworkCommandError } from './error/SetNetworkCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('SetNetworkCommandHandler', () => {
   let handler: SetNetworkCommandHandler;

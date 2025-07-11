@@ -203,13 +203,13 @@
 
 */
 
-import { OptionalField } from '../../../../core/decorator/OptionalDecorator.js';
-import { Security } from '../../../../domain/context/security/Security.js';
-import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../FormatValidation.js';
+import { OptionalField } from '@core/decorator/OptionalDecorator';
+import { Security } from '@domain/context/security/Security';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
-import { SecurityDate } from '../../../../domain/context/shared/SecurityDate.js';
-import { Factory } from '../../../../domain/context/factory/Factories.js';
+import { SecurityDate } from '@domain/context/shared/SecurityDate';
+import { Factory } from '@domain/context/factory/Factories';
 
 export default class CreateBondRequest extends ValidatedRequest<CreateBondRequest> {
   name: string;
