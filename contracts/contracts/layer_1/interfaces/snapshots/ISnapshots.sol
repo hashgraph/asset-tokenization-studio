@@ -248,4 +248,14 @@ interface ISnapshots {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_);
+
+    function getHoldersAtSnapshot(
+        uint256 _snapshotID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalHoldersAtSnapshot(
+        uint256 _snapshotID
+    ) external view returns (uint256);
 }
