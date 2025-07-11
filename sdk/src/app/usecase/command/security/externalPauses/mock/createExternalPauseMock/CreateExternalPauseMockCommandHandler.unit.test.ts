@@ -213,10 +213,10 @@ import {
 } from '@test/fixtures/shared/DataFixture';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import Account from '@domain/context/account/Account';
-import { CreateExternalPauseMockCommandHandler } from './CreateExternalPauseMockCommandHandler';
-import { CreateExternalPauseMockCommandResponse } from './CreateExternalPauseMockCommand';
 import { ErrorCode } from '@core/error/BaseError';
-import { CreateExternalPauseMockCommandError } from './error/CreateExternalPauseMockCommandError';
+import { CreateExternalPauseMockCommandHandler } from './CreateExternalPauseMockCommandHandler.js';
+import { CreateExternalPauseMockCommandError } from './error/CreateExternalPauseMockCommandError.js';
+import { CreateExternalPauseMockCommandResponse } from './CreateExternalPauseMockCommand.js';
 
 describe('CreateExternalPauseMockCommandHandler', () => {
   let handler: CreateExternalPauseMockCommandHandler;

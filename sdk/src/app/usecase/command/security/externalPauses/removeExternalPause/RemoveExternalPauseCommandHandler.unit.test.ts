@@ -207,6 +207,7 @@ import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import AccountService from '@service/account/AccountService';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
@@ -219,9 +220,11 @@ import { SecurityRole } from '@domain/context/security/SecurityRole';
 import {
   RemoveExternalPauseCommand,
   RemoveExternalPauseCommandResponse,
-} from './RemoveExternalPauseCommand';
-import { RemoveExternalPauseCommandHandler } from './RemoveExternalPauseCommandHandler';
+} from './RemoveExternalPauseCommand.js';
+import { RemoveExternalPauseCommandHandler } from './RemoveExternalPauseCommandHandler.js';
 import { RemoveExternalPauseCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
+import { RemoveExternalPauseCommandError } from './error/RemoveExternalPauseCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('RemoveExternalPauseCommandHandler', () => {
   let handler: RemoveExternalPauseCommandHandler;
@@ -241,6 +244,7 @@ describe('RemoveExternalPauseCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new RemoveExternalPauseCommandHandler(
@@ -257,6 +261,24 @@ describe('RemoveExternalPauseCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws RemoveExternalPauseCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        RemoveExternalPauseCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while removing external pause: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully remove pause', async () => {
       contractServiceMock.getContractEvmAddress
         .mockResolvedValueOnce(evmAddress)

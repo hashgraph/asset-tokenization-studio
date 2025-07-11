@@ -206,6 +206,7 @@
 import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '@test/fixtures/shared/DataFixture';
@@ -215,9 +216,11 @@ import { RemoveFromBlackListMockCommandFixture } from '@test/fixtures/externalCo
 import {
   RemoveFromBlackListMockCommand,
   RemoveFromBlackListMockCommandResponse,
-} from './RemoveFromBlackListMockCommand';
-import { RemoveFromBlackListMockCommandHandler } from './RemoveFromBlackListMockCommandHandler';
+} from './RemoveFromBlackListMockCommand.js';
+import { RemoveFromBlackListMockCommandHandler } from './RemoveFromBlackListMockCommandHandler.js';
 import AccountService from '@service/account/AccountService';
+import { RemoveFromBlackListMockCommandError } from './error/RemoveFromBlackListMockCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('RemoveFromBlackListMockCommandHandler', () => {
   let handler: RemoveFromBlackListMockCommandHandler;
@@ -233,8 +236,8 @@ describe('RemoveFromBlackListMockCommandHandler', () => {
   const targetEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
   );
-
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new RemoveFromBlackListMockCommandHandler(
@@ -250,6 +253,24 @@ describe('RemoveFromBlackListMockCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws RemoveFromBlackListMockCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        RemoveFromBlackListMockCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while removing from blacklist: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully remove from black list mock', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         contractEvmAddress,

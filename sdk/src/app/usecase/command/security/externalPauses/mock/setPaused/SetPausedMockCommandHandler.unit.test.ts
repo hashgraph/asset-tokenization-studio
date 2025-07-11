@@ -206,6 +206,7 @@
 import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
 } from '@test/fixtures/shared/DataFixture';
@@ -214,9 +215,11 @@ import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   SetPausedMockCommand,
   SetPausedMockCommandResponse,
-} from './SetPausedMockCommand';
-import { SetPausedMockCommandHandler } from './SetPausedMockCommandHandler';
+} from './SetPausedMockCommand.js';
+import { SetPausedMockCommandHandler } from './SetPausedMockCommandHandler.js';
 import { SetPausedMockCommandFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
+import { SetPausedMockCommandError } from './error/SetPausedMockCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('SetPausedMockCommandHandler', () => {
   let handler: SetPausedMockCommandHandler;
@@ -228,7 +231,7 @@ describe('SetPausedMockCommandHandler', () => {
   const contractEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
   );
-
+  const errorMsg = ErrorMsgFixture.create().msg;
   const transactionId = TransactionIdFixture.create().id;
 
   beforeEach(() => {
@@ -244,6 +247,24 @@ describe('SetPausedMockCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws SetPausedMockCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        SetPausedMockCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while setting external pause status: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully set pause mock', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         contractEvmAddress,
