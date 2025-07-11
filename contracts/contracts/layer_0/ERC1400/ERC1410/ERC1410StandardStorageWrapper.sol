@@ -267,15 +267,21 @@ abstract contract ERC1410StandardStorageWrapper is
         }
 
         if (addTo && removeFrom) {
-            //_updateTokenHolderSnapshot(from);
+            _updateTokenHolderSnapshot(from);
             _replaceTokenHolder(to, from);
-        } else if (addTo) {
-            //_updateTotalTokenHolderSnapshot();
+            return;
+        }
+        if (addTo) {
+            _updateTotalTokenHolderSnapshot();
             _addNewTokenHolder(to);
-        } else if (removeFrom) {
-            //_updateTokenHolderSnapshot(from);
-            //_updateTokenHolderSnapshot(_tokenHolders[_totalTokenHolders]);
-            //_updateTotalTokenHolderSnapshot();
+            return;
+        }
+        if (removeFrom) {
+            _updateTokenHolderSnapshot(from);
+            _updateTokenHolderSnapshot(
+                _getTokenHolder(_getTotalTokenHolders())
+            );
+            _updateTotalTokenHolderSnapshot();
             _removeTokenHolder(from);
         }
     }
@@ -415,6 +421,10 @@ abstract contract ERC1410StandardStorageWrapper is
     ) internal virtual;
 
     function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
+
+    function _updateTokenHolderSnapshot(address account) internal virtual;
+
+    function _updateTotalTokenHolderSnapshot() internal virtual;
 
     function _adjustTotalAndMaxSupplyForPartition(
         bytes32 _partition
