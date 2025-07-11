@@ -354,6 +354,28 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
     }
 
+    function _getDividendHolders(
+        uint256 _dividendID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory holders_) {
+        uint256 snapshotId = _getSnapshotID(
+            DIVIDEND_CORPORATE_ACTION_TYPE,
+            _dividendID
+        );
+        return _tokenHoldersAt(snapshotId, _pageIndex, _pageLength);
+    }
+
+    function _getTotalDividendHolders(
+        uint256 _dividendID
+    ) internal view returns (uint256) {
+        uint256 snapshotId = _getSnapshotID(
+            DIVIDEND_CORPORATE_ACTION_TYPE,
+            _dividendID
+        );
+        return _totalTokenHoldersAt(snapshotId);
+    }
+
     function _getVoting(
         uint256 _voteID
     )
@@ -404,6 +426,28 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     function _getVotingCount() internal view returns (uint256 votingCount_) {
         return
             _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+    }
+
+    function _getVotingHolders(
+        uint256 _voteID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory holders_) {
+        uint256 snapshotId = _getSnapshotID(
+            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+            _voteID
+        );
+        return _tokenHoldersAt(snapshotId, _pageIndex, _pageLength);
+    }
+
+    function _getTotalVotingHolders(
+        uint256 _voteID
+    ) internal view returns (uint256) {
+        uint256 snapshotId = _getSnapshotID(
+            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+            _voteID
+        );
+        return _totalTokenHoldersAt(snapshotId);
     }
 
     function _getScheduledBalanceAdjusment(
