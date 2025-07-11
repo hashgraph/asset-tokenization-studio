@@ -301,8 +301,9 @@ import {
   ProtectedClearingOperation,
 } from '@domain/context/security/Clearing';
 import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
-import { MetamaskService } from '@service/wallet/metamask/MetamaskService';
 import NetworkService from '@service/network/NetworkService';
+import MetamaskService from '@service/wallet/metamask/MetamaskService';
+
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
   private metamaskService: MetamaskService;

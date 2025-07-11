@@ -234,24 +234,23 @@ import {
 } from '@domain/context/network/MirrorNode';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { MetaMaskInpageProvider } from '@metamask/providers';
-import {
-  WalletEvents,
-  SupportedWallets,
-  InitializationData,
-  ConnectionState,
-} from '@port/in';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import EventService from '@service/event/EventService';
 import LogService from '@service/log/LogService';
 import { Signer, ethers } from 'ethers';
 import type { Provider } from '@ethersproject/providers';
 import Injectable from '@core/Injectable';
-import TransactionAdapter from '@port/out/TransactionAdapter';
+import TransactionAdapter, { InitializationData } from '@port/out/TransactionAdapter';
 import NetworkService from '@service/network/NetworkService';
+import { singleton } from 'tsyringe';
+import Service from '@service/Service';
+import { SupportedWallets } from '@domain/context/network/Wallet';
+import { ConnectionState, WalletEvents } from '@service/event/WalletEvent';
 
 declare const ethereum: MetaMaskInpageProvider;
 
-export class MetamaskService {
+@singleton()
+export default class MetamaskService extends Service {
   private signerOrProvider: Signer | Provider;
   private account: Account;
   private factories: Factories;
@@ -269,6 +268,7 @@ export class MetamaskService {
     networkService: NetworkService,
     mirrorNodeAdapter: MirrorNodeAdapter,
   ) {
+    super();
     this.eventService = eventService;
     this.commandBus = commandBus;
     this.networkService = networkService;
