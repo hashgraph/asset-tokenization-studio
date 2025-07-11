@@ -213,7 +213,6 @@ import {
 import {_SECURITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {ISecurity} from '../interfaces/ISecurity.sol';
 import {Common} from '../../layer_1/common/Common.sol';
-import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
 
 contract SecurityStorageWrapper is Common {
     function _storeRegulationData(
@@ -223,30 +222,6 @@ contract SecurityStorageWrapper is Common {
         ISecurity.SecurityRegulationData storage data = _securityStorage();
         data.regulationData = _regulationData;
         data.additionalSecurityData = _additionalSecurityData;
-    }
-
-    function _getSecurityHolders(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory holders_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
-            _pageIndex,
-            _pageLength
-        );
-
-        holders_ = new address[](
-            LibCommon.getSize(start, end, _getTotalSecurityHolders())
-        );
-
-        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
-
-        for (uint256 i = 0; i < holders_.length; i++) {
-            holders_[i] = erc1410Storage.tokenHolders[start + i];
-        }
-    }
-
-    function _getTotalSecurityHolders() internal view returns (uint256) {
-        return _erc1410BasicStorage().totalTokenHolders;
     }
 
     function _getSecurityRegulationData()
