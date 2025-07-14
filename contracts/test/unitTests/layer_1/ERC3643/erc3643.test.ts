@@ -1078,13 +1078,13 @@ describe('ERC3643 Tests', () => {
             })
 
             it('GIVEN MockCompliaceFalse THEN canTransfer returns false', async () => {
-                const complianceTrue: ComplianceMockBase =
+                const complianceFalse: ComplianceMockBase =
                     await ethers.getContractAt(
                         'ComplianceMockBase',
                         complianceMockFalse
                     )
                 expect(
-                    await complianceTrue.canTransfer(
+                    await complianceFalse.canTransfer(
                         ADDRESS_ZERO,
                         ADDRESS_ZERO,
                         ZERO
