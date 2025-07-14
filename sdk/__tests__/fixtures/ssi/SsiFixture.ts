@@ -209,6 +209,8 @@ import { GetIssuerListCountQuery } from '../../../src/app/usecase/query/security
 import { GetIssuerListMembersQuery } from '../../../src/app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery';
 import { GetRevocationRegistryAddressQuery } from '../../../src/app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery';
 import { IsIssuerQuery } from '../../../src/app/usecase/query/security/ssi/isIssuer/IsIssuerQuery';
+import { AddIssuerCommand } from '../../../src/app/usecase/command/security/ssi/addIssuer/AddIssuerCommand';
+import { SetRevocationRegistryAddressCommand } from '../../../src/app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand';
 import AddIssuerRequest from '../../../src/port/in/request/security/ssi/AddIssuerRequest';
 import SetRevocationRegistryAddressRequest from '../../../src/port/in/request/security/ssi/SetRevocationRegistryAddressRequest';
 import RemoveIssuerRequest from '../../../src/port/in/request/security/operations/issue/RemoveIssuerRequest';
@@ -282,3 +284,16 @@ export const IsIssuerRequestFixture = createFixture<IsIssuerRequest>(
     request.issuerId.as(() => HederaIdPropsFixture.create().value);
   },
 );
+
+export const AddIssuerCommandFixture = createFixture<AddIssuerCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.issuerId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const SetRevocationRegistryAddressCommandFixture =
+  createFixture<SetRevocationRegistryAddressCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.revocationRegistryId.as(() => HederaIdPropsFixture.create().value);
+  });

@@ -212,8 +212,7 @@ import {
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
 import TransactionService from '../../../../../../service/transaction/TransactionService';
-import { EmptyResponse } from '../../../../../../service/transaction/error/EmptyResponse.js';
-import { InvalidResponse } from '../../../../../../../core/error/InvalidResponse.js';
+import { CreateExternalWhiteListMockCommandError } from './error/CreateExternalWhiteListMockCommandError';
 
 @CommandHandler(CreateExternalWhiteListMockCommand)
 export class CreateExternalWhiteListMockCommandHandler
@@ -227,36 +226,34 @@ export class CreateExternalWhiteListMockCommandHandler
   ) {}
 
   async execute(): Promise<CreateExternalWhiteListMockCommandResponse> {
-    const handler = this.transactionService.getHandler();
+    try {
+      const handler = this.transactionService.getHandler();
 
-    const res = await handler.createExternalWhiteListMock();
+      const res = await handler.createExternalWhiteListMock();
 
-    let contractAddress: string;
+      let contractAddress: string;
 
-    if (typeof res === 'string') {
-      contractAddress = res;
-    } else {
-      if (!res.id)
-        throw new EmptyResponse(CreateExternalWhiteListMockCommandHandler.name);
-
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        1,
-        true,
-      );
-
-      if (!results || results.length !== 1) {
-        throw new InvalidResponse(results);
+      if (typeof res === 'string') {
+        contractAddress = res;
+      } else {
+        contractAddress = await this.transactionService.getTransactionResult({
+          res,
+          className: CreateExternalWhiteListMockCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
+          isContractCreation: true,
+        });
       }
-      contractAddress = results[0];
+
+      const address = (
+        await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
+      ).id.toString();
+
+      return Promise.resolve(
+        new CreateExternalWhiteListMockCommandResponse(address),
+      );
+    } catch (error) {
+      throw new CreateExternalWhiteListMockCommandError(error as Error);
     }
-
-    const address = (
-      await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-    ).id.toString();
-
-    return Promise.resolve(
-      new CreateExternalWhiteListMockCommandResponse(address),
-    );
   }
 }

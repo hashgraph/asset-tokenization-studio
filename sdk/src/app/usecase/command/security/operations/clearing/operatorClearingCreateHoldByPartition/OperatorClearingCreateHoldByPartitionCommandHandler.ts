@@ -287,8 +287,8 @@ export class OperatorClearingCreateHoldByPartitionCommandHandler
         amountBd,
         sourceEvmAddress,
         targetEvmAddress,
-        BigDecimal.fromString(clearingExpirationDate),
-        BigDecimal.fromString(holdExpirationDate),
+        BigDecimal.fromString(clearingExpirationDate.substring(0, 10)),
+        BigDecimal.fromString(holdExpirationDate.substring(0, 10)),
         securityId,
       );
 

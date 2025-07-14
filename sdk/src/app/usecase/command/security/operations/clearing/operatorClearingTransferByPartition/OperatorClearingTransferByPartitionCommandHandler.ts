@@ -211,7 +211,6 @@ import TransactionService from '../../../../../../service/transaction/Transactio
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
   OperatorClearingTransferByPartitionCommand,
   OperatorClearingTransferByPartitionCommandResponse,
@@ -232,8 +231,6 @@ export class OperatorClearingTransferByPartitionCommandHandler
     private readonly accountService: AccountService,
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
     @lazyInject(ContractService)
@@ -298,7 +295,7 @@ export class OperatorClearingTransferByPartitionCommandHandler
         amountBd,
         sourceEvmAddress,
         targetEvmAddress,
-        BigDecimal.fromString(expirationDate),
+        BigDecimal.fromString(expirationDate.substring(0, 10)),
         securityId,
       );
 
