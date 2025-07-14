@@ -223,6 +223,7 @@ import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import ContractService from '../../../../service/contract/ContractService.js';
 import { CreateBondCommandError } from './error/CreateBondCommandError.js';
 import { Response } from '../../../../../domain/context/transaction/Response';
+import { EVM_ZERO_ADDRESS } from '../../../../../core/Constants.js';
 
 @CommandHandler(CreateBondCommand)
 export class CreateBondCommandHandler
@@ -261,6 +262,7 @@ export class CreateBondCommandHandler
         externalPauses,
         externalControlLists,
         externalKycLists,
+        compliance,
       } = command;
 
       //TODO: Boy scout: remove request validations and adjust test
@@ -299,6 +301,10 @@ export class CreateBondCommandHandler
         this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
       ]);
 
+      const complianceEvmAddress = compliance
+        ? await this.contractService.getContractEvmAddress(compliance)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
       const handler = this.transactionService.getHandler();
 
       const bondInfo = new BondDetails(
@@ -322,6 +328,7 @@ export class CreateBondCommandHandler
         resolverEvmAddress,
         configId,
         configVersion,
+        complianceEvmAddress,
         externalPausesEvmAddresses,
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,

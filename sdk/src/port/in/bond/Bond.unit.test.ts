@@ -365,6 +365,7 @@ describe('Bond', () => {
           createBondRequest.externalPauses,
           createBondRequest.externalControlLists,
           createBondRequest.externalKycLists,
+          createBondRequest.compliance,
         ),
       );
 
