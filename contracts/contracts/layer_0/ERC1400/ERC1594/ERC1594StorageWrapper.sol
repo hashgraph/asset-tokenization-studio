@@ -206,7 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {_ZERO_ADDRESS, _ZERO_BYTES} from '../../constants/values.sol';
 import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
 import {
     IERC1594StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol';
@@ -313,40 +315,115 @@ abstract contract ERC1594StorageWrapper is
         return _erc1594Storage().issuance;
     }
 
+    function _isAbleToTransfer(
+        address _to,
+        uint256 _value,
+        bytes memory /*_data*/
+    )
+        internal
+        view
+        returns (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        address sender = _msgSender();
+
+        if (_to == _ZERO_ADDRESS) {
+            return (
+                false,
+                Eip1066._NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                Eip1066._REASON_INVALID_ZERO_ADDRESS,
+                abi.encode(_to)
+            );
+        }
+        if (_isPaused()) {
+            return (false, Eip1066._PAUSED, Eip1066._REASON_EMPTY, _ZERO_BYTES);
+        }
+        if (_isClearingActivated()) {
+            return (
+                false,
+                Eip1066._UNAVAILABLE,
+                Eip1066._REASON_CLEARING_IS_ACTIVE,
+                _ZERO_BYTES
+            );
+        }
+        if (_isRecovered(sender)) {
+            return (
+                false,
+                Eip1066._REVOKED_OR_BANNED,
+                Eip1066._REASON_ADDRESS_RECOVERED,
+                abi.encode(sender)
+            );
+        }
+        if (_isRecovered(_to)) {
+            return (
+                false,
+                Eip1066._REVOKED_OR_BANNED,
+                Eip1066._REASON_ADDRESS_RECOVERED,
+                abi.encode(_to)
+            );
+        }
+        if (!_isAbleToAccess(sender)) {
+            return (
+                false,
+                Eip1066._DISALLOWED_OR_STOP,
+                Eip1066._REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST,
+                abi.encode(sender)
+            );
+        }
+        if (!_isAbleToAccess(_to)) {
+            return (
+                false,
+                Eip1066._DISALLOWED_OR_STOP,
+                Eip1066._REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST,
+                abi.encode(_to)
+            );
+        }
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, sender)) {
+            return (
+                false,
+                Eip1066._DISALLOWED_OR_STOP,
+                Eip1066._REASON_KYC_NOT_GRANTED,
+                abi.encode(sender)
+            );
+        }
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+            return (
+                false,
+                Eip1066._DISALLOWED_OR_STOP,
+                Eip1066._REASON_KYC_NOT_GRANTED,
+                abi.encode(_to)
+            );
+        }
+        uint256 senderBalance = _balanceOfAdjusted(sender);
+        if (senderBalance < _value) {
+            return (
+                false,
+                Eip1066._INSUFFICIENT_FUNDS,
+                Eip1066._REASON_INSUFFICIENT_BALANCE,
+                abi.encode(sender, senderBalance, _value)
+            );
+        }
+        return (true, _SUCCESS, bytes32(0), '');
+    }
+
     function _canTransfer(
         address _to,
         uint256 _value,
-        bytes calldata /*_data*/
-    ) internal view returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (_isRecovered(_msgSender())) {
-            return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
-        }
-        if (_isRecovered(_to)) {
-            return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_msgSender())) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfAdjusted(_msgSender()) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
-            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
-            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
-
-        return (true, _SUCCESS, bytes32(0));
+        bytes calldata _data
+    )
+        internal
+        view
+        returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode)
+    {
+        (canTransfer, statusCode, reasonCode, ) = _isAbleToTransfer(
+            _to,
+            _value,
+            _data
+        );
     }
 
     function _canTransferFrom(

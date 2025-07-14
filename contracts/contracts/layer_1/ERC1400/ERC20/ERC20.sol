@@ -248,29 +248,22 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
 
     function transfer(
         address to,
-        uint256 value
+        uint256 amount
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(to)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
+        onlyCanTransfer(to, amount)
         returns (bool)
     {
-        return _transfer(_msgSender(), to, value);
+        return _transfer(_msgSender(), to, amount);
     }
 
     function transferFrom(
         address from,
         address to,
-        uint256 value
+        uint256 amount
     )
         external
         override
@@ -288,7 +281,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
         returns (bool)
     {
-        return _transferFrom(_msgSender(), from, to, value);
+        return _transferFrom(_msgSender(), from, to, amount);
     }
 
     function increaseAllowance(

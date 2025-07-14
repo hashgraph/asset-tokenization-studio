@@ -266,12 +266,41 @@ interface IERC1594 {
     function isIssuable() external view returns (bool);
 
     // Transfer Validity
+    /**
+     * @notice Checks whether a token transfer can be performed to a specified address with a given value and
+     * additional data.
+     * @param _to The address of the potential recipient of the tokens.
+     * @param _value The number of tokens that are intended to be transferred.
+     * @param _data Arbitrary additional data, often used for extra information required for the transfer,
+     * such as signed authorization or off-chain attestations.
+     * @return A tuple containing:
+     *   - bool: Indicates whether the transfer is possible (true) or not (false).
+     *   - bytes1: EIP-1066 status code providing a standardized, machine-readable reason for the transfer's
+     * success or failure (e.g., 0x11 for success, 0x10 for failure).
+     *   - bytes32: Application-specific reason code for more detailed, non-standardized information about the
+     * transfer's status.
+     */
     function canTransfer(
         address _to,
         uint256 _value,
         bytes calldata _data
     ) external view returns (bool, bytes1, bytes32);
 
+    /**
+     * @notice Checks whether a token transfer can be performed from a specified address to another address with
+     * a given value and additional data.
+     * @param _from The address of the sender of the tokens.
+     * @param _to The address of the potential recipient of the tokens.
+     * @param _value The number of tokens that are intended to be transferred.
+     * @param _data Arbitrary additional data, often used for extra information required for the transfer, such
+     * as signed authorization or off-chain attestations.
+     * @return A tuple containing:
+     *   - bool: Indicates whether the transfer is possible (true) or not (false).
+     *   - bytes1: EIP-1066 status code providing a standardized, machine-readable reason for the transfer's success
+     * or failure (e.g., 0x11 for success, 0x10 for failure).
+     *   - bytes32: Application-specific reason code for more detailed, non-standardized information about the
+     * transfer's status.
+     */
     function canTransferFrom(
         address _from,
         address _to,

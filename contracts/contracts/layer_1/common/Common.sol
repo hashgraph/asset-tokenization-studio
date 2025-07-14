@@ -206,11 +206,13 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {_ZERO_BYTES} from '../../layer_0/constants/values.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
 import {
     ERC1594StorageWrapper
 } from '../../layer_0/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
+import {IEip1066} from '../../layer_1/interfaces/eip1066/IEip1066.sol';
 
 abstract contract Common is ERC1594StorageWrapper {
     error AlreadyInitialized();
@@ -234,6 +236,23 @@ abstract contract Common is ERC1594StorageWrapper {
     modifier onlyClearingDisabled() {
         _checkClearingDisabled();
         _;
+    }
+
+    modifier onlyCanTransfer(address _to, uint256 _amount) {
+        _checkCanTransfer(_to, _amount);
+        _;
+    }
+
+    function _checkCanTransfer(address to, uint256 amount) internal view {
+        (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        ) = _isAbleToTransfer(to, amount, _ZERO_BYTES);
+        if (!isAbleToTransfer) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
+        }
     }
 
     function _checkUnProtectedPartitionsOrWildCardRole() internal view {

@@ -203,10 +203,13 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
 // solhint-disable max-line-length
+uint256 constant _MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+address constant _ZERO_ADDRESS = address(0);
+bytes constant _ZERO_BYTES = '';
 // keccak256('security.token.standard.dividend.corporateAction');
 bytes32 constant DIVIDEND_CORPORATE_ACTION_TYPE = 0x1c29d09f87f2b0c8192a7719a2acdfdfa320dc2835b5a0398e5bd8dc34c14b0e;
 
@@ -221,7 +224,7 @@ bytes32 constant BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE = 0x1256aa1b36483ca651
 
 uint256 constant SNAPSHOT_RESULT_ID = 0;
 
-uint256 constant _MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
 
 // keccak256('security.token.standard.balanceAdjustment.scheduledTasks');
 bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d;
@@ -229,8 +232,7 @@ bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e27
 // keccak256('security.token.standard.snapshot.scheduledTasks');
 bytes32 constant SNAPSHOT_TASK_TYPE = 0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c;
 
-bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
-
+// TODO: Remove this when all contracts are updated
 bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
 bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
 bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
