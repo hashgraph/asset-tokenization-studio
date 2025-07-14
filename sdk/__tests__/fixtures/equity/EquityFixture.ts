@@ -203,10 +203,34 @@
 
 */
 
+import CreateEquityRequest from '../../../src/port/in/request/equity/CreateEquityRequest';
 import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
+import {
+  CastRegulationSubType,
+  CastRegulationType,
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType';
+import {
+  ContractIdPropFixture,
+  HederaIdPropsFixture,
+} from '../shared/DataFixture';
 import { HederaId } from '../../../src/domain/context/shared/HederaId';
 import { GetScheduledBalanceAdjustmentQuery } from '../../../src/app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
+import { faker } from '@faker-js/faker/.';
+import GetEquityDetailsRequest from '../../../src/port/in/request/equity/GetEquityDetailsRequest';
+import SetDividendsRequest from '../../../src/port/in/request/equity/SetDividendsRequest';
+import GetDividendsForRequest from '../../../src/port/in/request/equity/GetDividendsForRequest';
+import GetDividendsRequest from '../../../src/port/in/request/equity/GetDividendsRequest';
+import GetAllDividendsRequest from '../../../src/port/in/request/equity/GetAllDividendsRequest';
+import SetVotingRightsRequest from '../../../src/port/in/request/equity/SetVotingRightsRequest';
+import GetVotingRightsForRequest from '../../../src/port/in/request/equity/GetVotingRightsForRequest';
+import GetVotingRightsRequest from '../../../src/port/in/request/equity/GetVotingRightsRequest';
+import GetAllVotingRightsRequest from '../../../src/port/in/request/equity/GetAllVotingRightsRequest';
+import SetScheduledBalanceAdjustmentRequest from '../../../src/port/in/request/equity/SetScheduledBalanceAdjustmentRequest';
+import GetScheduledBalanceAdjustmentCountRequest from '../../../src/port/in/request/equity/GetScheduledBalanceAdjustmentsCountRequest';
+import GetScheduledBalanceAdjustmentRequest from '../../../src/port/in/request/equity/GetScheduledBalanceAdjustmentRequest';
+import GetAllScheduledBalanceAdjustmentsRequest from '../../../src/port/in/request/equity/GetAllScheduledBalanceAdjustmentst';
 import { ScheduledBalanceAdjustment } from '../../../src/domain/context/equity/ScheduledBalanceAdjustment';
 import { GetScheduledBalanceAdjustmentCountQuery } from '../../../src/app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
 import { Dividend } from '../../../src/domain/context/equity/Dividend';
@@ -216,14 +240,203 @@ import { GetDividendsForQuery } from '../../../src/app/usecase/query/equity/divi
 import { DividendFor } from '../../../src/domain/context/equity/DividendFor';
 import { GetEquityDetailsQuery } from '../../../src/app/usecase/query/equity/get/getEquityDetails/GetEquityDetailsQuery';
 import { EquityDetails } from '../../../src/domain/context/equity/EquityDetails';
-import { DividendType } from '../../../src/domain/context/equity/DividendType';
 import { GetVotingQuery } from '../../../src/app/usecase/query/equity/votingRights/getVoting/GetVotingQuery';
 import { GetVotingCountQuery } from '../../../src/app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery';
 import { GetVotingForQuery } from '../../../src/app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery';
+import {
+  CastDividendType,
+  DividendType,
+} from '../../../src/domain/context/equity/DividendType';
 import { VotingFor } from '../../../src/domain/context/equity/VotingFor';
 import { VotingRights } from '../../../src/domain/context/equity/VotingRights';
-import { GetRegulationDetailsQuery } from 'app/usecase/query/factory/get/GetRegulationDetailsQuery';
-import { GetConfigInfoQuery } from 'app/usecase/query/management/GetConfigInfoQuery';
+import { GetRegulationDetailsQuery } from '../../../src/app/usecase/query/factory/get/GetRegulationDetailsQuery';
+import { GetConfigInfoQuery } from '../../../src/app/usecase/query/management/GetConfigInfoQuery';
+import { SetScheduledBalanceAdjustmentCommand } from '../../../src/app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
+import { SetDividendsCommand } from '../../../src/app/usecase/command/equity/dividends/set/SetDividendsCommand';
+import { SetVotingRightsCommand } from '../../../src/app/usecase/command/equity/votingRights/set/SetVotingRightsCommand';
+import { CreateEquityCommand } from '../../../src/app/usecase/command/equity/create/CreateEquityCommand';
+import { SecurityPropsFixture } from '../shared/SecurityFixture';
+import ContractId from '../../../src/domain/context/contract/ContractId';
+
+export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
+  (request) => {
+    request.name.faker((faker) => faker.company.name());
+    request.symbol.faker((faker) =>
+      faker.string.alpha({ length: 3, casing: 'upper' }),
+    );
+    request.isin.faker((faker) => `US${faker.string.numeric(9)}`);
+    request.decimals.faker((faker) => faker.number.int({ min: 0, max: 18 }));
+    request.isWhiteList.faker((faker) => faker.datatype.boolean());
+    request.isControllable.faker((faker) => faker.datatype.boolean());
+    request.arePartitionsProtected.faker((faker) => faker.datatype.boolean());
+    request.clearingActive.faker((faker) => faker.datatype.boolean());
+    request.internalKycActivated.faker((faker) => faker.datatype.boolean());
+    request.isMultiPartition.faker((faker) => faker.datatype.boolean());
+    const regulationType = CastRegulationType.toNumber(
+      faker.helpers.arrayElement(
+        Object.values(RegulationType).filter(
+          (type) => type !== RegulationType.NONE,
+        ),
+      ),
+    );
+    request.regulationType?.as(() => regulationType);
+    request.regulationSubType?.faker((faker) =>
+      regulationType === CastRegulationType.toNumber(RegulationType.REG_S)
+        ? CastRegulationSubType.toNumber(RegulationSubType.NONE)
+        : CastRegulationSubType.toNumber(
+            faker.helpers.arrayElement(
+              Object.values(RegulationSubType).filter(
+                (subType) => subType !== RegulationSubType.NONE,
+              ),
+            ),
+          ),
+    );
+    request.isCountryControlListWhiteList.faker((faker) =>
+      faker.datatype.boolean(),
+    );
+    request.numberOfShares.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
+    );
+    request.countries?.faker((faker) =>
+      faker.helpers
+        .arrayElements(
+          Array.from({ length: 5 }, () =>
+            faker.location.countryCode({ variant: 'alpha-2' }),
+          ),
+          { min: 1, max: 5 },
+        )
+        .join(','),
+    );
+    request.info.faker((faker) => faker.lorem.words());
+    request.currency.faker(
+      (faker) =>
+        `0x${Buffer.from(faker.finance.currencyCode()).toString('hex')}`,
+    );
+    request.dividendRight.faker((faker) =>
+      CastDividendType.toNumber(
+        faker.helpers.arrayElement(Object.values(DividendType)),
+      ),
+    );
+    request.nominalValue.faker((faker) =>
+      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    request.votingRight.faker((faker) => faker.datatype.boolean());
+    request.liquidationRight.faker((faker) => faker.datatype.boolean());
+    request.subscriptionRight.faker((faker) => faker.datatype.boolean());
+    request.conversionRight.faker((faker) => faker.datatype.boolean());
+    request.redemptionRight.faker((faker) => faker.datatype.boolean());
+    request.putRight.faker((faker) => faker.datatype.boolean());
+    request.configId.faker(
+      (faker) =>
+        `0x000000000000000000000000000000000000000000000000000000000000000${faker.number.int({ min: 1, max: 9 })}`,
+    );
+    request.configVersion.as(() => 1);
+    request.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
+    request.externalPauses?.as(() => [HederaIdPropsFixture.create().value]);
+    request.externalControlLists?.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    request.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+  },
+);
+
+export const GetEquityDetailsRequestFixture =
+  createFixture<GetEquityDetailsRequest>((request) => {
+    request.equityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const SetDividendsRequestFixture = createFixture<SetDividendsRequest>(
+  (request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.amountPerUnitOfSecurity.faker((faker) =>
+      faker.number.int({ min: 1, max: 12 }).toString(),
+    );
+    request.recordTimestamp.faker((faker) =>
+      faker.date.past().getTime().toString(),
+    );
+    request.executionTimestamp.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+  },
+);
+
+export const GetDividendsForRequestFixture =
+  createFixture<GetDividendsForRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetDividendsRequestFixture = createFixture<GetDividendsRequest>(
+  (request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  },
+);
+
+export const GetAllDividendsRequestFixture =
+  createFixture<GetAllDividendsRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const SetVotingRightsRequestFixture =
+  createFixture<SetVotingRightsRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.recordTimestamp.faker((faker) =>
+      faker.date.past().getTime().toString(),
+    );
+    request.data.as(() => '0x');
+  });
+
+export const GetVotingRightsForRequestFixture =
+  createFixture<GetVotingRightsForRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+    request.votingId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetVotingRightsRequestFixture =
+  createFixture<GetVotingRightsRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.votingId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetAllVotingRightsRequestFixture =
+  createFixture<GetAllVotingRightsRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const SetScheduledBalanceAdjustmentRequestFixture =
+  createFixture<SetScheduledBalanceAdjustmentRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.executionDate.faker((faker) =>
+      faker.date.past().getTime().toString(),
+    );
+    request.factor.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
+    );
+    request.decimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
+    );
+  });
+
+export const GetScheduledBalanceAdjustmentCountRequestFixture =
+  createFixture<GetScheduledBalanceAdjustmentCountRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetScheduledBalanceAdjustmentRequestFixture =
+  createFixture<GetScheduledBalanceAdjustmentRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.balanceAdjustmentId.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }),
+    );
+  });
+
+export const GetAllScheduledBalanceAdjustmentsRequestFixture =
+  createFixture<GetAllScheduledBalanceAdjustmentsRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
 
 export const GetScheduledBalanceAdjustmentQueryFixture =
   createFixture<GetScheduledBalanceAdjustmentQuery>((query) => {
@@ -310,6 +523,84 @@ export const GetConfigInfoQueryFixture = createFixture<GetConfigInfoQuery>(
     );
   },
 );
+
+export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
+  (command) => {
+    command.security.fromFixture(SecurityPropsFixture);
+    command.currency.faker((faker) => faker.finance.currencyCode());
+    command.nominalValue.faker((faker) =>
+      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    command.votingRight.faker((faker) => faker.datatype.boolean());
+    command.informationRight.faker((faker) => faker.datatype.boolean());
+    command.liquidationRight.faker((faker) => faker.datatype.boolean());
+    command.subscriptionRight.faker((faker) => faker.datatype.boolean());
+    command.conversionRight.faker((faker) => faker.datatype.boolean());
+    command.redemptionRight.faker((faker) => faker.datatype.boolean());
+    command.putRight.faker((faker) => faker.datatype.boolean());
+    command.dividendRight.faker((faker) => faker.datatype.boolean());
+    command.currency.faker((faker) =>
+      faker.string.hexadecimal({ length: 6, casing: 'lower', prefix: '0x' }),
+    );
+    command.factory?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
+    );
+    command.resolver?.as(
+      () => new ContractId(ContractIdPropFixture.create().value),
+    );
+    command.configId?.faker((faker) =>
+      faker.string.hexadecimal({ length: 64, casing: 'lower', prefix: '0x' }),
+    );
+    command.configVersion?.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
+    command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
+    command.externalControlLists?.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+  },
+);
+
+export const SetScheduledBalanceAdjustmentCommandFixture =
+  createFixture<SetScheduledBalanceAdjustmentCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.executionDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.factor.faker((faker) => faker.number.int().toString());
+    command.decimals.faker((faker) => faker.number.int().toString());
+  });
+
+export const SetDividendsCommandFixture = createFixture<SetDividendsCommand>(
+  (command) => {
+    command.address.as(() => HederaIdPropsFixture.create().value);
+    let recordDate: Date;
+    command.recordDate.faker((faker) => {
+      recordDate = faker.date.future();
+      return recordDate.getTime().toString();
+    });
+    command.executionDate.faker((faker) => {
+      return faker.date.future({ refDate: recordDate }).getTime().toString();
+    });
+    command.amount.faker((faker) => faker.number.int().toString());
+  },
+);
+
+export const SetVotingRightsCommandFixture =
+  createFixture<SetVotingRightsCommand>((command) => {
+    command.address.as(() => HederaIdPropsFixture.create().value);
+    command.recordDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.data.faker((faker) => {
+      return faker.string.hexadecimal({
+        length: 64,
+        casing: 'lower',
+        prefix: '0x',
+      });
+    });
+  });
 
 export const ScheduledBalanceAdjustmentFixture =
   createFixture<ScheduledBalanceAdjustment>((props) => {

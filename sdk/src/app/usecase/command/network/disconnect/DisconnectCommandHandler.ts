@@ -210,14 +210,19 @@ import {
   DisconnectCommand,
   DisconnectCommandResponse,
 } from './DisconnectCommand.js';
+import { DisconnectCommandError } from './error/DisconnectCommandError.js';
 
 @CommandHandler(DisconnectCommand)
 export class DisconnectCommandHandler
   implements ICommandHandler<DisconnectCommand>
 {
   async execute(): Promise<DisconnectCommandResponse> {
-    const handler = Injectable.resolveTransactionHandler();
-    const res = await handler.stop();
-    return Promise.resolve({ payload: res });
+    try {
+      const handler = Injectable.resolveTransactionHandler();
+      const res = await handler.stop();
+      return new DisconnectCommandResponse(res);
+    } catch (error) {
+      throw new DisconnectCommandError(error as Error);
+    }
   }
 }

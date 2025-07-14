@@ -203,6 +203,7 @@
 
 */
 
+import GetSecurityDetailsRequest from 'port/in/request/security/GetSecurityDetailsRequest';
 import { createFixture } from '../config';
 import {
   HederaIdPropsFixture,
@@ -223,6 +224,45 @@ export const BalanceOfQueryFixture = createFixture<BalanceOfQuery>((query) => {
   query.securityId.as(() => new HederaId(HederaIdPropsFixture.create().value));
   query.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
 });
+import GetAccountBalanceRequest from '../../../src/port/in/request/account/GetAccountBalanceRequest';
+import SetMaxSupplyRequest from '../../../src/port/in/request/security/operations/cap/SetMaxSupplyRequest';
+import GetMaxSupplyRequest from '../../../src/port/in/request/security/operations/cap/GetMaxSupplyRequest';
+
+export const GetSecurityDetailsRequestFixture =
+  createFixture<GetSecurityDetailsRequest>((request) => {
+    request.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+  });
+
+export const GetAccountBalanceRequestFixture =
+  createFixture<GetAccountBalanceRequest>((request) => {
+    request.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+    request.targetId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+  });
+
+export const SetMaxSupplyRequestFixture = createFixture<SetMaxSupplyRequest>(
+  (request) => {
+    request.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+    request.maxSupply.faker((faker) =>
+      faker.number.int({ min: 1, max: 10 }).toString(),
+    );
+  },
+);
+
+export const GetMaxSupplyRequestFixture = createFixture<GetMaxSupplyRequest>(
+  (request) => {
+    request.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+  },
+);
 
 export const CanRedeemByPartitionQueryFixture =
   createFixture<CanRedeemByPartitionQuery>((query) => {

@@ -34,6 +34,7 @@ extracted-methods.txt
 cache
 artifacts
 
+.deps/
 ./docs/*
 ./cache/*
 ./typechain-types/*

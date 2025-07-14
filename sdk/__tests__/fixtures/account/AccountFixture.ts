@@ -203,11 +203,13 @@
 
 */
 
+import GetAccountInfoRequest from '../../../src/port/in/request/account/GetAccountInfoRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { GetAccountBalanceQuery } from '../../../src/app/usecase/query/account/balance/GetAccountBalanceQuery';
 import { IsInControlListQuery } from '../../../src/app/usecase/query/account/controlList/IsInControlListQuery';
 import { GetAccountInfoQuery } from '../../../src/app/usecase/query/account/info/GetAccountInfoQuery';
+import GetAccountBalanceRequest from '../../../src/port/in/request/account/GetAccountBalanceRequest';
 import { AccountProps } from '../../../src/domain/context/account/Account';
 import { HederaId } from '../../../src/domain/context/shared/HederaId';
 
@@ -215,6 +217,13 @@ export const GetAccountBalanceQueryFixture =
   createFixture<GetAccountBalanceQuery>((query) => {
     query.securityId.as(() => HederaIdPropsFixture.create().value);
     query.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetAccountInfoRequestFixture =
+  createFixture<GetAccountInfoRequest>((request) => {
+    request.account.as(() => ({
+      accountId: HederaIdPropsFixture.create().value,
+    }));
   });
 
 export const IsInControlListQueryFixture = createFixture<IsInControlListQuery>(
@@ -229,6 +238,11 @@ export const GetAccountInfoQueryFixture = createFixture<GetAccountInfoQuery>(
     query.id.as(() => HederaIdPropsFixture.create().value);
   },
 );
+export const GetAccountBalanceRequestFixture =
+  createFixture<GetAccountBalanceRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
 
 export const AccountPropsFixture = createFixture<AccountProps>((props) => {
   props.id.as(() => new HederaId(HederaIdPropsFixture.create().value));
