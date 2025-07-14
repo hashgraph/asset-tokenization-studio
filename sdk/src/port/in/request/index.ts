@@ -353,6 +353,7 @@ import IsInternalKycActivatedRequest from './security/kyc/IsInternalKycActivated
 import GrantKycMockRequest from './security/externalKycLists/mock/GrantKycMockRequest.js';
 import RevokeKycMockRequest from './security/externalKycLists/mock/RevokeKycMockRequest.js';
 import GetKycStatusMockRequest from './security/externalKycLists/mock/GetKycStatusMockRequest.js';
+import TakeSnapshotRequest from './security/operations/snapshot/TakeSnapshotRequest.js';
 
 export {
   CreateEquityRequest,
@@ -504,4 +505,5 @@ export {
   GrantKycMockRequest,
   RevokeKycMockRequest,
   GetKycStatusMockRequest,
+  TakeSnapshotRequest,
 };

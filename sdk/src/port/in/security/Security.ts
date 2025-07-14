@@ -351,6 +351,8 @@ import ClearingTransferViewModel from '../response/ClearingTransferViewModel.js'
 import { GetClearingCreateHoldForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery.js';
 import { GetClearingRedeemForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery.js';
 import { GetClearingTransferForByPartitionQuery } from '../../../app/usecase/query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery.js';
+import { TakeSnapshotCommand } from '../../../app/usecase/command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand.js';
+import TakeSnapshotRequest from '../request/security/operations/snapshot/TakeSnapshotRequest.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -513,6 +515,9 @@ interface ISecurityInPort {
   ): Promise<{ payload: number; transactionId: string }>;
   operatorClearingTransferByPartition(
     request: OperatorClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  takeSnapshot(
+    request: TakeSnapshotRequest,
   ): Promise<{ payload: number; transactionId: string }>;
 }
 
@@ -1816,6 +1821,16 @@ class SecurityInPort implements ISecurityInPort {
         request.expirationDate,
       ),
     );
+  }
+
+  @LogError
+  async takeSnapshot(
+    request: TakeSnapshotRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const { securityId } = request;
+    ValidatedRequest.handleValidation(TakeSnapshotRequest.name, request);
+
+    return await this.commandBus.execute(new TakeSnapshotCommand(securityId));
   }
 }
 
