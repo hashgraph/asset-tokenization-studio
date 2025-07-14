@@ -224,8 +224,14 @@ import {
 import {
     ResolverProxyUnstructured
 } from '../../resolver/resolverProxy/unstructured/ResolverProxyUnstructured.sol';
+import {
+    IERC3643StorageWrapper
+} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
 
-abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
+abstract contract ERC3643StorageWrapper1 is
+    IERC3643StorageWrapper,
+    PauseStorageWrapper
+{
     modifier onlyUnrecoveredAddress(address _account) {
         _checkRecoveredAddress(_account);
         _;
@@ -245,6 +251,13 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
     ) {
         _checkInputBoolArrayLength(_addresses, _status);
         _;
+    }
+
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_ERC3643(address _compliance) internal {
+        IERC3643.ERC3643Storage storage clearingStorage = _erc3643Storage();
+        clearingStorage.initialized = true;
+        _setCompliance(_compliance);
     }
 
     function _setAddressFrozen(
@@ -276,6 +289,7 @@ abstract contract ERC3643StorageWrapper1 is PauseStorageWrapper {
 
     function _setCompliance(address _compliance) internal {
         _erc3643Storage().compliance = _compliance;
+        emit ComplianceAdded(_compliance);
     }
 
     function _setIdentityRegistry(address _identityRegistry) internal {

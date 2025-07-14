@@ -226,6 +226,13 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     address private constant _ONCHAIN_ID = address(0);
 
     // ====== External functions (state-changing) ======
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC3643(
+        address _compliance
+    ) external onlyUninitialized(_erc3643Storage().initialized) {
+        _initialize_ERC3643(_compliance);
+    }
+
     function setName(
         string calldata _name
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
@@ -280,7 +287,6 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         address _compliance
     ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
         _setCompliance(_compliance);
-        emit ComplianceAdded(_compliance);
     }
 
     function addAgent(
@@ -511,7 +517,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](23);
+        staticFunctionSelectors_ = new bytes4[](24);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
@@ -552,6 +558,9 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .initialize_ERC3643
+            .selector;
     }
 
     function getStaticInterfaceIds()
