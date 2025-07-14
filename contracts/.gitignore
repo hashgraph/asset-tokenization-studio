@@ -28,6 +28,7 @@ node_modules
 coverage
 coverage.json
 gas-report.txt
+extracted-methods.txt
 
 #Hardhat files
 cache
