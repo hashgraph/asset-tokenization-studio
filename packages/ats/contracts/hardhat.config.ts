@@ -271,7 +271,7 @@ const config: HardhatUserConfig = {
         noColors: true, // Recommended for file output
     },
     typechain: {
-        outDir: './build/typechain-types',
+        outDir: './typechain-types',
         target: 'ethers-v5',
     },
     mocha: {
