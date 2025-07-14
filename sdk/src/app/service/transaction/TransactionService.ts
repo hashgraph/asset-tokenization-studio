@@ -257,21 +257,12 @@ export default class TransactionService extends Service {
         LogService.logTrace('HWALLETCONNECT TransactionAdapter');
         return Injectable.resolve(HederaWalletConnectTransactionAdapter);
       case SupportedWallets.DFNS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
         LogService.logTrace('DFNS TransactionAdapter');
         return Injectable.resolve(DFNSTransactionAdapter);
       case SupportedWallets.FIREBLOCKS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
         LogService.logTrace('FIREBLOCKS TransactionAdapter');
         return Injectable.resolve(FireblocksTransactionAdapter);
       case SupportedWallets.AWSKMS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
         LogService.logTrace('AWSKMS TransactionAdapter');
         return Injectable.resolve(AWSKMSTransactionAdapter);
       default:
