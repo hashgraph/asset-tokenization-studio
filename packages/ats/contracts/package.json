@@ -96,6 +96,7 @@
   "devDependencies": {
     "@eslint/js": "^9.24.0",
     "@hashgraph/sdk": "^2.62.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@openzeppelin/contracts": "^4.9.6",
     "@openzeppelin/contracts-upgradeable": "^4.9.6",
