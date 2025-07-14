@@ -221,6 +221,11 @@ export const EQUITY_CONFIG_ID =
 export const BOND_CONFIG_ID =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 
+// Extract Methods // TODO: Use OUTPUT_FILE as input parameter (CONTRACTS_DIR?)
+export const CONTRACTS_DIR = 'contracts'
+export const OUTPUT_FILE = 'extracted-methods.txt'
+export const REGEX_SELECTOR = /function\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)/g
+
 // * Roles
 export const DEFAULT_ADMIN_ROLE =
     '0x0000000000000000000000000000000000000000000000000000000000000000'
