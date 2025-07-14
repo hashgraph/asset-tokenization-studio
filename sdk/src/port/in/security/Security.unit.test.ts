@@ -267,6 +267,7 @@ import {
   ReleaseHoldByPartitionRequest,
   ReleaseRequest,
   SetMaxSupplyRequest,
+  TakeSnapshotRequest,
   TransferAndLockRequest,
   TransferRequest,
 } from '../request';
@@ -438,6 +439,8 @@ import { OperatorClearingTransferByPartitionCommand } from '../../../app/usecase
 import { ClearingRedeemFromByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand';
 import { ProtectedClearingTransferByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
 import { ApproveClearingOperationByPartitionCommand } from '../../../app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
+import { TakeSnapshotRequestFixture } from '../../../../__tests__/fixtures/snapshot/SnapshotFixture';
+import { TakeSnapshotCommand } from '../../../app/usecase/command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -504,6 +507,7 @@ describe('Security', () => {
   let operatorClearingCreateHoldByPartitionRequest: OperatorClearingCreateHoldByPartitionRequest;
   let operatorClearingRedeemByPartitionRequest: OperatorClearingRedeemByPartitionRequest;
   let operatorClearingTransferByPartitionRequest: OperatorClearingTransferByPartitionRequest;
+  let takeSnapshotRequest: TakeSnapshotRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -6925,6 +6929,62 @@ describe('Security', () => {
       await expect(
         Security.approveClearingOperationByPartition(invalidRequest),
       ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('takeSnapshot', () => {
+    takeSnapshotRequest = new TakeSnapshotRequest(
+      TakeSnapshotRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should take snapshot successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.takeSnapshot(takeSnapshotRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        TakeSnapshotRequest.name,
+        takeSnapshotRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new TakeSnapshotCommand(takeSnapshotRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.takeSnapshot(takeSnapshotRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        TakeSnapshotRequest.name,
+        takeSnapshotRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new TakeSnapshotCommand(takeSnapshotRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      takeSnapshotRequest = new TakeSnapshotRequest({
+        ...TakeSnapshotRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.takeSnapshot(takeSnapshotRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
   });
 });
