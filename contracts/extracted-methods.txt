@@ -23,7 +23,7 @@ function deactivateClearing() external returns
 function decreaseAllowance(address spender, uint256 subtractedValue) external onlyUnpaused onlyListedAllowed
 function deployBond(BondData calldata _bondData, FactoryRegulationData calldata _factoryRegulationData) external checkResolver
 function finalizeControllable() external override onlyRole
-function initializeInternalKyc(bool _activateInternalKyc) external
+function initializeInternalKyc(bool _activateInternalKyc) extersdfsl
 function initialize_ControlList(bool _isWhiteList) external override onlyUninitialized
 function initialize_ERC1410_Basic(bool _multiPartition) external
 function initialize_ERC1594() external override onlyUninitialized
