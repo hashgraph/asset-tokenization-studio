@@ -362,10 +362,12 @@ class NetworkInPort implements INetworkInPort {
       await val.init();
 
       if (val instanceof RPCTransactionAdapter) {
-        val.setMirrorNodes(req.mirrorNodes);
-        val.setJsonRpcRelays(req.jsonRpcRelays);
-        val.setFactories(req.factories);
-        val.setResolvers(req.resolvers);
+        val.setConfig({
+          mirrorNodes: req.mirrorNodes,
+          jsonRpcRelays: req.jsonRpcRelays,
+          factories: req.factories,
+          resolvers: req.resolvers,
+        });
       }
     }
     return wallets;

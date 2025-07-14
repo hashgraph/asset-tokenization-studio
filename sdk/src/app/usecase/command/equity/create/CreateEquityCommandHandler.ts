@@ -223,6 +223,8 @@ import AccountService from '@service/account/AccountService';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import { Response } from '@domain/context/transaction/Response';
 import { CreateEquityCommandError } from './error/CreateEquityCommandError';
+import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
+import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler
@@ -282,6 +284,12 @@ export class CreateEquityCommandHandler
 
       if (configVersion === undefined) {
         throw new InvalidRequest('Config Version not found in request');
+      }
+      if (!security.regulationType) {
+        throw new MissingRegulationType();
+      }
+      if (!security.regulationsubType) {
+        throw new MissingRegulationSubType();
       }
 
       const diamondOwnerAccountEvmAddress: EvmAddress =
