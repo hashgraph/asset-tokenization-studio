@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
+import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
@@ -222,7 +222,10 @@ import {
     _SUCCESS,
     _FROM_ACCOUNT_KYC_ERROR_ID,
     _TO_ACCOUNT_KYC_ERROR_ID,
-    _CLEARING_ACTIVE_ERROR_ID
+    _CLEARING_ACTIVE_ERROR_ID,
+    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+    _ADDRESS_RECOVERED_FROM_ERROR_ID,
+    _ADDRESS_RECOVERED_TO_ERROR_ID
 } from '../../constants/values.sol';
 
 abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
@@ -234,32 +237,61 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
         bytes calldata /*_data*/,
         bytes calldata /*_operatorData*/
     ) internal view returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_isClearingActivated()) {
-            return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
-            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _CONTROLLER_ROLE;
+        roles[1] = _AGENT_ROLE;
+        if (!_hasAnyRole(roles, _msgSender())) {
+            if (_isRecovered(_msgSender())) {
+                return (
+                    false,
+                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
+                    bytes32(0)
+                );
+            }
+            if (_isRecovered(_to)) {
+                return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
+            }
+            if (_isPaused()) {
+                return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+            }
+            if (_isClearingActivated()) {
+                return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
+            }
+            if (_from == address(0)) {
+                return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+            }
+            if (_to == address(0)) {
+                return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+            }
+            if (!_isAbleToAccess(_msgSender())) {
+                return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+            }
+            if (!_isAbleToAccess(_from)) {
+                return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+            }
+            if (!_isAbleToAccess(_to)) {
+                return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+            }
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+                return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+            }
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+                return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+            }
+            // TODO: Better to check all in one boolean expression defined in a different pure function.
+            if (_from != _msgSender()) {
+                if (!_isAuthorized(_partition, _msgSender(), _from)) {
+                    return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
+                }
+
+                if (_isRecovered(_from)) {
+                    return (
+                        false,
+                        _ADDRESS_RECOVERED_FROM_ERROR_ID,
+                        bytes32(0)
+                    );
+                }
+            }
         }
         if (!_validPartition(_partition, _from)) {
             return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
@@ -267,15 +299,6 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
         if (_balanceOfByPartitionAdjusted(_partition, _from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
-        // TODO: Better to check all in one boolean expression defined in a different pure function.
-        if (
-            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
-        ) {
-            if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-            }
-        }
-
         return (true, _SUCCESS, bytes32(0));
     }
 }

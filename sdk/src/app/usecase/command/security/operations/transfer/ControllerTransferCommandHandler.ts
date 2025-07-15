@@ -216,9 +216,8 @@ import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 import ContractService from '../../../../../service/contract/ContractService.js';
-import { ControllerTransferCommandError } from './error/ControllerTransferCommandError.js';
+import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
 
 @CommandHandler(ControllerTransferCommand)
 export class ControllerTransferCommandHandler
@@ -258,10 +257,11 @@ export class ControllerTransferCommandHandler
         securityId,
         targetId,
         amount,
-        sourceId,
-        _PARTITION_ID_1,
         account.id.toString(),
+        sourceId,
       );
+
+      await this.validationService.checkDecimals(security, amount);
 
       const amountBd = BigDecimal.fromString(amount, security.decimals);
 

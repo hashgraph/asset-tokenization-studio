@@ -205,6 +205,7 @@
 
 import IssueRequest from './security/operations/issue/IssueRequest.js';
 import RedeemRequest from './security/operations/redeem/RedeemRequest.js';
+import BurnRequest from './security/operations/burn/BurnRequest.js';
 import ForceRedeemRequest from './security/operations/redeem/ForceRedeemRequest.js';
 import CreateEquityRequest from './equity/CreateEquityRequest.js';
 import CreateBondRequest from './bond/CreateBondRequest.js';
@@ -353,6 +354,31 @@ import IsInternalKycActivatedRequest from './security/kyc/IsInternalKycActivated
 import GrantKycMockRequest from './security/externalKycLists/mock/GrantKycMockRequest.js';
 import RevokeKycMockRequest from './security/externalKycLists/mock/RevokeKycMockRequest.js';
 import GetKycStatusMockRequest from './security/externalKycLists/mock/GetKycStatusMockRequest.js';
+import SetNameRequest from './security/operations/tokeMetadata/SetNameRequest.js';
+import SetSymbolRequest from './security/operations/tokeMetadata/SetSymbolRequest.js';
+import ForcedTransferRequest from './security/operations/transfer/ForcedTransferRequest';
+import MintRequest from './security/operations/mint/MintRequest.js';
+import SetOnchainIDRequest from './security/operations/tokeMetadata/SetOnchainIDRequest.js';
+import SetComplianceRequest from './security/compliance/SetComplianceRequest.js';
+import ComplianceRequest from './security/compliance/ComplianceRequest.js';
+import SetIdentityRegistryRequest from './security/identityRegistry/SetIdentityRegistryRequest.js';
+import IdentityRegistryRequest from './security/identityRegistry/IdentityRegistryRequest.js';
+import OnchainIDRequest from './security/operations/tokeMetadata/OnchainIDRequest.js';
+import FreezePartialTokensRequest from './security/operations/freeze/FreezePartialTokensRequest.js';
+import GetFrozenPartialTokensRequest from './security/operations/freeze/GetFrozenPartialTokensRequest.js';
+import UnfreezePartialTokensRequest from './security/operations/freeze/UnfreezePartialTokensRequest.js';
+import RecoveryAddressRequest from './security/operations/recovery/RecoveryAddressRequest.js';
+import IsAddressRecoveredRequest from './security/operations/recovery/IsAddressRecoveredRequest.js';
+import AddAgentRequest from './security/operations/agent/AddAgentRequest.js';
+import RemoveAgentRequest from './security/operations/agent/RemoveAgentRequest.js';
+import BatchBurnRequest from './security/operations/batch/BatchBurnRequest.js';
+import BatchForcedTransferRequest from './security/operations/batch/BatchForcedTransferRequest.js';
+import BatchFreezePartialTokensRequest from './security/operations/batch/BatchFreezePartialTokensRequest.js';
+import BatchMintRequest from './security/operations/batch/BatchMintRequest.js';
+import BatchSetAddressFrozenRequest from './security/operations/batch/BatchSetAddressFrozenRequest.js';
+import BatchTransferRequest from './security/operations/batch/BatchTransferRequest.js';
+import BatchUnfreezePartialTokensRequest from './security/operations/batch/BatchUnfreezePartialTokensRequest.js';
+import SetAddressFrozenRequest from './security/operations/freeze/SetAddressFrozenRequest.js';
 import TakeSnapshotRequest from './security/operations/snapshot/TakeSnapshotRequest.js';
 
 export {
@@ -361,11 +387,14 @@ export {
   ValidationResponse,
   IssueRequest,
   RedeemRequest,
+  BurnRequest,
   ForceRedeemRequest,
   RoleRequest,
   ApplyRolesRequest,
   TransferRequest,
   ForceTransferRequest,
+  ForcedTransferRequest,
+  MintRequest,
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
@@ -505,5 +534,28 @@ export {
   GrantKycMockRequest,
   RevokeKycMockRequest,
   GetKycStatusMockRequest,
+  SetNameRequest,
+  SetSymbolRequest,
+  SetOnchainIDRequest,
+  SetComplianceRequest,
+  SetIdentityRegistryRequest,
+  ComplianceRequest,
+  IdentityRegistryRequest,
+  OnchainIDRequest,
+  FreezePartialTokensRequest,
+  GetFrozenPartialTokensRequest,
+  UnfreezePartialTokensRequest,
+  RecoveryAddressRequest,
+  IsAddressRecoveredRequest,
+  AddAgentRequest,
+  RemoveAgentRequest,
+  BatchBurnRequest,
+  BatchForcedTransferRequest,
+  BatchFreezePartialTokensRequest,
+  BatchMintRequest,
+  BatchSetAddressFrozenRequest,
+  BatchTransferRequest,
+  BatchUnfreezePartialTokensRequest,
+  SetAddressFrozenRequest,
   TakeSnapshotRequest,
 };

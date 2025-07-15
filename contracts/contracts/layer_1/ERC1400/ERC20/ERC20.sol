@@ -238,6 +238,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyUnpaused
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(spender)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(spender)
         onlyWithoutMultiPartition
         returns (bool)
     {
@@ -252,6 +254,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         onlyClearingDisabled
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(to)
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(to)
         onlyWithoutMultiPartition
@@ -274,6 +278,9 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(from)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(from)
+        onlyUnrecoveredAddress(to)
         onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -291,6 +298,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         onlyUnpaused
         onlyListedAllowed(_msgSender())
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(spender)
         onlyListedAllowed(spender)
         onlyWithoutMultiPartition
         returns (bool)
@@ -307,6 +316,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(spender)
         onlyWithoutMultiPartition
+        onlyUnrecoveredAddress(_msgSender())
         returns (bool)
     {
         return _decreaseAllowance(spender, subtractedValue);

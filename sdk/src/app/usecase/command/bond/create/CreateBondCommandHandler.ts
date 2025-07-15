@@ -263,6 +263,7 @@ export class CreateBondCommandHandler
         externalKycLists,
       } = command;
 
+      //TODO: Boy scout: remove request validations and adjust test
       if (!factory) {
         throw new InvalidRequest('Factory not found in request');
       }

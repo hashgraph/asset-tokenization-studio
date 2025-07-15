@@ -266,6 +266,8 @@ abstract contract SnapshotsStorageWrapper1 is
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionClearedBalanceSnapshots;
         Snapshots abafSnapshots;
         Snapshots decimals;
+        mapping(address => Snapshots) accountFrozenBalanceSnapshots;
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionFrozenBalanceSnapshots;
     }
 
     event SnapshotTriggered(address indexed operator, uint256 snapshotId);
