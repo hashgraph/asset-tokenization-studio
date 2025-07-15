@@ -58,7 +58,7 @@ jobs:
             - name: Install dependencies Contracts
               working-directory: contracts
               run: |
-                  npm ci
+                  npm i
                   npm run compile:force
 
             - name: Test Contracts
@@ -68,7 +68,7 @@ jobs:
             - name: Install dependencies SDK
               working-directory: sdk
               run: |
-                  npm ci
+                  npm i
                   npm run build
 
             - name: Install Yarn

@@ -32,8 +32,8 @@ jobs:
         run: |
           touch .npmrc
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
-          cp .npmrc ./contracts/.npmrc
-          cp .npmrc ./sdk/.npmrc
+          cp .npmrc ./packages/ats/contracts/.npmrc
+          cp .npmrc ./packages/ats/sdk/.npmrc
 
       - name: Change references
         run: ./changeProjectsReferencesToRepo.sh
