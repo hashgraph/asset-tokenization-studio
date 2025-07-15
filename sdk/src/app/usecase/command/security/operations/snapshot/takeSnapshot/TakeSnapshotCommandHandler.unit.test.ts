@@ -203,124 +203,142 @@
 
 */
 
-import { singleton } from 'tsyringe';
-import Injectable from '../../../core/Injectable.js';
-import { RPCTransactionAdapter } from '../../../port/out/rpc/RPCTransactionAdapter.js';
-import TransactionAdapter from '../../../port/out/TransactionAdapter.js';
-import Service from '../Service.js';
-import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
-import { InvalidWalletTypeError } from '../../../domain/context/network/error/InvalidWalletAccountTypeError.js';
-import LogService from '../log/LogService.js';
-import { HederaWalletConnectTransactionAdapter } from '../../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.js';
-import { DFNSTransactionAdapter } from '../../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import { FireblocksTransactionAdapter } from '../../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import { AWSKMSTransactionAdapter } from '../../../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
-import { WalletNotSupported } from './error/WalletNotSupported.js';
-import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
-import { InvalidResponse } from '../../../core/error/InvalidResponse.js';
-import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter.js';
-import { EmptyResponse } from './error/EmptyResponse.js';
-import { Response } from '../../../domain/context/transaction/Response';
-import { ADDRESS_LENGTH, BYTES_32_LENGTH } from '../../../core/Constants.js';
+import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '../../../../../../service/account/AccountService.js';
+import {
+  AccountPropsFixture,
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import ContractService from '../../../../../../service/contract/ContractService.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import ValidationService from '../../../../../../service/validation/ValidationService.js';
+import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+import Account from '../../../../../../../domain/context/account/Account.js';
+import { faker } from '@faker-js/faker/.';
+import { TakeSnapshotCommandHandler } from './TakeSnapshotCommandHandler.js';
+import {
+  TakeSnapshotCommand,
+  TakeSnapshotCommandResponse,
+} from './TakeSnapshotCommand.js';
+import { TakeSnapshotCommandError } from './error/TakeSnapshotCommandError.js';
+import { TakeSnapshotCommandFixture } from '../../../../../../../../__tests__/fixtures/snapshot/SnapshotFixture.js';
+import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 
-@singleton()
-export default class TransactionService extends Service {
-  constructor(
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter = Injectable.resolve(
-      MirrorNodeAdapter,
-    ),
-  ) {
-    super();
-  }
+describe('TakeSnapshotCommandHandler', () => {
+  let handler: TakeSnapshotCommandHandler;
+  let command: TakeSnapshotCommand;
 
-  getHandler(): TransactionAdapter {
-    return Injectable.resolveTransactionHandler();
-  }
+  const transactionServiceMock = createMock<TransactionService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-  setHandler(adp: TransactionAdapter): TransactionAdapter {
-    Injectable.registerTransactionHandler(adp);
-    return adp;
-  }
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const account = new Account(AccountPropsFixture.create());
 
-  static getHandlerClass(type: SupportedWallets): TransactionAdapter {
-    switch (type) {
-      case SupportedWallets.METAMASK:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('METAMASK TransactionAdapter');
-        return Injectable.resolve(RPCTransactionAdapter);
-      case SupportedWallets.HWALLETCONNECT:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('HWALLETCONNECT TransactionAdapter');
-        return Injectable.resolve(HederaWalletConnectTransactionAdapter);
-      case SupportedWallets.DFNS:
-        LogService.logTrace('DFNS TransactionAdapter');
-        return Injectable.resolve(DFNSTransactionAdapter);
-      case SupportedWallets.FIREBLOCKS:
-        LogService.logTrace('FIREBLOCKS TransactionAdapter');
-        return Injectable.resolve(FireblocksTransactionAdapter);
-      case SupportedWallets.AWSKMS:
-        LogService.logTrace('AWSKMS TransactionAdapter');
-        return Injectable.resolve(AWSKMSTransactionAdapter);
-      default:
-        throw new WalletNotSupported();
-    }
-  }
+  const snapshotId = faker.string.hexadecimal({
+    length: 64,
+    prefix: '0x',
+  });
 
-  async getTransactionResult({
-    res,
-    result,
-    className,
-    position,
-    numberOfResultsItems,
-    isContractCreation,
-  }: {
-    res: TransactionResponse;
-    result?: Response;
-    className: string;
-    position: number;
-    numberOfResultsItems: number;
-    isContractCreation?: boolean;
-  }): Promise<string> {
-    if (!res.id) throw new EmptyResponse(className);
+  beforeEach(() => {
+    handler = new TakeSnapshotCommandHandler(
+      accountServiceMock,
+      contractServiceMock,
+      transactionServiceMock,
+      validationServiceMock,
+    );
+    command = TakeSnapshotCommandFixture.create();
+  });
 
-    if (result) {
-      return result;
-    }
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    let results;
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws TakeSnapshotCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-    if (isContractCreation) {
-      results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-        true,
-      );
-    } else {
-      results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-    }
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
-    if (!results || results.length !== numberOfResultsItems) {
-      throw new InvalidResponse(results);
-    }
+        const resultPromise = handler.execute(command);
 
-    if (
-      ['CreateEquityCommandHandler', 'CreateBondCommandHandler'].some(
-        (handler) => className.includes(handler),
-      )
-    ) {
-      const data = results.map((result) =>
-        result.substring(BYTES_32_LENGTH - ADDRESS_LENGTH + 2),
-      );
-      return `0x${data[position]}`;
-    }
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          TakeSnapshotCommandError,
+        );
 
-    return results[position];
-  }
-}
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while taking snapshot: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully take snapshot', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        validationServiceMock.checkPause.mockResolvedValue(undefined);
+        validationServiceMock.checkRole.mockResolvedValue(undefined);
+
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+
+        transactionServiceMock.getHandler().takeSnapshot.mockResolvedValue({
+          id: transactionId,
+        });
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          snapshotId,
+        );
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(TakeSnapshotCommandResponse);
+        expect(result.payload).toBe(parseInt(snapshotId, 16));
+        expect(result.transactionId).toBe(transactionId);
+
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._SNAPSHOT_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+        expect(
+          transactionServiceMock.getHandler().takeSnapshot,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(
+          transactionServiceMock.getHandler().takeSnapshot,
+        ).toHaveBeenCalledWith(evmAddress, command.securityId);
+
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith({
+          res: { id: transactionId },
+          className: TakeSnapshotCommandHandler.name,
+          position: 1,
+          numberOfResultsItems: 2,
+        });
+      });
+    });
+  });
+});

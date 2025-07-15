@@ -288,6 +288,7 @@ import {
   SetNameRequest,
   SetOnchainIDRequest,
   SetSymbolRequest,
+  TakeSnapshotRequest,
   TransferAndLockRequest,
   TransferRequest,
   UnfreezePartialTokensRequest,
@@ -564,6 +565,8 @@ import {
   SetAddressFrozenCommand,
   SetAddressFrozenCommandResponse,
 } from '../../../app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand';
+import { TakeSnapshotRequestFixture } from '../../../../__tests__/fixtures/snapshot/SnapshotFixture';
+import { TakeSnapshotCommand } from '../../../app/usecase/command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
 
 describe('Security', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -656,6 +659,7 @@ describe('Security', () => {
   let batchFreezePartialTokensRequest: BatchFreezePartialTokensRequest;
   let batchForcedTransferRequest: BatchForcedTransferRequest;
   let batchUnfreezePartialTokensRequest: BatchUnfreezePartialTokensRequest;
+  let takeSnapshotRequest: TakeSnapshotRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -9193,6 +9197,62 @@ describe('Security', () => {
       await expect(
         Security.batchUnfreezePartialTokens(batchUnfreezePartialTokensRequest),
       ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('takeSnapshot', () => {
+    takeSnapshotRequest = new TakeSnapshotRequest(
+      TakeSnapshotRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should take snapshot successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.takeSnapshot(takeSnapshotRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        TakeSnapshotRequest.name,
+        takeSnapshotRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new TakeSnapshotCommand(takeSnapshotRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.takeSnapshot(takeSnapshotRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        TakeSnapshotRequest.name,
+        takeSnapshotRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new TakeSnapshotCommand(takeSnapshotRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      takeSnapshotRequest = new TakeSnapshotRequest({
+        ...TakeSnapshotRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.takeSnapshot(takeSnapshotRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
   });
 });

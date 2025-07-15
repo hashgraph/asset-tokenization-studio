@@ -405,6 +405,8 @@ import { BatchFreezePartialTokensCommand } from '../../../app/usecase/command/se
 import { BatchForcedTransferCommand } from '../../../app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand.js';
 import { BatchUnfreezePartialTokensCommand } from '../../../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand.js';
 import { SetAddressFrozenCommand } from '../../../app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand.js';
+import { TakeSnapshotCommand } from '../../../app/usecase/command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand.js';
+import TakeSnapshotRequest from '../request/security/operations/snapshot/TakeSnapshotRequest.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -632,6 +634,9 @@ interface ISecurityInPort {
   batchUnfreezePartialTokens(
     request: BatchUnfreezePartialTokensRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  takeSnapshot(
+    request: TakeSnapshotRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -2246,6 +2251,16 @@ class SecurityInPort implements ISecurityInPort {
     return await this.commandBus.execute(
       new RemoveAgentCommand(request.securityId, request.agentId),
     );
+  }
+
+  @LogError
+  async takeSnapshot(
+    request: TakeSnapshotRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const { securityId } = request;
+    ValidatedRequest.handleValidation(TakeSnapshotRequest.name, request);
+
+    return await this.commandBus.execute(new TakeSnapshotCommand(securityId));
   }
 }
 

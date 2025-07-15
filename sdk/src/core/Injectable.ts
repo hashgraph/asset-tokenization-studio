@@ -423,6 +423,7 @@ import { BatchSetAddressFrozenCommandHandler } from '../app/usecase/command/secu
 import { BatchTransferCommandHandler } from '../app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommandHandler.js';
 import { BatchUnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommandHandler.js';
 import { SetAddressFrozenCommandHandler } from '../app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommandHandler.js';
+import { TakeSnapshotCommandHandler } from '../app/usecase/command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -870,6 +871,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: BatchUnfreezePartialTokensCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: TakeSnapshotCommandHandler,
   },
 ];
 
@@ -1327,9 +1332,13 @@ export default class Injectable {
 
   static registerTransactionAdapterInstances(): TransactionAdapter[] {
     const adapters: TransactionAdapter[] = [];
+    if (this.isWeb()) {
+      adapters.push(
+        Injectable.resolve(RPCTransactionAdapter),
+        Injectable.resolve(HederaWalletConnectTransactionAdapter),
+      );
+    }
     adapters.push(
-      Injectable.resolve(RPCTransactionAdapter),
-      Injectable.resolve(HederaWalletConnectTransactionAdapter),
       Injectable.resolve(DFNSTransactionAdapter),
       Injectable.resolve(FireblocksTransactionAdapter),
       Injectable.resolve(AWSKMSTransactionAdapter),
