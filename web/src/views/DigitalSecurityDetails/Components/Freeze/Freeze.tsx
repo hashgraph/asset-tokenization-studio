@@ -204,7 +204,6 @@
 */
 import { useWatch } from "react-hook-form";
 import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { History } from "../../components/History";
 import { useTranslation } from "react-i18next";
 import {
   Text,
@@ -216,22 +215,19 @@ import {
   PhosphorIcon,
 } from "io-bricks-ui";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { required, min } from "../../utils/rules";
-import { CancelButton } from "../../components/CancelButton";
 import { useParams } from "react-router";
-import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
-import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";
-import { useWalletStore } from "../../store/walletStore";
-import { useSecurityStore } from "../../store/securityStore";
 import { Info } from "@phosphor-icons/react";
-import {
-  useFreezeSecurity,
-  useUnfreezeSecurity,
-} from "../../hooks/mutations/useFreezeSecurity";
 import {
   UnfreezePartialTokensRequest,
   FreezePartialTokensRequest,
 } from "@hashgraph/asset-tokenization-sdk";
+import { useSecurityStore } from "../../../../store/securityStore";
+import { CancelButton } from "../../../../components/CancelButton";
+import { min, required } from "../../../../utils/rules";
+import {
+  useFreezeSecurity,
+  useUnfreezeSecurity,
+} from "../../../../hooks/mutations/useFreezeSecurity";
 
 interface MintFormValues {
   amount: number;
@@ -239,26 +235,19 @@ interface MintFormValues {
   isUnfreeze: boolean;
 }
 
-export const DigitalSecurityFreeze = () => {
-  const { t: tHeader } = useTranslation("security", {
-    keyPrefix: "freeze.header",
-  });
+export const Freeze = () => {
   const { t: tForm } = useTranslation("security", {
     keyPrefix: "freeze.input",
   });
   const { t } = useTranslation("security", { keyPrefix: "freeze" });
   const { t: tGlobal } = useTranslation("globals");
-  const { t: tProperties } = useTranslation("properties");
   const { control, formState, handleSubmit, reset } = useForm<MintFormValues>({
-    mode: "all",
+    mode: "onChange",
   });
-  const { address: walletAddress } = useWalletStore();
+
   const { id = "" } = useParams();
   const { details } = useSecurityStore();
-  const { isLoading: isBalancePanelLoading, update } = useDetailsBalancePanel(
-    id,
-    walletAddress,
-  );
+
   const { mutate: freezeSecurity, isLoading: isFreezeLoading } =
     useFreezeSecurity();
   const { mutate: unfreezeSecurity, isLoading: isUnfreezeLoading } =
@@ -281,7 +270,6 @@ export const DigitalSecurityFreeze = () => {
       });
 
       unfreezeSecurity(unfreezePartialTokensRequest, {
-        onSettled: () => update(),
         onSuccess: () => {
           reset();
         },
@@ -294,7 +282,6 @@ export const DigitalSecurityFreeze = () => {
       });
 
       freezeSecurity(freezePartialTokensRequest, {
-        onSettled: () => update(),
         onSuccess: () => {
           reset();
         },
@@ -304,15 +291,7 @@ export const DigitalSecurityFreeze = () => {
 
   return (
     <>
-      <History label={tHeader("title")} />
-      <HStack
-        layerStyle="container"
-        mt={6}
-        pt={20}
-        pb={8}
-        gap={20}
-        justify="center"
-      >
+      <HStack layerStyle="container" pt={10} pb={10} gap={20} justify="center">
         <VStack
           data-testid="mint-form"
           justifyContent="flex-start"
@@ -397,11 +376,6 @@ export const DigitalSecurityFreeze = () => {
             </Button>
           </HStack>
         </VStack>
-        <DetailsBalancePanel
-          balance={details?.totalSupply}
-          isLoading={isBalancePanelLoading}
-          title={tProperties("totalSupply")}
-        />
       </HStack>
     </>
   );

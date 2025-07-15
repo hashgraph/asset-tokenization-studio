@@ -204,10 +204,10 @@
 */
 
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { EditRole } from "./EditRole";
 import { SearchByRole } from "./SearchByRole";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 
 export const RoleManagement = () => {
   const { t: tTabs } = useTranslation("security", {
@@ -216,7 +216,7 @@ export const RoleManagement = () => {
 
   return (
     <Stack w="full" h="full" layerStyle="container" p={0}>
-      <Tabs
+      <PanelTabs
         tabs={[
           {
             content: <EditRole />,

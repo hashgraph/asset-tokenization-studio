@@ -10,13 +10,13 @@ exports[`RoleManagement should render correctly 1`] = `
     >
       <div
         aria-orientation="horizontal"
-        class="chakra-tabs__tablist css-ctgkh0"
+        class="chakra-tabs__tablist css-1xns9mo"
         role="tablist"
       >
         <button
           aria-controls="tabs-:r0:--tabpanel-0"
           aria-selected="true"
-          class="chakra-tabs__tab css-1wqiuq4"
+          class="chakra-tabs__tab css-6f7ltj"
           data-index="0"
           id="tabs-:r0:--tab-0"
           role="tab"
@@ -28,7 +28,7 @@ exports[`RoleManagement should render correctly 1`] = `
         <button
           aria-controls="tabs-:r0:--tabpanel-1"
           aria-selected="false"
-          class="chakra-tabs__tab css-1wqiuq4"
+          class="chakra-tabs__tab css-6f7ltj"
           data-index="1"
           id="tabs-:r0:--tab-1"
           role="tab"
@@ -39,15 +39,11 @@ exports[`RoleManagement should render correctly 1`] = `
         </button>
       </div>
       <div
-        class="chakra-tabs__tab-indicator css-1axjpr8"
-        style="position: absolute; transition-property: left, right, top, bottom, height, width; transition-duration: 0ms; transition-timing-function: cubic-bezier(0, 0, 0.2, 1); left: 0px; width: 0px;"
-      />
-      <div
-        class="chakra-tabs__tab-panels css-1o5uxli"
+        class="chakra-tabs__tab-panels css-4mrpka"
       >
         <div
           aria-labelledby="tabs-:r0:--tab-0"
-          class="chakra-tabs__tab-panel css-1ip3kt8"
+          class="chakra-tabs__tab-panel css-12r0y8x"
           id="tabs-:r0:--tabpanel-0"
           role="tabpanel"
           tabindex="0"
@@ -318,7 +314,7 @@ exports[`RoleManagement should render correctly 1`] = `
         </div>
         <div
           aria-labelledby="tabs-:r0:--tab-1"
-          class="chakra-tabs__tab-panel css-1ip3kt8"
+          class="chakra-tabs__tab-panel css-12r0y8x"
           hidden=""
           id="tabs-:r0:--tabpanel-1"
           role="tabpanel"
