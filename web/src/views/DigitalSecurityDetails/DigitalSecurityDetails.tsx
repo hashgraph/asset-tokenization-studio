@@ -204,7 +204,7 @@
 */
 
 import { HStack, Stack } from "@chakra-ui/react";
-import { Tag, Tabs } from "io-bricks-ui";
+import { Tag } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { History } from "../../components/History";
 import { Details } from "./Components/Details";
@@ -241,6 +241,7 @@ import { OperationsTab } from "./Components/Tabs/Operations";
 import { ControlTab } from "./Components/Tabs/Control";
 import { CorporateActionsTab } from "./Components/Tabs/CorporateActions";
 import { hasRole } from "../../utils/helpers";
+import { PanelTabs } from "../../components/PanelTabs/PanelTabs";
 
 export const DigitalSecurityDetails = () => {
   const { t: tHeader } = useTranslation("security", {
@@ -372,6 +373,8 @@ export const DigitalSecurityDetails = () => {
       showClearingOperations:
         !isSecurityPaused &&
         hasRole(roles, SecurityRole._CLEARING_VALIDATOR_ROLE),
+      showFreeze:
+        !isSecurityPaused && hasRole(roles, SecurityRole._FREEZE_MANAGER_ROLE),
     };
 
     const corporateActionsConfig = {
@@ -480,7 +483,7 @@ export const DigitalSecurityDetails = () => {
         )}
       </HStack>
       <Stack w="full" h="full" borderRadius={1} pt={6} gap={4}>
-        <Tabs tabs={tabs} variant="primary" />
+        <PanelTabs tabs={tabs} />
       </Stack>
     </>
   );

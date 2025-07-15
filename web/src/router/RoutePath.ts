@@ -221,7 +221,6 @@ export const RoutePath: Record<RouteName, string> = {
   [RouteName.ExternalKYCDetails]: "/external-kyc/:id",
   [RouteName.DigitalSecurityDetails]: "/security/:id",
   [RouteName.DigitalSecurityMint]: "/security/:id/mint",
-  [RouteName.DigitalSecurityFreeze]: "/security/:id/freeze",
   [RouteName.DigitalSecurityTransfer]: "/security/:id/transfer",
   [RouteName.DigitalSecurityForceTransfer]: "/security/:id/forceTransfer",
   [RouteName.DigitalSecurityRedeem]: "/security/:id/redeem",

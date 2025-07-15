@@ -1,5 +1,4 @@
 import { Box } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { KYC } from "../KYC/KYC";
 import { SSIManager } from "../SSIManager/SSIManager";
@@ -9,7 +8,7 @@ import { useMemo } from "react";
 import { ExternalPause } from "../ExternalPause/ExternalPause";
 import { ExternalControl } from "../ExternalControl/ExternalControl";
 import { ExternalKYC } from "../ExternalKYC/ExternalKYC";
-import { AdminControlActionsButtons } from "../AdminControlActionsButtons";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 
 interface ControlTabProps {
   details: SecurityViewModel;
@@ -58,8 +57,7 @@ export const ControlTab = ({ details, config }: ControlTabProps) => {
 
   return (
     <Box w={"full"} h={"full"}>
-      <AdminControlActionsButtons />
-      <Tabs tabs={tabs} variant="secondary" />
+      <PanelTabs tabs={tabs} />
     </Box>
   );
 };
