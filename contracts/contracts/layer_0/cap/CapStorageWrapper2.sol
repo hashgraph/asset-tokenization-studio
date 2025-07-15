@@ -288,7 +288,7 @@ abstract contract CapStorageWrapper2 is
         }
     }
 
-    function _checkWithinMaxSupply(uint256 _amount) private view {
+    function _checkWithinMaxSupply(uint256 _amount) internal view {
         uint256 maxSupply = _getMaxSupply();
         if (!_isCorrectMaxSupply(_totalSupply() + _amount, maxSupply)) {
             revert ICapStorageWrapper.MaxSupplyReached(maxSupply);

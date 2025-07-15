@@ -347,6 +347,28 @@ import {
   CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
   ACTIVATE_INTERNAL_KYC_GAS,
   DEACTIVATE_INTERNAL_KYC_GAS,
+  SET_NAME_GAS,
+  SET_SYMBOL_GAS,
+  BURN_GAS,
+  MINT_GAS,
+  FORCED_TRANSFER_GAS,
+  SET_ONCHAIN_ID_GAS,
+  SET_IDENTITY_REGISTRY_GAS,
+  SET_COMPLIANCE_GAS,
+  FREEZE_PARTIAL_TOKENS_GAS,
+  UNFREEZE_PARTIAL_TOKENS_GAS,
+  BATCH_TRANSFER_GAS,
+  BATCH_FORCED_TRANSFER_GAS,
+  BATCH_MINT_GAS,
+  BATCH_BURN_GAS,
+  BATCH_SET_ADDRESS_FROZEN_GAS,
+  BATCH_FREEZE_PARTIAL_TOKENS_GAS,
+  BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
+  EVM_ZERO_ADDRESS,
+  RECOVERY_ADDRESS_GAS,
+  ADD_AGENT_GAS,
+  REMOVE_AGENT_GAS,
+  SET_ADDRESS_FROZEN_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -390,6 +412,8 @@ import {
   MockedWhitelist__factory,
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
+  ERC3643__factory,
+  FreezeFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -431,6 +455,7 @@ import {
 } from '../../../domain/context/security/Clearing.js';
 import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
 import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
+import { ContractId } from '@hashgraph/sdk';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -1105,6 +1130,26 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async burn(
+    security: EvmAddress,
+    source: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Burning ${amount} securities from source: ${source.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).burn(source.toString(), amount.toBigNumber(), {
+        gasLimit: BURN_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
   async pause(security: EvmAddress): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(`Pausing security: ${security.toString()}`);
 
@@ -1225,6 +1270,24 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async mint(
+    security: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Minting ${amount} ${security} to account: ${target.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).mint(target.toString(), amount.toBigNumber(), { gasLimit: MINT_GAS }),
+      this.networkService.environment,
+    );
+  }
+
   async addToControlList(
     security: EvmAddress,
     targetId: EvmAddress,
@@ -1270,7 +1333,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Force transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
+      `Controller transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
@@ -1286,6 +1349,32 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         '0x',
         {
           gasLimit: CONTROLLER_TRANSFER_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async forcedTransfer(
+    security: EvmAddress,
+    source: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Forced transfer ${amount} tokens from account ${source.toString()} to account ${target.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).forcedTransfer(
+        source.toString(),
+        target.toString(),
+        amount.toBigNumber(),
+        {
+          gasLimit: FORCED_TRANSFER_GAS,
         },
       ),
       this.networkService.environment,
@@ -3245,6 +3334,407 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       ).deactivateInternalKyc({
         gasLimit: DEACTIVATE_INTERNAL_KYC_GAS,
       }),
+      this.networkService.environment,
+    );
+  }
+
+  async setName(
+    security: EvmAddress,
+    name: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting name to ${security.toString()}`);
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setName(name, {
+        gasLimit: SET_NAME_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+  async setSymbol(
+    security: EvmAddress,
+    symbol: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting symbol to ${security.toString()}`);
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setName(symbol, {
+        gasLimit: SET_SYMBOL_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setOnchainID(
+    security: EvmAddress,
+    onchainID: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting onchainID to ${security.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setOnchainID(onchainID.toString(), {
+        gasLimit: SET_ONCHAIN_ID_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setIdentityRegistry(
+    security: EvmAddress,
+    identityRegistry: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting Identity Registry to ${security.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setIdentityRegistry(identityRegistry.toString(), {
+        gasLimit: SET_IDENTITY_REGISTRY_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async setCompliance(
+    security: EvmAddress,
+    compliance: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting Compliance to ${security.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setCompliance(compliance.toString(), {
+        gasLimit: SET_COMPLIANCE_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async freezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Freezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
+    );
+    return RPCTransactionResponseAdapter.manageResponse(
+      await FreezeFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).freezePartialTokens(targetId.toString(), amount.toBigNumber(), {
+        gasLimit: FREEZE_PARTIAL_TOKENS_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async unfreezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Unfreezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
+    );
+    return RPCTransactionResponseAdapter.manageResponse(
+      await FreezeFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).unfreezePartialTokens(targetId.toString(), amount.toBigNumber(), {
+        gasLimit: UNFREEZE_PARTIAL_TOKENS_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async recoveryAddress(
+    security: EvmAddress,
+    lostWallet: EvmAddress,
+    newWallet: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Recovering address ${lostWallet.toString()} to ${newWallet.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).recoveryAddress(
+        lostWallet.toString(),
+        newWallet.toString(),
+        EVM_ZERO_ADDRESS,
+        {
+          gasLimit: RECOVERY_ADDRESS_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async addAgent(
+    security: EvmAddress,
+    agentId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Granting agent role to ${agentId.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addAgent(agentId.toString(), {
+        gasLimit: ADD_AGENT_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeAgent(
+    security: EvmAddress,
+    agentId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Revoking agent role from ${agentId.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ERC3643__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeAgent(agentId.toString(), {
+        gasLimit: REMOVE_AGENT_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async batchTransfer(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch transferring ${amountList.length} token amounts from ${security.toString()} to ${toList.map((item) => item.toString()).join(', ')}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchTransfer(
+      toList.map((account) => account.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_TRANSFER_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchForcedTransfer(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    fromList: EvmAddress[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch forced transferring ${amountList.length} token amounts from ${fromList.map((item) => item.toString())} to ${toList.map((item) => item.toString())}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchForcedTransfer(
+      fromList.map((item) => item.toString()),
+      toList.map((item) => item.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_FORCED_TRANSFER_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchMint(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    toList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch minting ${amountList.length} token amounts on ${security.toString()} to ${toList.map((item) => item.toString())}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchMint(
+      toList.map((item) => item.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_MINT_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchBurn(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch burning ${amountList.length} token amounts from ${targetList.map((item) => item.toString())}`,
+    );
+
+    const contract = ERC3643__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchBurn(
+      targetList.map((item) => item.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_BURN_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchSetAddressFrozen(
+    security: EvmAddress,
+    freezeList: boolean[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch setting address frozen status on ${targetList.length} addresses from ${security.toString()}`,
+    );
+
+    const contract = FreezeFacet__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchSetAddressFrozen(
+      targetList.map((item) => item.toString()),
+      freezeList,
+      {
+        gasLimit: BATCH_SET_ADDRESS_FROZEN_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchFreezePartialTokens(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch freezing partial tokens (${amountList.length}) on ${security.toString()} for targets ${targetList.map((item) => item.toString())}`,
+    );
+
+    const contract = FreezeFacet__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchFreezePartialTokens(
+      targetList.map((item) => item.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_FREEZE_PARTIAL_TOKENS_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async batchUnfreezePartialTokens(
+    security: EvmAddress,
+    amountList: BigDecimal[],
+    targetList: EvmAddress[],
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Batch unfreezing partial tokens (${amountList.length}) on ${security.toString()} for targets ${targetList.map((item) => item.toString())}`,
+    );
+
+    const contract = FreezeFacet__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.batchUnfreezePartialTokens(
+      targetList.map((item) => item.toString()),
+      amountList.map((item) => item.toBigNumber()),
+      {
+        gasLimit: BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
+      },
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
+      this.networkService.environment,
+    );
+  }
+
+  async setAddressFrozen(
+    security: EvmAddress,
+    status: boolean,
+    target: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Freezing address ${target.toString()}`);
+
+    const contract = FreezeFacet__factory.connect(
+      security.toString(),
+      this.signerOrProvider,
+    );
+    const tx = await contract.setAddressFrozen(target.toString(), status, {
+      gasLimit: SET_ADDRESS_FROZEN_GAS,
+    });
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      tx,
       this.networkService.environment,
     );
   }

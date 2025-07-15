@@ -258,7 +258,10 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
         security,
       );
 
-      await this.validationService.checkControlList(securityId, targetId);
+      await this.validationService.checkControlList(
+        securityId,
+        targetEvmAddress.toString(),
+      );
 
       await this.validationService.checkKycAddresses(
         securityId,
@@ -266,8 +269,8 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
         KycStatus.GRANTED,
       );
 
-      await this.validationService.checkRole(
-        SecurityRole._ISSUER_ROLE,
+      await this.validationService.checkAnyRole(
+        [SecurityRole._ISSUER_ROLE, SecurityRole._AGENT_ROLE],
         account.id.toString(),
         securityId,
       );

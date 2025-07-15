@@ -256,6 +256,8 @@ import {
   MockedBlacklist__factory,
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
+  ERC3643__factory,
+  FreezeFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -902,6 +904,7 @@ export class RPCQueryAdapter {
     partitionId: string,
     data: string,
     operatorData: string,
+    operatorId: string,
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer by partition`);
 
@@ -915,6 +918,9 @@ export class RPCQueryAdapter {
       amount.toBigNumber(),
       data,
       operatorData,
+      {
+        from: operatorId,
+      },
     );
   }
 
@@ -923,6 +929,7 @@ export class RPCQueryAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     data: string,
+    operatorId: string,
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer`);
 
@@ -930,6 +937,9 @@ export class RPCQueryAdapter {
       targetId.toString(),
       amount.toBigNumber(),
       data,
+      {
+        from: operatorId,
+      },
     );
   }
 
@@ -940,6 +950,7 @@ export class RPCQueryAdapter {
     partitionId: string,
     data: string,
     operatorData: string,
+    operatorId: string,
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can redeem`);
 
@@ -952,6 +963,9 @@ export class RPCQueryAdapter {
       amount.toBigNumber(),
       data,
       operatorData,
+      {
+        from: operatorId,
+      },
     );
   }
 
@@ -1808,5 +1822,63 @@ export class RPCQueryAdapter {
     ).getKycStatus(targetId.toString());
 
     return kycStatus;
+  }
+
+  async onchainID(address: EvmAddress): Promise<string> {
+    LogService.logTrace(`Getting OnchainID for security ${address.toString()}`);
+
+    return await this.connect(ERC3643__factory, address.toString()).onchainID();
+  }
+
+  async identityRegistry(address: EvmAddress): Promise<string> {
+    LogService.logTrace(
+      `Getting IdentityRegistry for security ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ERC3643__factory,
+      address.toString(),
+    ).identityRegistry();
+  }
+
+  async compliance(address: EvmAddress): Promise<string> {
+    LogService.logTrace(
+      `Getting Compliance for security ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ERC3643__factory,
+      address.toString(),
+    ).compliance();
+  }
+
+  async getFrozenPartialTokens(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting frozen partial tokens for account ${targetId}} for the mock contract ${address.toString()}`,
+    );
+
+    const frozenTokens = await this.connect(
+      FreezeFacet__factory,
+      address.toString(),
+    ).getFrozenTokens(targetId.toString());
+
+    return frozenTokens.toNumber();
+  }
+
+  async isAddressRecovered(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(`Getting recovery status of ${targetId}`);
+
+    const isAddressRecovered = await this.connect(
+      ERC3643__factory,
+      address.toString(),
+    ).isAddressRecovered(targetId.toString());
+
+    return isAddressRecovered;
   }
 }

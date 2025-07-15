@@ -242,7 +242,7 @@ export class TransferAndLockCommandHandler
     try {
       const { securityId, targetId, amount, expirationDate } = command;
       const handler = this.transactionService.getHandler();
-
+      const account = this.accountService.getCurrentAccount();
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
       const targetEvmAddress: EvmAddress =
@@ -256,6 +256,7 @@ export class TransferAndLockCommandHandler
         securityId,
         targetId,
         amount,
+        account.id.toString(),
       );
 
       const amountBd: BigDecimal = BigDecimal.fromString(

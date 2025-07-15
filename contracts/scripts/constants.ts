@@ -271,6 +271,8 @@ export const _PAUSE_MANAGER_ROLE =
     '0xbc36fbd776e95c4811506a63b650c876b4159cb152d827a5f717968b67c69b84'
 export const _CONTROL_LIST_MANAGER_ROLE =
     '0x0e625647b832ec7d4146c12550c31c065b71e0a698095568fd8320dd2aa72e75'
+export const FREEZE_MANAGER_ROLE =
+    '0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b'
 // * Tasks
 export const BALANCE_ADJUSTMENT_TASK_TYPE =
     '0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d'
@@ -280,6 +282,8 @@ export const KYC_MANAGER_ROLE =
     '0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449'
 export const INTERNAL_KYC_MANAGER_ROLE =
     '0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e'
+export const AGENT_ROLE =
+    '0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6'
 
 // * Errors
 export const IS_PAUSED_ERROR_ID = '0x40'
@@ -295,6 +299,9 @@ export const ALLOWANCE_REACHED_ERROR_ID = '0x49'
 export const FROM_ACCOUNT_KYC_ERROR_ID = '0x50'
 export const TO_ACCOUNT_KYC_ERROR_ID = '0x51'
 export const CLEARING_ACTIVE_ERROR_ID = '0x52'
+export const ADDRESS_RECOVERED_OPERATOR_ERROR_ID = '0x53'
+export const ADDRESS_RECOVERED_FROM_ERROR_ID = '0x54'
+export const ADDRESS_RECOVERED_TO_ERROR_ID = '0x55'
 
 export const SUCCESS = '0x00'
 
@@ -326,7 +333,7 @@ export const GAS_LIMIT = {
     default: 3_000_000,
     low: 1_000_000,
     high: 10_000_000,
-    initilize: {
+    initialize: {
         businessLogicResolver: 8_000_000,
     },
     proxyAdmin: {

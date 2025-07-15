@@ -231,6 +231,8 @@ contract ClearingHoldCreationFacet is
         external
         override
         onlyUnpaused
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_hold.to)
         validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
@@ -255,8 +257,11 @@ contract ClearingHoldCreationFacet is
         external
         override
         onlyUnpaused
-        validateAddress(_clearingOperationFrom.from)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_hold.to)
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
         validateAddress(_hold.escrow)
+        validateAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
@@ -295,8 +300,11 @@ contract ClearingHoldCreationFacet is
         external
         override
         onlyUnpaused
-        validateAddress(_clearingOperationFrom.from)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        onlyUnrecoveredAddress(_hold.to)
         validateAddress(_hold.escrow)
+        validateAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
@@ -332,6 +340,8 @@ contract ClearingHoldCreationFacet is
         external
         override
         onlyUnpaused
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_hold.to)
         onlyProtectedPartitions
         validateAddress(_protectedClearingOperation.from)
         onlyWithValidExpirationTimestamp(

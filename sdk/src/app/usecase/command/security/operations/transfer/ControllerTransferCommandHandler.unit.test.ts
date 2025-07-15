@@ -228,7 +228,6 @@ import {
   ControllerTransferCommandResponse,
 } from './ControllerTransferCommand.js';
 import { ControllerTransferCommandError } from './error/ControllerTransferCommandError.js';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants.js';
 
 describe('ControllerTransferCommandHandler', () => {
   let handler: ControllerTransferCommandHandler;
@@ -269,7 +268,7 @@ describe('ControllerTransferCommandHandler', () => {
       it('throws ControllerTransferCommandError when command fails with uncaught error', async () => {
         const fakeError = new Error(errorMsg);
 
-        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+        securityServiceMock.get.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
@@ -279,7 +278,7 @@ describe('ControllerTransferCommandHandler', () => {
 
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
-            `An error occurred while force transferring tokens: ${errorMsg}`,
+            `An error occurred while controller transferring tokens: ${errorMsg}`,
           ),
           errorCode: ErrorCode.UncaughtCommandError,
         });
@@ -327,9 +326,8 @@ describe('ControllerTransferCommandHandler', () => {
           command.securityId,
           command.targetId,
           command.amount,
-          command.sourceId,
-          _PARTITION_ID_1,
           account.id.toString(),
+          command.sourceId,
         );
 
         expect(

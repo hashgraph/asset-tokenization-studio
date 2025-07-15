@@ -205,6 +205,7 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import {
+  AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
 } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
@@ -225,6 +226,7 @@ import {
 } from './CanRedeemByPartitionQuery.js';
 import { CanRedeemByPartitionQueryError } from './error/CanRedeemByPartitionQueryError.js';
 import { EMPTY_BYTES } from '../../../../../core/Constants.js';
+import Account from '../../../../../domain/context/account/Account.js';
 
 describe('CanRedeemByPartitionQueryHandler', () => {
   let handler: CanRedeemByPartitionQueryHandler;
@@ -240,6 +242,7 @@ describe('CanRedeemByPartitionQueryHandler', () => {
     EvmAddressPropsFixture.create().value,
   );
   const security = new Security(SecurityPropsFixture.create());
+  const account = new Account(AccountPropsFixture.create());
 
   const errorMsg = ErrorMsgFixture.create().msg;
 
@@ -282,9 +285,10 @@ describe('CanRedeemByPartitionQueryHandler', () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,
       );
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+      accountServiceMock.getAccountEvmAddress.mockResolvedValue(
         sourceEvmAddress,
       );
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
       queryAdapterServiceMock.canRedeemByPartition.mockResolvedValueOnce([
         true,
         'test',
@@ -296,6 +300,7 @@ describe('CanRedeemByPartitionQueryHandler', () => {
       expect(result).toBeInstanceOf(CanRedeemByPartitionQueryResponse);
       expect(result.payload).toBe('test');
       expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
         1,
       );
@@ -304,7 +309,8 @@ describe('CanRedeemByPartitionQueryHandler', () => {
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.securityId,
       );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+        1,
         query.sourceId,
       );
       expect(queryAdapterServiceMock.canRedeemByPartition).toHaveBeenCalledWith(
@@ -314,6 +320,7 @@ describe('CanRedeemByPartitionQueryHandler', () => {
         query.partitionId,
         EMPTY_BYTES,
         EMPTY_BYTES,
+        account.evmAddress,
       );
     });
   });
