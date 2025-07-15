@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "setup": "npm install && npm run install:web",
-    "setup:dev": "npm install && npm run build:contracts && npm run build:sdk && npm run install:web && cd apps/ats/web && yarn dev",
+    "start:ats": "npm run clean && npm install && npm run build:contracts && npm run build:sdk && npm run install:web && cd apps/ats/web && yarn dev",
     "install:web": "cd apps/ats/web && yarn install",
     "build:contracts": "npm run build --workspace=packages/ats/contracts",
     "build:sdk": "npm run build --workspace=packages/ats/sdk",
