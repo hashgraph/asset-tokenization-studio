@@ -5,26 +5,24 @@
   "description": "asset tokenization",
   "private": true,
   "workspaces": [
-    "apps/ats/*",
     "packages/ats/*"
   ],
   "scripts": {
     "setup": "npm install && npm run install:web",
+    "setup:dev": "npm install && npm run build:contracts && npm run build:sdk && npm run install:web && cd apps/ats/web && yarn dev",
     "install:web": "cd apps/ats/web && yarn install",
-    "install:web:old": "cd apps/ats/web && yarn install --frozen-lockfile",
-    "build:contracts": "cd packages/ats/contracts && npm run compile:force",
-    "build:sdk": "cd packages/ats/sdk && npm run build",
+    "build:contracts": "npm run build --workspace=packages/ats/contracts",
+    "build:sdk": "npm run build --workspace=packages/ats/sdk",
     "build:web": "cd apps/ats/web && yarn build",
     "build:all": "npm run build:contracts && npm run build:sdk && npm run build:web",
     "publish:contracts": "cd packages/ats/contracts && npm publish",
     "publish:sdk": "cd packages/ats/sdk && npm publish",
     "publish:web": "cd apps/ats/web && npm publish",
-    "clean": "npx -y rimraf node_modules \"apps/ats/*/node_modules\" \"packages/ats/*/node_modules\" cache",
-    "clean:all": "npm run clean && npx -y rimraf build coverage \"apps/ats/*/build\" \"apps/ats/*/dist\" \"packages/ats/*/build\" \"packages/ats/*/dist\" package-lock.json yarn.lock \"apps/ats/*/package-lock.json\" \"apps/ats/*/yarn.lock\" \"packages/ats/*/package-lock.json\" \"packages/ats/*/yarn.lock\"",
+    "clean": "npm run clean:all:modules && npm run clean:all:build",
     "clean:contracts:modules": "cd packages/ats/contracts && npm run clean:node_modules",
     "clean:sdk:modules": "npx -y rimraf packages/ats/sdk/node_modules",
-    "clean:web:modules": "npx -y rimraf apps/ats/web/node_modules",
-    "clean:all:modules": "npx -y concurrently \"npm run clean:sdk:modules\" \"npm run clean:web:modules\" \"npm run clean:contracts:modules\"",
+    "clean:web:modules": "npx -y rimraf apps/ats/web/node_modules apps/ats/web/yarn.lock",
+    "clean:all:modules": "rimraf node_modules package-lock.json && npx -y concurrently \"npm run clean:sdk:modules\" \"npm run clean:web:modules\" \"npm run clean:contracts:modules\"",
     "clean:contracts:build": "cd packages/ats/contracts && npm run clean:build",
     "clean:sdk:build": "npx -y rimraf packages/ats/sdk/build sdk/coverage",
     "clean:web:build": "npx -y rimraf apps/ats/web/dist",
@@ -41,6 +39,8 @@
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "yarn": "^1.22.22",
+    "@nomiclabs/hardhat-ethers": "^2.2.2"
   }
 }
