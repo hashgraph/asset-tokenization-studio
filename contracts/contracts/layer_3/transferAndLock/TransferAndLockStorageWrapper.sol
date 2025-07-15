@@ -211,7 +211,7 @@ import {
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {
     getMessageHashTransferAndLockByPartition,
     getMessageHashTransferAndLock
@@ -305,19 +305,19 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
                 _transferAndLock.to,
                 _transferAndLock.amount
             ),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _transferAndLock.data,
             _msgSender(),
             ''
         );
         (success_, lockId_) = _lockByPartition(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _transferAndLock.amount,
             _transferAndLock.to,
             _transferAndLock.expirationTimestamp
         );
         emit PartitionTransferredAndLocked(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _msgSender(),
             _transferAndLock.to,
             _transferAndLock.amount,

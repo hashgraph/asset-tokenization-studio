@@ -213,7 +213,7 @@ import {
 import {
     _ERC1410_BASIC_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-import {_DEFAULT_PARTITION} from '../../constants/values.sol';
+import {DEFAULT_PARTITION} from '../../constants/values.sol';
 import {LockStorageWrapper1} from '../../lock/LockStorageWrapper1.sol';
 
 abstract contract ERC1410BasicStorageWrapperRead is
@@ -424,7 +424,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
     function _checkDefaultPartitionWithSinglePartition(
         bytes32 partition
     ) internal view {
-        if (!_isMultiPartition() && partition != _DEFAULT_PARTITION)
+        if (!_isMultiPartition() && partition != DEFAULT_PARTITION)
             revert PartitionNotAllowedInSinglePartitionMode(partition);
     }
 

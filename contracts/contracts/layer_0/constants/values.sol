@@ -207,9 +207,9 @@
 pragma solidity 0.8.18;
 
 // solhint-disable max-line-length
-uint256 constant _MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-address constant _ZERO_ADDRESS = address(0);
-bytes constant _ZERO_BYTES = '';
+uint256 constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+address constant ZERO_ADDRESS = address(0);
+bytes constant ZERO_BYTES = '';
 // keccak256('security.token.standard.dividend.corporateAction');
 bytes32 constant DIVIDEND_CORPORATE_ACTION_TYPE = 0x1c29d09f87f2b0c8192a7719a2acdfdfa320dc2835b5a0398e5bd8dc34c14b0e;
 
@@ -224,7 +224,7 @@ bytes32 constant BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE = 0x1256aa1b36483ca651
 
 uint256 constant SNAPSHOT_RESULT_ID = 0;
 
-bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
+bytes32 constant DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
 
 // keccak256('security.token.standard.balanceAdjustment.scheduledTasks');
 bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d;

@@ -211,7 +211,7 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     TransferAndLockStorageWrapper
@@ -283,19 +283,19 @@ contract TransferAndLock is
         _transferByPartition(
             _msgSender(),
             IERC1410Basic.BasicTransferInfo(_to, _amount),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _data,
             _msgSender(),
             ''
         );
         (success_, lockId_) = _lockByPartition(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _amount,
             _to,
             _expirationTimestamp
         );
         emit PartitionTransferredAndLocked(
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             _msgSender(),
             _to,
             _amount,
@@ -343,7 +343,7 @@ contract TransferAndLock is
         external
         override
         onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
-        onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
+        onlyRole(_protectedPartitionsRole(DEFAULT_PARTITION))
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyWithValidExpirationTimestamp(

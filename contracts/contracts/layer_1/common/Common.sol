@@ -206,7 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {_ZERO_BYTES} from '../../layer_0/constants/values.sol';
+import {ZERO_BYTES} from '../../layer_0/constants/values.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
 import {
@@ -249,7 +249,7 @@ abstract contract Common is ERC1594StorageWrapper {
             bytes1 statusCode,
             bytes32 reasonCode,
             bytes memory details
-        ) = _isAbleToTransfer(to, amount, _ZERO_BYTES);
+        ) = _isAbleToTransfer(to, amount, ZERO_BYTES);
         if (!isAbleToTransfer) {
             revert IEip1066.ExtendedError(statusCode, reasonCode, details);
         }

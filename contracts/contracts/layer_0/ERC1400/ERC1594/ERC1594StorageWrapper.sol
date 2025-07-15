@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ZERO_ADDRESS, _ZERO_BYTES} from '../../constants/values.sol';
+import {ZERO_ADDRESS, ZERO_BYTES} from '../../constants/values.sol';
 import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
 import {
@@ -331,70 +331,70 @@ abstract contract ERC1594StorageWrapper is
     {
         address sender = _msgSender();
 
-        if (_to == _ZERO_ADDRESS) {
+        if (_to == ZERO_ADDRESS) {
             return (
                 false,
-                Eip1066._NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066._REASON_INVALID_ZERO_ADDRESS,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                Eip1066.REASON_INVALID_ZERO_ADDRESS,
                 abi.encode(_to)
             );
         }
         if (_isPaused()) {
-            return (false, Eip1066._PAUSED, Eip1066._REASON_EMPTY, _ZERO_BYTES);
+            return (false, Eip1066.PAUSED, Eip1066.REASON_EMPTY, ZERO_BYTES);
         }
         if (_isClearingActivated()) {
             return (
                 false,
-                Eip1066._UNAVAILABLE,
-                Eip1066._REASON_CLEARING_IS_ACTIVE,
-                _ZERO_BYTES
+                Eip1066.UNAVAILABLE,
+                Eip1066.REASON_CLEARING_IS_ACTIVE,
+                ZERO_BYTES
             );
         }
         if (_isRecovered(sender)) {
             return (
                 false,
-                Eip1066._REVOKED_OR_BANNED,
-                Eip1066._REASON_ADDRESS_RECOVERED,
+                Eip1066.REVOKED_OR_BANNED,
+                Eip1066.REASON_ADDRESS_RECOVERED,
                 abi.encode(sender)
             );
         }
         if (_isRecovered(_to)) {
             return (
                 false,
-                Eip1066._REVOKED_OR_BANNED,
-                Eip1066._REASON_ADDRESS_RECOVERED,
+                Eip1066.REVOKED_OR_BANNED,
+                Eip1066.REASON_ADDRESS_RECOVERED,
                 abi.encode(_to)
             );
         }
         if (!_isAbleToAccess(sender)) {
             return (
                 false,
-                Eip1066._DISALLOWED_OR_STOP,
-                Eip1066._REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST,
+                Eip1066.DISALLOWED_OR_STOP,
+                Eip1066.REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST,
                 abi.encode(sender)
             );
         }
         if (!_isAbleToAccess(_to)) {
             return (
                 false,
-                Eip1066._DISALLOWED_OR_STOP,
-                Eip1066._REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST,
+                Eip1066.DISALLOWED_OR_STOP,
+                Eip1066.REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST,
                 abi.encode(_to)
             );
         }
         if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, sender)) {
             return (
                 false,
-                Eip1066._DISALLOWED_OR_STOP,
-                Eip1066._REASON_KYC_NOT_GRANTED,
+                Eip1066.DISALLOWED_OR_STOP,
+                Eip1066.REASON_KYC_NOT_GRANTED,
                 abi.encode(sender)
             );
         }
         if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
             return (
                 false,
-                Eip1066._DISALLOWED_OR_STOP,
-                Eip1066._REASON_KYC_NOT_GRANTED,
+                Eip1066.DISALLOWED_OR_STOP,
+                Eip1066.REASON_KYC_NOT_GRANTED,
                 abi.encode(_to)
             );
         }
@@ -402,12 +402,12 @@ abstract contract ERC1594StorageWrapper is
         if (senderBalance < _value) {
             return (
                 false,
-                Eip1066._INSUFFICIENT_FUNDS,
-                Eip1066._REASON_INSUFFICIENT_BALANCE,
+                Eip1066.INSUFFICIENT_FUNDS,
+                Eip1066.REASON_INSUFFICIENT_BALANCE,
                 abi.encode(sender, senderBalance, _value)
             );
         }
-        return (true, _SUCCESS, bytes32(0), '');
+        return (true, Eip1066.SUCCESS, bytes32(0), '');
     }
 
     function _canTransfer(
