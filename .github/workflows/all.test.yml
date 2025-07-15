@@ -55,44 +55,31 @@ jobs:
               with:
                   node-version: 20.x
 
-            - name: Install dependencies Contracts
-              working-directory: contracts
-              run: |
-                  npm i
-                  npm run compile:force
+            - name: Install monorepo package dependencies (ats/contracts and ats/sdk)
+              run: npm install
 
-            - name: Test Contracts
-              working-directory: contracts
+            - name: Build ats/contracts
+              run: npm run build:contracts
+
+            - name: Build ats/sdk
+              run: npm run build:sdk
+
+            - name: Install ats/web dependencies
+              run: npm run install:web
+
+            - name: build app/ats/web
+              run: npm run build:web
+
+            - name: Run ats/contracts tests
+              working-directory: packages/ats/contracts
               run: npm run test
 
-            - name: Install dependencies SDK
-              working-directory: sdk
-              run: |
-                  npm i
-                  npm run build
-
-            - name: Install Yarn
-              run: npm install -g yarn@1.22.22
-
-            #      # No tests for UI components yet
-            #      - name: Install dependencies UI Components
-            #        working-directory: uiComponents
-            #        run: yarn install
-
-            - name: Install dependencies web
-              working-directory: web
-              run: yarn install
-
-            - name: Build web
-              working-directory: web
-              run: yarn build
-
-            - name: Test web
-              working-directory: web
+            - name: Run ats/sdk tests
+              working-directory: packages/ats/sdk
               run: npm run test
 
-            - name: Test sdk
-              working-directory: sdk
+            - name: Run ats/web tests
+              working-directory: apps/ats/web
               run: npm run test
 
             #      # No tests for UI components yet
