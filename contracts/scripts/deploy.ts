@@ -852,241 +852,217 @@ export async function deployAtsContracts({
             businessLogicResolver: await deployContractWithFactory(
                 commands.businessLogicResolver
             ).then((result) => {
-                console.log(
-                    'BusinessLogicResolver has been deployed successfully'
-                )
+                console.log('BusinessLogicResolver has been deployed successfully at ' + result.address)
                 return result
             }),
             accessControl: await deployContractWithFactory(
                 commands.accessControl
             ).then((result) => {
-                console.log('AccessControl has been deployed successfully')
+                console.log('AccessControl has been deployed successfully at ' + result.address)
                 return result
             }),
             cap: await deployContractWithFactory(commands.cap).then(
                 (result) => {
-                    console.log('Cap has been deployed successfully')
+                    console.log('Cap has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             controlList: await deployContractWithFactory(
                 commands.controlList
             ).then((result) => {
-                console.log('ControlList has been deployed successfully')
+                console.log('ControlList has been deployed successfully at ' + result.address)
                 return result
             }),
             kyc: await deployContractWithFactory(commands.kyc).then(
                 (result) => {
-                    console.log('KYC has been deployed successfully')
+                    console.log('KYC has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             ssiManagement: await deployContractWithFactory(
                 commands.ssiManagement
             ).then((result) => {
-                console.log('SSIManagement has been deployed successfully')
+                console.log('SSIManagement has been deployed successfully at ' + result.address)
                 return result
             }),
             pause: await deployContractWithFactory(commands.pause).then(
                 (result) => {
-                    console.log('Pause has been deployed successfully')
+                    console.log('Pause has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             lock: await deployContractWithFactory(commands.lock).then(
                 (result) => {
-                    console.log('Lock has been deployed successfully')
+                    console.log('Lock has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             hold: await deployContractWithFactory(commands.hold).then(
                 (result) => {
-                    console.log('Hold has been deployed successfully')
+                    console.log('Hold has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             erc20: await deployContractWithFactory(commands.erc20).then(
                 (result) => {
-                    console.log('ERC20 has been deployed successfully')
+                    console.log('ERC20 has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             erc1410ScheduledTasks: await deployContractWithFactory(
                 commands.erc1410ScheduledTasks
             ).then((result) => {
-                console.log(
-                    'ERC1410ScheduledTasks has been deployed successfully'
-                )
+                console.log('ERC1410ScheduledTasks has been deployed successfully at ' + result.address)
                 return result
             }),
             erc1594: await deployContractWithFactory(commands.erc1594).then(
                 (result) => {
-                    console.log('ERC1594 has been deployed successfully')
+                    console.log('ERC1594 has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             erc1643: await deployContractWithFactory(commands.erc1643).then(
                 (result) => {
-                    console.log('ERC1643 has been deployed successfully')
+                    console.log('ERC1643 has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             erc1644: await deployContractWithFactory(commands.erc1644).then(
                 (result) => {
-                    console.log('ERC1644 has been deployed successfully')
+                    console.log('ERC1644 has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             snapshots: await deployContractWithFactory(commands.snapshots).then(
                 (result) => {
-                    console.log('Snapshots has been deployed successfully')
+                    console.log('Snapshots has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             diamondFacet: await deployContractWithFactory(
                 commands.diamondFacet
             ).then((result) => {
-                console.log('DiamondFacet has been deployed successfully')
+                console.log('DiamondFacet has been deployed successfully at ' + result.address)
                 return result
             }),
             equityUsa: await deployContractWithFactory(commands.equityUsa).then(
                 (result) => {
-                    console.log('EquityUSA has been deployed successfully')
+                    console.log('EquityUSA has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             bondUsa: await deployContractWithFactory(commands.bondUsa).then(
                 (result) => {
-                    console.log('BondUSA has been deployed successfully')
+                    console.log('BondUSA has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             scheduledSnapshots: await deployContractWithFactory(
                 commands.scheduledSnapshots
             ).then((result) => {
-                console.log('ScheduledSnapshots has been deployed successfully')
+                console.log('ScheduledSnapshots has been deployed successfully at ' + result.address)
                 return result
             }),
             scheduledBalanceAdjustments: await deployContractWithFactory(
                 commands.scheduledBalanceAdjustments
             ).then((result) => {
-                console.log(
-                    'ScheduledBalanceAdjustments has been deployed successfully'
-                )
+                console.log('ScheduledBalanceAdjustments has been deployed successfully at ' + result.address)
                 return result
             }),
             scheduledTasks: await deployContractWithFactory(
                 commands.scheduledTasks
             ).then((result) => {
-                console.log('ScheduledTasks has been deployed successfully')
+                console.log('ScheduledTasks has been deployed successfully at ' + result.address)
                 return result
             }),
             corporateActions: await deployContractWithFactory(
                 commands.corporateActions
             ).then((result) => {
-                console.log('CorporateActions has been deployed successfully')
+                console.log('CorporateActions has been deployed successfully at ' + result.address)
                 return result
             }),
             transferAndLock: await deployContractWithFactory(
                 commands.transferAndLock
             ).then((result) => {
-                console.log('TransferAndLock has been deployed successfully')
+                console.log('TransferAndLock has been deployed successfully at ' + result.address)
                 return result
             }),
             adjustBalances: await deployContractWithFactory(
                 commands.adjustBalances
             ).then((result) => {
-                console.log('AdjustBalances has been deployed successfully')
+                console.log('AdjustBalances has been deployed successfully at ' + result.address)
                 return result
             }),
             protectedPartitions: await deployContractWithFactory(
                 commands.protectedPartitions
             ).then((result) => {
-                console.log(
-                    'ProtectedPartitions has been deployed successfully'
-                )
+                console.log('ProtectedPartitions has been deployed successfully at ' + result.address)
                 return result
             }),
             clearingTransferFacet: await deployContractWithFactory(
                 commands.clearingTransferFacet
             ).then((result) => {
-                console.log(
-                    'ClearingTransferFacet has been deployed successfully'
-                )
+                console.log('ClearingTransferFacet has been deployed successfully at ' + result.address)
                 return result
             }),
             clearingRedeemFacet: await deployContractWithFactory(
                 commands.clearingRedeemFacet
             ).then((result) => {
-                console.log(
-                    'ClearingRedeemFacet has been deployed successfully'
-                )
+                console.log('ClearingRedeemFacet has been deployed successfully at ' + result.address)
                 return result
             }),
             clearingHoldCreationFacet: await deployContractWithFactory(
                 commands.clearingHoldCreationFacet
             ).then((result) => {
-                console.log(
-                    'ClearingHoldCreationFacet has been deployed successfully'
-                )
+                console.log('ClearingHoldCreationFacet has been deployed successfully at ' + result.address)
                 return result
             }),
             clearingReadFacet: await deployContractWithFactory(
                 commands.clearingReadFacet
             ).then((result) => {
-                console.log('ClearingReadFacet has been deployed successfully')
+                console.log('ClearingReadFacet has been deployed successfully at ' + result.address)
                 return result
             }),
             clearingActionsFacet: await deployContractWithFactory(
                 commands.clearingActionsFacet
             ).then((result) => {
-                console.log(
-                    'ClearingActionsFacet has been deployed successfully'
-                )
+                console.log('ClearingActionsFacet has been deployed successfully at ' + result.address)
                 return result
             }),
             externalPauseManagement: await deployContractWithFactory(
                 commands.externalPauseManagement
             ).then((result) => {
-                console.log(
-                    'ExternalPauseManagement has been deployed successfully'
-                )
+                console.log('ExternalPauseManagement has been deployed successfully at ' + result.address)
                 return result
             }),
             externalControlListManagement: await deployContractWithFactory(
                 commands.externalControlListManagement
             ).then((result) => {
-                console.log(
-                    'ExternalControlListManagement has been deployed successfully'
-                )
+                console.log('ExternalControlListManagement has been deployed successfully at ' + result.address)
                 return result
             }),
             externalKycListManagement: await deployContractWithFactory(
                 commands.externalKycListManagement
             ).then((result) => {
-                console.log(
-                    'ExternalKycListManagement has been deployed successfully'
-                )
+                console.log('ExternalKycListManagement has been deployed successfully at ' + result.address)
                 return result
             }),
             erc3643: await deployContractWithFactory(commands.erc3643).then(
                 (result) => {
-                    console.log('ERC3643 has been deployed successfully')
+                    console.log('ERC3643 has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             freeze: await deployContractWithFactory(commands.freeze).then(
                 (result) => {
-                    console.log('Freeze has been deployed successfully')
+                    console.log('Freeze has been deployed successfully at ' + result.address)
                     return result
                 }
             ),
             timeTravel: commands.timeTravel
                 ? await deployContractWithFactory(commands.timeTravel).then(
                       (result) => {
-                          console.log(
-                              'TimeTravel has been deployed successfully'
-                          )
+                          console.log('TimeTravel has been deployed successfully at ' + result.address)
                           return result
                       }
                   )

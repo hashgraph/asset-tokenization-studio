@@ -22,6 +22,27 @@
 -   **[Code of conduct](#code-of-conduct)**<br>
 -   **[License](#license)**<br>
 
+# Description
+
+Asset Tokenization Studio (ATS) is a suite designed to enable the creation, management, and trading of security tokens on the Hedera network.
+
+The ATS facilitates the tokenization of traditional financial assets (equities and bonds) onto the Hedera distributed ledger, providing a framework for:
+- Creating and deploying security tokens
+- Managing token lifecycles
+- Implementing compliance and regulatory requirements
+- Enabling secure token transfers and operations
+
+The ATS consists of three primary components that work together to provide a complete tokenization solution:
+
+- Smart Contracts - The on-chain components deployed on the Hedera network
+- SDK - A software development kit that provides programmatic access to the contracts
+- Web Application - A user interface for interacting with the tokenized assets
+
+The standard ERC for security tokens used in the smart contracts is ERC1400.
+
+In version 1.5.0 is added partially compatibility with the standard ERC364 (TREX) that will be fully compatibility in next versions.
+
+
 # Development manifesto
 
 The development of the project follows enterprise-grade practices for software development. Using DDD, hexagonal architecture, and the CQS pattern, all within an agile methodology.
@@ -115,8 +136,8 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 
     REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
     REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
-    REACT_APP_RPC_RESOLVER='0.0.5827968'
-    REACT_APP_RPC_FACTORY='0.0.5828112'
+    REACT_APP_RPC_RESOLVER='0.0.6349503'
+    REACT_APP_RPC_FACTORY='0.0.6349546'
 
     REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
     REACT_APP_DAPP_NAME="Asset Tokenization Studio"
