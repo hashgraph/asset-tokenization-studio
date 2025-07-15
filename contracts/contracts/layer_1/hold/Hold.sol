@@ -226,6 +226,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         validateAddress(_hold.escrow)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_hold.to)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
@@ -267,6 +269,11 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
+        {
+            _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_hold.to);
+            _checkRecoveredAddress(_from);
+        }
         (success_, holdId_) = _createHoldByPartition(
             _partition,
             _from,
@@ -310,6 +317,11 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
+        {
+            _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_hold.to);
+            _checkRecoveredAddress(_from);
+        }
         (success_, holdId_) = _createHoldByPartition(
             _partition,
             _from,
@@ -375,6 +387,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_protectedHold.hold.escrow)
+        onlyUnrecoveredAddress(_from)
+        onlyUnrecoveredAddress(_protectedHold.hold.to)
         onlyRole(_protectedPartitionsRole(_partition))
         onlyWithValidExpirationTimestamp(
             _protectedHold.hold.expirationTimestamp
@@ -407,6 +421,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyUnrecoveredAddress(_to)
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyWithValidHoldId(_holdIdentifier)
         onlyListedAllowed(_to)

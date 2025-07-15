@@ -216,12 +216,16 @@ import {
 } from '../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol';
 import {LocalContext} from '../../context/LocalContext.sol';
 import {
+    BusinessLogicResolverWrapper
+} from '../../../resolver/BusinessLogicResolverWrapper.sol';
+import {
     _ACCESS_CONTROL_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 
 abstract contract AccessControlStorageWrapper is
     IAccessControlStorageWrapper,
-    LocalContext
+    LocalContext,
+    BusinessLogicResolverWrapper
 {
     // TODO: Check if it's possible to use only one dependency of AddressSet and Bytes32Set
     using LibCommon for EnumerableSet.AddressSet;
@@ -318,6 +322,18 @@ abstract contract AccessControlStorageWrapper is
         return _has(_rolesStorage(), _role, _account);
     }
 
+    function _hasAnyRole(
+        bytes32[] memory _roles,
+        address _account
+    ) internal view returns (bool) {
+        for (uint256 i; i < _roles.length; i++) {
+            if (_has(_rolesStorage(), _roles[i], _account)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function _getRoleCountFor(
         address _account
     ) internal view returns (uint256 roleCount_) {
@@ -355,6 +371,15 @@ abstract contract AccessControlStorageWrapper is
     function _checkRole(bytes32 _role, address _account) internal view {
         if (!_hasRole(_role, _account)) {
             revert AccountHasNoRole(_account, _role);
+        }
+    }
+
+    function _checkAnyRole(
+        bytes32[] memory _roles,
+        address _account
+    ) internal view {
+        if (!_hasAnyRole(_roles, _account)) {
+            revert AccountHasNoRoles(_account, _roles);
         }
     }
 

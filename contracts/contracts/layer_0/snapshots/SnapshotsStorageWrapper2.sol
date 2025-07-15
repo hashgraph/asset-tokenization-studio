@@ -329,6 +329,22 @@ abstract contract SnapshotsStorageWrapper2 is
         );
     }
 
+    function _updateAccountFrozenBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal {
+        _updateSnapshot(
+            _snapshotStorage().accountFrozenBalanceSnapshots[account],
+            _getFrozenAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionFrozenBalanceSnapshots[account][
+                partition
+            ],
+            _getFrozenAmountForByPartition(partition, account)
+        );
+    }
+
     function _updateAccountClearedBalancesSnapshot(
         address account,
         bytes32 partition
@@ -511,6 +527,32 @@ abstract contract SnapshotsStorageWrapper2 is
             );
     }
 
+    function _frozenBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            _balanceOfAtAdjusted(
+                _snapshotID,
+                _snapshotStorage().accountFrozenBalanceSnapshots[_tokenHolder],
+                _getFrozenAmountForAdjusted(_tokenHolder)
+            );
+    }
+
+    function _frozenBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            _balanceOfAtAdjusted(
+                _snapshotID,
+                _snapshotStorage().accountPartitionFrozenBalanceSnapshots[
+                    _tokenHolder
+                ][_partition],
+                _getFrozenAmountForByPartitionAdjusted(_partition, _tokenHolder)
+            );
+    }
     function _clearedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
@@ -579,6 +621,15 @@ abstract contract SnapshotsStorageWrapper2 is
     ) internal view virtual returns (uint256 amount_);
 
     function _getHeldAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
+
+    function _getFrozenAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
+
+    function _getFrozenAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_);

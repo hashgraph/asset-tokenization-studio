@@ -236,6 +236,10 @@ abstract contract ERC1410ProtectedPartitions is
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         onlyProtectedPartitions
     {
+        {
+            _checkRecoveredAddress(_from);
+            _checkRecoveredAddress(_to);
+        }
         _protectedTransferFromByPartition(
             _partition,
             _from,
@@ -258,6 +262,7 @@ abstract contract ERC1410ProtectedPartitions is
         external
         override
         onlyUnpaused
+        onlyUnrecoveredAddress(_from)
         onlyClearingDisabled
         onlyRole(_protectedPartitionsRole(_partition))
         onlyListedAllowed(_from)
