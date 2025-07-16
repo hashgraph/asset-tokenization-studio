@@ -369,6 +369,7 @@ import {
   ADD_AGENT_GAS,
   REMOVE_AGENT_GAS,
   SET_ADDRESS_FROZEN_GAS,
+  REDEEM_AT_MATURITY_BY_PARTITION_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -3735,6 +3736,32 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
     return RPCTransactionResponseAdapter.manageResponse(
       tx,
+      this.networkService.environment,
+    );
+  }
+
+  async redeemAtMaturityByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Redeeming at maturity by partition to address ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Bond__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).redeemAtMaturityByPartition(
+        sourceId.toString(),
+        partitionId,
+        amount.toBigNumber(),
+        {
+          gasLimit: REDEEM_AT_MATURITY_BY_PARTITION_GAS,
+        },
+      ),
       this.networkService.environment,
     );
   }

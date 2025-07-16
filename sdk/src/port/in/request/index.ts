@@ -380,6 +380,7 @@ import BatchTransferRequest from './security/operations/batch/BatchTransferReque
 import BatchUnfreezePartialTokensRequest from './security/operations/batch/BatchUnfreezePartialTokensRequest.js';
 import SetAddressFrozenRequest from './security/operations/freeze/SetAddressFrozenRequest.js';
 import TakeSnapshotRequest from './security/operations/snapshot/TakeSnapshotRequest.js';
+import RedeemAtMaturityByPartitionRequest from './bond/RedeemAtMaturityByPartitionRequest.js';
 
 export {
   CreateEquityRequest,
@@ -558,4 +559,5 @@ export {
   BatchUnfreezePartialTokensRequest,
   SetAddressFrozenRequest,
   TakeSnapshotRequest,
+  RedeemAtMaturityByPartitionRequest,
 };

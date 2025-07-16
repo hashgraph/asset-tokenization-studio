@@ -358,6 +358,7 @@ import {
   EVM_ZERO_ADDRESS,
   ADD_AGENT_GAS,
   SET_ADDRESS_FROZEN_GAS,
+  REDEEM_AT_MATURITY_BY_PARTITION_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -4332,6 +4333,37 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(SET_ADDRESS_FROZEN_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async redeemAtMaturityByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'redeemAtMaturityByPartition';
+    LogService.logTrace(
+      `Redeeming at maturity by partition to address ${security.toString()}`,
+    );
+
+    const functionDataEncodedHex = new Interface(
+      Bond__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [
+      sourceId.toString(),
+      partitionId,
+      amount.toBigNumber(),
+    ]);
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(REDEEM_AT_MATURITY_BY_PARTITION_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
