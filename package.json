@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/hedera-asset-tokenization",
-  "version": "1.14.3",
+  "version": "1.14.4",
   "license": "Apache-2.0",
   "description": "asset tokenization",
   "private": true,
