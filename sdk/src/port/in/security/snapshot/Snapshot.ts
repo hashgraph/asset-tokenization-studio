@@ -203,17 +203,29 @@
 
 */
 
-import FormatValidation from '@port/in/request/FormatValidation';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import { TakeSnapshotRequest } from '../../request';
 import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { BaseSecurityInPort } from '../BaseSecurityInPort';
+import { TakeSnapshotCommand } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
 
-export default class TakeSnapshotRequest extends ValidatedRequest<TakeSnapshotRequest> {
-  securityId: string;
+export interface ISecurityInPortSnapshot {
+  takeSnapshot(
+    request: TakeSnapshotRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+}
 
-  constructor({ securityId }: { securityId: string }) {
-    super({
-      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-    });
+export class SecurityInPortSnapshot
+  extends BaseSecurityInPort
+  implements ISecurityInPortSnapshot
+{
+  @LogError
+  async takeSnapshot(
+    request: TakeSnapshotRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const { securityId } = request;
+    ValidatedRequest.handleValidation(TakeSnapshotRequest.name, request);
 
-    this.securityId = securityId;
+    return await this.commandBus.execute(new TakeSnapshotCommand(securityId));
   }
 }

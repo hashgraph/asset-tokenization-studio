@@ -203,20 +203,20 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import AccountService from '@service/account/AccountService';
 import {
   TakeSnapshotCommand,
   TakeSnapshotCommandResponse,
-} from './TakeSnapshotCommand.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import { TakeSnapshotCommandError } from './error/TakeSnapshotCommandError.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+} from './TakeSnapshotCommand';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import ContractService from '@service/contract/ContractService';
+import TransactionService from '@service/transaction/TransactionService';
+import ValidationService from '@service/validation/ValidationService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { TakeSnapshotCommandError } from './error/TakeSnapshotCommandError';
 
 @CommandHandler(TakeSnapshotCommand)
 export class TakeSnapshotCommandHandler

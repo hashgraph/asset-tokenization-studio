@@ -872,11 +872,10 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: BatchUnfreezePartialTokensCommandHandler,
   },
-
-    {
-      token: TOKENS.COMMAND_HANDLER,
-      useClass: TakeSnapshotCommandHandler,
-    },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: TakeSnapshotCommandHandler,
+  },
 ];
 
 const QUERY_HANDLERS = [

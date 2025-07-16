@@ -256,6 +256,10 @@ import {
   SecurityInPortTransfer,
 } from './transfer/Transfer';
 import { BaseSecurityInPort } from './BaseSecurityInPort';
+import {
+  ISecurityInPortSnapshot,
+  SecurityInPortSnapshot,
+} from './snapshot/Snapshot';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -278,7 +282,8 @@ interface SecurityInPort
     ISecurityInPortRedeem,
     ISecurityInPortSupply,
     ISecurityInPortTokenMetadata,
-    ISecurityInPortTransfer {}
+    ISecurityInPortTransfer,
+    ISecurityInPortSnapshot {}
 
 class SecurityInPort extends BaseSecurityInPort {
   constructor(
@@ -312,6 +317,7 @@ applyMixins(SecurityInPort, [
   SecurityInPortSupply,
   SecurityInPortTokenMetadata,
   SecurityInPortTransfer,
+  SecurityInPortSnapshot,
 ]);
 
 export default new SecurityInPort();

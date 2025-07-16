@@ -202,30 +202,29 @@
    limitations under the License.
 
 */
-
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import {
-  AccountPropsFixture,
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-  TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
 import { faker } from '@faker-js/faker/.';
-import { TakeSnapshotCommandHandler } from './TakeSnapshotCommandHandler.js';
 import {
   TakeSnapshotCommand,
   TakeSnapshotCommandResponse,
-} from './TakeSnapshotCommand.js';
-import { TakeSnapshotCommandError } from './error/TakeSnapshotCommandError.js';
-import { TakeSnapshotCommandFixture } from '../../../../../../../../__tests__/fixtures/snapshot/SnapshotFixture.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+} from './TakeSnapshotCommand';
+import { TakeSnapshotCommandHandler } from './TakeSnapshotCommandHandler';
+import TransactionService from '@service/transaction/TransactionService';
+import ValidationService from '@service/validation/ValidationService';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '@test/fixtures/shared/DataFixture';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { AccountPropsFixture } from '@test/fixtures/account/AccountFixture';
+import Account from '@domain/context/account/Account';
+import { TakeSnapshotCommandFixture } from '@test/fixtures/snapshot/SnapshotFixture';
+import { TakeSnapshotCommandError } from './error/TakeSnapshotCommandError';
+import { ErrorCode } from '@core/error/BaseError';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 
 describe('TakeSnapshotCommandHandler', () => {
   let handler: TakeSnapshotCommandHandler;

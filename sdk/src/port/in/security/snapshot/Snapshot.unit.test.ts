@@ -203,17 +203,100 @@
 
 */
 
-import FormatValidation from '@port/in/request/FormatValidation';
+import { createMock } from '@golevelup/ts-jest';
+import { CommandBus } from '@core/command/CommandBus';
+import { TakeSnapshotRequest } from '../../request';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
 import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Security from '@port/in/security/Security';
+import { TakeSnapshotRequestFixture } from '@test/fixtures/snapshot/SnapshotFixture';
+import { TakeSnapshotCommand } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
 
-export default class TakeSnapshotRequest extends ValidatedRequest<TakeSnapshotRequest> {
-  securityId: string;
+describe('Snapshot', () => {
+  let commandBusMock: jest.Mocked<CommandBus>;
+  let queryBusMock: jest.Mocked<QueryBus>;
+  let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-  constructor({ securityId }: { securityId: string }) {
-    super({
-      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+  let takeSnapshotRequest: TakeSnapshotRequest;
+
+  let handleValidationSpy: jest.SpyInstance;
+
+  const transactionId = TransactionIdFixture.create().id;
+
+  beforeEach(() => {
+    commandBusMock = createMock<CommandBus>();
+    queryBusMock = createMock<QueryBus>();
+    mirrorNodeMock = createMock<MirrorNodeAdapter>();
+
+    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    (Security as any).commandBus = commandBusMock;
+    (Security as any).queryBus = queryBusMock;
+    (Security as any).mirrorNode = mirrorNodeMock;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('takeSnapshot', () => {
+    takeSnapshotRequest = new TakeSnapshotRequest(
+      TakeSnapshotRequestFixture.create(),
+    );
+
+    const expectedResponse = {
+      payload: true,
+      transactionId: transactionId,
+    };
+    it('should take snapshot successfully', async () => {
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.takeSnapshot(takeSnapshotRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        TakeSnapshotRequest.name,
+        takeSnapshotRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new TakeSnapshotCommand(takeSnapshotRequest.securityId),
+      );
+      expect(result).toEqual(expectedResponse);
     });
 
-    this.securityId = securityId;
-  }
-}
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.takeSnapshot(takeSnapshotRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        TakeSnapshotRequest.name,
+        takeSnapshotRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new TakeSnapshotCommand(takeSnapshotRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      takeSnapshotRequest = new TakeSnapshotRequest({
+        ...TakeSnapshotRequestFixture.create({
+          securityId: 'invalid',
+        }),
+      });
+
+      await expect(Security.takeSnapshot(takeSnapshotRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+});
