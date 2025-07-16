@@ -38,16 +38,13 @@ jobs:
       - name: Change references
         run: ./changeProjectsReferencesToRepo.sh
 
-      - name: Install contracts dependencies
-        run: npm run install:contracts
+      - name: Install packages dependencies (ats/contracts and ats/sdk)
+        run: npm run install
 
       - name: Publish contracts package
         run: npm run publish:contracts --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Install sdk dependencies
-        run: npm run install:sdk
 
       - name: Publish sdk package
         run: npm run publish:sdk --access=public
