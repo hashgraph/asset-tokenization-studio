@@ -213,11 +213,17 @@ import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
 import {
     IERC1410Basic
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {_DEFAULT_PARTITION} from '../../constants/values.sol';
+import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 
 abstract contract ERC1410BasicStorageWrapper is
     IERC1410StorageWrapper,
     ERC20StorageWrapper1
 {
+    using LowLevelCall for address;
+
     function _transferByPartition(
         address _from,
         IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
@@ -252,6 +258,22 @@ abstract contract ERC1410BasicStorageWrapper is
                 _basicTransferInfo.to,
                 _partition
             );
+
+            if (
+                _from != _basicTransferInfo.to &&
+                _erc3643Storage().compliance != address(0) &&
+                _partition == _DEFAULT_PARTITION
+            ) {
+                (_erc3643Storage().compliance).functionCall(
+                    abi.encodeWithSelector(
+                        ICompliance.transferred.selector,
+                        _from,
+                        _basicTransferInfo.to,
+                        _basicTransferInfo.value
+                    ),
+                    IERC3643.ComplianceCallFailed.selector
+                );
+            }
             return bytes32(0);
         }
         _increaseBalanceByPartition(
@@ -259,6 +281,22 @@ abstract contract ERC1410BasicStorageWrapper is
             _basicTransferInfo.value,
             _partition
         );
+        if (
+            _from != _basicTransferInfo.to &&
+            _erc3643Storage().compliance != address(0) &&
+            _partition == _DEFAULT_PARTITION
+        ) {
+            (_erc3643Storage().compliance).functionCall(
+                abi.encodeWithSelector(
+                    ICompliance.transferred.selector,
+                    _from,
+                    _basicTransferInfo.to,
+                    _basicTransferInfo.value
+                ),
+                IERC3643.ComplianceCallFailed.selector
+            );
+        }
+
         return bytes32(0);
     }
 
