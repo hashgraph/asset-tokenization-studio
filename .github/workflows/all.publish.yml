@@ -39,7 +39,7 @@ jobs:
         run: ./changeProjectsReferencesToRepo.sh
 
       - name: Install packages dependencies (ats/contracts and ats/sdk)
-        run: npm run install
+        run: npm ci
 
       - name: Publish contracts package
         run: npm run publish:ats:contracts --access=public

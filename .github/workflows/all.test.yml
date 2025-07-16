@@ -56,7 +56,7 @@ jobs:
                   node-version: 20.x
 
             - name: Install monorepo package dependencies (ats/contracts and ats/sdk)
-              run: npm install
+              run: npm ci
 
             - name: Build ats/contracts
               run: npm run build:ats:contracts
@@ -65,7 +65,7 @@ jobs:
               run: npm run build:ats:sdk
 
             - name: Install ats/web dependencies
-              run: npm run install:ats:web
+              run: npm run install:ats:web:lock
 
             - name: build app/ats/web
               run: npm run build:ats:web
