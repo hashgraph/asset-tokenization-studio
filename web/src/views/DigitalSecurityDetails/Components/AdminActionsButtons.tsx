@@ -235,7 +235,7 @@ export const AdminActionsButtons = () => {
   if (isPaused || (!hasControllerRole && !hasMinterRole)) return null;
 
   return (
-    <HStack w="full" justifyContent="flex-end" gap={4} pb={6}>
+    <HStack w="full" justifyContent="flex-end" gap={4}>
       {hasMinterRole && (
         <Button
           data-testid="mint-button"

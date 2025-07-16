@@ -3,7 +3,7 @@
 exports[`AdminActionsButtons Admin has controller role should render correctly: controllerRole 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-u2mmsi"
+    class="chakra-stack css-1xa9bwv"
   >
     <a
       class="chakra-button css-vueqt9"
@@ -30,7 +30,7 @@ exports[`AdminActionsButtons Admin has controller role should render correctly: 
 exports[`AdminActionsButtons Admin has minter role should render correctly: minterRole 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-u2mmsi"
+    class="chakra-stack css-1xa9bwv"
   >
     <a
       class="chakra-button css-vueqt9"
