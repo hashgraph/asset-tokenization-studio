@@ -339,8 +339,6 @@ describe('ERC3643 Tests', () => {
         let erc3643Transferor: ERC3643
         let erc1410SnapshotFacet: ERC1410Snapshot
         let erc20Facet: ERC20
-        let complianceMockTrue: string
-        let complianceMockFalse: string
 
         before(async () => {
             // mute | mock console.log
@@ -366,24 +364,6 @@ describe('ERC3643 Tests', () => {
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
-
-            complianceMockTrue = (
-                await deployContract(
-                    new DeployContractCommand({
-                        name: 'ComplianceMockTrue',
-                        signer: signer_A,
-                    })
-                )
-            ).address
-
-            complianceMockFalse = (
-                await deployContract(
-                    new DeployContractCommand({
-                        name: 'ComplianceMockFalse',
-                        signer: signer_A,
-                    })
-                )
-            ).address
         })
 
         beforeEach(async () => {
