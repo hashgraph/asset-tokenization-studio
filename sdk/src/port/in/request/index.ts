@@ -379,6 +379,7 @@ import BatchTransferRequest from './security/operations/batch/BatchTransferReque
 import BatchUnfreezePartialTokensRequest from './security/operations/batch/BatchUnfreezePartialTokensRequest';
 import SetAddressFrozenRequest from './security/operations/freeze/SetAddressFrozenRequest';
 import DeactivateInternalKycRequest from './security/kyc/DeactivateInternalKycRequest';
+import TakeSnapshotRequest from './security/operations/snapshot/TakeSnapshotRequest';
 
 export {
   CreateEquityRequest,
@@ -556,4 +557,5 @@ export {
   BatchTransferRequest,
   BatchUnfreezePartialTokensRequest,
   SetAddressFrozenRequest,
+  TakeSnapshotRequest,
 };

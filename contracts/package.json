@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
-  "version": "1.14.1",
+  "version": "1.14.3",
   "main": "./build/typechain-types/index.js",
   "module": "./build/typechain-types/index.js",
   "files": [
@@ -88,7 +88,8 @@
     "slither": "npm run slither:summary && npm run slither:storageLayout && npm run slither:inheritance && npm run slither:analysis",
     "prettierCheck": "prettier --check",
     "prepack": "npm run compile:force",
-    "doc": "npx hardhat dodoc"
+    "doc": "npx hardhat dodoc",
+    "extractMethods": "npx -y tsx scripts/extractMethods.ts"
   },
   "keywords": [],
   "author": "",
