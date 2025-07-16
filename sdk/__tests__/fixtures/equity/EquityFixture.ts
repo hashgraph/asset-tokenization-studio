@@ -337,6 +337,7 @@ export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
       HederaIdPropsFixture.create().value,
     ]);
     request.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+    request.compliance?.as(() => HederaIdPropsFixture.create().value);
   },
 );
 
@@ -559,6 +560,7 @@ export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
       HederaIdPropsFixture.create().value,
     ]);
     command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+    command.compliance?.as(() => HederaIdPropsFixture.create().value);
   },
 );
 

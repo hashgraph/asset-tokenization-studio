@@ -261,6 +261,8 @@ export const CONTRACT_NAMES = [
     'ExternalKycListManagement',
     'ERC3643',
     'FreezeFacet',
+    'ComplianceMockTrue',
+    'ComplianceMockFalse',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
 export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']

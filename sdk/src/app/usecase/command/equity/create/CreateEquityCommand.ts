@@ -240,6 +240,7 @@ export class CreateEquityCommand extends Command<CreateEquityCommandResponse> {
     public readonly externalPauses?: string[],
     public readonly externalControlLists?: string[],
     public readonly externalKycLists?: string[],
+    public readonly compliance?: string,
   ) {
     super();
   }
