@@ -309,9 +309,11 @@ describe('🧪 Bond test', () => {
     const url = 'http://127.0.0.1:7546';
     const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
-    th.signerOrProvider = new Wallet(
-      CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-      customHttpProvider,
+    th.setSignerOrProvider(
+      new Wallet(
+        CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+        customHttpProvider,
+      ),
     );
 
     await Network.connect(
