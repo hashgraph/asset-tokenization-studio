@@ -42,11 +42,11 @@ jobs:
         run: npm run install
 
       - name: Publish contracts package
-        run: npm run publish:contracts --access=public
+        run: npm run publish:ats:contracts --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish sdk package
-        run: npm run publish:sdk --access=public
+        run: npm run publish:ats:sdk --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

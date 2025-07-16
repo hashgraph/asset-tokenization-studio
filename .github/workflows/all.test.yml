@@ -59,16 +59,16 @@ jobs:
               run: npm install
 
             - name: Build ats/contracts
-              run: npm run build:contracts
+              run: npm run build:ats:contracts
 
             - name: Build ats/sdk
-              run: npm run build:sdk
+              run: npm run build:ats:sdk
 
             - name: Install ats/web dependencies
-              run: npm run install:web
+              run: npm run install:ats:web
 
             - name: build app/ats/web
-              run: npm run build:web
+              run: npm run build:ats:web
 
             - name: Run ats/contracts tests
               working-directory: packages/ats/contracts
