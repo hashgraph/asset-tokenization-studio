@@ -279,6 +279,8 @@ export const INTERNAL_KYC_MANAGER_ROLE =
     '0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e'
 export const AGENT_ROLE =
     '0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6'
+export const TREX_OWNER_ROLE =
+    '0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7'
 
 // * Errors
 export const IS_PAUSED_ERROR_ID = '0x40'
