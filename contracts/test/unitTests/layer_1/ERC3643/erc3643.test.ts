@@ -1094,7 +1094,7 @@ describe('ERC3643 Tests', () => {
             })
 
             it('GIVEN ComplianceMock flag set to false THEN canTransfer returns false', async () => {
-                complianceMock.setFlags(false, false)
+                await complianceMock.setFlags(false, false)
                 expect(
                     await complianceMock.canTransfer(
                         ADDRESS_ZERO,
