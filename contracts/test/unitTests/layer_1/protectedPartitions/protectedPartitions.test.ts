@@ -2251,7 +2251,6 @@ describe('ProtectedPartitions Tests', () => {
                     1,
                     signature
                 )
-                console.log('COMPLIANCE TEST', complianceMock.address)
                 expect(await complianceMock.transferrredHit()).to.equal(1)
             })
         })
