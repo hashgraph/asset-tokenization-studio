@@ -241,12 +241,12 @@ abstract contract ERC1410StandardStorageWrapper is
         _triggerAndSyncAll(partition, from, to);
 
         if (from == address(0)) {
-            // mint
+            // mint | issue
             _updateAccountSnapshot(to, partition);
             return _updateTotalSupplySnapshot(partition);
         }
         if (to == address(0)) {
-            // burn
+            // burn | redeem
             _updateAccountSnapshot(from, partition);
             return _updateTotalSupplySnapshot(partition);
         }

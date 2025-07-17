@@ -210,6 +210,7 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {EnumerableSetBytes4} from './EnumerableSetBytes4.sol';
+import {ZERO_BYTES} from '../../constants/values.sol';
 
 library LibCommon {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -303,5 +304,42 @@ library LibCommon {
     ) internal pure returns (uint256 start_, uint256 end_) {
         start_ = _pageIndex * _pageLength;
         end_ = start_ + _pageLength;
+    }
+
+    // Bytes utility functions
+
+    /**
+     * @dev Helper function to handle bytes memory/calldata compatibility
+     * @return Empty bytes array that can be used in both memory and calldata contexts
+     */
+    function emptyBytes() internal pure returns (bytes memory) {
+        return new bytes(0);
+    }
+
+    /**
+     * @dev Helper function to convert bytes calldata to bytes memory
+     * @param _data The bytes calldata to convert
+     * @return The bytes memory equivalent
+     */
+    function toMemory(
+        bytes calldata _data
+    ) internal pure returns (bytes memory) {
+        return _data;
+    }
+
+    /**
+     * @dev Helper function to get ZERO_BYTES as bytes memory for consistent usage
+     * @return Empty bytes array from constant converted to memory
+     */
+    function zeroBytes() internal pure returns (bytes memory) {
+        return bytes(ZERO_BYTES);
+    }
+
+    /**
+     * @dev Helper function to get empty bytes for calldata contexts
+     * @return Empty bytes array for calldata usage
+     */
+    function emptyBytesCalldata() internal pure returns (bytes memory) {
+        return emptyBytes();
     }
 }

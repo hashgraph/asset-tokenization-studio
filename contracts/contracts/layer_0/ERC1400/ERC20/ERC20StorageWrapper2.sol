@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
+import {DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
 import {
     IERC20StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
@@ -225,7 +225,7 @@ abstract contract ERC20StorageWrapper2 is
     ERC1410StandardStorageWrapper
 {
     function _beforeAllowanceUpdate(address _owner, address _spender) internal {
-        _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
+        _triggerAndSyncAll(DEFAULT_PARTITION, _owner, address(0));
 
         _updateAllowanceAndLabaf(_owner, _spender);
     }
@@ -312,7 +312,7 @@ abstract contract ERC20StorageWrapper2 is
         _transferByPartition(
             from,
             IERC1410Basic.BasicTransferInfo(to, value),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             '',
             spender,
             ''
@@ -328,7 +328,7 @@ abstract contract ERC20StorageWrapper2 is
         _transferByPartition(
             from,
             IERC1410Basic.BasicTransferInfo(to, value),
-            _DEFAULT_PARTITION,
+            DEFAULT_PARTITION,
             '',
             address(0),
             ''
@@ -338,13 +338,13 @@ abstract contract ERC20StorageWrapper2 is
 
     function _mint(address to, uint256 value) internal {
         _issueByPartition(
-            IERC1410Standard.IssueData(_DEFAULT_PARTITION, to, value, '')
+            IERC1410Standard.IssueData(DEFAULT_PARTITION, to, value, '')
         );
         _emitTransferEvent(address(0), to, value);
     }
 
     function _burn(address from, uint256 value) internal {
-        _redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, '', '');
+        _redeemByPartition(DEFAULT_PARTITION, from, address(0), value, '', '');
         _emitTransferEvent(from, address(0), value);
     }
 

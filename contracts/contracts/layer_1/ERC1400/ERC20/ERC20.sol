@@ -213,7 +213,6 @@ import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC20_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -235,12 +234,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(spender)
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(spender)
         onlyWithoutMultiPartition
+        onlyCanApprove(_msgSender(), spender, value)
         returns (bool)
     {
         return _approve(spender, value);
@@ -248,47 +243,31 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
 
     function transfer(
         address to,
-        uint256 value
+        uint256 amount
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(to)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
+        onlyCanTransfer(to, amount)
         returns (bool)
     {
-        return _transfer(_msgSender(), to, value);
+        return _transfer(_msgSender(), to, amount);
     }
 
     function transferFrom(
         address from,
         address to,
-        uint256 value
+        uint256 amount
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(from)
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(from)
-        onlyUnrecoveredAddress(to)
-        onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
+        onlyCanTransferFrom(from, to, amount)
         returns (bool)
     {
-        return _transferFrom(_msgSender(), from, to, value);
+        return _transferFrom(_msgSender(), from, to, amount);
     }
 
     function increaseAllowance(
@@ -296,12 +275,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         uint256 addedValue
     )
         external
-        onlyUnpaused
-        onlyListedAllowed(_msgSender())
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(spender)
-        onlyListedAllowed(spender)
         onlyWithoutMultiPartition
+        onlyCanApprove(_msgSender(), spender, addedValue)
         returns (bool)
     {
         return _increaseAllowance(spender, addedValue);
@@ -312,11 +287,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         uint256 subtractedValue
     )
         external
-        onlyUnpaused
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(spender)
         onlyWithoutMultiPartition
-        onlyUnrecoveredAddress(_msgSender())
+        onlyCanApprove(_msgSender(), spender, subtractedValue)
         returns (bool)
     {
         return _decreaseAllowance(spender, subtractedValue);
