@@ -2175,7 +2175,7 @@ describe('ProtectedPartitions Tests', () => {
         })
 
         describe('Compliance', () => {
-            it('GIVEN a succesful protected clearing transfer THEN compliance contract is called', async () => {
+            it('GIVEN a successful protected clearing transfer THEN compliance contract is called', async () => {
                 await clearingFacet.activateClearing()
                 // TRANSFERS
                 const message = {
@@ -2212,10 +2212,10 @@ describe('ProtectedPartitions Tests', () => {
                 await clearingFacet.approveClearingOperationByPartition(
                     clearingIdentifier
                 )
-                expect(await complianceMock.transferrredHit()).to.equal(1)
+                expect(await complianceMock.transferredHit()).to.equal(1)
             })
 
-            it('GIVEN a succesful protected transfer THEN compliance contract is called', async () => {
+            it('GIVEN a successful protected transfer THEN compliance contract is called', async () => {
                 erc1410Facet = erc1410Facet.connect(signer_B)
 
                 const deadline = MAX_UINT256
@@ -2251,7 +2251,7 @@ describe('ProtectedPartitions Tests', () => {
                     1,
                     signature
                 )
-                expect(await complianceMock.transferrredHit()).to.equal(1)
+                expect(await complianceMock.transferredHit()).to.equal(1)
             })
         })
     })

@@ -6,7 +6,7 @@ contract ComplianceMock {
     error MockErrorMint(address _to, uint256 _amount);
     error MockErrorBurn(address _from, uint256 _amount);
 
-    uint256 public transferrredHit;
+    uint256 public transferredHit;
     uint256 public createdHit;
     uint256 public destroyedHit;
 
@@ -34,7 +34,7 @@ contract ComplianceMock {
         if (_revert) {
             revert MockErrorTransfer(_from, _to, _amount);
         }
-        ++transferrredHit;
+        ++transferredHit;
     }
     function created(address _to, uint256 _amount) external virtual {
         if (_revert) {

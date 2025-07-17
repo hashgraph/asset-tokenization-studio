@@ -1083,7 +1083,7 @@ describe('ERC3643 Tests', () => {
                 )
             })
 
-            it('GIVEN CompliaceMock flag set to true THEN canTransfer returns true', async () => {
+            it('GIVEN ComplianceMock flag set to true THEN canTransfer returns true', async () => {
                 expect(
                     await complianceMock.canTransfer(
                         ADDRESS_ZERO,
@@ -1093,7 +1093,7 @@ describe('ERC3643 Tests', () => {
                 ).to.be.true
             })
 
-            it('GIVEN CompliaceMock flag set to false THEN canTransfer returns false', async () => {
+            it('GIVEN ComplianceMock flag set to false THEN canTransfer returns false', async () => {
                 complianceMock.setFlags(false, false)
                 expect(
                     await complianceMock.canTransfer(
@@ -1241,7 +1241,7 @@ describe('ERC3643 Tests', () => {
                     .connect(signer_E)
                     .executeHoldByPartition(holdIdentifier, account_E, AMOUNT)
                 transfersCounter++
-                expect(await complianceMock.transferrredHit()).to.be.equal(
+                expect(await complianceMock.transferredHit()).to.be.equal(
                     transfersCounter
                 )
             })
@@ -1323,7 +1323,6 @@ describe('ERC3643 Tests', () => {
                 )
                 const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
                 expect(returnedArgs).to.equal(args.slice(2))
-                console.log(caught.data as string)
             })
 
             it('GIVEN a failed transfer call THEN transaction reverts with custom error', async () => {
@@ -1368,7 +1367,6 @@ describe('ERC3643 Tests', () => {
                 )
                 const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
                 expect(returnedArgs).to.equal(args.slice(2))
-                console.log(caught.data as string)
             })
 
             it('GIVEN a failed burn call THEN transaction reverts with custom error', async () => {
@@ -1409,7 +1407,6 @@ describe('ERC3643 Tests', () => {
                 )
                 const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
                 expect(returnedArgs).to.equal(args.slice(2))
-                console.log(caught.data as string)
             })
         })
 
