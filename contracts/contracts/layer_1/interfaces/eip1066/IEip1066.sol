@@ -7,4 +7,23 @@ interface IEip1066 {
         bytes32 reasonCode, // Application specific reason code
         bytes details // Additional details about the error
     );
+
+    error ReasonInsufficientBalance(
+        address from, // The address that has insufficient balance
+        uint256 fromBalance, // The balance of the address that has insufficient balance
+        uint256 value, // The value that was attempted to be transferred
+        bytes32 partition // The partition from which the transfer was attempted
+    );
+
+    error ReasonAddressRecovered(
+        address recoveredAddress // The address that was recovered
+    );
+
+    error ReasonAddressInBlacklistOrNotInWhitelist(
+        address blockedAddress // The address that is in blacklist or not in whitelist
+    );
+
+    error ReasonKycNotGranted(
+        address address_ // The address that is not granted KYC
+    );
 }

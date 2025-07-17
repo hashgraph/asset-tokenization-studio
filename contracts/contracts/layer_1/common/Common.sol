@@ -203,8 +203,8 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
 import {ZERO_BYTES} from '../../layer_0/constants/values.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
@@ -213,6 +213,7 @@ import {
     ERC1594StorageWrapper
 } from '../../layer_0/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
 import {IEip1066} from '../../layer_1/interfaces/eip1066/IEip1066.sol';
+import {Eip1066} from '../../layer_0/constants/eip1066.sol';
 
 abstract contract Common is ERC1594StorageWrapper {
     error AlreadyInitialized();
@@ -243,15 +244,128 @@ abstract contract Common is ERC1594StorageWrapper {
         _;
     }
 
-    function _checkCanTransfer(address to, uint256 amount) internal view {
+    modifier onlyCanTransferFrom(address _from, address _to, uint256 _amount) {
+        _checkCanTransferFrom(_from, _to, _amount);
+        _;
+    }
+
+    modifier onlyCanIssue(address _to, uint256 _amount) {
+        _checkCanIssue(_to, _amount);
+        _;
+    }
+
+    modifier onlyCanRedeem(address _from, uint256 _amount) {
+        _checkCanRedeem(_from, _amount);
+        _;
+    }
+
+    modifier onlyCanApprove(address _owner, address _spender, uint256 _amount) {
+        _checkCanApprove(_owner, _spender, _amount);
+        _;
+    }
+
+    function _checkCanTransfer(address _to, uint256 _amount) internal view {
         (
             bool isAbleToTransfer,
             bytes1 statusCode,
             bytes32 reasonCode,
             bytes memory details
-        ) = _isAbleToTransfer(to, amount, ZERO_BYTES);
+        ) = _isAbleToTransfer(_to, _amount, ZERO_BYTES);
         if (!isAbleToTransfer) {
             revert IEip1066.ExtendedError(statusCode, reasonCode, details);
+        }
+    }
+
+    function _checkCanTransferFrom(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) internal view {
+        (
+            bool canTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode
+        ) = _canTransferFrom(_from, _to, _amount, ZERO_BYTES);
+        if (!canTransfer) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, ZERO_BYTES);
+        }
+    }
+
+    function _checkCanIssue(address _to, uint256 _amount) internal view {
+        // Check if issuance is still allowed
+        if (!_isIssuable()) {
+            revert IEip1066.ExtendedError(
+                Eip1066.DISALLOWED_OR_STOP,
+                Eip1066.REASON_ISSUANCE_CLOSED,
+                ZERO_BYTES
+            );
+        }
+
+        // For issue operations, we need to check basic transfer validation plus issuance-specific checks
+        (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        ) = _isAbleToTransfer(_to, _amount, ZERO_BYTES);
+        if (!isAbleToTransfer) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
+        }
+    }
+
+    function _checkCanRedeem(address _from, uint256 _amount) internal view {
+        // For redeem operations, we check if the holder can transfer (burn) their tokens
+        (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        ) = _isAbleToTransfer(_from, _amount, ZERO_BYTES);
+        if (!isAbleToTransfer) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
+        }
+    }
+
+    function _checkCanApprove(
+        address _owner,
+        address _spender,
+        uint256 /*_amount*/
+    ) internal view {
+        // For approve operations, we check basic conditions without transfer amount validation
+        if (_isPaused()) {
+            revert IEip1066.ExtendedError(
+                Eip1066.PAUSED,
+                Eip1066.REASON_EMPTY,
+                ZERO_BYTES
+            );
+        }
+        if (_isRecovered(_owner)) {
+            revert IEip1066.ExtendedError(
+                Eip1066.REVOKED_OR_BANNED,
+                Eip1066.REASON_ADDRESS_RECOVERED,
+                abi.encode(_owner)
+            );
+        }
+        if (_isRecovered(_spender)) {
+            revert IEip1066.ExtendedError(
+                Eip1066.REVOKED_OR_BANNED,
+                Eip1066.REASON_ADDRESS_RECOVERED,
+                abi.encode(_spender)
+            );
+        }
+        if (!_isAbleToAccess(_owner)) {
+            revert IEip1066.ExtendedError(
+                Eip1066.DISALLOWED_OR_STOP,
+                Eip1066.REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST,
+                abi.encode(_owner)
+            );
+        }
+        if (!_isAbleToAccess(_spender)) {
+            revert IEip1066.ExtendedError(
+                Eip1066.DISALLOWED_OR_STOP,
+                Eip1066.REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST,
+                abi.encode(_spender)
+            );
         }
     }
 

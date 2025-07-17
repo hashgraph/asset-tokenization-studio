@@ -212,7 +212,6 @@ import {
 import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {Common} from '../../common/Common.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
@@ -232,16 +231,9 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyUnrecoveredAddress(_to)
-        onlyUnrecoveredAddress(_msgSender())
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyCanTransfer(_to, _value)
     {
         // Add a function to validate the `_data` parameter
         _transfer(_msgSender(), _to, _value);
@@ -255,21 +247,10 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_to)
-        onlyListedAllowed(_from)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyCanTransferFrom(_from, _to, _value)
     {
-        {
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_to);
-            _checkRecoveredAddress(_from);
-        }
         // Add a function to validate the `_data` parameter
         _transferFrom(_msgSender(), _from, _to, _value);
     }
@@ -290,13 +271,10 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnrecoveredAddress(_tokenHolder)
         onlyWithinMaxSupply(_value)
-        onlyUnpaused
-        onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
         onlyIssuable
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
+        onlyCanIssue(_tokenHolder, _value)
     {
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -320,13 +298,9 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyUnrecoveredAddress(_msgSender())
-        onlyListedAllowed(_msgSender())
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyCanRedeem(_msgSender(), _value)
     {
         _redeem(_value, _data);
     }
@@ -347,16 +321,10 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
         validateAddress(_tokenHolder)
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(_tokenHolder)
+        onlyCanTransferFrom(_msgSender(), _tokenHolder, _value)
     {
         _redeemFrom(_tokenHolder, _value, _data);
     }

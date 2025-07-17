@@ -370,6 +370,6 @@ library Eip1066 {
         keccak256('REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST');
     bytes32 public constant REASON_KYC_NOT_GRANTED =
         keccak256('REASON_KYC_NOT_GRANTED');
-    bytes32 public constant REASON_INSUFFICIENT_BALANCE =
-        keccak256('REASON_INSUFFICIENT_BALANCE');
+    bytes32 public constant REASON_ISSUANCE_CLOSED =
+        keccak256('REASON_ISSUANCE_CLOSED');
 }
