@@ -359,21 +359,38 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory holders_) {
-        uint256 snapshotId = _getSnapshotID(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
             _dividendID
         );
-        return _tokenHoldersAt(snapshotId, _pageIndex, _pageLength);
+
+        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
+            return new address[](0);
+
+        if (registeredDividend.snapshotId != 0)
+            return
+                _tokenHoldersAt(
+                    registeredDividend.snapshotId,
+                    _pageIndex,
+                    _pageLength
+                );
+
+        return _getTokenHolders(_pageIndex, _pageLength);
     }
 
     function _getTotalDividendHolders(
         uint256 _dividendID
     ) internal view returns (uint256) {
-        uint256 snapshotId = _getSnapshotID(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
             _dividendID
         );
-        return _totalTokenHoldersAt(snapshotId);
+
+        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
+            return 0;
+
+        if (registeredDividend.snapshotId != 0)
+            return _totalTokenHoldersAt(registeredDividend.snapshotId);
+
+        return _getTotalTokenHolders();
     }
 
     function _getVoting(
@@ -433,21 +450,33 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory holders_) {
-        uint256 snapshotId = _getSnapshotID(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            _voteID
-        );
-        return _tokenHoldersAt(snapshotId, _pageIndex, _pageLength);
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+
+        if (registeredVoting.voting.recordDate >= _blockTimestamp())
+            return new address[](0);
+
+        if (registeredVoting.snapshotId != 0)
+            return
+                _tokenHoldersAt(
+                    registeredVoting.snapshotId,
+                    _pageIndex,
+                    _pageLength
+                );
+
+        return _getTokenHolders(_pageIndex, _pageLength);
     }
 
     function _getTotalVotingHolders(
         uint256 _voteID
     ) internal view returns (uint256) {
-        uint256 snapshotId = _getSnapshotID(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            _voteID
-        );
-        return _totalTokenHoldersAt(snapshotId);
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+
+        if (registeredVoting.voting.recordDate >= _blockTimestamp()) return 0;
+
+        if (registeredVoting.snapshotId != 0)
+            return _totalTokenHoldersAt(registeredVoting.snapshotId);
+
+        return _getTotalTokenHolders();
     }
 
     function _getScheduledBalanceAdjusment(

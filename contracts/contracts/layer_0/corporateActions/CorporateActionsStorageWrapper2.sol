@@ -319,17 +319,6 @@ abstract contract CorporateActionsStorageWrapper2 is
         return snapshotId;
     }
 
-    function _getSnapshotID(
-        bytes32 _actionType,
-        uint256 _actionTypeId
-    ) internal view returns (uint256) {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[_actionType]
-            .at(_actionTypeId - 1);
-
-        return _getSnapshotID(actionId);
-    }
-
     function _initByActionType(
         bytes32 _actionType,
         bool _success,

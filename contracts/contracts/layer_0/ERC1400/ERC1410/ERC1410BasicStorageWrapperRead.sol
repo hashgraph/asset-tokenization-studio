@@ -404,6 +404,8 @@ abstract contract ERC1410BasicStorageWrapperRead is
             LibCommon.getSize(start, end, _getTotalTokenHolders())
         );
 
+        start++; // because tokenHolders starts from 1
+
         ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         for (uint256 i = 0; i < holders_.length; i++) {
