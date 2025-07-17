@@ -26,4 +26,6 @@ interface IEip1066 {
     error ReasonKycNotGranted(
         address address_ // The address that is not granted KYC
     );
+
+    error ReasonIssuanceClosed();
 }

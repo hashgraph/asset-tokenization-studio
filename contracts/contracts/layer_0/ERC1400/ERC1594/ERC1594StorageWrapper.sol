@@ -206,14 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ZERO_ADDRESS,
-    ZERO_BYTES,
-    DEFAULT_PARTITION
-} from '../../constants/values.sol';
+import {ZERO_ADDRESS, DEFAULT_PARTITION} from '../../constants/values.sol';
 import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
 import {IEip1066} from '../../../layer_1/interfaces/eip1066/IEip1066.sol';
+import {LibCommon} from '../../common/libraries/LibCommon.sol';
 
 import {
     IERC1594StorageWrapper
@@ -250,6 +247,12 @@ abstract contract ERC1594StorageWrapper is
     modifier onlyIssuable() {
         _checkIssuable();
         _;
+    }
+
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_ERC1594() internal {
+        _erc1594Storage().issuance = true;
+        _erc1594Storage().initialized = true;
     }
 
     /**
@@ -304,10 +307,31 @@ abstract contract ERC1594StorageWrapper is
         emit Redeemed(_msgSender(), _tokenHolder, _value, _data);
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC1594() internal {
-        _erc1594Storage().issuance = true;
-        _erc1594Storage().initialized = true;
+    // Utility functions moved to LibCommon library
+
+    /**
+     * @dev Helper function to validate operations with empty data
+     * @param _to The address for validation (can be from or to depending on operation)
+     * @param _amount The amount for validation
+     * @return isValid Whether the operation is valid
+     * @return statusCode EIP1066 status code
+     * @return reasonCode EIP1066 reason code
+     * @return details ABI-encoded error details
+     */
+    function _validateWithEmptyData(
+        address _to,
+        uint256 _amount
+    )
+        internal
+        view
+        returns (
+            bool isValid,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        return _isAbleToTransferMemory(_to, _amount, LibCommon.emptyBytes());
     }
 
     /**
@@ -340,7 +364,12 @@ abstract contract ERC1594StorageWrapper is
     {
         // Check pause status
         if (_flags.checkPause && _isPaused()) {
-            return (false, Eip1066.PAUSED, Eip1066.REASON_EMPTY, ZERO_BYTES);
+            return (
+                false,
+                Eip1066.PAUSED,
+                Eip1066.REASON_EMPTY,
+                LibCommon.emptyBytes()
+            );
         }
 
         // Check clearing status
@@ -349,7 +378,7 @@ abstract contract ERC1594StorageWrapper is
                 false,
                 Eip1066.UNAVAILABLE,
                 Eip1066.REASON_CLEARING_IS_ACTIVE,
-                ZERO_BYTES
+                LibCommon.emptyBytes()
             );
         }
 
@@ -475,7 +504,7 @@ abstract contract ERC1594StorageWrapper is
         }
 
         // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), ZERO_BYTES);
+        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
     }
 
     /**
@@ -492,7 +521,352 @@ abstract contract ERC1594StorageWrapper is
     function _isAbleToTransfer(
         address _to,
         uint256 _value,
-        bytes memory /*_data*/
+        bytes calldata _data
+    )
+        internal
+        view
+        returns (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        // Convert calldata to memory for consistent handling
+        return _isAbleToTransferMemory(_to, _value, LibCommon.toMemory(_data));
+    }
+
+    /**
+     * @dev Validates if a transferFrom operation can be performed
+     * @param _from The address to transfer from
+     * @param _to The address to transfer to
+     * @param _value The amount to transfer
+     * @return isAbleToTransfer Whether the transfer is allowed
+     * @return statusCode EIP1066 status code
+     * @return reasonCode EIP1066 reason code
+     * @return details ABI-encoded error details
+     */
+    function _isAbleToTransferFrom(
+        address _from,
+        address _to,
+        uint256 _value,
+        bytes calldata _data
+    )
+        internal
+        view
+        returns (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        // Convert calldata to memory for consistent handling
+        return
+            _isAbleToTransferFromMemory(
+                _from,
+                _to,
+                _value,
+                LibCommon.toMemory(_data)
+            );
+    }
+
+    /**
+     * @dev Validates if an issue operation can be performed
+     * @param _to The address to issue tokens to
+     * @param _value The amount to issue
+     * @return isAbleToIssue Whether the issuance is allowed
+     * @return statusCode EIP1066 status code
+     * @return reasonCode EIP1066 reason code
+     * @return details ABI-encoded error details
+     */
+    function _isAbleToIssue(
+        address _to,
+        uint256 _value,
+        bytes calldata _data
+    )
+        internal
+        view
+        returns (
+            bool isAbleToIssue,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        // Convert calldata to memory for consistent handling
+        return _isAbleToIssueMemory(_to, _value, LibCommon.toMemory(_data));
+    }
+
+    /**
+     * @dev Memory version of _isAbleToIssue for bytes memory compatibility
+     * @param _to The address to issue tokens to
+     * @param _value The amount to issue
+     * _data The data parameter as bytes memory
+     * @return isAbleToIssue Whether the issuance is allowed
+     * @return statusCode EIP1066 status code
+     * @return reasonCode EIP1066 reason code
+     * @return details ABI-encoded error details
+     */
+    function _isAbleToIssueMemory(
+        address _to,
+        uint256 _value,
+        bytes memory /* _data */
+    )
+        internal
+        view
+        returns (
+            bool isAbleToIssue,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        // Check if issuance is still allowed (operation-specific validation)
+        if (!_isIssuable()) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                Eip1066.REASON_ISSUANCE_CLOSED,
+                LibCommon.emptyBytes()
+            );
+        }
+
+        // Check for zero address (operation-specific validation)
+        if (_to == ZERO_ADDRESS) {
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                Eip1066.REASON_INVALID_ZERO_ADDRESS,
+                LibCommon.emptyBytes()
+            );
+        }
+
+        // Use common validation layer for shared checks
+        ValidationFlags memory flags = _createIssueValidationFlags();
+        (
+            isAbleToIssue,
+            statusCode,
+            reasonCode,
+            details
+        ) = _performCommonValidation(
+            ZERO_ADDRESS, // No operator for issue
+            ZERO_ADDRESS, // No from address for issue
+            _to, // To address
+            _value, // Amount
+            flags // Validation flags
+        );
+
+        // If common validation failed, return the error
+        if (!isAbleToIssue) {
+            return (isAbleToIssue, statusCode, reasonCode, details);
+        }
+
+        // All validations passed
+        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
+    }
+
+    /**
+     * @dev Validates if a redeem operation can be performed
+     * @param _from The address to redeem tokens from
+     * @param _value The amount to redeem
+     * @return isAbleToRedeem Whether the redemption is allowed
+     * @return statusCode EIP1066 status code
+     * @return reasonCode EIP1066 reason code
+     * @return details ABI-encoded error details
+     */
+    function _isAbleToRedeem(
+        address _from,
+        uint256 _value,
+        bytes calldata _data
+    )
+        internal
+        view
+        returns (
+            bool isAbleToRedeem,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        // Convert calldata to memory for consistent handling
+        return _isAbleToRedeemMemory(_from, _value, LibCommon.toMemory(_data));
+    }
+
+    /**
+     * @dev Memory version of _isAbleToRedeem for bytes memory compatibility
+     * @param _from The address to redeem tokens from
+     * @param _value The amount to redeem
+     * _data The data parameter as bytes memory
+     * @return isAbleToRedeem Whether the redemption is allowed
+     * @return statusCode EIP1066 status code
+     * @return reasonCode EIP1066 reason code
+     * @return details ABI-encoded error details
+     */
+    function _isAbleToRedeemMemory(
+        address _from,
+        uint256 _value,
+        bytes memory /* _data */
+    )
+        internal
+        view
+        returns (
+            bool isAbleToRedeem,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        // Check for zero address (operation-specific validation)
+        if (_from == ZERO_ADDRESS) {
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                Eip1066.REASON_INVALID_ZERO_ADDRESS,
+                LibCommon.emptyBytes()
+            );
+        }
+
+        // Use common validation layer for shared checks
+        ValidationFlags memory flags = _createRedeemValidationFlags();
+        (
+            isAbleToRedeem,
+            statusCode,
+            reasonCode,
+            details
+        ) = _performCommonValidation(
+            ZERO_ADDRESS, // No operator for redeem
+            _from, // From address
+            ZERO_ADDRESS, // No to address for redeem
+            _value, // Amount
+            flags // Validation flags
+        );
+
+        // If common validation failed, return the error
+        if (!isAbleToRedeem) {
+            return (isAbleToRedeem, statusCode, reasonCode, details);
+        }
+
+        // All validations passed
+        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
+    }
+
+    /**
+     * @dev Validates if an approve operation can be performed
+     * @param _owner The address that owns the tokens
+     * @param _spender The address that will be approved to spend tokens
+     *        _amount The amount to approve (not used in validation but kept for interface compatibility)
+     * @return isAbleToApprove Whether the approval is allowed
+     * @return statusCode EIP1066 status code
+     * @return reasonCode EIP1066 reason code
+     * @return details ABI-encoded error details
+     */
+    function _isAbleToApprove(
+        address _owner,
+        address _spender,
+        uint256 _amount
+    )
+        internal
+        view
+        returns (
+            bool isAbleToApprove,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        // Check for zero addresses (operation-specific validation)
+        if (_owner == ZERO_ADDRESS) {
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                Eip1066.REASON_INVALID_ZERO_ADDRESS,
+                LibCommon.emptyBytes()
+            );
+        }
+        if (_spender == ZERO_ADDRESS) {
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                Eip1066.REASON_INVALID_ZERO_ADDRESS,
+                LibCommon.emptyBytes()
+            );
+        }
+
+        // Use common validation layer for shared checks
+        ValidationFlags memory flags = _createApproveValidationFlags();
+        (
+            isAbleToApprove,
+            statusCode,
+            reasonCode,
+            details
+        ) = _performCommonValidation(
+            _spender, // Spender as operator
+            _owner, // Owner as from address
+            ZERO_ADDRESS, // No to address for approve
+            _amount, // Amount (not used for validation)
+            flags // Validation flags
+        );
+
+        // If common validation failed, return the error
+        if (!isAbleToApprove) {
+            return (isAbleToApprove, statusCode, reasonCode, details);
+        }
+
+        // All validations passed
+        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
+    }
+
+    function _checkIssuable() internal view {
+        if (!_isIssuable()) {
+            revert IEip1066.ExtendedError(
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonIssuanceClosed.selector,
+                LibCommon.emptyBytes()
+            );
+        }
+    }
+
+    /**
+     * @notice Determines whether the token can be transferred.
+     * @param _to The address to which the tokens will be transferred.
+     * @param _value The amount of tokens to be transferred.
+     * @param _data Additional data attached to the transfer.
+     * @return canTransfer Whether the transfer is allowed.
+     * @return statusCode EIP1066 status code.
+     * @return reasonCode Reason code for the status.
+     */
+    function _canTransfer(
+        address _to,
+        uint256 _value,
+        bytes memory _data
+    )
+        internal
+        view
+        returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode)
+    {
+        (canTransfer, statusCode, reasonCode, ) = _isAbleToTransferMemory(
+            _to,
+            _value,
+            _data
+        );
+        return (canTransfer, statusCode, reasonCode);
+    }
+
+    /**
+     * @dev Memory version of _isAbleToTransfer for bytes memory compatibility
+     * @param _to The address to transfer to
+     * @param _value The amount to transfer
+     * _data The data parameter as bytes memory
+     * @return isAbleToTransfer Whether the transfer is allowed
+     * @return statusCode EIP1066 status code
+     * @return reasonCode EIP1066 reason code
+     * @return details ABI-encoded error details
+     */
+    function _isAbleToTransferMemory(
+        address _to,
+        uint256 _value,
+        bytes memory /* _data */
     )
         internal
         view
@@ -511,7 +885,7 @@ abstract contract ERC1594StorageWrapper is
                 false,
                 Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
                 Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                ZERO_BYTES
+                LibCommon.emptyBytes()
             );
         }
 
@@ -536,20 +910,50 @@ abstract contract ERC1594StorageWrapper is
         }
 
         // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), ZERO_BYTES);
+        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
     }
 
     /**
-     * @dev Validates if a transferFrom operation can be performed
+     * @notice Determines whether tokens can be transferred from one address to another.
+     * @param _from The address from which the tokens will be transferred.
+     * @param _to The address to which the tokens will be transferred.
+     * @param _value The amount of tokens to be transferred.
+     * @param _data Additional data attached to the transfer.
+     * @return canTransfer Whether the transfer is allowed.
+     * @return statusCode EIP1066 status code.
+     * @return reasonCode Reason code for the status.
+     */
+    function _canTransferFrom(
+        address _from,
+        address _to,
+        uint256 _value,
+        bytes memory _data
+    )
+        internal
+        view
+        returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode)
+    {
+        (canTransfer, statusCode, reasonCode, ) = _isAbleToTransferFromMemory(
+            _from,
+            _to,
+            _value,
+            _data
+        );
+        return (canTransfer, statusCode, reasonCode);
+    }
+
+    /**
+     * @dev Memory version of _isAbleToTransferFrom for bytes memory compatibility
      * @param _from The address to transfer from
      * @param _to The address to transfer to
      * @param _value The amount to transfer
+     * _data The data parameter as bytes memory
      * @return isAbleToTransfer Whether the transfer is allowed
      * @return statusCode EIP1066 status code
      * @return reasonCode EIP1066 reason code
      * @return details ABI-encoded error details
      */
-    function _isAbleToTransferFrom(
+    function _isAbleToTransferFromMemory(
         address _from,
         address _to,
         uint256 _value,
@@ -572,7 +976,7 @@ abstract contract ERC1594StorageWrapper is
                 false,
                 Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
                 Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                ZERO_BYTES
+                LibCommon.emptyBytes()
             );
         }
         if (_to == ZERO_ADDRESS) {
@@ -580,7 +984,7 @@ abstract contract ERC1594StorageWrapper is
                 false,
                 Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
                 Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                ZERO_BYTES
+                LibCommon.emptyBytes()
             );
         }
 
@@ -618,233 +1022,11 @@ abstract contract ERC1594StorageWrapper is
         }
 
         // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), ZERO_BYTES);
+        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
     }
 
     /**
-     * @dev Validates if an issue operation can be performed
-     * @param _to The address to issue tokens to
-     * @param _value The amount to issue
-     * @return isAbleToIssue Whether the issuance is allowed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _isAbleToIssue(
-        address _to,
-        uint256 _value,
-        bytes memory /*_data*/
-    )
-        internal
-        view
-        returns (
-            bool isAbleToIssue,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        // Check if issuance is still allowed (operation-specific validation)
-        if (!_isIssuable()) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                Eip1066.REASON_ISSUANCE_CLOSED,
-                ZERO_BYTES
-            );
-        }
-
-        // Check for zero address (operation-specific validation)
-        if (_to == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                ZERO_BYTES
-            );
-        }
-
-        // Use common validation layer for shared checks
-        ValidationFlags memory flags = _createIssueValidationFlags();
-        (
-            isAbleToIssue,
-            statusCode,
-            reasonCode,
-            details
-        ) = _performCommonValidation(
-            ZERO_ADDRESS, // No operator for issue
-            ZERO_ADDRESS, // No from address for issue
-            _to, // To address
-            _value, // Amount
-            flags // Validation flags
-        );
-
-        // If common validation failed, return the error
-        if (!isAbleToIssue) {
-            return (isAbleToIssue, statusCode, reasonCode, details);
-        }
-
-        // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), ZERO_BYTES);
-    }
-
-    /**
-     * @dev Validates if a redeem operation can be performed
-     * @param _from The address to redeem tokens from
-     * @param _value The amount to redeem
-     * @return isAbleToRedeem Whether the redemption is allowed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _isAbleToRedeem(
-        address _from,
-        uint256 _value,
-        bytes memory /*_data*/
-    )
-        internal
-        view
-        returns (
-            bool isAbleToRedeem,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        // Check for zero address (operation-specific validation)
-        if (_from == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                ZERO_BYTES
-            );
-        }
-
-        // Use common validation layer for shared checks
-        ValidationFlags memory flags = _createRedeemValidationFlags();
-        (
-            isAbleToRedeem,
-            statusCode,
-            reasonCode,
-            details
-        ) = _performCommonValidation(
-            ZERO_ADDRESS, // No operator for redeem
-            _from, // From address
-            ZERO_ADDRESS, // No to address for redeem
-            _value, // Amount
-            flags // Validation flags
-        );
-
-        // If common validation failed, return the error
-        if (!isAbleToRedeem) {
-            return (isAbleToRedeem, statusCode, reasonCode, details);
-        }
-
-        // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), ZERO_BYTES);
-    }
-
-    /**
-     * @dev Validates if an approve operation can be performed
-     * @param _owner The address that owns the tokens
-     * @param _spender The address that will be approved to spend tokens
-     *        _amount The amount to approve (not used in validation but kept for interface compatibility)
-     * @return isAbleToApprove Whether the approval is allowed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _isAbleToApprove(
-        address _owner,
-        address _spender,
-        uint256 /*_amount*/
-    )
-        internal
-        view
-        returns (
-            bool isAbleToApprove,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        // Check for zero addresses (operation-specific validation)
-        if (_owner == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                ZERO_BYTES
-            );
-        }
-        if (_spender == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                ZERO_BYTES
-            );
-        }
-
-        // Use common validation layer for shared checks
-        ValidationFlags memory flags = _createApproveValidationFlags();
-        (
-            isAbleToApprove,
-            statusCode,
-            reasonCode,
-            details
-        ) = _performCommonValidation(
-            ZERO_ADDRESS, // No operator for approve
-            _owner, // From address (owner)
-            _spender, // To address (spender)
-            0, // Amount is not relevant for approve validation
-            flags // Validation flags
-        );
-
-        // If common validation failed, return the error
-        if (!isAbleToApprove) {
-            return (isAbleToApprove, statusCode, reasonCode, details);
-        }
-
-        // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), ZERO_BYTES);
-    }
-
-    function _canTransfer(
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    )
-        internal
-        view
-        returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode)
-    {
-        (canTransfer, statusCode, reasonCode, ) = _isAbleToTransfer(
-            _to,
-            _value,
-            _data
-        );
-    }
-
-    function _canTransferFrom(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes memory _data
-    ) internal view returns (bool, bytes1, bytes32) {
-        (
-            bool canTransfer,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-
-        ) = _isAbleToTransferFrom(_from, _to, _value, _data);
-        return (canTransfer, statusCode, reasonCode);
-    }
-
-    /**
-     * @dev Helper function to create validation flags for transfer operations
-     * @return ValidationFlags configured for transfer validation
+     * @dev Creates validation flags for transfer operations
      */
     function _createTransferValidationFlags()
         internal
@@ -868,8 +1050,7 @@ abstract contract ERC1594StorageWrapper is
     }
 
     /**
-     * @dev Helper function to create validation flags for transferFrom operations
-     * @return ValidationFlags configured for transferFrom validation
+     * @dev Creates validation flags for transferFrom operations
      */
     function _createTransferFromValidationFlags()
         internal
@@ -893,8 +1074,7 @@ abstract contract ERC1594StorageWrapper is
     }
 
     /**
-     * @dev Helper function to create validation flags for issue operations
-     * @return ValidationFlags configured for issue validation
+     * @dev Creates validation flags for issue operations
      */
     function _createIssueValidationFlags()
         internal
@@ -918,8 +1098,7 @@ abstract contract ERC1594StorageWrapper is
     }
 
     /**
-     * @dev Helper function to create validation flags for redeem operations
-     * @return ValidationFlags configured for redeem validation
+     * @dev Creates validation flags for redeem operations
      */
     function _createRedeemValidationFlags()
         internal
@@ -943,8 +1122,7 @@ abstract contract ERC1594StorageWrapper is
     }
 
     /**
-     * @dev Helper function to create validation flags for approve operations
-     * @return ValidationFlags configured for approve validation
+     * @dev Creates validation flags for approve operations
      */
     function _createApproveValidationFlags()
         internal
@@ -954,76 +1132,28 @@ abstract contract ERC1594StorageWrapper is
         return
             ValidationFlags({
                 checkPause: true,
-                checkClearing: true,
-                checkOperatorRecovery: false,
+                checkClearing: false,
+                checkOperatorRecovery: true,
                 checkFromRecovery: true,
-                checkToRecovery: true,
-                checkOperatorAccess: false,
+                checkToRecovery: false,
+                checkOperatorAccess: true,
                 checkFromAccess: true,
-                checkToAccess: true,
-                checkFromKyc: true,
-                checkToKyc: true,
+                checkToAccess: false,
+                checkFromKyc: false,
+                checkToKyc: false,
                 checkBalance: false
-            });
-    }
-
-    /**
-     * @dev Helper function to create custom validation flags
-     * @param checkPause Whether to check pause status
-     * @param checkClearing Whether to check clearing status
-     * @param checkOperatorRecovery Whether to check operator recovery status
-     * @param checkFromRecovery Whether to check from address recovery status
-     * @param checkToRecovery Whether to check to address recovery status
-     * @param checkOperatorAccess Whether to check operator access
-     * @param checkFromAccess Whether to check from address access
-     * @param checkToAccess Whether to check to address access
-     * @param checkFromKyc Whether to check from address KYC
-     * @param checkToKyc Whether to check to address KYC
-     * @param checkBalance Whether to check balance
-     * @return ValidationFlags configured with custom settings
-     */
-    function _createCustomValidationFlags(
-        bool checkPause,
-        bool checkClearing,
-        bool checkOperatorRecovery,
-        bool checkFromRecovery,
-        bool checkToRecovery,
-        bool checkOperatorAccess,
-        bool checkFromAccess,
-        bool checkToAccess,
-        bool checkFromKyc,
-        bool checkToKyc,
-        bool checkBalance
-    ) internal pure returns (ValidationFlags memory) {
-        return
-            ValidationFlags({
-                checkPause: checkPause,
-                checkClearing: checkClearing,
-                checkOperatorRecovery: checkOperatorRecovery,
-                checkFromRecovery: checkFromRecovery,
-                checkToRecovery: checkToRecovery,
-                checkOperatorAccess: checkOperatorAccess,
-                checkFromAccess: checkFromAccess,
-                checkToAccess: checkToAccess,
-                checkFromKyc: checkFromKyc,
-                checkToKyc: checkToKyc,
-                checkBalance: checkBalance
             });
     }
 
     function _erc1594Storage()
         internal
         pure
-        returns (ERC1594Storage storage erc1594Storage_)
+        returns (ERC1594Storage storage ds)
     {
         bytes32 position = _ERC1594_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            erc1594Storage_.slot := position
+            ds.slot := position
         }
-    }
-
-    function _checkIssuable() private view {
-        if (!_isIssuable()) revert IssuanceIsClosed();
     }
 }

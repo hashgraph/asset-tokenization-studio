@@ -206,7 +206,6 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {ZERO_BYTES} from '../../layer_0/constants/values.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
 import {
@@ -214,6 +213,7 @@ import {
 } from '../../layer_0/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
 import {IEip1066} from '../../layer_1/interfaces/eip1066/IEip1066.sol';
 import {Eip1066} from '../../layer_0/constants/eip1066.sol';
+import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
 
 abstract contract Common is ERC1594StorageWrapper {
     error AlreadyInitialized();
@@ -270,7 +270,7 @@ abstract contract Common is ERC1594StorageWrapper {
             bytes1 statusCode,
             bytes32 reasonCode,
             bytes memory details
-        ) = _isAbleToTransfer(_to, _amount, ZERO_BYTES);
+        ) = _validateWithEmptyData(_to, _amount);
         if (!isAbleToTransfer) {
             revert IEip1066.ExtendedError(statusCode, reasonCode, details);
         }
@@ -285,9 +285,13 @@ abstract contract Common is ERC1594StorageWrapper {
             bool canTransfer,
             bytes1 statusCode,
             bytes32 reasonCode
-        ) = _canTransferFrom(_from, _to, _amount, ZERO_BYTES);
+        ) = _canTransferFrom(_from, _to, _amount, LibCommon.emptyBytes());
         if (!canTransfer) {
-            revert IEip1066.ExtendedError(statusCode, reasonCode, ZERO_BYTES);
+            revert IEip1066.ExtendedError(
+                statusCode,
+                reasonCode,
+                LibCommon.emptyBytes()
+            );
         }
     }
 
@@ -297,7 +301,7 @@ abstract contract Common is ERC1594StorageWrapper {
             revert IEip1066.ExtendedError(
                 Eip1066.DISALLOWED_OR_STOP,
                 Eip1066.REASON_ISSUANCE_CLOSED,
-                ZERO_BYTES
+                LibCommon.emptyBytes()
             );
         }
 
@@ -307,7 +311,7 @@ abstract contract Common is ERC1594StorageWrapper {
             bytes1 statusCode,
             bytes32 reasonCode,
             bytes memory details
-        ) = _isAbleToTransfer(_to, _amount, ZERO_BYTES);
+        ) = _validateWithEmptyData(_to, _amount);
         if (!isAbleToTransfer) {
             revert IEip1066.ExtendedError(statusCode, reasonCode, details);
         }
@@ -320,7 +324,7 @@ abstract contract Common is ERC1594StorageWrapper {
             bytes1 statusCode,
             bytes32 reasonCode,
             bytes memory details
-        ) = _isAbleToTransfer(_from, _amount, ZERO_BYTES);
+        ) = _validateWithEmptyData(_from, _amount);
         if (!isAbleToTransfer) {
             revert IEip1066.ExtendedError(statusCode, reasonCode, details);
         }
@@ -336,7 +340,7 @@ abstract contract Common is ERC1594StorageWrapper {
             revert IEip1066.ExtendedError(
                 Eip1066.PAUSED,
                 Eip1066.REASON_EMPTY,
-                ZERO_BYTES
+                LibCommon.emptyBytes()
             );
         }
         if (_isRecovered(_owner)) {
