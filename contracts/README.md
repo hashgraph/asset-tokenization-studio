@@ -20,7 +20,7 @@ The contracts module contains the code of all the solidity smart contracts deplo
 
 The standard used for security token is ERC-1400.
 
-Version 1.5.0 introduces partial compatibility with the ERC-3643 (TREX) standard; full identity and compliance support will be added in future releases.
+Version 1.15.0 introduces partial compatibility with the ERC-3643 (TREX) standard; full identity and compliance support will be added in future releases.
 
 ## ERC-3643 compatibility 
 

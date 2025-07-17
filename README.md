@@ -40,7 +40,7 @@ The ATS consists of three primary components that work together to provide a com
 
 The standard ERC for security tokens used in the smart contracts is ERC1400.
 
-Version 1.5.0 introduces partial compatibility with the ERC-3643 (TREX) standard; full support will follow in upcoming releases.
+Version 1.15.0 introduces partial compatibility with the ERC-3643 (TREX) standard; full support will follow in upcoming releases.
 
 
 # Development manifesto
