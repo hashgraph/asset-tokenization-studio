@@ -451,7 +451,6 @@ abstract contract HoldStorageWrapper2 is
             );
             if (
                 _holdIdentifier.tokenHolder != _to &&
-                _erc3643Storage().compliance != address(0) &&
                 _holdIdentifier.partition == _DEFAULT_PARTITION
             ) {
                 (_erc3643Storage().compliance).functionCall(
@@ -469,7 +468,6 @@ abstract contract HoldStorageWrapper2 is
         _addPartitionTo(_amount, _to, _holdIdentifier.partition);
         if (
             _holdIdentifier.tokenHolder != _to &&
-            _erc3643Storage().compliance != address(0) &&
             _holdIdentifier.partition == _DEFAULT_PARTITION
         ) {
             (_erc3643Storage().compliance).functionCall(

@@ -261,7 +261,6 @@ abstract contract ERC1410BasicStorageWrapper is
 
             if (
                 _from != _basicTransferInfo.to &&
-                _erc3643Storage().compliance != address(0) &&
                 _partition == _DEFAULT_PARTITION
             ) {
                 (_erc3643Storage().compliance).functionCall(
@@ -282,9 +281,7 @@ abstract contract ERC1410BasicStorageWrapper is
             _partition
         );
         if (
-            _from != _basicTransferInfo.to &&
-            _erc3643Storage().compliance != address(0) &&
-            _partition == _DEFAULT_PARTITION
+            _from != _basicTransferInfo.to && _partition == _DEFAULT_PARTITION
         ) {
             (_erc3643Storage().compliance).functionCall(
                 abi.encodeWithSelector(

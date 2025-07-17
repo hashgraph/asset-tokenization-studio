@@ -213,9 +213,16 @@ library LowLevelCall {
         bytes memory _data,
         bytes4 _errorSelector
     ) internal returns (bytes memory) {
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = _target.call(_data);
-        return _verifyCallResultFromTarget(success, returndata, _errorSelector);
+        if (_target != address(0)) {
+            // solhint-disable-next-line avoid-low-level-calls
+            (bool success, bytes memory returndata) = _target.call(_data);
+            return
+                _verifyCallResultFromTarget(
+                    success,
+                    returndata,
+                    _errorSelector
+                );
+        }
     }
 
     function functionStaticCall(
