@@ -14,6 +14,7 @@
     "install:ats:web:lock": "cd apps/ats/web && yarn install --frozen-lockfile",
     "install:ats:sdk": "npm install --workspace=packages/ats/sdk --ignore-scripts",
     "install:ats:contracts": "npm install --workspace=packages/ats/contracts --ignore-scripts",
+    "install:ats:all": "npm run install:ats:contracts && npm run install:ats:sdk && npm run install:ats:web",
     "build:ats:contracts": "npm run build --workspace=packages/ats/contracts",
     "build:ats:sdk": "npm run build --workspace=packages/ats/sdk",
     "build:ats:web": "cd apps/ats/web && yarn build",
