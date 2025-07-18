@@ -278,9 +278,9 @@ abstract contract ERC1410StandardStorageWrapper is
         }
         if (removeFrom) {
             _updateTokenHolderSnapshot(from);
-            _updateTokenHolderSnapshot(
-                _getTokenHolder(_getTotalTokenHolders())
-            );
+            address lastTokenHolder = _getTokenHolder(_getTotalTokenHolders());
+            if (from != lastTokenHolder)
+                _updateTokenHolderSnapshot(lastTokenHolder);
             _updateTotalTokenHolderSnapshot();
             _removeTokenHolder(from);
         }

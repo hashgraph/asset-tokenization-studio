@@ -387,6 +387,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
             }
         }
 
+        delete basicStorage.tokenHolders[lastIndex];
         basicStorage.tokenHolderIndex[tokenHolder] = 0;
         basicStorage.totalTokenHolders--;
     }
