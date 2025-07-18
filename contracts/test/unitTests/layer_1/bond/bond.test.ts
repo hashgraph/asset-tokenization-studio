@@ -506,20 +506,6 @@ describe('Bond Tests', () => {
                 )
             })
 
-            it('GIVEN the operator account is blocked WHEN redeeming at maturity THEN transaction fails with AccountIsBlocked', async () => {
-                await controlListFacet.addToControlList(account_A)
-
-                await expect(
-                    bondFacet
-                        .connect(signer_A)
-                        .redeemAtMaturityByPartition(
-                            account_C,
-                            DEFAULT_PARTITION,
-                            amount
-                        )
-                ).to.be.revertedWithCustomError(bondFacet, 'AccountIsBlocked')
-            })
-
             it('GIVEN the token holder account is blocked WHEN redeeming at maturity THEN transaction fails with AccountIsBlocked', async () => {
                 await controlListFacet.addToControlList(account_B)
 

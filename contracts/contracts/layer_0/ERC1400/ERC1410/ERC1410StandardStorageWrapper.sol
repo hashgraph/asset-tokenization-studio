@@ -224,6 +224,7 @@ import {
     _ADDRESS_RECOVERED_FROM_ERROR_ID
 } from '../../constants/values.sol';
 import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {_MATURITY_REDEEMER_ROLE} from '../../../layer_1/constants/roles.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
     IERC1410Standard
@@ -405,6 +406,7 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
+        roles[2] = _MATURITY_REDEEMER_ROLE;
         if (!_hasAnyRole(roles, _msgSender())) {
             if (_isRecovered(_msgSender())) {
                 return (

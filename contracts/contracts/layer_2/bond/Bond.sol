@@ -230,13 +230,11 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         onlyUnpaused
         validateAddress(_tokenHolder)
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyListedAllowed(_msgSender())
         onlyListedAllowed(_tokenHolder)
         onlyRole(_MATURITY_REDEEMER_ROLE)
         onlyClearingDisabled
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        onlyUnrecoveredAddress(_msgSender())
         onlyUnrecoveredAddress(_tokenHolder)
         onlyAfterCurrentMaturityDate(_blockTimestamp())
     {
