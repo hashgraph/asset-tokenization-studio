@@ -32,24 +32,21 @@ jobs:
         run: |
           touch .npmrc
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
-          cp .npmrc ./contracts/.npmrc
-          cp .npmrc ./sdk/.npmrc
+          cp .npmrc ./packages/ats/contracts/.npmrc
+          cp .npmrc ./packages/ats/sdk/.npmrc
 
       - name: Change references
         run: ./changeProjectsReferencesToRepo.sh
 
-      - name: Install contracts dependencies
-        run: npm run install:contracts
+      - name: Install packages dependencies (ats/contracts and ats/sdk)
+        run: npm ci
 
       - name: Publish contracts package
-        run: npm run publish:contracts --access=public
+        run: npm run publish:ats:contracts --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Install sdk dependencies
-        run: npm run install:sdk
-
       - name: Publish sdk package
-        run: npm run publish:sdk --access=public
+        run: npm run publish:ats:sdk --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

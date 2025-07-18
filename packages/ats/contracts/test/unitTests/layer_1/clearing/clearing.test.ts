@@ -2722,7 +2722,7 @@ describe('Clearing Tests', () => {
                         clearingOperation.data,
                         EMPTY_HEX_BYTES
                     )
-                ;(clearingIdentifier.clearingId = 1),
+                ;((clearingIdentifier.clearingId = 1),
                     await checkCreatedClearingValues(
                         clearingIdentifier,
                         ClearingOperationType.HoldCreation,
@@ -2734,7 +2734,7 @@ describe('Clearing Tests', () => {
                         ThirdPartyType.NULL,
                         ADDRESS_ZERO,
                         hold
-                    )
+                    ))
 
                 // increase allowance
                 await erc20Facet

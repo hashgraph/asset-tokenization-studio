@@ -38,12 +38,26 @@ Ensure the following tools are installed with these versions:
 -   **NPM:** `v10.8.3`
 -   **Yarn:** `v1.22.22`
 
+# Project Structure
+This project is organized as a monorepo using npm workspaces to manage multiple packages in a modular and scalable way. The codebase is structured around domain-specific folders, allowing independent development and deployment of different applications.
+## ATS
+ATS (Asset Tokenization Studio) is one of the main applications in the monorepo. Its components are organized as follows:
+- `packages/ats/` Contains the core business logic of ATS:
+  - `contracts/` Smart contracts that implement the tokenization logic. 
+  - `sdk/` A TypeScript SDK to interact with the contracts from frontend or backend applications.
+- `apps/ats/` Contains the applications that consume the SDK:
+  - `web/` A React + Vite-based web application for interacting with ATS.
+
+⚠️ Note: The web module is not currently included in the npm workspaces because it uses Yarn for installation and build. This separation is due to compatibility constraints with some of its tooling. In future phases, we plan to integrate web into the npm workspaces once full compatibility is ensured.
+
+## Mass-Payout
+
 # Installation
 
 In a terminal:
 
 ```
-npm run install:all
+npm run setup
 ```
 
 This will install the dependencies in all projects and sets up the links between them.
@@ -56,11 +70,11 @@ When making modifications to any of the modules, you have to re-compile the depe
 
 ```bash
   // 1st
-  $ npm run build:contracts
+  $ npm run build:ats:contracts
   // 2nd
-  $ npm run build:sdk
+  $ npm run build:ats:sdk
   // or
-  $ npm run build:web
+  $ npm run build:ats:web
 ```
 
 # Setting Up the Environment
@@ -146,14 +160,17 @@ The following custody providers are supported through their respective SDKs with
 For further details or assistance regarding the custodian integration, please consult the relevant source code within the SDK or reach out to the development team. [Custodians Library](https://github.com/hashgraph/hedera-custodians-library)
 
 # Run
+## ATS
 
 In order to run the application locally:
 
 -   Clone the repository
--   Install the application as described in the _Installation_ section
 -   Create a ".env" file in the _web_ module (using the ".env.sample" file as a template)
--   Open a terminal and go to the _web_ folder
--   Run the command : **yarn dev**
+-   Open a terminal and run the command:
+
+```bash
+npm run start:ats
+```
 -   Open a browser and type in the URL displayed in the terminal (by default it will be : _http://localhost:5173_)
 
 # Support
