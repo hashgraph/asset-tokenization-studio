@@ -212,9 +212,19 @@ import {
     RegulationData,
     AdditionalSecurityData
 } from '../constants/regulation.sol';
-import {Common} from '../../layer_1/common/Common.sol';
 
-abstract contract Security is ISecurity, SecurityStorageWrapper, Common {
+abstract contract Security is ISecurity, SecurityStorageWrapper {
+    function getSecurityHolders(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_) {
+        return _getTokenHolders(_pageIndex, _pageLength);
+    }
+
+    function getTotalSecurityHolders() external view returns (uint256) {
+        return _getTotalTokenHolders();
+    }
+
     function getSecurityRegulationData()
         external
         pure

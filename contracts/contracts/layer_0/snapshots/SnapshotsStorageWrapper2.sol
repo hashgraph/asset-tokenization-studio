@@ -210,6 +210,7 @@ import {
     ISnapshotsStorageWrapper
 } from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
 import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
+import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
 
 abstract contract SnapshotsStorageWrapper2 is
     ISnapshotsStorageWrapper,
@@ -372,6 +373,22 @@ abstract contract SnapshotsStorageWrapper2 is
         );
     }
 
+    function _updateTokenHolderSnapshot(address account) internal override {
+        _updateSnapshotAddress(
+            _snapshotStorage().tokenHoldersSnapshots[
+                _getTokenHolderIndex(account)
+            ],
+            account
+        );
+    }
+
+    function _updateTotalTokenHolderSnapshot() internal override {
+        _updateSnapshot(
+            _snapshotStorage().totalTokenHoldersSnapshots,
+            _getTotalTokenHolders()
+        );
+    }
+
     function _abafAtSnapshot(
         uint256 _snapshotID
     ) internal view returns (uint256 abaf_) {
@@ -444,6 +461,44 @@ abstract contract SnapshotsStorageWrapper2 is
                 _snapshotStorage().accountBalanceSnapshots[account],
                 _balanceOfAdjusted(account)
             );
+    }
+
+    function _tokenHoldersAt(
+        uint256 snapshotId,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory) {
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
+            _pageIndex,
+            _pageLength
+        );
+
+        address[] memory tk = new address[](
+            LibCommon.getSize(start, end, _totalTokenHoldersAt(snapshotId))
+        );
+
+        for (uint256 i = 0; i < tk.length; i++) {
+            uint256 index = i + 1;
+            (bool snapshotted, address value) = _addressValueAt(
+                snapshotId,
+                _snapshotStorage().tokenHoldersSnapshots[index]
+            );
+
+            tk[i] = snapshotted ? value : _getTokenHolder(index);
+        }
+
+        return tk;
+    }
+
+    function _totalTokenHoldersAt(
+        uint256 snapshotId
+    ) internal view virtual returns (uint256) {
+        (bool snapshotted, uint256 value) = _valueAt(
+            snapshotId,
+            _snapshotStorage().totalTokenHoldersSnapshots
+        );
+
+        return snapshotted ? value : _getTotalTokenHolders();
     }
 
     function _balanceOfAtByPartition(

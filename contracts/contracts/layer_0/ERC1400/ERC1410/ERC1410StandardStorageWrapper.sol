@@ -236,23 +236,54 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 partition,
         address from,
         address to,
-        uint256 /*amount*/
+        uint256 amount
     ) internal override {
         _triggerAndSyncAll(partition, from, to);
+
+        bool addTo;
+        bool removeFrom;
 
         if (from == address(0)) {
             // mint
             _updateAccountSnapshot(to, partition);
-            return _updateTotalSupplySnapshot(partition);
-        }
-        if (to == address(0)) {
+            _updateTotalSupplySnapshot(partition);
+            // _balanceOf instead of _balanceOfAdjusted because we are comparing it to 0
+            if (amount > 0 && _balanceOf(to) == 0) addTo = true;
+        } else if (to == address(0)) {
             // burn
             _updateAccountSnapshot(from, partition);
-            return _updateTotalSupplySnapshot(partition);
+            _updateTotalSupplySnapshot(partition);
+            if (amount > 0 && _balanceOfAdjusted(from) == amount)
+                removeFrom = true;
         }
         // transfer
-        _updateAccountSnapshot(from, partition);
-        _updateAccountSnapshot(to, partition);
+        else {
+            _updateAccountSnapshot(from, partition);
+            _updateAccountSnapshot(to, partition);
+            // _balanceOf instead of _balanceOfAdjusted because we are comparing it to 0
+            if (amount > 0 && _balanceOf(to) == 0) addTo = true;
+            if (amount > 0 && _balanceOfAdjusted(from) == amount)
+                removeFrom = true;
+        }
+
+        if (addTo && removeFrom) {
+            _updateTokenHolderSnapshot(from);
+            _replaceTokenHolder(to, from);
+            return;
+        }
+        if (addTo) {
+            _updateTotalTokenHolderSnapshot();
+            _addNewTokenHolder(to);
+            return;
+        }
+        if (removeFrom) {
+            _updateTokenHolderSnapshot(from);
+            address lastTokenHolder = _getTokenHolder(_getTotalTokenHolders());
+            if (from != lastTokenHolder)
+                _updateTokenHolderSnapshot(lastTokenHolder);
+            _updateTotalTokenHolderSnapshot();
+            _removeTokenHolder(from);
+        }
     }
 
     function _triggerAndSyncAll(
@@ -390,6 +421,10 @@ abstract contract ERC1410StandardStorageWrapper is
     ) internal virtual;
 
     function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
+
+    function _updateTokenHolderSnapshot(address account) internal virtual;
+
+    function _updateTotalTokenHolderSnapshot() internal virtual;
 
     function _adjustTotalAndMaxSupplyForPartition(
         bytes32 _partition

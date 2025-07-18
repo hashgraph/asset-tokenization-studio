@@ -298,6 +298,16 @@ interface IEquity {
 
     function getDividendsCount() external view returns (uint256 dividendCount_);
 
+    function getDividendHolders(
+        uint256 _dividendID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalDividendHolders(
+        uint256 _dividendID
+    ) external view returns (uint256);
+
     function getVoting(
         uint256 _voteID
     ) external view returns (RegisteredVoting memory registeredVoting_);
@@ -308,6 +318,16 @@ interface IEquity {
     ) external view returns (VotingFor memory votingFor_);
 
     function getVotingCount() external view returns (uint256 votingCount_);
+
+    function getVotingHolders(
+        uint256 _voteID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalVotingHolders(
+        uint256 _voteID
+    ) external view returns (uint256);
 
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
