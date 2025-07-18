@@ -403,7 +403,7 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes calldata /*_data*/,
         bytes calldata /*_operatorData*/
     ) internal view returns (bool, bytes1, bytes32) {
-        bytes32[] memory roles = new bytes32[](2);
+        bytes32[] memory roles = new bytes32[](3);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
         roles[2] = _MATURITY_REDEEMER_ROLE;
