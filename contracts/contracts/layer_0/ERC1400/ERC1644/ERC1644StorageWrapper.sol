@@ -276,7 +276,7 @@ abstract contract ERC1644StorageWrapper is
      * allowed or not.
      * @return bool `true` when controller address is non-zero otherwise return `false`.
      */
-    function _isControllable() internal view returns (bool) {
+    function _isControllable() internal view override returns (bool) {
         return _erc1644Storage().isControllable;
     }
 

@@ -225,7 +225,8 @@ import {
     _CLEARING_ACTIVE_ERROR_ID,
     _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
     _ADDRESS_RECOVERED_FROM_ERROR_ID,
-    _ADDRESS_RECOVERED_TO_ERROR_ID
+    _ADDRESS_RECOVERED_TO_ERROR_ID,
+    _NOT_CONTROLLABLE
 } from '../../constants/values.sol';
 
 abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
@@ -240,6 +241,9 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
         if (!_hasAnyRole(roles, _msgSender())) {
             if (_isRecovered(_msgSender())) {
                 return (
@@ -250,9 +254,6 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
             }
             if (_isRecovered(_to)) {
                 return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
-            }
-            if (_isPaused()) {
-                return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
             }
             if (_isClearingActivated()) {
                 return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
@@ -291,6 +292,10 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
                         bytes32(0)
                     );
                 }
+            }
+        } else {
+            if (!_isControllable()) {
+                return (false, _NOT_CONTROLLABLE, bytes32(0));
             }
         }
         if (!_validPartition(_partition, _from)) {

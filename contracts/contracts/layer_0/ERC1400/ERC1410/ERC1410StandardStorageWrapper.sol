@@ -221,7 +221,8 @@ import {
     _FROM_ACCOUNT_KYC_ERROR_ID,
     _CLEARING_ACTIVE_ERROR_ID,
     _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-    _ADDRESS_RECOVERED_FROM_ERROR_ID
+    _ADDRESS_RECOVERED_FROM_ERROR_ID,
+    _NOT_CONTROLLABLE
 } from '../../constants/values.sol';
 import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
@@ -405,6 +406,9 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
         if (!_hasAnyRole(roles, _msgSender())) {
             if (_isRecovered(_msgSender())) {
                 return (
@@ -412,9 +416,6 @@ abstract contract ERC1410StandardStorageWrapper is
                     _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
                     bytes32(0)
                 );
-            }
-            if (_isPaused()) {
-                return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
             }
             if (_isClearingActivated()) {
                 return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
@@ -442,6 +443,10 @@ abstract contract ERC1410StandardStorageWrapper is
                         bytes32(0)
                     );
                 }
+            }
+        } else {
+            if (!_isControllable()) {
+                return (false, _NOT_CONTROLLABLE, bytes32(0));
             }
         }
         if (!_validPartition(_partition, _from)) {
@@ -521,6 +526,8 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 _partition,
         address _account
     ) internal view virtual returns (uint256);
+
+    function _isControllable() internal view virtual returns (bool);
 
     function _validateParams(bytes32 _partition, uint256 _value) internal pure {
         if (_value == uint256(0)) {
