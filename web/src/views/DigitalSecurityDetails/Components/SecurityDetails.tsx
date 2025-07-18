@@ -208,6 +208,8 @@ import { useTranslation } from "react-i18next";
 import { useSecurityStore } from "../../../store/securityStore";
 import { useParams } from "react-router-dom";
 import { toNumber } from "../../../utils/format";
+import { useGetCompliance } from "../../../hooks/queries/useCompliance";
+import { ComplianceRequest } from "@hashgraph/asset-tokenization-sdk";
 
 interface SecurityDetails extends Omit<DefinitionListProps, "items"> {}
 
@@ -215,6 +217,15 @@ export const SecurityDetails = (props: SecurityDetails) => {
   const { t: tProperties } = useTranslation("properties");
   const { details } = useSecurityStore();
   const { id } = useParams();
+
+  const { data: compliance } = useGetCompliance(
+    new ComplianceRequest({
+      securityId: id!,
+    }),
+    {
+      enabled: !!id,
+    },
+  );
 
   return (
     <DefinitionList
@@ -259,6 +270,14 @@ export const SecurityDetails = (props: SecurityDetails) => {
             toNumber(details?.maxSupply) - toNumber(details?.totalSupply)
           } ${details?.symbol}`,
         },
+        ...(compliance
+          ? [
+              {
+                title: tProperties("compliance"),
+                description: compliance ?? "",
+              },
+            ]
+          : []),
       ]}
       title="Details"
       {...props}
