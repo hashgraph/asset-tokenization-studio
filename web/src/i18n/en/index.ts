@@ -257,6 +257,7 @@ export default {
     isin: "ISIN",
     evmAddress: "EVM Address",
     id: "ID",
+    compliance: "Compliance",
     totalSupply: "Total Supply",
     maxSupply: "Max Supply",
     pendingToBeMinted: "Pending to be minted",

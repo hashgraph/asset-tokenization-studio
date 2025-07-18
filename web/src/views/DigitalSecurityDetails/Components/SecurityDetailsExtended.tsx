@@ -219,10 +219,14 @@ import {
 import { useSecurityStore } from "../../../store/securityStore";
 import { useParams } from "react-router-dom";
 import { Flex } from "@chakra-ui/react";
-import { BondDetailsViewModel } from "@hashgraph/asset-tokenization-sdk";
-import { useEffect, useMemo } from "react";
+import {
+  BondDetailsViewModel,
+  ComplianceRequest,
+} from "@hashgraph/asset-tokenization-sdk";
+import { useMemo } from "react";
 import { MaturityDateItem } from "./MadurityDateItem";
 import { DATE_TIME_FORMAT } from "../../../utils/constants";
+import { useGetCompliance } from "../../../hooks/queries/useCompliance";
 interface SecurityDetailsExtended extends Omit<DefinitionListProps, "items"> {
   nominalValue?: number;
   bondDetailsResponse?: BondDetailsViewModel;
@@ -237,8 +241,17 @@ export const SecurityDetailsExtended = ({
   const { details } = useSecurityStore();
   const { id } = useParams();
 
-  const defaultItems: BasicDefinitionListItem[] = useMemo(
-    () => [
+  const { data: compliance } = useGetCompliance(
+    new ComplianceRequest({
+      securityId: id!,
+    }),
+    {
+      enabled: !!id,
+    },
+  );
+
+  const defaultItems: BasicDefinitionListItem[] = useMemo(() => {
+    const items: BasicDefinitionListItem[] = [
       {
         title: tProperties("name"),
         description: details?.name ?? "",
@@ -294,45 +307,39 @@ export const SecurityDetailsExtended = ({
           toNumber(details?.maxSupply) - toNumber(details?.totalSupply)
         } ${details?.symbol}`,
       },
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [details],
-  );
+    ];
 
-  useEffect(() => {
-    if (
-      details &&
-      details.type === "BOND" &&
-      !defaultItems.find(({ title }) => title === tProperties("startingDate"))
-    ) {
-      defaultItems.push({
-        title: tProperties("startingDate"),
-        description: formatDate(
-          bondDetailsResponse?.startingDate,
-          DATE_TIME_FORMAT,
-        ),
+    if (compliance !== undefined) {
+      items.push({
+        title: tProperties("compliance"),
+        description: `${compliance}`,
       });
+    }
 
+    if (details?.type === "BOND") {
+      if (!items.find(({ title }) => title === tProperties("startingDate"))) {
+        items.push({
+          title: tProperties("startingDate"),
+          description: formatDate(
+            bondDetailsResponse?.startingDate,
+            DATE_TIME_FORMAT,
+          ),
+        });
+      }
       if (
-        bondDetailsResponse &&
-        bondDetailsResponse.maturityDate &&
+        bondDetailsResponse?.maturityDate &&
         id &&
-        !defaultItems.find(({ title }) => title === tProperties("maturityDate"))
+        !items.find(({ title }) => title === tProperties("maturityDate"))
       ) {
-        defaultItems.push({
+        items.push({
           title: tProperties("maturityDate"),
           description: <MaturityDateItem securityId={id} />,
         });
       }
     }
-  }, [
-    bondDetailsResponse,
-    bondDetailsResponse?.startingDate,
-    defaultItems,
-    details,
-    id,
-    tProperties,
-  ]);
+
+    return items;
+  }, [details, id, tProperties, nominalValue, bondDetailsResponse, compliance]);
 
   return (
     <DefinitionList
