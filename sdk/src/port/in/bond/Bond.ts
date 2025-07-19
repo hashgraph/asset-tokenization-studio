@@ -240,6 +240,8 @@ import {
 } from '../../../domain/context/factory/RegulationType.js';
 import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest.js';
 import { UpdateMaturityDateCommand } from '../../../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand.js';
+import { RedeemAtMaturityByPartitionRequest } from '../request/index.js';
+import { RedeemAtMaturityByPartitionCommand } from '../../../app/usecase/command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand.js';
 
 interface IBondInPort {
   create(
@@ -257,6 +259,9 @@ interface IBondInPort {
   getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
   updateMaturityDate(
     request: UpdateMaturityDateRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  redeemAtMaturityByPartition(
+    request: RedeemAtMaturityByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
@@ -478,6 +483,26 @@ class BondInPort implements IBondInPort {
 
     return await this.commandBus.execute(
       new UpdateMaturityDateCommand(maturityDate, securityId),
+    );
+  }
+
+  @LogError
+  async redeemAtMaturityByPartition(
+    request: RedeemAtMaturityByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, partitionId, sourceId, amount } = request;
+    ValidatedRequest.handleValidation(
+      RedeemAtMaturityByPartitionRequest.name,
+      request,
+    );
+
+    return await this.commandBus.execute(
+      new RedeemAtMaturityByPartitionCommand(
+        securityId,
+        partitionId,
+        sourceId,
+        amount,
+      ),
     );
   }
 }

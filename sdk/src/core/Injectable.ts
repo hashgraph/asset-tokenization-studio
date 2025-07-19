@@ -424,6 +424,7 @@ import { BatchTransferCommandHandler } from '../app/usecase/command/security/ope
 import { BatchUnfreezePartialTokensCommandHandler } from '../app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommandHandler.js';
 import { SetAddressFrozenCommandHandler } from '../app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommandHandler.js';
 import { TakeSnapshotCommandHandler } from '../app/usecase/command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommandHandler.js';
+import { RedeemAtMaturityByPartitionCommandHandler } from '../app/usecase/command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -875,6 +876,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: TakeSnapshotCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RedeemAtMaturityByPartitionCommandHandler,
   },
 ];
 
