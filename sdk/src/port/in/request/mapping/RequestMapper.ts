@@ -204,19 +204,19 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Account from '../../../../domain/context/account/Account.js';
-import PublicKey from '../../../../domain/context/account/PublicKey.js';
-import { RequestAccount } from '../BaseRequest.js';
+import Account from '@domain/context/account/Account';
+import PublicKey from '@domain/context/account/PublicKey';
+import { RequestAccount } from '../BaseRequest';
 import {
   AWSKMSConfigRequest,
   DFNSConfigRequest,
   FireblocksConfigRequest,
   HWCRequestSettings,
-} from '../network/ConnectRequest.js';
-import HWCSettings from '../../../../core/settings/walletConnect/HWCSettings.js';
-import DfnsSettings from '../../../../core/settings/custodialWalletSettings/DfnsSettings.js';
-import FireblocksSettings from '../../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
+} from '../network/ConnectRequest';
+import HWCSettings from '@core/settings/walletConnect/HWCSettings';
+import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
+import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
+import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
 
 export default class RequestMapper {
   public static mapAccount(account?: RequestAccount): Account | undefined {

@@ -203,18 +203,18 @@
 
 */
 
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import {
   GetBondDetailsQuery,
   GetBondDetailsQueryResponse,
-} from './GetBondDetailsQuery.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { BondDetails } from '../../../../../../domain/context/bond/BondDetails.js';
-import { GetBondDetailsQueryError } from './error/GetBondDetailsQueryError.js';
+} from './GetBondDetailsQuery';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { GetBondDetailsQueryError } from './error/GetBondDetailsQueryError';
 
 @QueryHandler(GetBondDetailsQuery)
 export class GetBondDetailsQueryHandler

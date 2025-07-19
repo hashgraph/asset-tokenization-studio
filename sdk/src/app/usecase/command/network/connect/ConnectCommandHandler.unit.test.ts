@@ -204,18 +204,18 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import { ConnectCommandHandler } from './ConnectCommandHandler.js';
-import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand.js';
-import { ConnectCommandFixture } from '../../../../../../__tests__/fixtures/network/NetworkFixture.js';
-import TransactionAdapter from '../../../../../../src/port/out/TransactionAdapter.js';
-import Account from '../../../../../../src/domain/context/account/Account.js';
+import TransactionService from '@service/transaction/TransactionService';
+import { ConnectCommandHandler } from './ConnectCommandHandler';
+import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand';
+import { ConnectCommandFixture } from '@test/fixtures/network/NetworkFixture';
+import TransactionAdapter from '@port/out/TransactionAdapter';
+import Account from '@domain/context/account/Account';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ConnectCommandError } from './error/ConnectCommandError.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ConnectCommandError } from './error/ConnectCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('ConnectCommandHandler', () => {
   let handler: ConnectCommandHandler;

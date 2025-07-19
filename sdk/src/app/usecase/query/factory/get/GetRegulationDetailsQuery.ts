@@ -203,10 +203,10 @@
 
 */
 
-import { Query } from '../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../core/query/QueryResponse.js';
-import { Regulation } from '../../../../../domain/context/factory/Regulation.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
+import { Regulation } from '@domain/context/factory/Regulation';
+import ContractId from '@domain/context/contract/ContractId';
 
 export class GetRegulationDetailsQueryResponse implements QueryResponse {
   constructor(public readonly regulation: Regulation) {}

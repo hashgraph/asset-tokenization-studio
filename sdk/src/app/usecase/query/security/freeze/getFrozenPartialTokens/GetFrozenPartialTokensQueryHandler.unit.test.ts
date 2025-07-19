@@ -207,24 +207,24 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import AccountService from '../../../../../service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
 import {
   GetFrozenPartialTokensQuery,
   GetFrozenPartialTokensQueryResponse,
-} from './GetFrozenPartialTokensQuery.js';
-import { GetFrozenPartialTokensQueryHandler } from './GetFrozenPartialTokensQueryHandler.js';
+} from './GetFrozenPartialTokensQuery';
+import { GetFrozenPartialTokensQueryHandler } from './GetFrozenPartialTokensQueryHandler';
 
-import { GetFrozenPartialTokensQueryError } from './error/GetFrozenPartialTokensQueryError.js';
-import { GetFrozenPartialTokensQueryFixture } from '../../../../../../../__tests__/fixtures/freeze/FreezeFixture.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import { GetFrozenPartialTokensQueryError } from './error/GetFrozenPartialTokensQueryError';
+import SecurityService from '@service/security/SecurityService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { GetFrozenPartialTokensQueryFixture } from '@test/fixtures/freeze/FreezeFixture';
 
 describe('GetFrozenPartialTokensQueryHandler', () => {
   let handler: GetFrozenPartialTokensQueryHandler;

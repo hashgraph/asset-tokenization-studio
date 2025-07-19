@@ -206,13 +206,13 @@
 import {
   IsAuthorizedWhiteListMockQuery,
   IsAuthorizedWhiteListMockQueryResponse,
-} from './IsAuthorizedWhiteListMockQuery.js';
-import { QueryHandler } from '../../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import ContractService from '../../../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../../../app/service/account/AccountService';
+} from './IsAuthorizedWhiteListMockQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
 
 @QueryHandler(IsAuthorizedWhiteListMockQuery)
 export class IsAuthorizedWhiteListMockQueryHandler

@@ -207,19 +207,19 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
 import {
   GetHoldsIdForByPartitionQuery,
   GetHoldsIdForByPartitionQueryResponse,
-} from './GetHoldsIdForByPartitionQuery.js';
-import { GetHoldsIdForByPartitionQueryHandler } from './GetHoldsIdForByPartitionQueryHandler.js';
-import { GetHoldsIdForByPartitionQueryFixture } from '../../../../../../../__tests__/fixtures/hold/HoldFixture.js';
-import { GetHoldsIdForByPartitionQueryError } from './error/GetHoldsIdForByPartitionQueryError.js';
+} from './GetHoldsIdForByPartitionQuery';
+import { GetHoldsIdForByPartitionQueryHandler } from './GetHoldsIdForByPartitionQueryHandler';
+import { GetHoldsIdForByPartitionQueryFixture } from '@test/fixtures/hold/HoldFixture';
+import { GetHoldsIdForByPartitionQueryError } from './error/GetHoldsIdForByPartitionQueryError';
 
 describe('GetHoldsIdForByPartitionQueryHandler', () => {
   let handler: GetHoldsIdForByPartitionQueryHandler;

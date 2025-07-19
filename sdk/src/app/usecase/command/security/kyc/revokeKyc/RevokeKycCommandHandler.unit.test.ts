@@ -203,28 +203,25 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { RevokeKycCommandFixture } from '../../../../../../../__tests__/fixtures/kyc/KycFixture.js';
-import { RevokeKycCommandHandler } from './RevokeKycCommandHandler.js';
-import {
-  RevokeKycCommand,
-  RevokeKycCommandResponse,
-} from './RevokeKycCommand.js';
-import { RevokeKycCommandError } from './error/RevokeKycCommandError.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { RevokeKycCommandFixture } from '@test/fixtures/kyc/KycFixture';
+import { RevokeKycCommandHandler } from './RevokeKycCommandHandler';
+import { RevokeKycCommand, RevokeKycCommandResponse } from './RevokeKycCommand';
+import { RevokeKycCommandError } from './error/RevokeKycCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('RevokeKycCommandHandler', () => {
   let handler: RevokeKycCommandHandler;

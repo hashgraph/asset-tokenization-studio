@@ -207,21 +207,21 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { GetCouponForQueryFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
-import { GetCouponForQueryError } from './error/GetCouponForQueryError.js';
-import { GetCouponForQueryHandler } from './GetCouponForQueryHandler.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { GetCouponForQueryFixture } from '@test/fixtures/bond/BondFixture';
+import { GetCouponForQueryError } from './error/GetCouponForQueryError';
+import { GetCouponForQueryHandler } from './GetCouponForQueryHandler';
+import AccountService from '@service/account/AccountService';
 import { BigNumber } from 'ethers';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import {
   GetCouponForQuery,
   GetCouponForQueryResponse,
-} from './GetCouponForQuery.js';
+} from './GetCouponForQuery';
 
 describe('GetCouponForQueryHandler', () => {
   let handler: GetCouponForQueryHandler;

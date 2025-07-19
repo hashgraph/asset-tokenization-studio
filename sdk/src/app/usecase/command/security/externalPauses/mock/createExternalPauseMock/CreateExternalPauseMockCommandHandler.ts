@@ -203,15 +203,15 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import {
   CreateExternalPauseMockCommand,
   CreateExternalPauseMockCommandResponse,
 } from './CreateExternalPauseMockCommand';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '../../../../../../../app/service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import TransactionService from '@service/transaction/TransactionService';
 import { CreateExternalPauseMockCommandError } from './error/CreateExternalPauseMockCommandError';
 
 @CommandHandler(CreateExternalPauseMockCommand)

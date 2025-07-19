@@ -207,21 +207,21 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   EquityDetailsFixture,
   GetEquityDetailsQueryFixture,
-} from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
-import { GetEquityDetailsQueryHandler } from './GetEquityDetailsQueryHandler.js';
+} from '@test/fixtures/equity/EquityFixture';
+import { GetEquityDetailsQueryHandler } from './GetEquityDetailsQueryHandler';
 import {
   GetEquityDetailsQuery,
   GetEquityDetailsQueryResponse,
-} from './GetEquityDetailsQuery.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetEquityDetailsQueryError } from './error/GetEquityDetailsQueryError.js';
+} from './GetEquityDetailsQuery';
+import AccountService from '@service/account/AccountService';
+import { GetEquityDetailsQueryError } from './error/GetEquityDetailsQueryError';
 
 describe('GetEquityDetailsQueryHandler', () => {
   let handler: GetEquityDetailsQueryHandler;

@@ -210,11 +210,11 @@ import {
   TransactionRecord,
   TransactionResponse as HTransactionResponse,
 } from '@hashgraph/sdk';
-import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
-import { TransactionResponseError } from '../error/TransactionResponseError.js';
-import { TransactionType } from '../TransactionResponseEnums.js';
-import { TransactionResponseAdapter } from '../TransactionResponseAdapter.js';
-import LogService from '../../../app/service/log/LogService.js';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
+import { TransactionResponseError } from '../error/TransactionResponseError';
+import { TransactionType } from '../TransactionResponseEnums';
+import { TransactionResponseAdapter } from '../TransactionResponseAdapter';
+import LogService from '@service/log/LogService';
 
 export class HederaTransactionResponseAdapter extends TransactionResponseAdapter {
   public static async manageResponse(

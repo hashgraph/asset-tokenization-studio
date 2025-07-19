@@ -205,7 +205,7 @@
 
 import BaseEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
-import WalletEvent from '../app/service/event/WalletEvent.js';
+import WalletEvent from '@service/event/WalletEvent';
 
 /**
  * Allows to emit events to be received by a listener, based on the NodeJS.EventEmitter

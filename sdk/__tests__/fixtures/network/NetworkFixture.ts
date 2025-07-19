@@ -204,17 +204,17 @@
 */
 
 import { createFixture } from '../config';
-import { ConnectCommand } from '../../../src/app/usecase/command/network/connect/ConnectCommand';
-import { SupportedWallets } from '../../../src/domain/context/network/Wallet';
-import DfnsSettings from '../../../src/core/settings/custodialWalletSettings/DfnsSettings';
-import FireblocksSettings from '../../../src/core/settings/custodialWalletSettings/FireblocksSettings';
-import AWSKMSSettings from '../../../src/core/settings/custodialWalletSettings/AWSKMSSettings';
+import { ConnectCommand } from '@command/network/connect/ConnectCommand';
+import { SupportedWallets } from '@domain/context/network/Wallet';
+import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
+import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
+import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import HWCSettings from '../../../src/core/settings/walletConnect/HWCSettings';
-import { SetConfigurationCommand } from '../../../src/app/usecase/command/network/setConfiguration/SetConfigurationCommand';
-import { SetNetworkCommand } from '../../../src/app/usecase/command/network/setNetwork/SetNetworkCommand';
-import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';
+import HWCSettings from '@core/settings/walletConnect/HWCSettings';
+import { SetConfigurationCommand } from '@command/network/setConfiguration/SetConfigurationCommand';
+import { SetNetworkCommand } from '@command/network/setNetwork/SetNetworkCommand';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
 
 export const DfnsSettingsFixture = createFixture<DfnsSettings>((settings) => {
   settings.serviceAccountSecretKey.faker((faker) => faker.string.uuid()),

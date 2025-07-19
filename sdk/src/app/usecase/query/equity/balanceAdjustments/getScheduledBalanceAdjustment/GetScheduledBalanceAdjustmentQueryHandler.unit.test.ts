@@ -207,21 +207,21 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { GetScheduledBalanceAdjustmentQueryHandler } from './GetScheduledBalanceAdjustmentQueryHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { GetScheduledBalanceAdjustmentQueryHandler } from './GetScheduledBalanceAdjustmentQueryHandler';
 import {
   GetScheduledBalanceAdjustmentQuery,
   GetScheduledBalanceAdjustmentQueryResponse,
-} from './GetScheduledBalanceAdjustmentQuery.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import { GetScheduledBalanceAdjustmentQueryError } from './error/GetScheduledBalanceAdjustmentQueryError.js';
+} from './GetScheduledBalanceAdjustmentQuery';
+import ContractService from '@service/contract/ContractService';
+import { GetScheduledBalanceAdjustmentQueryError } from './error/GetScheduledBalanceAdjustmentQueryError';
 import {
   GetScheduledBalanceAdjustmentQueryFixture,
   ScheduledBalanceAdjustmentFixture,
-} from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
+} from '@test/fixtures/equity/EquityFixture';
 
 describe('GetScheduledBalanceAdjustmentQueryHandler', () => {
   let handler: GetScheduledBalanceAdjustmentQueryHandler;

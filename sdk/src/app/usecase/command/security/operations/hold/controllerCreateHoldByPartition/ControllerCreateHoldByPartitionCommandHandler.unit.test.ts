@@ -203,32 +203,32 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import { ControllerCreateHoldByPartitionCommandHandler } from './ControllerCreateHoldByPartitionCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import { ControllerCreateHoldByPartitionCommandHandler } from './ControllerCreateHoldByPartitionCommandHandler';
 import {
   ControllerCreateHoldByPartitionCommand,
   ControllerCreateHoldByPartitionCommandResponse,
-} from './ControllerCreateHoldByPartitionCommand.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import { CreateHoldCommandFixture } from '../../../../../../../../__tests__/fixtures/hold/HoldFixture.js';
-import { ControllerCreateHoldByPartitionCommandError } from './error/ControllerCreateHoldByPartitionCommandError.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../../domain/context/security/Security.js';
+} from './ControllerCreateHoldByPartitionCommand';
+import SecurityService from '@service/security/SecurityService';
+import { CreateHoldCommandFixture } from '@test/fixtures/hold/HoldFixture';
+import { ControllerCreateHoldByPartitionCommandError } from './error/ControllerCreateHoldByPartitionCommandError';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
 import { faker } from '@faker-js/faker/.';
 
 describe('ControllerCreateHoldByPartitionCommandHandler', () => {

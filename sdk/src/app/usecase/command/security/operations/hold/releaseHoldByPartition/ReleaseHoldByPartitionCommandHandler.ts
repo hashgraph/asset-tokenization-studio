@@ -203,21 +203,21 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import SecurityService from '@service/security/SecurityService';
 import {
   ReleaseHoldByPartitionCommand,
   ReleaseHoldByPartitionCommandResponse,
-} from './ReleaseHoldByPartitionCommand.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import { ReleaseHoldByPartitionCommandError } from './error/ReleaseHoldByPartitionCommandError.js';
+} from './ReleaseHoldByPartitionCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import { ReleaseHoldByPartitionCommandError } from './error/ReleaseHoldByPartitionCommandError';
 
 @CommandHandler(ReleaseHoldByPartitionCommand)
 export class ReleaseHoldByPartitionCommandHandler

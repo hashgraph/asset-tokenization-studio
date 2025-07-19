@@ -207,11 +207,11 @@ import {
   AWSKMSConfigRequest,
   DFNSConfigRequest,
   FireblocksConfigRequest,
-} from '../src/port/in/request/network/ConnectRequest.js';
-import Account from '../src/domain/context/account/Account.js';
-import PrivateKey from '../src/domain/context/account/PrivateKey.js';
-import PublicKey from '../src/domain/context/account/PublicKey.js';
-import { HederaId } from '../src/domain/context/shared/HederaId.js';
+} from '@port/in/request/network/ConnectRequest';
+import Account from '@domain/context/account/Account';
+import PrivateKey from '@domain/context/account/PrivateKey';
+import PublicKey from '@domain/context/account/PublicKey';
+import { HederaId } from '@domain/context/shared/HederaId';
 import { config } from 'dotenv';
 
 config();

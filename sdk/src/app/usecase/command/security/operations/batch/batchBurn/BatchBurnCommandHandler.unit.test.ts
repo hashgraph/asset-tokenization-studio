@@ -203,30 +203,30 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
 
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import { BatchBurnCommandError } from './error/BatchBurnCommandError.js';
-import { BatchBurnCommand, BatchBurnResponse } from './BatchBurnCommand.js';
-import { BatchBurnCommandHandler } from './BatchBurnCommandHandler.js';
+import { ErrorCode } from '@core/error/BaseError';
+import { BatchBurnCommandError } from './error/BatchBurnCommandError';
+import { BatchBurnCommand, BatchBurnResponse } from './BatchBurnCommand';
+import { BatchBurnCommandHandler } from './BatchBurnCommandHandler';
 
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../../domain/context/security/Security.js';
-import { BatchBurnCommandFixture } from '../../../../../../../../__tests__/fixtures/batch/BatchFixture.js';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import SecurityService from '@service/security/SecurityService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import { BatchBurnCommandFixture } from '@test/fixtures/batch/BatchFixture';
 
 describe('BatchBurnCommandHandler', () => {
   let handler: BatchBurnCommandHandler;

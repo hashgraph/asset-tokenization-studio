@@ -203,28 +203,28 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { SetRevocationRegistryAddressCommandFixture } from '../../../../../../../__tests__/fixtures/ssi/SsiFixture.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { SetRevocationRegistryAddressCommandHandler } from './SetRevocationRegistryAddressCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import { SetRevocationRegistryAddressCommandFixture } from '@test/fixtures/ssi/SsiFixture';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { SetRevocationRegistryAddressCommandHandler } from './SetRevocationRegistryAddressCommandHandler';
 import {
   SetRevocationRegistryAddressCommand,
   SetRevocationRegistryAddressCommandResponse,
-} from './SetRevocationRegistryAddressCommand.js';
-import { SetRevocationRegistryAddressCommandError } from './error/SetRevocationRegistryAddressCommandError.js';
+} from './SetRevocationRegistryAddressCommand';
+import { SetRevocationRegistryAddressCommandError } from './error/SetRevocationRegistryAddressCommandError';
 
 describe('RemoveIssuerCommandHandler', () => {
   let handler: SetRevocationRegistryAddressCommandHandler;

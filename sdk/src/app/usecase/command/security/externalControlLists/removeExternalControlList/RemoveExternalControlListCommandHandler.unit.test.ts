@@ -203,25 +203,28 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { RemoveExternalControlListCommandFixture } from '../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { RemoveExternalControlListCommandHandler } from './RemoveExternalControlListCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { RemoveExternalControlListCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { RemoveExternalControlListCommandHandler } from './RemoveExternalControlListCommandHandler';
 import {
   RemoveExternalControlListCommand,
   RemoveExternalControlListCommandResponse,
 } from './RemoveExternalControlListCommand.js';
+import { RemoveExternalControlListCommandError } from './error/RemoveExternalControlListCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('RemoveExternalControlListCommandHandler', () => {
   let handler: RemoveExternalControlListCommandHandler;
@@ -241,6 +244,7 @@ describe('RemoveExternalControlListCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new RemoveExternalControlListCommandHandler(
@@ -257,6 +261,24 @@ describe('RemoveExternalControlListCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws RemoveExternalControlListCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        RemoveExternalControlListCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while removing external control list: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully remove external control list', async () => {
       contractServiceMock.getContractEvmAddress
         .mockResolvedValueOnce(evmAddress)

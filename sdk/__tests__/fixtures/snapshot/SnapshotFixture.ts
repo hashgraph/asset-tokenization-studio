@@ -203,9 +203,9 @@
 
 */
 
-import { TakeSnapshotRequest } from 'index';
-import { TakeSnapshotCommand } from '../../../src/app/usecase/command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
+import TakeSnapshotRequest from '@port/in/request/security/operations/snapshot/TakeSnapshotRequest';
 import { createFixture } from '../config';
+import { TakeSnapshotCommand } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 
 export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>(

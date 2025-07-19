@@ -203,25 +203,22 @@
 
 */
 
-import {
-  SetCouponCommand,
-  SetCouponCommandResponse,
-} from './SetCouponCommand.js';
-import { SetCouponCommandHandler } from './SetCouponCommandHandler.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { SetCouponCommandFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
+import { SetCouponCommand, SetCouponCommandResponse } from './SetCouponCommand';
+import { SetCouponCommandHandler } from './SetCouponCommandHandler';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { SetCouponCommandFixture } from '@test/fixtures/bond/BondFixture';
 import { createMock } from '@golevelup/ts-jest';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import {
   CouponIdFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { SetCouponCommandError } from './error/SetCouponCommandError.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { SetCouponCommandError } from './error/SetCouponCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('SetCouponCommandHandler', () => {
   let handler: SetCouponCommandHandler;

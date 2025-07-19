@@ -203,32 +203,32 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { SetMaxSupplyCommandFixture } from '../../../../../../../__tests__/fixtures/cap/CapFixture.js';
-import { SetMaxSupplyCommandHandler } from './SetMaxSupplyCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { SetMaxSupplyCommandFixture } from '@test/fixtures/cap/CapFixture';
+import { SetMaxSupplyCommandHandler } from './SetMaxSupplyCommandHandler';
 import {
   SetMaxSupplyCommand,
   SetMaxSupplyCommandResponse,
-} from './SetMaxSupplyCommand.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { SetMaxSupplyCommandError } from './error/SetMaxSupplyCommandError.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+} from './SetMaxSupplyCommand';
+import SecurityService from '@service/security/SecurityService';
+import Account from '@domain/context/account/Account';
+import { Security } from '@domain/context/security/Security';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { SetMaxSupplyCommandError } from './error/SetMaxSupplyCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('SetMaxSupplyCommandHandler', () => {
   let handler: SetMaxSupplyCommandHandler;

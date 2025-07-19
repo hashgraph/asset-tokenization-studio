@@ -203,8 +203,8 @@
 
 */
 
-import Mapper from '../../core/validation/Mapper.js';
-import { IndexableObject } from '../Type.js';
+import Mapper from '@core/validation/Mapper';
+import { IndexableObject } from '@core/Type';
 
 const OPTIONAL_KEYS = Symbol('optionalKeys');
 
