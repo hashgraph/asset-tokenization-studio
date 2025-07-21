@@ -203,62 +203,10 @@
 
 */
 
-import BaseError, {
-  ErrorCode,
-} from '../../../../../../core/error/BaseError.js';
-import { AccountNotKycd } from '../AccountNotKycd.js';
-import { ClearingActivated } from '../ClearingActivated.js';
-import { InsufficientAllowance } from '../InsufficientAllowance.js';
-import { InvalidPartition } from '../InvalidPartition.js';
-import { AccountIsNotOperator } from '../AccountIsNotOperator.js';
-import { InsufficientBalance } from '../InsufficientBalance.js';
-import { InvalidFromAccount } from '../InvalidFromAccount.js';
-import { InvalidDestinationAccount } from '../InvalidDestinationAccount.js';
-import { AccountNotInControlList } from '../AccountNotInControlList.js';
-import { SecurityPaused } from '../SecurityPaused.js';
-import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
-import { AddressRecovered } from '../AddressRecovered.js';
-import { NotControllable } from '../NotControllable.js';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
 
-export class ContractsErrorMapper {
-  static mapError(
-    errorCode: string,
-    operatorId: string,
-    sourceId?: string,
-    targetId?: string,
-  ): BaseError {
-    const errorMappings: {
-      [key: string]: (
-        sourceId?: string,
-        targetId?: string,
-        operatorId?: string,
-      ) => BaseError;
-    } = {
-      '0x40': () => new SecurityPaused(),
-      '0x41': (_1, _2, operatorId) => new AccountNotInControlList(operatorId!),
-      '0x42': (sourceId, _2, _3) => new AccountNotInControlList(sourceId!),
-      '0x43': (_1, targetId, _3) => new AccountNotInControlList(targetId!),
-      '0x44': () => new InvalidFromAccount(),
-      '0x45': () => new InvalidDestinationAccount(),
-      '0x46': () => new InsufficientBalance(),
-      '0x47': (sourceId, _2, operatorId) =>
-        new AccountIsNotOperator(sourceId!, operatorId!),
-      '0x48': () => new InvalidPartition(),
-      '0x49': (sourceId, _2, operatorId) =>
-        new InsufficientAllowance(sourceId!, operatorId!),
-      '0x50': (sourceId) => new AccountNotKycd(sourceId!, KycStatus.GRANTED),
-      '0x51': (_1, targetId) =>
-        new AccountNotKycd(targetId!, KycStatus.GRANTED),
-      '0x52': () => new ClearingActivated(),
-      '0x53': (_1, _2, operatorId) => new AddressRecovered(operatorId!),
-      '0x54': (sourceId, _2, _3) => new AddressRecovered(sourceId!),
-      '0x55': (_1, targetId, _3) => new AddressRecovered(targetId!),
-      '0x56': (_1, _2, _3) => new NotControllable(),
-    };
-
-    return (
-      errorMappings[errorCode]?.(sourceId, targetId, operatorId) ||
-      new BaseError(ErrorCode.Unexpected, 'An unexpected error occurred.')
-    );
+export class NotControllable extends BaseError {
+  constructor() {
+    super(ErrorCode.NotControllable, `The security is not controllable`);
   }
 }
