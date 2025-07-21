@@ -44,6 +44,11 @@ jobs:
           echo "ats_changed=$ATS_CHANGED" >> $GITHUB_OUTPUT
           echo "mass_payout_changed=$MASS_PAYOUT_CHANGED" >> $GITHUB_OUTPUT
 
+      - name: Display change detection results
+        run: |
+          echo "ATS changed: ${{ steps.set.outputs.ats_changed }}"
+          echo "Mass Payout changed: ${{ steps.set.outputs.mass_payout_changed }}"
+
   test-ats:
     name: Test ATS
     needs: detect-changes
