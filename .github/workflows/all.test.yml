@@ -13,22 +13,26 @@ jobs:
     name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
-      ats_changed: ${{ steps.filter.outputs.ats_changed }}
-      mass_payout_changed: ${{ steps.filter.outputs.mass_payout_changed }}
+      ats_changed: ${{ steps.set.outputs.ats_changed }}
+      mass_payout_changed: ${{ steps.set.outputs.mass_payout_changed }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Detect changed files
+      - name: Get all changed files
         id: changed-files
         uses: tj-actions/changed-files@v44
 
-      - name: Filter changes by domain
-        id: filter
+      - name: Set output flags
+        id: set
         run: |
+          echo "Changed files:"
+          echo "${{ steps.changed-files.outputs.all_changed_files }}"
+          
           ATS_CHANGED=false
           MASS_PAYOUT_CHANGED=false
 
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "Checking file: $file"
             if [[ "$file" == apps/ats/* || "$file" == packages/ats/* ]]; then
               ATS_CHANGED=true
             fi
