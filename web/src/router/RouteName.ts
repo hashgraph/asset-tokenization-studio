@@ -224,7 +224,6 @@ export enum RouteName {
   DigitalSecurityDetails = "DIGITAL_SECURITY_DETAILS",
   DigitalSecuritiesList = "DIGITAL_SECURITIES_LIST",
   DigitalSecurityMint = "DIGITAL_SECURITY_MINT",
-  DigitalSecurityFreeze = "DIGITAL_SECURITY_FREEZE",
   DigitalSecurityTransfer = "DIGITAL_SECURITY_TRANSFER",
   DigitalSecurityForceTransfer = "DIGITAL_SECURITY_FORCE_TRANSFER",
   DigitalSecurityRedeem = "DIGITAL_SECURITY_REDEEM",
