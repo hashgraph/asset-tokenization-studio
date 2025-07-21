@@ -218,6 +218,7 @@ import { StepNewSerie } from "./Components/StepNewSerie";
 import { StepReview } from "./Components/StepReview";
 import { StepRegulation } from "../CreateSecurityCommons/StepRegulation";
 import { StepExternalManagement } from "../CreateSecurityCommons/StepExternalManagement";
+import { StepERC3643 } from "../CreateSecurityCommons/StepERC3643";
 
 export const CreateEquity = () => {
   const { t } = useTranslation("security", { keyPrefix: "createEquity" });
@@ -262,6 +263,10 @@ export const CreateEquity = () => {
     {
       title: t("stepExternalManagement.title"),
       content: <StepExternalManagement />,
+    },
+    {
+      title: t("stepERC3643.title"),
+      content: <StepERC3643 />,
     },
     {
       title: t("header.regulation"),
