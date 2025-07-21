@@ -170,21 +170,21 @@
    limitations under the License.
 */
 
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator';
-import { ICommandHandler } from '../../../../../core/command/CommandHandler';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
-import TransactionService from '../../../../service/transaction/TransactionService';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
 import {
   RedeemAtMaturityByPartitionCommand,
   RedeemAtMaturityByPartitionCommandResponse,
 } from './RedeemAtMaturityByPartitionCommand';
-import AccountService from '../../../../service/account/AccountService.js';
-import ContractService from '../../../../service/contract/ContractService';
-import ValidationService from '../../../../service/validation/ValidationService';
-import SecurityService from '../../../../service/security/SecurityService.js';
 import { RedeemAtMaturityByPartitionCommandError } from './error/RedeemAtMaturityByPartitionCommandError';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import TransactionService from '@service/transaction/TransactionService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import SecurityService from '@service/security/SecurityService';
+import ValidationService from '@service/validation/ValidationService';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 
 @CommandHandler(RedeemAtMaturityByPartitionCommand)
 export class RedeemAtMaturityByPartitionCommandHandler

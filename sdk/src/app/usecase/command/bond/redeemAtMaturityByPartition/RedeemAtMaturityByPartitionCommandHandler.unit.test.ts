@@ -203,31 +203,32 @@
 
 */
 
-import TransactionService from '../../../../service/transaction/TransactionService.js';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../service/account/AccountService.js';
+
+import TransactionService from '@service/transaction/TransactionService.js';
+import { RedeemAtMaturityByPartitionCommandHandler } from './RedeemAtMaturityByPartitionCommandHandler';
+import {
+  RedeemAtMaturityByPartitionCommand,
+  RedeemAtMaturityByPartitionCommandResponse,
+} from './RedeemAtMaturityByPartitionCommand';
+import ValidationService from '@service/validation/ValidationService';
+import AccountService from '@service/account/AccountService';
+import SecurityService from '@service/security/SecurityService';
+import ContractService from '@service/contract/ContractService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import ValidationService from '../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import SecurityService from '../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../domain/context/security/Security.js';
-import Account from '../../../../../domain/context/account/Account.js';
-import { AccountPropsFixture } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import { RedeemAtMaturityByPartitionCommandError } from './error/RedeemAtMaturityByPartitionCommandError.js';
-import { RedeemAtMaturityByPartitionCommandHandler } from './RedeemAtMaturityByPartitionCommandHandler.js';
-import {
-  RedeemAtMaturityByPartitionCommand,
-  RedeemAtMaturityByPartitionCommandResponse,
-} from './RedeemAtMaturityByPartitionCommand.js';
-import { RedeemAtMaturityByPartitionCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import { AccountPropsFixture } from '@test/fixtures/account/AccountFixture';
+import Account from '@domain/context/account/Account';
+import { RedeemAtMaturityByPartitionCommandFixture } from '@test/fixtures/bond/BondFixture';
+import { RedeemAtMaturityByPartitionCommandError } from './error/RedeemAtMaturityByPartitionCommandError';
+import { ErrorCode } from '@core/error/BaseError';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 
 describe('RedeemAtMaturityByPartitionCommandHandler', () => {
   let handler: RedeemAtMaturityByPartitionCommandHandler;

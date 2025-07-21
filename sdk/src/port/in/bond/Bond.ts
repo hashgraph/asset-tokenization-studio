@@ -240,8 +240,8 @@ import {
 } from '@domain/context/factory/RegulationType';
 import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
-import { RedeemAtMaturityByPartitionRequest } from '../request/bond/RedeemAtMaturityByPartitionRequest';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import RedeemAtMaturityByPartitionRequest from '../request/bond/RedeemAtMaturityByPartitionRequest';
 
 interface IBondInPort {
   create(
