@@ -273,6 +273,7 @@ export enum ErrorCode {
   NotIssuable = '20035',
   InvalidSupply = '20036',
   AddressRecovered = '20037',
+  NotControllable = '20038',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',

@@ -218,6 +218,7 @@ import { AccountNotInControlList } from '../AccountNotInControlList.js';
 import { SecurityPaused } from '../SecurityPaused.js';
 import { KycStatus } from '../../../../../../domain/context/kyc/Kyc.js';
 import { AddressRecovered } from '../AddressRecovered.js';
+import { NotControllable } from '../NotControllable.js';
 
 export class ContractsErrorMapper {
   static mapError(
@@ -252,6 +253,7 @@ export class ContractsErrorMapper {
       '0x53': (_1, _2, operatorId) => new AddressRecovered(operatorId!),
       '0x54': (sourceId, _2, _3) => new AddressRecovered(sourceId!),
       '0x55': (_1, targetId, _3) => new AddressRecovered(targetId!),
+      '0x56': (_1, _2, _3) => new NotControllable(),
     };
 
     return (

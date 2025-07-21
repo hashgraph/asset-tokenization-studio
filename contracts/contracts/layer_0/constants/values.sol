@@ -247,5 +247,6 @@ bytes1 constant _CLEARING_ACTIVE_ERROR_ID = 0x52;
 bytes1 constant _ADDRESS_RECOVERED_OPERATOR_ERROR_ID = 0x53;
 bytes1 constant _ADDRESS_RECOVERED_FROM_ERROR_ID = 0x54;
 bytes1 constant _ADDRESS_RECOVERED_TO_ERROR_ID = 0x55;
+bytes1 constant _NOT_CONTROLLABLE = 0x56;
 
 bytes1 constant _SUCCESS = 0x00;

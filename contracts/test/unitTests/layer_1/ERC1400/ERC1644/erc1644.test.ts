@@ -237,6 +237,10 @@ import {
     SSI_MANAGER_ROLE,
     ZERO,
     EMPTY_STRING,
+    IS_PAUSED_ERROR_ID,
+    HASH_ZERO,
+    EMPTY_HEX_BYTES,
+    NOT_CONTROLLABLE,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../../common'
 
@@ -414,14 +418,25 @@ describe('ERC1644 Tests', () => {
                 // Using account C (with role)
                 erc1644Facet = erc1644Facet.connect(signer_C)
 
+                expect(
+                    await erc1594Facet
+                        .connect(signer_C)
+                        .canTransferFrom(
+                            account_E,
+                            account_D,
+                            amount,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.deep.equal([false, IS_PAUSED_ERROR_ID, HASH_ZERO])
+
                 // controller transfer fails
                 await expect(
                     erc1644Facet.controllerTransfer(
                         account_D,
                         account_E,
                         amount,
-                        '0x',
-                        '0x'
+                        EMPTY_HEX_BYTES,
+                        EMPTY_HEX_BYTES
                     )
                 ).to.be.revertedWithCustomError(erc1644Facet, 'TokenIsPaused')
             })
@@ -599,7 +614,6 @@ describe('ERC1644 Tests', () => {
 
                 // controller finalize fails
                 erc1644Facet = erc1644Facet.connect(signer_A)
-                erc1594Facet = erc1594Facet.connect(signer_C)
 
                 await expect(erc1644Facet.finalizeControllable())
                     .to.emit(erc1644Facet, 'FinalizedControllerFeature')
@@ -612,6 +626,16 @@ describe('ERC1644 Tests', () => {
             })
 
             it('GIVEN finalizeControllable WHEN controllerTransfer THEN TokenIsNotControllable', async () => {
+                expect(
+                    await erc1594Facet
+                        .connect(signer_A)
+                        .canTransferFrom(
+                            account_E,
+                            account_D,
+                            amount,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.deep.equal([false, NOT_CONTROLLABLE, HASH_ZERO])
                 await expect(
                     erc1644Facet.controllerTransfer(
                         account_D,
