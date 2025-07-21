@@ -48,6 +48,10 @@ Run the command :
 npm run build
 ```
 
+
+sdasdasdasd
+
+asdasd
 # Test
 
 The SDK tests are located in the _**tests**_ folder at the root of the sdk module.

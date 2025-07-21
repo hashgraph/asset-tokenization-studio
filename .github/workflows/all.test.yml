@@ -190,7 +190,19 @@ jobs:
     needs: [ detect-changes, test-ats, test-mass-payout ]
     if: always()
     steps:
-      - name: Check summary
+      - name: Check result propagation
         run: |
-          echo "✅ Workflow finished. ATS changed: ${{ needs.detect-changes.outputs.ats_changed }}"
-          echo "✅ Workflow finished. Mass Payout changed: ${{ needs.detect-changes.outputs.mass_payout_changed }}"
+          echo "🎯 ATS changed: ${{ needs.detect-changes.outputs.ats_changed }}"
+          echo "🎯 Mass Payout changed: ${{ needs.detect-changes.outputs.mass_payout_changed }}"
+
+          echo "Propagating job results..."
+
+          ATS_RESULT="${{ needs.test-ats.result }}"
+          MP_RESULT="${{ needs.test-mass-payout.result }}"
+
+          if [[ "$ATS_RESULT" == "failure" || "$MP_RESULT" == "failure" ]]; then
+            echo "❌ One of the test jobs failed."
+            exit 1
+          fi
+
+          echo "✅ All required tests passed or were skipped."
