@@ -241,6 +241,9 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   @OptionalField()
   diamondOwnerAccount?: string;
 
+  @OptionalField()
+  compliance?: string;
+
   votingRight: boolean;
   informationRight: boolean;
   liquidationRight: boolean;
@@ -293,6 +296,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     info,
     configId,
     configVersion,
+    compliance,
   }: {
     name: string;
     symbol: string;
@@ -326,6 +330,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     info: string;
     configId: string;
     configVersion: number;
+    compliance?: string;
   }) {
     super({
       name: (val) => {
@@ -376,6 +381,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
           true,
         );
       },
+      compliance: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
     });
     this.name = name;
     this.symbol = symbol;
@@ -410,5 +416,6 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.info = info;
     this.configId = configId;
     this.configVersion = configVersion;
+    this.compliance = compliance;
   }
 }

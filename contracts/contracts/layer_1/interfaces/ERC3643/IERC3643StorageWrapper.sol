@@ -207,6 +207,11 @@
 pragma solidity 0.8.18;
 
 interface IERC3643StorageWrapper {
+    /**
+     *  @notice This event is emitted when the Compliance has been set for the token
+     */
+    event ComplianceAdded(address indexed compliance);
+
     /*
      *   @notice Thrown when unfreezing more than what is frozen
      */

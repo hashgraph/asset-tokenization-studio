@@ -241,6 +241,9 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   @OptionalField()
   diamondOwnerAccount?: string;
 
+  @OptionalField()
+  compliance?: string;
+
   currency: string;
   numberOfUnits: string;
   nominalValue: string;
@@ -287,6 +290,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     info,
     configId,
     configVersion,
+    compliance,
   }: {
     name: string;
     symbol: string;
@@ -317,6 +321,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     info: string;
     configId: string;
     configVersion: number;
+    compliance?: string;
   }) {
     super({
       name: (val) => {
@@ -389,6 +394,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
           true,
         );
       },
+      compliance: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
     });
     this.name = name;
     this.symbol = symbol;
@@ -420,5 +426,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.info = info;
     this.configId = configId;
     this.configVersion = configVersion;
+    this.compliance = compliance;
   }
 }

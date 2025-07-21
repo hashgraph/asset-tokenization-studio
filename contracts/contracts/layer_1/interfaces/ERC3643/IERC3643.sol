@@ -217,6 +217,7 @@ interface IERC3643 {
         mapping(address => uint256) frozenTokens;
         mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
         mapping(address => bool) addressRecovered;
+        bool initialized;
     }
 
     /**
@@ -234,11 +235,6 @@ interface IERC3643 {
      *  @notice This event is emitted when the IdentityRegistry has been set for the token
      */
     event IdentityRegistryAdded(address indexed identityRegistry);
-
-    /**
-     *  @notice This event is emitted when the Compliance has been set for the token
-     */
-    event ComplianceAdded(address indexed compliance);
 
     /**
      * @dev Emitted when the agent role is granted
@@ -286,6 +282,14 @@ interface IERC3643 {
      * @notice Thrown in batch operations when input boolean arrays length is different
      */
     error InputBoolArrayLengthMismatch();
+
+    /**
+     * @dev Facet initializer
+     *
+     * Sets the compliance contract address
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC3643(address _compliance) external;
 
     /**
      * @dev Sets the name of the token to `_name`.

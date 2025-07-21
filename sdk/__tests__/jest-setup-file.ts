@@ -504,6 +504,7 @@ function createBondMockImplementation(
   _resolver: EvmAddress,
   _configId: string,
   _configVersion: number,
+  _compliance: EvmAddress,
   _externalPauses?: EvmAddress[],
   _diamondOwnerAccount?: EvmAddress,
 ): Promise<TransactionResponse> {
@@ -1653,6 +1654,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       _resolver: EvmAddress,
       _configId: string,
       _configVersion: number,
+      _compliance: EvmAddress,
       _externalPauses?: EvmAddress[],
       _diamondOwnerAccount?: EvmAddress,
     ) => {

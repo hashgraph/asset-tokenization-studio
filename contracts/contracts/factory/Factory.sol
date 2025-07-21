@@ -248,6 +248,7 @@ import {
     IExternalKycListManagement
 } from '../layer_1/interfaces/externalKycLists/IExternalKycListManagement.sol';
 import {IKyc} from '../layer_1/interfaces/kyc/IKyc.sol';
+import {IERC3643} from '../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {validateISIN} from './isinValidator.sol';
 
 contract Factory is IFactory, LocalContext {
@@ -454,5 +455,7 @@ contract Factory is IFactory, LocalContext {
 
         IExternalKycListManagement(securityAddress_)
             .initialize_ExternalKycLists(_securityData.externalKycLists);
+
+        IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance);
     }
 }

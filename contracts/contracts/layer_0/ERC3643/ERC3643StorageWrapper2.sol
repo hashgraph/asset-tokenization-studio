@@ -210,16 +210,10 @@ import {
     SnapshotsStorageWrapper2
 } from '../snapshots/SnapshotsStorageWrapper2.sol';
 import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import {
-    IERC3643StorageWrapper
-} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract ERC3643StorageWrapper2 is
-    IERC3643StorageWrapper,
-    SnapshotsStorageWrapper2
-{
+abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     modifier onlyEmptyWallet(address _tokenHolder) {
         if (!_canRecover(_tokenHolder)) revert IERC3643.CannotRecoverWallet();
         _;

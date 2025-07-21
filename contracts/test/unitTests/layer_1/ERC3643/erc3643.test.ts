@@ -232,6 +232,7 @@ import {
     ProtectedPartitions,
     DiamondFacet,
     FreezeFacet,
+    ComplianceMockBase,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -265,6 +266,8 @@ import {
     LOCKER_ROLE,
     ADDRESS_RECOVERED_TO_ERROR_ID,
     ADDRESS_RECOVERED_FROM_ERROR_ID,
+    deployContract,
+    DeployContractCommand,
 } from '@scripts'
 import { Contract } from 'ethers'
 
@@ -281,7 +284,6 @@ const EMPTY_VC_ID = EMPTY_STRING
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
 const onchainId = ethers.Wallet.createRandom().address
 const identityRegistry = ethers.Wallet.createRandom().address
-const compliance = ethers.Wallet.createRandom().address
 
 describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
@@ -328,6 +330,8 @@ describe('ERC3643 Tests', () => {
         let erc3643Transferor: ERC3643
         let erc1410SnapshotFacet: ERC1410Snapshot
         let erc20Facet: ERC20
+        let complianceMockTrue: string
+        let complianceMockFalse: string
 
         before(async () => {
             // mute | mock console.log
@@ -353,6 +357,24 @@ describe('ERC3643 Tests', () => {
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
+
+            complianceMockTrue = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'ComplianceMockTrue',
+                        signer: signer_A,
+                    })
+                )
+            ).address
+
+            complianceMockFalse = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'ComplianceMockFalse',
+                        signer: signer_A,
+                    })
+                )
+            ).address
         })
 
         beforeEach(async () => {
@@ -420,6 +442,7 @@ describe('ERC3643 Tests', () => {
                 init_rbacs,
                 factory,
                 businessLogicResolver: businessLogicResolver.address,
+                compliance: complianceMockTrue,
             })
 
             accessControlFacet = await ethers.getContractAt(
@@ -995,45 +1018,79 @@ describe('ERC3643 Tests', () => {
             expect(parsed['Version']).to.equal(configVersion.toString())
         })
 
-        it('GIVEN an initialized token WHEN updating the onChanId THEN UpdatedTokenInformation emits OnchainIDUpdated with updated onchainId and current metadata', async () => {
-            const retrieved_onChainId = await erc3643Facet.onchainID()
-            expect(retrieved_onChainId).to.equal(ADDRESS_ZERO)
+        describe('Identity', () => {
+            it('GIVEN an initialized token WHEN updating the onChanId THEN UpdatedTokenInformation emits OnchainIDUpdated with updated onchainId and current metadata', async () => {
+                const retrieved_onChainId = await erc3643Facet.onchainID()
+                expect(retrieved_onChainId).to.equal(ADDRESS_ZERO)
 
-            //Update onChainId
-            expect(await erc3643Facet.setOnchainID(onchainId))
-                .to.emit(erc3643Facet, 'UpdatedTokenInformation')
-                .withArgs(name, symbol, decimals, version, onchainId)
+                //Update onChainId
+                expect(await erc3643Facet.setOnchainID(onchainId))
+                    .to.emit(erc3643Facet, 'UpdatedTokenInformation')
+                    .withArgs(name, symbol, decimals, version, onchainId)
 
-            const retrieved_newOnChainId = await erc3643Facet.onchainID()
-            expect(retrieved_newOnChainId).to.equal(onchainId)
+                const retrieved_newOnChainId = await erc3643Facet.onchainID()
+                expect(retrieved_newOnChainId).to.equal(onchainId)
+            })
+
+            it('GIVEN an initialized token WHEN updating the identityRegistry THEN setIdentityRegistry emits IdentityRegistryAdded with updated identityRegistry', async () => {
+                const retrieved_identityRegistry =
+                    await erc3643Facet.identityRegistry()
+                expect(retrieved_identityRegistry).to.equal(ADDRESS_ZERO)
+
+                //Update identityRegistry
+                expect(await erc3643Facet.setIdentityRegistry(identityRegistry))
+                    .to.emit(erc3643Facet, 'IdentityRegistryAdded')
+                    .withArgs(identityRegistry)
+
+                const retrieved_newIdentityRegistry =
+                    await erc3643Facet.identityRegistry()
+                expect(retrieved_newIdentityRegistry).to.equal(identityRegistry)
+            })
         })
 
-        it('GIVEN an initialized token WHEN updating the identityRegistry THEN setIdentityRegistry emits IdentityRegistryAdded with updated identityRegistry', async () => {
-            const retrieved_identityRegistry =
-                await erc3643Facet.identityRegistry()
-            expect(retrieved_identityRegistry).to.equal(ADDRESS_ZERO)
+        describe('Compliance', () => {
+            it('GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance', async () => {
+                const retrieved_compliance = await erc3643Facet.compliance()
+                expect(retrieved_compliance).to.equal(complianceMockTrue)
 
-            //Update identityRegistry
-            expect(await erc3643Facet.setIdentityRegistry(identityRegistry))
-                .to.emit(erc3643Facet, 'IdentityRegistryAdded')
-                .withArgs(identityRegistry)
+                //Update compliance
+                expect(await erc3643Facet.setCompliance(complianceMockFalse))
+                    .to.emit(erc3643Facet, 'ComplianceAdded')
+                    .withArgs(complianceMockFalse)
 
-            const retrieved_newIdentityRegistry =
-                await erc3643Facet.identityRegistry()
-            expect(retrieved_newIdentityRegistry).to.equal(identityRegistry)
-        })
+                const retrieved_newCompliance = await erc3643Facet.compliance()
+                expect(retrieved_newCompliance).to.equal(complianceMockFalse)
+            })
 
-        it('GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance', async () => {
-            const retrieved_compliance = await erc3643Facet.compliance()
-            expect(retrieved_compliance).to.equal(ADDRESS_ZERO)
+            it('GIVEN MockCompliaceTrue THEN canTransfer returns true', async () => {
+                const complianceTrue: ComplianceMockBase =
+                    await ethers.getContractAt(
+                        'ComplianceMockBase',
+                        complianceMockTrue
+                    )
+                expect(
+                    await complianceTrue.canTransfer(
+                        ADDRESS_ZERO,
+                        ADDRESS_ZERO,
+                        ZERO
+                    )
+                ).to.be.true
+            })
 
-            //Update compliance
-            expect(await erc3643Facet.setCompliance(compliance))
-                .to.emit(erc3643Facet, 'ComplianceAdded')
-                .withArgs(compliance)
-
-            const retrieved_newCompliance = await erc3643Facet.compliance()
-            expect(retrieved_newCompliance).to.equal(compliance)
+            it('GIVEN MockCompliaceFalse THEN canTransfer returns false', async () => {
+                const complianceFalse: ComplianceMockBase =
+                    await ethers.getContractAt(
+                        'ComplianceMockBase',
+                        complianceMockFalse
+                    )
+                expect(
+                    await complianceFalse.canTransfer(
+                        ADDRESS_ZERO,
+                        ADDRESS_ZERO,
+                        ZERO
+                    )
+                ).to.be.false
+            })
         })
 
         describe('Batch Operations', () => {
@@ -1715,7 +1772,7 @@ describe('ERC3643 Tests', () => {
 
                 // set compliance fails
                 await expect(
-                    erc3643Facet.setCompliance(compliance)
+                    erc3643Facet.setCompliance(complianceMockFalse)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
@@ -1801,7 +1858,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setIdentityRegistry(identityRegistry)
                 ).to.be.rejectedWith('TokenIsPaused')
                 await expect(
-                    erc3643Facet.setCompliance(compliance)
+                    erc3643Facet.setCompliance(complianceMockFalse)
                 ).to.be.rejectedWith('TokenIsPaused')
             })
         })
