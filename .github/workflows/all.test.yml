@@ -29,10 +29,10 @@ jobs:
           MASS_PAYOUT_CHANGED=false
 
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            if [[ "$file" == apps/ats/** || "$file" == packages/ats/** ]]; then
+            if [[ "$file" == apps/ats/* || "$file" == packages/ats/* ]]; then
               ATS_CHANGED=true
             fi
-            if [[ "$file" == apps/mass-payout/** || "$file" == packages/mass-payout/** ]]; then
+            if [[ "$file" == apps/mass-payout/* || "$file" == packages/mass-payout/* ]]; then
               MASS_PAYOUT_CHANGED=true
             fi
           done
@@ -183,3 +183,14 @@ jobs:
       - name: Run ats/contracts tests
         working-directory: packages/ats/contracts
         run: npm run test
+
+  testing:
+    name: testing
+    runs-on: ubuntu-latest
+    needs: [ detect-changes, test-ats, test-mass-payout ]
+    if: always()
+    steps:
+      - name: Check summary
+        run: |
+          echo "✅ Workflow finished. ATS changed: ${{ needs.detect-changes.outputs.ats_changed }}"
+          echo "✅ Workflow finished. Mass Payout changed: ${{ needs.detect-changes.outputs.mass_payout_changed }}"
