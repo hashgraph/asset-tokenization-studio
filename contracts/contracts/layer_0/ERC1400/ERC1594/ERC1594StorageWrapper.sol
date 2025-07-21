@@ -224,7 +224,8 @@ import {
     _TO_ACCOUNT_KYC_ERROR_ID,
     _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
     _ADDRESS_RECOVERED_FROM_ERROR_ID,
-    _ADDRESS_RECOVERED_TO_ERROR_ID
+    _ADDRESS_RECOVERED_TO_ERROR_ID,
+    _NOT_CONTROLLABLE
 } from '../../constants/values.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
@@ -358,6 +359,9 @@ abstract contract ERC1594StorageWrapper is
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
         if (!_hasAnyRole(roles, _msgSender())) {
             if (_isRecovered(_msgSender())) {
                 return (
@@ -368,9 +372,6 @@ abstract contract ERC1594StorageWrapper is
             }
             if (_isRecovered(_to)) {
                 return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
-            }
-            if (_isPaused()) {
-                return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
             }
             if (_to == address(0)) {
                 return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
@@ -404,6 +405,10 @@ abstract contract ERC1594StorageWrapper is
             }
             if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
                 return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+            }
+        } else {
+            if (!_isControllable()) {
+                return (false, _NOT_CONTROLLABLE, bytes32(0));
             }
         }
         if (_balanceOfAdjusted(_from) < _value) {

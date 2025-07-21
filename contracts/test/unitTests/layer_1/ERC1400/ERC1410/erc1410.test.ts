@@ -262,6 +262,8 @@ import {
     CLEARING_ACTIVE_ERROR_ID,
     CLEARING_ROLE,
     dateToUnixTimestamp,
+    NOT_CONTROLLABLE,
+    HASH_ZERO,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -1117,6 +1119,41 @@ describe('ERC1410 Tests', () => {
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canRedeem_2[0]).to.be.equal(false)
             expect(canRedeem_2[1]).to.be.equal(IS_PAUSED_ERROR_ID)
+        })
+
+        it('GIVEN a not controllable token THEN canRedeem fails with error NOT_CONTROLLABLE', async () => {
+            await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C)
+            // Using account C (with role)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+
+            await erc1644Facet.finalizeControllable()
+            expect(
+                await erc1410Facet.canRedeemByPartition(
+                    account_E,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            ).to.be.deep.equal([false, NOT_CONTROLLABLE, HASH_ZERO])
+        })
+
+        it('GIVEN a not controllable token THEN canTransferByPartition fails with error NOT_CONTROLLABLE', async () => {
+            await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C)
+            // Using account C (with role)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+
+            await erc1644Facet.finalizeControllable()
+            expect(
+                await erc1410Facet.canTransferByPartition(
+                    account_D,
+                    account_E,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            ).to.be.deep.equal([false, NOT_CONTROLLABLE, HASH_ZERO])
         })
 
         it('GIVEN a token with clearing active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
@@ -2436,6 +2473,17 @@ describe('ERC1410 Tests', () => {
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
 
+            expect(
+                await erc1410Facet.canTransferByPartition(
+                    account_D,
+                    account_E,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            ).to.be.deep.equal([false, IS_PAUSED_ERROR_ID, HASH_ZERO])
+
             // controller transfer fails
             await expect(
                 erc1410Facet.controllerTransferByPartition(
@@ -2462,6 +2510,16 @@ describe('ERC1410 Tests', () => {
 
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
+
+            expect(
+                await erc1410Facet.canRedeemByPartition(
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            ).to.be.deep.equal([false, IS_PAUSED_ERROR_ID, HASH_ZERO])
 
             // remove document
             await expect(
