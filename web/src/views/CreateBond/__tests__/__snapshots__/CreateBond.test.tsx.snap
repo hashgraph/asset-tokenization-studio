@@ -207,7 +207,7 @@ exports[`CreateBond render correctly 1`] = `
                   class="chakra-step__title css-gryw16"
                   data-status="incomplete"
                 >
-                  External Lists
+                  ERC3643
                 </h3>
               </div>
               <div
@@ -241,7 +241,7 @@ exports[`CreateBond render correctly 1`] = `
                   class="chakra-step__title css-gryw16"
                   data-status="incomplete"
                 >
-                  Regulation
+                  External Lists
                 </h3>
               </div>
               <div
@@ -266,6 +266,40 @@ exports[`CreateBond render correctly 1`] = `
                   data-status="incomplete"
                 >
                   6
+                </div>
+              </div>
+              <div
+                class="css-cimg9i"
+              >
+                <h3
+                  class="chakra-step__title css-gryw16"
+                  data-status="incomplete"
+                >
+                  Regulation
+                </h3>
+              </div>
+              <div
+                class="chakra-step__separator css-14zkmre"
+                data-orientation="horizontal"
+                data-status="incomplete"
+                role="separator"
+              />
+            </div>
+            <div
+              class="chakra-step css-9fgisr"
+              content="[object Object]"
+              data-orientation="horizontal"
+              data-status="incomplete"
+            >
+              <div
+                class="chakra-step__indicator css-ae2ufg"
+                data-status="incomplete"
+              >
+                <div
+                  class="chakra-step__number css-1brar58"
+                  data-status="incomplete"
+                >
+                  7
                 </div>
               </div>
               <div
