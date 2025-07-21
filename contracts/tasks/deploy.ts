@@ -239,7 +239,7 @@ task(
     .addOptionalParam(
         'fileName',
         'The output file name',
-        undefined,
+        'deployedContracts',
         types.string
     )
     .setAction(async (args: DeployAllArgs, hre) => {
@@ -363,7 +363,11 @@ task(
                     address,
                     network,
                 })
-                console.log(`   --> ${key}: ${address} (${contractId})`)
+                if (['Business Logic Resolver Proxy', 'Factory Proxy'].includes(key)) {
+                    console.log(`   --> *** ${key}: ${address} (${contractId})`)
+                } else {
+                    console.log(`   --> ${key}: ${address} (${contractId})`)
+                }
             } catch (e: unknown) {
                 console.log((e as Error).message)
             } finally {
