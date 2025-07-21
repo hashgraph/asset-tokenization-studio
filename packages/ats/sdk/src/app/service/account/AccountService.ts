@@ -262,4 +262,9 @@ export default class AccountService extends Service {
         : await this.getAccountEvmAddress(accountId);
     return evmAddress;
   }
+
+  async dummy(): Promise<void> {
+    // It can be removed
+    console.log('Dummy method called');
+  }
 }
