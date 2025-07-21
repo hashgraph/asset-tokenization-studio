@@ -363,7 +363,11 @@ task(
                     address,
                     network,
                 })
-                if (['Business Logic Resolver Proxy', 'Factory Proxy'].includes(key)) {
+                if (
+                    ['Business Logic Resolver Proxy', 'Factory Proxy'].includes(
+                        key
+                    )
+                ) {
                     console.log(`   --> *** ${key}: ${address} (${contractId})`)
                 } else {
                     console.log(`   --> ${key}: ${address} (${contractId})`)

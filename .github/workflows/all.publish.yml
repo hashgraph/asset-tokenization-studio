@@ -1,8 +1,10 @@
 name: Publishing
+
 on:
   release:
     types:
       - published
+
 permissions:
   contents: read
 
@@ -10,9 +12,6 @@ jobs:
   publish:
     name: Publish NPM Packages
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
 
     steps:
       - name: Harden Runner
@@ -38,15 +37,25 @@ jobs:
       - name: Change references
         run: ./changeProjectsReferencesToRepo.sh
 
-      - name: Install packages dependencies (ats/contracts and ats/sdk)
+      - name: Install dependencies
         run: npm ci
 
-      - name: Publish contracts package
+      # --- ATS publishing ---
+      - name: Publish ats/contracts
+        if: contains(github.ref_name, 'ats')
         run: npm run publish:ats:contracts --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish sdk package
+      - name: Publish ats/sdk
+        if: contains(github.ref_name, 'ats')
         run: npm run publish:ats:sdk --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # --- Mass Payout publishing ---
+      - name: Publish mass-payout
+        if: contains(github.ref_name, 'mp')
+        run: npm run publish:mass-payout --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
