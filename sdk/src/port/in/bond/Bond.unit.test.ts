@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   CreateBondRequest,
   GetBondDetailsRequest,
@@ -219,12 +219,12 @@ import {
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
-import NetworkService from '../../../app/service/network/NetworkService';
+} from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import NetworkService from '@service/network/NetworkService';
 import BondToken from './Bond';
 import {
   BondDetailsFixture,
@@ -239,27 +239,27 @@ import {
   RedeemAtMaturityByPartitionRequestFixture,
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
-} from '../../../../__tests__/fixtures/bond/BondFixture';
-import { SecurityPropsFixture } from '../../../../__tests__/fixtures/shared/SecurityFixture';
-import { Security } from '../../../domain/context/security/Security';
-import { CreateBondCommand } from '../../../app/usecase/command/bond/create/CreateBondCommand';
-import ContractId from '../../../domain/context/contract/ContractId';
+} from '@test/fixtures/bond/BondFixture';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import { CreateBondCommand } from '@command/bond/create/CreateBondCommand';
+import ContractId from '@domain/context/contract/ContractId';
 import {
   CastRegulationSubType,
   CastRegulationType,
-} from '../../../domain/context/factory/RegulationType';
-import BigDecimal from '../../../domain/context/shared/BigDecimal';
+} from '@domain/context/factory/RegulationType';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { faker } from '@faker-js/faker/.';
-import { GetBondDetailsQuery } from '../../../app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery';
-import { ONE_THOUSAND } from '../../../domain/context/shared/SecurityDate';
-import { SetCouponCommand } from '../../../app/usecase/command/bond/coupon/set/SetCouponCommand';
-import { GetCouponDetailsQuery } from '../../../app/usecase/query/bond/get/getCouponDetails/GetCouponDetailsQuery';
+import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
+import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
+import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
+import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
 import { BigNumber } from 'ethers';
-import { GetCouponForQuery } from '../../../app/usecase/query/bond/coupons/getCouponFor/GetCouponForQuery';
-import { GetCouponQuery } from '../../../app/usecase/query/bond/coupons/getCoupon/GetCouponQuery';
-import { GetCouponCountQuery } from '../../../app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQuery';
-import { UpdateMaturityDateCommand } from '../../../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand';
-import { RedeemAtMaturityByPartitionCommand } from '../../../app/usecase/command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
+import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
+import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 
 describe('Bond', () => {
   let commandBusMock: jest.Mocked<CommandBus>;

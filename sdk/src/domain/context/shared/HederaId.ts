@@ -204,7 +204,7 @@
 */
 
 import { AccountId } from '@hashgraph/sdk';
-import { InvalidIdFormat } from './error/InvalidIdFormat.js';
+import { InvalidIdFormat } from './error/InvalidIdFormat';
 
 export const HEDERA_FORMAT_ID_REGEX =
   /^(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))(?:-([a-z]{5}))?$/;

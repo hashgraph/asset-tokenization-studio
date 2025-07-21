@@ -203,9 +203,9 @@
 
 */
 
-import { Command } from '../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
-import { HederaId } from '../../../../../../domain/context/shared/HederaId.js';
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
+import { HederaId } from '@domain/context/shared/HederaId';
 
 export class RemoveFromControlListCommandResponse implements CommandResponse {
   constructor(

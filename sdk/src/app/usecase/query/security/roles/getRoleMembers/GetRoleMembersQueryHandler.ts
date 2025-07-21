@@ -203,17 +203,17 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import {
   GetRoleMembersQuery,
   GetRoleMembersQueryResponse,
-} from './GetRoleMembersQuery.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import ContractService from '../../../../../service/contract/ContractService';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { GetRoleMembersQueryError } from './error/GetRoleMembersQueryError.js';
+} from './GetRoleMembersQuery';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { GetRoleMembersQueryError } from './error/GetRoleMembersQueryError';
 
 @QueryHandler(GetRoleMembersQuery)
 export class GetRoleMembersQueryHandler

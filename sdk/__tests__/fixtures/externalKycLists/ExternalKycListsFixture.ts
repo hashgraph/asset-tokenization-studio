@@ -203,28 +203,28 @@
 
 */
 
-import UpdateExternalKycListsRequest from '../../../src/port/in/request/security/externalKycLists/UpdateExternalKycListsRequest';
-import { UpdateExternalKycListsCommand } from '../../../src/app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
+import UpdateExternalKycListsRequest from '@port/in/request/security/externalKycLists/UpdateExternalKycListsRequest';
+import { UpdateExternalKycListsCommand } from '@command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { AddExternalKycListCommand } from '../../../src/app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand';
-import { RemoveExternalKycListCommand } from '../../../src/app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand';
-import AddExternalKycListRequest from '../../../src/port/in/request/security/externalKycLists/AddExternalKycListRequest';
-import RemoveExternalKycListRequest from '../../../src/port/in/request/security/externalKycLists/RemoveExternalKycListRequest';
-import { GetExternalKycListsCountQuery } from '../../../src/app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
-import { GetExternalKycListsMembersQuery } from '../../../src/app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery';
-import { IsExternalKycListQuery } from '../../../src/app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
-import { IsExternallyGrantedQuery } from '../../../src/app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
-import IsExternallyGrantedRequest from '../../../src/port/in/request/security/externalKycLists/IsExternallyGrantedRequest';
-import IsExternalKycListRequest from '../../../src/port/in/request/security/externalKycLists/IsExternalKycListRequest';
-import GetExternalKycListsMembersRequest from '../../../src/port/in/request/security/externalKycLists/GetExternalKycListsMembersRequest';
-import GetExternalKycListsCountRequest from '../../../src/port/in/request/security/externalKycLists/GetExternalKycListsCountRequest';
-import { GrantKycMockCommand } from '../../../src/app/usecase/command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommand';
-import { RevokeKycMockCommand } from '../../../src/app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommand';
-import { GetKycStatusMockQuery } from '../../../src/app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQuery';
-import GrantKycMockRequest from '../../../src/port/in/request/security/externalKycLists/mock/GrantKycMockRequest';
-import RevokeKycMockRequest from '../../../src/port/in/request/security/externalKycLists/mock/RevokeKycMockRequest';
-import GetKycStatusMockRequest from '../../../src/port/in/request/security/externalKycLists/mock/GetKycStatusMockRequest';
+import { AddExternalKycListCommand } from '@command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand';
+import { RemoveExternalKycListCommand } from '@command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand';
+import AddExternalKycListRequest from '@port/in/request/security/externalKycLists/AddExternalKycListRequest';
+import RemoveExternalKycListRequest from '@port/in/request/security/externalKycLists/RemoveExternalKycListRequest';
+import { GetExternalKycListsCountQuery } from '@query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
+import { GetExternalKycListsMembersQuery } from '@query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery';
+import { IsExternalKycListQuery } from '@query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
+import { IsExternallyGrantedQuery } from '@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
+import IsExternallyGrantedRequest from '@port/in/request/security/externalKycLists/IsExternallyGrantedRequest';
+import IsExternalKycListRequest from '@port/in/request/security/externalKycLists/IsExternalKycListRequest';
+import GetExternalKycListsMembersRequest from '@port/in/request/security/externalKycLists/GetExternalKycListsMembersRequest';
+import GetExternalKycListsCountRequest from '@port/in/request/security/externalKycLists/GetExternalKycListsCountRequest';
+import { GrantKycMockCommand } from '@command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommand';
+import { RevokeKycMockCommand } from '@command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommand';
+import { GetKycStatusMockQuery } from '@query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQuery';
+import GrantKycMockRequest from '@port/in/request/security/externalKycLists/mock/GrantKycMockRequest';
+import RevokeKycMockRequest from '@port/in/request/security/externalKycLists/mock/RevokeKycMockRequest';
+import GetKycStatusMockRequest from '@port/in/request/security/externalKycLists/mock/GetKycStatusMockRequest';
 
 export const UpdateExternalKycListsCommandFixture =
   createFixture<UpdateExternalKycListsCommand>((command) => {

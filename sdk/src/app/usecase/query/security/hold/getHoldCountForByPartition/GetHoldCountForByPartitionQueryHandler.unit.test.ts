@@ -207,19 +207,19 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
 import {
   GetHoldCountForByPartitionQuery,
   GetHoldCountForByPartitionQueryResponse,
-} from './GetHoldCountForByPartitionQuery.js';
-import { GetHoldCountForByPartitionQueryHandler } from './GetHoldCountForByPartitionQueryHandler.js';
-import { GetHoldCountForByPartitionQueryFixture } from '../../../../../../../__tests__/fixtures/hold/HoldFixture.js';
-import { GetHoldCountForByPartitionQueryError } from './error/GetHoldCountForByPartitionQueryError.js';
+} from './GetHoldCountForByPartitionQuery';
+import { GetHoldCountForByPartitionQueryHandler } from './GetHoldCountForByPartitionQueryHandler';
+import { GetHoldCountForByPartitionQueryFixture } from '@test/fixtures/hold/HoldFixture';
+import { GetHoldCountForByPartitionQueryError } from './error/GetHoldCountForByPartitionQueryError';
 
 describe('GetHoldCountForByPartitionQueryHandler', () => {
   let handler: GetHoldCountForByPartitionQueryHandler;

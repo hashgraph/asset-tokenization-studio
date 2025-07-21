@@ -205,8 +205,8 @@
 
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { createFixture } from '../config';
-import { BurnRequest } from '../../../src';
-import { BurnCommand } from '../../../src/app/usecase/command/security/operations/burn/BurnCommand';
+import { BurnCommand } from '@command/security/operations/burn/BurnCommand';
+import { BurnRequest } from '@port/in';
 
 export const BurnRequestFixture = createFixture<BurnRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);

@@ -203,19 +203,19 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
 import {
   RemoveFromControlListCommand,
   RemoveFromControlListCommandResponse,
-} from './RemoveFromControlListCommand.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { RemoveFromControlListCommandError } from './error/RemoveFromControlListCommandError.js';
+} from './RemoveFromControlListCommand';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService';
+import { RemoveFromControlListCommandError } from './error/RemoveFromControlListCommandError';
 
 @CommandHandler(RemoveFromControlListCommand)
 export class RemoveFromControlListCommandHandler

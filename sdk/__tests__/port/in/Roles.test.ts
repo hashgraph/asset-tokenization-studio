@@ -203,7 +203,7 @@
 
 */
 
-import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter.js';
+import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
 import {
   SDK,
   LoggerTransports,
@@ -217,31 +217,31 @@ import {
   GetRoleMembersRequest,
   Equity,
   ApplyRolesRequest,
-} from '../../../src/index.js';
-import Injectable from '../../../src/core/Injectable.js';
-import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
-import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter.js';
-import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
+} from '@port/in';
+import Injectable from '@core/Injectable';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
 import ConnectRequest, {
   SupportedWallets,
-} from '../../../src/port/in/request/network/ConnectRequest.js';
+} from '@port/in/request/network/ConnectRequest';
 import { Wallet, ethers } from 'ethers';
 import {
   CLIENT_ACCOUNT_ECDSA,
   CLIENT_ACCOUNT_ECDSA_A,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
-} from '../../config.js';
-import { SecurityRole } from '../../../src/domain/context/security/SecurityRole.js';
-import NetworkService from '../../../src/app/service/network/NetworkService.js';
-import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
-import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
+} from '@test/config';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import NetworkService from '@service/network/NetworkService';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import SecurityViewModel from '@port/in/response/SecurityViewModel';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType.js';
+} from '@domain/context/factory/RegulationType';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -313,9 +313,11 @@ describe('🧪 Role test', () => {
     const url = 'http://127.0.0.1:7546';
     const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
-    th.signerOrProvider = new Wallet(
-      CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-      customHttpProvider,
+    th.setSignerOrProvider(
+      new Wallet(
+        CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+        customHttpProvider,
+      ),
     );
 
     await Network.connect(

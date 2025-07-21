@@ -203,18 +203,18 @@
 
 */
 
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import {
   GetCouponDetailsQuery,
   GetCouponDetailsQueryResponse,
-} from './GetCouponDetailsQuery.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { CouponDetails } from '../../../../../../domain/context/bond/CouponDetails.js';
-import { GetCouponDetailsQueryError } from './error/GetCouponDetailsQueryError.js';
+} from './GetCouponDetailsQuery';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import { GetCouponDetailsQueryError } from './error/GetCouponDetailsQueryError';
 
 @QueryHandler(GetCouponDetailsQuery)
 export class GetCouponDetailsQueryHandler

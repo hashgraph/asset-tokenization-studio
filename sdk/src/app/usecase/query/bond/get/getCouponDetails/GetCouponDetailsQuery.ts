@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import { CouponDetails } from '../../../../../../domain/context/bond/CouponDetails.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
 
 export class GetCouponDetailsQueryResponse implements QueryResponse {
   constructor(public readonly coupon: CouponDetails) {}

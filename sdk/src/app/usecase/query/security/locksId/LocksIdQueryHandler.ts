@@ -203,15 +203,15 @@
 
 */
 
-import { LocksIdQuery, LocksIdQueryResponse } from './LocksIdQuery.js';
-import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../service/account/AccountService';
-import ContractService from '../../../../service/contract/ContractService.js';
-import { LocksIdQueryError } from './error/LocksIdQueryError.js';
+import { LocksIdQuery, LocksIdQueryResponse } from './LocksIdQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import { LocksIdQueryError } from './error/LocksIdQueryError';
 
 @QueryHandler(LocksIdQuery)
 export class LocksIdQueryHandler implements IQueryHandler<LocksIdQuery> {

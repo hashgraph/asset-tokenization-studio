@@ -203,21 +203,24 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   GrantKycMockCommand,
   GrantKycMockCommandResponse,
 } from './GrantKycMockCommand.js';
 import { GrantKycMockCommandHandler } from './GrantKycMockCommandHandler.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import { GrantKycMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
+import AccountService from '@service/account/AccountService';
+import { GrantKycMockCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { GrantKycMockCommandError } from './error/GrantKycMockCommandError.js';
 
 describe('GrantKycMockCommandHandler', () => {
   let handler: GrantKycMockCommandHandler;
@@ -233,7 +236,7 @@ describe('GrantKycMockCommandHandler', () => {
   const targetEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
   );
-
+  const errorMsg = ErrorMsgFixture.create().msg;
   const transactionId = TransactionIdFixture.create().id;
 
   beforeEach(() => {
@@ -250,6 +253,24 @@ describe('GrantKycMockCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws GrantKycMockCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        GrantKycMockCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while granting external KYC: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully grant kyc mock', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         contractEvmAddress,

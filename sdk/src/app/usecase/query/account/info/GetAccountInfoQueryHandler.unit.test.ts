@@ -207,17 +207,17 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   AccountPropsFixture,
   GetAccountInfoQueryFixture,
-} from '../../../../../../__tests__/fixtures/account/AccountFixture.js';
-import { ErrorMsgFixture } from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import { GetAccountInfoQueryHandler } from './GetAccountInfoQueryHandler.js';
+} from '@test/fixtures/account/AccountFixture';
+import { ErrorMsgFixture } from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { GetAccountInfoQueryHandler } from './GetAccountInfoQueryHandler';
 import {
   GetAccountInfoQuery,
   GetAccountInfoQueryResponse,
-} from './GetAccountInfoQuery.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import Account from '../../../../../domain/context/account/Account.js';
-import { GetAccountInfoQueryError } from './error/GetAccountInfoQueryError.js';
+} from './GetAccountInfoQuery';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Account from '@domain/context/account/Account';
+import { GetAccountInfoQueryError } from './error/GetAccountInfoQueryError';
 
 describe('GetAccountInfoQueryHandler', () => {
   let handler: GetAccountInfoQueryHandler;

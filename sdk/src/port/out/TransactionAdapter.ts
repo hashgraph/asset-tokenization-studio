@@ -205,24 +205,24 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import BigDecimal from '../../domain/context/shared/BigDecimal.js';
-import Account from '../../domain/context/account/Account.js';
-import { HederaId } from '../../domain/context/shared/HederaId.js';
-import { MirrorNodeAdapter } from './mirror/MirrorNodeAdapter.js';
-import { Environment } from '../../domain/context/network/Environment.js';
-import LogService from '../../app/service/log/LogService.js';
-import { Security } from '../../domain/context/security/Security.js';
-import EvmAddress from '../../domain/context/contract/EvmAddress.js';
-import { BondDetails } from '../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
-import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
-import HWCSettings from '../../core/settings/walletConnect/HWCSettings.js';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import Account from '@domain/context/account/Account';
+import { HederaId } from '@domain/context/shared/HederaId';
+import { MirrorNodeAdapter } from './mirror/MirrorNodeAdapter';
+import { Environment } from '@domain/context/network/Environment';
+import LogService from '@service/log/LogService';
+import { Security } from '@domain/context/security/Security';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import HWCSettings from '@core/settings/walletConnect/HWCSettings';
 import { ContractId } from '@hashgraph/sdk';
-import DfnsSettings from '../../core/settings/custodialWalletSettings/DfnsSettings.js';
-import FireblocksSettings from '../../core/settings/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
-import { ClearingOperationType } from '../../domain/context/security/Clearing.js';
+import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
+import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
+import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
+import { ClearingOperationType } from '@domain/context/security/Clearing';
 
 export interface InitializationData {
   account?: Account;

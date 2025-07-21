@@ -203,10 +203,10 @@
 
 */
 
-import IssueRequest from '../../../src/port/in/request/security/operations/issue/IssueRequest';
+import IssueRequest from '@port/in/request/security/operations/issue/IssueRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { IssueCommand } from '../../../src/app/usecase/command/security/operations/issue/IssueCommand';
+import { IssueCommand } from '@command/security/operations/issue/IssueCommand';
 
 export const IssueCommandFixture = createFixture<IssueCommand>((command) => {
   command.amount.faker((faker) =>

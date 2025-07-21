@@ -204,28 +204,28 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import SecurityService from '../../../../../service/security/SecurityService';
-import ValidationService from '../../../../../service/validation/ValidationService';
-import TransactionService from 'app/service/transaction/TransactionService';
-import AccountService from '../../../../../service/account/AccountService';
-import ContractService from '../../../../../service/contract/ContractService';
+import SecurityService from '@service/security/SecurityService';
+import ValidationService from '@service/validation/ValidationService';
+import TransactionService from '@service/transaction/TransactionService';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
 
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import Account from '../../../../../../domain/context/account/Account';
-import { Security } from '../../../../../../domain/context/security/Security';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+} from '@test/fixtures/shared/DataFixture';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import Account from '@domain/context/account/Account';
+import { Security } from '@domain/context/security/Security';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import { MintCommandHandler } from './MintCommandHandler';
 import { MintCommand, MintCommandResponse } from './MintCommand';
 import { MintCommandError } from './error/MintCommandError';
-import TransactionAdapter from '../../../../../../port/out/TransactionAdapter';
-import { MintCommandFixture } from '../../../../../../../__tests__/fixtures/mint/MintFixture';
-import { KycStatus } from '../../../../../../domain/context/kyc/Kyc';
+import TransactionAdapter from '@port/out/TransactionAdapter';
+import { MintCommandFixture } from '@test/fixtures/mint/MintFixture';
+import { KycStatus } from '@domain/context/kyc/Kyc';
 
 describe('MintCommandHandler', () => {
   let handler: MintCommandHandler;

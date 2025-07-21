@@ -204,9 +204,9 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import ValidatedRequest from '../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../FormatValidation.js';
-import { InvalidValue } from '../../error/InvalidValue.js';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../../FormatValidation';
+import { InvalidValue } from '../../error/InvalidValue';
 
 export default class ApplyRolesRequest extends ValidatedRequest<ApplyRolesRequest> {
   securityId: string;

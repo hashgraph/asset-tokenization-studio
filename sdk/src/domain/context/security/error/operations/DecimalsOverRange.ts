@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class DecimalsOverRange extends BaseError {
   constructor(val: number) {

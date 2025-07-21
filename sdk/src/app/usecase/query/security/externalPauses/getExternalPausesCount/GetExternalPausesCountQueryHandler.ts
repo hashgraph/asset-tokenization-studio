@@ -203,17 +203,17 @@
 
 */
 
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import SecurityService from '@service/security/SecurityService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   GetExternalPausesCountQuery,
   GetExternalPausesCountQueryResponse,
-} from './GetExternalPausesCountQuery.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
+} from './GetExternalPausesCountQuery';
+import ContractService from '@service/contract/ContractService';
 
 @QueryHandler(GetExternalPausesCountQuery)
 export class GetExternalPausesCountQueryHandler

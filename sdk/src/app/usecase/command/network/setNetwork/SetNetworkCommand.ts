@@ -203,11 +203,11 @@
 
 */
 
-import { Command } from '../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
-import { Environment } from '../../../../../domain/context/network/Environment.js';
-import { MirrorNode } from '../../../../../domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../../../domain/context/network/JsonRpcRelay.js';
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
+import { Environment } from '@domain/context/network/Environment';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
 
 export class SetNetworkCommandResponse implements CommandResponse {
   constructor(

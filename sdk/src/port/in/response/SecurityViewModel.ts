@@ -203,8 +203,8 @@
 
 */
 
-import { QueryResponse } from '../../../core/query/QueryResponse.js';
-import RegulationViewModel from './RegulationViewModel.js';
+import { QueryResponse } from '@core/query/QueryResponse';
+import RegulationViewModel from './RegulationViewModel';
 
 export default interface SecurityViewModel extends QueryResponse {
   name?: string;

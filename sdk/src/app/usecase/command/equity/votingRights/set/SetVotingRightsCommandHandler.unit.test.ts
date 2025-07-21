@@ -204,24 +204,24 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import TransactionService from '@service/transaction/TransactionService';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+} from '@test/fixtures/shared/DataFixture';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { faker } from '@faker-js/faker/.';
-import { SetVotingRightsCommandFixture } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
-import { SetVotingRightsCommandHandler } from './SetVotingRightsCommandHandler.js';
+import { SetVotingRightsCommandFixture } from '@test/fixtures/equity/EquityFixture';
+import { SetVotingRightsCommandHandler } from './SetVotingRightsCommandHandler';
 import {
   SetVotingRightsCommand,
   SetVotingRightsCommandResponse,
-} from './SetVotingRightsCommand.js';
-import { SetVotingRightsCommandError } from './error/SetVotingRightsCommandError.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+} from './SetVotingRightsCommand';
+import { SetVotingRightsCommandError } from './error/SetVotingRightsCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('SetVotingRightsCommandHandler', () => {
   let handler: SetVotingRightsCommandHandler;

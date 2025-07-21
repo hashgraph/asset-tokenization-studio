@@ -203,16 +203,16 @@
 
 */
 
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   IsClearingActivatedQuery,
   IsClearingActivatedQueryResponse,
 } from './IsClearingActivatedQuery';
-import ContractService from '../../../../../service/contract/ContractService';
+import ContractService from '@service/contract/ContractService';
 import { IsClearingActivatedQueryError } from './error/IsClearingActivatedQueryError';
 
 @QueryHandler(IsClearingActivatedQuery)

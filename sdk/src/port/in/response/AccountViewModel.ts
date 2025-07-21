@@ -203,8 +203,8 @@
 
 */
 
-import PublicKey from '../../../domain/context/account/PublicKey.js';
-import { QueryResponse } from '../../../core/query/QueryResponse.js';
+import PublicKey from '@domain/context/account/PublicKey';
+import { QueryResponse } from '@core/query/QueryResponse';
 
 export default interface AccountViewModel extends QueryResponse {
   id?: string;

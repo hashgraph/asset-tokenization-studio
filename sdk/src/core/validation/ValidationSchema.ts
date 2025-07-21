@@ -203,8 +203,8 @@
 
 */
 
-import BaseError from '../error/BaseError.js';
-import { BaseArgs } from './BaseArgs.js';
+import BaseError from '@core/error/BaseError';
+import { BaseArgs } from './BaseArgs';
 
 export type ValidatedArgsKey<T extends BaseArgs> = keyof Omit<
   T,

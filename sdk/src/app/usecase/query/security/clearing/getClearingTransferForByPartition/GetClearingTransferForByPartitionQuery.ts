@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import { ClearingTransfer } from '../../../../../../domain/context/security/Clearing.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
+import { ClearingTransfer } from '@domain/context/security/Clearing';
 
 export class GetClearingTransferForByPartitionQueryResponse
   implements QueryResponse

@@ -207,13 +207,13 @@ import {
   GetIssuerListMembersQuery,
   GetIssuerListMembersQueryResponse,
 } from './GetIssuerListMembersQuery';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import AccountService from '../../../../../service/account/AccountService';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import ContractService from '../../../../../service/contract/ContractService';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
 import { GetIssuerListMembersQueryError } from './error/GetIssuerListMembersQueryError';
 
 @QueryHandler(GetIssuerListMembersQuery)

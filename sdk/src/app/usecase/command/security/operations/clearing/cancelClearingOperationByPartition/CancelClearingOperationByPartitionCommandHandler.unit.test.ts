@@ -203,28 +203,28 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import { HandleClearingOperationByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
-import { CancelClearingOperationByPartitionCommandHandler } from './CancelClearingOperationByPartitionCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { HandleClearingOperationByPartitionCommandFixture } from '@test/fixtures/clearing/ClearingFixture';
+import { CancelClearingOperationByPartitionCommandHandler } from './CancelClearingOperationByPartitionCommandHandler';
 import {
   CancelClearingOperationByPartitionCommand,
   CancelClearingOperationByPartitionCommandResponse,
-} from './CancelClearingOperationByPartitionCommand.js';
-import { CancelClearingOperationByPartitionCommandError } from './error/CancelClearingOperationByPartitionCommandError.js';
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+} from './CancelClearingOperationByPartitionCommand';
+import { CancelClearingOperationByPartitionCommandError } from './error/CancelClearingOperationByPartitionCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('CancelClearingOperationByPartitionCommandHandler', () => {
   let handler: CancelClearingOperationByPartitionCommandHandler;

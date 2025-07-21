@@ -203,23 +203,23 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { ReleaseCommandHandler } from './ReleaseCommandHandler.js';
-import { ReleaseCommand, ReleaseCommandResponse } from './ReleaseCommand.js';
-import { ReleaseCommandFixture } from '../../../../../../../__tests__/fixtures/lock/LockFixture.js';
-import { ReleaseCommandError } from './error/ReleaseCommandError.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { ReleaseCommandHandler } from './ReleaseCommandHandler';
+import { ReleaseCommand, ReleaseCommandResponse } from './ReleaseCommand';
+import { ReleaseCommandFixture } from '@test/fixtures/lock/LockFixture';
+import { ReleaseCommandError } from './error/ReleaseCommandError';
 
 describe('ReleaseCommandHandler', () => {
   let handler: ReleaseCommandHandler;

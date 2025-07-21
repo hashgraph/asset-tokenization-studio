@@ -205,13 +205,13 @@
 
 import { container } from 'tsyringe';
 import SecurityService from './SecurityService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import Injectable from '../../../core/Injectable';
-import { GetSecurityQuery } from '../../usecase/query/security/get/GetSecurityQuery';
-import { Security } from '../../../domain/context/security/Security';
+import { QueryBus } from '@core/query/QueryBus';
+import Injectable from '@core/Injectable';
+import { GetSecurityQuery } from '@query/security/get/GetSecurityQuery';
+import { Security } from '@domain/context/security/Security';
 import { SecurityNotFound } from './error/SecurityNotFound';
 import { createMock } from '@golevelup/ts-jest';
-import { SecurityPropsFixture } from '../../../../__tests__/fixtures/shared/SecurityFixture';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 
 describe('SecurityService', () => {
   let service: SecurityService;

@@ -203,33 +203,33 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import { FreezePartialTokensCommandError } from './error/FreezePartialTokensCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
+import { FreezePartialTokensCommandError } from './error/FreezePartialTokensCommandError';
 import {
   FreezePartialTokensCommand,
   FreezePartialTokensResponse,
-} from './FreezePartialTokensCommand.js';
-import { FreezePartialTokensCommandHandler } from './FreezePartialTokensCommandHandler.js';
-import { FreezePartialTokensCommandFixture } from '../../../../../../../../__tests__/fixtures/freeze/FreezeFixture.js';
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../../domain/context/security/Security.js';
+} from './FreezePartialTokensCommand';
+import { FreezePartialTokensCommandHandler } from './FreezePartialTokensCommandHandler';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import SecurityService from '@service/security/SecurityService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import { FreezePartialTokensCommandFixture } from '@test/fixtures/freeze/FreezeFixture';
 
 describe('FreezePartialTokensCommandHandler', () => {
   let handler: FreezePartialTokensCommandHandler;

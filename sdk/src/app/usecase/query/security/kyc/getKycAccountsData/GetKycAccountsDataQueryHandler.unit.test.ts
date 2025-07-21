@@ -207,24 +207,24 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
 import {
   GetKycAccountsDataQueryFixture,
   KycAccountDataFixture,
-} from '../../../../../../../__tests__/fixtures/kyc/KycFixture.js';
+} from '@test/fixtures/kyc/KycFixture';
 import {
   GetKycAccountsDataQuery,
   GetKycAccountsDataQueryResponse,
-} from './GetKycAccountsDataQuery.js';
-import { GetKycAccountsDataQueryHandler } from './GetKycAccountsDataQueryHandler.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetKycAccountsDataQueryError } from './error/GetKycAccountsDataQueryError.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/account/AccountFixture.js';
+} from './GetKycAccountsDataQuery';
+import { GetKycAccountsDataQueryHandler } from './GetKycAccountsDataQueryHandler';
+import AccountService from '@service/account/AccountService';
+import { GetKycAccountsDataQueryError } from './error/GetKycAccountsDataQueryError';
+import Account from '@domain/context/account/Account';
+import { AccountPropsFixture } from '@test/fixtures/account/AccountFixture';
 
 describe('GetKycAccountsDataQueryHandler', () => {
   let handler: GetKycAccountsDataQueryHandler;

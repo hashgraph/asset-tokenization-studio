@@ -204,7 +204,7 @@
 */
 
 import { createFixture } from '../config';
-import { Regulation } from '../../../src/domain/context/factory/Regulation';
+import { Regulation } from '@domain/context/factory/Regulation';
 
 export const RegulationFixture = createFixture<Regulation>((props) => {
   props.type.faker((faker) => faker.lorem.sentence());
