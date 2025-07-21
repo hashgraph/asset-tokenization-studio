@@ -1,4 +1,4 @@
-name: CI Selective Test Runner
+name: Tests
 
 on:
   push:
