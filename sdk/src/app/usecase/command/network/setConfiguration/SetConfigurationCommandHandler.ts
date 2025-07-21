@@ -203,15 +203,15 @@
 
 */
 
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import NetworkService from '../../../../service/network/NetworkService.js';
-import { SetConfigurationCommandError } from './error/SetConfigurationCommandError.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import NetworkService from '@service/network/NetworkService';
+import { SetConfigurationCommandError } from './error/SetConfigurationCommandError';
 import {
   SetConfigurationCommand,
   SetConfigurationCommandResponse,
-} from './SetConfigurationCommand.js';
+} from './SetConfigurationCommand';
 
 @CommandHandler(SetConfigurationCommand)
 export class SetConfigurationCommandHandler

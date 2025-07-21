@@ -203,22 +203,19 @@
 
 */
 
-import WalletEvent from '../../../../app/service/event/WalletEvent.js';
-import Configuration from '../../../../domain/context/network/Configuration.js';
-import { Environment } from '../../../../domain/context/network/Environment.js';
-import {
-  MirrorNode,
-  MirrorNodes,
-} from '../../../../domain/context/network/MirrorNode.js';
+import WalletEvent from '@service/event/WalletEvent';
+import Configuration from '@domain/context/network/Configuration';
+import { Environment } from '@domain/context/network/Environment';
+import { MirrorNode, MirrorNodes } from '@domain/context/network/MirrorNode';
 import {
   JsonRpcRelay,
   JsonRpcRelays,
-} from '../../../../domain/context/network/JsonRpcRelay.js';
-import { SupportedWallets } from '../../../../domain/context/network/Wallet.js';
-import { BaseRequest } from '../BaseRequest.js';
-import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import { Factories } from '../../../../domain/context/factory/Factories.js';
-import { Resolvers } from '../../../../domain/context/factory/Resolvers.js';
+} from '@domain/context/network/JsonRpcRelay';
+import { SupportedWallets } from '@domain/context/network/Wallet';
+import { BaseRequest } from '../BaseRequest';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { Factories } from '@domain/context/factory/Factories';
+import { Resolvers } from '@domain/context/factory/Resolvers';
 export { SupportedWallets };
 
 export default class InitializationRequest

@@ -208,25 +208,25 @@ import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../app/service/account/AccountService.js';
-import SecurityService from '../../../../../app/service/security/SecurityService.js';
-import { CanRedeemByPartitionQueryFixture } from '../../../../../../__tests__/fixtures/erc1400/ERC1400Fixture.js';
-import { SecurityPropsFixture } from '../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../domain/context/security/Security.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import { CanRedeemByPartitionQueryHandler } from './CanRedeemByPartitionQueryHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
+import SecurityService from '@service/security/SecurityService';
+import { CanRedeemByPartitionQueryFixture } from '@test/fixtures/erc1400/ERC1400Fixture';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { CanRedeemByPartitionQueryHandler } from './CanRedeemByPartitionQueryHandler';
 import {
   CanRedeemByPartitionQuery,
   CanRedeemByPartitionQueryResponse,
-} from './CanRedeemByPartitionQuery.js';
-import { CanRedeemByPartitionQueryError } from './error/CanRedeemByPartitionQueryError.js';
-import { EMPTY_BYTES } from '../../../../../core/Constants.js';
-import Account from '../../../../../domain/context/account/Account.js';
+} from './CanRedeemByPartitionQuery';
+import { CanRedeemByPartitionQueryError } from './error/CanRedeemByPartitionQueryError';
+import { EMPTY_BYTES } from '@core/Constants';
+import Account from '@domain/context/account/Account';
 
 describe('CanRedeemByPartitionQueryHandler', () => {
   let handler: CanRedeemByPartitionQueryHandler;

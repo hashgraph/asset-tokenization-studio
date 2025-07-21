@@ -203,98 +203,99 @@
 
 */
 
-import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter.js';
-import {
-  ControlListRequest,
-  CreateEquityRequest,
-  CreateHoldByPartitionRequest,
-  Equity,
-  ExecuteHoldByPartitionRequest,
-  ForceRedeemRequest,
-  ForceTransferRequest,
-  GetAccountBalanceRequest,
-  GetControlListCountRequest,
-  GetControlListMembersRequest,
-  GetControlListTypeRequest,
-  GetHeldAmountForRequest,
-  GetHoldCountForByPartitionRequest,
-  GetHoldsIdForByPartitionRequest,
-  GetLockCountRequest,
-  GetLocksIdRequest,
-  IssueRequest,
-  LoggerTransports,
-  PartitionsProtectedRequest,
-  PauseRequest,
-  ProtectedCreateHoldByPartitionRequest,
-  ProtectedRedeemFromByPartitionRequest,
-  ProtectedTransferAndLockByPartitionRequest,
-  ProtectedTransferFromByPartitionRequest,
-  ReleaseHoldByPartitionRequest,
-  ReleaseRequest,
-  Role,
-  RoleRequest,
-  SDK,
-  Security,
-  TransferAndLockRequest,
-  GrantKycRequest,
-  AddIssuerRequest,
-  SsiManagement,
-  Kyc,
-  ClearingCreateHoldByPartitionRequest,
-  GetClearedAmountForRequest,
-  GetClearingCountForByPartitionRequest,
-  GetClearingsIdForByPartitionRequest,
-  ActivateClearingRequest,
-  DeactivateClearingRequest,
-  ClearingRedeemByPartitionRequest,
-  ClearingTransferByPartitionRequest,
-  CancelClearingOperationByPartitionRequest,
-  ReclaimClearingOperationByPartitionRequest,
-  ApproveClearingOperationByPartitionRequest,
-  ProtectedClearingRedeemByPartitionRequest,
-  ProtectedClearingTransferByPartitionRequest,
-  OperatorClearingCreateHoldByPartitionRequest,
-  OperatorClearingRedeemByPartitionRequest,
-  OperatorClearingTransferByPartitionRequest,
-  GetClearingRedeemForByPartitionRequest,
-  GetClearingCreateHoldForByPartitionRequest,
-  GetClearingTransferForByPartitionRequest,
-  SetMaxSupplyRequest,
-  ProtectedClearingCreateHoldByPartitionRequest,
-} from '../../../src/index.js';
-import TransferRequest from '../../../src/port/in/request/security/operations/transfer/TransferRequest.js';
-import RedeemRequest from '../../../src/port/in/request/security/operations/redeem/RedeemRequest.js';
-import Injectable from '../../../src/core/Injectable.js';
-import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
-import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter.js';
-import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
+import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
+
+import TransferRequest from '@port/in/request/security/operations/transfer/TransferRequest';
+import RedeemRequest from '@port/in/request/security/operations/redeem/RedeemRequest';
+import Injectable from '@core/Injectable';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
 import {
   CLIENT_ACCOUNT_ECDSA,
   CLIENT_ACCOUNT_ECDSA_A,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
   CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT,
-} from '../../config.js';
-import NetworkService from '../../../src/app/service/network/NetworkService.js';
-import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
+} from '@test/config';
+import NetworkService from '@service/network/NetworkService';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
 import { ethers, Wallet } from 'ethers';
-import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
-import GetSecurityDetailsRequest from '../../../src/port/in/request/security/GetSecurityDetailsRequest.js';
-import { SecurityRole } from '../../../src/domain/context/security/SecurityRole.js';
-import { SecurityControlListType } from '../../../src/domain/context/security/SecurityControlListType.js';
+import SecurityViewModel from '@port/in/response/SecurityViewModel';
+import GetSecurityDetailsRequest from '@port/in/request/security/GetSecurityDetailsRequest';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType.js';
-import Account from '../../../src/domain/context/account/Account.js';
+} from '@domain/context/factory/RegulationType';
+import Account from '@domain/context/account/Account';
 import { keccak256 } from 'js-sha3';
-import { _PARTITION_ID_1 } from '../../../src/core/Constants.js';
-import createVcT3 from '../../utils/verifiableCredentials.js';
-import { ClearingOperationType } from '../../../src/domain/context/security/Clearing.js';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal.js';
-import { ONE_THOUSAND } from '../../../src/domain/context/shared/SecurityDate.js';
+import { _PARTITION_ID_1 } from '@core/Constants';
+import createVcT3 from '@test/utils/verifiableCredentials';
+import { ClearingOperationType } from '@domain/context/security/Clearing';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
+import {
+  SDK,
+  LoggerTransports,
+  CreateEquityRequest,
+  Equity,
+  Role,
+  RoleRequest,
+  SsiManagement,
+  AddIssuerRequest,
+  Kyc,
+  GrantKycRequest,
+  Security,
+  SetMaxSupplyRequest,
+  GetControlListCountRequest,
+  GetControlListMembersRequest,
+  ControlListRequest,
+  IssueRequest,
+  GetAccountBalanceRequest,
+  ForceRedeemRequest,
+  TransferAndLockRequest,
+  GetLockCountRequest,
+  GetLocksIdRequest,
+  ReleaseRequest,
+  ForceTransferRequest,
+  PauseRequest,
+  GetControlListTypeRequest,
+  CreateHoldByPartitionRequest,
+  GetHeldAmountForRequest,
+  GetHoldCountForByPartitionRequest,
+  GetHoldsIdForByPartitionRequest,
+  ReleaseHoldByPartitionRequest,
+  PartitionsProtectedRequest,
+  ProtectedTransferFromByPartitionRequest,
+  ProtectedRedeemFromByPartitionRequest,
+  ProtectedTransferAndLockByPartitionRequest,
+  ProtectedCreateHoldByPartitionRequest,
+  ExecuteHoldByPartitionRequest,
+  ActivateClearingRequest,
+  DeactivateClearingRequest,
+  ClearingCreateHoldByPartitionRequest,
+  GetClearedAmountForRequest,
+  GetClearingCreateHoldForByPartitionRequest,
+  GetClearingCountForByPartitionRequest,
+  GetClearingsIdForByPartitionRequest,
+  ReclaimClearingOperationByPartitionRequest,
+  ClearingRedeemByPartitionRequest,
+  GetClearingRedeemForByPartitionRequest,
+  CancelClearingOperationByPartitionRequest,
+  ClearingTransferByPartitionRequest,
+  GetClearingTransferForByPartitionRequest,
+  ApproveClearingOperationByPartitionRequest,
+  OperatorClearingTransferByPartitionRequest,
+  OperatorClearingRedeemByPartitionRequest,
+  OperatorClearingCreateHoldByPartitionRequest,
+  ProtectedClearingRedeemByPartitionRequest,
+  ProtectedClearingTransferByPartitionRequest,
+  ProtectedClearingCreateHoldByPartitionRequest,
+} from '@port/in';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -341,11 +342,6 @@ describe('🧪 Security tests', () => {
   const url = 'http://127.0.0.1:7546';
   const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
-  const wallet = new Wallet(
-    CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-    customHttpProvider,
-  );
-
   beforeAll(async () => {
     mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
     mirrorNodeAdapter.set(mirrorNode);
@@ -373,7 +369,12 @@ describe('🧪 Security tests', () => {
     });
     await th.register(account, true);
 
-    th.signerOrProvider = wallet;
+    th.setSignerOrProvider(
+      new Wallet(
+        CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+        customHttpProvider,
+      ),
+    );
 
     const requestST = new CreateEquityRequest({
       name: name,

@@ -170,28 +170,28 @@
    limitations under the License.
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+} from '@test/fixtures/shared/DataFixture';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   RecoveryAddressCommand,
   RecoveryAddressCommandResponse,
-} from './RecoveryAddressCommand.js';
-import { RecoveryAddressCommandHandler } from './RecoveryAddressCommandHandler.js';
-import { RecoveryAddressCommandFixture } from '../../../../../../../__tests__/fixtures/recovery/RecoveryFixture.js';
-import { RecoveryAddressCommandError } from './error/RecoveryAddressCommandError.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/account/AccountFixture.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import ContractService from 'app/service/contract/ContractService.js';
+} from './RecoveryAddressCommand';
+import { RecoveryAddressCommandHandler } from './RecoveryAddressCommandHandler';
+import { RecoveryAddressCommandFixture } from '@test/fixtures/recovery/RecoveryFixture';
+import { RecoveryAddressCommandError } from './error/RecoveryAddressCommandError';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { AccountPropsFixture } from '@test/fixtures/account/AccountFixture';
+import Account from '@domain/context/account/Account';
+import ContractService from '@service/contract/ContractService';
 
 describe('RecoveryAddressCommandHandler', () => {
   let handler: RecoveryAddressCommandHandler;

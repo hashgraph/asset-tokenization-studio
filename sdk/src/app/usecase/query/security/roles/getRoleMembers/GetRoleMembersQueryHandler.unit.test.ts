@@ -207,18 +207,18 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import { GetRoleMembersQueryFixture } from '../../../../../../../__tests__/fixtures/role/RoleFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetRoleMembersQueryFixture } from '@test/fixtures/role/RoleFixture';
 import {
   GetRoleMembersQuery,
   GetRoleMembersQueryResponse,
-} from './GetRoleMembersQuery.js';
-import { GetRoleMembersQueryError } from './error/GetRoleMembersQueryError.js';
-import { GetRoleMembersQueryHandler } from './GetRoleMembersQueryHandler.js';
+} from './GetRoleMembersQuery';
+import { GetRoleMembersQueryError } from './error/GetRoleMembersQueryError';
+import { GetRoleMembersQueryHandler } from './GetRoleMembersQueryHandler';
 
 describe('GetRoleMembersQueryHandler', () => {
   let handler: GetRoleMembersQueryHandler;

@@ -203,10 +203,10 @@
 
 */
 
-import { Command } from '../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
-import ContractId from '../../../../../domain/context/contract/ContractId.js';
-import { SecurityProps } from '../../../../../domain/context/security/Security.js';
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
+import ContractId from '@domain/context/contract/ContractId';
+import { SecurityProps } from '@domain/context/security/Security';
 
 export class CreateBondCommandResponse implements CommandResponse {
   public readonly securityId: ContractId;

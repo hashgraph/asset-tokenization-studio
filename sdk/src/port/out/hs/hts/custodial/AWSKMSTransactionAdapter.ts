@@ -208,11 +208,11 @@ import {
   CustodialWalletService,
 } from '@hashgraph/hedera-custodians-integration';
 import { singleton } from 'tsyringe';
-import LogService from '../../../../../app/service/log/LogService';
-import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
-import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
+import LogService from '@service/log/LogService';
+import { WalletEvents } from '@service/event/WalletEvent';
+import { SupportedWallets } from '@domain/context/network/Wallet';
 import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
-import AWSKMSSettings from '../../../../../core/settings/custodialWalletSettings/AWSKMSSettings';
+import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
 
 @singleton()
 export class AWSKMSTransactionAdapter extends CustodialTransactionAdapter {

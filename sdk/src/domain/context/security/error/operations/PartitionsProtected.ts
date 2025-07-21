@@ -203,8 +203,8 @@
 
 */
 
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 import { SecurityRole } from '../../SecurityRole';
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError';
 
 export class PartitionsProtected extends BaseError {
   constructor(role?: SecurityRole | string) {

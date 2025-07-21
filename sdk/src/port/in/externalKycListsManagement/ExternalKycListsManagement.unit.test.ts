@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   AddExternalKycListRequest,
   RemoveExternalKycListRequest,
@@ -220,11 +220,11 @@ import {
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
+} from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
 import {
   AddExternalKycListsRequestFixture,
   RemoveExternalKycListsRequestFixture,
@@ -236,19 +236,19 @@ import {
   GrantKycMockRequestFixture,
   RevokeKycMockRequestFixture,
   GetKycStatusMockRequestFixture,
-} from '../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture';
+} from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
 import ExternalKycListsManagement from './ExternalKycListsManagement';
-import { UpdateExternalKycListsCommand } from '../../../app/usecase/command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
-import { AddExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand';
-import { RemoveExternalKycListCommand } from '../../../app/usecase/command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand';
-import { IsExternallyGrantedQuery } from '../../../app/usecase/query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
-import { IsExternalKycListQuery } from '../../../app/usecase/query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
-import { GetExternalKycListsCountQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
-import { GetExternalKycListsMembersQuery } from '../../../app/usecase/query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery';
-import { GrantKycMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommand';
-import { RevokeKycMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommand';
-import { GetKycStatusMockQuery } from '../../../app/usecase/query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQuery';
-import { CreateExternalKycListMockCommand } from '../../../app/usecase/command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommand';
+import { UpdateExternalKycListsCommand } from '@command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommand';
+import { AddExternalKycListCommand } from '@command/security/externalKycLists/addExternalKycList/AddExternalKycListCommand';
+import { RemoveExternalKycListCommand } from '@command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommand';
+import { IsExternallyGrantedQuery } from '@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
+import { IsExternalKycListQuery } from '@query/security/externalKycLists/isExternalKycList/IsExternalKycListQuery';
+import { GetExternalKycListsCountQuery } from '@query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQuery';
+import { GetExternalKycListsMembersQuery } from '@query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQuery';
+import { GrantKycMockCommand } from '@command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommand';
+import { RevokeKycMockCommand } from '@command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommand';
+import { GetKycStatusMockQuery } from '@query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQuery';
+import { CreateExternalKycListMockCommand } from '@command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommand';
 describe('ExternalKycListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;

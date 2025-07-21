@@ -203,10 +203,10 @@
 
 */
 
-import { SecurityDate } from '../../../../../../domain/context/shared/SecurityDate.js';
-import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import { SecurityDate } from '@domain/context/shared/SecurityDate';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
-import FormatValidation from '../../../FormatValidation.js';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 export default class ControllerCreateHoldByPartitionRequest extends ValidatedRequest<ControllerCreateHoldByPartitionRequest> {
   securityId: string;

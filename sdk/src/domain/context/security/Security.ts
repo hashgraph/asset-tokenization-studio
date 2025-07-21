@@ -203,31 +203,31 @@
 
 */
 
-import BaseError from '../../../core/error/BaseError.js';
-import CheckNums from '../../../core/checks/numbers/CheckNums.js';
-import CheckStrings from '../../../core/checks/strings/CheckStrings.js';
-import InvalidDecimalRange from './error/values/InvalidDecimalRange.js';
-import NameEmpty from './error/values/NameEmpty.js';
-import NameLength from './error/values/NameLength.js';
-import SymbolEmpty from './error/values/SymbolEmpty.js';
-import SymbolLength from './error/values/SymbolLength.js';
-import EvmAddress from '../contract/EvmAddress.js';
-import BigDecimal from '../shared/BigDecimal.js';
-import { HederaId } from '../shared/HederaId.js';
-import { InvalidType } from '../../../port/in/request/error/InvalidType.js';
-import InvalidAmount from './error/values/InvalidAmount.js';
-import { SecurityType } from '../factory/SecurityType.js';
-import { Regulation } from '../factory/Regulation.js';
+import BaseError from '@core/error/BaseError';
+import CheckNums from '@core/checks/numbers/CheckNums';
+import CheckStrings from '@core/checks/strings/CheckStrings';
+import InvalidDecimalRange from './error/values/InvalidDecimalRange';
+import NameEmpty from './error/values/NameEmpty';
+import NameLength from './error/values/NameLength';
+import SymbolEmpty from './error/values/SymbolEmpty';
+import SymbolLength from './error/values/SymbolLength';
+import EvmAddress from '../contract/EvmAddress';
+import BigDecimal from '../shared/BigDecimal';
+import { HederaId } from '../shared/HederaId';
+import { InvalidType } from '@port/in/request/error/InvalidType';
+import InvalidAmount from './error/values/InvalidAmount';
+import { SecurityType } from '../factory/SecurityType';
+import { Regulation } from '../factory/Regulation';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../factory/RegulationType.js';
-import ValidatedDomain from '../../../core/validation/ValidatedArgs.js';
-import { Factory } from '../factory/Factories.js';
-import { OptionalField } from '../../../core/decorator/OptionalDecorator.js';
-import InvalidSupply from './error/values/InvalidSupply.js';
+} from '../factory/RegulationType';
+import ValidatedDomain from '@core/validation/ValidatedArgs';
+import { Factory } from '../factory/Factories';
+import { OptionalField } from '@core/decorator/OptionalDecorator';
+import InvalidSupply from './error/values/InvalidSupply';
 
 const TWELVE = 12;
 const TEN = 10;

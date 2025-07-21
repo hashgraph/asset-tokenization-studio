@@ -204,18 +204,18 @@
 */
 
 import ContractService from './ContractService'; // Adjust path as needed
-import NetworkService from '../network/NetworkService';
-import TransactionService from '../transaction/TransactionService';
-import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter';
-import EvmAddress from '../../../domain/context/contract/EvmAddress';
+import NetworkService from '@service/network/NetworkService';
+import TransactionService from '@service/transaction/TransactionService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import { createMock } from '@golevelup/ts-jest';
-import { QueryBus } from '../../../core/query/QueryBus';
-import Injectable from '../../../core/Injectable';
+import { QueryBus } from '@core/query/QueryBus';
+import Injectable from '@core/Injectable';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture';
-import { InvalidEvmAddress } from '../../../domain/context/contract/error/InvalidEvmAddress';
+} from '@test/fixtures/shared/DataFixture';
+import { InvalidEvmAddress } from '@domain/context/contract/error/InvalidEvmAddress';
 
 describe('ContractService', () => {
   let service: ContractService;

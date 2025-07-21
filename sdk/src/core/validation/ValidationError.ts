@@ -203,8 +203,8 @@
 
 */
 
-import BaseError, { ErrorCode } from '../error/BaseError.js';
-import ValidationResponse from './ValidationResponse.js';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
+import ValidationResponse from './ValidationResponse';
 
 export class ValidationError extends BaseError {
   constructor(name: string, validations: ValidationResponse[]) {

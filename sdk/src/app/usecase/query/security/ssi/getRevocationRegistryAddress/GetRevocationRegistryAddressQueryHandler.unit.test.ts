@@ -207,21 +207,21 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetRevocationRegistryAddressQueryFixture } from '../../../../../../../__tests__/fixtures/ssi/SsiFixture.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/account/AccountFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
+import { GetRevocationRegistryAddressQueryFixture } from '@test/fixtures/ssi/SsiFixture';
+import Account from '@domain/context/account/Account';
+import { AccountPropsFixture } from '@test/fixtures/account/AccountFixture';
 import {
   GetRevocationRegistryAddressQuery,
   GetRevocationRegistryAddressQueryResponse,
-} from './GetRevocationRegistryAddressQuery.js';
-import { GetRevocationRegistryAddressQueryHandler } from './GetRevocationRegistryAddressQueryHandler.js';
-import { GetRevocationRegistryAddressQueryError } from './error/GetRevocationRegistryAddressQueryError.js';
+} from './GetRevocationRegistryAddressQuery';
+import { GetRevocationRegistryAddressQueryHandler } from './GetRevocationRegistryAddressQueryHandler';
+import { GetRevocationRegistryAddressQueryError } from './error/GetRevocationRegistryAddressQueryError';
 
 describe('GetRevocationRegistryAddressQueryHandler', () => {
   let handler: GetRevocationRegistryAddressQueryHandler;

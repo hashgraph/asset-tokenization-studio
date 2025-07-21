@@ -203,18 +203,18 @@
 
 */
 
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { UpdateConfigCommand } from '../../../src/app/usecase/command/management/updateConfig/updateConfigCommand';
-import { createFixture } from '../config';
-import { UpdateConfigVersionCommand } from '../../../src/app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
-import { UpdateResolverCommand } from '../../../src/app/usecase/command/management/updateResolver/updateResolverCommand';
-import ContractId from '../../../src/domain/context/contract/ContractId.js';
+import { UpdateConfigCommand } from '@command/management/updateConfig/updateConfigCommand';
+import { UpdateConfigVersionCommand } from '@command/management/updateConfigVersion/updateConfigVersionCommand';
+import { UpdateResolverCommand } from '@command/management/updateResolver/updateResolverCommand';
+import ContractId from '@domain/context/contract/ContractId';
 import {
-  GetConfigInfoRequest,
-  UpdateConfigRequest,
   UpdateConfigVersionRequest,
+  UpdateConfigRequest,
   UpdateResolverRequest,
-} from '../../../src';
+  GetConfigInfoRequest,
+} from 'src';
+import { createFixture } from '../config';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
 
 export const UpdateConfigCommandFixture = createFixture<UpdateConfigCommand>(
   (command) => {

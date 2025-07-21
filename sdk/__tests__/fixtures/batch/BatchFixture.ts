@@ -206,22 +206,23 @@
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
 import { BigNumber } from 'ethers';
+
+import { BatchTransferCommand } from '@command/security/operations/batch/batchTransfer/BatchTransferCommand';
+import { BatchBurnCommand } from '@command/security/operations/batch/batchBurn/BatchBurnCommand';
+import { BatchForcedTransferCommand } from '@command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand';
+import { BatchFreezePartialTokensCommand } from '@command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommand';
+import { BatchMintCommand } from '@command/security/operations/batch/batchMint/BatchMintCommand';
+import { BatchSetAddressFrozenCommand } from '@command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommand';
+import { BatchUnfreezePartialTokensCommand } from '@command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand';
 import {
-  BatchBurnRequest,
-  BatchForcedTransferRequest,
-  BatchFreezePartialTokensRequest,
-  BatchMintRequest,
-  BatchSetAddressFrozenRequest,
   BatchTransferRequest,
+  BatchForcedTransferRequest,
+  BatchMintRequest,
+  BatchBurnRequest,
+  BatchSetAddressFrozenRequest,
+  BatchFreezePartialTokensRequest,
   BatchUnfreezePartialTokensRequest,
-} from 'index';
-import { BatchTransferCommand } from 'app/usecase/command/security/operations/batch/batchTransfer/BatchTransferCommand';
-import { BatchBurnCommand } from 'app/usecase/command/security/operations/batch/batchBurn/BatchBurnCommand';
-import { BatchForcedTransferCommand } from 'app/usecase/command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand';
-import { BatchFreezePartialTokensCommand } from 'app/usecase/command/security/operations/batch/batchFreezePartialTokens/BatchFreezePartialTokensCommand';
-import { BatchMintCommand } from 'app/usecase/command/security/operations/batch/batchMint/BatchMintCommand';
-import { BatchSetAddressFrozenCommand } from 'app/usecase/command/security/operations/batch/batchSetAddressFrozen/BatchSetAddressFrozenCommand';
-import { BatchUnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommand';
+} from 'src';
 
 export const BatchTransferRequestFixture = createFixture<BatchTransferRequest>(
   (request) => {

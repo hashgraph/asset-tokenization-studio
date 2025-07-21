@@ -203,7 +203,7 @@
 
 */
 
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default class CheckNums {

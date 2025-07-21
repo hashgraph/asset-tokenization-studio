@@ -203,25 +203,25 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { PauseCommandHandler } from './PauseCommandHandler.js';
-import { PauseCommand, PauseCommandResponse } from './PauseCommand.js';
-import { PauseCommandError } from './error/PauseCommandError.js';
-import { PauseCommandFixture } from '../../../../../../../__tests__/fixtures/pause/PauseFixture.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import Account from '@domain/context/account/Account';
+import { AccountPropsFixture } from '@test/fixtures/shared/DataFixture';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { PauseCommandHandler } from './PauseCommandHandler';
+import { PauseCommand, PauseCommandResponse } from './PauseCommand';
+import { PauseCommandError } from './error/PauseCommandError';
+import { PauseCommandFixture } from '@test/fixtures/pause/PauseFixture';
 
 describe('PauseCommandHandler', () => {
   let handler: PauseCommandHandler;
