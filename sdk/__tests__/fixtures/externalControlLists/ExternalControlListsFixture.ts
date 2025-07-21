@@ -203,32 +203,32 @@
 
 */
 
-import UpdateExternalControlListsRequest from '../../../src/port/in/request/security/externalControlLists/UpdateExternalControlListsRequest';
+import UpdateExternalControlListsRequest from '@port/in/request/security/externalControlLists/UpdateExternalControlListsRequest';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { UpdateExternalControlListsCommand } from '../../../src/app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
-import { AddExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
-import { RemoveExternalControlListCommand } from '../../../src/app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
-import AddExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/AddExternalControlListRequest';
-import RemoveExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/RemoveExternalControlListRequest';
-import { GetExternalControlListsCountQuery } from '../../../src/app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery';
-import { GetExternalControlListsMembersQuery } from '../../../src/app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery';
-import { IsExternalControlListQuery } from '../../../src/app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery';
-import IsExternalControlListRequest from '../../../src/port/in/request/security/externalControlLists/IsExternalControlListRequest';
-import GetExternalControlListsMembersRequest from '../../../src/port/in/request/security/externalControlLists/GetExternalControlListsMembersRequest';
-import GetExternalControlListsCountRequest from '../../../src/port/in/request/security/externalControlLists/GetExternalControlListsCountRequest';
-import { AddToBlackListMockCommand } from '../../../src/app/usecase/command/security/externalControlLists/mock/addToBlackListMock/AddToBlackListMockCommand';
-import { AddToWhiteListMockCommand } from '../../../src/app/usecase/command/security/externalControlLists/mock/addToWhiteListMock/AddToWhiteListMockCommand';
-import { RemoveFromBlackListMockCommand } from '../../../src/app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommand';
-import { RemoveFromWhiteListMockCommand } from '../../../src/app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommand';
-import { IsAuthorizedBlackListMockQuery } from '../../../src/app/usecase/query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery';
-import { IsAuthorizedWhiteListMockQuery } from '../../../src/app/usecase/query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery';
-import AddToBlackListMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/AddToBlackListMockRequest';
-import AddToWhiteListMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/AddToWhiteListMockRequest';
-import RemoveFromWhiteListMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/RemoveFromWhiteListMockRequest';
-import RemoveFromBlackListMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/RemoveFromBlackListMockRequest';
-import IsAuthorizedBlackListMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/IsAuthorizedBlackListMockRequest';
-import IsAuthorizedWhiteListMockRequest from '../../../src/port/in/request/security/externalControlLists/mock/IsAuthorizedWhiteListMockRequest';
+import { UpdateExternalControlListsCommand } from '@command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
+import { AddExternalControlListCommand } from '@command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
+import { RemoveExternalControlListCommand } from '@command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
+import AddExternalControlListRequest from '@port/in/request/security/externalControlLists/AddExternalControlListRequest';
+import RemoveExternalControlListRequest from '@port/in/request/security/externalControlLists/RemoveExternalControlListRequest';
+import { GetExternalControlListsCountQuery } from '@query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery';
+import { GetExternalControlListsMembersQuery } from '@query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery';
+import { IsExternalControlListQuery } from '@query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery';
+import IsExternalControlListRequest from '@port/in/request/security/externalControlLists/IsExternalControlListRequest';
+import GetExternalControlListsMembersRequest from '@port/in/request/security/externalControlLists/GetExternalControlListsMembersRequest';
+import GetExternalControlListsCountRequest from '@port/in/request/security/externalControlLists/GetExternalControlListsCountRequest';
+import { AddToBlackListMockCommand } from '@command/security/externalControlLists/mock/addToBlackListMock/AddToBlackListMockCommand';
+import { AddToWhiteListMockCommand } from '@command/security/externalControlLists/mock/addToWhiteListMock/AddToWhiteListMockCommand';
+import { RemoveFromBlackListMockCommand } from '@command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommand';
+import { RemoveFromWhiteListMockCommand } from '@command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommand';
+import { IsAuthorizedBlackListMockQuery } from '@query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery';
+import { IsAuthorizedWhiteListMockQuery } from '@query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery';
+import AddToBlackListMockRequest from '@port/in/request/security/externalControlLists/mock/AddToBlackListMockRequest';
+import AddToWhiteListMockRequest from '@port/in/request/security/externalControlLists/mock/AddToWhiteListMockRequest';
+import RemoveFromWhiteListMockRequest from '@port/in/request/security/externalControlLists/mock/RemoveFromWhiteListMockRequest';
+import RemoveFromBlackListMockRequest from '@port/in/request/security/externalControlLists/mock/RemoveFromBlackListMockRequest';
+import IsAuthorizedBlackListMockRequest from '@port/in/request/security/externalControlLists/mock/IsAuthorizedBlackListMockRequest';
+import IsAuthorizedWhiteListMockRequest from '@port/in/request/security/externalControlLists/mock/IsAuthorizedWhiteListMockRequest';
 
 export const UpdateExternalControlListsCommandFixture =
   createFixture<UpdateExternalControlListsCommand>((command) => {

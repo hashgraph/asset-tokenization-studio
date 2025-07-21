@@ -207,16 +207,16 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../app/service/contract/ContractService.js';
-import AccountService from '../../../../../app/service/account/AccountService.js';
-import { LockCountQueryFixture } from '../../../../../../__tests__/fixtures/lock/LockFixture.js';
-import { LockCountQueryHandler } from './LockCountQueryHandler.js';
-import { LockCountQuery, LockCountQueryResponse } from './LockCountQuery.js';
-import { LockCountQueryError } from './error/LockCountQueryError.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
+import { LockCountQueryFixture } from '@test/fixtures/lock/LockFixture';
+import { LockCountQueryHandler } from './LockCountQueryHandler';
+import { LockCountQuery, LockCountQueryResponse } from './LockCountQuery';
+import { LockCountQueryError } from './error/LockCountQueryError';
 
 describe('LockCountQueryHandler', () => {
   let handler: LockCountQueryHandler;

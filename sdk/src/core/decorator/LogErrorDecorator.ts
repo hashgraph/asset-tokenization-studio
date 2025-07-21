@@ -203,7 +203,7 @@
 
 */
 
-import LogService from '../../app/service/log/LogService.js';
+import LogService from '@service/log/LogService';
 
 export const LogError = (
   target: unknown,

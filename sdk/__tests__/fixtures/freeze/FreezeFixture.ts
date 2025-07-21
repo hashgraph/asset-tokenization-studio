@@ -202,17 +202,18 @@
    limitations under the License.
 
 */
-import { FreezePartialTokensCommand } from 'app/usecase/command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand';
-import { UnfreezePartialTokensCommand } from 'app/usecase/command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand';
-import { GetFrozenPartialTokensQuery } from 'app/usecase/query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
+
+import { FreezePartialTokensCommand } from '@command/security/operations/freeze/freezePartialTokens/FreezePartialTokensCommand';
+import { UnfreezePartialTokensCommand } from '@command/security/operations/freeze/unfreezePartialTokens/UnfreezePartialTokensCommand';
+import { GetFrozenPartialTokensQuery } from '@query/security/freeze/getFrozenPartialTokens/GetFrozenPartialTokensQuery';
 import {
   FreezePartialTokensRequest,
-  SetAddressFrozenRequest,
   UnfreezePartialTokensRequest,
-} from 'index';
+  SetAddressFrozenRequest,
+} from 'src';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetAddressFrozenCommand } from 'app/usecase/command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand';
+import { SetAddressFrozenCommand } from '@command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommand';
 
 export const SetAddressFrozenCommandFixture =
   createFixture<SetAddressFrozenCommand>((command) => {

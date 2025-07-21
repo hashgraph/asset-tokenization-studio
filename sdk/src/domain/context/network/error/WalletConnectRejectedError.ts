@@ -203,8 +203,8 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
-import { SupportedWallets } from '../Wallet.js';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
+import { SupportedWallets } from '../Wallet';
 
 export class WalletConnectRejectedError extends BaseError {
   constructor(wallet: SupportedWallets) {

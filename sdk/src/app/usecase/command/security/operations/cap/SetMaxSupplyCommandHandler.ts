@@ -203,22 +203,22 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import SecurityService from '@service/security/SecurityService';
 import {
   SetMaxSupplyCommand,
   SetMaxSupplyCommandResponse,
-} from './SetMaxSupplyCommand.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { SetMaxSupplyCommandError } from './error/SetMaxSupplyCommandError.js';
+} from './SetMaxSupplyCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import ValidationService from '@service/validation/ValidationService';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import ContractService from '@service/contract/ContractService';
+import { SetMaxSupplyCommandError } from './error/SetMaxSupplyCommandError';
 
 @CommandHandler(SetMaxSupplyCommand)
 export class SetMaxSupplyCommandHandler

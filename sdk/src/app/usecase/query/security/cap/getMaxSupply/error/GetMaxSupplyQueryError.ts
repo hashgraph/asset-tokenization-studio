@@ -203,8 +203,8 @@
 
 */
 
-import { QueryError } from '../../../../error/QueryError';
-import BaseError from '../../../../../../../core/error/BaseError';
+import { QueryError } from '@query/error/QueryError';
+import BaseError from '@core/error/BaseError';
 
 export class GetMaxSupplyQueryError extends QueryError {
   constructor(error: Error) {

@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../../FormatValidation.js';
-import { BaseArgs as BaseRequest } from '../../../../../../core/validation/BaseArgs.js';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '@port/in/request/FormatValidation';
+import { BaseArgs as BaseRequest } from '@core/validation/BaseArgs';
 
 export default class IssueRequest
   extends ValidatedRequest<IssueRequest>

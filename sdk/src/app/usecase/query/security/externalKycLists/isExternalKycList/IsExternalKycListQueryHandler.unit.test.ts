@@ -204,19 +204,19 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { EvmAddressPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { IsExternalKycListQueryHandler } from './IsExternalKycListQueryHandler.js';
+import { EvmAddressPropsFixture } from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import SecurityService from '@service/security/SecurityService';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { Security } from '@domain/context/security/Security';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { IsExternalKycListQueryHandler } from './IsExternalKycListQueryHandler';
 import {
   IsExternalKycListQuery,
   IsExternalKycListQueryResponse,
-} from './IsExternalKycListQuery.js';
-import { IsExternalKycListQueryFixture } from '../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
+} from './IsExternalKycListQuery';
+import { IsExternalKycListQueryFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
 
 describe('IsExternalKycListQueryHandler', () => {
   let handler: IsExternalKycListQueryHandler;

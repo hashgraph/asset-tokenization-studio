@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../../FormatValidation.js';
+import FormatValidation from '@port/in/request/FormatValidation';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
 export default class TakeSnapshotRequest extends ValidatedRequest<TakeSnapshotRequest> {
   securityId: string;

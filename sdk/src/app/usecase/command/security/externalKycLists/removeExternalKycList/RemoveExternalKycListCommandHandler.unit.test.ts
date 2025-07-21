@@ -203,25 +203,28 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 import { RemoveExternalKycListCommandHandler } from './RemoveExternalKycListCommandHandler.js';
 import {
   RemoveExternalKycListCommand,
   RemoveExternalKycListCommandResponse,
 } from './RemoveExternalKycListCommand.js';
-import { RemoveExternalKycListCommandFixture } from '../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
+import { RemoveExternalKycListCommandFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
+import { RemoveExternalKycListCommandError } from './error/RemoveExternalKycListCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('RemoveExternalKycListCommandHandler', () => {
   let handler: RemoveExternalKycListCommandHandler;
@@ -241,6 +244,7 @@ describe('RemoveExternalKycListCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new RemoveExternalKycListCommandHandler(
@@ -257,6 +261,24 @@ describe('RemoveExternalKycListCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws RemoveExternalKycListCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        RemoveExternalKycListCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while removing external KYC: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully remove external kyc list', async () => {
       contractServiceMock.getContractEvmAddress
         .mockResolvedValueOnce(evmAddress)

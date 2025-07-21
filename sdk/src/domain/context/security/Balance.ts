@@ -203,7 +203,7 @@
 
 */
 
-import BigDecimal from '../shared/BigDecimal.js';
+import BigDecimal from '../shared/BigDecimal';
 
 export class Balance {
   constructor(public readonly value: BigDecimal) {}

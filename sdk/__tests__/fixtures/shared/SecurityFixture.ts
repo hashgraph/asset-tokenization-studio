@@ -204,19 +204,19 @@
 */
 
 import { createFixture } from '../config';
-import { SecurityProps } from '../../../src/domain/context/security/Security';
-import { SecurityType } from '../../../src/domain/context/factory/SecurityType';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
+import { SecurityProps } from '@domain/context/security/Security';
+import { SecurityType } from '@domain/context/factory/SecurityType';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import {
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType';
+} from '@domain/context/factory/RegulationType';
 import { RegulationFixture } from './RegulationFixture';
 import { EvmAddressPropsFixture, HederaIdPropsFixture } from './DataFixture';
-import EvmAddress from '../../../src/domain/context/contract/EvmAddress';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { HederaId } from '@domain/context/shared/HederaId';
 import { faker } from '@faker-js/faker';
-import { GetSecurityQuery } from '../../../src/app/usecase/query/security/get/GetSecurityQuery';
+import { GetSecurityQuery } from '@query/security/get/GetSecurityQuery';
 
 export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
   security.name.faker((faker) => faker.company.name());

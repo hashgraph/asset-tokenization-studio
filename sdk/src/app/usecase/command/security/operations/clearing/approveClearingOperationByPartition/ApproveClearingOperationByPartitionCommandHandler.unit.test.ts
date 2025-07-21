@@ -203,32 +203,32 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import { HandleClearingOperationByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
-import { ApproveClearingOperationByPartitionCommandHandler } from './ApproveClearingOperationByPartitionCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { HandleClearingOperationByPartitionCommandFixture } from '@test/fixtures/clearing/ClearingFixture';
+import { ApproveClearingOperationByPartitionCommandHandler } from './ApproveClearingOperationByPartitionCommandHandler';
 import {
   ApproveClearingOperationByPartitionCommand,
   ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
-import SecurityService from '../../../../../../../app/service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../../domain/context/security/Security.js';
-import { ApproveClearingOperationByPartitionCommandError } from './error/ApproveClearingOperationByPartitionCommandError.js';
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
+} from './ApproveClearingOperationByPartitionCommand';
+import SecurityService from '@service/security/SecurityService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import { ApproveClearingOperationByPartitionCommandError } from './error/ApproveClearingOperationByPartitionCommandError';
+import { ErrorCode } from '@core/error/BaseError';
+import { KycStatus } from '@domain/context/kyc/Kyc';
 
 describe('ApproveClearingOperationByPartitionCommandHandler', () => {
   let handler: ApproveClearingOperationByPartitionCommandHandler;

@@ -203,9 +203,9 @@
 
 */
 
-import { HederaId } from '../shared/HederaId.js';
-import PrivateKey from './PrivateKey.js';
-import PublicKey from './PublicKey.js';
+import { HederaId } from '../shared/HederaId';
+import PrivateKey from './PrivateKey';
+import PublicKey from './PublicKey';
 
 export interface AccountProps {
   id: string;

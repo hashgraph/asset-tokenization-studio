@@ -206,17 +206,17 @@
 import {
   GetClearingTransferForByPartitionQuery,
   GetClearingTransferForByPartitionQueryResponse,
-} from './GetClearingTransferForByPartitionQuery.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { GetClearingTransferForByPartitionQueryError } from './error/GetClearingTransferForByPartitionQueryError.js';
+} from './GetClearingTransferForByPartitionQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import SecurityService from '@service/security/SecurityService';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetClearingTransferForByPartitionQueryError } from './error/GetClearingTransferForByPartitionQueryError';
 
 @QueryHandler(GetClearingTransferForByPartitionQuery)
 export class GetClearingTransferForByPartitionQueryHandler

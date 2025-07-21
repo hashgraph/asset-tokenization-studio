@@ -205,15 +205,15 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
-import { ValidationSchema, ValidatedArgsKey } from './ValidationSchema.js';
-import ValidationResponse from './ValidationResponse.js';
-import { EmptyValue } from '../error/EmptyValue.js';
-import Mapper from './Mapper.js';
-import { getOptionalFields } from '../decorator/OptionalDecorator.js';
-import BaseError from '../error/BaseError.js';
-import { RuntimeError } from '../error/RuntimeError.js';
-import { BaseArgs } from './BaseArgs.js';
-import { Validation } from './Validation.js';
+import { ValidationSchema, ValidatedArgsKey } from './ValidationSchema';
+import ValidationResponse from './ValidationResponse';
+import { EmptyValue } from '@core/error/EmptyValue';
+import Mapper from './Mapper';
+import { getOptionalFields } from '@core/decorator/OptionalDecorator';
+import BaseError from '@core/error/BaseError';
+import { RuntimeError } from '@core/error/RuntimeError';
+import { BaseArgs } from './BaseArgs';
+import { Validation } from './Validation';
 export default class ValidatedArgs<T extends BaseArgs> extends Validation {
   private schema: ValidationSchema<T>;
 

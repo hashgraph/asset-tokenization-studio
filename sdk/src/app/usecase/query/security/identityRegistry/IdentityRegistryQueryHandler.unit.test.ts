@@ -207,18 +207,18 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../service/contract/ContractService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
 import {
   IdentityRegistryQuery,
   IdentityRegistryQueryResponse,
-} from './IdentityRegistryQuery.js';
-import { IdentityRegistryQueryHandler } from './IdentityRegistryQueryHandler.js';
-import { IdentityRegistryQueryError } from './error/IdentityRegistryQueryError.js';
-import { IdentityRegistryQueryFixture } from '../../../../../../__tests__/fixtures/identityRegistry/IdentityRegistryFixture.js';
+} from './IdentityRegistryQuery';
+import { IdentityRegistryQueryHandler } from './IdentityRegistryQueryHandler';
+import { IdentityRegistryQueryError } from './error/IdentityRegistryQueryError';
+import { IdentityRegistryQueryFixture } from '@test/fixtures/identityRegistry/IdentityRegistryFixture';
 
 describe('IdentityRegistryQueryHandler', () => {
   let handler: IdentityRegistryQueryHandler;

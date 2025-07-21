@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import { KycAccountData } from '../../../../../../domain/context/kyc/KycAccountData.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
+import { KycAccountData } from '@domain/context/kyc/KycAccountData';
 
 export class GetKycAccountsDataQueryResponse implements QueryResponse {
   constructor(public readonly payload: KycAccountData[]) {}

@@ -203,24 +203,24 @@
 
 */
 
-import TransactionService from '../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import { UpdateMaturityDateCommandFixture } from '../../../../../../__tests__/fixtures/bond/BondFixture.js';
+import { UpdateMaturityDateCommandFixture } from '@test/fixtures/bond/BondFixture';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { UpdateMaturityDateCommandHandler } from './UpdateMaturityDateCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import { UpdateMaturityDateCommandHandler } from './UpdateMaturityDateCommandHandler';
 import {
   UpdateMaturityDateCommand,
   UpdateMaturityDateCommandResponse,
-} from './UpdateMaturityDateCommand.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import ValidationService from '../../../../service/validation/ValidationService.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { UpdateMaturityDateCommandError } from './error/UpdateMaturityDateCommandError.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
+} from './UpdateMaturityDateCommand';
+import ContractService from '@service/contract/ContractService';
+import ValidationService from '@service/validation/ValidationService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { UpdateMaturityDateCommandError } from './error/UpdateMaturityDateCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('UpdateMaturityDateCommandHandler', () => {
   let handler: UpdateMaturityDateCommandHandler;

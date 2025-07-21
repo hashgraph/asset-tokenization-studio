@@ -204,24 +204,24 @@
 */
 
 import { singleton } from 'tsyringe';
-import Injectable from '../../../core/Injectable.js';
-import { RPCTransactionAdapter } from '../../../port/out/rpc/RPCTransactionAdapter.js';
-import TransactionAdapter from '../../../port/out/TransactionAdapter.js';
-import Service from '../Service.js';
-import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
-import { InvalidWalletTypeError } from '../../../domain/context/network/error/InvalidWalletAccountTypeError.js';
-import LogService from '../log/LogService.js';
-import { HederaWalletConnectTransactionAdapter } from '../../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.js';
-import { DFNSTransactionAdapter } from '../../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import { FireblocksTransactionAdapter } from '../../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import { AWSKMSTransactionAdapter } from '../../../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
-import { WalletNotSupported } from './error/WalletNotSupported.js';
-import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
-import { InvalidResponse } from '../../../core/error/InvalidResponse.js';
-import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter.js';
-import { EmptyResponse } from './error/EmptyResponse.js';
-import { Response } from '../../../domain/context/transaction/Response';
-import { ADDRESS_LENGTH, BYTES_32_LENGTH } from '../../../core/Constants.js';
+import Injectable from '@core/Injectable';
+import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
+import TransactionAdapter from '@port/out/TransactionAdapter';
+import Service from '@service/Service';
+import { SupportedWallets } from '@domain/context/network/Wallet';
+import { InvalidWalletTypeError } from '@domain/context/network/error/InvalidWalletAccountTypeError';
+import LogService from '@service/log/LogService';
+import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
+import { DFNSTransactionAdapter } from '@port/out/hs/hts/custodial/DFNSTransactionAdapter';
+import { FireblocksTransactionAdapter } from '@port/out/hs/hts/custodial/FireblocksTransactionAdapter';
+import { AWSKMSTransactionAdapter } from '@port/out/hs/hts/custodial/AWSKMSTransactionAdapter';
+import { WalletNotSupported } from './error/WalletNotSupported';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
+import { InvalidResponse } from '@core/error/InvalidResponse';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { EmptyResponse } from './error/EmptyResponse';
+import { Response } from '@domain/context/transaction/Response';
+import { ADDRESS_LENGTH, BYTES_32_LENGTH } from '@core/Constants';
 
 @singleton()
 export default class TransactionService extends Service {

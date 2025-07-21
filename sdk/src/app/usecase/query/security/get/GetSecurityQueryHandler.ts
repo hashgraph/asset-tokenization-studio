@@ -203,19 +203,16 @@
 
 */
 
-import { Security } from '../../../../../domain/context/security/Security.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import {
-  GetSecurityQuery,
-  GetSecurityQueryResponse,
-} from './GetSecurityQuery.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../service/contract/ContractService';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import { GetSecurityQueryError } from './error/GetSecurityQueryError.js';
+import { Security } from '@domain/context/security/Security';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { GetSecurityQuery, GetSecurityQueryResponse } from './GetSecurityQuery';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { GetSecurityQueryError } from './error/GetSecurityQueryError';
 
 @QueryHandler(GetSecurityQuery)
 export class GetSecurityQueryHandler

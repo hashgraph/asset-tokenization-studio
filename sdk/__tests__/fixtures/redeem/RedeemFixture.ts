@@ -203,14 +203,14 @@
 
 */
 
-import { ProtectedRedeemFromByPartitionCommand } from '../../../src/app/usecase/command/security/operations/redeem/ProtectedRedeemFromByPartitionCommand';
+import { ProtectedRedeemFromByPartitionCommand } from '@command/security/operations/redeem/ProtectedRedeemFromByPartitionCommand';
 import {
   HederaIdPropsFixture,
   PartitionIdFixture,
 } from '../shared/DataFixture';
 import { createFixture } from '../config';
-import RedeemRequest from '../../../src/port/in/request/security/operations/redeem/RedeemRequest';
-import ForceRedeemRequest from '../../../src/port/in/request/security/operations/redeem/ForceRedeemRequest';
+import RedeemRequest from '@port/in/request/security/operations/redeem/RedeemRequest';
+import ForceRedeemRequest from '@port/in/request/security/operations/redeem/ForceRedeemRequest';
 
 export const RedeemCommandFixture =
   createFixture<ProtectedRedeemFromByPartitionCommand>((command) => {

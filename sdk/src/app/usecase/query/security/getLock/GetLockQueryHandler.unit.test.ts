@@ -207,22 +207,22 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../app/service/contract/ContractService.js';
-import { SecurityPropsFixture } from '../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../domain/context/security/Security.js';
-import { GetLockQueryHandler } from './GetLockQueryHandler.js';
-import { GetLockQuery, GetLockQueryResponse } from './GetLockQuery.js';
-import AccountService from '../../../../../app/service/account/AccountService.js';
-import SecurityService from '../../../../../app/service/security/SecurityService.js';
-import { GetLockQueryFixture } from '../../../../../../__tests__/fixtures/lock/LockFixture.js';
-import { GetLockQueryError } from './error/GetLockQueryError.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import { GetLockQueryHandler } from './GetLockQueryHandler';
+import { GetLockQuery, GetLockQueryResponse } from './GetLockQuery';
+import AccountService from '@service/account/AccountService';
+import SecurityService from '@service/security/SecurityService';
+import { GetLockQueryFixture } from '@test/fixtures/lock/LockFixture';
+import { GetLockQueryError } from './error/GetLockQueryError';
 import { BigNumber } from 'ethers';
-import { Lock } from '../../../../../domain/context/security/Lock.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
+import { Lock } from '@domain/context/security/Lock';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 
 describe('GetLockQueryHandler', () => {
   let handler: GetLockQueryHandler;

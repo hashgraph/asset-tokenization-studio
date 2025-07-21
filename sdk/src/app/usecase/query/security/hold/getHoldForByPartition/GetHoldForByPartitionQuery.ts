@@ -203,9 +203,9 @@
 
 */
 
-import { HoldDetails } from '../../../../../../domain/context/security/Hold.js';
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { HoldDetails } from '@domain/context/security/Hold';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
 
 export class GetHoldForByPartitionQueryResponse implements QueryResponse {
   constructor(public readonly payload: HoldDetails) {}

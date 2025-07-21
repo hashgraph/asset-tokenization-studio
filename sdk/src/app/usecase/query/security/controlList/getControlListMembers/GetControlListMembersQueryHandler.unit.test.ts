@@ -207,18 +207,18 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import { GetControlListMembersQueryFixture } from '../../../../../../../__tests__/fixtures/controlList/ControlListFixture.js';
-import { GetControlListMembersQueryError } from './error/GetControlListMembersQueryError.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetControlListMembersQueryFixture } from '@test/fixtures/controlList/ControlListFixture';
+import { GetControlListMembersQueryError } from './error/GetControlListMembersQueryError';
 import {
   GetControlListMembersQuery,
   GetControlListMembersQueryResponse,
-} from './GetControlListMembersQuery.js';
-import { GetControlListMembersQueryHandler } from './GetControlListMembersQueryHandler.js';
+} from './GetControlListMembersQuery';
+import { GetControlListMembersQueryHandler } from './GetControlListMembersQueryHandler';
 
 describe('GetControlListMembersQueryHandler', () => {
   let handler: GetControlListMembersQueryHandler;

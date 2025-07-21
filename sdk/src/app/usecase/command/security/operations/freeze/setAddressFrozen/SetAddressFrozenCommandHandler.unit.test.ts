@@ -203,29 +203,29 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import { SetAddressFrozenCommandError } from './error/SetAddressFrozenCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
+import { SetAddressFrozenCommandError } from './error/SetAddressFrozenCommandError';
 import {
   SetAddressFrozenCommand,
   SetAddressFrozenCommandResponse,
-} from './SetAddressFrozenCommand.js';
-import { SetAddressFrozenCommandHandler } from './SetAddressFrozenCommandHandler.js';
-import { SetAddressFrozenCommandFixture } from '../../../../../../../../__tests__/fixtures/freeze/FreezeFixture.js';
+} from './SetAddressFrozenCommand';
+import { SetAddressFrozenCommandHandler } from './SetAddressFrozenCommandHandler';
+import { SetAddressFrozenCommandFixture } from '@test/fixtures/freeze/FreezeFixture';
 
 describe('SetAddressFrozenCommandHandler', () => {
   let handler: SetAddressFrozenCommandHandler;

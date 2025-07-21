@@ -205,20 +205,20 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import AccountIntPort from './Account';
-import { QueryBus } from '../../../core/query/QueryBus';
+import { QueryBus } from '@core/query/QueryBus';
 import { GetAccountBalanceRequest, GetAccountInfoRequest } from '../request';
-import LogService from '../../../app/service/log/LogService';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
+import LogService from '@service/log/LogService';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 import {
   AccountPropsFixture,
   GetAccountBalanceRequestFixture,
   GetAccountInfoRequestFixture,
-} from '../../../../__tests__/fixtures/account/AccountFixture';
-import { GetAccountInfoQuery } from '../../../app/usecase/query/account/info/GetAccountInfoQuery';
-import { HederaId } from '../../../domain/context/shared/HederaId';
-import { GetAccountBalanceQuery } from '../../../app/usecase/query/account/balance/GetAccountBalanceQuery';
-import { ValidationError } from '../../../core/validation/ValidationError';
-import Account from '../../../domain/context/account/Account';
+} from '@test/fixtures/account/AccountFixture';
+import { GetAccountInfoQuery } from '@query/account/info/GetAccountInfoQuery';
+import { HederaId } from '@domain/context/shared/HederaId';
+import { GetAccountBalanceQuery } from '@query/account/balance/GetAccountBalanceQuery';
+import { ValidationError } from '@core/validation/ValidationError';
+import Account from '@domain/context/account/Account';
 
 describe('Account', () => {
   let queryBusMock: jest.Mocked<QueryBus>;
