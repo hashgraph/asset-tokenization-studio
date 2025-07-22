@@ -92,4 +92,4 @@ npm run test
 ```
 # Delete 
 
-See if pipeline is launched
+See if pipeline is launched 1

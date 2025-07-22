@@ -1,8 +1,8 @@
-name: Tests
+name: Test ATS
 
 on:
   push:
-    branches: [main]
+    branches: [main, refactor/add-workspaces]
     paths:
       - "packages/ats/**"
       - "apps/ats/**"
