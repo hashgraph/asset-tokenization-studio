@@ -204,7 +204,7 @@
 */
 
 import { singleton } from 'tsyringe';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
 import TransactionAdapter from '@port/out/TransactionAdapter';
 import Service from '@service/Service';
