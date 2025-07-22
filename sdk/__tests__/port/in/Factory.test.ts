@@ -218,7 +218,7 @@ import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
 import NetworkService from '@service/network/NetworkService';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import {
   CastRegulationSubType,
   CastRegulationType,

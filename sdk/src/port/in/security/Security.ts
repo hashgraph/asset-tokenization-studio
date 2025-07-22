@@ -205,7 +205,7 @@
 
 import SecurityViewModel from '../response/SecurityViewModel';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { QueryBus } from '@core/query/QueryBus';
 import { CommandBus } from '@core/command/CommandBus';
 import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
