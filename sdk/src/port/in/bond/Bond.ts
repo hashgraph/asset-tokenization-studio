@@ -205,7 +205,7 @@
 
 import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
 import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { LogError } from '@core/decorator/LogErrorDecorator';
 import { QueryBus } from '@core/query/QueryBus';
 import ValidatedRequest from '@core/validation/ValidatedArgs';

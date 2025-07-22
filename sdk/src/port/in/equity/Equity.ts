@@ -212,7 +212,7 @@ import { GetVotingQuery } from '@query/equity/votingRights/getVoting/GetVotingQu
 import { GetVotingCountQuery } from '@query/equity/votingRights/getVotingCount/GetVotingCountQuery';
 import { GetVotingForQuery } from '@query/equity/votingRights/getVotingFor/GetVotingForQuery';
 import { SetScheduledBalanceAdjustmentCommand } from '@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { CommandBus } from '@core/command/CommandBus';
 import { LogError } from '@core/decorator/LogErrorDecorator';
 import { QueryBus } from '@core/query/QueryBus';

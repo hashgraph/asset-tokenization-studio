@@ -224,7 +224,7 @@ import LogService from '@service/log/LogService';
 import { SigningError } from '@port/out/error/SigningError';
 import { SupportedWallets } from '@domain/context/network/Wallet';
 import { WalletEvents, WalletPairedEvent } from '@service/event/WalletEvent';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { TransactionType } from '@port/out/TransactionResponseEnums';
 import Hex from '@core/Hex';
 import { HederaTransactionAdapter } from '@port/out/hs/HederaTransactionAdapter';

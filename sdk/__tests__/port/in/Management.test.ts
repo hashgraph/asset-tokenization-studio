@@ -231,7 +231,7 @@ import {
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
 } from '@test/config';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import Account from '@domain/context/account/Account';
 import Management from '@port/in/management/Management';
 import { ethers, Wallet } from 'ethers';

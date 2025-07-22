@@ -203,7 +203,7 @@
 
 */
 
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { QueryBus } from '@core/query/QueryBus';
 import { UnlistedKycIssuer } from '@domain/context/security/error/operations/UnlistedKycIssuer';
 import Service from '@service/Service';
