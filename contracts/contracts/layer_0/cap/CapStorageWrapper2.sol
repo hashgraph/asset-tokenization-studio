@@ -203,13 +203,13 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
 import {
     ICapStorageWrapper
 } from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
 import {LockStorageWrapper2} from '../lock/LockStorageWrapper2.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract CapStorageWrapper2 is
     ICapStorageWrapper,

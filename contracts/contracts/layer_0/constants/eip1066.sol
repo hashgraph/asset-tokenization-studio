@@ -339,37 +339,4 @@ library Eip1066 {
     bytes1 public constant RESERVED_FD = 0xFD;
     bytes1 public constant RESERVED_FE = 0xFE;
     bytes1 public constant OFF_CHAIN_INFO_OR_META = 0xFF;
-
-    // ! NON-STANDARD CODES BELOW THIS LINE !
-    // Application-specific reason codes for EIP-1066
-    // | Constant Name                              | Meaning                           |
-    // |--------------------------------------------|-----------------------------------|
-    // | REASON_OPERATOR_ACCOUNT_BLOCKED            | Operator account is blocked       |
-    // | FROM_ACCOUNT_BLOCKED_ERROR_ID              | From account is blocked           |
-    // | TO_ACCOUNT_BLOCKED_ERROR_ID                | To account is blocked             |
-    // | FROM_ACCOUNT_NULL_ERROR_ID                 | From account is null              |
-    // | TO_ACCOUNT_NULL_ERROR_ID                   | To account is null                |
-    // | NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID        | Not enough balance                |
-    // | IS_NOT_OPERATOR_ERROR_ID                   | Is not operator                   |
-    // | WRONG_PARTITION_ERROR_ID                   | Wrong partition                   |
-    // | ALLOWANCE_REACHED_ERROR_ID                 | Allowance reached                 |
-    // | FROM_ACCOUNT_KYC_ERROR_ID                  | From account KYC error            |
-    // | TO_ACCOUNT_KYC_ERROR_ID                    | To account KYC error              |
-    // | CLEARING_ACTIVE_ERROR_ID                   | Clearing is active                |
-    // | ADDRESS_RECOVERED_OPERATOR_ERROR_ID        | Address recovered (operator)      |
-    // | ADDRESS_RECOVERED_FROM_ERROR_ID            | Address recovered (from)          |
-    // | ADDRESS_RECOVERED_TO_ERROR_ID              | Address recovered (to)            |
-    bytes32 public constant REASON_EMPTY = bytes32(0);
-    bytes32 public constant REASON_INVALID_ZERO_ADDRESS =
-        keccak256('REASON_INVALID_ZERO_ADDRESS');
-    bytes32 public constant REASON_CLEARING_IS_ACTIVE =
-        keccak256('REASON_CLEARING_IS_ACTIVE');
-    bytes32 public constant REASON_ADDRESS_RECOVERED =
-        keccak256('REASON_ADDRESS_RECOVERED');
-    bytes32 public constant REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST =
-        keccak256('REASON_ADDRESS_IN_BLACKLIST_OR_NOT_IN_WHITELIST');
-    bytes32 public constant REASON_KYC_NOT_GRANTED =
-        keccak256('REASON_KYC_NOT_GRANTED');
-    bytes32 public constant REASON_ISSUANCE_CLOSED =
-        keccak256('REASON_ISSUANCE_CLOSED');
 }

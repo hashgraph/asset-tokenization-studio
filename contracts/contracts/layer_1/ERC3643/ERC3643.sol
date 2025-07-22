@@ -337,13 +337,9 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         uint256 _amount
     )
         external
-        onlyUnpaused
-        onlyUnrecoveredAddress(_to)
         onlyWithinMaxSupply(_amount)
-        onlyListedAllowed(_to)
         onlyWithoutMultiPartition
-        onlyIssuable
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyCanIssue(_to, _amount)
     {
         {
             bytes32[] memory roles = new bytes32[](2);

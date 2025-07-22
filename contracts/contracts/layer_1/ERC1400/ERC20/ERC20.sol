@@ -235,7 +235,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         override
         onlyWithoutMultiPartition
-        onlyCanApprove(_msgSender(), spender, value)
+        onlyCanApprove(spender, value)
         returns (bool)
     {
         return _approve(spender, value);
@@ -276,7 +276,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     )
         external
         onlyWithoutMultiPartition
-        onlyCanApprove(_msgSender(), spender, addedValue)
+        onlyCanApprove(spender, addedValue)
         returns (bool)
     {
         return _increaseAllowance(spender, addedValue);
@@ -288,7 +288,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     )
         external
         onlyWithoutMultiPartition
-        onlyCanApprove(_msgSender(), spender, subtractedValue)
+        onlyCanApprove(spender, subtractedValue)
         returns (bool)
     {
         return _decreaseAllowance(spender, subtractedValue);
@@ -329,6 +329,14 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
 
     function getERC20Metadata() external view returns (ERC20Metadata memory) {
         return _getERC20MetadataAdjusted();
+    }
+
+    function canApprove(
+        address spender,
+        uint256 amount,
+        bytes calldata data
+    ) external view returns (bool, bytes1, bytes32) {
+        return _canApprove(spender, amount, data);
     }
 
     function getStaticResolverKey()

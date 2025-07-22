@@ -233,7 +233,6 @@ interface IERC1410Standard {
     ) external;
 
     function canRedeemByPartition(
-        address _from,
         bytes32 _partition,
         uint256 _value,
         bytes calldata _data,

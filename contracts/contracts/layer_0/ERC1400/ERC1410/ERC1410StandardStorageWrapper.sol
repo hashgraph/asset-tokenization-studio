@@ -207,31 +207,29 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410OperatorStorageWrapper
-} from './ERC1410OperatorStorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS,
-    _FROM_ACCOUNT_KYC_ERROR_ID,
-    _CLEARING_ACTIVE_ERROR_ID,
-    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-    _ADDRESS_RECOVERED_FROM_ERROR_ID
-} from '../../constants/values.sol';
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+    EMPTY_BYTES,
+    EMPTY_BYTES32,
+    DEFAULT_PARTITION
+} from '../../../layer_0/constants/values.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {IEip1066} from '../../../layer_1/interfaces/eip1066/IEip1066.sol';
 import {
     IERC1410Standard
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
+import {
+    ERC1410OperatorStorageWrapper
+} from './ERC1410OperatorStorageWrapper.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
 {
+    // Modifier for partition-based redemption following ERC1594 pattern
+    modifier onlyCanRedeemByPartition(bytes32 _partition, uint256 _amount) {
+        _checkCanRedeemByPartition(_partition, _amount);
+        _;
+    }
+
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -395,62 +393,143 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 _partition
     ) internal virtual;
 
+    /**
+     * @dev Check function for modifier - throws on failure
+     */
+    function _checkCanRedeemByPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal view {
+        (
+            bool isAbleToRedeem,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        ) = _isAbleToRedeemByPartition(
+                _partition,
+                _amount,
+                EMPTY_BYTES,
+                EMPTY_BYTES
+            );
+        if (!isAbleToRedeem) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
+        }
+    }
+
+    /**
+     * @dev Public interface for checking redemption by partition - returns status codes
+     */
     function _canRedeemByPartition(
-        address _from,
         bytes32 _partition,
         uint256 _value,
-        bytes calldata /*_data*/,
-        bytes calldata /*_operatorData*/
-    ) internal view returns (bool, bytes1, bytes32) {
-        bytes32[] memory roles = new bytes32[](2);
-        roles[0] = _CONTROLLER_ROLE;
-        roles[1] = _AGENT_ROLE;
-        if (!_hasAnyRole(roles, _msgSender())) {
-            if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-                    bytes32(0)
-                );
-            }
-            if (_isPaused()) {
-                return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-            }
-            if (_isClearingActivated()) {
-                return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
-            }
-            if (_from == address(0)) {
-                return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-            }
-            if (!_isAbleToAccess(_msgSender())) {
-                return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-            }
-            if (!_isAbleToAccess(_from)) {
-                return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-            }
-            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-                return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-            }
-            if (_from != _msgSender()) {
-                if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                    return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-                }
-                if (_isRecovered(_from)) {
-                    return (
-                        false,
-                        _ADDRESS_RECOVERED_FROM_ERROR_ID,
-                        bytes32(0)
-                    );
-                }
-            }
+        bytes calldata _data,
+        bytes calldata _operatorData
+    )
+        internal
+        view
+        returns (bool canRedeem, bytes1 statusCode, bytes32 reasonCode)
+    {
+        (canRedeem, statusCode, reasonCode, ) = _isAbleToRedeemByPartition(
+            _partition,
+            _value,
+            _data,
+            _operatorData
+        );
+        return (canRedeem, statusCode, reasonCode);
+    }
+
+    /**
+     * @dev Core validation logic for redemption by partition using unified validation
+     */
+    function _isAbleToRedeemByPartition(
+        bytes32 _partition,
+        uint256 _value,
+        bytes memory /*_data*/,
+        bytes memory /*_operatorData*/
+    )
+        internal
+        view
+        returns (
+            bool isAbleToRedeem,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        if (_isPaused()) {
+            return (false, Eip1066.PAUSED, EMPTY_BYTES32, EMPTY_BYTES);
         }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
+
+        if (_isClearingActivated()) {
+            return (
+                false,
+                Eip1066.UNAVAILABLE,
+                IEip1066.ReasonClearingIsActive.selector,
+                EMPTY_BYTES
+            );
         }
-        if (_balanceOfByPartition(_partition, _from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+
+        if (_isRecovered(_msgSender())) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IEip1066.ReasonAddressRecovered.selector,
+                abi.encode(_msgSender())
+            );
         }
-        return (true, _SUCCESS, bytes32(0));
+
+        if (!_isAbleToAccess(_msgSender()) == false) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonKycNotGranted.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (!_validPartition(_partition, _msgSender())) {
+            return (
+                false,
+                Eip1066.APP_SPECIFIC_FAILURE,
+                IEip1066.ReasonInvalidPartition.selector,
+                abi.encode(_partition)
+            );
+        }
+
+        if (!!_isMultiPartition() && _partition != DEFAULT_PARTITION) {
+            return (
+                false,
+                Eip1066.APP_SPECIFIC_FAILURE,
+                IEip1066.ReasonNotDefaultPartitionWithSinglePartition.selector,
+                abi.encode(_partition)
+            );
+        }
+
+        if (_balanceOfByPartitionAdjusted(_partition, _msgSender()) < _value) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                IEip1066.ReasonInsufficientBalance.selector,
+                abi.encode(
+                    _msgSender(),
+                    _balanceOfAdjusted(_msgSender()),
+                    _value,
+                    _partition
+                )
+            );
+        }
+
+        // All validations passed
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
     function _totalSupplyAdjusted() internal view returns (uint256) {

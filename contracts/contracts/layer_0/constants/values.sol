@@ -209,7 +209,8 @@ pragma solidity 0.8.18;
 // solhint-disable max-line-length
 uint256 constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 address constant ZERO_ADDRESS = address(0);
-bytes constant ZERO_BYTES = '';
+bytes32 constant EMPTY_BYTES32 = bytes32(0);
+bytes constant EMPTY_BYTES = bytes('');
 // keccak256('security.token.standard.dividend.corporateAction');
 bytes32 constant DIVIDEND_CORPORATE_ACTION_TYPE = 0x1c29d09f87f2b0c8192a7719a2acdfdfa320dc2835b5a0398e5bd8dc34c14b0e;
 
@@ -231,23 +232,3 @@ bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e27
 
 // keccak256('security.token.standard.snapshot.scheduledTasks');
 bytes32 constant SNAPSHOT_TASK_TYPE = 0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c;
-
-// TODO: Remove this when all contracts are updated
-bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
-bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
-bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
-bytes1 constant _TO_ACCOUNT_BLOCKED_ERROR_ID = 0x43;
-bytes1 constant _FROM_ACCOUNT_NULL_ERROR_ID = 0x44;
-bytes1 constant _TO_ACCOUNT_NULL_ERROR_ID = 0x45;
-bytes1 constant _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
-bytes1 constant _IS_NOT_OPERATOR_ERROR_ID = 0x47;
-bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
-bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
-bytes1 constant _FROM_ACCOUNT_KYC_ERROR_ID = 0x50;
-bytes1 constant _TO_ACCOUNT_KYC_ERROR_ID = 0x51;
-bytes1 constant _CLEARING_ACTIVE_ERROR_ID = 0x52;
-bytes1 constant _ADDRESS_RECOVERED_OPERATOR_ERROR_ID = 0x53;
-bytes1 constant _ADDRESS_RECOVERED_FROM_ERROR_ID = 0x54;
-bytes1 constant _ADDRESS_RECOVERED_TO_ERROR_ID = 0x55;
-
-bytes1 constant _SUCCESS = 0x00;

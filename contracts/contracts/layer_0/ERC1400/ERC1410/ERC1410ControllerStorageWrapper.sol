@@ -206,99 +206,186 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS,
-    _FROM_ACCOUNT_KYC_ERROR_ID,
-    _TO_ACCOUNT_KYC_ERROR_ID,
-    _CLEARING_ACTIVE_ERROR_ID,
-    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-    _ADDRESS_RECOVERED_FROM_ERROR_ID,
-    _ADDRESS_RECOVERED_TO_ERROR_ID
-} from '../../constants/values.sol';
+    ZERO_ADDRESS,
+    EMPTY_BYTES,
+    EMPTY_BYTES32,
+    DEFAULT_PARTITION
+} from '../../../layer_0/constants/values.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {IEip1066} from '../../../layer_1/interfaces/eip1066/IEip1066.sol';
+import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
+import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
 
 abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
+    function _checkCanTransferByPartition(
+        address _to,
+        bytes32 _partition,
+        uint256 _value
+    ) internal returns (bool, bytes1, bytes32) {
+        (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        ) = _isAbleToTransferByPartition(
+                _to, // To address
+                _partition, // Partition
+                _value, // Amount
+                EMPTY_BYTES, // Data
+                EMPTY_BYTES // Operator data
+            );
+        if (!isAbleToTransfer) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
+        }
+    }
+
     function _canTransferByPartition(
-        address _from,
         address _to,
         bytes32 _partition,
         uint256 _value,
         bytes calldata /*_data*/,
         bytes calldata /*_operatorData*/
     ) internal view returns (bool, bytes1, bytes32) {
-        bytes32[] memory roles = new bytes32[](2);
-        roles[0] = _CONTROLLER_ROLE;
-        roles[1] = _AGENT_ROLE;
-        if (!_hasAnyRole(roles, _msgSender())) {
-            if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-                    bytes32(0)
-                );
-            }
-            if (_isRecovered(_to)) {
-                return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
-            }
-            if (_isPaused()) {
-                return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-            }
-            if (_isClearingActivated()) {
-                return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
-            }
-            if (_from == address(0)) {
-                return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-            }
-            if (_to == address(0)) {
-                return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-            }
-            if (!_isAbleToAccess(_msgSender())) {
-                return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-            }
-            if (!_isAbleToAccess(_from)) {
-                return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-            }
-            if (!_isAbleToAccess(_to)) {
-                return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-            }
-            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-                return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-            }
-            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
-                return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-            }
-            // TODO: Better to check all in one boolean expression defined in a different pure function.
-            if (_from != _msgSender()) {
-                if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                    return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-                }
+        (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
 
-                if (_isRecovered(_from)) {
-                    return (
-                        false,
-                        _ADDRESS_RECOVERED_FROM_ERROR_ID,
-                        bytes32(0)
-                    );
-                }
-            }
+        ) = _isAbleToTransferByPartition(
+                _to, // To address
+                _partition, // Partition
+                _value, // Amount
+                EMPTY_BYTES, // Data
+                EMPTY_BYTES // Operator data
+            );
+
+        return (isAbleToTransfer, statusCode, reasonCode);
+    }
+
+    function _isAbleToTransferByPartition(
+        address _to,
+        bytes32 _partition,
+        uint256 _value,
+        bytes memory /*_data*/,
+        bytes memory /*_operatorData*/
+    )
+        internal
+        view
+        returns (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        if (_isPaused()) {
+            return (false, Eip1066.PAUSED, EMPTY_BYTES32, EMPTY_BYTES);
         }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
+
+        if (_isClearingActivated()) {
+            return (
+                false,
+                Eip1066.UNAVAILABLE,
+                IEip1066.ReasonClearingIsActive.selector,
+                EMPTY_BYTES
+            );
         }
-        if (_balanceOfByPartitionAdjusted(_partition, _from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+
+        if (_msgSender() == ZERO_ADDRESS || _to == ZERO_ADDRESS) {
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                IEip1066.ReasonInvalidZeroAddress.selector,
+                EMPTY_BYTES
+            );
         }
-        return (true, _SUCCESS, bytes32(0));
+
+        if (_isRecovered(_msgSender())) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IEip1066.ReasonAddressRecovered.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (_isRecovered(_to)) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IEip1066.ReasonAddressRecovered.selector,
+                abi.encode(_to)
+            );
+        }
+
+        if (!_isAbleToAccess(_msgSender()) == false) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (!_isAbleToAccess(_to) == false) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                abi.encode(_to)
+            );
+        }
+
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonKycNotGranted.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonKycNotGranted.selector,
+                abi.encode(_to)
+            );
+        }
+
+        if (!_validPartition(_partition, _msgSender())) {
+            return (
+                false,
+                Eip1066.APP_SPECIFIC_FAILURE,
+                IEip1066.ReasonInvalidPartition.selector,
+                abi.encode(_partition)
+            );
+        }
+
+        // (!_checkDefaultPartitionWithSinglePartition(_partition))
+        if (!_isMultiPartition() && _partition != DEFAULT_PARTITION) {
+            return (
+                false,
+                Eip1066.APP_SPECIFIC_FAILURE,
+                IEip1066.ReasonNotDefaultPartitionWithSinglePartition.selector,
+                abi.encode(_partition)
+            );
+        }
+
+        if (_balanceOfByPartitionAdjusted(_partition, _msgSender()) < _value) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                IEip1066.ReasonInsufficientBalance.selector,
+                abi.encode(
+                    _msgSender(),
+                    _balanceOfAdjusted(_msgSender()),
+                    _value,
+                    _partition
+                )
+            );
+        }
     }
 }

@@ -225,7 +225,6 @@ interface IERC1410Controller {
     ) external;
 
     function canTransferByPartition(
-        address _from,
         address _to,
         bytes32 _partition,
         uint256 _value,

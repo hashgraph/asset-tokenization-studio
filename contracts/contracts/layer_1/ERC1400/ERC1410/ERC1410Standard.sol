@@ -307,19 +307,11 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     }
 
     function canRedeemByPartition(
-        address _from,
         bytes32 _partition,
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external view override returns (bool, bytes1, bytes32) {
-        return
-            _canRedeemByPartition(
-                _from,
-                _partition,
-                _value,
-                _data,
-                _operatorData
-            );
+    ) external view returns (bool, bytes1, bytes32) {
+        return _canRedeemByPartition(_partition, _value, _data, _operatorData);
     }
 }

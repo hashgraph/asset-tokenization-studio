@@ -8,11 +8,27 @@ interface IEip1066 {
         bytes details // Additional details about the error
     );
 
+    error ReasonInvalidZeroAddress();
+
+    error ReasonClearingIsActive();
+
     error ReasonInsufficientBalance(
         address from, // The address that has insufficient balance
         uint256 fromBalance, // The balance of the address that has insufficient balance
         uint256 value, // The value that was attempted to be transferred
         bytes32 partition // The partition from which the transfer was attempted
+    );
+
+    error ReasonInsufficientAllowance(
+        address operator, // The address of the operator that attempted the transfer
+        address from, // The address that has insufficient allowance
+        uint256 fromAllowance, // The allowance of the address that has insufficient allowance
+        uint256 value, // The value that was attempted to be transferred
+        bytes32 partition // The partition from which the transfer was attempted
+    );
+
+    error ReasonMaxSupplyReached(
+        uint256 maxSupply // The maximum supply that was reached
     );
 
     error ReasonAddressRecovered(
@@ -28,4 +44,19 @@ interface IEip1066 {
     );
 
     error ReasonIssuanceClosed();
+
+    error ReasonInvalidPartition(
+        address account, // The address of the account that attempted the operation
+        bytes32 partition // The partition that is invalid
+    );
+
+    error ReasonNotDefaultPartitionWithSinglePartition(
+        bytes32 partition // The partition that is not the default partition
+    );
+
+    error ReasonOperatorNotAuthorized(
+        bytes32 partition, // The partition for which the operator is not authorized
+        address operator, // The address of the operator that is not authorized
+        address tokenHolder // The address of the token holder
+    );
 }

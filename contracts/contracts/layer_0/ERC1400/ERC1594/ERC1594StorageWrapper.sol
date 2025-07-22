@@ -206,16 +206,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ZERO_ADDRESS, DEFAULT_PARTITION} from '../../constants/values.sol';
+import {
+    ZERO_ADDRESS,
+    EMPTY_BYTES,
+    EMPTY_BYTES32,
+    DEFAULT_PARTITION
+} from '../../../layer_0/constants/values.sol';
 import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
+import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {IEip1066} from '../../../layer_1/interfaces/eip1066/IEip1066.sol';
-import {LibCommon} from '../../common/libraries/LibCommon.sol';
-
 import {
     IERC1594StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {Eip1066} from '../../constants/eip1066.sol';
 import {CapStorageWrapper2} from '../../cap/CapStorageWrapper2.sol';
 
 abstract contract ERC1594StorageWrapper is
@@ -227,25 +231,33 @@ abstract contract ERC1594StorageWrapper is
         bool initialized;
     }
 
-    /**
-     * @dev Validation flags structure to control which validations to perform
-     */
-    struct ValidationFlags {
-        bool checkPause; // Check if contract is paused
-        bool checkClearing; // Check if clearing is active
-        bool checkOperatorRecovery; // Check if operator address is recovered
-        bool checkFromRecovery; // Check if from address is recovered
-        bool checkToRecovery; // Check if to address is recovered
-        bool checkOperatorAccess; // Check if operator has access (whitelist/blacklist)
-        bool checkFromAccess; // Check if from address has access
-        bool checkToAccess; // Check if to address has access
-        bool checkFromKyc; // Check if from address has valid KYC
-        bool checkToKyc; // Check if to address has valid KYC
-        bool checkBalance; // Check if from address has sufficient balance
-    }
-
     modifier onlyIssuable() {
         _checkIssuable();
+        _;
+    }
+
+    modifier onlyCanTransfer(address _to, uint256 _amount) {
+        _checkCanTransfer(_to, _amount);
+        _;
+    }
+
+    modifier onlyCanTransferFrom(address _from, address _to, uint256 _amount) {
+        _checkCanTransferFrom(_from, _to, _amount);
+        _;
+    }
+
+    modifier onlyCanIssue(address _to, uint256 _amount) {
+        _checkCanIssue(_to, _amount);
+        _;
+    }
+
+    modifier onlyCanRedeem(uint256 _amount) {
+        _checkCanRedeem(_amount);
+        _;
+    }
+
+    modifier onlyCanRedeemFrom(address _from, uint256 _amount) {
+        _checkCanRedeemFrom(_from, _amount);
         _;
     }
 
@@ -307,206 +319,6 @@ abstract contract ERC1594StorageWrapper is
         emit Redeemed(_msgSender(), _tokenHolder, _value, _data);
     }
 
-    // Utility functions moved to LibCommon library
-
-    /**
-     * @dev Helper function to validate operations with empty data
-     * @param _to The address for validation (can be from or to depending on operation)
-     * @param _amount The amount for validation
-     * @return isValid Whether the operation is valid
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _validateWithEmptyData(
-        address _to,
-        uint256 _amount
-    )
-        internal
-        view
-        returns (
-            bool isValid,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        return _isAbleToTransferMemory(_to, _amount, LibCommon.emptyBytes());
-    }
-
-    /**
-     * @dev Performs common validation checks based on the provided flags
-     * @param _operator The operator address (can be zero address if not applicable)
-     * @param _from The from address (can be zero address if not applicable)
-     * @param _to The to address (can be zero address if not applicable)
-     * @param _amount The amount being transferred/issued/redeemed
-     * @param _flags Validation flags indicating which checks to perform
-     * @return isValid Whether all enabled validations passed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _performCommonValidation(
-        address _operator,
-        address _from,
-        address _to,
-        uint256 _amount,
-        ValidationFlags memory _flags
-    )
-        internal
-        view
-        returns (
-            bool isValid,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        // Check pause status
-        if (_flags.checkPause && _isPaused()) {
-            return (
-                false,
-                Eip1066.PAUSED,
-                Eip1066.REASON_EMPTY,
-                LibCommon.emptyBytes()
-            );
-        }
-
-        // Check clearing status
-        if (_flags.checkClearing && _isClearingActivated()) {
-            return (
-                false,
-                Eip1066.UNAVAILABLE,
-                Eip1066.REASON_CLEARING_IS_ACTIVE,
-                LibCommon.emptyBytes()
-            );
-        }
-
-        // Check operator recovery status
-        if (
-            _flags.checkOperatorRecovery &&
-            _operator != ZERO_ADDRESS &&
-            _isRecovered(_operator)
-        ) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IEip1066.ReasonAddressRecovered.selector,
-                abi.encode(_operator)
-            );
-        }
-
-        // Check from address recovery status
-        if (
-            _flags.checkFromRecovery &&
-            _from != ZERO_ADDRESS &&
-            _isRecovered(_from)
-        ) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IEip1066.ReasonAddressRecovered.selector,
-                abi.encode(_from)
-            );
-        }
-
-        // Check to address recovery status
-        if (
-            _flags.checkToRecovery && _to != ZERO_ADDRESS && _isRecovered(_to)
-        ) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IEip1066.ReasonAddressRecovered.selector,
-                abi.encode(_to)
-            );
-        }
-
-        // Check operator access (whitelist/blacklist)
-        if (
-            _flags.checkOperatorAccess &&
-            _operator != ZERO_ADDRESS &&
-            !_isAbleToAccess(_operator)
-        ) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
-                abi.encode(_operator)
-            );
-        }
-
-        // Check from address access (whitelist/blacklist)
-        if (
-            _flags.checkFromAccess &&
-            _from != ZERO_ADDRESS &&
-            !_isAbleToAccess(_from)
-        ) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
-                abi.encode(_from)
-            );
-        }
-
-        // Check to address access (whitelist/blacklist)
-        if (
-            _flags.checkToAccess && _to != ZERO_ADDRESS && !_isAbleToAccess(_to)
-        ) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
-                abi.encode(_to)
-            );
-        }
-
-        // Check from address KYC status
-        if (
-            _flags.checkFromKyc &&
-            _from != ZERO_ADDRESS &&
-            !_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)
-        ) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonKycNotGranted.selector,
-                abi.encode(_from)
-            );
-        }
-
-        // Check to address KYC status
-        if (
-            _flags.checkToKyc &&
-            _to != ZERO_ADDRESS &&
-            !_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)
-        ) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonKycNotGranted.selector,
-                abi.encode(_to)
-            );
-        }
-
-        // Check balance (only if from address is provided and amount > 0)
-        if (_flags.checkBalance && _from != ZERO_ADDRESS && _amount > 0) {
-            uint256 fromBalance = _balanceOfAdjusted(_from);
-            if (fromBalance < _amount) {
-                return (
-                    false,
-                    Eip1066.INSUFFICIENT_FUNDS,
-                    IEip1066.ReasonInsufficientBalance.selector,
-                    abi.encode(_from, fromBalance, _amount, DEFAULT_PARTITION)
-                );
-            }
-        }
-
-        // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
-    }
-
     /**
      * @notice A security token issuer can specify that issuance has finished for the token
      * (i.e. no new tokens can be minted or issued).
@@ -518,63 +330,40 @@ abstract contract ERC1594StorageWrapper is
         return _erc1594Storage().issuance;
     }
 
-    function _isAbleToTransfer(
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    )
-        internal
-        view
-        returns (
-            bool isAbleToTransfer,
+    function _checkCanIssue(address _to, uint256 _amount) internal view {
+        (
+            bool isAbleToIssue,
             bytes1 statusCode,
             bytes32 reasonCode,
             bytes memory details
-        )
-    {
-        // Convert calldata to memory for consistent handling
-        return _isAbleToTransferMemory(_to, _value, LibCommon.toMemory(_data));
+        ) = _isAbleToIssue(_to, _amount, EMPTY_BYTES);
+        if (!isAbleToIssue) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
+        }
     }
 
-    /**
-     * @dev Validates if a transferFrom operation can be performed
-     * @param _from The address to transfer from
-     * @param _to The address to transfer to
-     * @param _value The amount to transfer
-     * @return isAbleToTransfer Whether the transfer is allowed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _isAbleToTransferFrom(
-        address _from,
+    function _canIssue(
         address _to,
-        uint256 _value,
+        uint256 _amount,
         bytes calldata _data
     )
         internal
         view
-        returns (
-            bool isAbleToTransfer,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
+        returns (bool canIssue, bytes1 statusCode, bytes32 reasonCode)
     {
-        // Convert calldata to memory for consistent handling
-        return
-            _isAbleToTransferFromMemory(
-                _from,
-                _to,
-                _value,
-                LibCommon.toMemory(_data)
-            );
+        (canIssue, statusCode, reasonCode, ) = _isAbleToIssue(
+            _to,
+            _amount,
+            _data
+        );
+        return (canIssue, statusCode, reasonCode);
     }
 
     /**
      * @dev Validates if an issue operation can be performed
      * @param _to The address to issue tokens to
      * @param _value The amount to issue
+     * _data The data parameter
      * @return isAbleToIssue Whether the issuance is allowed
      * @return statusCode EIP1066 status code
      * @return reasonCode EIP1066 reason code
@@ -583,34 +372,6 @@ abstract contract ERC1594StorageWrapper is
     function _isAbleToIssue(
         address _to,
         uint256 _value,
-        bytes calldata _data
-    )
-        internal
-        view
-        returns (
-            bool isAbleToIssue,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        // Convert calldata to memory for consistent handling
-        return _isAbleToIssueMemory(_to, _value, LibCommon.toMemory(_data));
-    }
-
-    /**
-     * @dev Memory version of _isAbleToIssue for bytes memory compatibility
-     * @param _to The address to issue tokens to
-     * @param _value The amount to issue
-     * _data The data parameter as bytes memory
-     * @return isAbleToIssue Whether the issuance is allowed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _isAbleToIssueMemory(
-        address _to,
-        uint256 _value,
         bytes memory /* _data */
     )
         internal
@@ -622,89 +383,125 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
-        // Check if issuance is still allowed (operation-specific validation)
+        if (_isPaused()) {
+            return (false, Eip1066.PAUSED, EMPTY_BYTES32, EMPTY_BYTES);
+        }
+        if (_isClearingActivated()) {
+            return (
+                false,
+                Eip1066.UNAVAILABLE,
+                IEip1066.ReasonClearingIsActive.selector,
+                EMPTY_BYTES
+            );
+        }
+        if (_msgSender() == ZERO_ADDRESS || _to == ZERO_ADDRESS) {
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                IEip1066.ReasonInvalidZeroAddress.selector,
+                EMPTY_BYTES
+            );
+        }
+        if (_isRecovered(_msgSender())) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IEip1066.ReasonAddressRecovered.selector,
+                abi.encode(_msgSender())
+            );
+        }
+        if (_isRecovered(_to)) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IEip1066.ReasonAddressRecovered.selector,
+                abi.encode(_to)
+            );
+        }
+
+        if (!_isAbleToAccess(_msgSender())) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (!_isAbleToAccess(_to)) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                abi.encode(_to)
+            );
+        }
+
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonKycNotGranted.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonKycNotGranted.selector,
+                abi.encode(_to)
+            );
+        }
+
         if (!_isIssuable()) {
             return (
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
-                Eip1066.REASON_ISSUANCE_CLOSED,
-                LibCommon.emptyBytes()
+                IEip1066.ReasonIssuanceClosed.selector,
+                EMPTY_BYTES
             );
         }
 
-        // Check for zero address (operation-specific validation)
-        if (_to == ZERO_ADDRESS) {
+        if (!_isCorrectMaxSupply(_totalSupply() + _value, _getMaxSupply())) {
             return (
                 false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                LibCommon.emptyBytes()
+                Eip1066.TRANSFER_VOLUME_EXCEEDED,
+                IEip1066.ReasonMaxSupplyReached.selector,
+                abi.encode(_getMaxSupply())
             );
-        }
-
-        // Use common validation layer for shared checks
-        ValidationFlags memory flags = _createIssueValidationFlags();
-        (
-            isAbleToIssue,
-            statusCode,
-            reasonCode,
-            details
-        ) = _performCommonValidation(
-            ZERO_ADDRESS, // No operator for issue
-            ZERO_ADDRESS, // No from address for issue
-            _to, // To address
-            _value, // Amount
-            flags // Validation flags
-        );
-
-        // If common validation failed, return the error
-        if (!isAbleToIssue) {
-            return (isAbleToIssue, statusCode, reasonCode, details);
         }
 
         // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
-    /**
-     * @dev Validates if a redeem operation can be performed
-     * @param _from The address to redeem tokens from
-     * @param _value The amount to redeem
-     * @return isAbleToRedeem Whether the redemption is allowed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _isAbleToRedeem(
-        address _from,
-        uint256 _value,
-        bytes calldata _data
-    )
-        internal
-        view
-        returns (
+    function _checkCanRedeem(uint256 _amount) internal view {
+        (
             bool isAbleToRedeem,
             bytes1 statusCode,
             bytes32 reasonCode,
             bytes memory details
-        )
-    {
-        // Convert calldata to memory for consistent handling
-        return _isAbleToRedeemMemory(_from, _value, LibCommon.toMemory(_data));
+        ) = _isAbleToRedeem(_amount, EMPTY_BYTES);
+        if (!isAbleToRedeem) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
+        }
     }
 
-    /**
-     * @dev Memory version of _isAbleToRedeem for bytes memory compatibility
-     * @param _from The address to redeem tokens from
-     * @param _value The amount to redeem
-     * _data The data parameter as bytes memory
-     * @return isAbleToRedeem Whether the redemption is allowed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _isAbleToRedeemMemory(
-        address _from,
+    function _canRedeem(
+        uint256 _amount,
+        bytes calldata _data
+    )
+        internal
+        view
+        returns (bool canRedeem, bytes1 statusCode, bytes32 reasonCode)
+    {
+        (canRedeem, statusCode, reasonCode, ) = _isAbleToRedeem(_amount, _data);
+        return (canRedeem, statusCode, reasonCode);
+    }
+
+    function _isAbleToRedeem(
         uint256 _value,
         bytes memory /* _data */
     )
@@ -717,104 +514,229 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
-        // Check for zero address (operation-specific validation)
-        if (_from == ZERO_ADDRESS) {
+        if (_isPaused()) {
+            return (false, Eip1066.PAUSED, EMPTY_BYTES32, EMPTY_BYTES);
+        }
+
+        if (_isClearingActivated()) {
             return (
                 false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                LibCommon.emptyBytes()
+                Eip1066.UNAVAILABLE,
+                IEip1066.ReasonClearingIsActive.selector,
+                EMPTY_BYTES
             );
         }
 
-        // Use common validation layer for shared checks
-        ValidationFlags memory flags = _createRedeemValidationFlags();
-        (
-            isAbleToRedeem,
-            statusCode,
-            reasonCode,
-            details
-        ) = _performCommonValidation(
-            ZERO_ADDRESS, // No operator for redeem
-            _from, // From address
-            ZERO_ADDRESS, // No to address for redeem
-            _value, // Amount
-            flags // Validation flags
-        );
+        if (_msgSender() == ZERO_ADDRESS) {
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                IEip1066.ReasonInvalidZeroAddress.selector,
+                EMPTY_BYTES
+            );
+        }
 
-        // If common validation failed, return the error
-        if (!isAbleToRedeem) {
-            return (isAbleToRedeem, statusCode, reasonCode, details);
+        if (_isRecovered(_msgSender())) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IEip1066.ReasonAddressRecovered.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (!_isAbleToAccess(_msgSender()) == false) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonKycNotGranted.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (_balanceOfAdjusted(_msgSender()) < _value) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                IEip1066.ReasonInsufficientBalance.selector,
+                abi.encode(
+                    _msgSender(),
+                    _balanceOfAdjusted(_msgSender()),
+                    _value,
+                    DEFAULT_PARTITION
+                )
+            );
         }
 
         // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
-    /**
-     * @dev Validates if an approve operation can be performed
-     * @param _owner The address that owns the tokens
-     * @param _spender The address that will be approved to spend tokens
-     *        _amount The amount to approve (not used in validation but kept for interface compatibility)
-     * @return isAbleToApprove Whether the approval is allowed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _isAbleToApprove(
-        address _owner,
-        address _spender,
-        uint256 _amount
+    function _checkCanRedeemFrom(address _from, uint256 _amount) internal view {
+        (
+            bool isAbleToRedeemFrom,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        ) = _isAbleToRedeemFrom(_from, _amount, EMPTY_BYTES);
+        if (!isAbleToRedeemFrom) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
+        }
+    }
+
+    function _canRedeemFrom(
+        address _from,
+        uint256 _amount,
+        bytes calldata _data
+    )
+        internal
+        view
+        returns (bool canRedeemFrom, bytes1 statusCode, bytes32 reasonCode)
+    {
+        (canRedeemFrom, statusCode, reasonCode, ) = _isAbleToRedeemFrom(
+            _from,
+            _amount,
+            _data
+        );
+        return (canRedeemFrom, statusCode, reasonCode);
+    }
+
+    function _isAbleToRedeemFrom(
+        address _from,
+        uint256 _value,
+        bytes memory /*_data*/
     )
         internal
         view
         returns (
-            bool isAbleToApprove,
+            bool isAbleToRedeemFrom,
             bytes1 statusCode,
             bytes32 reasonCode,
             bytes memory details
         )
     {
-        // Check for zero addresses (operation-specific validation)
-        if (_owner == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                LibCommon.emptyBytes()
-            );
-        }
-        if (_spender == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                LibCommon.emptyBytes()
-            );
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _CONTROLLER_ROLE;
+        roles[1] = _AGENT_ROLE; // Check for zero addresses first (operation-specific validation)
+
+        if (!_hasAnyRole(roles, _msgSender())) {
+            if (_isPaused()) {
+                return (false, Eip1066.PAUSED, EMPTY_BYTES32, EMPTY_BYTES);
+            }
+
+            if (_isClearingActivated()) {
+                return (
+                    false,
+                    Eip1066.UNAVAILABLE,
+                    IEip1066.ReasonClearingIsActive.selector,
+                    EMPTY_BYTES
+                );
+            }
+
+            if (_msgSender() == ZERO_ADDRESS || _from == ZERO_ADDRESS) {
+                return (
+                    false,
+                    Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                    IEip1066.ReasonInvalidZeroAddress.selector,
+                    EMPTY_BYTES
+                );
+            }
+
+            if (_isRecovered(_msgSender())) {
+                return (
+                    false,
+                    Eip1066.REVOKED_OR_BANNED,
+                    IEip1066.ReasonAddressRecovered.selector,
+                    abi.encode(_msgSender())
+                );
+            }
+
+            if (_isRecovered(_from)) {
+                return (
+                    false,
+                    Eip1066.REVOKED_OR_BANNED,
+                    IEip1066.ReasonAddressRecovered.selector,
+                    abi.encode(_from)
+                );
+            }
+
+            if (!_isAbleToAccess(_msgSender()) == false) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                    abi.encode(_msgSender())
+                );
+            }
+
+            if (!_isAbleToAccess(_from) == false) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                    abi.encode(_from)
+                );
+            }
+
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IEip1066.ReasonKycNotGranted.selector,
+                    abi.encode(_msgSender())
+                );
+            }
+
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IEip1066.ReasonKycNotGranted.selector,
+                    abi.encode(_from)
+                );
+            }
+
+            if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+                return (
+                    false,
+                    Eip1066.INSUFFICIENT_FUNDS,
+                    IEip1066.ReasonInsufficientAllowance.selector,
+                    abi.encode(
+                        _msgSender(),
+                        _from,
+                        _allowanceAdjusted(_from, _msgSender()),
+                        _value,
+                        DEFAULT_PARTITION
+                    )
+                );
+            }
         }
 
-        // Use common validation layer for shared checks
-        ValidationFlags memory flags = _createApproveValidationFlags();
-        (
-            isAbleToApprove,
-            statusCode,
-            reasonCode,
-            details
-        ) = _performCommonValidation(
-            _spender, // Spender as operator
-            _owner, // Owner as from address
-            ZERO_ADDRESS, // No to address for approve
-            _amount, // Amount (not used for validation)
-            flags // Validation flags
-        );
-
-        // If common validation failed, return the error
-        if (!isAbleToApprove) {
-            return (isAbleToApprove, statusCode, reasonCode, details);
+        if (_balanceOfAdjusted(_from) < _value) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                IEip1066.ReasonInsufficientBalance.selector,
+                abi.encode(
+                    _from,
+                    _balanceOfAdjusted(_from),
+                    _value,
+                    DEFAULT_PARTITION
+                )
+            );
         }
 
         // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
     function _checkIssuable() internal view {
@@ -822,8 +744,20 @@ abstract contract ERC1594StorageWrapper is
             revert IEip1066.ExtendedError(
                 Eip1066.DISALLOWED_OR_STOP,
                 IEip1066.ReasonIssuanceClosed.selector,
-                LibCommon.emptyBytes()
+                EMPTY_BYTES
             );
+        }
+    }
+
+    function _checkCanTransfer(address _to, uint256 _amount) internal view {
+        (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        ) = _isAbleToTransfer(_to, _amount, EMPTY_BYTES);
+        if (!isAbleToTransfer) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
         }
     }
 
@@ -839,13 +773,13 @@ abstract contract ERC1594StorageWrapper is
     function _canTransfer(
         address _to,
         uint256 _value,
-        bytes memory _data
+        bytes calldata _data
     )
         internal
         view
         returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode)
     {
-        (canTransfer, statusCode, reasonCode, ) = _isAbleToTransferMemory(
+        (canTransfer, statusCode, reasonCode, ) = _isAbleToTransfer(
             _to,
             _value,
             _data
@@ -854,16 +788,16 @@ abstract contract ERC1594StorageWrapper is
     }
 
     /**
-     * @dev Memory version of _isAbleToTransfer for bytes memory compatibility
-     * @param _to The address to transfer to
-     * @param _value The amount to transfer
-     * _data The data parameter as bytes memory
-     * @return isAbleToTransfer Whether the transfer is allowed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
+     * @dev Checks if a transfer operation is allowed (memory version for compatibility).
+     * @param _to The address to which the tokens will be transferred.
+     * @param _value The amount of tokens to be transferred.
+     * _data Additional data attached to the transfer (unused).
+     * @return isAbleToTransfer Whether the transfer is allowed.
+     * @return statusCode EIP1066 status code.
+     * @return reasonCode EIP1066 reason code.
+     * @return details ABI-encoded error details.
      */
-    function _isAbleToTransferMemory(
+    function _isAbleToTransfer(
         address _to,
         uint256 _value,
         bytes memory /* _data */
@@ -877,63 +811,127 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
-        address sender = _msgSender();
+        if (_isPaused()) {
+            return (false, Eip1066.PAUSED, EMPTY_BYTES32, EMPTY_BYTES);
+        }
 
-        // Check for zero address first (operation-specific validation)
-        if (_to == ZERO_ADDRESS) {
+        if (_isClearingActivated()) {
             return (
                 false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                LibCommon.emptyBytes()
+                Eip1066.UNAVAILABLE,
+                IEip1066.ReasonClearingIsActive.selector,
+                EMPTY_BYTES
             );
         }
 
-        // Use common validation layer for shared checks
-        ValidationFlags memory flags = _createTransferValidationFlags();
-        (
-            isAbleToTransfer,
-            statusCode,
-            reasonCode,
-            details
-        ) = _performCommonValidation(
-            ZERO_ADDRESS, // No operator for direct transfer
-            sender, // From address
-            _to, // To address
-            _value, // Amount
-            flags // Validation flags
-        );
+        if (_msgSender() == ZERO_ADDRESS || _to == ZERO_ADDRESS) {
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                IEip1066.ReasonInvalidZeroAddress.selector,
+                EMPTY_BYTES
+            );
+        }
 
-        // If common validation failed, return the error
-        if (!isAbleToTransfer) {
-            return (isAbleToTransfer, statusCode, reasonCode, details);
+        if (_isRecovered(_msgSender())) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IEip1066.ReasonAddressRecovered.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (_isRecovered(_to)) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IEip1066.ReasonAddressRecovered.selector,
+                abi.encode(_to)
+            );
+        }
+
+        if (!_isAbleToAccess(_msgSender()) == false) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (!_isAbleToAccess(_to) == false) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                abi.encode(_to)
+            );
+        }
+
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonKycNotGranted.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IEip1066.ReasonKycNotGranted.selector,
+                abi.encode(_to)
+            );
+        }
+
+        if (_balanceOfAdjusted(_msgSender()) < _value) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                IEip1066.ReasonInsufficientBalance.selector,
+                abi.encode(
+                    _msgSender(),
+                    _balanceOfAdjusted(_msgSender()),
+                    _value,
+                    DEFAULT_PARTITION
+                )
+            );
         }
 
         // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
-    /**
-     * @notice Determines whether tokens can be transferred from one address to another.
-     * @param _from The address from which the tokens will be transferred.
-     * @param _to The address to which the tokens will be transferred.
-     * @param _value The amount of tokens to be transferred.
-     * @param _data Additional data attached to the transfer.
-     * @return canTransfer Whether the transfer is allowed.
-     * @return statusCode EIP1066 status code.
-     * @return reasonCode Reason code for the status.
-     */
+    function _checkCanTransferFrom(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) internal view {
+        (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        ) = _isAbleToTransferFrom(_from, _to, _amount, EMPTY_BYTES);
+        if (!isAbleToTransfer) {
+            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
+        }
+    }
+
     function _canTransferFrom(
         address _from,
         address _to,
         uint256 _value,
-        bytes memory _data
+        bytes calldata _data
     )
         internal
         view
         returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode)
     {
-        (canTransfer, statusCode, reasonCode, ) = _isAbleToTransferFromMemory(
+        (canTransfer, statusCode, reasonCode, ) = _isAbleToTransferFrom(
             _from,
             _to,
             _value,
@@ -942,18 +940,7 @@ abstract contract ERC1594StorageWrapper is
         return (canTransfer, statusCode, reasonCode);
     }
 
-    /**
-     * @dev Memory version of _isAbleToTransferFrom for bytes memory compatibility
-     * @param _from The address to transfer from
-     * @param _to The address to transfer to
-     * @param _value The amount to transfer
-     * _data The data parameter as bytes memory
-     * @return isAbleToTransfer Whether the transfer is allowed
-     * @return statusCode EIP1066 status code
-     * @return reasonCode EIP1066 reason code
-     * @return details ABI-encoded error details
-     */
-    function _isAbleToTransferFromMemory(
+    function _isAbleToTransferFrom(
         address _from,
         address _to,
         uint256 _value,
@@ -968,181 +955,140 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
-        address operator = _msgSender();
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _CONTROLLER_ROLE;
+        roles[1] = _AGENT_ROLE;
 
-        // Check for zero addresses first (operation-specific validation)
-        if (_from == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                LibCommon.emptyBytes()
-            );
-        }
-        if (_to == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                Eip1066.REASON_INVALID_ZERO_ADDRESS,
-                LibCommon.emptyBytes()
-            );
-        }
+        if (!_hasAnyRole(roles, _msgSender())) {
+            // Sender does not have the privileged role
+            if (_isPaused()) {
+                return (false, Eip1066.PAUSED, EMPTY_BYTES32, EMPTY_BYTES);
+            }
 
-        // Check allowance first (operation-specific validation)
-        if (_from != operator) {
-            uint256 currentAllowance = _allowanceAdjusted(_from, operator);
-            if (currentAllowance < _value) {
+            if (_isClearingActivated()) {
+                return (
+                    false,
+                    Eip1066.UNAVAILABLE,
+                    IEip1066.ReasonClearingIsActive.selector,
+                    EMPTY_BYTES
+                );
+            }
+            if (
+                _msgSender() == ZERO_ADDRESS ||
+                _from == ZERO_ADDRESS ||
+                _to == ZERO_ADDRESS
+            ) {
+                return (
+                    false,
+                    Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                    IEip1066.ReasonInvalidZeroAddress.selector,
+                    EMPTY_BYTES
+                );
+            }
+            if (_isRecovered(_msgSender())) {
+                return (
+                    false,
+                    Eip1066.REVOKED_OR_BANNED,
+                    IEip1066.ReasonAddressRecovered.selector,
+                    abi.encode(_msgSender())
+                );
+            }
+            if (_isRecovered(_from)) {
+                return (
+                    false,
+                    Eip1066.REVOKED_OR_BANNED,
+                    IEip1066.ReasonAddressRecovered.selector,
+                    abi.encode(_from)
+                );
+            }
+            if (_isRecovered(_to)) {
+                return (
+                    false,
+                    Eip1066.REVOKED_OR_BANNED,
+                    IEip1066.ReasonAddressRecovered.selector,
+                    abi.encode(_to)
+                );
+            }
+            if (!_isAbleToAccess(_msgSender())) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                    abi.encode(_msgSender())
+                );
+            }
+            if (!_isAbleToAccess(_from)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                    abi.encode(_from)
+                );
+            }
+            if (!_isAbleToAccess(_to)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
+                    abi.encode(_to)
+                );
+            }
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IEip1066.ReasonKycNotGranted.selector,
+                    abi.encode(_msgSender())
+                );
+            }
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IEip1066.ReasonKycNotGranted.selector,
+                    abi.encode(_from)
+                );
+            }
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IEip1066.ReasonKycNotGranted.selector,
+                    abi.encode(_to)
+                );
+            }
+            if (_allowanceAdjusted(_from, _msgSender()) < _value) {
                 return (
                     false,
                     Eip1066.INSUFFICIENT_FUNDS,
-                    Eip1066.REASON_EMPTY,
-                    abi.encode(_from, operator, currentAllowance, _value)
+                    IEip1066.ReasonInsufficientAllowance.selector,
+                    abi.encode(
+                        _msgSender(),
+                        _from,
+                        _allowanceAdjusted(_from, _msgSender()),
+                        _value,
+                        DEFAULT_PARTITION
+                    )
                 );
             }
         }
 
-        // Use common validation layer for shared checks
-        ValidationFlags memory flags = _createTransferFromValidationFlags();
-        (
-            isAbleToTransfer,
-            statusCode,
-            reasonCode,
-            details
-        ) = _performCommonValidation(
-            operator, // Operator address
-            _from, // From address
-            _to, // To address
-            _value, // Amount
-            flags // Validation flags
-        );
-
-        // If common validation failed, return the error
-        if (!isAbleToTransfer) {
-            return (isAbleToTransfer, statusCode, reasonCode, details);
+        if (_balanceOfAdjusted(_from) < _value) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                IEip1066.ReasonInsufficientBalance.selector,
+                abi.encode(
+                    _from,
+                    _balanceOfAdjusted(_from),
+                    _value,
+                    DEFAULT_PARTITION
+                )
+            );
         }
 
         // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), LibCommon.emptyBytes());
-    }
-
-    /**
-     * @dev Creates validation flags for transfer operations
-     */
-    function _createTransferValidationFlags()
-        internal
-        pure
-        returns (ValidationFlags memory)
-    {
-        return
-            ValidationFlags({
-                checkPause: true,
-                checkClearing: true,
-                checkOperatorRecovery: false,
-                checkFromRecovery: true,
-                checkToRecovery: true,
-                checkOperatorAccess: false,
-                checkFromAccess: true,
-                checkToAccess: true,
-                checkFromKyc: true,
-                checkToKyc: true,
-                checkBalance: true
-            });
-    }
-
-    /**
-     * @dev Creates validation flags for transferFrom operations
-     */
-    function _createTransferFromValidationFlags()
-        internal
-        pure
-        returns (ValidationFlags memory)
-    {
-        return
-            ValidationFlags({
-                checkPause: true,
-                checkClearing: true,
-                checkOperatorRecovery: true,
-                checkFromRecovery: true,
-                checkToRecovery: true,
-                checkOperatorAccess: true,
-                checkFromAccess: true,
-                checkToAccess: true,
-                checkFromKyc: true,
-                checkToKyc: true,
-                checkBalance: true
-            });
-    }
-
-    /**
-     * @dev Creates validation flags for issue operations
-     */
-    function _createIssueValidationFlags()
-        internal
-        pure
-        returns (ValidationFlags memory)
-    {
-        return
-            ValidationFlags({
-                checkPause: true,
-                checkClearing: true,
-                checkOperatorRecovery: false,
-                checkFromRecovery: false,
-                checkToRecovery: true,
-                checkOperatorAccess: false,
-                checkFromAccess: false,
-                checkToAccess: true,
-                checkFromKyc: false,
-                checkToKyc: true,
-                checkBalance: false
-            });
-    }
-
-    /**
-     * @dev Creates validation flags for redeem operations
-     */
-    function _createRedeemValidationFlags()
-        internal
-        pure
-        returns (ValidationFlags memory)
-    {
-        return
-            ValidationFlags({
-                checkPause: true,
-                checkClearing: true,
-                checkOperatorRecovery: false,
-                checkFromRecovery: true,
-                checkToRecovery: false,
-                checkOperatorAccess: false,
-                checkFromAccess: true,
-                checkToAccess: false,
-                checkFromKyc: true,
-                checkToKyc: false,
-                checkBalance: true
-            });
-    }
-
-    /**
-     * @dev Creates validation flags for approve operations
-     */
-    function _createApproveValidationFlags()
-        internal
-        pure
-        returns (ValidationFlags memory)
-    {
-        return
-            ValidationFlags({
-                checkPause: true,
-                checkClearing: false,
-                checkOperatorRecovery: true,
-                checkFromRecovery: true,
-                checkToRecovery: false,
-                checkOperatorAccess: true,
-                checkFromAccess: true,
-                checkToAccess: false,
-                checkFromKyc: false,
-                checkToKyc: false,
-                checkBalance: false
-            });
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
     function _erc1594Storage()

@@ -275,16 +275,14 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
     }
 
     function canTransferByPartition(
-        address _from,
         address _to,
         bytes32 _partition,
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external view override returns (bool, bytes1, bytes32) {
+    ) external view returns (bool, bytes1, bytes32) {
         return
             _canTransferByPartition(
-                _from,
                 _to,
                 _partition,
                 _value,
