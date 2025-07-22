@@ -213,6 +213,7 @@ import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
 import {Common} from '../../common/Common.sol';
+import {DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -233,7 +234,13 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransfer(_to, _value)
+        onlyCanTransferFromByPartition(
+            _msgSender(),
+            _to,
+            DEFAULT_PARTITION,
+            _value,
+            ''
+        )
     {
         // Add a function to validate the `_data` parameter
         _transfer(_msgSender(), _to, _value);
@@ -272,7 +279,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         external
         override
         onlyWithoutMultiPartition
-        onlyCanIssue(_tokenHolder, _value)
+        onlyCanIssueByPartition(_tokenHolder, DEFAULT_PARTITION, _value, _data)
     {
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -298,7 +305,13 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeem(_value)
+        onlyCanRedeemFromByPartition(
+            _msgSender(),
+            _value,
+            DEFAULT_PARTITION,
+            _data,
+            ''
+        )
     {
         _redeem(_value, _data);
     }
@@ -321,7 +334,13 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFrom(_tokenHolder, _value)
+        onlyCanRedeemFromByPartition(
+            _tokenHolder,
+            _value,
+            DEFAULT_PARTITION,
+            _data,
+            ''
+        )
     {
         _redeemFrom(_tokenHolder, _value, _data);
     }

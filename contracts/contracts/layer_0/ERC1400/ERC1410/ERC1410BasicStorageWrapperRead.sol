@@ -213,8 +213,6 @@ import {
     _ERC1410_BASIC_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {DEFAULT_PARTITION} from '../../constants/values.sol';
-import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
-import {IEip1066} from '../../../layer_1/interfaces/eip1066/IEip1066.sol';
 import {LockStorageWrapper1} from '../../lock/LockStorageWrapper1.sol';
 
 abstract contract ERC1410BasicStorageWrapperRead is
@@ -268,10 +266,11 @@ abstract contract ERC1410BasicStorageWrapperRead is
         uint256 fromBalance = _balanceOfByPartition(_partition, _from);
 
         if (fromBalance < _value) {
-            revert IEip1066.ExtendedError(
-                Eip1066.INSUFFICIENT_FUNDS,
-                IEip1066.ReasonInsufficientBalance.selector,
-                abi.encode(_from, fromBalance, _value, _partition)
+            revert IERC1410StorageWrapper.InsufficientBalance(
+                _from,
+                fromBalance,
+                _value,
+                _partition
             );
         }
 

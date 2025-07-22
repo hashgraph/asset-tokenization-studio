@@ -213,6 +213,7 @@ import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC20_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
+import {DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
 
 contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -249,7 +250,14 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransfer(to, amount)
+        onlyCanTransferFromByPartition(
+            _msgSender(),
+            to,
+            DEFAULT_PARTITION,
+            amount,
+            '',
+            ''
+        )
         returns (bool)
     {
         return _transfer(_msgSender(), to, amount);
@@ -264,7 +272,14 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFrom(from, to, amount)
+        onlyCanTransferFromByPartition(
+            from,
+            to,
+            DEFAULT_PARTITION,
+            amount,
+            '',
+            ''
+        )
         returns (bool)
     {
         return _transferFrom(_msgSender(), from, to, amount);

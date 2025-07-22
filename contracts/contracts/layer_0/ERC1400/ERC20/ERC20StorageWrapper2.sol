@@ -221,8 +221,6 @@ import {
 import {
     IERC1410Standard
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
-import {IEip1066} from '../../../layer_1/interfaces/eip1066/IEip1066.sol';
-import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
 import {
     ERC1410StandardStorageWrapper
 } from '../ERC1410/ERC1410StandardStorageWrapper.sol';
@@ -231,11 +229,6 @@ abstract contract ERC20StorageWrapper2 is
     IERC20StorageWrapper,
     ERC1410StandardStorageWrapper
 {
-    modifier onlyCanApprove(address _spender, uint256 _amount) {
-        _checkCanApprove(_spender, _amount);
-        _;
-    }
-
     function _beforeAllowanceUpdate(address _owner, address _spender) internal {
         _triggerAndSyncAll(DEFAULT_PARTITION, _owner, address(0));
 
@@ -394,117 +387,6 @@ abstract contract ERC20StorageWrapper2 is
 
         emit Approval(from, spender, _erc20Storage().allowed[from][spender]);
     }
-
-    function _checkCanApprove(address _spender, uint256 _amount) internal view {
-        (
-            bool isAbleToApprove,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        ) = _isAbleToApprove(_spender, _amount, EMPTY_BYTES);
-        if (!isAbleToApprove) {
-            revert IEip1066.ExtendedError(statusCode, reasonCode, details);
-        }
-    }
-
-    function _canApprove(
-        address _spender,
-        uint256 _amount,
-        bytes calldata _data
-    )
-        internal
-        view
-        returns (bool canApprove, bytes1 statusCode, bytes32 reasonCode)
-    {
-        (canApprove, statusCode, reasonCode, ) = _isAbleToApprove(
-            _spender,
-            _amount,
-            _data
-        );
-        return (canApprove, statusCode, reasonCode);
-    }
-
-    function _isAbleToApprove(
-        address _spender,
-        uint256 _amount,
-        bytes memory /*_data*/
-    )
-        internal
-        view
-        returns (
-            bool isAbleToApprove,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        if (_isPaused()) {
-            return (false, Eip1066.PAUSED, EMPTY_BYTES32, EMPTY_BYTES);
-        }
-
-        if (_msgSender() == ZERO_ADDRESS || _spender == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                IEip1066.ReasonInvalidZeroAddress.selector,
-                EMPTY_BYTES
-            );
-        }
-
-        if (_isRecovered(_msgSender())) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IEip1066.ReasonAddressRecovered.selector,
-                abi.encode(_msgSender())
-            );
-        }
-
-        if (_isRecovered(_spender)) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IEip1066.ReasonAddressRecovered.selector,
-                abi.encode(_spender)
-            );
-        }
-
-        if (!_isAbleToAccess(_msgSender()) == false) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
-                abi.encode(_msgSender())
-            );
-        }
-
-        if (!_isAbleToAccess(_spender) == false) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
-                abi.encode(_spender)
-            );
-        }
-
-        if (_balanceOfAdjusted(_spender) < _amount) {
-            return (
-                false,
-                Eip1066.INSUFFICIENT_FUNDS,
-                IEip1066.ReasonInsufficientBalance.selector,
-                abi.encode(
-                    _spender,
-                    _balanceOfAdjusted(_spender),
-                    _amount,
-                    DEFAULT_PARTITION
-                )
-            );
-        }
-
-        // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
-    }
-
     function _emitTransferEvent(
         address from,
         address to,

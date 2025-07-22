@@ -232,7 +232,14 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         override
         onlyUnProtectedPartitionsOrWildCardRole
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCanTransfer(_basicTransferInfo.to, _basicTransferInfo.value)
+        onlyCanTransferFromByPartition(
+            _msgSender(),
+            _basicTransferInfo.to,
+            _partition,
+            _basicTransferInfo.value,
+            _data,
+            ''
+        )
         returns (bytes32)
     {
         {

@@ -248,13 +248,9 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     )
         external
         override
-        onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyListedAllowed(_msgSender())
-        onlyUnrecoveredAddress(_msgSender())
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyCanRedeemFromByPartition(_msgSender(),_partition,_value, _data, '')
     {
         // Add the function to validate the `_data` parameter
         _redeemByPartition(
@@ -283,19 +279,11 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyListedAllowed(_tokenHolder)
-        onlyListedAllowed(_msgSender())
         onlyOperator(_partition, _tokenHolder)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
+        onlyCanRedeemFromByPartition(_tokenHolder, _partition,_value, _data, '')
     {
-        {
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_tokenHolder);
-        }
         _redeemByPartition(
             _partition,
             _tokenHolder,
@@ -312,6 +300,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external view returns (bool, bytes1, bytes32) {
-        return _canRedeemByPartition(_partition, _value, _data, _operatorData);
+        (bool status, bytes1 code, bytes32 reason, ) =  _isAbleToRedeemFromByPartition(_partition, _value, _data, _operatorData);
+        return(status, code, reason);
     }
 }

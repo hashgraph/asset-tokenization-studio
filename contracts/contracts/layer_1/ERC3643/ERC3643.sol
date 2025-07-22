@@ -339,7 +339,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         external
         onlyWithinMaxSupply(_amount)
         onlyWithoutMultiPartition
-        onlyCanIssue(_to, _amount)
+        onlyCanIssueByPartition(_to, DEFAULT_PARTITION, _amount, '')
     {
         {
             bytes32[] memory roles = new bytes32[](2);
