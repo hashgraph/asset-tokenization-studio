@@ -212,6 +212,7 @@ import { UpdateMaturityDateCommandHandler } from '@command/bond/updateMaturityDa
 import { SetCouponCommandHandler } from '@command/bond/coupon/set/SetCouponCommandHandler';
 import { CreateBondCommandHandler } from '@command/bond/create/CreateBondCommandHandler';
 import { GetBondDetailsQueryHandler } from '@query/bond/get/getBondDetails/GetBondDetailsQueryHandler';
+import { RedeemAtMaturityByPartitionCommandHandler } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommandHandler';
 
 export const COMMAND_HANDLERS_BOND = [
   {
@@ -225,6 +226,10 @@ export const COMMAND_HANDLERS_BOND = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: UpdateMaturityDateCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RedeemAtMaturityByPartitionCommandHandler,
   },
 ];
 
