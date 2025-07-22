@@ -207,7 +207,7 @@
 import { injectable } from 'tsyringe';
 import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from '@core/Constants';
 import { CommandMetadata } from '@core/decorator/CommandMetadata';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { Type } from '@core/Type';
 import { Command } from './Command';
 import { ICommandHandler } from './CommandHandler';

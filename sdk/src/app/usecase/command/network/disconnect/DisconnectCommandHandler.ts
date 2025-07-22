@@ -205,7 +205,7 @@
 
 import { ICommandHandler } from '@core/command/CommandHandler';
 import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import {
   DisconnectCommand,
   DisconnectCommandResponse,

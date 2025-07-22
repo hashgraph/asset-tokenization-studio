@@ -204,7 +204,7 @@
 */
 
 import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { IQueryHandler } from '@core/query/QueryHandler';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import { GetAccountInfoQueryError } from './error/GetAccountInfoQueryError';

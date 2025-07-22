@@ -207,7 +207,7 @@
 import { injectable } from 'tsyringe';
 import { QUERY_HANDLER_METADATA, QUERY_METADATA } from '@core/Constants';
 import { QueryMetadata } from '@core/decorator/QueryMetadata';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { Type } from '@core/Type';
 import { Query } from './Query';
 import { IQueryHandler } from './QueryHandler';
