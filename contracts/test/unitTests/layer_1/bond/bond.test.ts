@@ -729,38 +729,39 @@ describe('Bond Tests', () => {
                     'WrongIndexForAction'
                 )
 
-            const listCount = await bondFacet.getCouponCount()
-            const coupon = await bondFacet.getCoupon(numberOfCoupons + 1)
-            const couponFor = await bondFacet.getCouponFor(
-                numberOfCoupons + 1,
-                account_A
-            )
-            const couponTotalHolders = await bondFacet.getTotalCouponHolders(
-                numberOfCoupons + 1
-            )
-            const couponHolders = await bondFacet.getCouponHolders(
-                numberOfCoupons + 1,
-                0,
-                couponTotalHolders
-            )
+                const listCount = await bondFacet.getCouponCount()
+                const coupon = await bondFacet.getCoupon(numberOfCoupons + 1)
+                const couponFor = await bondFacet.getCouponFor(
+                    numberOfCoupons + 1,
+                    account_A
+                )
+                const couponTotalHolders =
+                    await bondFacet.getTotalCouponHolders(numberOfCoupons + 1)
+                const couponHolders = await bondFacet.getCouponHolders(
+                    numberOfCoupons + 1,
+                    0,
+                    couponTotalHolders
+                )
 
-            expect(listCount).to.equal(numberOfCoupons + 1)
-            expect(coupon.snapshotId).to.equal(0)
-            expect(coupon.coupon.recordDate).to.equal(couponRecordDateInSeconds)
-            expect(coupon.coupon.executionDate).to.equal(
-                couponExecutionDateInSeconds
-            )
-            expect(coupon.coupon.rate).to.equal(couponRate)
-            expect(couponFor.recordDate).to.equal(couponRecordDateInSeconds)
-            expect(couponFor.executionDate).to.equal(
-                couponExecutionDateInSeconds
-            )
-            expect(couponFor.rate).to.equal(couponRate)
-            expect(couponFor.tokenBalance).to.equal(0)
-            expect(couponFor.recordDateReached).to.equal(false)
-            expect(couponTotalHolders).to.equal(0)
-            expect(couponHolders.length).to.equal(couponTotalHolders)
-        })
+                expect(listCount).to.equal(numberOfCoupons + 1)
+                expect(coupon.snapshotId).to.equal(0)
+                expect(coupon.coupon.recordDate).to.equal(
+                    couponRecordDateInSeconds
+                )
+                expect(coupon.coupon.executionDate).to.equal(
+                    couponExecutionDateInSeconds
+                )
+                expect(coupon.coupon.rate).to.equal(couponRate)
+                expect(couponFor.recordDate).to.equal(couponRecordDateInSeconds)
+                expect(couponFor.executionDate).to.equal(
+                    couponExecutionDateInSeconds
+                )
+                expect(couponFor.rate).to.equal(couponRate)
+                expect(couponFor.tokenBalance).to.equal(0)
+                expect(couponFor.recordDateReached).to.equal(false)
+                expect(couponTotalHolders).to.equal(0)
+                expect(couponHolders.length).to.equal(couponTotalHolders)
+            })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds', async () => {
                 // Granting Role to account C
@@ -807,25 +808,24 @@ describe('Bond Tests', () => {
                 )
                 await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
 
-            const couponFor = await bondFacet.getCouponFor(
-                numberOfCoupons + 1,
-                account_A
-            )
-            const couponTotalHolders = await bondFacet.getTotalCouponHolders(
-                numberOfCoupons + 1
-            )
-            const couponHolders = await bondFacet.getCouponHolders(
-                numberOfCoupons + 1,
-                0,
-                couponTotalHolders
-            )
+                const couponFor = await bondFacet.getCouponFor(
+                    numberOfCoupons + 1,
+                    account_A
+                )
+                const couponTotalHolders =
+                    await bondFacet.getTotalCouponHolders(numberOfCoupons + 1)
+                const couponHolders = await bondFacet.getCouponHolders(
+                    numberOfCoupons + 1,
+                    0,
+                    couponTotalHolders
+                )
 
-            expect(couponFor.tokenBalance).to.equal(TotalAmount)
-            expect(couponFor.recordDateReached).to.equal(true)
-            expect(couponTotalHolders).to.equal(1)
-            expect(couponHolders.length).to.equal(couponTotalHolders)
-            expect(couponHolders).to.have.members([account_A])
-        })
+                expect(couponFor.tokenBalance).to.equal(TotalAmount)
+                expect(couponFor.recordDateReached).to.equal(true)
+                expect(couponTotalHolders).to.equal(1)
+                expect(couponHolders.length).to.equal(couponTotalHolders)
+                expect(couponHolders).to.have.members([account_A])
+            })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds', async () => {
                 // Granting Role to account C
@@ -878,25 +878,24 @@ describe('Bond Tests', () => {
                 )
                 await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
 
-            const couponFor = await bondFacet.getCouponFor(
-                numberOfCoupons + 1,
-                account_A
-            )
-            const couponTotalHolders = await bondFacet.getTotalCouponHolders(
-                numberOfCoupons + 1
-            )
-            const couponHolders = await bondFacet.getCouponHolders(
-                numberOfCoupons + 1,
-                0,
-                couponTotalHolders
-            )
+                const couponFor = await bondFacet.getCouponFor(
+                    numberOfCoupons + 1,
+                    account_A
+                )
+                const couponTotalHolders =
+                    await bondFacet.getTotalCouponHolders(numberOfCoupons + 1)
+                const couponHolders = await bondFacet.getCouponHolders(
+                    numberOfCoupons + 1,
+                    0,
+                    couponTotalHolders
+                )
 
-            expect(couponFor.tokenBalance).to.equal(TotalAmount)
-            expect(couponFor.recordDateReached).to.equal(true)
-            expect(couponTotalHolders).to.equal(1)
-            expect(couponHolders.length).to.equal(couponTotalHolders)
-            expect(couponHolders).to.have.members([account_A])
-        })
+                expect(couponFor.tokenBalance).to.equal(TotalAmount)
+                expect(couponFor.recordDateReached).to.equal(true)
+                expect(couponTotalHolders).to.equal(1)
+                expect(couponHolders.length).to.equal(couponTotalHolders)
+                expect(couponHolders).to.have.members([account_A])
+            })
 
             it('GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds', async () => {
                 // * Arrange
@@ -1029,37 +1028,38 @@ describe('Bond Tests', () => {
             it('Check Coupon', async () => {
                 bondFacet = bondFacet.connect(signer_C)
 
-            for (let i = 1; i <= numberOfCoupons; i++) {
-                const coupon = await bondFacet.getCoupon(i)
-                const couponFor = await bondFacet.getCouponFor(i, account_A)
-                const couponTotalHolders =
-                    await bondFacet.getTotalCouponHolders(i)
-                const couponHolders = await bondFacet.getCouponHolders(
-                    i,
-                    0,
-                    couponTotalHolders
-                )
+                for (let i = 1; i <= numberOfCoupons; i++) {
+                    const coupon = await bondFacet.getCoupon(i)
+                    const couponFor = await bondFacet.getCouponFor(i, account_A)
+                    const couponTotalHolders =
+                        await bondFacet.getTotalCouponHolders(i)
+                    const couponHolders = await bondFacet.getCouponHolders(
+                        i,
+                        0,
+                        couponTotalHolders
+                    )
 
-                expect(coupon.coupon.recordDate).to.equal(
-                    firstCouponDate + (i - 1) * frequency
-                )
-                expect(coupon.coupon.executionDate).to.equal(
-                    firstCouponDate + (i - 1) * frequency
-                )
-                expect(coupon.coupon.rate).to.equal(rate)
-                expect(coupon.snapshotId).to.equal(0)
-                expect(couponFor.recordDate).to.equal(
-                    firstCouponDate + (i - 1) * frequency
-                )
-                expect(couponFor.executionDate).to.equal(
-                    firstCouponDate + (i - 1) * frequency
-                )
-                expect(couponFor.tokenBalance).to.equal(0)
-                expect(couponFor.rate).to.equal(rate)
-                expect(couponFor.recordDateReached).to.equal(false)
-                expect(couponTotalHolders).to.equal(0)
-                expect(couponHolders.length).to.equal(couponTotalHolders)
-            }
+                    expect(coupon.coupon.recordDate).to.equal(
+                        firstCouponDate + (i - 1) * frequency
+                    )
+                    expect(coupon.coupon.executionDate).to.equal(
+                        firstCouponDate + (i - 1) * frequency
+                    )
+                    expect(coupon.coupon.rate).to.equal(rate)
+                    expect(coupon.snapshotId).to.equal(0)
+                    expect(couponFor.recordDate).to.equal(
+                        firstCouponDate + (i - 1) * frequency
+                    )
+                    expect(couponFor.executionDate).to.equal(
+                        firstCouponDate + (i - 1) * frequency
+                    )
+                    expect(couponFor.tokenBalance).to.equal(0)
+                    expect(couponFor.rate).to.equal(rate)
+                    expect(couponFor.recordDateReached).to.equal(false)
+                    expect(couponTotalHolders).to.equal(0)
+                    expect(couponHolders.length).to.equal(couponTotalHolders)
+                }
+            })
         })
     })
     describe('Multi Partition', () => {
