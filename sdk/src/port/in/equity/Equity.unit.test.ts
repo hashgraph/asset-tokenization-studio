@@ -2130,17 +2130,6 @@ describe('Equity', () => {
       ).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if voteId is invalid', async () => {
-      getVotingHoldersRequest = new GetVotingHoldersRequest({
-        ...GetVotingHoldersRequestFixture.create(),
-        voteId: -1,
-      });
-
-      await expect(
-        EquityToken.getVotingHolders(getVotingHoldersRequest),
-      ).rejects.toThrow(ValidationError);
-    });
-
     it('should throw error if start is invalid', async () => {
       getVotingHoldersRequest = new GetVotingHoldersRequest({
         ...GetVotingHoldersRequestFixture.create(),

@@ -240,7 +240,6 @@ import {
   GetCouponHoldersQueryFixture,
   GetCouponRequestFixture,
   RedeemAtMaturityByPartitionRequestFixture,
-  GetTotalCouponHoldersQueryFixture,
   GetTotalCouponHoldersRequestFixture,
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,

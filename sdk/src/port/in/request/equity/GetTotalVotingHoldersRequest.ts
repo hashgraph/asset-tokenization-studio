@@ -210,13 +210,7 @@ export default class GetTotalVotingHoldersRequest extends ValidatedRequest<GetTo
   securityId: string;
   voteId: number;
 
-  constructor({
-    securityId,
-    voteId,
-  }: {
-    securityId: string;
-    voteId: number;
-  }) {
+  constructor({ securityId, voteId }: { securityId: string; voteId: number }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       voteId: FormatValidation.checkNumber({ min: 0 }),
