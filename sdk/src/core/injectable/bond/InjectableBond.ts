@@ -212,6 +212,7 @@ import { UpdateMaturityDateCommandHandler } from '@command/bond/updateMaturityDa
 import { SetCouponCommandHandler } from '@command/bond/coupon/set/SetCouponCommandHandler';
 import { CreateBondCommandHandler } from '@command/bond/create/CreateBondCommandHandler';
 import { GetBondDetailsQueryHandler } from '@query/bond/get/getBondDetails/GetBondDetailsQueryHandler';
+import { RedeemAtMaturityByPartitionCommandHandler } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommandHandler';
 import { GetTotalCouponHoldersQueryHandler } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQueryHandler';
 import { GetCouponHoldersQueryHandler } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQueryHandler';
 
@@ -227,6 +228,10 @@ export const COMMAND_HANDLERS_BOND = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: UpdateMaturityDateCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RedeemAtMaturityByPartitionCommandHandler,
   },
 ];
 

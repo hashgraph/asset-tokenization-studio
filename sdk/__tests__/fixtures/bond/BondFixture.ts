@@ -210,6 +210,7 @@ import ContractId from '@domain/context/contract/ContractId';
 import {
   ContractIdPropFixture,
   HederaIdPropsFixture,
+  PartitionIdFixture,
 } from '../shared/DataFixture';
 import { SecurityPropsFixture } from '../shared/SecurityFixture';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
@@ -239,6 +240,8 @@ import { CouponDetails } from '@domain/context/bond/CouponDetails';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
 import { Coupon } from '@domain/context/bond/Coupon';
+import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import RedeemAtMaturityByPartitionRequest from '@port/in/request/bond/RedeemAtMaturityByPartitionRequest';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import GetCouponHoldersRequest from '@port/in/request/bond/GetCouponHoldersRequest';
@@ -305,6 +308,16 @@ export const UpdateMaturityDateCommandFixture =
       faker.date.future().getTime().toString(),
     );
     command.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const RedeemAtMaturityByPartitionCommandFixture =
+  createFixture<RedeemAtMaturityByPartitionCommand>((command) => {
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 1000 }).toString(),
+    );
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
   });
 
 export const BondDetailsFixture = createFixture<BondDetails>((props) => {
@@ -543,4 +556,14 @@ export const UpdateMaturityDateRequestFixture =
     request.maturityDate.faker((faker) =>
       faker.date.future().getTime().toString(),
     );
+  });
+
+export const RedeemAtMaturityByPartitionRequestFixture =
+  createFixture<RedeemAtMaturityByPartitionRequest>((request) => {
+    request.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 1000 }).toString(),
+    );
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.sourceId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
   });

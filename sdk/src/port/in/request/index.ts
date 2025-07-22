@@ -380,6 +380,7 @@ import BatchUnfreezePartialTokensRequest from './security/operations/batch/Batch
 import SetAddressFrozenRequest from './security/operations/freeze/SetAddressFrozenRequest';
 import DeactivateInternalKycRequest from './security/kyc/DeactivateInternalKycRequest';
 import TakeSnapshotRequest from './security/operations/snapshot/TakeSnapshotRequest';
+import RedeemAtMaturityByPartitionRequest from './bond/RedeemAtMaturityByPartitionRequest';
 import GetTokenHoldersAtSnapshotRequest from './security/operations/snapshot/GetTokenHoldersAtSnapshotRequest';
 import GetTotalTokenHoldersAtSnapshotRequest from './security/operations/snapshot/GetTotalTokenHoldersAtSnapshotRequest';
 import GetCouponHoldersRequest from './bond/GetCouponHoldersRequest';
@@ -568,6 +569,7 @@ export {
   BatchUnfreezePartialTokensRequest,
   SetAddressFrozenRequest,
   TakeSnapshotRequest,
+  RedeemAtMaturityByPartitionRequest,
   GetTokenHoldersAtSnapshotRequest,
   GetTotalTokenHoldersAtSnapshotRequest,
   GetCouponHoldersRequest,
