@@ -214,15 +214,18 @@ import {
 } from '../../../layer_0/constants/values.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {IEip1066} from '../../../layer_1/interfaces/eip1066/IEip1066.sol';
-import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
+// import {ERC1644StorageWrapper} from "../ERC1644/ERC1644StorageWrapper.sol";
 import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
+import {ValidationCommon} from '../../common/ValidationCommon.sol';
 
-abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
+abstract contract ERC1410ControllerStorageWrapper is
+    ValidationCommon /* ERC1644StorageWrapper */
+{
     function _checkCanTransferByPartition(
         address _to,
         bytes32 _partition,
         uint256 _value
-    ) internal returns (bool, bytes1, bytes32) {
+    ) internal view {
         (
             bool isAbleToTransfer,
             bytes1 statusCode,
