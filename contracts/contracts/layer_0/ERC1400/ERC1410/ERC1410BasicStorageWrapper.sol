@@ -209,14 +209,16 @@ pragma solidity 0.8.18;
 import {
     IERC1410StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
+// import {ERC20StorageWrapper1} from "../ERC20/ERC20StorageWrapper1.sol";
 import {
     IERC1410Basic
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {ValidationCommon} from '../../common/ValidationCommon.sol';
 
 abstract contract ERC1410BasicStorageWrapper is
     IERC1410StorageWrapper,
-    ERC20StorageWrapper1
+    ValidationCommon
+    // ERC20StorageWrapper1
 {
     function _transferByPartition(
         address _from,

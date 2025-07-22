@@ -5,11 +5,9 @@ import {ZERO_ADDRESS, EMPTY_BYTES} from '../constants/values.sol';
 import {Eip1066} from '../constants/eip1066.sol';
 import {IEip1066} from '../../layer_1/interfaces/eip1066/IEip1066.sol';
 import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
-import {
-    ERC1644StorageWrapper
-} from '../ERC1400/ERC1644/ERC1644StorageWrapper.sol';
+import {ERC20StorageWrapper1} from '../ERC1400/ERC20/ERC20StorageWrapper1.sol';
 
-abstract contract ValidationCommon is ERC1644StorageWrapper {
+abstract contract ValidationCommon is ERC20StorageWrapper1 {
     // Example helper function for common checks
     function _checkAddressValidity(
         address _account

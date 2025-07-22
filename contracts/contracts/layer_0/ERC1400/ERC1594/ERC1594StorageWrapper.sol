@@ -206,13 +206,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {EMPTY_BYTES, EMPTY_BYTES32, DEFAULT_PARTITION} from "../../../layer_0/constants/values.sol";
-import {_ERC1594_STORAGE_POSITION} from "../../constants/storagePositions.sol";
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
-import {IEip1066} from "../../../layer_1/interfaces/eip1066/IEip1066.sol";
-import {IERC1594StorageWrapper} from "../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol";
-import {Eip1066} from "../../constants/eip1066.sol";
-import {CapStorageWrapper2} from "../../cap/CapStorageWrapper2.sol";
+import {
+    EMPTY_BYTES,
+    EMPTY_BYTES32,
+    DEFAULT_PARTITION
+} from '../../../layer_0/constants/values.sol';
+import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {IEip1066} from '../../../layer_1/interfaces/eip1066/IEip1066.sol';
+import {
+    IERC1594StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol';
+import {Eip1066} from '../../constants/eip1066.sol';
+import {CapStorageWrapper2} from '../../cap/CapStorageWrapper2.sol';
 
 abstract contract ERC1594StorageWrapper is
     IERC1594StorageWrapper,
@@ -233,11 +239,7 @@ abstract contract ERC1594StorageWrapper is
         _;
     }
 
-    modifier onlyCanTransferFrom(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) {
+    modifier onlyCanTransferFrom(address _from, address _to, uint256 _amount) {
         _checkCanTransferFrom(_from, _to, _amount);
         _;
     }

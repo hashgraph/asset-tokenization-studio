@@ -207,20 +207,15 @@
 pragma solidity 0.8.18;
 
 import {
-    ZERO_ADDRESS,
     EMPTY_BYTES,
     EMPTY_BYTES32,
     DEFAULT_PARTITION
 } from '../../../layer_0/constants/values.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {IEip1066} from '../../../layer_1/interfaces/eip1066/IEip1066.sol';
-// import {ERC1644StorageWrapper} from "../ERC1644/ERC1644StorageWrapper.sol";
+import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
 import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
-import {ValidationCommon} from '../../common/ValidationCommon.sol';
 
-abstract contract ERC1410ControllerStorageWrapper is
-    ValidationCommon /* ERC1644StorageWrapper */
-{
+abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
     function _checkCanTransferByPartition(
         address _to,
         bytes32 _partition,
@@ -295,67 +290,23 @@ abstract contract ERC1410ControllerStorageWrapper is
             );
         }
 
-        if (_msgSender() == ZERO_ADDRESS || _to == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                IEip1066.ReasonInvalidZeroAddress.selector,
-                EMPTY_BYTES
-            );
+        (
+            isAbleToTransfer,
+            statusCode,
+            reasonCode,
+            details
+        ) = _checkAddressValidity(_msgSender());
+        if (!isAbleToTransfer) {
+            return (isAbleToTransfer, statusCode, reasonCode, details);
         }
-
-        if (_isRecovered(_msgSender())) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IEip1066.ReasonAddressRecovered.selector,
-                abi.encode(_msgSender())
-            );
-        }
-
-        if (_isRecovered(_to)) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IEip1066.ReasonAddressRecovered.selector,
-                abi.encode(_to)
-            );
-        }
-
-        if (!_isAbleToAccess(_msgSender()) == false) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
-                abi.encode(_msgSender())
-            );
-        }
-
-        if (!_isAbleToAccess(_to) == false) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
-                abi.encode(_to)
-            );
-        }
-
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonKycNotGranted.selector,
-                abi.encode(_msgSender())
-            );
-        }
-
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonKycNotGranted.selector,
-                abi.encode(_to)
-            );
+        (
+            isAbleToTransfer,
+            statusCode,
+            reasonCode,
+            details
+        ) = _checkAddressValidity(_to);
+        if (!isAbleToTransfer) {
+            return (isAbleToTransfer, statusCode, reasonCode, details);
         }
 
         if (!_validPartition(_partition, _msgSender())) {

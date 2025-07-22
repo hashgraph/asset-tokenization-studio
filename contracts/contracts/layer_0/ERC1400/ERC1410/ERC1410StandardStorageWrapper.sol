@@ -211,7 +211,6 @@ import {
     EMPTY_BYTES32,
     DEFAULT_PARTITION
 } from '../../../layer_0/constants/values.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {IEip1066} from '../../../layer_1/interfaces/eip1066/IEip1066.sol';
 import {
     IERC1410Standard
@@ -469,31 +468,17 @@ abstract contract ERC1410StandardStorageWrapper is
             );
         }
 
-        if (_isRecovered(_msgSender())) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IEip1066.ReasonAddressRecovered.selector,
-                abi.encode(_msgSender())
-            );
+        (
+            isAbleToRedeem,
+            statusCode,
+            reasonCode,
+            details
+        ) = _checkAddressValidity(_msgSender());
+        if (!isAbleToRedeem) {
+            return (isAbleToRedeem, statusCode, reasonCode, details);
         }
-
-        if (!_isAbleToAccess(_msgSender()) == false) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonAddressInBlacklistOrNotInWhitelist.selector,
-                abi.encode(_msgSender())
-            );
-        }
-
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IEip1066.ReasonKycNotGranted.selector,
-                abi.encode(_msgSender())
-            );
+        if (!isAbleToRedeem) {
+            return (isAbleToRedeem, statusCode, reasonCode, details);
         }
 
         if (!_validPartition(_partition, _msgSender())) {
@@ -505,7 +490,7 @@ abstract contract ERC1410StandardStorageWrapper is
             );
         }
 
-        if (!!_isMultiPartition() && _partition != DEFAULT_PARTITION) {
+        if (!_isMultiPartition() && _partition != DEFAULT_PARTITION) {
             return (
                 false,
                 Eip1066.APP_SPECIFIC_FAILURE,
