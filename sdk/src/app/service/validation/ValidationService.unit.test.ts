@@ -205,7 +205,7 @@
 
 import ValidationService from './ValidationService';
 import { QueryBus } from '@core/query/QueryBus';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { createMock } from '@golevelup/ts-jest';
 import {
   AmountFixture,

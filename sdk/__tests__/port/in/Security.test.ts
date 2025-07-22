@@ -207,7 +207,7 @@ import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
 
 import TransferRequest from '@port/in/request/security/operations/transfer/TransferRequest';
 import RedeemRequest from '@port/in/request/security/operations/redeem/RedeemRequest';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { MirrorNode } from '@domain/context/network/MirrorNode';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';

@@ -228,7 +228,7 @@ import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import ContractViewModel from '@port/in/response/ContractViewModel';
 import TransactionResultViewModel from '@port/in/response/TransactionResultViewModel';
 import { HBAR_DECIMALS } from '@core/Constants';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { CLIENT_PUBLIC_KEY_ECDSA } from './config';
 import {
   CastRegulationSubType,

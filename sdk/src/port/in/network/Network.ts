@@ -204,7 +204,7 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { CommandBus } from '@core/command/CommandBus';
 import { InitializationData, NetworkData } from '@port/out/TransactionAdapter';
 import { ConnectCommand } from '@command/network/connect/ConnectCommand';

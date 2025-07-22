@@ -206,7 +206,7 @@
 import { ICommandHandler } from '@core/command/CommandHandler';
 import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
 import NetworkService from '@service/network/NetworkService';

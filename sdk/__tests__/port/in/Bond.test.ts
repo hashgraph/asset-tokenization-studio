@@ -230,7 +230,7 @@ import { MirrorNode } from '@domain/context/network/MirrorNode';
 import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
 import NetworkService from '@service/network/NetworkService';
 import SecurityViewModel from '@port/in/response/SecurityViewModel';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
 import {
   CastRegulationSubType,

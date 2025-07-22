@@ -234,7 +234,7 @@ import LogService from '@service/log/LogService';
 import EventService from '@service/event/EventService';
 import NetworkService from '@service/network/NetworkService';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import Hex from '@core/Hex';
 import Account from '@domain/context/account/Account';
 import TransactionResponse from '@domain/context/transaction/TransactionResponse';

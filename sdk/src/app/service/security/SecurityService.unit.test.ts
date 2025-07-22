@@ -206,7 +206,7 @@
 import { container } from 'tsyringe';
 import SecurityService from './SecurityService';
 import { QueryBus } from '@core/query/QueryBus';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { GetSecurityQuery } from '@query/security/get/GetSecurityQuery';
 import { Security } from '@domain/context/security/Security';
 import { SecurityNotFound } from './error/SecurityNotFound';
