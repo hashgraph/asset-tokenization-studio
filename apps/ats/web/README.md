@@ -90,3 +90,6 @@ In order to execute all the tests run this command from the _web_ folder:
 ```
 npm run test
 ```
+# Delete 
+
+See if pipeline is launched
