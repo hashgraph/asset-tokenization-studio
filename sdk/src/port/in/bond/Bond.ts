@@ -240,6 +240,12 @@ import {
 } from '@domain/context/factory/RegulationType';
 import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import {
+  GetCouponHoldersRequest,
+  GetTotalCouponHoldersRequest,
+} from '../request';
+import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
+import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 
 interface IBondInPort {
   create(
@@ -258,6 +264,8 @@ interface IBondInPort {
   updateMaturityDate(
     request: UpdateMaturityDateRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
+  getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
 }
 
 class BondInPort implements IBondInPort {
@@ -479,6 +487,35 @@ class BondInPort implements IBondInPort {
     return await this.commandBus.execute(
       new UpdateMaturityDateCommand(maturityDate, securityId),
     );
+  }
+
+  @LogError
+  async getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]> {
+    const { securityId, couponId, start, end } = request;
+    ValidatedRequest.handleValidation(GetCouponHoldersRequest.name, request);
+
+    return (
+      await this.queryBus.execute(
+        new GetCouponHoldersQuery(securityId, couponId, start, end),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getTotalCouponHolders(
+    request: GetTotalCouponHoldersRequest,
+  ): Promise<number> {
+    const { securityId, couponId } = request;
+    ValidatedRequest.handleValidation(
+      GetTotalCouponHoldersRequest.name,
+      request,
+    );
+
+    return (
+      await this.queryBus.execute(
+        new GetTotalCouponHoldersQuery(securityId, couponId),
+      )
+    ).payload;
   }
 }
 

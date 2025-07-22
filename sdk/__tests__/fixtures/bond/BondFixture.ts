@@ -241,6 +241,8 @@ import { BigNumber } from 'ethers';
 import { Coupon } from '@domain/context/bond/Coupon';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
+import GetCouponHoldersRequest from '@port/in/request/bond/GetCouponHoldersRequest';
+import GetTotalCouponHoldersRequest from '@port/in/request/bond/GetTotalCouponHoldersRequest';
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {
@@ -379,6 +381,20 @@ export const CouponFixture = createFixture<Coupon>((props) => {
       new BigDecimal(BigNumber.from(faker.number.int({ min: 1, max: 5 }))),
   );
 });
+
+export const GetCouponHoldersRequestFixture =
+  createFixture<GetCouponHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    request.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalCouponHoldersRequestFixture =
+  createFixture<GetTotalCouponHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
 
 export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
   (request) => {

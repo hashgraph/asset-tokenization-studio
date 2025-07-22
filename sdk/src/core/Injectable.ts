@@ -424,16 +424,16 @@ import { BatchTransferCommandHandler } from '@command/security/operations/batch/
 import { BatchUnfreezePartialTokensCommandHandler } from '@command/security/operations/batch/batchUnfreezePartialTokens/BatchUnfreezePartialTokensCommandHandler';
 import { SetAddressFrozenCommandHandler } from '@command/security/operations/freeze/setAddressFrozen/SetAddressFrozenCommandHandler';
 import { TakeSnapshotCommandHandler } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommandHandler';
-import { GetTokenHoldersAtSnapshotQueryHandler } from '@query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQueryHandler.js';
-import { GetTotalTokenHoldersAtSnapshotQueryHandler } from '@query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQueryHandler.js';
-import { GetCouponHoldersQueryHandler } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQueryHandler.js';
-import { GetTotalCouponHoldersQueryHandler } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQueryHandler.js';
-import { GetDividendHoldersQueryHandler } from '@query/equity/dividends/getDividendHolders/GetDividendHoldersQueryHandler.js';
-import { GetTotalDividendHoldersQueryHandler } from '@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQueryHandler.js';
-import { GetVotingHoldersQueryHandler } from '@query/equity/votingRights/getVotingHolders/GetVotingHoldersQueryHandler.js';
-import { GetTotalVotingHoldersQueryHandler } from '@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQueryHandler.js';
-import { GetSecurityHoldersQueryHandler } from '@query/security/security/getSecurityHolders/GetSecurityHoldersQueryHandler.js';
-import { GetTotalSecurityHoldersQueryHandler } from '@query/security/security/getTotalSecurityHolders/GetTotalSecurityHoldersQueryHandler.js';
+import { GetTokenHoldersAtSnapshotQueryHandler } from '@query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQueryHandler';
+import { GetTotalTokenHoldersAtSnapshotQueryHandler } from '@query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQueryHandler';
+import { GetCouponHoldersQueryHandler } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQueryHandler';
+import { GetTotalCouponHoldersQueryHandler } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQueryHandler';
+import { GetDividendHoldersQueryHandler } from '@query/equity/dividends/getDividendHolders/GetDividendHoldersQueryHandler';
+import { GetTotalDividendHoldersQueryHandler } from '@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQueryHandler';
+import { GetVotingHoldersQueryHandler } from '@query/equity/votingRights/getVotingHolders/GetVotingHoldersQueryHandler';
+import { GetTotalVotingHoldersQueryHandler } from '@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQueryHandler';
+import { GetSecurityHoldersQueryHandler } from '@query/security/security/getSecurityHolders/GetSecurityHoldersQueryHandler';
+import { GetTotalSecurityHoldersQueryHandler } from '@query/security/security/getTotalSecurityHolders/GetTotalSecurityHoldersQueryHandler';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),

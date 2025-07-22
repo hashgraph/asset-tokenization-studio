@@ -214,8 +214,8 @@ export class GetTotalTokenHoldersAtSnapshotQueryResponse
 
 export class GetTotalTokenHoldersAtSnapshotQuery extends Query<GetTotalTokenHoldersAtSnapshotQueryResponse> {
   constructor(
-    public readonly snapshotId: number,
     public readonly securityId: string,
+    public readonly snapshotId: number,
   ) {
     super();
   }

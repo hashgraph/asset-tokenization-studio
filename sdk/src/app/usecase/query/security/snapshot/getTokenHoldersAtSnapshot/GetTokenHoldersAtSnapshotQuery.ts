@@ -212,8 +212,8 @@ export class GetTokenHoldersAtSnapshotQueryResponse implements QueryResponse {
 
 export class GetTokenHoldersAtSnapshotQuery extends Query<GetTokenHoldersAtSnapshotQueryResponse> {
   constructor(
-    public readonly snapshotId: number,
     public readonly securityId: string,
+    public readonly snapshotId: number,
     public readonly start: number,
     public readonly end: number,
   ) {

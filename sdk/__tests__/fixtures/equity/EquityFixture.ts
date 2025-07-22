@@ -261,6 +261,10 @@ import { GetDividendHoldersQuery } from '@query/equity/dividends/getDividendHold
 import { GetTotalDividendHoldersQuery } from '@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery';
 import { GetVotingHoldersQuery } from '@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery';
 import { GetTotalVotingHoldersQuery } from '@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery';
+import GetDividendHoldersRequest from '@port/in/request/equity/GetDividendHoldersRequest';
+import GetTotalDividendHoldersRequest from '@port/in/request/equity/GetTotalDividendHoldersRequest';
+import GetVotingHoldersRequest from '@port/in/request/equity/GetVotingHoldersRequest';
+import GetTotalVotingHoldersRequest from '@port/in/request/equity/GetTotalVotingHoldersRequest';
 
 export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
   (request) => {
@@ -440,6 +444,34 @@ export const GetScheduledBalanceAdjustmentRequestFixture =
 export const GetAllScheduledBalanceAdjustmentsRequestFixture =
   createFixture<GetAllScheduledBalanceAdjustmentsRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const GetDividendHoldersRequestFixture =
+  createFixture<GetDividendHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    request.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalDividendHoldersRequestFixture =
+  createFixture<GetTotalDividendHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetVotingHoldersRequestFixture =
+  createFixture<GetVotingHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.voteId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    request.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalVotingHoldersRequestFixture =
+  createFixture<GetTotalVotingHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.voteId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
   });
 
 export const GetScheduledBalanceAdjustmentQueryFixture =
