@@ -207,17 +207,47 @@
 pragma solidity 0.8.18;
 
 import {IBond} from '../interfaces/bond/IBond.sol';
+import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 import {BondStorageWrapper} from './BondStorageWrapper.sol';
 import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {
     _CORPORATE_ACTION_ROLE,
-    _BOND_MANAGER_ROLE
+    _BOND_MANAGER_ROLE,
+    _MATURITY_REDEEMER_ROLE
 } from '../../layer_1/constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
+    function redeemAtMaturityByPartition(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_tokenHolder)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyListedAllowed(_tokenHolder)
+        onlyRole(_MATURITY_REDEEMER_ROLE)
+        onlyClearingDisabled
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
+        onlyUnrecoveredAddress(_tokenHolder)
+        onlyAfterCurrentMaturityDate(_blockTimestamp())
+    {
+        _redeemByPartition(
+            _partition,
+            _tokenHolder,
+            _msgSender(),
+            _amount,
+            '',
+            ''
+        );
+    }
+
     function setCoupon(
         Coupon calldata _newCoupon
     )

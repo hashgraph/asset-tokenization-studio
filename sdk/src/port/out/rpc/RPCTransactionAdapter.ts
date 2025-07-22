@@ -2912,6 +2912,24 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async redeemAtMaturityByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Redeeming at maturity by partition to address ${security.toString()}`,
+    );
+
+    return this.executeTransaction(
+      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'redeemAtMaturityByPartition',
+      [sourceId.toString(), partitionId, amount.toBigNumber()],
+      GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
+    );
+  }
+
   private async executeTransaction<T>(
     factory: any,
     method: string,

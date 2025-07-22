@@ -3088,6 +3088,26 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async redeemAtMaturityByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Redeeming at maturity by partition to address ${security.toString()}`,
+    );
+    const contract = new Contract(security.toString(), Bond__factory.abi);
+    return this.executeWithArgs(
+      contract,
+      'redeemAtMaturityByPartition',
+      securityId,
+      GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
+      [sourceId.toString(), partitionId, amount.toBigNumber()],
+    );
+  }
+
   // * Definition of the abstract methods
   abstract signAndSendTransaction(
     transaction: Transaction,
