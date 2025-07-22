@@ -257,6 +257,10 @@ import { SetDividendsCommand } from '@command/equity/dividends/set/SetDividendsC
 import { SetVotingRightsCommand } from '@command/equity/votingRights/set/SetVotingRightsCommand';
 import ContractId from '@domain/context/contract/ContractId';
 import { SecurityPropsFixture } from '../shared/SecurityFixture';
+import { GetDividendHoldersQuery } from '@query/equity/dividends/getDividendHolders/GetDividendHoldersQuery';
+import { GetTotalDividendHoldersQuery } from '@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery';
+import { GetVotingHoldersQuery } from '@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery';
+import { GetTotalVotingHoldersQuery } from '@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery';
 
 export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
   (request) => {
@@ -523,6 +527,34 @@ export const GetConfigInfoQueryFixture = createFixture<GetConfigInfoQuery>(
     );
   },
 );
+
+export const GetDividendHoldersQueryFixture =
+  createFixture<GetDividendHoldersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalDividendHoldersQueryFixture =
+  createFixture<GetTotalDividendHoldersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetVotingHoldersQueryFixture =
+  createFixture<GetVotingHoldersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.voteId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalVotingHoldersQueryFixture =
+  createFixture<GetTotalVotingHoldersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.voteId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
 
 export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
   (command) => {

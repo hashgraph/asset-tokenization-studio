@@ -203,35 +203,90 @@
 
 */
 
-import { GetTotalTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQuery';
-import TakeSnapshotRequest from '@port/in/request/security/operations/snapshot/TakeSnapshotRequest';
-import { TakeSnapshotCommand } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
+import { createMock } from '@golevelup/ts-jest';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import {
+  GetTotalVotingHoldersQuery,
+  GetTotalVotingHoldersQueryResponse,
+} from './GetTotalVotingHoldersQuery.js';
+import { GetTotalVotingHoldersQueryHandler } from './GetTotalVotingHoldersQueryHandler.js';
+import { GetTotalVotingHoldersQueryError } from './error/GetTotalVotingHoldersQueryError.js';
+import {
+  GetTotalVotingHoldersQueryFixture,
+} from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
 
-export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+describe('GetTotalVotingHoldersQueryHandler', () => {
+  let handler: GetTotalVotingHoldersQueryHandler;
+  let query: GetTotalVotingHoldersQuery;
 
-export const TakeSnapshotRequestFixture = createFixture<TakeSnapshotRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
 
-export const GetTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTokenHoldersAtSnapshotQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const errorMsg = ErrorMsgFixture.create().msg;
+
+  beforeEach(() => {
+    handler = new GetTotalVotingHoldersQueryHandler(
+      queryAdapterServiceMock,
+      contractServiceMock,
+    );
+    query = GetTotalVotingHoldersQueryFixture.create();
   });
 
-export const GetTotalTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTotalTokenHoldersAtSnapshotQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  afterEach(() => {
+    jest.resetAllMocks();
   });
+
+  describe('execute', () => {
+    it('throws GetTotalVotingHoldersQueryError when query fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(query);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        GetTotalVotingHoldersQueryError,
+      );
+
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while querying total voting holders: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtQueryError,
+      });
+    });
+
+    it('should successfully get total voting holders', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      queryAdapterServiceMock.getTotalVotingHolders.mockResolvedValue(1);
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(GetTotalVotingHoldersQueryResponse);
+      expect(result.payload).toStrictEqual(1);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(
+        queryAdapterServiceMock.getTotalVotingHolders,
+      ).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+      expect(
+        queryAdapterServiceMock.getTotalVotingHolders,
+      ).toHaveBeenCalledWith(evmAddress, query.voteId);
+    });
+  });
+});

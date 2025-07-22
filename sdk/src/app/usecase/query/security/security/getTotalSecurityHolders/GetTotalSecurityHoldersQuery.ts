@@ -203,35 +203,19 @@
 
 */
 
-import { GetTotalTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQuery';
-import TakeSnapshotRequest from '@port/in/request/security/operations/snapshot/TakeSnapshotRequest';
-import { TakeSnapshotCommand } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 
-export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+export class GetTotalSecurityHoldersQueryResponse
+  implements QueryResponse
+{
+  constructor(public readonly payload: number) {}
+}
 
-export const TakeSnapshotRequestFixture = createFixture<TakeSnapshotRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const GetTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTokenHoldersAtSnapshotQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-  });
-
-export const GetTotalTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTotalTokenHoldersAtSnapshotQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
+export class GetTotalSecurityHoldersQuery extends Query<GetTotalSecurityHoldersQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+  ) {
+    super();
+  }
+}

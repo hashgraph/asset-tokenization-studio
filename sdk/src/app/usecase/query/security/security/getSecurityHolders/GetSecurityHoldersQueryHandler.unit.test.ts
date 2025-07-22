@@ -203,35 +203,101 @@
 
 */
 
-import { GetTotalTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQuery';
-import TakeSnapshotRequest from '@port/in/request/security/operations/snapshot/TakeSnapshotRequest';
-import { TakeSnapshotCommand } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
+import { createMock } from '@golevelup/ts-jest';
+import {
+  AccountPropsFixture,
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import AccountService from '../../../../../service/account/AccountService.js';
+import {
+  GetSecurityHoldersQuery,
+  GetSecurityHoldersQueryResponse,
+} from './GetSecurityHoldersQuery.js';
+import { GetSecurityHoldersQueryHandler } from './GetSecurityHoldersQueryHandler.js';
+import { GetSecurityHoldersQueryError } from './error/GetSecurityHoldersQueryError.js';
+import Account from '../../../../../../domain/context/account/Account.js';
+import { GetSecurityHoldersQueryFixture } from '../../../../../../../__tests__/fixtures/security/SecurityFixture.js';
 
-export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+describe('GetSecurityHoldersQueryHandler', () => {
+  let handler: GetSecurityHoldersQueryHandler;
+  let query: GetSecurityHoldersQuery;
 
-export const TakeSnapshotRequestFixture = createFixture<TakeSnapshotRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
-export const GetTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTokenHoldersAtSnapshotQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const account = new Account(AccountPropsFixture.create());
+  const errorMsg = ErrorMsgFixture.create().msg;
+
+  beforeEach(() => {
+    handler = new GetSecurityHoldersQueryHandler(
+      queryAdapterServiceMock,
+      accountServiceMock,
+      contractServiceMock,
+    );
+    query = GetSecurityHoldersQueryFixture.create();
   });
 
-export const GetTotalTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTotalTokenHoldersAtSnapshotQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  afterEach(() => {
+    jest.resetAllMocks();
   });
+
+  describe('execute', () => {
+    it('throws GetSecurityHoldersQueryError when query fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(query);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        GetSecurityHoldersQueryError,
+      );
+
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while querying security holders: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtQueryError,
+      });
+    });
+
+    it('should successfully get token holders for security', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      queryAdapterServiceMock.getTokenHoldersAtSnapshot.mockResolvedValue([
+        evmAddress.toString(),
+      ]);
+      accountServiceMock.getAccountInfo.mockResolvedValueOnce(account);
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(GetSecurityHoldersQueryResponse);
+      expect(result.payload).toStrictEqual([account.id.toString()]);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledTimes(1);
+      expect(
+        queryAdapterServiceMock.getTokenHoldersAtSnapshot,
+      ).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+      expect(
+        queryAdapterServiceMock.getTokenHoldersAtSnapshot,
+      ).toHaveBeenCalledWith(evmAddress, query.start, query.end);
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(
+        evmAddress.toString(),
+      );
+    });
+  });
+});

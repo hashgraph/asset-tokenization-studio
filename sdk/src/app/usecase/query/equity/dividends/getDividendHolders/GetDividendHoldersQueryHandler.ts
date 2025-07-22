@@ -203,35 +203,57 @@
 
 */
 
-import { GetTotalTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQuery';
-import TakeSnapshotRequest from '@port/in/request/security/operations/snapshot/TakeSnapshotRequest';
-import { TakeSnapshotCommand } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import {
+  GetDividendHoldersQuery,
+  GetDividendHoldersQueryResponse,
+} from './GetDividendHoldersQuery.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import { GetDividendHoldersQueryError } from './error/GetDividendHoldersQueryError.js';
+import AccountService from '../../../../../service/account/AccountService.js';
 
-export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+@QueryHandler(GetDividendHoldersQuery)
+export class GetDividendHoldersQueryHandler
+  implements IQueryHandler<GetDividendHoldersQuery>
+{
+  constructor(
+    @lazyInject(RPCQueryAdapter)
+    private readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+  ) {}
 
-export const TakeSnapshotRequestFixture = createFixture<TakeSnapshotRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  async execute(
+    query: GetDividendHoldersQuery,
+  ): Promise<GetDividendHoldersQueryResponse> {
+    try {
+      const { securityId, dividendId, start, end } = query;
 
-export const GetTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTokenHoldersAtSnapshotQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-  });
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-export const GetTotalTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTotalTokenHoldersAtSnapshotQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-  });
+      const res = await this.queryAdapter.getDividendHolders(
+        securityEvmAddress,
+        dividendId,
+        start,
+        end,
+      );
+
+      const updatedRes = await Promise.all(
+        res.map(async (address) =>
+          (await this.accountService.getAccountInfo(address)).id.toString(),
+        ),
+      );
+
+      return new GetDividendHoldersQueryResponse(updatedRes);
+    } catch (error) {
+      throw new GetDividendHoldersQueryError(error as Error);
+    }
+  }
+}

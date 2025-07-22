@@ -203,35 +203,88 @@
 
 */
 
-import { GetTotalTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQuery';
-import TakeSnapshotRequest from '@port/in/request/security/operations/snapshot/TakeSnapshotRequest';
-import { TakeSnapshotCommand } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
+import { createMock } from '@golevelup/ts-jest';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import ContractService from '../../../../../service/contract/ContractService.js';
+import {
+  GetTotalDividendHoldersQuery,
+  GetTotalDividendHoldersQueryResponse,
+} from './GetTotalDividendHoldersQuery.js';
+import { GetTotalDividendHoldersQueryHandler } from './GetTotalDividendHoldersQueryHandler.js';
+import { GetTotalDividendHoldersQueryError } from './error/GetTotalDividendHoldersQueryError.js';
+import { GetTotalDividendHoldersQueryFixture } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
 
-export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+describe('GetTotalDividendHoldersQueryHandler', () => {
+  let handler: GetTotalDividendHoldersQueryHandler;
+  let query: GetTotalDividendHoldersQuery;
 
-export const TakeSnapshotRequestFixture = createFixture<TakeSnapshotRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
 
-export const GetTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTokenHoldersAtSnapshotQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
-    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const errorMsg = ErrorMsgFixture.create().msg;
+
+  beforeEach(() => {
+    handler = new GetTotalDividendHoldersQueryHandler(
+      queryAdapterServiceMock,
+      contractServiceMock,
+    );
+    query = GetTotalDividendHoldersQueryFixture.create();
   });
 
-export const GetTotalTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTotalTokenHoldersAtSnapshotQuery>((query) => {
-    query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  afterEach(() => {
+    jest.resetAllMocks();
   });
+
+  describe('execute', () => {
+    it('throws GetTotalDividendHoldersQueryError when query fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(query);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        GetTotalDividendHoldersQueryError,
+      );
+
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while querying total dividend holders: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtQueryError,
+      });
+    });
+
+    it('should successfully get total dividend holders', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      queryAdapterServiceMock.getTotalDividendHolders.mockResolvedValue(1);
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(GetTotalDividendHoldersQueryResponse);
+      expect(result.payload).toStrictEqual(1);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(
+        queryAdapterServiceMock.getTotalDividendHolders,
+      ).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+      expect(
+        queryAdapterServiceMock.getTotalDividendHolders,
+      ).toHaveBeenCalledWith(evmAddress, query.dividendId);
+    });
+  });
+});

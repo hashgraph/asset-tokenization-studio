@@ -203,35 +203,19 @@
 
 */
 
-import { GetTotalTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQuery';
-import TakeSnapshotRequest from '@port/in/request/security/operations/snapshot/TakeSnapshotRequest';
-import { TakeSnapshotCommand } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
+import { GetSecurityHoldersQuery } from '../../../src/app/usecase/query/security/security/getSecurityHolders/GetSecurityHoldersQuery';
+import { GetTotalSecurityHoldersQuery } from '../../../src/app/usecase/query/security/security/getTotalSecurityHolders/GetTotalSecurityHoldersQuery';
 
-export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>(
-  (command) => {
-    command.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const TakeSnapshotRequestFixture = createFixture<TakeSnapshotRequest>(
-  (request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-  },
-);
-
-export const GetTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTokenHoldersAtSnapshotQuery>((query) => {
+export const GetSecurityHoldersQueryFixture =
+  createFixture<GetSecurityHoldersQuery>((query) => {
     query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
     query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
     query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   });
 
-export const GetTotalTokenHoldersAtSnapshotQueryFixture =
-  createFixture<GetTotalTokenHoldersAtSnapshotQuery>((query) => {
+export const GetTotalSecurityHoldersQueryFixture =
+  createFixture<GetTotalSecurityHoldersQuery>((query) => {
     query.securityId.as(() => HederaIdPropsFixture.create().value);
-    query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
   });
