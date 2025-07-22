@@ -204,7 +204,7 @@
 */
 
 import { Command } from '@core/command/Command';
-import { CommandResponse } from '@core/command/CommandResponse.js';
+import { CommandResponse } from '@core/command/CommandResponse';
 
 export class RedeemAtMaturityByPartitionCommandResponse
   implements CommandResponse
