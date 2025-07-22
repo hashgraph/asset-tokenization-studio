@@ -240,6 +240,12 @@ interface IBond {
         bool recordDateReached;
     }
 
+    function redeemAtMaturityByPartition(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _amount
+    ) external;
+
     function setCoupon(
         Coupon calldata _newCoupon
     ) external returns (bool success_, uint256 couponID_);

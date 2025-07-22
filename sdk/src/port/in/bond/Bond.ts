@@ -205,7 +205,7 @@
 
 import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
 import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { LogError } from '@core/decorator/LogErrorDecorator';
 import { QueryBus } from '@core/query/QueryBus';
 import ValidatedRequest from '@core/validation/ValidatedArgs';
@@ -240,6 +240,8 @@ import {
 } from '@domain/context/factory/RegulationType';
 import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import RedeemAtMaturityByPartitionRequest from '../request/bond/RedeemAtMaturityByPartitionRequest';
 
 interface IBondInPort {
   create(
@@ -257,6 +259,9 @@ interface IBondInPort {
   getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
   updateMaturityDate(
     request: UpdateMaturityDateRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  redeemAtMaturityByPartition(
+    request: RedeemAtMaturityByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
@@ -478,6 +483,26 @@ class BondInPort implements IBondInPort {
 
     return await this.commandBus.execute(
       new UpdateMaturityDateCommand(maturityDate, securityId),
+    );
+  }
+
+  @LogError
+  async redeemAtMaturityByPartition(
+    request: RedeemAtMaturityByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, partitionId, sourceId, amount } = request;
+    ValidatedRequest.handleValidation(
+      RedeemAtMaturityByPartitionRequest.name,
+      request,
+    );
+
+    return await this.commandBus.execute(
+      new RedeemAtMaturityByPartitionCommand(
+        securityId,
+        partitionId,
+        sourceId,
+        amount,
+      ),
     );
   }
 }

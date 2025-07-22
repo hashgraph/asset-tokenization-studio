@@ -212,7 +212,7 @@ import { GetRoleMemberCountQuery } from '@query/security/roles/getRoleMemberCoun
 import { GetRoleMembersQuery } from '@query/security/roles/getRoleMembers/GetRoleMembersQuery';
 import { GetRolesForQuery } from '@query/security/roles/getRolesFor/GetRolesForQuery';
 import { HasRoleQuery } from '@query/security/roles/hasRole/HasRoleQuery';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { CommandBus } from '@core/command/CommandBus';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import { LogError } from '@core/decorator/LogErrorDecorator';

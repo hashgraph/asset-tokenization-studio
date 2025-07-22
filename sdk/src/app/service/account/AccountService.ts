@@ -204,7 +204,7 @@
 */
 
 import { singleton } from 'tsyringe';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { QueryBus } from '@core/query/QueryBus';
 import Account from '@domain/context/account/Account';
 import { AccountIdNotValid } from '@domain/context/account/error/AccountIdNotValid';

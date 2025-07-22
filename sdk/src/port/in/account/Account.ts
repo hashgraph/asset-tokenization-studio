@@ -210,7 +210,7 @@ import ValidatedRequest from '@core/validation/ValidatedArgs';
 
 import { GetAccountInfoQuery } from '@query/account/info/GetAccountInfoQuery';
 import { QueryBus } from '@core/query/QueryBus';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { HederaId } from '@domain/context/shared/HederaId';
 import { LogError } from '@core/decorator/LogErrorDecorator';
 import { GetAccountBalanceQuery } from '@query/account/balance/GetAccountBalanceQuery';

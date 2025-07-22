@@ -214,6 +214,7 @@ import {
   GetCouponRequest,
   GetAllCouponsRequest,
   UpdateMaturityDateRequest,
+  RedeemAtMaturityByPartitionRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
@@ -235,6 +236,7 @@ import {
   GetCouponDetailsRequestFixture,
   GetCouponForRequestFixture,
   GetCouponRequestFixture,
+  RedeemAtMaturityByPartitionRequestFixture,
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
 } from '@test/fixtures/bond/BondFixture';
@@ -257,6 +259,7 @@ import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponFor
 import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 
 describe('Bond', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -271,6 +274,7 @@ describe('Bond', () => {
   let getCouponRequest: GetCouponRequest;
   let getAllCouponsRequest: GetAllCouponsRequest;
   let updateMaturityDateRequest: UpdateMaturityDateRequest;
+  let redeemAtMaturityByPartitionRequest: RedeemAtMaturityByPartitionRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -1237,6 +1241,122 @@ describe('Bond', () => {
 
       await expect(
         BondToken.updateMaturityDate(updateMaturityDateRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('redeemAtMaturityByPartition', () => {
+    redeemAtMaturityByPartitionRequest = new RedeemAtMaturityByPartitionRequest(
+      RedeemAtMaturityByPartitionRequestFixture.create(),
+    );
+    it('should redeem at maturity by partition successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.redeemAtMaturityByPartition(
+        redeemAtMaturityByPartitionRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        RedeemAtMaturityByPartitionRequest.name,
+        redeemAtMaturityByPartitionRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RedeemAtMaturityByPartitionCommand(
+          redeemAtMaturityByPartitionRequest.securityId,
+          redeemAtMaturityByPartitionRequest.partitionId,
+          redeemAtMaturityByPartitionRequest.sourceId,
+          redeemAtMaturityByPartitionRequest.amount,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.redeemAtMaturityByPartition(
+          redeemAtMaturityByPartitionRequest,
+        ),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        RedeemAtMaturityByPartitionRequest.name,
+        redeemAtMaturityByPartitionRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RedeemAtMaturityByPartitionCommand(
+          redeemAtMaturityByPartitionRequest.securityId,
+          redeemAtMaturityByPartitionRequest.partitionId,
+          redeemAtMaturityByPartitionRequest.sourceId,
+          redeemAtMaturityByPartitionRequest.amount,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      redeemAtMaturityByPartitionRequest =
+        new RedeemAtMaturityByPartitionRequest({
+          ...RedeemAtMaturityByPartitionRequestFixture.create(),
+          securityId: 'invalid',
+        });
+
+      await expect(
+        BondToken.redeemAtMaturityByPartition(
+          redeemAtMaturityByPartitionRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if partitionId is invalid', async () => {
+      redeemAtMaturityByPartitionRequest =
+        new RedeemAtMaturityByPartitionRequest({
+          ...RedeemAtMaturityByPartitionRequestFixture.create(),
+          partitionId: 'invalid',
+        });
+
+      await expect(
+        BondToken.redeemAtMaturityByPartition(
+          redeemAtMaturityByPartitionRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if sourceId is invalid', async () => {
+      redeemAtMaturityByPartitionRequest =
+        new RedeemAtMaturityByPartitionRequest({
+          ...RedeemAtMaturityByPartitionRequestFixture.create(),
+          sourceId: 'invalid',
+        });
+
+      await expect(
+        BondToken.redeemAtMaturityByPartition(
+          redeemAtMaturityByPartitionRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if amount is invalid', async () => {
+      redeemAtMaturityByPartitionRequest =
+        new RedeemAtMaturityByPartitionRequest({
+          ...RedeemAtMaturityByPartitionRequestFixture.create(),
+          amount: 'invalid',
+        });
+
+      await expect(
+        BondToken.redeemAtMaturityByPartition(
+          redeemAtMaturityByPartitionRequest,
+        ),
       ).rejects.toThrow(ValidationError);
     });
   });
