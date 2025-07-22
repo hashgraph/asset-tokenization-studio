@@ -346,6 +346,20 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         return _getCouponCount();
     }
 
+    function getCouponHolders(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_) {
+        return _getCouponHolders(_couponID, _pageIndex, _pageLength);
+    }
+
+    function getTotalCouponHolders(
+        uint256 _couponID
+    ) external view returns (uint256) {
+        return _getTotalCouponHolders(_couponID);
+    }
+
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_bond(
         BondDetailsData calldata _bondDetailsData,
