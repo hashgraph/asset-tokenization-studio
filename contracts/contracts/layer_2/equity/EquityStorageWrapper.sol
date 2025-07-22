@@ -354,6 +354,45 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
     }
 
+    function _getDividendHolders(
+        uint256 _dividendID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory holders_) {
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
+            _dividendID
+        );
+
+        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
+            return new address[](0);
+
+        if (registeredDividend.snapshotId != 0)
+            return
+                _tokenHoldersAt(
+                    registeredDividend.snapshotId,
+                    _pageIndex,
+                    _pageLength
+                );
+
+        return _getTokenHolders(_pageIndex, _pageLength);
+    }
+
+    function _getTotalDividendHolders(
+        uint256 _dividendID
+    ) internal view returns (uint256) {
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
+            _dividendID
+        );
+
+        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
+            return 0;
+
+        if (registeredDividend.snapshotId != 0)
+            return _totalTokenHoldersAt(registeredDividend.snapshotId);
+
+        return _getTotalTokenHolders();
+    }
+
     function _getVoting(
         uint256 _voteID
     )
@@ -404,6 +443,40 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     function _getVotingCount() internal view returns (uint256 votingCount_) {
         return
             _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+    }
+
+    function _getVotingHolders(
+        uint256 _voteID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory holders_) {
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+
+        if (registeredVoting.voting.recordDate >= _blockTimestamp())
+            return new address[](0);
+
+        if (registeredVoting.snapshotId != 0)
+            return
+                _tokenHoldersAt(
+                    registeredVoting.snapshotId,
+                    _pageIndex,
+                    _pageLength
+                );
+
+        return _getTokenHolders(_pageIndex, _pageLength);
+    }
+
+    function _getTotalVotingHolders(
+        uint256 _voteID
+    ) internal view returns (uint256) {
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+
+        if (registeredVoting.voting.recordDate >= _blockTimestamp()) return 0;
+
+        if (registeredVoting.snapshotId != 0)
+            return _totalTokenHoldersAt(registeredVoting.snapshotId);
+
+        return _getTotalTokenHolders();
     }
 
     function _getScheduledBalanceAdjusment(

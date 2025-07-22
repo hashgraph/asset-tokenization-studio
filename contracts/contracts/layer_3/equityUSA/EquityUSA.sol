@@ -245,7 +245,7 @@ contract EquityUSA is IEquityUSA, Equity, Security {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](14);
+        staticFunctionSelectors_ = new bytes4[](20);
         staticFunctionSelectors_[selectorIndex++] = this
             ._initialize_equityUSA
             .selector;
@@ -277,6 +277,24 @@ contract EquityUSA is IEquityUSA, Equity, Security {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getSecurityRegulationData
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getSecurityHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalSecurityHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getDividendHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalDividendHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getVotingHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalVotingHolders
             .selector;
     }
 
