@@ -272,7 +272,7 @@ describe('GetSecurityHoldersQueryHandler', () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,
       );
-      queryAdapterServiceMock.getTokenHoldersAtSnapshot.mockResolvedValue([
+      queryAdapterServiceMock.getSecurityHolders.mockResolvedValue([
         evmAddress.toString(),
       ]);
       accountServiceMock.getAccountInfo.mockResolvedValueOnce(account);
@@ -286,15 +286,17 @@ describe('GetSecurityHoldersQueryHandler', () => {
         1,
       );
       expect(accountServiceMock.getAccountInfo).toHaveBeenCalledTimes(1);
-      expect(
-        queryAdapterServiceMock.getTokenHoldersAtSnapshot,
-      ).toHaveBeenCalledTimes(1);
+      expect(queryAdapterServiceMock.getSecurityHolders).toHaveBeenCalledTimes(
+        1,
+      );
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.securityId,
       );
-      expect(
-        queryAdapterServiceMock.getTokenHoldersAtSnapshot,
-      ).toHaveBeenCalledWith(evmAddress, query.start, query.end);
+      expect(queryAdapterServiceMock.getSecurityHolders).toHaveBeenCalledWith(
+        evmAddress,
+        query.start,
+        query.end,
+      );
       expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(
         evmAddress.toString(),
       );
