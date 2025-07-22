@@ -203,27 +203,25 @@
 
 */
 
+import { ErrorCode } from '@core/error/BaseError';
 import { createMock } from '@golevelup/ts-jest';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import { GetVotingHoldersQueryFixture } from '@test/fixtures/equity/EquityFixture';
 import {
+  EvmAddressPropsFixture,
   AccountPropsFixture,
   ErrorMsgFixture,
-  EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import AccountService from '../../../../../service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { GetVotingHoldersQueryError } from './error/GetVotingHoldersQueryError';
 import {
   GetVotingHoldersQuery,
   GetVotingHoldersQueryResponse,
-} from './GetVotingHoldersQuery.js';
-import { GetVotingHoldersQueryHandler } from './GetVotingHoldersQueryHandler.js';
-import { GetVotingHoldersQueryError } from './error/GetVotingHoldersQueryError.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import {
-  GetVotingHoldersQueryFixture,
-} from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
+} from './GetVotingHoldersQuery';
+import { GetVotingHoldersQueryHandler } from './GetVotingHoldersQueryHandler';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import Account from '@domain/context/account/Account';
 
 describe('GetDividendHoldersQueryHandler', () => {
   let handler: GetVotingHoldersQueryHandler;

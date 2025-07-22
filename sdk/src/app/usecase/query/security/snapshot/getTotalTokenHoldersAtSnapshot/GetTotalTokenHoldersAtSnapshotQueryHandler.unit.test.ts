@@ -203,22 +203,22 @@
 
 */
 
+import { ErrorCode } from '@core/error/BaseError';
 import { createMock } from '@golevelup/ts-jest';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import ContractService from '@service/contract/ContractService';
 import {
-  ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
+  ErrorMsgFixture,
+} from '@test/fixtures/shared/DataFixture';
+import { GetTotalTokenHoldersAtSnapshotQueryFixture } from '@test/fixtures/snapshot/SnapshotFixture';
+import { GetTotalTokenHoldersAtSnapshotQueryError } from './error/GetTotalTokenHoldersAtSnapshotQueryError';
 import {
   GetTotalTokenHoldersAtSnapshotQuery,
   GetTotalTokenHoldersAtSnapshotQueryResponse,
-} from './GetTotalTokenHoldersAtSnapshotQuery.js';
-import { GetTotalTokenHoldersAtSnapshotQueryHandler } from './GetTotalTokenHoldersAtSnapshotQueryHandler.js';
-import { GetTotalTokenHoldersAtSnapshotQueryError } from './error/GetTotalTokenHoldersAtSnapshotQueryError.js';
-import { GetTotalTokenHoldersAtSnapshotQueryFixture } from '../../../../../../../__tests__/fixtures/snapshot/SnapshotFixture.js';
+} from './GetTotalTokenHoldersAtSnapshotQuery';
+import { GetTotalTokenHoldersAtSnapshotQueryHandler } from './GetTotalTokenHoldersAtSnapshotQueryHandler';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 
 describe('GetTotalTokenHoldersAtSnapshotQueryHandler', () => {
   let handler: GetTotalTokenHoldersAtSnapshotQueryHandler;

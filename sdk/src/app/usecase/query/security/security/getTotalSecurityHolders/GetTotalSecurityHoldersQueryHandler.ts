@@ -203,17 +203,17 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import ContractService from '@service/contract/ContractService';
+import { GetTotalSecurityHoldersQueryError } from './error/GetTotalSecurityHoldersQueryError';
 import {
   GetTotalSecurityHoldersQuery,
   GetTotalSecurityHoldersQueryResponse,
-} from './GetTotalSecurityHoldersQuery.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { GetTotalSecurityHoldersQueryError } from './error/GetTotalSecurityHoldersQueryError.js';
+} from './GetTotalSecurityHoldersQuery';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 
 @QueryHandler(GetTotalSecurityHoldersQuery)
 export class GetTotalSecurityHoldersQueryHandler

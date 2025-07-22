@@ -203,22 +203,22 @@
 
 */
 
+import { ErrorCode } from '@core/error/BaseError';
 import { createMock } from '@golevelup/ts-jest';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import ContractService from '@service/contract/ContractService';
+import { GetTotalDividendHoldersQueryFixture } from '@test/fixtures/equity/EquityFixture';
 import {
-  ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
+  ErrorMsgFixture,
+} from '@test/fixtures/shared/DataFixture';
+import { GetTotalDividendHoldersQueryError } from './error/GetTotalDividendHoldersQueryError';
 import {
   GetTotalDividendHoldersQuery,
   GetTotalDividendHoldersQueryResponse,
-} from './GetTotalDividendHoldersQuery.js';
-import { GetTotalDividendHoldersQueryHandler } from './GetTotalDividendHoldersQueryHandler.js';
-import { GetTotalDividendHoldersQueryError } from './error/GetTotalDividendHoldersQueryError.js';
-import { GetTotalDividendHoldersQueryFixture } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
+} from './GetTotalDividendHoldersQuery';
+import { GetTotalDividendHoldersQueryHandler } from './GetTotalDividendHoldersQueryHandler';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 
 describe('GetTotalDividendHoldersQueryHandler', () => {
   let handler: GetTotalDividendHoldersQueryHandler;

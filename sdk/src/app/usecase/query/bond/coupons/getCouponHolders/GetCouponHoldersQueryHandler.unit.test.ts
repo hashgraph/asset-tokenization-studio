@@ -203,25 +203,25 @@
 
 */
 
+import { ErrorCode } from '@core/error/BaseError';
 import { createMock } from '@golevelup/ts-jest';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import { GetCouponHoldersQueryFixture } from '@test/fixtures/bond/BondFixture';
 import {
+  EvmAddressPropsFixture,
   AccountPropsFixture,
   ErrorMsgFixture,
-  EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import AccountService from '../../../../../service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { GetCouponHoldersQueryError } from './error/GetCouponHoldersQueryError';
 import {
   GetCouponHoldersQuery,
   GetCouponHoldersQueryResponse,
-} from './GetCouponHoldersQuery.js';
-import { GetCouponHoldersQueryHandler } from './GetCouponHoldersQueryHandler.js';
-import { GetCouponHoldersQueryError } from './error/GetCouponHoldersQueryError.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { GetCouponHoldersQueryFixture } from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
+} from './GetCouponHoldersQuery';
+import { GetCouponHoldersQueryHandler } from './GetCouponHoldersQueryHandler';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import Account from '@domain/context/account/Account';
 
 describe('GetCouponHoldersQueryHandler', () => {
   let handler: GetCouponHoldersQueryHandler;
@@ -286,15 +286,11 @@ describe('GetCouponHoldersQueryHandler', () => {
         1,
       );
       expect(accountServiceMock.getAccountInfo).toHaveBeenCalledTimes(1);
-      expect(
-        queryAdapterServiceMock.getCouponHolders,
-      ).toHaveBeenCalledTimes(1);
+      expect(queryAdapterServiceMock.getCouponHolders).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.securityId,
       );
-      expect(
-        queryAdapterServiceMock.getCouponHolders,
-      ).toHaveBeenCalledWith(
+      expect(queryAdapterServiceMock.getCouponHolders).toHaveBeenCalledWith(
         evmAddress,
         query.couponId,
         query.start,

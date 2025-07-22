@@ -203,8 +203,8 @@
 
 */
 
-import { QueryError } from '../../../../error/QueryError';
-import BaseError from '../../../../../../../core/error/BaseError';
+import BaseError from '@core/error/BaseError';
+import { QueryError } from '@query/error/QueryError';
 
 export class GetDividendHoldersQueryError extends QueryError {
   constructor(error: Error) {

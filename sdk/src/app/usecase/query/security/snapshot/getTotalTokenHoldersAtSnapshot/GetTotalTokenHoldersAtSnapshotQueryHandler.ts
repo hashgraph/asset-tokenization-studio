@@ -203,17 +203,17 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import ContractService from '@service/contract/ContractService';
+import { GetTotalTokenHoldersAtSnapshotQueryError } from './error/GetTotalTokenHoldersAtSnapshotQueryError';
 import {
   GetTotalTokenHoldersAtSnapshotQuery,
   GetTotalTokenHoldersAtSnapshotQueryResponse,
-} from './GetTotalTokenHoldersAtSnapshotQuery.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { GetTotalTokenHoldersAtSnapshotQueryError } from './error/GetTotalTokenHoldersAtSnapshotQueryError.js';
+} from './GetTotalTokenHoldersAtSnapshotQuery';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 
 @QueryHandler(GetTotalTokenHoldersAtSnapshotQuery)
 export class GetTotalTokenHoldersAtSnapshotQueryHandler

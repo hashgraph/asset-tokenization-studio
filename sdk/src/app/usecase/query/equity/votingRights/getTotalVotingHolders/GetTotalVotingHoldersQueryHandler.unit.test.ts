@@ -203,24 +203,22 @@
 
 */
 
+import { ErrorCode } from '@core/error/BaseError';
 import { createMock } from '@golevelup/ts-jest';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import ContractService from '@service/contract/ContractService';
+import { GetTotalVotingHoldersQueryFixture } from '@test/fixtures/equity/EquityFixture';
 import {
-  ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
+  ErrorMsgFixture,
+} from '@test/fixtures/shared/DataFixture';
+import { GetTotalVotingHoldersQueryError } from './error/GetTotalVotingHoldersQueryError';
 import {
   GetTotalVotingHoldersQuery,
   GetTotalVotingHoldersQueryResponse,
-} from './GetTotalVotingHoldersQuery.js';
-import { GetTotalVotingHoldersQueryHandler } from './GetTotalVotingHoldersQueryHandler.js';
-import { GetTotalVotingHoldersQueryError } from './error/GetTotalVotingHoldersQueryError.js';
-import {
-  GetTotalVotingHoldersQueryFixture,
-} from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
+} from './GetTotalVotingHoldersQuery';
+import { GetTotalVotingHoldersQueryHandler } from './GetTotalVotingHoldersQueryHandler';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 
 describe('GetTotalVotingHoldersQueryHandler', () => {
   let handler: GetTotalVotingHoldersQueryHandler;

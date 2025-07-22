@@ -203,25 +203,25 @@
 
 */
 
+import { ErrorCode } from '@core/error/BaseError';
 import { createMock } from '@golevelup/ts-jest';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
 import {
+  EvmAddressPropsFixture,
   AccountPropsFixture,
   ErrorMsgFixture,
-  EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import AccountService from '../../../../../service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { GetTokenHoldersAtSnapshotQueryFixture } from '@test/fixtures/snapshot/SnapshotFixture';
+import { GetTokenHoldersAtSnapshotQueryError } from './error/GetTokenHoldersAtSnapshotQueryError';
 import {
   GetTokenHoldersAtSnapshotQuery,
   GetTokenHoldersAtSnapshotQueryResponse,
-} from './GetTokenHoldersAtSnapshotQuery.js';
-import { GetTokenHoldersAtSnapshotQueryHandler } from './GetTokenHoldersAtSnapshotQueryHandler.js';
-import { GetTokenHoldersAtSnapshotQueryError } from './error/GetTokenHoldersAtSnapshotQueryError.js';
-import { GetTokenHoldersAtSnapshotQueryFixture } from '../../../../../../../__tests__/fixtures/snapshot/SnapshotFixture.js';
-import Account from '../../../../../../domain/context/account/Account.js';
+} from './GetTokenHoldersAtSnapshotQuery';
+import { GetTokenHoldersAtSnapshotQueryHandler } from './GetTokenHoldersAtSnapshotQueryHandler';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import Account from '@domain/context/account/Account';
 
 describe('GetTokenHoldersAtSnapshotQueryHandler', () => {
   let handler: GetTokenHoldersAtSnapshotQueryHandler;

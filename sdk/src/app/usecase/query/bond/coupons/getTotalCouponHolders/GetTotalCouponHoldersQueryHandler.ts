@@ -203,17 +203,17 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import ContractService from '@service/contract/ContractService';
+import { GetTotalCouponHoldersQueryError } from './error/GetTotalCouponHoldersQueryError';
 import {
   GetTotalCouponHoldersQuery,
   GetTotalCouponHoldersQueryResponse,
-} from './GetTotalCouponHoldersQuery.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { GetTotalCouponHoldersQueryError } from './error/GetTotalCouponHoldersQueryError.js';
+} from './GetTotalCouponHoldersQuery';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 
 @QueryHandler(GetTotalCouponHoldersQuery)
 export class GetTotalCouponHoldersQueryHandler

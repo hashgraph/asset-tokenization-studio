@@ -203,19 +203,15 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
 
-export class GetTotalSecurityHoldersQueryResponse
-  implements QueryResponse
-{
+export class GetTotalSecurityHoldersQueryResponse implements QueryResponse {
   constructor(public readonly payload: number) {}
 }
 
 export class GetTotalSecurityHoldersQuery extends Query<GetTotalSecurityHoldersQueryResponse> {
-  constructor(
-    public readonly securityId: string,
-  ) {
+  constructor(public readonly securityId: string) {
     super();
   }
 }

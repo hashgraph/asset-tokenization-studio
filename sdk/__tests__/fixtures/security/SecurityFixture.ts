@@ -203,10 +203,10 @@
 
 */
 
+import { GetSecurityHoldersQuery } from '@query/security/security/getSecurityHolders/GetSecurityHoldersQuery';
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetSecurityHoldersQuery } from '../../../src/app/usecase/query/security/security/getSecurityHolders/GetSecurityHoldersQuery';
-import { GetTotalSecurityHoldersQuery } from '../../../src/app/usecase/query/security/security/getTotalSecurityHolders/GetTotalSecurityHoldersQuery';
+import { GetTotalSecurityHoldersQuery } from '@query/security/security/getTotalSecurityHolders/GetTotalSecurityHoldersQuery';
 
 export const GetSecurityHoldersQueryFixture =
   createFixture<GetSecurityHoldersQuery>((query) => {

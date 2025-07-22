@@ -203,12 +203,12 @@
 
 */
 
-import { GetTotalTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery';
-import { createFixture } from '../config';
-import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { GetTokenHoldersAtSnapshotQuery } from '../../../src/app/usecase/query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQuery';
 import TakeSnapshotRequest from '@port/in/request/security/operations/snapshot/TakeSnapshotRequest';
 import { TakeSnapshotCommand } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand';
+import { createFixture } from '../config';
+import { HederaIdPropsFixture } from '../shared/DataFixture';
+import { GetTokenHoldersAtSnapshotQuery } from '@query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQuery';
+import { GetTotalTokenHoldersAtSnapshotQuery } from '@query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery';
 
 export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>(
   (command) => {

@@ -203,25 +203,25 @@
 
 */
 
+import { ErrorCode } from '@core/error/BaseError';
 import { createMock } from '@golevelup/ts-jest';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import { GetSecurityHoldersQueryFixture } from '@test/fixtures/security/SecurityFixture';
 import {
+  EvmAddressPropsFixture,
   AccountPropsFixture,
   ErrorMsgFixture,
-  EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import AccountService from '../../../../../service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { GetSecurityHoldersQueryError } from './error/GetSecurityHoldersQueryError';
 import {
   GetSecurityHoldersQuery,
   GetSecurityHoldersQueryResponse,
-} from './GetSecurityHoldersQuery.js';
-import { GetSecurityHoldersQueryHandler } from './GetSecurityHoldersQueryHandler.js';
-import { GetSecurityHoldersQueryError } from './error/GetSecurityHoldersQueryError.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { GetSecurityHoldersQueryFixture } from '../../../../../../../__tests__/fixtures/security/SecurityFixture.js';
+} from './GetSecurityHoldersQuery';
+import { GetSecurityHoldersQueryHandler } from './GetSecurityHoldersQueryHandler';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import Account from '@domain/context/account/Account';
 
 describe('GetSecurityHoldersQueryHandler', () => {
   let handler: GetSecurityHoldersQueryHandler;
