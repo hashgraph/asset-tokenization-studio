@@ -331,11 +331,4 @@ interface IERC20 is IERC20StorageWrapper {
     function decimalsAt(uint256 _timestamp) external view returns (uint8);
 
     function getERC20Metadata() external view returns (ERC20Metadata memory);
-
-    // Validation functions
-    function canApprove(
-        address spender,
-        uint256 amount,
-        bytes calldata data
-    ) external view returns (bool, bytes1, bytes32);
 }

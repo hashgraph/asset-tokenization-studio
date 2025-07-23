@@ -218,14 +218,12 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     )
         external
         override
-        onlyUnrecoveredAddress(_issueData.tokenHolder)
         onlyWithinMaxSupply(_issueData.value)
         onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
-        validateAddress(_issueData.tokenHolder)
-        onlyListedAllowed(_issueData.tokenHolder)
-        onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _issueData.tokenHolder)
+        onlyIdentified(address(0), _issueData.tokenHolder)
+        onlyCompliant(address(0), _issueData.tokenHolder)
+        onlyIssuable
     {
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -250,7 +248,13 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         override
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(_msgSender(),_partition,_value, _data, '')
+        onlyCanRedeemFromByPartition(
+            _msgSender(),
+            _partition,
+            _value,
+            _data,
+            ''
+        )
     {
         // Add the function to validate the `_data` parameter
         _redeemByPartition(
@@ -282,7 +286,13 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyOperator(_partition, _tokenHolder)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(_tokenHolder, _partition,_value, _data, '')
+        onlyCanRedeemFromByPartition(
+            _tokenHolder,
+            _partition,
+            _value,
+            _data,
+            ''
+        )
     {
         _redeemByPartition(
             _partition,
@@ -300,7 +310,18 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external view returns (bool, bytes1, bytes32) {
-        (bool status, bytes1 code, bytes32 reason, ) =  _isAbleToRedeemFromByPartition(_partition, _value, _data, _operatorData);
-        return(status, code, reason);
+        (
+            bool status,
+            bytes1 code,
+            bytes32 reason,
+
+        ) = _isAbleToRedeemFromByPartition(
+                _msgSender(),
+                _partition,
+                _value,
+                _data,
+                _operatorData
+            );
+        return (status, code, reason);
     }
 }

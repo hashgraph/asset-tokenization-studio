@@ -278,16 +278,22 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         address _to,
         bytes32 _partition,
         uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
+        bytes memory _data,
+        bytes memory _operatorData
     ) external view returns (bool, bytes1, bytes32) {
-        return
-            _canTransferByPartition(
+        (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reason,
+
+        ) = _isAbleToTransferFromByPartition(
+                _msgSender(),
                 _to,
                 _partition,
                 _value,
                 _data,
                 _operatorData
             );
+        return (status, statusCode, reason);
     }
 }

@@ -239,6 +239,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
             _to,
             DEFAULT_PARTITION,
             _value,
+            '',
             ''
         )
     {
@@ -256,7 +257,14 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFrom(_from, _to, _value)
+        onlyCanTransferFromByPartition(
+            _from,
+            _to,
+            DEFAULT_PARTITION,
+            _value,
+            '',
+            ''
+        )
     {
         // Add a function to validate the `_data` parameter
         _transferFrom(_msgSender(), _from, _to, _value);
@@ -299,7 +307,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
      */
     function redeem(
         uint256 _value,
-        bytes calldata _data
+        bytes memory _data
     )
         external
         override
@@ -307,8 +315,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(
             _msgSender(),
-            _value,
             DEFAULT_PARTITION,
+            _value,
             _data,
             ''
         )
@@ -328,7 +336,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     function redeemFrom(
         address _tokenHolder,
         uint256 _value,
-        bytes calldata _data
+        bytes memory _data
     )
         external
         override
@@ -336,8 +344,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(
             _tokenHolder,
-            _value,
             DEFAULT_PARTITION,
+            _value,
             _data,
             ''
         )
@@ -354,47 +362,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
      */
     function isIssuable() external view override returns (bool) {
         return _isIssuable();
-    }
-
-    function canIssue(
-        address _to,
-        uint256 _amount,
-        bytes calldata _data
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
-    {
-        return _canIssue(_to, _amount, _data);
-    }
-
-    function canRedeem(
-        uint256 _amount,
-        bytes calldata _data
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
-    {
-        return _canRedeem(_amount, _data);
-    }
-
-    function canRedeemFrom(
-        address _from,
-        uint256 _amount,
-        bytes calldata _data
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
-    {
-        return _canRedeemFrom(_from, _amount, _data);
     }
 
     /**
@@ -419,7 +386,20 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         onlyWithoutMultiPartition
         returns (bool, bytes1, bytes32)
     {
-        return _canTransfer(_to, _value, _data);
+        (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reason,
+
+        ) = _isAbleToTransferFromByPartition(
+                _msgSender(),
+                _to,
+                DEFAULT_PARTITION,
+                _value,
+                '',
+                ''
+            );
+        return (status, statusCode, reason);
     }
 
     /**
@@ -440,7 +420,20 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         uint256 _value,
         bytes calldata _data
     ) external view onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
-        return _canTransferFrom(_from, _to, _value, _data);
+        (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reason,
+
+        ) = _isAbleToTransferFromByPartition(
+                _from,
+                _to,
+                DEFAULT_PARTITION,
+                _value,
+                '',
+                ''
+            );
+        return (status, statusCode, reason);
     }
 
     function getStaticResolverKey()
@@ -458,7 +451,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](10);
+        staticFunctionSelectors_ = new bytes4[](9);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .initialize_ERC1594
@@ -476,9 +469,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         staticFunctionSelectors_[selectorsIndex++] = this.canTransfer.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .canTransferFrom
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .canRedeemFrom
             .selector;
     }
 

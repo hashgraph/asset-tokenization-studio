@@ -265,44 +265,6 @@ interface IERC1594 {
 
     function isIssuable() external view returns (bool);
 
-    /**
-     * @notice Checks whether a token issuance can be performed to a specified address with a given value and
-     * additional data.
-     * @param _to The address of the potential recipient of the tokens.
-     * @param _value The number of tokens that are intended to be issued.
-     * @param _data Arbitrary additional data, often used for extra information required for the issuance,
-     * such as signed authorization or off-chain attestations.
-     * @return A tuple containing:
-     *   - bool: Indicates whether the issuance is possible (true) or not (false).
-     *   - bytes1: EIP-1066 status code providing a standardized, machine-readable reason for the issuance's
-     * success or failure (e.g., 0x11 for success, 0x10 for failure).
-     *   - bytes32: Application-specific reason code for more detailed, non-standardized information about the
-     * issuance's status.
-     */
-    function canIssue(
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external view returns (bool, bytes1, bytes32);
-
-    /**
-     * @notice Checks whether a token redemption can be performed with a given value and
-     * additional data.
-     * @param _value The number of tokens that are intended to be redeemed.
-     * @param _data Arbitrary additional data, often used for extra information required for the redemption,
-     * such as signed authorization or off-chain attestations.
-     * @return A tuple containing:
-     *   - bool: Indicates whether the redemption is possible (true) or not (false).
-     *   - bytes1: EIP-1066 status code providing a standardized, machine-readable reason for the redemption's
-     * success or failure (e.g., 0x11 for success, 0x10 for failure).
-     *   - bytes32: Application-specific reason code for more detailed, non-standardized information about the
-     * redemption's status.
-     */
-    function canRedeem(
-        uint256 _value,
-        bytes calldata _data
-    ) external view returns (bool, bytes1, bytes32);
-
     // Transfer Validity
     /**
      * @notice Checks whether a token transfer can be performed to a specified address with a given value and
@@ -342,26 +304,6 @@ interface IERC1594 {
     function canTransferFrom(
         address _from,
         address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external view returns (bool, bytes1, bytes32);
-
-    /**
-     * @notice Checks whether a token redemption can be performed from a specified address with a given value and
-     * additional data.
-     * @param _from The address of the token holder whose tokens will be redeemed.
-     * @param _value The number of tokens that are intended to be redeemed.
-     * @param _data Arbitrary additional data, often used for extra information required for the redemption,
-     * such as signed authorization or off-chain attestations.
-     * @return A tuple containing:
-     *   - bool: Indicates whether the redemption is possible (true) or not (false).
-     *   - bytes1: EIP-1066 status code providing a standardized, machine-readable reason for the redemption's
-     * success or failure (e.g., 0x11 for success, 0x10 for failure).
-     *   - bytes32: Application-specific reason code for more detailed, non-standardized information about the
-     * redemption's status.
-     */
-    function canRedeemFrom(
-        address _from,
         uint256 _value,
         bytes calldata _data
     ) external view returns (bool, bytes1, bytes32);
