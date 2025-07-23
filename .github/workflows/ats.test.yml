@@ -2,7 +2,7 @@ name: Tests ATS
 
 on:
   push:
-    branches: [main]
+    branches: [main, refactor/add-workspaces]
     paths:
       - "packages/ats/**"
       - "apps/ats/**"
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   test-ats:
-    name: Test ATS
+    name: testing
     runs-on: token-studio-linux-large
     env:
       NODE_OPTIONS: '--max-old-space-size=32768'

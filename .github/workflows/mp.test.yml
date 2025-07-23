@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   test-mass-payout:
-    name: Test Mass Payout
+    name: testing
     runs-on: token-studio-linux-large
     env:
       NODE_OPTIONS: '--max-old-space-size=32768'
