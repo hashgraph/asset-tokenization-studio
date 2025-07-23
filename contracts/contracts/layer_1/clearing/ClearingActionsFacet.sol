@@ -319,10 +319,7 @@ contract ClearingActionsFacet is
             _clearingOperationIdentifier.partition
         )
         onlyWithValidClearingId(_clearingOperationIdentifier)
-        onlyValidKycStatus(
-            IKyc.KycStatus.GRANTED,
-            _clearingOperationIdentifier.tokenHolder
-        )
+        onlyIdentified(_clearingOperationIdentifier.tokenHolder, address(0))
         onlyClearingActivated
         validateExpirationTimestamp(_clearingOperationIdentifier, true)
         returns (bool success_)

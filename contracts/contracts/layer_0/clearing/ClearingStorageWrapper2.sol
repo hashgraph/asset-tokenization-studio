@@ -224,7 +224,6 @@ import {
     checkNounceAndDeadline
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
-import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 
 abstract contract ClearingStorageWrapper2 is
@@ -972,6 +971,9 @@ abstract contract ClearingStorageWrapper2 is
             memory _clearingOperationIdentifier
     ) internal view virtual returns (uint256);
 
+    function _checkCompliance(address _from, address _to) internal view virtual;
+    function _checkIdentity(address _from, address _to) internal view virtual;
+
     function _clearingTransferExecution(
         bytes32 _partition,
         address _tokenHolder,
@@ -991,13 +993,8 @@ abstract contract ClearingStorageWrapper2 is
         address destination = _tokenHolder;
 
         if (_operation == IClearingActions.ClearingActionType.Approve) {
-            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
-            _checkValidKycStatus(
-                IKyc.KycStatus.GRANTED,
-                clearingTransferData.destination
-            );
-            _checkControlList(_tokenHolder);
-            _checkControlList(clearingTransferData.destination);
+            _checkIdentity(_tokenHolder, clearingTransferData.destination);
+            _checkCompliance(_tokenHolder, clearingTransferData.destination);
 
             destination = clearingTransferData.destination;
         }
@@ -1030,8 +1027,8 @@ abstract contract ClearingStorageWrapper2 is
             );
 
         if (_operation == IClearingActions.ClearingActionType.Approve) {
-            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
-            _checkControlList(_tokenHolder);
+            _checkIdentity(_tokenHolder, address(0));
+            _checkCompliance(_tokenHolder, address(0));
         } else
             _transferClearingBalance(
                 _partition,

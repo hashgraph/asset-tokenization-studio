@@ -287,7 +287,10 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         external
         override
         onlyWithoutMultiPartition
-        onlyCanIssueByPartition(_tokenHolder, DEFAULT_PARTITION, _value, _data)
+        onlyWithinMaxSupply(_value)
+        onlyIdentified(address(0), _tokenHolder)
+        onlyCompliant(address(0), _tokenHolder)
+        onlyIssuable
     {
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -378,7 +381,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     function canTransfer(
         address _to,
         uint256 _value,
-        bytes calldata _data
+        bytes memory _data
     )
         external
         view
@@ -396,7 +399,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
                 _to,
                 DEFAULT_PARTITION,
                 _value,
-                '',
+                _data,
                 ''
             );
         return (status, statusCode, reason);
@@ -418,7 +421,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         address _from,
         address _to,
         uint256 _value,
-        bytes calldata _data
+        bytes memory _data
     ) external view onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         (
             bool status,
@@ -430,7 +433,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
                 _to,
                 DEFAULT_PARTITION,
                 _value,
-                '',
+                _data,
                 ''
             );
         return (status, statusCode, reason);

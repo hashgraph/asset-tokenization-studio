@@ -207,15 +207,8 @@
 pragma solidity 0.8.18;
 
 import {
-    EMPTY_BYTES,
-    EMPTY_BYTES32,
-    DEFAULT_PARTITION
-} from '../../../layer_0/constants/values.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
-import {
     IERC1410Standard
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
-import {Eip1066} from '../../../layer_0/constants/eip1066.sol';
 import {
     ERC1410OperatorStorageWrapper
 } from './ERC1410OperatorStorageWrapper.sol';

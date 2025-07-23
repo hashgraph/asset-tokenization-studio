@@ -208,9 +208,7 @@ pragma solidity 0.8.18;
 
 import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
 import {Common} from '../../common/Common.sol';
-
 import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410Standard is IERC1410Standard, Common {
     function issueByPartition(
@@ -286,14 +284,16 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyOperator(_partition, _tokenHolder)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(
-            _tokenHolder,
-            _partition,
-            _value,
-            _data,
-            ''
-        )
     {
+        {
+            _checkCanRedeemFromByPartition(
+                _tokenHolder,
+                _partition,
+                _value,
+                _data,
+                _operatorData
+            );
+        }
         _redeemByPartition(
             _partition,
             _tokenHolder,

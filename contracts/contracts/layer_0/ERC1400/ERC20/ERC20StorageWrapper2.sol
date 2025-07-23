@@ -206,12 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    DEFAULT_PARTITION,
-    ZERO_ADDRESS,
-    EMPTY_BYTES,
-    EMPTY_BYTES32
-} from '../../../layer_0/constants/values.sol';
+import {DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
 import {
     IERC20StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';

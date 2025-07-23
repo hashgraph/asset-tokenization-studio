@@ -210,7 +210,6 @@ import {
     IERC1410ProtectedPartitions
 } from '../../interfaces/ERC1400/IERC1410ProtectedPartitions.sol';
 import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410ProtectedPartitions is
     IERC1410ProtectedPartitions,

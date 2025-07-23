@@ -209,11 +209,9 @@ pragma solidity 0.8.18;
 import {
     ZERO_ADDRESS,
     EMPTY_BYTES,
-    EMPTY_BYTES32,
     DEFAULT_PARTITION
 } from '../../../layer_0/constants/values.sol';
 import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
     IERC1594StorageWrapper
@@ -674,7 +672,7 @@ abstract contract ERC1594StorageWrapper is
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
-    function _checkIdentity(address _from, address _to) internal view {
+    function _checkIdentity(address _from, address _to) internal view override {
         (
             bool isIdentified,
             ,
@@ -723,7 +721,10 @@ abstract contract ERC1594StorageWrapper is
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
-    function _checkCompliance(address _from, address _to) internal view {
+    function _checkCompliance(
+        address _from,
+        address _to
+    ) internal view override {
         (
             bool isCompliant,
             ,

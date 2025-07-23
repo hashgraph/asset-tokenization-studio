@@ -212,7 +212,6 @@ import {IHold} from '../interfaces/hold/IHold.sol';
 import {Common} from '../common/Common.sol';
 import {_CONTROLLER_ROLE} from '../constants/roles.sol';
 import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
@@ -421,12 +420,10 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        onlyUnrecoveredAddress(_to)
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyWithValidHoldId(_holdIdentifier)
-        onlyListedAllowed(_to)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _holdIdentifier.tokenHolder)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyIdentified(_holdIdentifier.tokenHolder, _to)
+        onlyCompliant(address(0), _to)
         returns (bool success_)
     {
         success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);
