@@ -212,83 +212,83 @@ import { COMMAND_HANDLERS_AGENT } from './agent/InjectableAgent';
 import {
   COMMAND_HANDLERS_BOND,
   QUERY_HANDLERS_BOND,
-} from './bond/InjectableBond.js';
+} from './bond/InjectableBond';
 import {
   COMMAND_HANDLERS_CLEARING,
   QUERY_HANDLERS_CLEARING,
-} from './clearing/InjectableClearing.js';
+} from './clearing/InjectableClearing';
 import {
   COMMAND_HANDLERS_COMPLIANCE,
   QUERY_HANDLERS_COMPLIANCE,
-} from './compliance/InjectableCompliance.js';
+} from './compliance/InjectableCompliance';
 import {
   COMMAND_HANDLERS_CONTROL_LIST,
   QUERY_HANDLERS_CONTROL_LIST,
-} from './controlList/InjectableControlList.js';
+} from './controlList/InjectableControlList';
 import {
   COMMAND_HANDLERS_EQUITY,
   QUERY_HANDLERS_EQUITY,
-} from './equity/InjectableEquity.js';
+} from './equity/InjectableEquity';
 import {
   COMMAND_HANDLERS_FREEZE,
   QUERY_HANDLERS_FREEZE,
-} from './freeze/InjectableFreeze.js';
+} from './freeze/InjectableFreeze';
 import {
   COMMAND_HANDLERS_HOLD,
   QUERY_HANDLERS_HOLD,
-} from './hold/InjectableHold.js';
+} from './hold/InjectableHold';
 import {
   COMMAND_HANDLERS_IDENTITY,
   QUERY_HANDLERS_IDENTITY,
-} from './identity/InjectableIdentity.js';
-import { COMMAND_HANDLERS_ISSUE } from './issue/InjectableIssue.js';
-import {
-  COMMAND_HANDLERS_KYC,
-  QUERY_HANDLERS_KYC,
-} from './kyc/InjectableKyc.js';
+} from './identity/InjectableIdentity';
+import { COMMAND_HANDLERS_ISSUE } from './issue/InjectableIssue';
+import { COMMAND_HANDLERS_KYC, QUERY_HANDLERS_KYC } from './kyc/InjectableKyc';
 import {
   COMMAND_HANDLERS_LOCK,
   QUERY_HANDLERS_LOCK,
-} from './lock/InjectableLock.js';
+} from './lock/InjectableLock';
 import {
   COMMAND_HANDLERS_MOCK,
   QUERY_HANDLERS_MOCK,
-} from './mock/InjectableMock.js';
-import { COMMAND_HANDLERS_NETWORK } from './network/InjectableNetwork.js';
+} from './mock/InjectableMock';
+import { COMMAND_HANDLERS_NETWORK } from './network/InjectableNetwork';
 import {
   COMMAND_HANDLERS_PAUSE,
   QUERY_HANDLERS_PAUSE,
-} from './pause/InjectablePause.js';
+} from './pause/InjectablePause';
 import {
   COMMAND_HANDLERS_PROTECTED,
   QUERY_HANDLERS_PROTECTED,
-} from './protectedPartitions/InjectableProtected.js';
+} from './protectedPartitions/InjectableProtected';
 import {
   COMMAND_HANDLERS_RBAC,
   QUERY_HANDLERS_RBAC,
-} from './rbac/InjectableRbac.js';
+} from './rbac/InjectableRbac';
 import {
   COMMAND_HANDLERS_RECOVERY,
   QUERY_HANDLERS_RECOVERY,
-} from './recovery/InjectableRecovery.js';
+} from './recovery/InjectableRecovery';
 import {
   COMMAND_HANDLERS_REDEEM,
   QUERY_HANDLERS_REDEEM,
-} from './redeem/InjectableRedeem.js';
+} from './redeem/InjectableRedeem';
 import {
   COMMAND_HANDLERS_RESOLVER,
   QUERY_HANDLERS_RESOLVER,
-} from './resolver/InjectableResolver.js';
-import { COMMAND_HANDLERS_METADATA } from './security/InjectableMetadata.js';
-import { COMMAND_HANDLERS_SNAPSHOT } from './snapshot/InjectableSnapshot.js';
+} from './resolver/InjectableResolver';
+import { COMMAND_HANDLERS_METADATA } from './security/InjectableMetadata';
+import {
+  COMMAND_HANDLERS_SNAPSHOT,
+  QUERY_HANDLERS_SNAPSHOT,
+} from './snapshot/InjectableSnapshot';
 import {
   COMMAND_HANDLERS_SUPPLY,
   QUERY_HANDLERS_SUPPLY,
-} from './supply/InjectableSupply.js';
+} from './supply/InjectableSupply';
 import {
   COMMAND_HANDLERS_TRANSFER,
   QUERY_HANDLERS_TRANSFER,
-} from './transfer/InjectableTransfer.js';
+} from './transfer/InjectableTransfer';
 import { TOKENS } from './Tokens';
 import { QUERY_HANDLERS_SECURITY_DETAILS } from './security/InjectableSecurityDetails';
 import {
@@ -350,6 +350,7 @@ export const QUERY_HANDLERS = [
   ...QUERY_HANDLERS_TRANSFER,
   ...QUERY_HANDLERS_ACCOUNT,
   ...QUERY_HANDLERS_OPERATOR,
+  ...QUERY_HANDLERS_SNAPSHOT,
 ];
 
 export const TRANSACTION_HANDLER = [
