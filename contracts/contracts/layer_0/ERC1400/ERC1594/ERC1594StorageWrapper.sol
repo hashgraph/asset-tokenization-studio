@@ -803,6 +803,7 @@ abstract contract ERC1594StorageWrapper is
         bytes memory _details
     ) internal pure {
         bytes memory revertData = abi.encode(bytes4(_reasonCode), _details);
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let len := mload(revertData)
             let dataPtr := add(revertData, 0x20)

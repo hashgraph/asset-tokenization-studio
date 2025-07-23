@@ -214,7 +214,6 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_ACTIONS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
 import {_CLEARING_ROLE} from '../constants/roles.sol';
 
 contract ClearingActionsFacet is
