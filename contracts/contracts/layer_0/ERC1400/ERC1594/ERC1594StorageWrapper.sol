@@ -367,7 +367,13 @@ abstract contract ERC1594StorageWrapper is
             ,
             bytes32 reasonCode,
             bytes memory details
-        ) = _isAbleToRedeemFromByPartition(_from, _partition, _value, '', '');
+        ) = _isAbleToRedeemFromByPartition(
+                _from,
+                _partition,
+                _value,
+                EMPTY_BYTES,
+                EMPTY_BYTES
+            );
         if (!isAbleToRedeemFrom) {
             _revertWithData(reasonCode, details);
         }
@@ -389,10 +395,10 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
+        // Application specific
         if (_isPaused()) {
             return (false, Eip1066.PAUSED, TokenIsPaused.selector, EMPTY_BYTES);
         }
-
         if (_isClearingActivated()) {
             return (
                 false,
@@ -401,7 +407,7 @@ abstract contract ERC1594StorageWrapper is
                 EMPTY_BYTES
             );
         }
-
+        // Format
         if (_from == ZERO_ADDRESS) {
             return (
                 false,
@@ -410,7 +416,7 @@ abstract contract ERC1594StorageWrapper is
                 EMPTY_BYTES
             );
         }
-
+        // Compliance
         if (_isRecovered(_from)) {
             return (
                 false,
@@ -419,17 +425,7 @@ abstract contract ERC1594StorageWrapper is
                 abi.encode(_from)
             );
         }
-
-        if (!_isAbleToAccess(_msgSender()) == false) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                AccountIsBlocked.selector,
-                abi.encode(_msgSender())
-            );
-        }
-
-        if (!_isAbleToAccess(_from) == false) {
+        if (!_isAbleToAccess(_from)) {
             return (
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
@@ -437,7 +433,7 @@ abstract contract ERC1594StorageWrapper is
                 abi.encode(_from)
             );
         }
-
+        // Identity
         if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (
                 false,
@@ -452,6 +448,16 @@ abstract contract ERC1594StorageWrapper is
             !_isAuthorized(_partition, _msgSender(), _from) &&
             !_hasRole(_protectedPartitionsRole(_partition), _msgSender())
         ) {
+            // From methods checks
+            // Compliance
+            if (!_isAbleToAccess(_msgSender())) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    AccountIsBlocked.selector,
+                    abi.encode(_msgSender())
+                );
+            }
             if (_allowanceAdjusted(_from, _msgSender()) < _value) {
                 return (
                     false,
@@ -466,6 +472,7 @@ abstract contract ERC1594StorageWrapper is
                     )
                 );
             }
+            // Business logic
             if (_isRecovered(_msgSender())) {
                 return (
                     false,
@@ -475,7 +482,7 @@ abstract contract ERC1594StorageWrapper is
                 );
             }
         }
-
+        // Business logic
         if (!_validPartition(_partition, _from)) {
             return (
                 false,
@@ -545,6 +552,7 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
+        // Application specific
         if (_isPaused()) {
             return (false, Eip1066.PAUSED, TokenIsPaused.selector, EMPTY_BYTES);
         }
@@ -557,7 +565,7 @@ abstract contract ERC1594StorageWrapper is
                 EMPTY_BYTES
             );
         }
-
+        // Format
         if (_from == ZERO_ADDRESS || _to == ZERO_ADDRESS) {
             return (
                 false,
@@ -566,15 +574,7 @@ abstract contract ERC1594StorageWrapper is
                 EMPTY_BYTES
             );
         }
-
-        if (!_isAbleToAccess(_msgSender())) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                AccountIsBlocked.selector,
-                abi.encode(_msgSender())
-            );
-        }
+        // Compliance
         if (_isRecovered(_from)) {
             return (
                 false,
@@ -607,7 +607,7 @@ abstract contract ERC1594StorageWrapper is
                 abi.encode(_to)
             );
         }
-
+        // Identity
         if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (
                 false,
@@ -630,6 +630,16 @@ abstract contract ERC1594StorageWrapper is
             !_isAuthorized(_partition, _msgSender(), _from) &&
             !_hasRole(_protectedPartitionsRole(_partition), _msgSender())
         ) {
+            // From methods checks
+            // Compliance
+            if (!_isAbleToAccess(_msgSender())) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    AccountIsBlocked.selector,
+                    abi.encode(_msgSender())
+                );
+            }
             if (_isRecovered(_msgSender())) {
                 return (
                     false,
@@ -638,7 +648,7 @@ abstract contract ERC1594StorageWrapper is
                     abi.encode(_msgSender())
                 );
             }
-            //TODO: Discern between calls to the operator method and from
+            // Business logic
             if (_allowanceAdjusted(_from, _msgSender()) < _value) {
                 return (
                     false,
@@ -654,6 +664,7 @@ abstract contract ERC1594StorageWrapper is
                 );
             }
         }
+        // Business logic
         if (_balanceOfAdjusted(_from) < _value) {
             return (
                 false,
@@ -802,7 +813,10 @@ abstract contract ERC1594StorageWrapper is
         bytes32 _reasonCode,
         bytes memory _details
     ) internal pure {
-        bytes memory revertData = abi.encode(bytes4(_reasonCode), _details);
+        bytes memory revertData = abi.encodePacked(
+            bytes4(_reasonCode),
+            _details
+        );
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let len := mload(revertData)
