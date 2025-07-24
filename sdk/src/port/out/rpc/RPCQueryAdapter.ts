@@ -1881,4 +1881,155 @@ export class RPCQueryAdapter {
 
     return isAddressRecovered;
   }
+
+  async getTokenHoldersAtSnapshot(
+    address: EvmAddress,
+    snapshotId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting token holders at snapshot ${snapshotId} for security ${address.toString()}`,
+    );
+    return await this.connect(
+      Snapshots__factory,
+      address.toString(),
+    ).getTokenHoldersAtSnapshot(snapshotId, start, end);
+  }
+
+  async getTotalTokenHoldersAtSnapshot(
+    address: EvmAddress,
+    snapshotId: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting total token holders at snapshot ${snapshotId} for security ${address.toString()}`,
+    );
+
+    const total = await this.connect(
+      Snapshots__factory,
+      address.toString(),
+    ).getTotalTokenHoldersAtSnapshot(snapshotId);
+
+    return total.toNumber();
+  }
+
+  async getCouponHolders(
+    address: EvmAddress,
+    couponId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting coupon holders for coupon ${couponId} for security ${address.toString()}`,
+    );
+    return await this.connect(
+      Bond__factory,
+      address.toString(),
+    ).getCouponHolders(couponId, start, end);
+  }
+
+  async getTotalCouponHolders(
+    address: EvmAddress,
+    couponId: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting total coupon holders for coupon ${couponId} for security ${address.toString()}`,
+    );
+
+    const total = await this.connect(
+      Bond__factory,
+      address.toString(),
+    ).getTotalCouponHolders(couponId);
+
+    return total.toNumber();
+  }
+
+  async getDividendHolders(
+    address: EvmAddress,
+    dividendId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting dividend holders for dividend ${dividendId} for security ${address.toString()}`,
+    );
+    return await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getDividendHolders(dividendId, start, end);
+  }
+
+  async getTotalDividendHolders(
+    address: EvmAddress,
+    dividendId: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting total dividend holders for dividend ${dividendId} for security ${address.toString()}`,
+    );
+
+    const total = await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getTotalDividendHolders(dividendId);
+
+    return total.toNumber();
+  }
+
+  async getVotingHolders(
+    address: EvmAddress,
+    voteId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting voting holders for vote ${voteId} for security ${address.toString()}`,
+    );
+    return await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getVotingHolders(voteId, start, end);
+  }
+
+  async getTotalVotingHolders(
+    address: EvmAddress,
+    voteId: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting total voting holders for vote ${voteId} for security ${address.toString()}`,
+    );
+
+    const total = await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getTotalVotingHolders(voteId);
+
+    return total.toNumber();
+  }
+
+  async getSecurityHolders(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting security holders for security ${address.toString()}`,
+    );
+    return await this.connect(
+      Security__factory,
+      address.toString(),
+    ).getSecurityHolders(start, end);
+  }
+
+  async getTotalSecurityHolders(address: EvmAddress): Promise<number> {
+    LogService.logTrace(
+      `Getting total security holders for security ${address.toString()}`,
+    );
+
+    const total = await this.connect(
+      Security__factory,
+      address.toString(),
+    ).getTotalSecurityHolders();
+
+    return total.toNumber();
+  }
 }

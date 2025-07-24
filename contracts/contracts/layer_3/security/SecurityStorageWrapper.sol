@@ -212,8 +212,9 @@ import {
 } from '../constants/regulation.sol';
 import {_SECURITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {ISecurity} from '../interfaces/ISecurity.sol';
+import {Common} from '../../layer_1/common/Common.sol';
 
-contract SecurityStorageWrapper {
+contract SecurityStorageWrapper is Common {
     function _storeRegulationData(
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData

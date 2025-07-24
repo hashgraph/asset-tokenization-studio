@@ -242,6 +242,12 @@ import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 import RedeemAtMaturityByPartitionRequest from '../request/bond/RedeemAtMaturityByPartitionRequest';
+import {
+  GetCouponHoldersRequest,
+  GetTotalCouponHoldersRequest,
+} from '../request';
+import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
+import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 
 interface IBondInPort {
   create(
@@ -263,6 +269,8 @@ interface IBondInPort {
   redeemAtMaturityByPartition(
     request: RedeemAtMaturityByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
+  getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
 }
 
 class BondInPort implements IBondInPort {
@@ -504,6 +512,35 @@ class BondInPort implements IBondInPort {
         amount,
       ),
     );
+  }
+
+  @LogError
+  async getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]> {
+    const { securityId, couponId, start, end } = request;
+    ValidatedRequest.handleValidation(GetCouponHoldersRequest.name, request);
+
+    return (
+      await this.queryBus.execute(
+        new GetCouponHoldersQuery(securityId, couponId, start, end),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getTotalCouponHolders(
+    request: GetTotalCouponHoldersRequest,
+  ): Promise<number> {
+    const { securityId, couponId } = request;
+    ValidatedRequest.handleValidation(
+      GetTotalCouponHoldersRequest.name,
+      request,
+    );
+
+    return (
+      await this.queryBus.execute(
+        new GetTotalCouponHoldersQuery(securityId, couponId),
+      )
+    ).payload;
   }
 }
 

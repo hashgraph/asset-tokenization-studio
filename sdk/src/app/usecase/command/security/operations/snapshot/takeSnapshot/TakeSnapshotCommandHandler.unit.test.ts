@@ -335,7 +335,7 @@ describe('TakeSnapshotCommandHandler', () => {
           res: { id: transactionId },
           className: TakeSnapshotCommandHandler.name,
           position: 1,
-          numberOfResultsItems: 2,
+          numberOfResultsItems: 1,
         });
       });
     });

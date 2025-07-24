@@ -541,6 +541,13 @@ describe('Equity Tests', () => {
             const listCount = await equityFacet.getDividendsCount()
             const dividend = await equityFacet.getDividends(1)
             const dividendFor = await equityFacet.getDividendsFor(1, account_A)
+            const dividendTotalHolder =
+                await equityFacet.getTotalDividendHolders(1)
+            const dividendHolders = await equityFacet.getDividendHolders(
+                1,
+                0,
+                dividendTotalHolder
+            )
 
             expect(listCount).to.equal(1)
             expect(dividend.snapshotId).to.equal(0)
@@ -561,6 +568,8 @@ describe('Equity Tests', () => {
             expect(dividendFor.tokenBalance).to.equal(0)
             expect(dividendFor.recordDateReached).to.equal(false)
             expect(dividendFor.decimals).to.equal(0)
+            expect(dividendTotalHolder).to.equal(0)
+            expect(dividendHolders.length).to.equal(dividendTotalHolder)
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends and lock THEN transaction succeeds', async () => {
@@ -604,9 +613,19 @@ describe('Equity Tests', () => {
                 dividendsRecordDateInSeconds + 1
             )
             const dividendFor = await equityFacet.getDividendsFor(1, account_A)
+            const dividendTotalHolder =
+                await equityFacet.getTotalDividendHolders(1)
+            const dividendHolders = await equityFacet.getDividendHolders(
+                1,
+                0,
+                dividendTotalHolder
+            )
 
             expect(dividendFor.tokenBalance).to.equal(TotalAmount)
             expect(dividendFor.recordDateReached).to.equal(true)
+            expect(dividendTotalHolder).to.equal(1)
+            expect(dividendHolders.length).to.equal(dividendTotalHolder)
+            expect(dividendHolders).to.have.members([account_A])
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends and hold THEN transaction succeeds', async () => {
@@ -656,9 +675,19 @@ describe('Equity Tests', () => {
                 dividendsRecordDateInSeconds + 1
             )
             const dividendFor = await equityFacet.getDividendsFor(1, account_A)
+            const dividendTotalHolder =
+                await equityFacet.getTotalDividendHolders(1)
+            const dividendHolders = await equityFacet.getDividendHolders(
+                1,
+                0,
+                dividendTotalHolder
+            )
 
             expect(dividendFor.tokenBalance).to.equal(TotalAmount)
             expect(dividendFor.recordDateReached).to.equal(true)
+            expect(dividendTotalHolder).to.equal(1)
+            expect(dividendHolders.length).to.equal(dividendTotalHolder)
+            expect(dividendHolders).to.have.members([account_A])
         })
     })
 
@@ -719,6 +748,12 @@ describe('Equity Tests', () => {
             const listCount = await equityFacet.getVotingCount()
             const voting = await equityFacet.getVoting(1)
             const votingFor = await equityFacet.getVotingFor(1, account_A)
+            const votingTotalHolder = await equityFacet.getTotalVotingHolders(1)
+            const votingHolders = await equityFacet.getVotingHolders(
+                1,
+                0,
+                votingTotalHolder
+            )
 
             expect(listCount).to.equal(1)
             expect(voting.snapshotId).to.equal(0)
@@ -728,6 +763,8 @@ describe('Equity Tests', () => {
             expect(votingFor.data).to.equal(voteData)
             expect(votingFor.tokenBalance).to.equal(0)
             expect(votingFor.recordDateReached).to.equal(false)
+            expect(votingTotalHolder).to.equal(0)
+            expect(votingHolders.length).to.equal(votingTotalHolder)
         })
 
         it('GIVEN an account with corporateActions role WHEN setVoting and lock THEN transaction succeeds', async () => {
@@ -768,9 +805,18 @@ describe('Equity Tests', () => {
                 votingRecordDateInSeconds + 1
             )
             const votingFor = await equityFacet.getVotingFor(1, account_A)
+            const votingTotalHolder = await equityFacet.getTotalVotingHolders(1)
+            const votingHolders = await equityFacet.getVotingHolders(
+                1,
+                0,
+                votingTotalHolder
+            )
 
             expect(votingFor.tokenBalance).to.equal(TotalAmount)
             expect(votingFor.recordDateReached).to.equal(true)
+            expect(votingTotalHolder).to.equal(1)
+            expect(votingHolders.length).to.equal(votingTotalHolder)
+            expect(votingHolders).to.have.members([account_A])
         })
     })
 

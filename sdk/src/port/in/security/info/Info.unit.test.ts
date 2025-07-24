@@ -205,7 +205,11 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import { CommandBus } from '@core/command/CommandBus';
-import { GetSecurityDetailsRequest } from '../../request';
+import {
+  GetSecurityDetailsRequest,
+  GetSecurityHoldersRequest,
+  GetTotalSecurityHoldersRequest,
+} from '../../request';
 import LogService from '@service/log/LogService';
 import { QueryBus } from '@core/query/QueryBus';
 import ValidatedRequest from '@core/validation/ValidatedArgs';
@@ -215,6 +219,13 @@ import Security from '@port/in/security/Security';
 import { GetSecurityDetailsRequestFixture } from '@test/fixtures/erc1400/ERC1400Fixture';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { GetSecurityQuery } from '@query/security/get/GetSecurityQuery';
+import {
+  GetSecurityHoldersRequestFixture,
+  GetTotalSecurityHoldersRequestFixture,
+} from '@test/fixtures/security/SecurityFixture';
+import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
+import { GetSecurityHoldersQuery } from '@query/security/security/getSecurityHolders/GetSecurityHoldersQuery';
+import { GetTotalSecurityHoldersQuery } from '@query/security/security/getTotalSecurityHolders/GetTotalSecurityHoldersQuery';
 
 describe('Info', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -222,8 +233,11 @@ describe('Info', () => {
   let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
   let getSecurityDetailsRequest: GetSecurityDetailsRequest;
+  let getSecurityHoldersRequest: GetSecurityHoldersRequest;
+  let getTotalSecurityHoldersRequest: GetTotalSecurityHoldersRequest;
 
   let handleValidationSpy: jest.SpyInstance;
+  const transactionId = TransactionIdFixture.create().id;
 
   beforeEach(() => {
     commandBusMock = createMock<CommandBus>();
@@ -316,6 +330,160 @@ describe('Info', () => {
       await expect(Security.getInfo(getSecurityDetailsRequest)).rejects.toThrow(
         ValidationError,
       );
+    });
+  });
+
+  describe('getSecurityHolders', () => {
+    getSecurityHoldersRequest = new GetSecurityHoldersRequest(
+      GetSecurityHoldersRequestFixture.create(),
+    );
+    it('should get token holders at snapshot successfully', async () => {
+      const expectedResponse = {
+        payload: [transactionId],
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.getSecurityHolders(
+        getSecurityHoldersRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetSecurityHoldersRequest.name,
+        getSecurityHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetSecurityHoldersQuery(
+          getSecurityHoldersRequest.securityId,
+          getSecurityHoldersRequest.start,
+          getSecurityHoldersRequest.end,
+        ),
+      );
+      expect(result).toStrictEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.getSecurityHolders(getSecurityHoldersRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetSecurityHoldersRequest.name,
+        getSecurityHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetSecurityHoldersQuery(
+          getSecurityHoldersRequest.securityId,
+          getSecurityHoldersRequest.start,
+          getSecurityHoldersRequest.end,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getSecurityHoldersRequest = new GetSecurityHoldersRequest({
+        ...GetSecurityHoldersRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        Security.getSecurityHolders(getSecurityHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if start is invalid', async () => {
+      getSecurityHoldersRequest = new GetSecurityHoldersRequest({
+        ...GetSecurityHoldersRequestFixture.create(),
+        start: -1,
+      });
+
+      await expect(
+        Security.getSecurityHolders(getSecurityHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if end is invalid', async () => {
+      getSecurityHoldersRequest = new GetSecurityHoldersRequest({
+        ...GetSecurityHoldersRequestFixture.create(),
+        end: -1,
+      });
+
+      await expect(
+        Security.getSecurityHolders(getSecurityHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getTotalSecurityHolders', () => {
+    getTotalSecurityHoldersRequest = new GetTotalSecurityHoldersRequest(
+      GetTotalSecurityHoldersRequestFixture.create(),
+    );
+    it('should get total security holders successfully', async () => {
+      const expectedResponse = {
+        payload: 1,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.getTotalSecurityHolders(
+        getTotalSecurityHoldersRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetTotalSecurityHoldersRequest.name,
+        getTotalSecurityHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetTotalSecurityHoldersQuery(
+          getTotalSecurityHoldersRequest.securityId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        Security.getTotalSecurityHolders(getTotalSecurityHoldersRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetTotalSecurityHoldersRequest.name,
+        getTotalSecurityHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetTotalSecurityHoldersQuery(
+          getTotalSecurityHoldersRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getTotalSecurityHoldersRequest = new GetTotalSecurityHoldersRequest({
+        ...GetTotalSecurityHoldersRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        Security.getTotalSecurityHolders(getTotalSecurityHoldersRequest),
+      ).rejects.toThrow(ValidationError);
     });
   });
 });

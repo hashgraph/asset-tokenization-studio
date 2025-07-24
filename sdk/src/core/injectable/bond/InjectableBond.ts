@@ -213,6 +213,8 @@ import { SetCouponCommandHandler } from '@command/bond/coupon/set/SetCouponComma
 import { CreateBondCommandHandler } from '@command/bond/create/CreateBondCommandHandler';
 import { GetBondDetailsQueryHandler } from '@query/bond/get/getBondDetails/GetBondDetailsQueryHandler';
 import { RedeemAtMaturityByPartitionCommandHandler } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommandHandler';
+import { GetTotalCouponHoldersQueryHandler } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQueryHandler';
+import { GetCouponHoldersQueryHandler } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQueryHandler';
 
 export const COMMAND_HANDLERS_BOND = [
   {
@@ -253,5 +255,13 @@ export const QUERY_HANDLERS_BOND = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetBondDetailsQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetCouponHoldersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetTotalCouponHoldersQueryHandler,
   },
 ];

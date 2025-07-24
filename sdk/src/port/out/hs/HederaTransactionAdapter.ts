@@ -772,7 +772,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       'grantRole',
       securityId,
       GAS.GRANT_ROLES,
-      [targetId.toString(), role],
+      [role, targetId.toString()],
     );
   }
 

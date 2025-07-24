@@ -349,6 +349,7 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
 
     this.account = new Account({
       id: settings.hederaAccountId,
+      evmAddress: accountMirror.evmAddress,
       publicKey: accountMirror.publicKey,
     });
 
