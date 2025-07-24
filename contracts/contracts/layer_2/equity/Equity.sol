@@ -359,6 +359,20 @@ abstract contract Equity is
         return _getDividendsCount();
     }
 
+    function getDividendHolders(
+        uint256 _dividendID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_) {
+        return _getDividendHolders(_dividendID, _pageIndex, _pageLength);
+    }
+
+    function getTotalDividendHolders(
+        uint256 _dividendID
+    ) external view returns (uint256) {
+        return _getTotalDividendHolders(_dividendID);
+    }
+
     function getVoting(
         uint256 _voteID
     )
@@ -391,6 +405,20 @@ abstract contract Equity is
         returns (uint256 votingCount_)
     {
         return _getVotingCount();
+    }
+
+    function getVotingHolders(
+        uint256 _voteID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_) {
+        return _getVotingHolders(_voteID, _pageIndex, _pageLength);
+    }
+
+    function getTotalVotingHolders(
+        uint256 _voteID
+    ) external view returns (uint256) {
+        return _getTotalVotingHolders(_voteID);
     }
 
     function getScheduledBalanceAdjustment(

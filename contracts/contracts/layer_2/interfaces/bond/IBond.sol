@@ -274,4 +274,14 @@ interface IBond {
     ) external view returns (CouponFor memory couponFor_);
 
     function getCouponCount() external view returns (uint256 couponCount_);
+
+    function getCouponHolders(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalCouponHolders(
+        uint256 _couponID
+    ) external view returns (uint256);
 }

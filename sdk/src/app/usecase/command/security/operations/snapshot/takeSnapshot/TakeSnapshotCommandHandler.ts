@@ -259,7 +259,7 @@ export class TakeSnapshotCommandHandler
         result: res.response?.snapshotId,
         className: TakeSnapshotCommandHandler.name,
         position: 1,
-        numberOfResultsItems: 2,
+        numberOfResultsItems: 1,
       });
 
       return Promise.resolve(

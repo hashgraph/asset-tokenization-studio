@@ -214,6 +214,10 @@ import { GetVotingForQueryHandler } from '@query/equity/votingRights/getVotingFo
 import { GetVotingQueryHandler } from '@query/equity/votingRights/getVoting/GetVotingQueryHandler';
 import { GetVotingCountQueryHandler } from '@query/equity/votingRights/getVotingCount/GetVotingCountQueryHandler';
 import { GetEquityDetailsQueryHandler } from '@query/equity/get/getEquityDetails/GetEquityDetailsQueryHandler';
+import { GetDividendHoldersQueryHandler } from '@query/equity/dividends/getDividendHolders/GetDividendHoldersQueryHandler';
+import { GetTotalDividendHoldersQueryHandler } from '@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQueryHandler';
+import { GetVotingHoldersQueryHandler } from '@query/equity/votingRights/getVotingHolders/GetVotingHoldersQueryHandler';
+import { GetTotalVotingHoldersQueryHandler } from '@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQueryHandler';
 
 export const COMMAND_HANDLERS_EQUITY = [
   {
@@ -258,5 +262,21 @@ export const QUERY_HANDLERS_EQUITY = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetEquityDetailsQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetDividendHoldersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetTotalDividendHoldersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetVotingHoldersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetTotalVotingHoldersQueryHandler,
   },
 ];
