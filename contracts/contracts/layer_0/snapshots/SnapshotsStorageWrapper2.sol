@@ -209,12 +209,14 @@ pragma solidity 0.8.18;
 import {
     ISnapshotsStorageWrapper
 } from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
-import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
+import {
+    ERC20VotesStorageWrapper
+} from '../ERC1400/ERC20Votes/ERC20VotesStorageWrapper.sol';
 import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
 
 abstract contract SnapshotsStorageWrapper2 is
     ISnapshotsStorageWrapper,
-    ERC20StorageWrapper2
+    ERC20VotesStorageWrapper
 {
     function _updateAbafSnapshot() internal {
         _updateSnapshot(_snapshotStorage().abafSnapshots, _getAbaf());

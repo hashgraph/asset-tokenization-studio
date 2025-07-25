@@ -207,85 +207,8 @@
 pragma solidity 0.8.18;
 
 import {
-    IERC1410StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
-import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+    _ERC20VOTES_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
+import {ERC20StorageWrapper2} from '../ERC20/ERC20StorageWrapper2.sol';
 
-abstract contract ERC1410BasicStorageWrapper is
-    IERC1410StorageWrapper,
-    ERC20StorageWrapper1
-{
-    function _transferByPartition(
-        address _from,
-        IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
-        bytes32 _partition,
-        bytes memory _data,
-        address _operator,
-        bytes memory _operatorData
-    ) internal returns (bytes32) {
-        _beforeTokenTransfer(
-            _partition,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value
-        );
-
-        _reduceBalanceByPartition(_from, _basicTransferInfo.value, _partition);
-
-        // Emit transfer event.
-        emit TransferByPartition(
-            _partition,
-            _operator,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value,
-            _data,
-            _operatorData
-        );
-
-        if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
-            _addPartitionTo(
-                _basicTransferInfo.value,
-                _basicTransferInfo.to,
-                _partition
-            );
-            return bytes32(0);
-        }
-        _increaseBalanceByPartition(
-            _basicTransferInfo.to,
-            _basicTransferInfo.value,
-            _partition
-        );
-
-        _afterTokenTransfer(
-            _partition,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value
-        );
-        return bytes32(0);
-    }
-
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual;
-
-    function _afterTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual;
-
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    ) internal virtual;
-}
+abstract contract ERC20VotesStorageWrapper is ERC20StorageWrapper2 {}
