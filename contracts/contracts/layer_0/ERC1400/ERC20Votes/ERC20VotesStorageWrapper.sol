@@ -209,6 +209,24 @@ pragma solidity 0.8.18;
 import {
     _ERC20VOTES_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-import {ERC20StorageWrapper2} from '../ERC20/ERC20StorageWrapper2.sol';
+import {ERC1594StorageWrapper} from '../ERC1594/ERC1594StorageWrapper.sol';
 
-abstract contract ERC20VotesStorageWrapper is ERC20StorageWrapper2 {}
+abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
+    struct ERC20VotesStorage {
+        mapping(address => address) _delegates;
+        mapping(address => Checkpoint[]) _checkpoints;
+        Checkpoint[] _totalSupplyCheckpoints;
+    }
+
+    function _erc20VotesStorage()
+        internal
+        pure
+        returns (ERC20VotesStorage storage erc20votesStorage_)
+    {
+        bytes32 position = _ERC20VOTES_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc20votesStorage_.slot := position
+        }
+    }
+}
