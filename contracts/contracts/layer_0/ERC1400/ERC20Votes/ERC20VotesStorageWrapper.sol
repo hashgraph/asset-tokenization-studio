@@ -210,12 +210,290 @@ import {
     _ERC20VOTES_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {ERC1594StorageWrapper} from '../ERC1594/ERC1594StorageWrapper.sol';
+import {IERC20Votes} from '../../../layer_1/interfaces/ERC1400/IERC20Votes.sol';
+import '@openzeppelin/contracts/utils/math/Math.sol';
+import '@openzeppelin/contracts/utils/math/SafeCast.sol';
+import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
+import {_DELEGATION_ERC20VOTES_TYPEHASH} from '../../constants/values.sol';
+import {
+    checkNounceAndDeadline,
+    getDomainHash
+} from '../../../layer_1/protectedPartitions/signatureVerification.sol';
+import {IVotes} from '@openzeppelin/contracts/governance/utils/IVotes.sol';
 
 abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     struct ERC20VotesStorage {
-        mapping(address => address) _delegates;
-        mapping(address => Checkpoint[]) _checkpoints;
-        Checkpoint[] _totalSupplyCheckpoints;
+        bool activated;
+        string contractName;
+        string contractVersion;
+        mapping(address => address) delegates;
+        mapping(address => IERC20Votes.Checkpoint[]) checkpoints;
+        IERC20Votes.Checkpoint[] totalSupplyCheckpoints;
+    }
+
+    function _setActivate(bool _activated) internal virtual {
+        _erc20VotesStorage().activated = _activated;
+    }
+
+    function _delegate(address delegatee) internal virtual {
+        _delegate(_msgSender(), delegatee);
+    }
+
+    function _delegateBySig(
+        address delegatee,
+        uint256 nonce,
+        uint256 expiry,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal virtual {
+        address from = ECDSA.recover(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        _DELEGATION_ERC20VOTES_TYPEHASH,
+                        delegatee,
+                        nonce,
+                        expiry
+                    )
+                )
+            ),
+            v,
+            r,
+            s
+        );
+
+        checkNounceAndDeadline(
+            nonce,
+            from,
+            _getNounceFor(from),
+            expiry,
+            _blockTimestamp()
+        );
+
+        _setNounce(nonce, from);
+
+        _delegate(from, delegatee);
+    }
+
+    function _hashTypedDataV4(
+        bytes32 structHash
+    ) internal view virtual returns (bytes32) {
+        return
+            ECDSA.toTypedDataHash(
+                getDomainHash(
+                    _erc20VotesStorage().contractName,
+                    _erc20VotesStorage().contractVersion,
+                    _blockChainid(),
+                    address(this)
+                ),
+                structHash
+            );
+    }
+
+    function _clock() internal view virtual returns (uint256) {
+        return SafeCast.toUint48(block.number);
+    }
+
+    function _CLOCK_MODE() internal view virtual returns (string memory) {
+        // Check that the clock was not modified
+        require(_clock() == block.number, 'ERC20Votes: broken clock mode');
+        return 'mode=blocknumber&from=default';
+    }
+
+    function _checkpoints(
+        address account,
+        uint256 pos
+    ) internal view virtual returns (IERC20Votes.Checkpoint memory) {
+        return _erc20VotesStorage().checkpoints[account][pos];
+    }
+
+    function _numCheckpoints(
+        address account
+    ) internal view virtual returns (uint256) {
+        return _erc20VotesStorage().checkpoints[account].length;
+    }
+
+    function _delegates(
+        address account
+    ) internal view virtual returns (address) {
+        return _erc20VotesStorage().delegates[account];
+    }
+
+    function _getVotes(
+        address account
+    ) internal view virtual returns (uint256) {
+        ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
+
+        uint256 pos = erc20VotesStorage.checkpoints[account].length;
+        unchecked {
+            return
+                pos == 0
+                    ? 0
+                    : erc20VotesStorage.checkpoints[account][pos - 1].votes;
+        }
+    }
+
+    function _getPastVotes(
+        address account,
+        uint256 timepoint
+    ) internal view virtual returns (uint256) {
+        require(timepoint < _clock(), 'ERC20Votes: future lookup');
+        return
+            _checkpointsLookup(
+                _erc20VotesStorage().checkpoints[account],
+                timepoint
+            );
+    }
+
+    function _getPastTotalSupply(
+        uint256 timepoint
+    ) internal view virtual returns (uint256) {
+        require(timepoint < _clock(), 'ERC20Votes: future lookup');
+        return
+            _checkpointsLookup(
+                _erc20VotesStorage().totalSupplyCheckpoints,
+                timepoint
+            );
+    }
+
+    function _checkpointsLookup(
+        IERC20Votes.Checkpoint[] storage ckpts,
+        uint256 timepoint
+    ) private view returns (uint256) {
+        uint256 length = ckpts.length;
+
+        uint256 low = 0;
+        uint256 high = length;
+
+        if (length > 5) {
+            uint256 mid = length - Math.sqrt(length);
+            if (ckpts[mid].fromBlock > timepoint) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        while (low < high) {
+            uint256 mid = Math.average(low, high);
+            if (ckpts[mid].fromBlock > timepoint) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        unchecked {
+            return high == 0 ? 0 : ckpts[high - 1].votes;
+        }
+    }
+
+    function _afterTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual override {
+        if (from == address(0)) {
+            _writeCheckpoint(
+                _erc20VotesStorage().totalSupplyCheckpoints,
+                _add,
+                amount
+            );
+            _moveVotingPower(address(0), _delegates(to), amount);
+        } else if (to == address(0)) {
+            _writeCheckpoint(
+                _erc20VotesStorage().totalSupplyCheckpoints,
+                _subtract,
+                amount
+            );
+            _moveVotingPower(_delegates(from), address(0), amount);
+        } else _moveVotingPower(_delegates(from), _delegates(to), amount);
+    }
+
+    function _delegate(address delegator, address delegatee) internal virtual {
+        address currentDelegate = _delegates(delegator);
+        uint256 delegatorBalance = _balanceOf(delegator) +
+            _getLockedAmountFor(delegator) +
+            _getHeldAmountFor(delegator) +
+            _getClearedAmountFor(delegator);
+
+        _erc20VotesStorage().delegates[delegator] = delegatee;
+
+        emit IVotes.DelegateChanged(delegator, currentDelegate, delegatee);
+
+        _moveVotingPower(currentDelegate, delegatee, delegatorBalance);
+    }
+
+    function _moveVotingPower(
+        address src,
+        address dst,
+        uint256 amount
+    ) private {
+        if (src != dst && amount > 0) {
+            if (src != address(0)) {
+                (uint256 oldWeight, uint256 newWeight) = _writeCheckpoint(
+                    _erc20VotesStorage().checkpoints[src],
+                    _subtract,
+                    amount
+                );
+                emit IERC20Votes.DelegateVotesChanged(
+                    src,
+                    oldWeight,
+                    newWeight
+                );
+            }
+
+            if (dst != address(0)) {
+                (uint256 oldWeight, uint256 newWeight) = _writeCheckpoint(
+                    _erc20VotesStorage().checkpoints[dst],
+                    _add,
+                    amount
+                );
+                emit IERC20Votes.DelegateVotesChanged(
+                    dst,
+                    oldWeight,
+                    newWeight
+                );
+            }
+        }
+    }
+
+    function _writeCheckpoint(
+        IERC20Votes.Checkpoint[] storage ckpts,
+        function(uint256, uint256) view returns (uint256) op,
+        uint256 delta
+    ) private returns (uint256 oldWeight, uint256 newWeight) {
+        uint256 pos = ckpts.length;
+
+        unchecked {
+            IERC20Votes.Checkpoint memory oldCkpt = pos == 0
+                ? IERC20Votes.Checkpoint(0, 0)
+                : ckpts[pos - 1];
+
+            oldWeight = oldCkpt.votes;
+            newWeight = op(oldWeight, delta);
+
+            if (pos > 0 && oldCkpt.fromBlock == _clock()) {
+                ckpts[pos - 1].votes = newWeight;
+            } else {
+                ckpts.push(
+                    IERC20Votes.Checkpoint({
+                        fromBlock: _clock(),
+                        votes: newWeight
+                    })
+                );
+            }
+        }
+    }
+
+    function _add(uint256 a, uint256 b) private pure returns (uint256) {
+        return a + b;
+    }
+
+    function _subtract(uint256 a, uint256 b) private pure returns (uint256) {
+        return a - b;
     }
 
     function _erc20VotesStorage()

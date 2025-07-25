@@ -222,9 +222,13 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Votes(
         bool _activated
-    ) external override onlyUninitialized(_erc20Storage().initialized) {}
+    ) external override onlyUninitialized(_erc20Storage().initialized) {
+        _setActivate(_activated);
+    }
 
-    function delegate(address _delegatee) external override {}
+    function delegate(address _delegatee) external override {
+        _delegate(_delegatee);
+    }
 
     function delegateBySig(
         address _delegatee,
@@ -233,37 +237,55 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) external override {}
+    ) external override {
+        _delegateBySig(_delegatee, _nonce, _expiry, _v, _r, _s);
+    }
 
-    function clock() external view override returns (uint48) {}
+    function clock() external view override returns (uint48) {
+        return _clock();
+    }
 
-    function CLOCK_MODE() external view override returns (string memory) {}
+    function CLOCK_MODE() external view override returns (string memory) {
+        return _CLOCK_MODE();
+    }
 
     function getVotes(
         address _account
-    ) external view override returns (uint256) {}
+    ) external view override returns (uint256) {
+        return _getVotes(_account);
+    }
 
     function getPastVotes(
         address _account,
         uint256 _timepoint
-    ) external view override returns (uint256) {}
+    ) external view override returns (uint256) {
+        _getPastVotes(_account, _timepoint);
+    }
 
     function getPastTotalSupply(
         uint256 _timepoint
-    ) external view override returns (uint256) {}
+    ) external view override returns (uint256) {
+        return _getPastTotalSupply(_timepoint);
+    }
 
     function delegates(
         address _account
-    ) external view override returns (address) {}
+    ) external view override returns (address) {
+        return _delegates(_account);
+    }
 
     function checkpoints(
         address _account,
-        uint32 _pos
-    ) external view override returns (Checkpoint memory) {}
+        uint256 _pos
+    ) external view override returns (Checkpoint memory) {
+        return _checkpoints(_account, _pos);
+    }
 
     function numCheckpoints(
         address _account
-    ) external view override returns (uint32) {}
+    ) external view override returns (uint256) {
+        return _numCheckpoints(_account);
+    }
 
     function getStaticResolverKey()
         external

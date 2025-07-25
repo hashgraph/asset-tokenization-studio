@@ -212,16 +212,16 @@ import {IERC5805} from '@openzeppelin/contracts/interfaces/IERC5805.sol';
 
 interface IERC20Votes is IERC5805 {
     struct Checkpoint {
-        uint32 fromBlock;
-        uint224 votes;
+        uint256 fromBlock;
+        uint256 votes;
     }
 
     function initialize_ERC20Votes(bool _activated) external;
 
     function checkpoints(
         address _account,
-        uint32 _pos
+        uint256 _pos
     ) external view returns (Checkpoint memory);
 
-    function numCheckpoints(address _account) external view returns (uint32);
+    function numCheckpoints(address _account) external view returns (uint256);
 }
