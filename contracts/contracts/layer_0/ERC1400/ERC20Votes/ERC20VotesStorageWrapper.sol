@@ -310,119 +310,6 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         );
     }
 
-    function _hashTypedDataV4(
-        bytes32 structHash
-    ) internal view virtual returns (bytes32) {
-        return
-            ECDSA.toTypedDataHash(
-                getDomainHash(
-                    _erc20VotesStorage().contractName,
-                    _erc20VotesStorage().contractVersion,
-                    _blockChainid(),
-                    address(this)
-                ),
-                structHash
-            );
-    }
-
-    function _clock() internal view virtual returns (uint48) {
-        return SafeCast.toUint48(block.number);
-    }
-
-    function _CLOCK_MODE() internal view virtual returns (string memory) {
-        // Check that the clock was not modified
-        require(_clock() == block.number, 'ERC20Votes: broken clock mode');
-        return 'mode=blocknumber&from=default';
-    }
-
-    function _checkpoints(
-        address account,
-        uint256 pos
-    ) internal view virtual returns (IERC20Votes.Checkpoint memory) {
-        return _erc20VotesStorage().checkpoints[account][pos];
-    }
-
-    function _numCheckpoints(
-        address account
-    ) internal view virtual returns (uint256) {
-        return _erc20VotesStorage().checkpoints[account].length;
-    }
-
-    function _delegates(
-        address account
-    ) internal view virtual returns (address) {
-        return _erc20VotesStorage().delegates[account];
-    }
-
-    function _getVotes(
-        address account
-    ) internal view virtual returns (uint256) {
-        ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
-
-        uint256 pos = erc20VotesStorage.checkpoints[account].length;
-        unchecked {
-            return
-                pos == 0
-                    ? 0
-                    : erc20VotesStorage.checkpoints[account][pos - 1].votes;
-        }
-    }
-
-    function _getPastVotes(
-        address account,
-        uint256 timepoint
-    ) internal view virtual returns (uint256) {
-        require(timepoint < _clock(), 'ERC20Votes: future lookup');
-        return
-            _checkpointsLookup(
-                _erc20VotesStorage().checkpoints[account],
-                timepoint
-            );
-    }
-
-    function _getPastTotalSupply(
-        uint256 timepoint
-    ) internal view virtual returns (uint256) {
-        require(timepoint < _clock(), 'ERC20Votes: future lookup');
-        return
-            _checkpointsLookup(
-                _erc20VotesStorage().totalSupplyCheckpoints,
-                timepoint
-            );
-    }
-
-    function _checkpointsLookup(
-        IERC20Votes.Checkpoint[] storage ckpts,
-        uint256 timepoint
-    ) private view returns (uint256) {
-        uint256 length = ckpts.length;
-
-        uint256 low = 0;
-        uint256 high = length;
-
-        if (length > 5) {
-            uint256 mid = length - Math.sqrt(length);
-            if (ckpts[mid].fromBlock > timepoint) {
-                high = mid;
-            } else {
-                low = mid + 1;
-            }
-        }
-
-        while (low < high) {
-            uint256 mid = Math.average(low, high);
-            if (ckpts[mid].fromBlock > timepoint) {
-                high = mid;
-            } else {
-                low = mid + 1;
-            }
-        }
-
-        unchecked {
-            return high == 0 ? 0 : ckpts[high - 1].votes;
-        }
-    }
-
     function _afterTokenTransfer(
         bytes32 /*partition*/,
         address from,
@@ -488,21 +375,6 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         }
     }
 
-    function _calculateFactorSince(
-        uint256 _fromBlock
-    ) internal view returns (uint256) {
-        uint256 abafAtBlock = _checkpointsLookup(
-            _erc20VotesStorage().abafCheckpoints,
-            _fromBlock
-        );
-        uint256 currentAbaf = _checkpointsLookup(
-            _erc20VotesStorage().abafCheckpoints,
-            _clock()
-        );
-
-        return currentAbaf / abafAtBlock;
-    }
-
     function _moveVotingPower(
         address account,
         function(uint256, uint256) view returns (uint256) op,
@@ -544,6 +416,137 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
                 );
             }
         }
+    }
+
+    function _hashTypedDataV4(
+        bytes32 structHash
+    ) internal view virtual returns (bytes32) {
+        return
+            ECDSA.toTypedDataHash(
+                getDomainHash(
+                    _erc20VotesStorage().contractName,
+                    _erc20VotesStorage().contractVersion,
+                    _blockChainid(),
+                    address(this)
+                ),
+                structHash
+            );
+    }
+
+    function _clock() internal view virtual returns (uint48) {
+        return SafeCast.toUint48(block.number);
+    }
+
+    function _CLOCK_MODE() internal view virtual returns (string memory) {
+        // Check that the clock was not modified
+        require(_clock() == block.number, 'ERC20Votes: broken clock mode');
+        return 'mode=blocknumber&from=default';
+    }
+
+    function _checkpoints(
+        address account,
+        uint256 pos
+    ) internal view virtual returns (IERC20Votes.Checkpoint memory) {
+        return _erc20VotesStorage().checkpoints[account][pos];
+    }
+
+    function _numCheckpoints(
+        address account
+    ) internal view virtual returns (uint256) {
+        return _erc20VotesStorage().checkpoints[account].length;
+    }
+
+    function _delegates(
+        address account
+    ) internal view virtual returns (address) {
+        return _erc20VotesStorage().delegates[account];
+    }
+
+    function _getVotes(
+        address account
+    ) internal view virtual returns (uint256) {
+        return
+            _lastCheckpointAdjusted(_erc20VotesStorage().checkpoints[account]);
+    }
+
+    function _getPastVotes(
+        address account,
+        uint256 timepoint
+    ) internal view virtual returns (uint256) {
+        require(timepoint < _clock(), 'ERC20Votes: future lookup');
+        return
+            _checkpointsLookup(
+                _erc20VotesStorage().checkpoints[account],
+                timepoint
+            );
+    }
+
+    function _getPastTotalSupply(
+        uint256 timepoint
+    ) internal view virtual returns (uint256) {
+        require(timepoint < _clock(), 'ERC20Votes: future lookup');
+        return
+            _checkpointsLookup(
+                _erc20VotesStorage().totalSupplyCheckpoints,
+                timepoint
+            );
+    }
+
+    function _checkpointsLookup(
+        IERC20Votes.Checkpoint[] storage ckpts,
+        uint256 timepoint
+    ) private view returns (uint256) {
+        uint256 length = ckpts.length;
+
+        uint256 low = 0;
+        uint256 high = length;
+
+        if (length > 5) {
+            uint256 mid = length - Math.sqrt(length);
+            if (ckpts[mid].fromBlock > timepoint) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        while (low < high) {
+            uint256 mid = Math.average(low, high);
+            if (ckpts[mid].fromBlock > timepoint) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        if (ckpts[high - 1].fromBlock == timepoint)
+            return ckpts[high - 1].votes;
+
+        return _lastCheckpointAdjusted(ckpts);
+    }
+
+    function _lastCheckpointAdjusted(
+        IERC20Votes.Checkpoint[] storage _ckpts
+    ) internal view returns (uint256) {
+        uint256 length = _ckpts.length;
+
+        if (length == 0) return 0;
+
+        return
+            _ckpts[length - 1].votes *
+            _calculateFactorSince(_ckpts[length - 1].fromBlock);
+    }
+
+    function _calculateFactorSince(
+        uint256 _fromBlock
+    ) internal view returns (uint256) {
+        uint256 abafAtBlock = _checkpointsLookup(
+            _erc20VotesStorage().abafCheckpoints,
+            _fromBlock
+        );
+        uint256 currentAbaf = _getAbaf();
+
+        return currentAbaf / abafAtBlock;
     }
 
     function _add(uint256 a, uint256 b) private pure returns (uint256) {
