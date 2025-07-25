@@ -402,7 +402,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     }
 
     function _afterTokenTransfer(
-        bytes32 partition,
+        bytes32 /*partition*/,
         address from,
         address to,
         uint256 amount
@@ -449,23 +449,26 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     ) private {
         if (src != dst && amount > 0) {
             if (src != address(0)) {
-                (uint256 oldWeight, uint256 newWeight) = _writeCheckpoint(
-                    _erc20VotesStorage().checkpoints[src],
-                    _subtract,
-                    amount
-                );
-                emit DelegateVotesChanged(src, oldWeight, newWeight);
+                _moveVotingPower(src, _subtract, amount);
             }
 
             if (dst != address(0)) {
-                (uint256 oldWeight, uint256 newWeight) = _writeCheckpoint(
-                    _erc20VotesStorage().checkpoints[dst],
-                    _add,
-                    amount
-                );
-                emit DelegateVotesChanged(dst, oldWeight, newWeight);
+                _moveVotingPower(dst, _add, amount);
             }
         }
+    }
+
+    function _moveVotingPower(
+        address account,
+        function(uint256, uint256) view returns (uint256) op,
+        uint256 amount
+    ) private {
+        (uint256 oldWeight, uint256 newWeight) = _writeCheckpoint(
+            _erc20VotesStorage().checkpoints[account],
+            op,
+            amount
+        );
+        emit DelegateVotesChanged(account, oldWeight, newWeight);
     }
 
     function _writeCheckpoint(

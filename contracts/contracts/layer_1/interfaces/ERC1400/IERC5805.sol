@@ -207,7 +207,7 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/interfaces/IERC6372.sol";
-import {IVotes} from "./IVotes.sol";
+import '@openzeppelin/contracts/interfaces/IERC6372.sol';
+import {IVotes} from './IVotes.sol';
 
 interface IERC5805 is IERC6372, IVotes {}
