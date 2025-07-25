@@ -205,9 +205,10 @@
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.18;
 
 import '@openzeppelin/contracts/interfaces/IERC6372.sol';
 import {IVotes} from './IVotes.sol';
 
+// solhint-disable no-empty-blocks
 interface IERC5805 is IERC6372, IVotes {}

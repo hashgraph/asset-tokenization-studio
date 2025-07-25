@@ -222,6 +222,16 @@ import {
 import {IVotes} from '@openzeppelin/contracts/governance/utils/IVotes.sol';
 
 abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
+    struct ERC20VotesStorage {
+        bool activated;
+        string contractName;
+        string contractVersion;
+        mapping(address => address) delegates;
+        mapping(address => IERC20Votes.Checkpoint[]) checkpoints;
+        IERC20Votes.Checkpoint[] totalSupplyCheckpoints;
+        IERC20Votes.Checkpoint[] abafCheckpoints;
+    }
+
     event DelegateChanged(
         address indexed delegator,
         address indexed fromDelegate,
@@ -233,16 +243,6 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         uint256 previousBalance,
         uint256 newBalance
     );
-
-    struct ERC20VotesStorage {
-        bool activated;
-        string contractName;
-        string contractVersion;
-        mapping(address => address) delegates;
-        mapping(address => IERC20Votes.Checkpoint[]) checkpoints;
-        IERC20Votes.Checkpoint[] totalSupplyCheckpoints;
-        IERC20Votes.Checkpoint[] abafCheckpoints;
-    }
 
     function _setActivate(bool _activated) internal virtual {
         _erc20VotesStorage().activated = _activated;
@@ -363,7 +363,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         address src,
         address dst,
         uint256 amount
-    ) private {
+    ) internal {
         if (src != dst && amount > 0) {
             if (src != address(0)) {
                 _moveVotingPower(src, _subtract, amount);
@@ -379,7 +379,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         address account,
         function(uint256, uint256) view returns (uint256) op,
         uint256 amount
-    ) private {
+    ) internal {
         (uint256 oldWeight, uint256 newWeight) = _writeCheckpoint(
             _erc20VotesStorage().checkpoints[account],
             op,
@@ -392,7 +392,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         IERC20Votes.Checkpoint[] storage ckpts,
         function(uint256, uint256) view returns (uint256) op,
         uint256 delta
-    ) private returns (uint256 oldWeight, uint256 newWeight) {
+    ) internal returns (uint256 oldWeight, uint256 newWeight) {
         uint256 pos = ckpts.length;
 
         unchecked {
@@ -437,6 +437,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         return SafeCast.toUint48(block.number);
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _CLOCK_MODE() internal view virtual returns (string memory) {
         // Check that the clock was not modified
         require(_clock() == block.number, 'ERC20Votes: broken clock mode');
@@ -495,7 +496,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     function _checkpointsLookup(
         IERC20Votes.Checkpoint[] storage ckpts,
         uint256 timepoint
-    ) private view returns (uint256) {
+    ) internal view returns (uint256) {
         uint256 length = ckpts.length;
 
         uint256 low = 0;
@@ -549,11 +550,11 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         return currentAbaf / abafAtBlock;
     }
 
-    function _add(uint256 a, uint256 b) private pure returns (uint256) {
+    function _add(uint256 a, uint256 b) internal pure returns (uint256) {
         return a + b;
     }
 
-    function _subtract(uint256 a, uint256 b) private pure returns (uint256) {
+    function _subtract(uint256 a, uint256 b) internal pure returns (uint256) {
         return a - b;
     }
 

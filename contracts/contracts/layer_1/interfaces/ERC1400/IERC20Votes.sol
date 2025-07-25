@@ -216,6 +216,7 @@ interface IERC20Votes is IERC5805 {
         uint256 votes;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Votes(bool _activated) external;
 
     function checkpoints(

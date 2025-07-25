@@ -245,6 +245,7 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         return _clock();
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function CLOCK_MODE() external view override returns (string memory) {
         return _CLOCK_MODE();
     }
