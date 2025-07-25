@@ -303,7 +303,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
             );
     }
 
-    function _clock() internal view virtual returns (uint256) {
+    function _clock() internal view virtual returns (uint48) {
         return SafeCast.toUint48(block.number);
     }
 
