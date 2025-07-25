@@ -216,12 +216,12 @@ interface IERC20Votes is IERC5805 {
         uint224 votes;
     }
 
-    function checkpoints(
-        address account,
-        uint32 pos
-    ) public view virtual returns (Checkpoint memory);
+    function initialize_ERC20Votes(bool _activated) external;
 
-    function numCheckpoints(
-        address account
-    ) public view virtual returns (uint32);
+    function checkpoints(
+        address _account,
+        uint32 _pos
+    ) external view returns (Checkpoint memory);
+
+    function numCheckpoints(address _account) external view returns (uint32);
 }
