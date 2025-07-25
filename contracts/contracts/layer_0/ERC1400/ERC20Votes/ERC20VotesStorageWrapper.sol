@@ -222,6 +222,18 @@ import {
 import {IVotes} from '@openzeppelin/contracts/governance/utils/IVotes.sol';
 
 abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
+    event DelegateChanged(
+        address indexed delegator,
+        address indexed fromDelegate,
+        address indexed toDelegate
+    );
+
+    event DelegateVotesChanged(
+        address indexed delegate,
+        uint256 previousBalance,
+        uint256 newBalance
+    );
+
     struct ERC20VotesStorage {
         bool activated;
         string contractName;
@@ -425,7 +437,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
 
         _erc20VotesStorage().delegates[delegator] = delegatee;
 
-        emit IVotes.DelegateChanged(delegator, currentDelegate, delegatee);
+        emit DelegateChanged(delegator, currentDelegate, delegatee);
 
         _moveVotingPower(currentDelegate, delegatee, delegatorBalance);
     }
@@ -442,11 +454,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
                     _subtract,
                     amount
                 );
-                emit IERC20Votes.DelegateVotesChanged(
-                    src,
-                    oldWeight,
-                    newWeight
-                );
+                emit DelegateVotesChanged(src, oldWeight, newWeight);
             }
 
             if (dst != address(0)) {
@@ -455,11 +463,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
                     _add,
                     amount
                 );
-                emit IERC20Votes.DelegateVotesChanged(
-                    dst,
-                    oldWeight,
-                    newWeight
-                );
+                emit DelegateVotesChanged(dst, oldWeight, newWeight);
             }
         }
     }
