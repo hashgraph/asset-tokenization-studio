@@ -208,9 +208,20 @@
 
 pragma solidity 0.8.18;
 
-import {IERC20StorageWrapper} from './IERC20StorageWrapper.sol';
-import {IFactory} from '../../../interfaces/factory/IFactory.sol';
+import {IERC5805} from '@openzeppelin/contracts/interfaces/IERC5805.sol';
 
-interface IERC20Votes is IERC20StorageWrapper {
-    
+interface IERC20Votes is IERC5805 {
+    struct Checkpoint {
+        uint32 fromBlock;
+        uint224 votes;
+    }
+
+    function checkpoints(
+        address account,
+        uint32 pos
+    ) public view virtual returns (Checkpoint memory);
+
+    function numCheckpoints(
+        address account
+    ) public view virtual returns (uint32);
 }
