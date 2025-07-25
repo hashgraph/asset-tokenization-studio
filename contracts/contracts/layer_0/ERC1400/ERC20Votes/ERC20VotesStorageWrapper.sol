@@ -395,21 +395,25 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         address to,
         uint256 amount
     ) internal virtual override {
-        if (from == address(0)) {
-            _writeCheckpoint(
-                _erc20VotesStorage().totalSupplyCheckpoints,
-                _add,
-                amount
-            );
-            _moveVotingPower(address(0), _delegates(to), amount);
-        } else if (to == address(0)) {
-            _writeCheckpoint(
-                _erc20VotesStorage().totalSupplyCheckpoints,
-                _subtract,
-                amount
-            );
-            _moveVotingPower(_delegates(from), address(0), amount);
-        } else _moveVotingPower(_delegates(from), _delegates(to), amount);
+        ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
+
+        if (erc20VotesStorage.activated) {
+            if (from == address(0)) {
+                _writeCheckpoint(
+                    erc20VotesStorage.totalSupplyCheckpoints,
+                    _add,
+                    amount
+                );
+                _moveVotingPower(address(0), _delegates(to), amount);
+            } else if (to == address(0)) {
+                _writeCheckpoint(
+                    erc20VotesStorage.totalSupplyCheckpoints,
+                    _subtract,
+                    amount
+                );
+                _moveVotingPower(_delegates(from), address(0), amount);
+            } else _moveVotingPower(_delegates(from), _delegates(to), amount);
+        }
     }
 
     function _delegate(address delegator, address delegatee) internal virtual {
