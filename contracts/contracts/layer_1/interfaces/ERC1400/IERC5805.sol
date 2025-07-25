@@ -204,24 +204,10 @@
 */
 
 // SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.0;
 
-import {IERC5805} from './IERC5805.sol';
+import "@openzeppelin/contracts/interfaces/IERC6372.sol";
+import {IVotes} from "./IVotes.sol";
 
-interface IERC20Votes is IERC5805 {
-    struct Checkpoint {
-        uint256 fromBlock;
-        uint256 votes;
-    }
-
-    function initialize_ERC20Votes(bool _activated) external;
-
-    function checkpoints(
-        address _account,
-        uint256 _pos
-    ) external view returns (Checkpoint memory);
-
-    function numCheckpoints(address _account) external view returns (uint256);
-}
+interface IERC5805 is IERC6372, IVotes {}
