@@ -241,6 +241,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         mapping(address => address) delegates;
         mapping(address => IERC20Votes.Checkpoint[]) checkpoints;
         IERC20Votes.Checkpoint[] totalSupplyCheckpoints;
+        IERC20Votes.Checkpoint[] abafCheckpoints;
     }
 
     function _setActivate(bool _activated) internal virtual {
@@ -286,6 +287,27 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         _setNounce(nonce, from);
 
         _delegate(from, delegatee);
+    }
+
+    function _takeAbafCheckpoint() internal {
+        ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
+
+        uint256 pos = erc20VotesStorage.abafCheckpoints.length;
+
+        if (pos != 0) {
+            assert(
+                erc20VotesStorage.abafCheckpoints[pos - 1].fromBlock < _clock()
+            );
+        }
+
+        uint256 abaf = _getAbaf();
+
+        _erc20VotesStorage().abafCheckpoints.push(
+            IERC20Votes.Checkpoint({
+                fromBlock: _clock(),
+                votes: (abaf == 0) ? 1 : abaf
+            })
+        );
     }
 
     function _hashTypedDataV4(
@@ -410,6 +432,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
 
         if (erc20VotesStorage.activated) {
+            _takeAbafCheckpoint();
             if (from == address(0)) {
                 _writeCheckpoint(
                     erc20VotesStorage.totalSupplyCheckpoints,
@@ -429,11 +452,18 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     }
 
     function _delegate(address delegator, address delegatee) internal virtual {
+        _triggerScheduledTasks(0);
+
+        _takeAbafCheckpoint();
+
         address currentDelegate = _delegates(delegator);
-        uint256 delegatorBalance = _balanceOf(delegator) +
-            _getLockedAmountFor(delegator) +
-            _getHeldAmountFor(delegator) +
-            _getClearedAmountFor(delegator);
+        uint256 delegatorBalance = _balanceOfAdjustedAt(
+            delegator,
+            _blockTimestamp()
+        ) +
+            _getLockedAmountForAdjustedAt(delegator, _blockTimestamp()) +
+            _getHeldAmountForAdjusted(delegator) +
+            _getClearedAmountForAdjusted(delegator);
 
         _erc20VotesStorage().delegates[delegator] = delegatee;
 
@@ -456,6 +486,21 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
                 _moveVotingPower(dst, _add, amount);
             }
         }
+    }
+
+    function _calculateFactorSince(
+        uint256 _fromBlock
+    ) internal view returns (uint256) {
+        uint256 abafAtBlock = _checkpointsLookup(
+            _erc20VotesStorage().abafCheckpoints,
+            _fromBlock
+        );
+        uint256 currentAbaf = _checkpointsLookup(
+            _erc20VotesStorage().abafCheckpoints,
+            _clock()
+        );
+
+        return currentAbaf / abafAtBlock;
     }
 
     function _moveVotingPower(
@@ -483,7 +528,9 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
                 ? IERC20Votes.Checkpoint(0, 0)
                 : ckpts[pos - 1];
 
-            oldWeight = oldCkpt.votes;
+            oldWeight =
+                oldCkpt.votes *
+                _calculateFactorSince(oldCkpt.fromBlock);
             newWeight = op(oldWeight, delta);
 
             if (pos > 0 && oldCkpt.fromBlock == _clock()) {
