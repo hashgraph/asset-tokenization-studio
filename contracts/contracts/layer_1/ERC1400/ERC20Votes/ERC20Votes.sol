@@ -226,7 +226,7 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         _setActivate(_activated);
     }
 
-    function delegate(address _delegatee) external override {
+    function delegate(address _delegatee) external override onlyUnpaused {
         _delegate(_delegatee);
     }
 
@@ -237,7 +237,7 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) external override {
+    ) external override onlyUnpaused {
         _delegateBySig(_delegatee, _nonce, _expiry, _v, _r, _s);
     }
 
