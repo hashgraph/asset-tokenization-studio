@@ -215,7 +215,7 @@ import {
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import {_DEFAULT_PARTITION} from '../../constants/values.sol';
+import {DEFAULT_PARTITION} from '../../constants/values.sol';
 import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 
 abstract contract ERC1410BasicStorageWrapper is
@@ -261,7 +261,7 @@ abstract contract ERC1410BasicStorageWrapper is
 
             if (
                 _from != _basicTransferInfo.to &&
-                _partition == _DEFAULT_PARTITION
+                _partition == DEFAULT_PARTITION
             ) {
                 (_erc3643Storage().compliance).functionCall(
                     abi.encodeWithSelector(
@@ -280,9 +280,7 @@ abstract contract ERC1410BasicStorageWrapper is
             _basicTransferInfo.value,
             _partition
         );
-        if (
-            _from != _basicTransferInfo.to && _partition == _DEFAULT_PARTITION
-        ) {
+        if (_from != _basicTransferInfo.to && _partition == DEFAULT_PARTITION) {
             (_erc3643Storage().compliance).functionCall(
                 abi.encodeWithSelector(
                     ICompliance.transferred.selector,

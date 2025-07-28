@@ -206,14 +206,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ERC1410OperatorStorageWrapper} from "./ERC1410OperatorStorageWrapper.sol";
-import {_IS_PAUSED_ERROR_ID, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, _FROM_ACCOUNT_NULL_ERROR_ID, _FROM_ACCOUNT_BLOCKED_ERROR_ID, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, _IS_NOT_OPERATOR_ERROR_ID, _WRONG_PARTITION_ERROR_ID, _SUCCESS, _FROM_ACCOUNT_KYC_ERROR_ID, _CLEARING_ACTIVE_ERROR_ID, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, _ADDRESS_RECOVERED_FROM_ERROR_ID, _DEFAULT_PARTITION} from "../../constants/values.sol";
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
-import {IKyc} from "../../../layer_1/interfaces/kyc/IKyc.sol";
-import {IERC1410Standard} from "../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol";
-import {ICompliance} from "../../../layer_1/interfaces/ERC3643/ICompliance.sol";
-import {IERC3643} from "../../../layer_1/interfaces/ERC3643/IERC3643.sol";
-import {LowLevelCall} from "../../common/libraries/LowLevelCall.sol";
+import {
+    ERC1410OperatorStorageWrapper
+} from './ERC1410OperatorStorageWrapper.sol';
+import {DEFAULT_PARTITION} from '../../constants/values.sol';
+import {
+    IERC1410Standard
+} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
@@ -319,7 +321,7 @@ abstract contract ERC1410StandardStorageWrapper is
 
         _increaseTotalSupplyByPartition(_issueData.partition, _issueData.value);
 
-        if (_issueData.partition == _DEFAULT_PARTITION) {
+        if (_issueData.partition == DEFAULT_PARTITION) {
             _erc3643Storage().compliance.functionCall(
                 abi.encodeWithSelector(
                     ICompliance.created.selector,
@@ -353,7 +355,7 @@ abstract contract ERC1410StandardStorageWrapper is
 
         _reduceTotalSupplyByPartition(_partition, _value);
 
-        if (_partition == _DEFAULT_PARTITION) {
+        if (_partition == DEFAULT_PARTITION) {
             _erc3643Storage().compliance.functionCall(
                 abi.encodeWithSelector(
                     ICompliance.destroyed.selector,

@@ -220,12 +220,16 @@ import {Eip1066} from '../../constants/eip1066.sol';
 import {CapStorageWrapper2} from '../../cap/CapStorageWrapper2.sol';
 import {IClearing} from '../../../layer_1/interfaces/clearing/IClearing.sol';
 import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 
 abstract contract ERC1594StorageWrapper is
     IERC1594StorageWrapper,
     CapStorageWrapper2
 {
+    using LowLevelCall for address;
+
     struct ERC1594Storage {
         bool issuance;
         bool initialized;
@@ -607,6 +611,28 @@ abstract contract ERC1594StorageWrapper is
                 abi.encode(_to)
             );
         }
+        // ERC3643 Compliance Check
+        {
+            bytes memory complianceResult = (_erc3643Storage().compliance)
+                .functionStaticCall(
+                    abi.encodeWithSelector(
+                        ICompliance.canTransfer.selector,
+                        _from,
+                        _to,
+                        _value
+                    ),
+                    IERC3643.ComplianceCallFailed.selector
+                );
+
+            if (!abi.decode(complianceResult, (bool))) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IERC3643.ComplianceCallFailed.selector,
+                    abi.encode(_from, _to, _value)
+                );
+            }
+        }
         // Identity
         if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (
@@ -806,6 +832,30 @@ abstract contract ERC1594StorageWrapper is
                 );
             }
         }
+
+        // ERC3643 Compliance Check
+        if (_from != address(0) && _to != address(0)) {
+            bytes memory complianceResult = (_erc3643Storage().compliance)
+                .functionStaticCall(
+                    abi.encodeWithSelector(
+                        ICompliance.canTransfer.selector,
+                        _from,
+                        _to,
+                        0 // Using 0 as amount since this is a general compliance check
+                    ),
+                    IERC3643.ComplianceCallFailed.selector
+                );
+
+            if (!abi.decode(complianceResult, (bool))) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IERC3643.ComplianceCallFailed.selector,
+                    abi.encode(_from, _to, 0)
+                );
+            }
+        }
+
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 

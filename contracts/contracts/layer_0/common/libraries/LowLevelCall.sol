@@ -212,7 +212,7 @@ library LowLevelCall {
         address _target,
         bytes memory _data,
         bytes4 _errorSelector
-    ) internal returns (bytes memory) {
+    ) internal returns (bytes memory result) {
         if (_target != address(0)) {
             // solhint-disable-next-line avoid-low-level-calls
             (bool success, bytes memory returndata) = _target.call(_data);

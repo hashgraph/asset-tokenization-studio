@@ -227,7 +227,7 @@ import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import {_DEFAULT_PARTITION} from '../constants/values.sol';
+import {DEFAULT_PARTITION} from '../constants/values.sol';
 import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
 
 abstract contract ClearingStorageWrapper2 is
@@ -977,6 +977,7 @@ abstract contract ClearingStorageWrapper2 is
     ) internal view virtual returns (uint256);
 
     function _checkCompliance(address _from, address _to) internal view virtual;
+
     function _checkIdentity(address _from, address _to) internal view virtual;
 
     function _clearingTransferExecution(
@@ -1013,7 +1014,7 @@ abstract contract ClearingStorageWrapper2 is
         if (
             _tokenHolder != destination &&
             _erc3643Storage().compliance != address(0) &&
-            _partition == _DEFAULT_PARTITION
+            _partition == DEFAULT_PARTITION
         ) {
             (_erc3643Storage().compliance).functionCall(
                 abi.encodeWithSelector(
