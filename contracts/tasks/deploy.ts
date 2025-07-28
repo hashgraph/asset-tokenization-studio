@@ -294,6 +294,7 @@ task(
             externalKycListManagement,
             protectedPartitions,
             erc3643,
+            freeze,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -348,6 +349,7 @@ task(
                 externalKycListManagement.address,
             'Protected Partitions': protectedPartitions.address,
             ERC3643: erc3643.address,
+            Freeze: freeze.address,
         }
 
         const contractAddress = []
@@ -363,7 +365,11 @@ task(
                     address,
                     network,
                 })
-                if (['Business Logic Resolver Proxy', 'Factory Proxy'].includes(key)) {
+                if (
+                    ['Business Logic Resolver Proxy', 'Factory Proxy'].includes(
+                        key
+                    )
+                ) {
                     console.log(`   --> *** ${key}: ${address} (${contractId})`)
                 } else {
                     console.log(`   --> ${key}: ${address} (${contractId})`)
