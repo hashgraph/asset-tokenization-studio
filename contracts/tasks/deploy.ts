@@ -303,6 +303,7 @@ task(
             externalKycListManagement,
             protectedPartitions,
             erc3643,
+            freeze,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -374,6 +375,7 @@ task(
                 externalKycListManagement.address,
             'Protected Partitions': protectedPartitions.address,
             ERC3643: erc3643.address,
+            Freeze: freeze.address,
             'T-REX Factory': trexFactory,
         }
 

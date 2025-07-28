@@ -253,7 +253,15 @@ import ScheduledBalanceAdjustmentViewModel from '../response/ScheduledBalanceAdj
 import { GetScheduledBalanceAdjustmentQuery } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
 import GetScheduledBalanceAdjustmentCountRequest from '../request/equity/GetScheduledBalanceAdjustmentsCountRequest';
 import { GetScheduledBalanceAdjustmentCountQuery } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
-import { GetAllScheduledBalanceAdjustmentsRequest } from '../request/index';
+import { GetDividendHoldersQuery } from '@query/equity/dividends/getDividendHolders/GetDividendHoldersQuery';
+import { GetTotalDividendHoldersQuery } from '@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery';
+import { GetVotingHoldersQuery } from '@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery';
+import { GetTotalVotingHoldersQuery } from '@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery';
+import GetAllScheduledBalanceAdjustmentsRequest from '../request/equity/GetAllScheduledBalanceAdjustmentst';
+import GetDividendHoldersRequest from '../request/equity/GetDividendHoldersRequest';
+import GetTotalDividendHoldersRequest from '../request/equity/GetTotalDividendHoldersRequest';
+import GetVotingHoldersRequest from '../request/equity/GetVotingHoldersRequest';
+import GetTotalVotingHoldersRequest from '../request/equity/GetTotalVotingHoldersRequest';
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
     security: SecurityViewModel;
@@ -296,6 +304,12 @@ interface IEquityInPort {
   getAllScheduledBalanceAdjustments(
     request: GetAllScheduledBalanceAdjustmentsRequest,
   ): Promise<ScheduledBalanceAdjustmentViewModel[]>;
+  getDividendHolders(request: GetDividendHoldersRequest): Promise<string[]>;
+  getTotalDividendHolders(
+    request: GetTotalDividendHoldersRequest,
+  ): Promise<number>;
+  getVotingHolders(request: GetVotingHoldersRequest): Promise<string[]>;
+  getTotalVotingHolders(request: GetTotalVotingHoldersRequest): Promise<number>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -697,6 +711,66 @@ class EquityInPort implements IEquityInPort {
     }
 
     return scheduledBalanceAdjustments;
+  }
+
+  @LogError
+  async getDividendHolders(
+    request: GetDividendHoldersRequest,
+  ): Promise<string[]> {
+    const { securityId, dividendId, start, end } = request;
+    ValidatedRequest.handleValidation(GetDividendHoldersRequest.name, request);
+
+    return (
+      await this.queryBus.execute(
+        new GetDividendHoldersQuery(securityId, dividendId, start, end),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getTotalDividendHolders(
+    request: GetTotalDividendHoldersRequest,
+  ): Promise<number> {
+    const { securityId, dividendId } = request;
+    ValidatedRequest.handleValidation(
+      GetTotalDividendHoldersRequest.name,
+      request,
+    );
+
+    return (
+      await this.queryBus.execute(
+        new GetTotalDividendHoldersQuery(securityId, dividendId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getVotingHolders(request: GetVotingHoldersRequest): Promise<string[]> {
+    const { securityId, voteId, start, end } = request;
+    ValidatedRequest.handleValidation(GetVotingHoldersRequest.name, request);
+
+    return (
+      await this.queryBus.execute(
+        new GetVotingHoldersQuery(securityId, voteId, start, end),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getTotalVotingHolders(
+    request: GetTotalVotingHoldersRequest,
+  ): Promise<number> {
+    const { securityId, voteId } = request;
+    ValidatedRequest.handleValidation(
+      GetTotalVotingHoldersRequest.name,
+      request,
+    );
+
+    return (
+      await this.queryBus.execute(
+        new GetTotalVotingHoldersQuery(securityId, voteId),
+      )
+    ).payload;
   }
 }
 
