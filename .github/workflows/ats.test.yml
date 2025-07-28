@@ -14,6 +14,7 @@ on:
             - 'apps/ats/**'
             - 'package.json'
             - '.github/workflows/ats.test.yml'
+    workflow_dispatch:
 
 permissions:
     contents: read

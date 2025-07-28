@@ -208,6 +208,7 @@ import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfil
 import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
 // You don't need to add this to deps, it's included by @esbuild-plugins/node-modules-polyfill
 import rollupNodePolyFill from "rollup-plugin-node-polyfills";
+import commonjs from "@rollup/plugin-commonjs";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import EnvironmentPlugin from "vite-plugin-environment";
@@ -250,8 +251,7 @@ export default {
       querystring: "rollup-plugin-node-polyfills/polyfills/qs",
       punycode: "rollup-plugin-node-polyfills/polyfills/punycode",
       url: "rollup-plugin-node-polyfills/polyfills/url",
-      /******** Remove the string decoder below *********/
-      // string_decoder: "rollup-plugin-node-polyfills/polyfills/string-decoder",
+      string_decoder: "rollup-plugin-node-polyfills/polyfills/string-decoder",
       http: "rollup-plugin-node-polyfills/polyfills/http",
       https: "rollup-plugin-node-polyfills/polyfills/http",
       os: "rollup-plugin-node-polyfills/polyfills/os",
@@ -279,6 +279,10 @@ export default {
     dedupe: ["@emotion/react"],
   },
   optimizeDeps: {
+    include: [
+      "@hashgraph/asset-tokenization-contracts",
+      "@hashgraph/asset-tokenization-sdk",
+    ],
     esbuildOptions: {
       /********* New line inserted ***********/
       // inject: ['./vite-polyfills/setImmediate.js'],
@@ -298,10 +302,15 @@ export default {
   },
   build: {
     rollupOptions: {
+      external: ["winston", "winston-daily-rotate-file", "winston-transport"],
       plugins: [
         // Enable rollup polyfills plugin
         // used during production bundling
         rollupNodePolyFill(),
+        // Handle CommonJS modules
+        commonjs({
+          include: ["**/node_modules/**", "**/packages/ats/contracts/**"],
+        }),
       ],
     },
   },

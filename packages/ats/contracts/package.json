@@ -1,8 +1,8 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
   "version": "1.14.4",
+  "type": "commonjs",
   "main": "./build/typechain-types/index.js",
-  "module": "./build/typechain-types/index.js",
   "files": [
     "build/",
     "contracts/"
@@ -10,12 +10,10 @@
   "exports": {
     ".": {
       "import": "./build/typechain-types/index.js",
-      "require": "./build/typechain-types/index.js"
+      "require": "./build/typechain-types/index.js",
+      "default": "./build/typechain-types/index.js"
     },
-    "./typechain-types/index.js": {
-      "import": "./build/typechain-types/index.js",
-      "require": "./build/typechain-types/index.js"
-    }
+    "./typechain-types/index.js": "./build/typechain-types/index.js"
   },
   "scripts": {
     "build": "npx -y rimraf build && npm run compile && npx tsc -p tsconfig.json",
