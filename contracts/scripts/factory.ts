@@ -287,6 +287,7 @@ export interface SecurityData {
     externalPauses: string[]
     externalControlLists: string[]
     externalKycLists: string[]
+    erc20VotesActivated: boolean
 }
 
 export interface EquityData {
@@ -354,6 +355,7 @@ export async function setEquityData({
     arePartitionsProtected,
     clearingActive,
     internalKycActivated,
+    erc20VotesActivated = false,
     name,
     symbol,
     decimals,
@@ -383,6 +385,7 @@ export async function setEquityData({
     arePartitionsProtected: boolean
     clearingActive: boolean
     internalKycActivated: boolean
+    erc20VotesActivated?: boolean
     name: string
     symbol: string
     decimals: number
@@ -443,6 +446,7 @@ export async function setEquityData({
         erc20MetadataInfo,
         clearingActive,
         internalKycActivated,
+        erc20VotesActivated,
         externalPauses: externalPauses ?? [],
         externalControlLists: externalControlLists ?? [],
         externalKycLists: externalKycLists ?? [],
@@ -477,6 +481,7 @@ export async function setBondData({
     arePartitionsProtected,
     clearingActive,
     internalKycActivated,
+    erc20VotesActivated = false,
     name,
     symbol,
     decimals,
@@ -503,6 +508,7 @@ export async function setBondData({
     arePartitionsProtected: boolean
     clearingActive: boolean
     internalKycActivated: boolean
+    erc20VotesActivated?: boolean
     name: string
     symbol: string
     decimals: number
@@ -560,6 +566,7 @@ export async function setBondData({
         erc20MetadataInfo,
         clearingActive,
         internalKycActivated,
+        erc20VotesActivated,
         externalPauses: externalPauses ?? [],
         externalControlLists: externalControlLists ?? [],
         externalKycLists: externalKycLists ?? [],
@@ -595,6 +602,7 @@ export async function deployEquityFromFactory({
     arePartitionsProtected,
     clearingActive,
     internalKycActivated,
+    erc20VotesActivated = false,
     name,
     symbol,
     decimals,
@@ -627,6 +635,7 @@ export async function deployEquityFromFactory({
     arePartitionsProtected: boolean
     clearingActive: boolean
     internalKycActivated: boolean
+    erc20VotesActivated?: boolean
     name: string
     symbol: string
     decimals: number
@@ -660,6 +669,7 @@ export async function deployEquityFromFactory({
         isMultiPartition,
         clearingActive,
         internalKycActivated,
+        erc20VotesActivated,
         name,
         symbol,
         decimals,
@@ -712,6 +722,7 @@ export async function deployBondFromFactory({
     arePartitionsProtected,
     clearingActive,
     internalKycActivated,
+    erc20VotesActivated = false,
     name,
     symbol,
     decimals,
@@ -741,6 +752,7 @@ export async function deployBondFromFactory({
     arePartitionsProtected: boolean
     clearingActive: boolean
     internalKycActivated: boolean
+    erc20VotesActivated?: boolean
     name: string
     symbol: string
     decimals: number
@@ -770,6 +782,7 @@ export async function deployBondFromFactory({
         arePartitionsProtected,
         clearingActive,
         internalKycActivated,
+        erc20VotesActivated,
         isMultiPartition,
         name,
         symbol,
