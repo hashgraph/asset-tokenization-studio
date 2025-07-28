@@ -256,7 +256,7 @@ abstract contract TimeTravelStorageWrapper is
         emit SystemBlocknumberChanged(_oldSystemNumber, _newSystemNumber);
     }
 
-    function _resetSystemBlockNumber() internal {
+    function _resetSystemBlocknumber() internal {
         _blocknumber = 0;
         emit SystemBlocknumberReset();
     }
