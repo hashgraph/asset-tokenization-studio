@@ -245,6 +245,7 @@ interface IFactory {
         address[] externalPauses;
         address[] externalControlLists;
         address[] externalKycLists;
+        bool erc20VotesActivated;
     }
 
     struct EquityData {
