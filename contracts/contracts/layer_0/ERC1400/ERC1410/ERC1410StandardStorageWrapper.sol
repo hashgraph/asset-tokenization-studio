@@ -221,17 +221,23 @@ import {
     _FROM_ACCOUNT_KYC_ERROR_ID,
     _CLEARING_ACTIVE_ERROR_ID,
     _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-    _ADDRESS_RECOVERED_FROM_ERROR_ID
+    _ADDRESS_RECOVERED_FROM_ERROR_ID,
+    _DEFAULT_PARTITION
 } from '../../constants/values.sol';
 import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
     IERC1410Standard
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
 {
+    using LowLevelCall for address;
+
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -331,6 +337,17 @@ abstract contract ERC1410StandardStorageWrapper is
 
         _increaseTotalSupplyByPartition(_issueData.partition, _issueData.value);
 
+        if (_issueData.partition == _DEFAULT_PARTITION) {
+            _erc3643Storage().compliance.functionCall(
+                abi.encodeWithSelector(
+                    ICompliance.created.selector,
+                    _issueData.tokenHolder,
+                    _issueData.value
+                ),
+                IERC3643.ComplianceCallFailed.selector
+            );
+        }
+
         emit IssuedByPartition(
             _issueData.partition,
             _msgSender(),
@@ -353,6 +370,17 @@ abstract contract ERC1410StandardStorageWrapper is
         _reduceBalanceByPartition(_from, _value, _partition);
 
         _reduceTotalSupplyByPartition(_partition, _value);
+
+        if (_partition == _DEFAULT_PARTITION) {
+            _erc3643Storage().compliance.functionCall(
+                abi.encodeWithSelector(
+                    ICompliance.destroyed.selector,
+                    _from,
+                    _value
+                ),
+                IERC3643.ComplianceCallFailed.selector
+            );
+        }
 
         emit RedeemedByPartition(
             _partition,
