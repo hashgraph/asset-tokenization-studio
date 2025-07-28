@@ -230,6 +230,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         mapping(address => IERC20Votes.Checkpoint[]) checkpoints;
         IERC20Votes.Checkpoint[] totalSupplyCheckpoints;
         IERC20Votes.Checkpoint[] abafCheckpoints;
+        bool initialized;
     }
 
     event DelegateChanged(

@@ -222,7 +222,7 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Votes(
         bool _activated
-    ) external override onlyUninitialized(_erc20Storage().initialized) {
+    ) external override onlyUninitialized(_erc20VotesStorage().initialized) {
         _setActivate(_activated);
     }
 
@@ -260,7 +260,7 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         address _account,
         uint256 _timepoint
     ) external view override returns (uint256) {
-        _getPastVotes(_account, _timepoint);
+        return _getPastVotes(_account, _timepoint);
     }
 
     function getPastTotalSupply(
