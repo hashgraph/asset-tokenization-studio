@@ -292,21 +292,22 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     function _takeAbafCheckpoint() internal {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
 
+        uint256 abaf = _getAbaf();
+        abaf = (abaf == 0) ? 1 : abaf;
+
         uint256 pos = erc20VotesStorage.abafCheckpoints.length;
 
-        if (pos != 0) {
-            assert(
-                erc20VotesStorage.abafCheckpoints[pos - 1].fromBlock < _clock()
-            );
-        }
-
-        uint256 abaf = _getAbaf();
+        if (pos != 0)
+            if (
+                erc20VotesStorage.abafCheckpoints[pos - 1].fromBlock == _clock()
+            ) {
+                if (erc20VotesStorage.abafCheckpoints[pos - 1].votes != abaf)
+                    revert IERC20Votes.AbafChangeForBlockForbidden(_clock());
+                return;
+            }
 
         _erc20VotesStorage().abafCheckpoints.push(
-            IERC20Votes.Checkpoint({
-                fromBlock: _clock(),
-                votes: (abaf == 0) ? 1 : abaf
-            })
+            IERC20Votes.Checkpoint({fromBlock: _clock(), votes: abaf})
         );
     }
 
@@ -402,7 +403,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
 
             oldWeight =
                 oldCkpt.votes *
-                _calculateFactorSince(oldCkpt.fromBlock);
+                _calculateFactorBetween(oldCkpt.fromBlock, _clock());
             newWeight = op(oldWeight, delta);
 
             if (pos > 0 && oldCkpt.fromBlock == _clock()) {
@@ -467,7 +468,10 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         address account
     ) internal view virtual returns (uint256) {
         return
-            _lastCheckpointAdjusted(_erc20VotesStorage().checkpoints[account]);
+            _getVotesAdjusted(
+                _clock(),
+                _erc20VotesStorage().checkpoints[account]
+            );
     }
 
     function _getPastVotes(
@@ -476,9 +480,9 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     ) internal view virtual returns (uint256) {
         require(timepoint < _clock(), 'ERC20Votes: future lookup');
         return
-            _checkpointsLookup(
-                _erc20VotesStorage().checkpoints[account],
-                timepoint
+            _getVotesAdjusted(
+                timepoint,
+                _erc20VotesStorage().checkpoints[account]
             );
     }
 
@@ -487,16 +491,28 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     ) internal view virtual returns (uint256) {
         require(timepoint < _clock(), 'ERC20Votes: future lookup');
         return
-            _checkpointsLookup(
-                _erc20VotesStorage().totalSupplyCheckpoints,
-                timepoint
+            _getVotesAdjusted(
+                timepoint,
+                _erc20VotesStorage().totalSupplyCheckpoints
             );
+    }
+
+    function _getVotesAdjusted(
+        uint256 timepoint,
+        IERC20Votes.Checkpoint[] storage ckpts
+    ) internal view returns (uint256) {
+        (uint256 blockNumber, uint256 votes) = _checkpointsLookup(
+            ckpts,
+            timepoint
+        );
+
+        return votes * _calculateFactorBetween(blockNumber, timepoint);
     }
 
     function _checkpointsLookup(
         IERC20Votes.Checkpoint[] storage ckpts,
         uint256 timepoint
-    ) internal view returns (uint256) {
+    ) internal view returns (uint256 block_, uint256 vote_) {
         uint256 length = ckpts.length;
 
         uint256 low = 0;
@@ -520,34 +536,27 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
             }
         }
 
-        if (ckpts[high - 1].fromBlock == timepoint)
-            return ckpts[high - 1].votes;
+        if (high == 0) return (0, 0);
 
-        return _lastCheckpointAdjusted(ckpts);
+        unchecked {
+            return (ckpts[high - 1].fromBlock, ckpts[high - 1].votes);
+        }
     }
 
-    function _lastCheckpointAdjusted(
-        IERC20Votes.Checkpoint[] storage _ckpts
+    function _calculateFactorBetween(
+        uint256 _fromBlock,
+        uint256 _toBlock
     ) internal view returns (uint256) {
-        uint256 length = _ckpts.length;
-
-        if (length == 0) return 0;
-
-        return
-            _ckpts[length - 1].votes *
-            _calculateFactorSince(_ckpts[length - 1].fromBlock);
-    }
-
-    function _calculateFactorSince(
-        uint256 _fromBlock
-    ) internal view returns (uint256) {
-        uint256 abafAtBlock = _checkpointsLookup(
+        (, uint256 abafAtBlockFrom) = _checkpointsLookup(
             _erc20VotesStorage().abafCheckpoints,
             _fromBlock
         );
-        uint256 currentAbaf = _getAbaf();
+        (, uint256 abafAtBlockTo) = _checkpointsLookup(
+            _erc20VotesStorage().abafCheckpoints,
+            _toBlock
+        );
 
-        return currentAbaf / abafAtBlock;
+        return abafAtBlockTo / abafAtBlockFrom;
     }
 
     function _add(uint256 a, uint256 b) internal pure returns (uint256) {
