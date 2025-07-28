@@ -203,232 +203,89 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import {
+  FormControl,
+  HStack,
+  SimpleGrid,
+  Stack,
+  VStack,
+} from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
+import { Text, InfoDivider, InputController } from "io-bricks-ui";
+import { useFormContext, useFormState } from "react-hook-form";
+import { useEffect } from "react";
+import { ICreateEquityFormValues } from "../CreateEquity/ICreateEquityFormValues";
+import { ICreateBondFormValues } from "../CreateBond/ICreateBondFormValues";
+import { FormStepContainer } from "../../components/FormStepContainer";
+import { CancelButton } from "../../components/CancelButton";
+import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
+import { NextStepButton } from "../CreateEquity/Components/NextStepButton";
+import { isHederaValidAddress } from "../../utils/rules";
 
-import {ICompliance} from './ICompliance.sol';
-import {IIdentityRegistry} from './IIdentityRegistry.sol';
+export const StepERC3643 = () => {
+  const { t } = useTranslation("security", {
+    keyPrefix: "createEquity.stepERC3643",
+  });
 
-interface IERC3643 {
-    struct ERC3643Storage {
-        address onchainID;
-        address identityRegistry;
-        address compliance;
-        mapping(address => uint256) frozenTokens;
-        mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
-        mapping(address => bool) addressRecovered;
-        bool initialized;
-    }
+  const { control, watch, setValue, clearErrors } = useFormContext<
+    ICreateEquityFormValues | ICreateBondFormValues
+  >();
 
-    /**
-     *  @notice This event is emitted when the token information is updated.
-     */
-    event UpdatedTokenInformation(
-        string indexed newName,
-        string indexed newSymbol,
-        uint8 newDecimals,
-        string newVersion,
-        address indexed newOnchainID
-    );
+  const stepFormState = useFormState({
+    control,
+  });
 
-    /**
-     *  @notice This event is emitted when the IdentityRegistry has been set for the token
-     */
-    event IdentityRegistryAdded(address indexed identityRegistry);
+  const complianceAddress = watch("complianceAddress");
 
-    /**
-     * @dev Emitted when the agent role is granted
-     *
-     * @param _agent Address of the agent that has been added
-     */
-    event AgentAdded(address indexed _agent);
+  useEffect(() => {
+    setValue("complianceAddress", complianceAddress);
+  }, [complianceAddress, setValue, clearErrors]);
 
-    /**
-     * @dev Emitted when the agent role is revoked
-     *
-     * @param _agent Address of the agent that has been removed
-     */
-    event AgentRemoved(address indexed _agent);
+  return (
+    <FormStepContainer>
+      <Stack gap={2}>
+        <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+        <Text textStyle="BodyTextRegularMD">{t("subtitle")}</Text>
+      </Stack>
+      <InfoDivider title={t("compliance")} type="main" />
+      <VStack w="full">
+        <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">
+                {t("complianceAddress")}
+              </Text>
+            </HStack>
+            <InputController
+              control={control}
+              id="complianceAddress"
+              rules={{
+                validate: (value: string) => {
+                  if (!value) {
+                    return true;
+                  }
+                  return isHederaValidAddress(value);
+                },
+              }}
+              placeholder={t("complianceAddressPlaceholder")}
+            />
+          </Stack>
+        </FormControl>
+      </VStack>
 
-    /**
-     * @dev Emitted when a wallet is recovered
-     *
-     * @param _lostWallet Address of the lost wallet
-     * @param _newWallet Address of the new wallet
-     * @param _investorOnchainID OnchainID
-     */
-    event RecoverySuccess(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    );
-
-    /**
-     * @notice Thrown when calling from a recovered wallet
-     */
-    error WalletRecovered();
-
-    /**
-     * @notice Thrown when attempting to recover a wallet with pending locks, holds or clearings
-     */
-    error CannotRecoverWallet();
-
-    /**
-     * @notice Thrown in batch operations when input amount arrays length is different
-     */
-    error InputAmountsArrayLengthMismatch();
-
-    /**
-     * @notice Thrown in batch operations when input boolean arrays length is different
-     */
-    error InputBoolArrayLengthMismatch();
-
-    /**
-     * @notice Thrown when the calls to the methods in the compliance contract fail
-     */
-    error ComplianceCallFailed();
-
-    /**
-     * @dev Facet initializer
-     *
-     * Sets the compliance contract address
-     */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(address _compliance) external;
-
-    /**
-     * @dev Sets the name of the token to `_name`.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setName(string calldata _name) external;
-
-    /**
-     * @dev Sets the symbol of the token to `_symbol`.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setSymbol(string calldata _symbol) external;
-
-    /**
-     * @dev Sets the onchainID of the token to `_onchainID`.
-     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
-     *
-     * This function should only be callable by an authorized entities
-     *
-     * Returns `true` if the transfer was successful.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setOnchainID(address _onchainID) external;
-
-    /**
-     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
-     * @dev This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the transfer was successful.
-     *
-     * Emits a ControllerTransfer event.
-     */
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external returns (bool);
-
-    /**
-     * @dev Sets the identity registry contract address.
-     * @dev Mints `_amount` tokens to the address `_to`.
-     *
-     * Emits an IdentityRegistryAdded event.
-     */
-    function setIdentityRegistry(address _identityRegistry) external;
-
-    /**
-     * @dev Mints `_amount` tokens to the address `_to`.
-     *
-     * This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the minting was successful.
-     *
-     * Emits a Issued event.
-     */
-    function mint(address _to, uint256 _amount) external;
-
-    /**
-     * @dev Sets the compliance contract address.
-     * @dev Burns `_amount` tokens from the address `_userAddress`.
-     *
-     * Reduces total supply.
-     *
-     * Emits a ComplianceAdded event.
-     */
-    function setCompliance(address _compliance) external;
-
-    /**
-     * @dev Burns `_amount` tokens from the address `_userAddress`.
-     *
-     * This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the burn was successful.
-     *
-     * Emits a redeem event.
-     */
-    function burn(address _userAddress, uint256 _amount) external;
-
-    /**
-     * @notice Gives an account the agent role
-     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
-     * @dev Can only be called by the role admin
-     */
-    function addAgent(address _agent) external;
-
-    /**
-     * @notice Revokes an account the agent role
-     * @dev Can only be called by the role admin
-     */
-    function removeAgent(address _agent) external;
-
-    /**
-     * @notice Transfers the status of a lost wallet to a new wallet
-     * @dev Can only be called by the agent
-     */
-    function recoveryAddress(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    ) external returns (bool);
-
-    /**
-     * @notice Retrieves recovery status of a wallet
-     */
-    function isAddressRecovered(address _wallet) external returns (bool);
-
-    /**
-     * @dev Checks if an account has the agent role
-     */
-    function isAgent(address _agent) external view returns (bool);
-
-    /**
-     * @dev Returns the onchainID address associated with the token.
-     */
-    function onchainID() external view returns (address);
-
-    /**
-     * @dev Returns the address of the identity registry contract.
-     * @dev Returns the version of the contract as a string.
-     *
-     */
-    function identityRegistry() external view returns (IIdentityRegistry);
-
-    /**
-     * @dev Returns the address of the compliance contract.
-     */
-    function compliance() external view returns (ICompliance);
-
-    /**
-     * @notice Retrieves the latest version of the contract.
-     * @dev The version is represented as a string.
-     */
-    function version() external view returns (string memory);
-}
+      <HStack
+        gap={4}
+        w="full"
+        h="100px"
+        align="end"
+        justifyContent={"flex-end"}
+      >
+        <CancelButton />
+        <PreviousStepButton />
+        <NextStepButton
+          isDisabled={Boolean(complianceAddress) && !stepFormState.isValid}
+        />
+      </HStack>
+    </FormStepContainer>
+  );
+};

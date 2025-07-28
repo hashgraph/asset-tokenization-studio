@@ -207,4 +207,8 @@
 pragma solidity 0.8.18;
 
 /* solhint-disable-next-line no-empty-blocks */
-interface ICompliance {}
+interface ICompliance {
+    function transferred(address _from, address _to, uint256 _amount) external;
+    function created(address _to, uint256 _amount) external;
+    function destroyed(address _from, uint256 _amount) external;
+}

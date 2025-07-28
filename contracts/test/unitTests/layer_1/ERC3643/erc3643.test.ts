@@ -203,6 +203,7 @@
 
 */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
@@ -232,7 +233,7 @@ import {
     ProtectedPartitions,
     DiamondFacet,
     FreezeFacet,
-    ComplianceMockBase,
+    ComplianceMock,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -268,6 +269,7 @@ import {
     ADDRESS_RECOVERED_FROM_ERROR_ID,
     deployContract,
     DeployContractCommand,
+    CLEARING_VALIDATOR_ROLE,
     TREX_OWNER_ROLE,
 } from '@scripts'
 import { Contract } from 'ethers'
@@ -325,14 +327,19 @@ describe('ERC3643 Tests', () => {
     let protectedPartitionsFacet: ProtectedPartitions
     let diamondFacet: DiamondFacet
     let freezeFacet: FreezeFacet
+    let complianceMock: ComplianceMock
+    let complianceMockAddress: string
 
+    enum ClearingOperationType {
+        Transfer,
+        Redeem,
+        HoldCreation,
+    }
     describe('single partition', () => {
         let erc3643Issuer: ERC3643
         let erc3643Transferor: ERC3643
         let erc1410SnapshotFacet: ERC1410Snapshot
         let erc20Facet: ERC20
-        let complianceMockTrue: string
-        let complianceMockFalse: string
 
         before(async () => {
             // mute | mock console.log
@@ -358,24 +365,6 @@ describe('ERC3643 Tests', () => {
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
-
-            complianceMockTrue = (
-                await deployContract(
-                    new DeployContractCommand({
-                        name: 'ComplianceMockTrue',
-                        signer: signer_A,
-                    })
-                )
-            ).address
-
-            complianceMockFalse = (
-                await deployContract(
-                    new DeployContractCommand({
-                        name: 'ComplianceMockFalse',
-                        signer: signer_A,
-                    })
-                )
-            ).address
         })
 
         beforeEach(async () => {
@@ -399,6 +388,10 @@ describe('ERC3643 Tests', () => {
                 role: CLEARING_ROLE,
                 members: [account_B],
             }
+            const rbacClearingValidator: Rbac = {
+                role: CLEARING_VALIDATOR_ROLE,
+                members: [account_A],
+            }
             const rbacAgent: Rbac = {
                 role: AGENT_ROLE,
                 members: [account_A],
@@ -415,7 +408,18 @@ describe('ERC3643 Tests', () => {
                 rbacClearing,
                 rbacAgent,
                 rbacTrexOwner,
+                rbacClearingValidator,
             ]
+
+            complianceMockAddress = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'ComplianceMock',
+                        signer: signer_A,
+                        args: [true, false],
+                    })
+                )
+            ).address
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -448,7 +452,7 @@ describe('ERC3643 Tests', () => {
                 init_rbacs,
                 factory,
                 businessLogicResolver: businessLogicResolver.address,
-                compliance: complianceMockTrue,
+                compliance: complianceMockAddress,
             })
 
             accessControlFacet = await ethers.getContractAt(
@@ -560,6 +564,7 @@ describe('ERC3643 Tests', () => {
                     ...clearingTransferFacet.interface.fragments,
                     ...clearingRedeemFacet.interface.fragments,
                     ...clearingHoldCreationFacet.interface.fragments,
+                    ...clearingActionsFacet.interface.fragments,
                 ],
                 signer_A
             )
@@ -579,6 +584,10 @@ describe('ERC3643 Tests', () => {
             freezeFacet = await ethers.getContractAt(
                 'FreezeFacet',
                 diamond.address
+            )
+            complianceMock = await ethers.getContractAt(
+                'ComplianceMock',
+                complianceMockAddress
             )
 
             accessControlFacet = accessControlFacet.connect(signer_A)
@@ -1009,7 +1018,6 @@ describe('ERC3643 Tests', () => {
 
         it('GIVEN an initialized token WHEN retrieving the version THEN returns the right version', async () => {
             const json = await erc3643Facet.version()
-            console.log(json)
             const parsed = JSON.parse(json)
 
             const [configResolver, configId, configVersion] =
@@ -1057,25 +1065,33 @@ describe('ERC3643 Tests', () => {
         describe('Compliance', () => {
             it('GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance', async () => {
                 const retrieved_compliance = await erc3643Facet.compliance()
-                expect(retrieved_compliance).to.equal(complianceMockTrue)
+                expect(retrieved_compliance).to.equal(complianceMockAddress)
 
-                //Update compliance
-                expect(await erc3643Facet.setCompliance(complianceMockFalse))
+                const newComplianceMockAddress = (
+                    await deployContract(
+                        new DeployContractCommand({
+                            name: 'ComplianceMock',
+                            signer: signer_A,
+                            args: [true, false],
+                        })
+                    )
+                ).address
+
+                expect(
+                    await erc3643Facet.setCompliance(newComplianceMockAddress)
+                )
                     .to.emit(erc3643Facet, 'ComplianceAdded')
-                    .withArgs(complianceMockFalse)
+                    .withArgs(newComplianceMockAddress)
 
                 const retrieved_newCompliance = await erc3643Facet.compliance()
-                expect(retrieved_newCompliance).to.equal(complianceMockFalse)
+                expect(retrieved_newCompliance).to.equal(
+                    newComplianceMockAddress
+                )
             })
 
-            it('GIVEN MockCompliaceTrue THEN canTransfer returns true', async () => {
-                const complianceTrue: ComplianceMockBase =
-                    await ethers.getContractAt(
-                        'ComplianceMockBase',
-                        complianceMockTrue
-                    )
+            it('GIVEN ComplianceMock flag set to true THEN canTransfer returns true', async () => {
                 expect(
-                    await complianceTrue.canTransfer(
+                    await complianceMock.canTransfer(
                         ADDRESS_ZERO,
                         ADDRESS_ZERO,
                         ZERO
@@ -1083,19 +1099,320 @@ describe('ERC3643 Tests', () => {
                 ).to.be.true
             })
 
-            it('GIVEN MockCompliaceFalse THEN canTransfer returns false', async () => {
-                const complianceFalse: ComplianceMockBase =
-                    await ethers.getContractAt(
-                        'ComplianceMockBase',
-                        complianceMockFalse
-                    )
+            it('GIVEN ComplianceMock flag set to false THEN canTransfer returns false', async () => {
+                await complianceMock.setFlags(false, false)
                 expect(
-                    await complianceFalse.canTransfer(
+                    await complianceMock.canTransfer(
                         ADDRESS_ZERO,
                         ADDRESS_ZERO,
                         ZERO
                     )
                 ).to.be.false
+            })
+
+            it('GIVEN a successful transfer THEN transferred is called in compliance contract', async () => {
+                // Setup
+                // Grant mutual approvals to interacting accounts
+                await erc20Facet
+                    .connect(signer_D)
+                    .approve(account_E, MAX_UINT256)
+                await erc20Facet
+                    .connect(signer_E)
+                    .approve(account_D, MAX_UINT256)
+                await erc1410Facet
+                    .connect(signer_E)
+                    .authorizeOperator(account_D)
+                await erc1410Facet
+                    .connect(signer_D)
+                    .authorizeOperator(account_E)
+                // Issue
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: AMOUNT,
+                    data: '0x',
+                })
+                const basicTransferInfo = {
+                    to: account_D,
+                    value: AMOUNT,
+                }
+                let transfersCounter = 0
+                // Standard transfers
+                await erc1410Facet
+                    .connect(signer_E)
+                    .transferByPartition(
+                        DEFAULT_PARTITION,
+                        basicTransferInfo,
+                        EMPTY_HEX_BYTES
+                    )
+                transfersCounter++
+                await erc20Facet
+                    .connect(signer_E)
+                    .transferFrom(account_D, account_E, AMOUNT)
+                transfersCounter++
+                await erc20Facet.connect(signer_E).transfer(account_D, AMOUNT)
+                transfersCounter++
+                const operatorTransferData = {
+                    partition: DEFAULT_PARTITION,
+                    from: account_D,
+                    to: account_E,
+                    value: AMOUNT,
+                    data: EMPTY_HEX_BYTES,
+                    operatorData: EMPTY_HEX_BYTES,
+                }
+                await erc1410Facet
+                    .connect(signer_E)
+                    .operatorTransferByPartition(operatorTransferData)
+                transfersCounter++
+                await erc1594Facet
+                    .connect(signer_E)
+                    .transferWithData(account_D, AMOUNT, EMPTY_HEX_BYTES)
+                transfersCounter++
+                await erc1594Facet
+                    .connect(signer_E)
+                    .transferFromWithData(
+                        account_D,
+                        account_E,
+                        AMOUNT,
+                        EMPTY_HEX_BYTES
+                    )
+                transfersCounter++
+                await erc3643Facet
+                    .connect(signer_E)
+                    .batchTransfer([account_D], [AMOUNT])
+                transfersCounter++
+                // Clearing transfer
+                await clearingFacet.connect(signer_B).activateClearing()
+                const clearingOperation = {
+                    partition: DEFAULT_PARTITION,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:03Z'
+                    ),
+                    data: EMPTY_HEX_BYTES,
+                }
+                await clearingFacet
+                    .connect(signer_D)
+                    .clearingTransferByPartition(
+                        clearingOperation,
+                        AMOUNT,
+                        account_E
+                    )
+                transfersCounter++
+                const clearingIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_D,
+                    clearingId: 1,
+                    clearingOperationType: ClearingOperationType.Transfer,
+                }
+                await clearingFacet.approveClearingOperationByPartition(
+                    clearingIdentifier
+                )
+                const clearingOperationFrom = {
+                    clearingOperation: clearingOperation,
+                    from: account_E,
+                    operatorData: EMPTY_HEX_BYTES,
+                }
+                await clearingFacet
+                    .connect(signer_D)
+                    .clearingTransferFromByPartition(
+                        clearingOperationFrom,
+                        AMOUNT,
+                        account_D
+                    )
+                clearingIdentifier.tokenHolder = account_E
+                await clearingFacet.approveClearingOperationByPartition(
+                    clearingIdentifier
+                )
+                transfersCounter++
+                await clearingFacet.connect(signer_B).deactivateClearing()
+                // Hold execute
+                const hold = {
+                    amount: AMOUNT,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:03Z'
+                    ),
+                    escrow: account_E,
+                    to: account_E,
+                    data: EMPTY_HEX_BYTES,
+                }
+                await holdFacet
+                    .connect(signer_D)
+                    .createHoldByPartition(DEFAULT_PARTITION, hold)
+                const holdIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_D,
+                    holdId: 1,
+                }
+                await holdFacet
+                    .connect(signer_E)
+                    .executeHoldByPartition(holdIdentifier, account_E, AMOUNT)
+                transfersCounter++
+                expect(await complianceMock.transferredHit()).to.be.equal(
+                    transfersCounter
+                )
+            })
+
+            it('GIVEN a successful mint THEN created is called in compliance contract', async () => {
+                let mintCounter = 0
+
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: AMOUNT,
+                    data: '0x',
+                })
+                mintCounter++
+                await erc3643Facet.mint(account_E, AMOUNT)
+                mintCounter++
+                await erc3643Facet.batchMint([account_E], [AMOUNT])
+                mintCounter++
+                await erc1594Facet.issue(account_E, AMOUNT, EMPTY_HEX_BYTES)
+                mintCounter++
+                expect(await complianceMock.createdHit()).to.be.equal(
+                    mintCounter
+                )
+            })
+
+            it('GIVEN a successful burn THEN destroyed is called in compliance contract', async () => {
+                let burnCounter = 0
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: 10 * AMOUNT,
+                    data: '0x',
+                })
+                await erc1410Facet
+                    .connect(signer_E)
+                    .redeemByPartition(DEFAULT_PARTITION, AMOUNT, '0x')
+                burnCounter++
+                await erc3643Facet.burn(account_E, AMOUNT)
+                burnCounter++
+                await erc3643Facet.batchBurn([account_E], [AMOUNT])
+                burnCounter++
+                await erc1594Facet
+                    .connect(signer_E)
+                    .redeem(AMOUNT, EMPTY_HEX_BYTES)
+                burnCounter++
+                expect(await complianceMock.destroyedHit()).to.be.equal(
+                    burnCounter
+                )
+            })
+
+            it('GIVEN a failed mint call THEN transaction reverts with custom error', async () => {
+                await complianceMock.setFlags(true, true)
+                let caught
+                try {
+                    await erc1410Facet.issueByPartition({
+                        partition: DEFAULT_PARTITION,
+                        tokenHolder: account_E,
+                        value: AMOUNT,
+                        data: '0x',
+                    })
+                } catch (err: any) {
+                    caught = err
+                }
+                const returnedSelector = (caught.data as string).slice(0, 10)
+                const outerSelector = erc3643Facet.interface.getSighash(
+                    'ComplianceCallFailed()'
+                )
+                expect(returnedSelector).to.equal(outerSelector)
+                const targetErrorSelector = complianceMock.interface.getSighash(
+                    'MockErrorMint(address,uint256)'
+                )
+                const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+                    ['address', 'uint256'],
+                    [account_E, AMOUNT]
+                )
+                const args = ethers.utils.solidityPack(
+                    ['bytes4', 'bytes'],
+                    [targetErrorSelector, targetErrorArgs]
+                )
+                const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
+                expect(returnedArgs).to.equal(args.slice(2))
+            })
+
+            it('GIVEN a failed transfer call THEN transaction reverts with custom error', async () => {
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: AMOUNT,
+                    data: '0x',
+                })
+                await complianceMock.setFlags(true, true)
+                const basicTransferInfo = {
+                    to: account_D,
+                    value: AMOUNT,
+                }
+                let caught
+                try {
+                    await erc1410Facet
+                        .connect(signer_E)
+                        .transferByPartition(
+                            DEFAULT_PARTITION,
+                            basicTransferInfo,
+                            EMPTY_HEX_BYTES
+                        )
+                } catch (err: any) {
+                    caught = err
+                }
+                const returnedSelector = (caught.data as string).slice(0, 10)
+                const outerSelector = erc3643Facet.interface.getSighash(
+                    'ComplianceCallFailed()'
+                )
+                expect(returnedSelector).to.equal(outerSelector)
+                const targetErrorSelector = complianceMock.interface.getSighash(
+                    'MockErrorTransfer(address,address,uint256)'
+                )
+                const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+                    ['address', 'address', 'uint256'],
+                    [account_E, account_D, AMOUNT]
+                )
+                const args = ethers.utils.solidityPack(
+                    ['bytes4', 'bytes'],
+                    [targetErrorSelector, targetErrorArgs]
+                )
+                const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
+                expect(returnedArgs).to.equal(args.slice(2))
+            })
+
+            it('GIVEN a failed burn call THEN transaction reverts with custom error', async () => {
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: AMOUNT,
+                    data: '0x',
+                })
+                await complianceMock.setFlags(true, true)
+                let caught
+                try {
+                    await erc1410Facet
+                        .connect(signer_E)
+                        .redeemByPartition(
+                            DEFAULT_PARTITION,
+                            AMOUNT,
+                            EMPTY_HEX_BYTES
+                        )
+                } catch (err: any) {
+                    caught = err
+                }
+                const returnedSelector = (caught.data as string).slice(0, 10)
+                const outerSelector = erc3643Facet.interface.getSighash(
+                    'ComplianceCallFailed()'
+                )
+                expect(returnedSelector).to.equal(outerSelector)
+                const targetErrorSelector = complianceMock.interface.getSighash(
+                    'MockErrorBurn(address,uint256)'
+                )
+                const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+                    ['address', 'uint256'],
+                    [account_E, AMOUNT]
+                )
+                const args = ethers.utils.solidityPack(
+                    ['bytes4', 'bytes'],
+                    [targetErrorSelector, targetErrorArgs]
+                )
+                const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
+                expect(returnedArgs).to.equal(args.slice(2))
             })
         })
 
@@ -1778,7 +2095,7 @@ describe('ERC3643 Tests', () => {
 
                 // set compliance fails
                 await expect(
-                    erc3643Facet.setCompliance(complianceMockFalse)
+                    erc3643Facet.setCompliance(complianceMockAddress)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
@@ -1864,7 +2181,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setIdentityRegistry(identityRegistry)
                 ).to.be.rejectedWith('TokenIsPaused')
                 await expect(
-                    erc3643Facet.setCompliance(complianceMockFalse)
+                    erc3643Facet.setCompliance(complianceMockAddress)
                 ).to.be.rejectedWith('TokenIsPaused')
             })
         })

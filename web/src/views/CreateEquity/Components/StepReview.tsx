@@ -290,6 +290,7 @@ export const StepReview = () => {
   const externalControlList = getValues("externalControlList");
   const externalKYCList = getValues("externalKYCList");
   const internalKycActivated = getValues("internalKycActivated");
+  const complianceAddress = getValues("complianceAddress");
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
@@ -344,6 +345,7 @@ export const StepReview = () => {
           externalKycLists: externalKYCList,
         }),
       internalKycActivated,
+      compliance: complianceAddress,
     });
 
     createSecurity(request);
@@ -391,6 +393,13 @@ export const StepReview = () => {
     {
       title: t("stepNewSerie.dividendType"),
       value: transformDividendType(dividendType.toString()),
+    },
+  ];
+
+  const erc3643Details: DetailReviewProps[] = [
+    {
+      title: t("stepERC3643.complianceAddress"),
+      value: complianceAddress ?? "-",
     },
   ];
 
@@ -490,8 +499,15 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
+          <InfoDivider step={3} title={t("stepERC3643.title")} type="main" />
+          <SimpleGrid columns={1} gap={6} w="full">
+            {erc3643Details.map((props) => (
+              <DetailReview {...props} />
+            ))}
+          </SimpleGrid>
+
           <InfoDivider
-            step={3}
+            step={4}
             title={t("stepExternalManagement.title")}
             type="main"
           />
@@ -501,7 +517,7 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
-          <InfoDivider step={4} title={tRegulation("title")} type="main" />
+          <InfoDivider step={5} title={tRegulation("title")} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">
             {regulationDetails.map((props) => (
               <DetailReview {...props} />
