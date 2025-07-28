@@ -219,6 +219,7 @@ import { StepReview } from "./Components/StepReview";
 import { StepCoupon } from "./Components/StepCoupon";
 import { StepRegulation } from "../CreateSecurityCommons/StepRegulation";
 import { StepExternalManagement } from "../CreateSecurityCommons/StepExternalManagement";
+import { StepERC3643 } from "../CreateSecurityCommons/StepERC3643";
 
 export const CreateBond = () => {
   const { t } = useTranslation("security", { keyPrefix: "createBond" });
@@ -256,6 +257,10 @@ export const CreateBond = () => {
     {
       title: t("header.coupon"),
       content: <StepCoupon />,
+    },
+    {
+      title: t("stepERC3643.title"),
+      content: <StepERC3643 />,
     },
     {
       title: t("stepExternalManagement.title"),

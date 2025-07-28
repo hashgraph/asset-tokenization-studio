@@ -232,6 +232,7 @@ export enum SecurityRole {
   _INTERNAL_KYC_MANAGER_ROLE = '0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e',
   _FREEZE_MANAGER_ROLE = '0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b',
   _AGENT_ROLE = '0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6',
+  _TREX_OWNER_ROLE = '0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7',
 }
 
 export function getProtectedPartitionRole(partitionId: string): string {

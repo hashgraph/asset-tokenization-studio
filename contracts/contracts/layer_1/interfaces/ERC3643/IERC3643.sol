@@ -284,6 +284,11 @@ interface IERC3643 {
     error InputBoolArrayLengthMismatch();
 
     /**
+     * @notice Thrown when the calls to the methods in the compliance contract fail
+     */
+    error ComplianceCallFailed();
+
+    /**
      * @dev Facet initializer
      *
      * Sets the compliance contract address
