@@ -135,4 +135,3 @@ asset-tokenization-studio.iml
 
 # Extracted methods from contracts
 contracts/extracted-methods.txt
-contracts/deployedContracts.json
