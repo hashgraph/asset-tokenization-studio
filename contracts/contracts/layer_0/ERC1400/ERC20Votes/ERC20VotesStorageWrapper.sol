@@ -435,13 +435,13 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     }
 
     function _clock() internal view virtual returns (uint48) {
-        return SafeCast.toUint48(block.number);
+        return SafeCast.toUint48(_blockNumber());
     }
 
     // solhint-disable-next-line func-name-mixedcase
     function _CLOCK_MODE() internal view virtual returns (string memory) {
         // Check that the clock was not modified
-        require(_clock() == block.number, 'ERC20Votes: broken clock mode');
+        require(_clock() == _blockNumber(), 'ERC20Votes: broken clock mode');
         return 'mode=blocknumber&from=default';
     }
 
