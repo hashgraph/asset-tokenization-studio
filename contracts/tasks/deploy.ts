@@ -242,12 +242,21 @@ task(
         'deployedContracts',
         types.string
     )
+    .addOptionalParam(
+        'trexFactory',
+        'Deploy the adapted Trex Factory',
+        false,
+        types.boolean
+    )
     .setAction(async (args: DeployAllArgs, hre) => {
         // Inlined to avoid circular dependency
         const {
             deployAtsFullInfrastructure,
             DeployAtsFullInfrastructureCommand,
             addresstoHederaId,
+            deployContract,
+            DeployContractCommand,
+            ADDRESS_ZERO,
         } = await import('@scripts')
         const network = hre.network.name as Network
         console.log(`Executing deployAll on ${hre.network.name} ...`)
@@ -303,6 +312,23 @@ task(
             })
         )
 
+        let trexFactory
+
+        if (args.trexFactory) {
+            const trexFactoryDeployResult = await deployContract(
+                new DeployContractCommand({
+                    name: `TREXFactoryAts`,
+                    signer,
+                    args: [
+                        ADDRESS_ZERO, // implementationAuthority
+                        ADDRESS_ZERO, // idFactory
+                        factory.address,
+                    ],
+                })
+            )
+            trexFactory = trexFactoryDeployResult.proxyAddress
+        }
+
         // * Display the deployed addresses
         const addressList = {
             'Business Logic Resolver Proxy': businessLogicResolver.proxyAddress,
@@ -348,6 +374,7 @@ task(
                 externalKycListManagement.address,
             'Protected Partitions': protectedPartitions.address,
             ERC3643: erc3643.address,
+            'T-REX Factory': trexFactory,
         }
 
         const contractAddress = []
@@ -363,7 +390,11 @@ task(
                     address,
                     network,
                 })
-                if (['Business Logic Resolver Proxy', 'Factory Proxy'].includes(key)) {
+                if (
+                    ['Business Logic Resolver Proxy', 'Factory Proxy'].includes(
+                        key
+                    )
+                ) {
                     console.log(`   --> *** ${key}: ${address} (${contractId})`)
                 } else {
                     console.log(`   --> ${key}: ${address} (${contractId})`)

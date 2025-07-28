@@ -1,0 +1,202 @@
+[
+    {
+        "name": "Business Logic Resolver Proxy",
+        "address": "0x9e51c9d04245660848562D9Ac4d593A972278868",
+        "contractId": "0.0.6458919"
+    },
+    {
+        "name": "Business Logic Resolver Proxy Admin",
+        "address": "0x86b9FB54cf5C589E9C8405470c8cEF37Ed9Bf5c7",
+        "contractId": "0.0.6458917"
+    },
+    {
+        "name": "Business Logic Resolver",
+        "address": "0x96521Ab20Bc14bCe36e8Ae6f863aBaEaee6aF646",
+        "contractId": "0.0.6458916"
+    },
+    {
+        "name": "Factory Proxy",
+        "address": "0x2B0D9f9038411E3C321b57F9101Da9f27E9E1967",
+        "contractId": "0.0.6459076"
+    },
+    {
+        "name": "Factory Proxy Admin",
+        "address": "0xbb3EE33c8Ef9DF8A20Fb7c21b7C7D27499a260bC",
+        "contractId": "0.0.6459075"
+    },
+    {
+        "name": "Factory",
+        "address": "0x0Aa6758DAe58f589e6d658c5bd3A7232FC8EAB85",
+        "contractId": "0.0.6459072"
+    },
+    {
+        "name": "Access Control",
+        "address": "0xCc50bAC866FA7D0f65c61ea05b71d8A89c4A42a8",
+        "contractId": "0.0.6458923"
+    },
+    {
+        "name": "Cap",
+        "address": "0x9F6eCb514A834Ac399d5308C0f270e5f4DF127E2",
+        "contractId": "0.0.6458924"
+    },
+    {
+        "name": "Control List",
+        "address": "0x0d66209bDdc42CcE6A29Ea5307aaDA9d96C40F23",
+        "contractId": "0.0.6458925"
+    },
+    {
+        "name": "Kyc",
+        "address": "0x44B5636d7ab7829ef0d0d8f0920401ABbD90870E",
+        "contractId": "0.0.6458927"
+    },
+    {
+        "name": "SsiManagement",
+        "address": "0x99c747fd90188Fa4B432f8eD33AF45421f24fa90",
+        "contractId": "0.0.6458932"
+    },
+    {
+        "name": "Pause",
+        "address": "0x6260878dDcc079cF8D2AA5a64F2E580C99c940b7",
+        "contractId": "0.0.6458935"
+    },
+    {
+        "name": "ERC20",
+        "address": "0x9f4392dcD8fF99dC7f69823A9f4B9357681ef9D2",
+        "contractId": "0.0.6458966"
+    },
+    {
+        "name": "ERC1410",
+        "address": "0x80A3630f83Fe2F347b9dCAef100FcCe3e8b0122D",
+        "contractId": "0.0.6458980"
+    },
+    {
+        "name": "ERC1594",
+        "address": "0x2B563fDCD261CaDED9AC7f353B068A3b8e463eb5",
+        "contractId": "0.0.6458990"
+    },
+    {
+        "name": "ERC1643",
+        "address": "0x3cc407225B7b1771a9Ab8AE3423f0a85740a330D",
+        "contractId": "0.0.6458993"
+    },
+    {
+        "name": "ERC1644",
+        "address": "0x7A7f8587D6382839CeC855364aeCE7e212693019",
+        "contractId": "0.0.6458998"
+    },
+    {
+        "name": "Snapshots",
+        "address": "0x88f4409dEbd49d7D180526FC5e7835f36692D0c6",
+        "contractId": "0.0.6459001"
+    },
+    {
+        "name": "Diamond Facet",
+        "address": "0x3c559cF66F936212B036ef322e46E0B6C0d15a4A",
+        "contractId": "0.0.6459005"
+    },
+    {
+        "name": "Equity",
+        "address": "0x053F3afEFde0d1325Ce7ca994fFC60cCd40CF3da",
+        "contractId": "0.0.6459011"
+    },
+    {
+        "name": "Bond",
+        "address": "0xC4692D65D32c06e7FE9f9a003584C97f2165a8E3",
+        "contractId": "0.0.6459018"
+    },
+    {
+        "name": "Scheduled Snapshots",
+        "address": "0x67A363D9CFDB2f40640AB19821820c9019683Ed9",
+        "contractId": "0.0.6459019"
+    },
+    {
+        "name": "Scheduled Balance Adjustments",
+        "address": "0xb2F2DEBF90ec06250091D5A66088Ea04Ac2a7feE",
+        "contractId": "0.0.6459020"
+    },
+    {
+        "name": "Scheduled Tasks",
+        "address": "0x992B82dA727935161c805d1e23731717CE5b2125",
+        "contractId": "0.0.6459023"
+    },
+    {
+        "name": "Corporate Actions",
+        "address": "0x5F85EFBBe5FF9C089A40Da0980d4297B4CfE1A50",
+        "contractId": "0.0.6459026"
+    },
+    {
+        "name": "Lock",
+        "address": "0xc17C02DE0c6dfd78150A24A510963bf8e30B5d44",
+        "contractId": "0.0.6458940"
+    },
+    {
+        "name": "Hold",
+        "address": "0x9926bdbA07B9869969Aa1376E1fc192c84490761",
+        "contractId": "0.0.6458953"
+    },
+    {
+        "name": "Transfer and Lock",
+        "address": "0xE62Ed4Cc9A568aD82f8382dCF668efcdB0aFDb47",
+        "contractId": "0.0.6459028"
+    },
+    {
+        "name": "Adjust Balances",
+        "address": "0x31eBC9303d044F525065a8C0ce44D054cF3B1fCb",
+        "contractId": "0.0.6459029"
+    },
+    {
+        "name": "Clearing Action Facet",
+        "address": "0x637167a784444E31793bf0b65B5Fa76ae07C4706",
+        "contractId": "0.0.6459050"
+    },
+    {
+        "name": "Clearing Transfer Facet",
+        "address": "0x7119d5807C6785d7c1a5dF4e4c023b9f5cb8462f",
+        "contractId": "0.0.6459035"
+    },
+    {
+        "name": "Clearing Redeem Facet",
+        "address": "0x4850f9981D71b132e041AFa037cfa5825aD2509d",
+        "contractId": "0.0.6459039"
+    },
+    {
+        "name": "Clearing Hold Creation Facet",
+        "address": "0x108338d90d4a91000e513e51c361193a264da927",
+        "contractId": "0.0.6459044"
+    },
+    {
+        "name": "Clearing Read Facet",
+        "address": "0x8f687c5Ba7fBEdeE05eF64e3A18Cf7f3f5E4cD5f",
+        "contractId": "0.0.6459046"
+    },
+    {
+        "name": "External Pause Management Facet",
+        "address": "0x37Ee598071abE5b1A0b93546b2948012d814Fde2",
+        "contractId": "0.0.6459051"
+    },
+    {
+        "name": "External Control List Management Facet",
+        "address": "0xd4180165A4FCBC5321821b05329d999E946AB1fE",
+        "contractId": "0.0.6459052"
+    },
+    {
+        "name": "External Kyc List Management Facet",
+        "address": "0xF144fb60F101247b1ebD4366DC5870Ba00BEB09c",
+        "contractId": "0.0.6459055"
+    },
+    {
+        "name": "Protected Partitions",
+        "address": "0x830bf6Db8a88b7494297F6e72bf0Fb93c5cb3311",
+        "contractId": "0.0.6459031"
+    },
+    {
+        "name": "ERC3643",
+        "address": "0x387Fa5aD9F8bd4B809Dd45f048Beae97EF08B910",
+        "contractId": "0.0.6459060"
+    },
+    {
+        "name": "T-REX Factory",
+        "address": "0x91843420439768951453d1EB477197C5A67B4c7C",
+        "contractId": "0.0.6459081"
+    }
+]
