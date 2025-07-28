@@ -251,7 +251,8 @@ export default {
       querystring: "rollup-plugin-node-polyfills/polyfills/qs",
       punycode: "rollup-plugin-node-polyfills/polyfills/punycode",
       url: "rollup-plugin-node-polyfills/polyfills/url",
-      string_decoder: "rollup-plugin-node-polyfills/polyfills/string-decoder",
+      string_decoder:
+        "rollup-plugin-node-polyfills/polyfills/string-decoder.js",
       http: "rollup-plugin-node-polyfills/polyfills/http",
       https: "rollup-plugin-node-polyfills/polyfills/http",
       os: "rollup-plugin-node-polyfills/polyfills/os",
@@ -275,6 +276,11 @@ export default {
       domain: "rollup-plugin-node-polyfills/polyfills/domain",
       buffer: "rollup-plugin-node-polyfills/polyfills/buffer-es6",
       process: "rollup-plugin-node-polyfills/polyfills/process-es6",
+      // Winston and logging related modules - provide mock implementations for browser
+      winston: "/src/winston-mock.js",
+      "winston-daily-rotate-file":
+        "rollup-plugin-node-polyfills/polyfills/empty.js",
+      "winston-transport": "rollup-plugin-node-polyfills/polyfills/empty.js",
     },
     dedupe: ["@emotion/react"],
   },
@@ -283,6 +289,7 @@ export default {
       "@hashgraph/asset-tokenization-contracts",
       "@hashgraph/asset-tokenization-sdk",
     ],
+    exclude: ["winston", "winston-daily-rotate-file", "winston-transport"],
     esbuildOptions: {
       /********* New line inserted ***********/
       // inject: ['./vite-polyfills/setImmediate.js'],
