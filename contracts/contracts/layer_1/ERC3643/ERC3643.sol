@@ -215,10 +215,10 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
-    _DEFAULT_ADMIN_ROLE,
     _CONTROLLER_ROLE,
     _ISSUER_ROLE,
-    _AGENT_ROLE
+    _AGENT_ROLE,
+    _TREX_OWNER_ROLE
 } from '../constants/roles.sol';
 import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
@@ -235,7 +235,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
 
     function setName(
         string calldata _name
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _setName(_name);
 
         emit UpdatedTokenInformation(
@@ -249,7 +249,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
 
     function setSymbol(
         string calldata _symbol
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _setSymbol(_symbol);
 
         emit UpdatedTokenInformation(
@@ -263,7 +263,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
 
     function setOnchainID(
         address _onchainID
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _erc20Storage();
         _erc3643Storage().onchainID = _onchainID;
 
@@ -278,14 +278,14 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
 
     function setIdentityRegistry(
         address _identityRegistry
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         _setIdentityRegistry(_identityRegistry);
         emit IdentityRegistryAdded(_identityRegistry);
     }
 
     function setCompliance(
         address _compliance
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         _setCompliance(_compliance);
     }
 

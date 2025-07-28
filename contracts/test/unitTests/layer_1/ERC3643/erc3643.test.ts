@@ -270,6 +270,7 @@ import {
     deployContract,
     DeployContractCommand,
     CLEARING_VALIDATOR_ROLE,
+    TREX_OWNER_ROLE,
 } from '@scripts'
 import { Contract } from 'ethers'
 
@@ -395,6 +396,10 @@ describe('ERC3643 Tests', () => {
                 role: AGENT_ROLE,
                 members: [account_A],
             }
+            const rbacTrexOwner: Rbac = {
+                role: TREX_OWNER_ROLE,
+                members: [account_A],
+            }
             const init_rbacs: Rbac[] = [
                 rbacPause,
                 rbacIssuer,
@@ -402,6 +407,7 @@ describe('ERC3643 Tests', () => {
                 rbacSSI,
                 rbacClearing,
                 rbacAgent,
+                rbacTrexOwner,
                 rbacClearingValidator,
             ]
 
@@ -2047,7 +2053,7 @@ describe('ERC3643 Tests', () => {
         })
 
         describe('AccessControl', () => {
-            it('GIVEN an account without admin role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
+            it('GIVEN an account without TREX_OWNER role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
@@ -2056,7 +2062,7 @@ describe('ERC3643 Tests', () => {
                     'AccountHasNoRole'
                 )
             })
-            it('GIVEN an account without admin role WHEN setSymbol THEN transaction fails with AccountHasNoRole', async () => {
+            it('GIVEN an account without TREX_OWNER role WHEN setSymbol THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
@@ -2065,7 +2071,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setSymbol(newSymbol)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
-            it('GIVEN an account without admin role WHEN setOnchainID THEN transaction fails with AccountHasNoRole', async () => {
+            it('GIVEN an account without TREX_OWNER role WHEN setOnchainID THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
@@ -2074,7 +2080,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setOnchainID(onchainId)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
-            it('GIVEN an account without admin role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole', async () => {
+            it('GIVEN an account without TREX_OWNER role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
@@ -2083,7 +2089,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setIdentityRegistry(identityRegistry)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
-            it('GIVEN an account without admin role WHEN setCompliance THEN transaction fails with AccountHasNoRole', async () => {
+            it('GIVEN an account without TREX_OWNER role WHEN setCompliance THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
