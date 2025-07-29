@@ -720,7 +720,7 @@ abstract contract ERC1594StorageWrapper is
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IERC3643.ComplianceCallFailed.selector,
+                    IERC3643.ComplianceNotAllowed.selector,
                     abi.encode(_from, _to, 0)
                 );
             }
