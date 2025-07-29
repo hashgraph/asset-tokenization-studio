@@ -227,11 +227,14 @@ import {
 import {
     IERC3643StorageWrapper
 } from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
+import {LowLevelCall} from "../common/libraries/LowLevelCall.sol";
 
 abstract contract ERC3643StorageWrapper1 is
     IERC3643StorageWrapper,
     PauseStorageWrapper
 {
+    using LowLevelCall for address;
+
     modifier onlyUnrecoveredAddress(address _account) {
         _checkRecoveredAddress(_account);
         _;
@@ -299,6 +302,7 @@ abstract contract ERC3643StorageWrapper1 is
 
     function _setIdentityRegistry(address _identityRegistry) internal {
         _erc3643Storage().identityRegistry = _identityRegistry;
+        // TODO: check if event IdentityStorageSet(address indexed identityStorage);
     }
 
     function _getFrozenAmountFor(
@@ -322,6 +326,11 @@ abstract contract ERC3643StorageWrapper1 is
 
     function _isRecovered(address _sender) internal view returns (bool) {
         return _erc3643Storage().addressRecovered[_sender];
+    }
+
+    function _isVerified(address _userAddress) internal view returns (bool) {
+        //TODO: call to contract using lowlevelcall library
+
     }
 
     function _version() internal view returns (string memory) {

@@ -693,6 +693,7 @@ abstract contract ERC1594StorageWrapper is
         if (!isIdentified) {
             _revertWithData(reasonCode, details);
         }
+        //TODO: ADD VERIFIED CHECK
     }
 
     function _isIdentified(
@@ -730,6 +731,13 @@ abstract contract ERC1594StorageWrapper is
         }
 
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _isVerified(
+        address _from,
+        address _to ) internal view returns (bool) {
+        // TODO: use isverified from erc3643
+
     }
 
     function _checkCompliance(
