@@ -303,7 +303,7 @@ describe('ERC20Votes Tests', () => {
 
     before(async () => {
         // mute | mock console.log
-        //console.log = () => {}
+        console.log = () => {}
         ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
             await ethers.getSigners()
         account_A = signer_A.address
