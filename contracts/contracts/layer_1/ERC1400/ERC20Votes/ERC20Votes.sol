@@ -212,7 +212,10 @@ import {IERC20Votes} from '../../interfaces/ERC1400/IERC20Votes.sol';
 import {IERC5805} from '@openzeppelin/contracts/interfaces/IERC5805.sol';
 import {IERC6372} from '@openzeppelin/contracts/interfaces/IERC6372.sol';
 import {IVotes} from '@openzeppelin/contracts/governance/utils/IVotes.sol';
-
+import {
+    _CONTRACT_NAME_ERC20VOTES,
+    _CONTRACT_VERSION_ERC20VOTES
+} from '../../constants/values.sol';
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -226,6 +229,8 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
         _setActivate(_activated);
         erc20VotesStorage.initialized = true;
+        erc20VotesStorage.contractName = _CONTRACT_NAME_ERC20VOTES;
+        erc20VotesStorage.contractVersion = _CONTRACT_VERSION_ERC20VOTES;
     }
 
     function delegate(address _delegatee) external override onlyUnpaused {

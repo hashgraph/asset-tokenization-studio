@@ -491,7 +491,10 @@ describe('ERC20Votes Tests', () => {
         })
     })
 
-    describe.skip('Delegation by Signature', () => {
+    describe('Delegation by Signature', () => {
+        const CONTRACT_NAME = 'ERC20Votes'
+        const CONTRACT_VERSION = '1.0.0'
+
         beforeEach(async () => {
             // Issue tokens to account_A
             await erc1410Facet.issueByPartition({
@@ -524,8 +527,8 @@ describe('ERC20Votes Tests', () => {
             const expiry = Math.floor(Date.now() / 1000) - 3600 // 1 hour ago
 
             const domain = {
-                name: 'ERC20Votes',
-                version: '1',
+                name: CONTRACT_NAME,
+                version: CONTRACT_VERSION,
                 chainId: await ethers.provider
                     .getNetwork()
                     .then((n) => n.chainId),
@@ -570,13 +573,13 @@ describe('ERC20Votes Tests', () => {
                 .withArgs(expiry)
         })
 
-        it.skip('GIVEN reused nonce WHEN delegateBySig THEN reverts', async () => {
+        it('GIVEN reused nonce WHEN delegateBySig THEN reverts', async () => {
             const nonce = 1
             const expiry = Math.floor(Date.now() / 1000) + 3600
 
             const domain = {
-                name: 'ERC20Votes',
-                version: '1',
+                name: CONTRACT_NAME,
+                version: CONTRACT_VERSION,
                 chainId: await ethers.provider
                     .getNetwork()
                     .then((n) => n.chainId),
@@ -629,14 +632,61 @@ describe('ERC20Votes Tests', () => {
                 .withArgs(nonce, account_A)
         })
 
+        it('GIVEN wrong signature WHEN delegateBySig THEN reverts', async () => {
+            const nonce = 1
+            const expiry = Math.floor(Date.now() / 1000) + 3600
+
+            const domain = {
+                name: 'WrongName',
+                version: CONTRACT_VERSION,
+                chainId: await ethers.provider
+                    .getNetwork()
+                    .then((n) => n.chainId),
+                verifyingContract: diamond.address,
+            }
+
+            const types = {
+                Delegation: [
+                    { name: 'delegatee', type: 'address' },
+                    { name: 'nonce', type: 'uint256' },
+                    { name: 'expiry', type: 'uint256' },
+                ],
+            }
+
+            const value = {
+                delegatee: account_B,
+                nonce: nonce,
+                expiry: expiry,
+            }
+
+            const signature = await signer_A._signTypedData(
+                domain,
+                types,
+                value
+            )
+            const sig = ethers.utils.splitSignature(signature)
+
+            // First delegation succeeds
+            await expect(
+                erc20VotesFacet.delegateBySig(
+                    account_B,
+                    nonce,
+                    expiry,
+                    sig.v,
+                    sig.r,
+                    sig.s
+                )
+            ).to.be.reverted
+        })
+
         it('GIVEN valid signature WHEN delegateBySig THEN delegation succeeds', async () => {
             const nonce = 1
             const expiry = Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
 
             // Create signature for delegation
             const domain = {
-                name: 'ERC20Votes',
-                version: '1',
+                name: CONTRACT_NAME,
+                version: CONTRACT_VERSION,
                 chainId: await ethers.provider
                     .getNetwork()
                     .then((n) => n.chainId),
