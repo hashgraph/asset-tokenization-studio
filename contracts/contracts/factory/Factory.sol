@@ -456,6 +456,9 @@ contract Factory is IFactory, LocalContext {
         IExternalKycListManagement(securityAddress_)
             .initialize_ExternalKycLists(_securityData.externalKycLists);
 
-        IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance);
+        IERC3643(securityAddress_).initialize_ERC3643(
+            _securityData.compliance,
+            _securityData.identityRegistry
+        );
     }
 }

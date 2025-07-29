@@ -254,10 +254,15 @@ abstract contract ERC3643StorageWrapper1 is
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC3643(address _compliance) internal {
+    function _initialize_ERC3643(
+        address _compliance,
+        address _identityRegistry
+    ) internal {
         IERC3643.ERC3643Storage storage clearingStorage = _erc3643Storage();
         clearingStorage.initialized = true;
         _setCompliance(_compliance);
+        _setIdentityRegistry(_identityRegistry);
+        _erc3643Storage.initialized = true;
     }
 
     function _setAddressFrozen(

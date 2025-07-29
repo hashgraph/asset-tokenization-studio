@@ -227,9 +227,10 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     // ====== External functions (state-changing) ======
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(
-        address _compliance
+        address _compliance,
+        address _identityRegistry
     ) external onlyUninitialized(_erc3643Storage().initialized) {
-        _initialize_ERC3643(_compliance);
+        _initialize_ERC3643(_compliance, _identityRegistry);
     }
 
     function setName(

@@ -289,6 +289,7 @@ export interface SecurityData {
     externalControlLists: string[]
     externalKycLists: string[]
     compliance: string
+    identityRegistry: string
 }
 
 export interface EquityData {
@@ -378,6 +379,7 @@ export async function setEquityData({
     externalControlLists,
     externalKycLists,
     compliance,
+    identityRegistry,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -408,6 +410,7 @@ export async function setEquityData({
     externalControlLists?: string[]
     externalKycLists?: string[]
     compliance?: string
+    identityRegistry?: string
 }) {
     let rbacs: Rbac[] = []
 
@@ -451,6 +454,7 @@ export async function setEquityData({
         externalControlLists: externalControlLists ?? [],
         externalKycLists: externalKycLists ?? [],
         compliance: compliance ?? ADDRESS_ZERO,
+        identityRegistry: identityRegistry ?? ADDRESS_ZERO,
     }
 
     const equityDetails: EquityDetailsData = {
@@ -501,6 +505,7 @@ export async function setBondData({
     externalControlLists,
     externalKycLists,
     compliance,
+    identityRegistry,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -528,6 +533,7 @@ export async function setBondData({
     externalControlLists?: string[]
     externalKycLists?: string[]
     compliance?: string
+    identityRegistry?: string
 }) {
     let rbacs: Rbac[] = []
 
@@ -571,6 +577,7 @@ export async function setBondData({
         externalControlLists: externalControlLists ?? [],
         externalKycLists: externalKycLists ?? [],
         compliance: compliance ?? ADDRESS_ZERO,
+        identityRegistry: identityRegistry ?? ADDRESS_ZERO,
     }
 
     const bondDetails: BondDetailsData = {
@@ -604,6 +611,7 @@ export async function deployEquityFromFactory({
     clearingActive,
     internalKycActivated,
     compliance,
+    identityRegistry,
     name,
     symbol,
     decimals,
@@ -637,6 +645,7 @@ export async function deployEquityFromFactory({
     clearingActive: boolean
     internalKycActivated: boolean
     compliance?: string
+    identityRegistry?: string
     name: string
     symbol: string
     decimals: number
@@ -689,6 +698,7 @@ export async function deployEquityFromFactory({
         addAdmin,
         businessLogicResolver,
         compliance,
+        identityRegistry,
     })
 
     const factoryRegulationData = await setFactoryRegulationData(
@@ -745,6 +755,7 @@ export async function deployBondFromFactory({
     factory,
     businessLogicResolver,
     compliance,
+    identityRegistry,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -775,6 +786,7 @@ export async function deployBondFromFactory({
     factory: IFactory
     businessLogicResolver: string
     compliance?: string
+    identityRegistry?: string
 }) {
     const bondData = await setBondData({
         adminAccount,
@@ -800,6 +812,7 @@ export async function deployBondFromFactory({
         addAdmin,
         businessLogicResolver,
         compliance,
+        identityRegistry,
     })
 
     const factoryRegulationData = await setFactoryRegulationData(

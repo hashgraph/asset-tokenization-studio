@@ -286,10 +286,14 @@ interface IERC3643 {
     /**
      * @dev Facet initializer
      *
-     * Sets the compliance contract address
+     * @param _compliance Address of the compliance contract
+     * @param _identityRegistry Address of the identity registry contract
      */
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(address _compliance) external;
+    function initialize_ERC3643(
+        address _compliance,
+        address _identityRegistry
+    ) external;
 
     /**
      * @dev Sets the name of the token to `_name`.
