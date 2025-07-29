@@ -443,6 +443,15 @@ abstract contract ERC1594StorageWrapper is
             );
         }
 
+        if (!_isVerified(_from)) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IIdentityRegistry.AddressNotVerified.selector,
+                abi.encode(_from)
+            );
+        }
+
         if (
             _from != _msgSender() &&
             !_isAuthorized(_partition, _msgSender(), _from) &&
@@ -625,6 +634,24 @@ abstract contract ERC1594StorageWrapper is
             );
         }
 
+        if (!_isVerified(_from)) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IIdentityRegistry.AddressNotVerified.selector,
+                abi.encode(_from)
+            );
+        }
+
+        if (!_isVerified(_to)) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IIdentityRegistry.AddressNotVerified.selector,
+                abi.encode(_to)
+            );
+        }
+
         if (
             _from != _msgSender() &&
             !_isAuthorized(_partition, _msgSender(), _from) &&
@@ -693,7 +720,16 @@ abstract contract ERC1594StorageWrapper is
         if (!isIdentified) {
             _revertWithData(reasonCode, details);
         }
-        //TODO: ADD VERIFIED CHECK
+
+        (
+            bool isVerified,
+            bytes1 verifyStatusCode,
+            bytes32 verifyReasonCode,
+            bytes memory verifyDetails
+        ) = _isVerified(_from, _to);
+        if (!isVerified) {
+            _revertWithData(verifyReasonCode, verifyDetails);
+        }
     }
 
     function _isIdentified(
@@ -735,9 +771,41 @@ abstract contract ERC1594StorageWrapper is
 
     function _isVerified(
         address _from,
-        address _to ) internal view returns (bool) {
-        // TODO: use isverified from erc3643
+        address _to
+    )
+        internal
+        view
+        returns (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        //TODO: Check if address 0 is valid (minting)
+        if (_from != address(0)) {
+            if (!_isVerified(_from)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IIdentityRegistry.AddressNotVerified.selector,
+                    abi.encode(_from)
+                );
+            }
+        }
 
+        if (_to != address(0)) {
+            if (!_isVerified(_to)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IIdentityRegistry.AddressNotVerified.selector,
+                    abi.encode(_to)
+                );
+            }
+        }
+
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
     function _checkCompliance(

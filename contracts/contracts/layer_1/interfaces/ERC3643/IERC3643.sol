@@ -284,6 +284,11 @@ interface IERC3643 {
     error InputBoolArrayLengthMismatch();
 
     /**
+     * @notice Thrown when the calls to the methods in the identity registry contract fail
+     */
+    error IdentityRegistryCallFailed();
+
+    /**
      * @dev Facet initializer
      *
      * @param _compliance Address of the compliance contract

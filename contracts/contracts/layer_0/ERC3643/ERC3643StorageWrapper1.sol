@@ -206,18 +206,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    _ERC3643_STORAGE_POSITION,
-    _RESOLVER_PROXY_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {_AGENT_ROLE} from '../constants/roles.sol';
-import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import '../../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {
     IAccessControl
 } from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
-import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
-import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {
+    IERC3643StorageWrapper
+} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
 import {
     IIdentityRegistry
 } from '../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol';
@@ -225,9 +222,15 @@ import {
     ResolverProxyUnstructured
 } from '../../resolver/resolverProxy/unstructured/ResolverProxyUnstructured.sol';
 import {
-    IERC3643StorageWrapper
-} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
-import {LowLevelCall} from "../common/libraries/LowLevelCall.sol";
+    _ERC3643_STORAGE_POSITION,
+    _RESOLVER_PROXY_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
+import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import {_AGENT_ROLE} from '../constants/roles.sol';
 
 abstract contract ERC3643StorageWrapper1 is
     IERC3643StorageWrapper,
@@ -329,8 +332,16 @@ abstract contract ERC3643StorageWrapper1 is
     }
 
     function _isVerified(address _userAddress) internal view returns (bool) {
-        //TODO: call to contract using lowlevelcall library
+        bytes memory result = LowLevelCall.functionStaticCall(
+            _erc3643Storage().identityRegistry,
+            abi.encodeWithSelector(
+                IIdentityRegistry.isVerified.selector,
+                _userAddress
+            ),
+            IERC3643.IdentityRegistryCallFailed.selector
+        );
 
+        return abi.decode(result, (bool));
     }
 
     function _version() internal view returns (string memory) {
