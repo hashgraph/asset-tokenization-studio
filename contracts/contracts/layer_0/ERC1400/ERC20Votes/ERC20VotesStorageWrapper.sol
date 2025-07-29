@@ -346,6 +346,9 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         _takeAbafCheckpoint();
 
         address currentDelegate = _delegates(delegator);
+
+        if (currentDelegate == delegatee) return;
+
         uint256 delegatorBalance = _balanceOfAdjustedAt(
             delegator,
             _blockTimestamp()
@@ -556,6 +559,8 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
             _erc20VotesStorage().abafCheckpoints,
             _toBlock
         );
+
+        if (abafAtBlockFrom == 0 || abafAtBlockTo == 0) return 1;
 
         return abafAtBlockTo / abafAtBlockFrom;
     }

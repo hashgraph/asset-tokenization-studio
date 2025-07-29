@@ -223,7 +223,9 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
     function initialize_ERC20Votes(
         bool _activated
     ) external override onlyUninitialized(_erc20VotesStorage().initialized) {
+        ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
         _setActivate(_activated);
+        erc20VotesStorage.initialized = true;
     }
 
     function delegate(address _delegatee) external override onlyUnpaused {
