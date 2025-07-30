@@ -221,6 +221,7 @@ import {CapStorageWrapper2} from '../../cap/CapStorageWrapper2.sol';
 import {IClearing} from '../../../layer_1/interfaces/clearing/IClearing.sol';
 import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {IIdentityRegistry} from '../../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol';
 
 abstract contract ERC1594StorageWrapper is
     IERC1594StorageWrapper,
