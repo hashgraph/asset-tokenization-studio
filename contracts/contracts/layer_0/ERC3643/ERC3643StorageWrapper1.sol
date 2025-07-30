@@ -268,7 +268,6 @@ abstract contract ERC3643StorageWrapper1 is
         clearingStorage.initialized = true;
         _setCompliance(_compliance);
         _setIdentityRegistry(_identityRegistry);
-        _erc3643Storage.initialized = true;
     }
 
     function _setAddressFrozen(
@@ -305,7 +304,6 @@ abstract contract ERC3643StorageWrapper1 is
 
     function _setIdentityRegistry(address _identityRegistry) internal {
         _erc3643Storage().identityRegistry = _identityRegistry;
-        // TODO: check if event IdentityStorageSet(address indexed identityStorage);
     }
 
     function _getFrozenAmountFor(
@@ -340,7 +338,6 @@ abstract contract ERC3643StorageWrapper1 is
             ),
             IERC3643.IdentityRegistryCallFailed.selector
         );
-
         return abi.decode(result, (bool));
     }
 

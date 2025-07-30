@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-contract IdentityMock {
+contract IdentityRegistryMock {
 
     error MockErrorVerified(address _userAddress);
-
-    uint256 public isVerifiedHit;
 
     bool private _canTransfer;
     bool private _revert;
@@ -27,11 +25,10 @@ contract IdentityMock {
 
     function isVerified(
         address _userAddress
-    ) external virtual returns (bool) {
+    ) external view returns (bool) {
         if (_revert) {
             revert MockErrorVerified(_userAddress);
         }
-        ++isVerifiedHit;
         return verifiedUsers[_userAddress];
     }
 
@@ -41,6 +38,10 @@ contract IdentityMock {
         uint256 _amount
     ) external view virtual returns (bool) {
         return _canTransfer;
+    }
+
+    function setVerified(address _user, bool _verified) external {
+        verifiedUsers[_user] = _verified;
     }
 
 }

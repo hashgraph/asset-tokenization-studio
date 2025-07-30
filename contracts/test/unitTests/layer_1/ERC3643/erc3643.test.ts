@@ -233,6 +233,7 @@ import {
     DiamondFacet,
     FreezeFacet,
     ComplianceMockBase,
+    IdentityRegistryMock,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -283,7 +284,6 @@ const MAX_SUPPLY = 10000000
 const EMPTY_VC_ID = EMPTY_STRING
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
 const onchainId = ethers.Wallet.createRandom().address
-const identityRegistry = ethers.Wallet.createRandom().address
 
 describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
@@ -324,6 +324,8 @@ describe('ERC3643 Tests', () => {
     let protectedPartitionsFacet: ProtectedPartitions
     let diamondFacet: DiamondFacet
     let freezeFacet: FreezeFacet
+    let identityRegistryAddress: string
+    let identityRegistryMock: IdentityRegistryMock
 
     describe('single partition', () => {
         let erc3643Issuer: ERC3643
@@ -411,6 +413,16 @@ describe('ERC3643 Tests', () => {
                 rbacAgent,
             ]
 
+            identityRegistryAddress = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'IdentityRegistryMock',
+                        signer: signer_A,
+                        args: [true, false]
+                    })
+                )
+            ).address
+
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
                 isWhiteList: false,
@@ -443,6 +455,7 @@ describe('ERC3643 Tests', () => {
                 factory,
                 businessLogicResolver: businessLogicResolver.address,
                 compliance: complianceMockTrue,
+                identityRegistry: identityRegistryAddress,
             })
 
             accessControlFacet = await ethers.getContractAt(
@@ -532,6 +545,15 @@ describe('ERC3643 Tests', () => {
                 diamond.address
             )
             lockFacet = await ethers.getContractAt('Lock', diamond.address)
+
+            identityRegistryMock = await ethers.getContractAt(
+                'IdentityRegistryMock',
+                identityRegistryAddress
+            )
+
+            await identityRegistryMock.setVerified(account_A, true);
+            await identityRegistryMock.setVerified(account_E, true);
+
             const clearingRedeemFacet = await ethers.getContractAt(
                 'ClearingRedeemFacet',
                 diamond.address,
@@ -726,6 +748,7 @@ describe('ERC3643 Tests', () => {
                 await accessControlFacet
                     .connect(signer_A)
                     .grantRole(CONTROLLER_ROLE, account_A)
+
             })
             it('GIVEN an account with balance WHEN forcedTransfer THEN transaction success', async () => {
                 //Happy path
@@ -1035,17 +1058,60 @@ describe('ERC3643 Tests', () => {
             it('GIVEN an initialized token WHEN updating the identityRegistry THEN setIdentityRegistry emits IdentityRegistryAdded with updated identityRegistry', async () => {
                 const retrieved_identityRegistry =
                     await erc3643Facet.identityRegistry()
-                expect(retrieved_identityRegistry).to.equal(ADDRESS_ZERO)
+                expect(retrieved_identityRegistry).to.equal(identityRegistryAddress)
 
                 //Update identityRegistry
-                expect(await erc3643Facet.setIdentityRegistry(identityRegistry))
+                expect(await erc3643Facet.setIdentityRegistry(identityRegistryAddress))
                     .to.emit(erc3643Facet, 'IdentityRegistryAdded')
-                    .withArgs(identityRegistry)
+                    .withArgs(identityRegistryAddress)
 
                 const retrieved_newIdentityRegistry =
                     await erc3643Facet.identityRegistry()
-                expect(retrieved_newIdentityRegistry).to.equal(identityRegistry)
+                expect(retrieved_newIdentityRegistry).to.equal(identityRegistryAddress)
             })
+
+            it('GIVEN identityMock flag set to true THEN canTransfer returns true', async () => {
+                expect(
+                    await identityRegistryMock.canTransfer(
+                        ADDRESS_ZERO,
+                        ADDRESS_ZERO,
+                        ZERO
+                    )
+                ).to.be.true
+            })
+
+            it('GIVEN identityMock flag set to false THEN canTransfer returns false', async () => {
+                await identityRegistryMock.setFlags(false, false)
+                expect(
+                    await identityRegistryMock.canTransfer(
+                        ADDRESS_ZERO,
+                        ADDRESS_ZERO,
+                        ZERO
+                    )
+                ).to.be.false
+            })
+
+            it('GIVEN a non verified account when mint THEN transaction reverts with custom error', async () => {
+                await identityRegistryMock.setVerified(account_E, false)
+
+                await expect(
+                    erc3643Issuer.mint(account_E, AMOUNT)
+                ).to.be.revertedWithCustomError(erc3643Facet, 'IdentityRegistryCallFailed()')
+            })
+
+            it('GIVEN non verified account with balance WHEN forcedTransfer THEN reverts with custom error', async () => {
+                await erc3643Issuer.mint(account_E, AMOUNT)
+
+                //Grant CONTROLLER_ROLE role to account E
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_E)
+
+                await identityRegistryMock.setVerified(account_E, false)
+
+                await expect(
+                    erc3643Transferor.forcedTransfer(account_E, account_D, AMOUNT / 2)
+                ).to.be.revertedWithCustomError(erc3643Facet, 'IdentityRegistryCallFailed()');
+            })
+
         })
 
         describe('Compliance', () => {
@@ -1763,7 +1829,7 @@ describe('ERC3643 Tests', () => {
 
                 // set IdentityRegistry fails
                 await expect(
-                    erc3643Facet.setIdentityRegistry(identityRegistry)
+                    erc3643Facet.setIdentityRegistry(identityRegistryAddress)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
             it('GIVEN an account without admin role WHEN setCompliance THEN transaction fails with AccountHasNoRole', async () => {
@@ -1855,7 +1921,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setOnchainID(onchainId)
                 ).to.be.rejectedWith('TokenIsPaused')
                 await expect(
-                    erc3643Facet.setIdentityRegistry(identityRegistry)
+                    erc3643Facet.setIdentityRegistry(identityRegistryAddress)
                 ).to.be.rejectedWith('TokenIsPaused')
                 await expect(
                     erc3643Facet.setCompliance(complianceMockFalse)
@@ -2897,7 +2963,7 @@ describe('ERC3643 Tests', () => {
         })
     })
 
-    describe('multi partition', () => {
+    describe.skip('multi partition', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}

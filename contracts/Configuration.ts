@@ -263,8 +263,8 @@ export const CONTRACT_NAMES = [
     'FreezeFacet',
     'ComplianceMockTrue',
     'ComplianceMockFalse',
+    'IdentityRegistryMock',
 ] as const
-//TODO: ADD IdentityMock
 export type ContractName = (typeof CONTRACT_NAMES)[number]
 export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
 

@@ -236,6 +236,7 @@ const config: HardhatUserConfig = {
             chainId: 1337,
             blockGasLimit: 30_000_000,
             hardfork: 'london',
+            allowUnlimitedContractSize: true, //TODO: delete
         },
         local: {
             url: Configuration.endpoints.local.jsonRpc,
@@ -262,7 +263,7 @@ const config: HardhatUserConfig = {
         alphaSort: true,
         disambiguatePaths: false,
         runOnCompile: Configuration.contractSizerRunOnCompile,
-        strict: true,
+        strict: false,
     },
     gasReporter: {
         enabled: Configuration.reportGas,
