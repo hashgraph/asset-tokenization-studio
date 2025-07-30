@@ -551,9 +551,6 @@ describe('ERC3643 Tests', () => {
                 identityRegistryAddress
             )
 
-            await identityRegistryMock.setVerified(account_A, true);
-            await identityRegistryMock.setVerified(account_E, true);
-
             const clearingRedeemFacet = await ethers.getContractAt(
                 'ClearingRedeemFacet',
                 diamond.address,
@@ -1070,46 +1067,26 @@ describe('ERC3643 Tests', () => {
                 expect(retrieved_newIdentityRegistry).to.equal(identityRegistryAddress)
             })
 
-            it('GIVEN identityMock flag set to true THEN canTransfer returns true', async () => {
-                expect(
-                    await identityRegistryMock.canTransfer(
-                        ADDRESS_ZERO,
-                        ADDRESS_ZERO,
-                        ZERO
-                    )
-                ).to.be.true
-            })
-
-            it('GIVEN identityMock flag set to false THEN canTransfer returns false', async () => {
-                await identityRegistryMock.setFlags(false, false)
-                expect(
-                    await identityRegistryMock.canTransfer(
-                        ADDRESS_ZERO,
-                        ADDRESS_ZERO,
-                        ZERO
-                    )
-                ).to.be.false
-            })
-
             it('GIVEN a non verified account when mint THEN transaction reverts with custom error', async () => {
-                await identityRegistryMock.setVerified(account_E, false)
-
+                await identityRegistryMock.setFlags(false, false)
                 await expect(
                     erc3643Issuer.mint(account_E, AMOUNT)
-                ).to.be.revertedWithCustomError(erc3643Facet, 'IdentityRegistryCallFailed()')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'AddressNotVerified')
             })
 
-            it('GIVEN non verified account with balance WHEN forcedTransfer THEN reverts with custom error', async () => {
+            it('GIVEN non verified account with balance WHEN transfer THEN reverts with custom error', async () => {
                 await erc3643Issuer.mint(account_E, AMOUNT)
 
                 //Grant CONTROLLER_ROLE role to account E
                 await accessControlFacet.grantRole(CONTROLLER_ROLE, account_E)
 
-                await identityRegistryMock.setVerified(account_E, false)
+                await identityRegistryMock.setFlags(false, false)
 
                 await expect(
-                    erc3643Transferor.forcedTransfer(account_E, account_D, AMOUNT / 2)
-                ).to.be.revertedWithCustomError(erc3643Facet, 'IdentityRegistryCallFailed()');
+                    await erc3643Facet
+                        .connect(signer_E)
+                        .batchTransfer([account_D], [AMOUNT])
+                ).to.be.revertedWithCustomError(erc3643Facet, 'AddressNotVerified')
             })
 
         })

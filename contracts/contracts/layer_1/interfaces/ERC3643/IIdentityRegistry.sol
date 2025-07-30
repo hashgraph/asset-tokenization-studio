@@ -208,11 +208,6 @@ pragma solidity 0.8.18;
 
 /* solhint-disable-next-line no-empty-blocks */
 interface IIdentityRegistry {
-    /**
-     * @dev Emitted when a user address is not verified in the identity registry.
-     * @param userAddress The address of the user that is not verified.
-     */
-    error AddressNotVerified(address userAddress);
 
     /*
      * @dev Checks if a user address is verified in the identity registry.

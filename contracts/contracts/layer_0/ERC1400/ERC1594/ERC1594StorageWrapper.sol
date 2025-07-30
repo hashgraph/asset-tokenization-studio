@@ -448,7 +448,7 @@ abstract contract ERC1594StorageWrapper is
             return (
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
-                IIdentityRegistry.AddressNotVerified.selector,
+                IERC3643.AddressNotVerified.selector,
                 abi.encode(_from)
             );
         }
@@ -639,7 +639,7 @@ abstract contract ERC1594StorageWrapper is
             return (
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
-                IIdentityRegistry.AddressNotVerified.selector,
+                IERC3643.AddressNotVerified.selector,
                 abi.encode(_from)
             );
         }
@@ -648,7 +648,7 @@ abstract contract ERC1594StorageWrapper is
             return (
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
-                IIdentityRegistry.AddressNotVerified.selector,
+                IERC3643.AddressNotVerified.selector,
                 abi.encode(_to)
             );
         }
@@ -783,13 +783,12 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
-        //TODO: Check if address 0 is valid (minting)
         if (_from != address(0)) {
             if (!_isVerified(_from)) {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IIdentityRegistry.AddressNotVerified.selector,
+                    IERC3643.AddressNotVerified.selector,
                     abi.encode(_from)
                 );
             }
@@ -800,7 +799,7 @@ abstract contract ERC1594StorageWrapper is
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IIdentityRegistry.AddressNotVerified.selector,
+                    IERC3643.AddressNotVerified.selector,
                     abi.encode(_to)
                 );
             }

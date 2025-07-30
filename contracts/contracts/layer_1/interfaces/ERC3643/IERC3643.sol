@@ -289,6 +289,12 @@ interface IERC3643 {
     error IdentityRegistryCallFailed();
 
     /**
+     * @dev Emitted when a user address is not verified in the identity registry.
+     * @param userAddress The address of the user that is not verified.
+     */
+    error AddressNotVerified(address userAddress);
+
+    /**
      * @dev Facet initializer
      *
      * @param _compliance Address of the compliance contract
