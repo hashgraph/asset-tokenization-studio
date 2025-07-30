@@ -203,6 +203,7 @@
 
 */
 
+import '../environmentMock';
 import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
 import {
   SDK,
