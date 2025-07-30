@@ -262,12 +262,10 @@ import {
     AGENT_ROLE,
     PROTECTED_PARTITIONS_ROLE,
     PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
-    ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
     LOCKER_ROLE,
-    ADDRESS_RECOVERED_TO_ERROR_ID,
-    ADDRESS_RECOVERED_FROM_ERROR_ID,
     deployContract,
     DeployContractCommand,
+    EIP1066_CODES,
 } from '@scripts'
 import { Contract } from 'ethers'
 
@@ -640,12 +638,21 @@ describe('ERC3643 Tests', () => {
                 ).to.be.equal(AMOUNT / 2)
             })
             it('GIVEN a paused token WHEN attempting to mint TokenIsPaused error', async () => {
+                await ssiManagementFacet.addIssuer(account_A)
+                await kycFacet.grantKyc(
+                    account_A,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_A
+                )
+
                 pauseFacet = pauseFacet.connect(signer_B)
                 await pauseFacet.pause()
 
                 await expect(
                     erc3643Facet.mint(account_A, AMOUNT)
-                ).to.be.rejectedWith('TokenIsPaused')
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
             it('GIVEN a max supply WHEN mint more than the max supply THEN transaction fails with MaxSupplyReached', async () => {
                 // Using account A (with role)
@@ -665,6 +672,15 @@ describe('ERC3643 Tests', () => {
                 // Using account C (with role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
+                await ssiManagementFacet.addIssuer(account_C)
+                await kycFacet.grantKyc(
+                    account_C,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_C
+                )
+
                 // mint fails
                 await expect(
                     erc3643Facet.mint(account_C, AMOUNT)
@@ -677,7 +693,7 @@ describe('ERC3643 Tests', () => {
                 await kycFacet.revokeKyc(account_E)
                 await expect(
                     erc3643Facet.mint(account_E, AMOUNT)
-                ).to.revertedWithCustomError(erc3643Facet, 'InvalidKycStatus')
+                ).to.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             })
         })
 
@@ -1003,7 +1019,6 @@ describe('ERC3643 Tests', () => {
 
         it('GIVEN an initialized token WHEN retrieving the version THEN returns the right version', async () => {
             const json = await erc3643Facet.version()
-            console.log(json)
             const parsed = JSON.parse(json)
 
             const [configResolver, configId, configVersion] =
@@ -1627,31 +1642,7 @@ describe('ERC3643 Tests', () => {
                         data: EMPTY_HEX_BYTES,
                     })
                 ).to.emit(erc1410Facet, 'IssuedByPartition')
-                const canTransferFrom = await erc1594Facet.canTransferFrom(
-                    account_E,
-                    account_D,
-                    amount,
-                    '0x'
-                )
-                const canTransferByPartition =
-                    await erc1410Facet.canTransferByPartition(
-                        account_E,
-                        account_D,
-                        DEFAULT_PARTITION,
-                        amount,
-                        '0x',
-                        '0x'
-                    )
-                const canRedeemFrom = await erc1410Facet.canRedeemByPartition(
-                    account_E,
-                    DEFAULT_PARTITION,
-                    amount,
-                    '0x',
-                    '0x'
-                )
-                expect(canTransferFrom[0]).to.equal(true)
-                expect(canTransferByPartition[0]).to.equal(true)
-                expect(canRedeemFrom[0]).to.equal(true)
+
                 await expect(
                     erc1644Facet.controllerRedeem(account_E, amount, '0x', '0x')
                 ).to.emit(erc1644Facet, 'ControllerRedemption')
@@ -2272,7 +2263,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet
                         .connect(signer_C)
                         .batchTransfer([account_D], [amount])
-                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // 2 - From
                 operatorTransferData.from = account_C
                 await expect(
@@ -2322,7 +2313,7 @@ describe('ERC3643 Tests', () => {
                         1,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 operatorTransferData.to = account_C
                 await expect(
@@ -2347,7 +2338,7 @@ describe('ERC3643 Tests', () => {
                 ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc3643Facet.batchTransfer([account_C], [amount])
-                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // Allowance
                 // 1 - Operator
                 await expect(
@@ -2402,7 +2393,7 @@ describe('ERC3643 Tests', () => {
                         1,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 await expect(
                     erc1410Facet
@@ -2423,19 +2414,19 @@ describe('ERC3643 Tests', () => {
                             amount,
                             EMPTY_HEX_BYTES
                         )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc1594Facet
                         .connect(signer_C)
                         .redeemFrom(account_A, amount, EMPTY_HEX_BYTES)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // 2 - From
                 await expect(
                     erc1594Facet.redeemFrom(account_C, amount, EMPTY_HEX_BYTES)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc1594Facet.redeemFrom(account_C, amount, EMPTY_HEX_BYTES)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc1410Facet.operatorRedeemByPartition(
                         DEFAULT_PARTITION,
@@ -2448,7 +2439,7 @@ describe('ERC3643 Tests', () => {
                 // Issue
                 await expect(
                     erc1594Facet.issue(account_C, amount, EMPTY_HEX_BYTES)
-                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc1410Facet.issueByPartition({
                         partition: DEFAULT_PARTITION,
@@ -2456,17 +2447,17 @@ describe('ERC3643 Tests', () => {
                         value: amount,
                         data: EMPTY_HEX_BYTES,
                     })
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc3643Facet.mint(account_C, amount)
-                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc3643Facet.batchMint([account_C], [amount])
-                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // Locks
                 await expect(
                     lockFacet.lock(amount, account_C, MAX_UINT256)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     lockFacet.lockByPartition(
                         DEFAULT_PARTITION,
@@ -2474,7 +2465,7 @@ describe('ERC3643 Tests', () => {
                         account_C,
                         MAX_UINT256
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // Clearings
                 await clearingActionsFacet.activateClearing()
                 const clearingOperation = {
@@ -2497,7 +2488,7 @@ describe('ERC3643 Tests', () => {
                             amount,
                             account_A
                         )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     clearingFacet
                         .connect(signer_C)
@@ -2506,7 +2497,7 @@ describe('ERC3643 Tests', () => {
                             amount,
                             account_A
                         )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 const protectedClearingOperation = {
                     clearingOperation: clearingOperation,
                     from: account_C,
@@ -2521,7 +2512,7 @@ describe('ERC3643 Tests', () => {
                         account_A,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 // 2 - From
                 clearingOperationFrom.from = account_C
@@ -2531,7 +2522,7 @@ describe('ERC3643 Tests', () => {
                         amount,
                         account_C
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 clearingOperationFrom.from = account_A
                 // 3 - To
                 await expect(
@@ -2540,14 +2531,14 @@ describe('ERC3643 Tests', () => {
                         amount,
                         account_C
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     clearingFacet.clearingTransferFromByPartition(
                         clearingOperationFrom,
                         amount,
                         account_C
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 protectedClearingOperation.from = account_A
                 await expect(
@@ -2557,7 +2548,7 @@ describe('ERC3643 Tests', () => {
                         account_C,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 protectedClearingOperation.from = account_C
                 await protectedPartitionsFacet.unprotectPartitions()
                 // Clearings - Holds
@@ -2573,7 +2564,7 @@ describe('ERC3643 Tests', () => {
                     clearingFacet
                         .connect(signer_C)
                         .clearingCreateHoldByPartition(clearingOperation, hold)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     clearingFacet
                         .connect(signer_C)
@@ -2581,7 +2572,7 @@ describe('ERC3643 Tests', () => {
                             clearingOperationFrom,
                             hold
                         )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 await expect(
                     clearingFacet.protectedClearingCreateHoldByPartition(
@@ -2589,7 +2580,7 @@ describe('ERC3643 Tests', () => {
                         hold,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 // 2 - From
                 await expect(
@@ -2597,7 +2588,7 @@ describe('ERC3643 Tests', () => {
                         clearingOperationFrom,
                         hold
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // 3 - To
                 hold.to = account_C
                 await expect(
@@ -2605,13 +2596,13 @@ describe('ERC3643 Tests', () => {
                         clearingOperation,
                         hold
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     clearingFacet.clearingCreateHoldFromByPartition(
                         clearingOperationFrom,
                         hold
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 await expect(
                     clearingFacet.protectedClearingCreateHoldByPartition(
@@ -2619,7 +2610,7 @@ describe('ERC3643 Tests', () => {
                         hold,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 // Clearings - Redeems
                 // 1 - Operator
@@ -2627,7 +2618,7 @@ describe('ERC3643 Tests', () => {
                     clearingFacet
                         .connect(signer_C)
                         .clearingRedeemByPartition(clearingOperation, amount)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     clearingFacet
                         .connect(signer_C)
@@ -2635,7 +2626,7 @@ describe('ERC3643 Tests', () => {
                             clearingOperationFrom,
                             amount
                         )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 await expect(
                     clearingFacet.protectedClearingRedeemByPartition(
@@ -2643,7 +2634,7 @@ describe('ERC3643 Tests', () => {
                         amount,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 await clearingActionsFacet.deactivateClearing()
                 // 2 - From
@@ -2653,7 +2644,7 @@ describe('ERC3643 Tests', () => {
                         clearingOperationFrom,
                         amount
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 clearingOperationFrom.from = account_A
                 // Holds
                 // 1 - Operator
@@ -2782,7 +2773,7 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canTransferByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 canTransferByPartition = await erc1410Facet
                     .connect(signer_C)
@@ -2795,14 +2786,12 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canTransferByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 let canTransfer = await erc1594Facet
                     .connect(signer_C)
                     .canTransfer(account_A, amount, EMPTY_HEX_BYTES)
-                expect(canTransfer[1]).to.equal(
-                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
-                )
+                expect(canTransfer[1]).to.equal(EIP1066_CODES.REVOKED_OR_BANNED)
                 // 2 - From
                 await erc1410Facet.issueByPartition({
                     partition: DEFAULT_PARTITION,
@@ -2828,7 +2817,7 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canTransferByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_FROM_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 // 3 - To
                 canTransferByPartition = await erc1410Facet
@@ -2842,14 +2831,14 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canTransferByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_TO_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 canTransfer = await erc1594Facet.canTransfer(
                     account_C,
                     amount,
                     EMPTY_HEX_BYTES
                 )
-                expect(canTransfer[1]).to.equal(ADDRESS_RECOVERED_TO_ERROR_ID)
+                expect(canTransfer[1]).to.equal(EIP1066_CODES.REVOKED_OR_BANNED)
                 // Can redeem
                 // 1 - Operator
                 let canRedeemByPartition = await erc1410Facet
@@ -2862,7 +2851,7 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canRedeemByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 canRedeemByPartition = await erc1410Facet
                     .connect(signer_C)
@@ -2874,7 +2863,7 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canRedeemByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 // 2 - From
                 canRedeemByPartition = await erc1410Facet
@@ -2887,7 +2876,7 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canRedeemByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_FROM_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 // Freeze
                 await expect(

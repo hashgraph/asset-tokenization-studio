@@ -421,9 +421,9 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyWithValidHoldId(_holdIdentifier)
         onlyIdentified(_holdIdentifier.tokenHolder, _to)
         onlyCompliant(address(0), _to)
+        onlyWithValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
         success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);

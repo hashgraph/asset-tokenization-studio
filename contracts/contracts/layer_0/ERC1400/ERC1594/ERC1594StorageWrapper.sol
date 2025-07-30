@@ -439,13 +439,12 @@ abstract contract ERC1594StorageWrapper is
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
                 IKyc.InvalidKycStatus.selector,
-                abi.encode(_from)
+                EMPTY_BYTES
             );
         }
 
         if (
             _from != _msgSender() &&
-            !_isAuthorized(_partition, _msgSender(), _from) &&
             !_hasRole(_protectedPartitionsRole(_partition), _msgSender())
         ) {
             // From methods checks
@@ -458,7 +457,10 @@ abstract contract ERC1594StorageWrapper is
                     abi.encode(_msgSender())
                 );
             }
-            if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+            if (
+                !_isAuthorized(_partition, _msgSender(), _from) &&
+                _allowanceAdjusted(_from, _msgSender()) < _value
+            ) {
                 return (
                     false,
                     Eip1066.INSUFFICIENT_FUNDS,
@@ -613,7 +615,7 @@ abstract contract ERC1594StorageWrapper is
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
                 IKyc.InvalidKycStatus.selector,
-                abi.encode(_from)
+                EMPTY_BYTES
             );
         }
         if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
@@ -621,13 +623,11 @@ abstract contract ERC1594StorageWrapper is
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
                 IKyc.InvalidKycStatus.selector,
-                abi.encode(_to)
+                EMPTY_BYTES
             );
         }
-
         if (
             _from != _msgSender() &&
-            !_isAuthorized(_partition, _msgSender(), _from) &&
             !_hasRole(_protectedPartitionsRole(_partition), _msgSender())
         ) {
             // From methods checks
@@ -649,7 +649,10 @@ abstract contract ERC1594StorageWrapper is
                 );
             }
             // Business logic
-            if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+            if (
+                !_isAuthorized(_partition, _msgSender(), _from) &&
+                _allowanceAdjusted(_from, _msgSender()) < _value
+            ) {
                 return (
                     false,
                     Eip1066.INSUFFICIENT_FUNDS,
@@ -663,6 +666,15 @@ abstract contract ERC1594StorageWrapper is
                     )
                 );
             }
+        }
+
+        if (!_validPartition(_partition, _from)) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                InvalidPartition.selector,
+                abi.encode(_from, _partition)
+            );
         }
         // Business logic
         if (_balanceOfAdjusted(_from) < _value) {
@@ -714,7 +726,7 @@ abstract contract ERC1594StorageWrapper is
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
                     IKyc.InvalidKycStatus.selector,
-                    abi.encode(_from)
+                    EMPTY_BYTES
                 );
             }
         }
@@ -724,7 +736,7 @@ abstract contract ERC1594StorageWrapper is
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
                     IKyc.InvalidKycStatus.selector,
-                    abi.encode(_to)
+                    EMPTY_BYTES
                 );
             }
         }
@@ -760,14 +772,6 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
-        if (!_isAbleToAccess(_msgSender())) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                AccountIsBlocked.selector,
-                abi.encode(_msgSender())
-            );
-        }
         if (_from != address(0)) {
             if (_isRecovered(_from)) {
                 return (

@@ -216,12 +216,13 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     )
         external
         override
+        onlyUnpaused
+        onlyIssuable
         onlyWithinMaxSupply(_issueData.value)
         onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyIdentified(address(0), _issueData.tokenHolder)
         onlyCompliant(address(0), _issueData.tokenHolder)
-        onlyIssuable
     {
         {
             bytes32[] memory roles = new bytes32[](2);
