@@ -224,6 +224,8 @@ describe(`${Details.name}`, () => {
         detailsResponse={detailsResponse}
         equityDetailsResponse={{} as EquityDetailsViewModel}
         bondDetailsResponse={{} as BondDetailsViewModel}
+        isLoadingSecurityDetails={false}
+        isFetchingSecurityDetails={false}
       />,
     );
 

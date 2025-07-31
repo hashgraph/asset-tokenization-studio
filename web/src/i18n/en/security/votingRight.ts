@@ -207,6 +207,7 @@ export default {
   tabs: {
     program: "Program voting rights",
     see: "See voting rights",
+    holders: "Holders",
   },
   program: {
     input: {
@@ -242,6 +243,19 @@ export default {
       title: "Voting rights programmed as {{ name }}",
       number: "Number of votes: {{ number }}",
       pending: "The voting is pending",
+    },
+  },
+  holders: {
+    title: "Holders",
+    voteIdInput: {
+      label: "Vote ID",
+      placeholder: "1",
+      tooltip: "ID of the voting right to display.",
+    },
+    searchButton: "Search",
+    emptyTable: "No data",
+    table: {
+      holderAddress: "Holder address",
     },
   },
   messages: {
