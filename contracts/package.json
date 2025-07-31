@@ -89,8 +89,7 @@
     "prettierCheck": "prettier --check",
     "prepack": "npm run compile:force",
     "doc": "npx hardhat dodoc",
-    "extractMethods": "npx -y tsx scripts/extractMethods.ts",
-    "oz": "npx hardhat run scripts/OZ.ts --network hardhat"
+    "extractMethods": "npx -y tsx scripts/extractMethods.ts"
   },
   "keywords": [],
   "author": "",
