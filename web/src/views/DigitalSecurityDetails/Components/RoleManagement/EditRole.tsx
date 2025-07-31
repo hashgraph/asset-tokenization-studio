@@ -206,7 +206,7 @@
 import { Button, HStack, Stack, VStack } from "@chakra-ui/react";
 import { Text, useToast, SearchInputController } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
-import { required, isHederaValidAddress } from "../../../../utils/rules";
+import { required, isHederaValidId } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { SecurityDetails } from "../SecurityDetails";
 import { GetRolesForRequest } from "@hashgraph/asset-tokenization-sdk";
@@ -324,7 +324,7 @@ export const EditRole = () => {
                     size="sm"
                     rules={{
                       required,
-                      validate: { isHederaValidAddress },
+                      validate: { isHederaValidId: isHederaValidId },
                     }}
                   />
                 </Stack>

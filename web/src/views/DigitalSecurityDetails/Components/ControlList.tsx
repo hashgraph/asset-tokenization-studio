@@ -221,7 +221,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
 import { useTable } from "../../../hooks/useTable";
 import _chunk from "lodash/chunk";
-import { isHederaValidAddress, required } from "../../../utils/rules";
+import { isHederaValidId, required } from "../../../utils/rules";
 import {
   useAddToControlList,
   useGetControlListCount,
@@ -452,7 +452,7 @@ export const ControlList = () => {
               size="sm"
               rules={{
                 required,
-                validate: { isHederaValidAddress },
+                validate: { isHederaValidId: isHederaValidId },
               }}
             />
           </Stack>

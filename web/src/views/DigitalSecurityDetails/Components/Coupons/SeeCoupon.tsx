@@ -213,7 +213,7 @@ import {
   Text,
   Tooltip,
 } from "io-bricks-ui";
-import { isHederaValidAddress, min, required } from "../../../../utils/rules";
+import { isHederaValidId, min, required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { Info } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
@@ -379,7 +379,7 @@ export const SeeCoupon = () => {
             <InputController
               control={control}
               id="targetId"
-              rules={{ required, isHederaValidAddress }}
+              rules={{ required, isHederaValidId: isHederaValidId }}
               placeholder={tForm("account.placeholder")}
             />
           </Stack>

@@ -208,7 +208,7 @@ import { Button, Heading, Text, useToast } from "io-bricks-ui";
 import { SearchInputController, DefinitionList } from "io-bricks-ui";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { isHederaValidAddress, required } from "../../../utils/rules";
+import { isHederaValidId, required } from "../../../utils/rules";
 import {
   GetAccountBalanceRequest,
   GetClearedAmountForRequest,
@@ -474,7 +474,7 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
               size="sm"
               rules={{
                 required,
-                validate: { isHederaValidAddress },
+                validate: { isHederaValidId: isHederaValidId },
               }}
             />
             <Button

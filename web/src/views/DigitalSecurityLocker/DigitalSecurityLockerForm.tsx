@@ -16,7 +16,7 @@ import { LockRequest } from "@hashgraph/asset-tokenization-sdk";
 import { dateToUnixTimestamp } from "../../utils/format";
 import {
   isAfterDate,
-  isHederaValidAddress,
+  isHederaValidId,
   min,
   required,
 } from "../../utils/rules";
@@ -83,7 +83,7 @@ export const DigitalSecurityLockerForm = () => {
               <InputController
                 control={control}
                 id="targetId"
-                rules={{ required, validate: { isHederaValidAddress } }}
+                rules={{ required, validate: { isHederaValidId: isHederaValidId } }}
                 placeholder={tForm("targetId.placeholder")}
               />
             </Stack>

@@ -18,7 +18,7 @@ import { GrantKycRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
 import { FileArchive } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
-import { isHederaValidAddress, required } from "../../../../utils/rules";
+import { isHederaValidId, required } from "../../../../utils/rules";
 
 interface FormValues {
   accountId: string;
@@ -113,7 +113,7 @@ export const KYCModal = ({ isOpen, onClose }: KYCModalProps) => {
               isRequired={true}
               rules={{
                 required,
-                validate: { isHederaValidAddress },
+                validate: { isHederaValidId: isHederaValidId },
               }}
             />
             <HStack w={"full"}>

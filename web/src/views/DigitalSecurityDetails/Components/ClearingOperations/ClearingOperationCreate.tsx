@@ -10,7 +10,7 @@ import {
   SelectController,
   Text,
 } from "io-bricks-ui";
-import { isHederaValidAddress, min, required } from "../../../../utils/rules";
+import { isHederaValidId, min, required } from "../../../../utils/rules";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
@@ -254,7 +254,7 @@ export const ClearingOperationsCreate = () => {
                   isRequired={true}
                   rules={{
                     required,
-                    validate: { isHederaValidAddress },
+                    validate: { isHederaValidId: isHederaValidId },
                   }}
                 />
               </Stack>
@@ -292,7 +292,7 @@ export const ClearingOperationsCreate = () => {
                     isRequired={true}
                     rules={{
                       required,
-                      validate: { isHederaValidAddress },
+                      validate: { isHederaValidId: isHederaValidId },
                     }}
                   />
                 </Stack>
@@ -309,7 +309,7 @@ export const ClearingOperationsCreate = () => {
                     isRequired={true}
                     rules={{
                       required,
-                      validate: { isHederaValidAddress },
+                      validate: { isHederaValidId: isHederaValidId },
                     }}
                   />
                 </Stack>
@@ -326,7 +326,7 @@ export const ClearingOperationsCreate = () => {
                     isRequired={true}
                     rules={{
                       required,
-                      validate: { isHederaValidAddress },
+                      validate: { isHederaValidId: isHederaValidId },
                     }}
                   />
                 </Stack>

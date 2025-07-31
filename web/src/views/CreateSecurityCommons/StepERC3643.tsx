@@ -220,7 +220,7 @@ import { FormStepContainer } from "../../components/FormStepContainer";
 import { CancelButton } from "../../components/CancelButton";
 import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
 import { NextStepButton } from "../CreateEquity/Components/NextStepButton";
-import { isHederaValidAddress } from "../../utils/rules";
+import { isHederaValidId } from "../../utils/rules";
 
 export const StepERC3643 = () => {
   const { t } = useTranslation("security", {
@@ -264,7 +264,7 @@ export const StepERC3643 = () => {
                   if (!value) {
                     return true;
                   }
-                  return isHederaValidAddress(value);
+                  return isHederaValidId(value);
                 },
               }}
               placeholder={t("complianceAddressPlaceholder")}
@@ -272,6 +272,31 @@ export const StepERC3643 = () => {
           </Stack>
         </FormControl>
       </VStack>
+        <InfoDivider title={t("identityRegistry")} type="main" />
+        <VStack w="full">
+            <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
+                <Stack w="full">
+                    <HStack justifySelf="flex-start">
+                        <Text textStyle="BodyTextRegularSM">
+                            {t("identityRegistryId")}
+                        </Text>
+                    </HStack>
+                    <InputController
+                        control={control}
+                        id="identityRegistryId"
+                        rules={{
+                            validate: (value: string) => {
+                                if (!value) {
+                                    return true;
+                                }
+                                return isHederaValidId(value);
+                            },
+                        }}
+                        placeholder={t("identityRegistryIdPlaceholder")}
+                    />
+                </Stack>
+            </FormControl>
+        </VStack>
 
       <HStack
         gap={4}

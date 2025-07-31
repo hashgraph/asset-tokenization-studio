@@ -9,7 +9,7 @@ import {
   Text,
 } from "io-bricks-ui";
 import { useForm } from "react-hook-form";
-import { isHederaValidAddress, required } from "../../../../utils/rules";
+import { isHederaValidId, required } from "../../../../utils/rules";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { SecurityRole } from "../../../../utils/SecurityRole";
 import { Link as RouterLink, useParams } from "react-router-dom";
@@ -175,7 +175,7 @@ export const Locker = () => {
                 size="sm"
                 rules={{
                   required,
-                  validate: { isHederaValidAddress },
+                  validate: { isHederaValidId: isHederaValidId },
                 }}
               />
               <Button

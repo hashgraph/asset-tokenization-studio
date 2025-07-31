@@ -10,7 +10,7 @@ import {
   Text,
   useToast,
 } from "io-bricks-ui";
-import { isHederaValidAddress, required } from "../../utils/rules";
+import { isHederaValidId, required } from "../../utils/rules";
 import { useForm } from "react-hook-form";
 import { RouterManager } from "../../router/RouterManager";
 import { useState } from "react";
@@ -98,7 +98,7 @@ export const AddExternalControl = () => {
               size="md"
               rules={{
                 required,
-                validate: { isHederaValidAddress },
+                validate: { isHederaValidId: isHederaValidId },
               }}
             />
           </VStack>

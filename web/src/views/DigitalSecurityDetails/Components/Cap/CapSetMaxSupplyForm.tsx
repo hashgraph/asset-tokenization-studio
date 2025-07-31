@@ -8,7 +8,7 @@ import {
   PopUp,
   Text,
 } from "io-bricks-ui";
-import { isHederaValidAddress, min, required } from "../../../../utils/rules";
+import { isHederaValidId, min, required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
@@ -99,7 +99,7 @@ export const CapSetMaxSupplyForm = () => {
               <InputController
                 control={control}
                 id="securityId"
-                rules={{ required, validate: { isHederaValidAddress } }}
+                rules={{ required, validate: { isHederaValidId: isHederaValidId } }}
                 placeholder={securityId}
                 defaultValue={securityId}
                 value={securityId}
