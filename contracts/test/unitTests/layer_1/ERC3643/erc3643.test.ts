@@ -267,6 +267,8 @@ import {
     deployContract,
     DeployContractCommand,
     EIP1066_CODES,
+    CLEARING_VALIDATOR_ROLE,
+    TREX_OWNER_ROLE,
 } from '@scripts'
 import { Contract } from 'ethers'
 
