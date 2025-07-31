@@ -203,15 +203,38 @@
 
 */
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.17;
 
 // solhint-disable no-global-import
+// solhint-disable no-empty-blocks
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
-import {Factory, IFactory, FactoryRegulationData} from '../Factory.sol';
-import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../../layer_0/constants/roles.sol';
+import {
+    IFactory,
+    FactoryRegulationData,
+    IResolverProxy
+} from './interfaces/IFactory.sol';
+import {
+    IAccessControl,
+    _DEFAULT_ADMIN_ROLE
+} from './interfaces/IAccessControl.sol';
 import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
+
+// imports for compilation
+import '@tokenysolutions/t-rex/contracts/registry/implementation/ClaimTopicsRegistry.sol';
+import '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistry.sol';
+import '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistryStorage.sol';
+import '@tokenysolutions/t-rex/contracts/registry/implementation/TrustedIssuersRegistry.sol';
+import '@tokenysolutions/t-rex/contracts/compliance/modular/ModularCompliance.sol';
+import '@tokenysolutions/t-rex/contracts/proxy/authority/TREXImplementationAuthority.sol';
+import '@tokenysolutions/t-rex/contracts/proxy/TrustedIssuersRegistryProxy.sol';
+import '@tokenysolutions/t-rex/contracts/proxy/ClaimTopicsRegistryProxy.sol';
+import '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryProxy.sol';
+import '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryStorageProxy.sol';
+import '@tokenysolutions/t-rex/contracts/proxy/ModularComplianceProxy.sol';
+import '@tokenysolutions/t-rex/contracts/compliance/legacy/DefaultCompliance.sol';
+import '@onchain-id/solidity/contracts/Identity.sol';
+import '@onchain-id/solidity/contracts/ClaimIssuer.sol';
 
 /// @author Tokeny Solutions
 /// @notice Adapted from the T-REX official repository to deploy an ERC-3643-compatible ATS security token
@@ -245,160 +268,58 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
      *  @dev See {ITREXFactory-deployTREXSuite}.
      *  @dev Blank implementation of original method to avoid compilation error
      */
-    // solhint-disable no-empty-blocks
     function deployTREXSuite(
         string memory _salt,
         TokenDetails calldata _tokenDetails,
         ClaimDetails calldata _claimDetails
     ) external {}
-    // solhint-enable no-empty-blocks
 
     /**
      *  @dev See {ITREXFactory-deployTREXSuite}.
-     *  @dev Original method adapted to deploy an ATS security token
-     *  @param _securityData The abi encoded security data used to deploy the ATS security token
-     *  @param _factoryRegulationData The factory regulation data used to deploy the ATS security token
+     *  @dev Original method adapted to deploy an ATS equity
      */
-    // solhint-disable-next-line code-complexity, function-max-lines
-    function deployTREXSuite(
+    function deployTREXSuiteAtsEquity(
         string memory _salt,
         TokenDetails calldata _tokenDetails,
         ClaimDetails calldata _claimDetails,
-        bytes calldata _securityData,
-        FactoryRegulationData calldata _factoryRegulationData,
-        IFactory.SecurityType _securityType
+        IFactory.EquityData calldata _equityData,
+        FactoryRegulationData calldata _factoryRegulationData
     ) external onlyOwner {
-        require(tokenDeployed[_salt] == address(0), 'token already deployed');
-        require(
-            (_claimDetails.issuers).length ==
-                (_claimDetails.issuerClaims).length,
-            'claim pattern not valid'
-        );
-        require(
-            (_claimDetails.issuers).length <= 5,
-            'max 5 claim issuers at deployment'
-        );
-        require(
-            (_claimDetails.claimTopics).length <= 5,
-            'max 5 claim topics at deployment'
-        );
-        require(
-            (_tokenDetails.irAgents).length <= 5 &&
-                (_tokenDetails.tokenAgents).length <= 5,
-            'max 5 agents at deployment'
-        );
-        require(
-            (_tokenDetails.complianceModules).length <= 30,
-            'max 30 module actions at deployment'
-        );
-        require(
-            (_tokenDetails.complianceModules).length >=
-                (_tokenDetails.complianceSettings).length,
-            'invalid compliance pattern'
+        IFactory.EquityData memory equityDataMem = _equityData;
+        equityDataMem.security.rbacs = _prepareRbacs(
+            _equityData.security.rbacs
         );
 
-        ITrustedIssuersRegistry tir = ITrustedIssuersRegistry(
-            _deployTIR(_salt, _implementationAuthority)
-        );
-        IClaimTopicsRegistry ctr = IClaimTopicsRegistry(
-            _deployCTR(_salt, _implementationAuthority)
-        );
-        IModularCompliance mc = IModularCompliance(
-            _deployMC(_salt, _implementationAuthority)
-        );
-        IIdentityRegistryStorage irs;
-        if (_tokenDetails.irs == address(0)) {
-            irs = IIdentityRegistryStorage(
-                _deployIRS(_salt, _implementationAuthority)
-            );
-        } else {
-            irs = IIdentityRegistryStorage(_tokenDetails.irs);
-        }
-        IIdentityRegistry ir = IIdentityRegistry(
-            _deployIR(
-                _salt,
-                _implementationAuthority,
-                address(tir),
-                address(ctr),
-                address(irs)
+        IToken token = IToken(
+            IFactory(_atsFactory).deployEquity(
+                equityDataMem,
+                _factoryRegulationData
             )
         );
-        /// deploy the token from the ATS factory
-        IToken token;
-        if (_securityType == IFactory.SecurityType.Equity) {
-            token = IToken(
-                Factory(_atsFactory).deployEquity(
-                    abi.decode(_securityData, (IFactory.EquityData)),
-                    _factoryRegulationData
-                )
-            );
-        } else {
-            token = IToken(
-                Factory(_atsFactory).deployBond(
-                    abi.decode(_securityData, (IFactory.BondData)),
-                    _factoryRegulationData
-                )
-            );
-        }
-        if (_tokenDetails.ONCHAINID == address(0)) {
-            address _tokenID = IIdFactory(_idFactory).createTokenIdentity(
-                address(token),
-                _tokenDetails.owner,
-                _salt
-            );
-            token.setOnchainID(_tokenID);
-        }
-        for (uint256 i = 0; i < (_claimDetails.claimTopics).length; i++) {
-            ctr.addClaimTopic(_claimDetails.claimTopics[i]);
-        }
-        for (uint256 i = 0; i < (_claimDetails.issuers).length; i++) {
-            tir.addTrustedIssuer(
-                IClaimIssuer((_claimDetails).issuers[i]),
-                _claimDetails.issuerClaims[i]
-            );
-        }
-        irs.bindIdentityRegistry(address(ir));
-        AgentRole(address(ir)).addAgent(address(token));
-        for (uint256 i = 0; i < (_tokenDetails.irAgents).length; i++) {
-            AgentRole(address(ir)).addAgent(_tokenDetails.irAgents[i]);
-        }
-        for (uint256 i = 0; i < (_tokenDetails.tokenAgents).length; i++) {
-            AgentRole(address(token)).addAgent(_tokenDetails.tokenAgents[i]);
-        }
-        for (uint256 i = 0; i < (_tokenDetails.complianceModules).length; i++) {
-            if (!mc.isModuleBound(_tokenDetails.complianceModules[i])) {
-                mc.addModule(_tokenDetails.complianceModules[i]);
-            }
-            if (i < (_tokenDetails.complianceSettings).length) {
-                mc.callModuleFunction(
-                    _tokenDetails.complianceSettings[i],
-                    _tokenDetails.complianceModules[i]
-                );
-            }
-        }
-        tokenDeployed[_salt] = address(token);
-        /// equivalent to transfer ownership of the token to the new owner
-        AccessControl(address(token)).grantRole(
-            _DEFAULT_ADMIN_ROLE,
-            _tokenDetails.owner
+        _deployTREXSuite(_salt, _tokenDetails, _claimDetails, token);
+    }
+
+    /**
+     *  @dev See {ITREXFactory-deployTREXSuite}.
+     *  @dev Original method adapted to deploy an ATS bond
+     */
+    function deployTREXSuiteAtsBond(
+        string memory _salt,
+        TokenDetails calldata _tokenDetails,
+        ClaimDetails calldata _claimDetails,
+        IFactory.BondData calldata _bondData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external onlyOwner {
+        IFactory.BondData memory bondDataMem = _bondData;
+        bondDataMem.security.rbacs = _prepareRbacs(_bondData.security.rbacs);
+
+        IToken token = IToken(
+            IFactory(_atsFactory).deployBond(
+                bondDataMem,
+                _factoryRegulationData
+            )
         );
-        AccessControl(address(token)).revokeRole(
-            _DEFAULT_ADMIN_ROLE,
-            address(this)
-        );
-        (Ownable(address(ir))).transferOwnership(_tokenDetails.owner);
-        (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
-        (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);
-        (Ownable(address(mc))).transferOwnership(_tokenDetails.owner);
-        emit TREXSuiteDeployed(
-            address(token),
-            address(ir),
-            address(irs),
-            address(tir),
-            address(ctr),
-            address(mc),
-            _salt
-        );
+        _deployTREXSuite(_salt, _tokenDetails, _claimDetails, token);
     }
 
     /**
@@ -484,13 +405,120 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         emit IdFactorySet(idFactory_);
     }
 
-    /**
-     *  @dev Sets the address of the ATS factory used for the security token deployments
-     */
-    function setAtsFactory(address atsFactory_) public onlyOwner {
-        require(atsFactory_ != address(0), 'invalid argument - zero address');
-        _atsFactory = atsFactory_;
-        emit IdFactorySet(atsFactory_);
+    /// @dev Standard deployment with the security passed as argument
+    function _deployTREXSuite(
+        string memory _salt,
+        TokenDetails calldata _tokenDetails,
+        ClaimDetails calldata _claimDetails,
+        IToken _token
+    ) internal {
+        require(tokenDeployed[_salt] == address(0), 'token already deployed');
+        require(
+            (_claimDetails.issuers).length ==
+                (_claimDetails.issuerClaims).length,
+            'claim pattern not valid'
+        );
+        require(
+            (_claimDetails.issuers).length <= 5,
+            'max 5 claim issuers at deployment'
+        );
+        require(
+            (_claimDetails.claimTopics).length <= 5,
+            'max 5 claim topics at deployment'
+        );
+        require(
+            (_tokenDetails.irAgents).length <= 5 &&
+                (_tokenDetails.tokenAgents).length <= 5,
+            'max 5 agents at deployment'
+        );
+        require(
+            (_tokenDetails.complianceModules).length <= 30,
+            'max 30 module actions at deployment'
+        );
+        require(
+            (_tokenDetails.complianceModules).length >=
+                (_tokenDetails.complianceSettings).length,
+            'invalid compliance pattern'
+        );
+
+        ITrustedIssuersRegistry tir = ITrustedIssuersRegistry(
+            _deployTIR(_salt, _implementationAuthority)
+        );
+        IClaimTopicsRegistry ctr = IClaimTopicsRegistry(
+            _deployCTR(_salt, _implementationAuthority)
+        );
+        IModularCompliance mc = IModularCompliance(
+            _deployMC(_salt, _implementationAuthority)
+        );
+        IIdentityRegistryStorage irs;
+        if (_tokenDetails.irs == address(0)) {
+            irs = IIdentityRegistryStorage(
+                _deployIRS(_salt, _implementationAuthority)
+            );
+        } else {
+            irs = IIdentityRegistryStorage(_tokenDetails.irs);
+        }
+        IIdentityRegistry ir = IIdentityRegistry(
+            _deployIR(
+                _salt,
+                _implementationAuthority,
+                address(tir),
+                address(ctr),
+                address(irs)
+            )
+        );
+        if (_tokenDetails.ONCHAINID == address(0)) {
+            address _tokenID = IIdFactory(_idFactory).createTokenIdentity(
+                address(_token),
+                _tokenDetails.owner,
+                _salt
+            );
+            _token.setOnchainID(_tokenID);
+        }
+        for (uint256 i = 0; i < (_claimDetails.claimTopics).length; i++) {
+            ctr.addClaimTopic(_claimDetails.claimTopics[i]);
+        }
+        for (uint256 i = 0; i < (_claimDetails.issuers).length; i++) {
+            tir.addTrustedIssuer(
+                IClaimIssuer((_claimDetails).issuers[i]),
+                _claimDetails.issuerClaims[i]
+            );
+        }
+        irs.bindIdentityRegistry(address(ir));
+        AgentRole(address(ir)).addAgent(address(_token));
+        for (uint256 i = 0; i < (_tokenDetails.irAgents).length; i++) {
+            AgentRole(address(ir)).addAgent(_tokenDetails.irAgents[i]);
+        }
+        for (uint256 i = 0; i < (_tokenDetails.tokenAgents).length; i++) {
+            AgentRole(address(_token)).addAgent(_tokenDetails.tokenAgents[i]);
+        }
+        for (uint256 i = 0; i < (_tokenDetails.complianceModules).length; i++) {
+            if (!mc.isModuleBound(_tokenDetails.complianceModules[i])) {
+                mc.addModule(_tokenDetails.complianceModules[i]);
+            }
+            if (i < (_tokenDetails.complianceSettings).length) {
+                mc.callModuleFunction(
+                    _tokenDetails.complianceSettings[i],
+                    _tokenDetails.complianceModules[i]
+                );
+            }
+        }
+        tokenDeployed[_salt] = address(_token);
+        /// equivalent to transfer ownership of the token to the new owner
+        IAccessControl(address(_token)).renounceRole(_DEFAULT_ADMIN_ROLE);
+        (Ownable(address(ir))).transferOwnership(_tokenDetails.owner);
+        (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
+        (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);
+        (Ownable(address(mc))).transferOwnership(_tokenDetails.owner);
+        emit TREXSuiteDeployed(
+            address(_token),
+            address(ir),
+            address(irs),
+            address(tir),
+            address(ctr),
+            address(mc),
+            _salt
+        );
     }
 
     /// deploy function with create2 opcode call
@@ -577,28 +605,29 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         return _deploy(_salt, bytecode);
     }
 
-    /// function used to deploy a token using CREATE2
-    function _deployToken(
-        string memory _salt,
-        address implementationAuthority_,
-        address _identityRegistry,
-        address _compliance,
-        string memory _name,
-        string memory _symbol,
-        uint8 _decimals,
-        address _onchainId
-    ) private returns (address) {
-        bytes memory _code = type(TokenProxy).creationCode;
-        bytes memory _constructData = abi.encode(
-            implementationAuthority_,
-            _identityRegistry,
-            _compliance,
-            _name,
-            _symbol,
-            _decimals,
-            _onchainId
-        );
-        bytes memory bytecode = abi.encodePacked(_code, _constructData);
-        return _deploy(_salt, bytecode);
+    /**
+     * @dev Prepares RBAC array by adding default admin role to address(this)
+     */
+    function _prepareRbacs(
+        IResolverProxy.Rbac[] calldata originalRbacs
+    ) private view returns (IResolverProxy.Rbac[] memory rbacs) {
+        uint256 length = originalRbacs.length;
+        rbacs = new IResolverProxy.Rbac[](length + 1);
+
+        // Copy original RBACs
+        for (uint256 i; i < length; ) {
+            rbacs[i] = originalRbacs[i];
+            unchecked {
+                ++i;
+            }
+        }
+
+        // Add default admin RBAC
+        address[] memory members = new address[](1);
+        members[0] = address(this);
+        rbacs[length] = IResolverProxy.Rbac({
+            role: _DEFAULT_ADMIN_ROLE,
+            members: members
+        });
     }
 }

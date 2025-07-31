@@ -37,6 +37,7 @@
         "test:demo": "npx hardhat test test/demo/Demo.test.ts",
         "test:demo:Hedera": "npx hardhat test test/demo/Demo.test.Hedera.ts",
         "test:factory": "npx hardhat test test/unitTests/factory/factory.test.ts",
+        "test:trexFactory": "npx hardhat test test/unitTests/factory/trex/factory.test.ts",
         "test:resolverProxy": "npx hardhat test test/unitTests/resolverProxy/resolverProxy.test.ts",
         "test:resolver": "npx hardhat test test/unitTests/resolver/BusinessLogicResolver.test.ts",
         "test:accessControl": "npx hardhat test test/unitTests/layer_1/accessControl/accessControl.test.ts",
@@ -89,8 +90,7 @@
         "prettierCheck": "prettier --check",
         "prepack": "npm run compile:force",
         "doc": "npx hardhat dodoc",
-        "extractMethods": "npx -y tsx scripts/extractMethods.ts",
-        "fix-pragma-tokeny": "find node_modules/@tokenysolutions node_modules/@onchain-id -name '*.sol' -type f -not -path '*/artifacts/*' -not -path '*/cache/*' -exec sed -i.bak 's/pragma solidity 0\\.8\\.17;/pragma solidity ^0.8.17;/g' {} +"
+        "extractMethods": "npx -y tsx scripts/extractMethods.ts"
     },
     "keywords": [],
     "author": "",

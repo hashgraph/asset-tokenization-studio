@@ -203,94 +203,239 @@
 
 */
 
-import { HardhatUserConfig } from 'hardhat/config'
-import 'tsconfig-paths/register'
-import '@nomicfoundation/hardhat-toolbox'
-import '@nomicfoundation/hardhat-chai-matchers'
-import '@typechain/hardhat'
-import 'hardhat-contract-sizer'
-import 'hardhat-gas-reporter'
-import Configuration from '@configuration'
-import '@tasks'
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { BusinessLogicResolver, TREXFactoryAts, ITREXFactory } from '@typechain'
+import {
+    ADDRESS_ZERO,
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    Rbac,
+    setEquityData,
+    setBondData,
+    DividendType,
+    setFactoryRegulationData,
+    RegulationType,
+    RegulationSubType,
+    deployContract,
+    DeployContractCommand,
+} from '@scripts'
+import { deploySuiteWithModularCompliancesFixture } from './fixtures/deploy-full-suite.fixture'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
-const config: HardhatUserConfig = {
-    solidity: {
-        compilers: [
-            {
-                version: '0.8.17',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-            {
-                version: '0.8.18',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-        ],
-    },
-    paths: {
-        sources: './contracts',
-        tests: './test/unitTests',
-        cache: './cache',
-        artifacts: './artifacts',
-    },
-    defaultNetwork: 'hardhat',
-    networks: {
-        hardhat: {
-            chainId: 1337,
-            blockGasLimit: 30_000_000,
-            hardfork: 'london',
-        },
-        local: {
-            url: Configuration.endpoints.local.jsonRpc,
-            accounts: Configuration.privateKeys.local,
-            timeout: 60_000,
-        },
-        previewnet: {
-            url: Configuration.endpoints.previewnet.jsonRpc,
-            accounts: Configuration.privateKeys.previewnet,
-            timeout: 120_000,
-        },
-        testnet: {
-            url: Configuration.endpoints.testnet.jsonRpc,
-            accounts: Configuration.privateKeys.testnet,
-            timeout: 120_000,
-        },
-        mainnet: {
-            url: Configuration.endpoints.mainnet.jsonRpc,
-            accounts: Configuration.privateKeys.mainnet,
-            timeout: 120_000,
-        },
-    },
-    contractSizer: {
-        alphaSort: true,
-        disambiguatePaths: false,
-        runOnCompile: Configuration.contractSizerRunOnCompile,
-        strict: true,
-    },
-    gasReporter: {
-        enabled: Configuration.reportGas,
-        showTimeSpent: true,
-        outputFile: 'gas-report.txt', // Force output to a file
-        noColors: true, // Recommended for file output
-    },
-    typechain: {
-        outDir: './typechain-types',
-        target: 'ethers-v5',
-    },
-    mocha: {
-        timeout: 3_000_000,
-    },
-}
+describe('TREX Factory Tests', () => {
+    let deployer: SignerWithAddress
 
-export default config
+    const init_rbacs: Rbac[] = []
+
+    const name = 'TEST_AccessControl'
+    const symbol = 'TAC'
+    const decimals = 6
+    const isin = isinGenerator()
+    const isWhitelist = false
+    const isControllable = true
+    const isMultiPartition = false
+    const arePartitionsProtected = false
+    const clearingActive = true
+    const internalKycActivated = false
+
+    const votingRight = true
+    const informationRight = false
+    const liquidationRight = true
+    const subscriptionRight = false
+    const conversionRight = true
+    const redemptionRight = false
+    const putRight = true
+    const dividendRight = DividendType.PREFERRED
+    const numberOfShares = BigInt(2000)
+
+    const currency = '0x455552'
+    const numberOfUnits = BigInt(1000)
+    const nominalValue = 100
+    let startingDate = 999
+    let maturityDate = 999
+    const couponFrequency = 1
+    const couponRate = 1
+    let firstCouponDate = 999
+
+    const regulationType = RegulationType.REG_D
+    const regulationSubType = RegulationSubType.REG_D_506_B
+    const countriesControlListType = true
+    const listOfCountries = 'ES,FR,CH'
+    const info = 'info'
+
+    let businessLogicResolver: BusinessLogicResolver
+    let factoryAts: TREXFactoryAts
+    const tokenDetails: ITREXFactory.TokenDetailsStruct =
+        {} as ITREXFactory.TokenDetailsStruct
+    const claimDetails: ITREXFactory.ClaimDetailsStruct =
+        {} as ITREXFactory.ClaimDetailsStruct
+
+    before(async () => {
+        // mute | mock console.log
+        // console.log = () => {}
+
+        const trexDeployment = await loadFixture(
+            deploySuiteWithModularCompliancesFixture
+        )
+
+        deployer = trexDeployment.accounts.deployer
+
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: deployer,
+                useDeployed: false,
+                useEnvironment: true,
+                timeTravelEnabled: true,
+            })
+        )
+
+        const factoryAtsAddress = (
+            await deployContract(
+                new DeployContractCommand({
+                    name: 'TREXFactoryAts',
+                    args: [
+                        trexDeployment.authorities.trexImplementationAuthority
+                            .address,
+                        trexDeployment.factories.identityFactory.address,
+                        deployedContracts.factory.proxyAddress,
+                    ],
+                    signer: deployer,
+                })
+            )
+        ).address
+
+        await trexDeployment.factories.identityFactory
+            .connect(deployer)
+            .addTokenFactory(factoryAtsAddress)
+
+        factoryAts = await ethers.getContractAt(
+            'TREXFactoryAts',
+            factoryAtsAddress!
+        )
+
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+
+        tokenDetails.name = 'ATS-TREX-Token'
+        tokenDetails.symbol = 'ATS-TREX'
+        tokenDetails.decimals = 6
+        tokenDetails.ONCHAINID = ADDRESS_ZERO
+        tokenDetails.owner = deployer.address
+        tokenDetails.irAgents = [deployer.address]
+        tokenDetails.irs = ADDRESS_ZERO
+        tokenDetails.tokenAgents = [deployer.address]
+        tokenDetails.complianceModules = []
+        tokenDetails.complianceSettings = []
+
+        claimDetails.claimTopics = []
+        claimDetails.issuerClaims = []
+        claimDetails.issuers = []
+    })
+
+    describe('Equity tests', () => {
+        it('GIVEN a valid equitiy THEN security is deployed successfully', async () => {
+            const equityData = await setEquityData({
+                adminAccount: deployer.address,
+                isWhiteList: isWhitelist,
+                isControllable,
+                arePartitionsProtected,
+                clearingActive,
+                internalKycActivated,
+                isMultiPartition,
+                name,
+                symbol,
+                decimals,
+                isin,
+                votingRight,
+                informationRight,
+                liquidationRight,
+                subscriptionRight,
+                conversionRight,
+                redemptionRight,
+                putRight,
+                dividendRight,
+                currency,
+                numberOfShares,
+                nominalValue,
+                init_rbacs,
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
+
+            const factoryRegulationData = await setFactoryRegulationData(
+                regulationType,
+                regulationSubType,
+                countriesControlListType,
+                listOfCountries,
+                info
+            )
+
+            await expect(
+                factoryAts
+                    .connect(deployer)
+                    .deployTREXSuiteAtsEquity(
+                        'salt-equity',
+                        tokenDetails,
+                        claimDetails,
+                        equityData,
+                        factoryRegulationData
+                    )
+            ).to.emit(factoryAts, 'TREXSuiteDeployed')
+        })
+    })
+
+    describe('Bond tests', () => {
+        it('GIVEN a valid bond THEN security is deployed successfully', async () => {
+            const currentTimeInSeconds =
+                Math.floor(new Date().getTime() / 1000) + 1
+            startingDate = currentTimeInSeconds + 10000
+            maturityDate = startingDate + 30
+            firstCouponDate = 0
+
+            const bondData = await setBondData({
+                adminAccount: deployer.address,
+                isWhiteList: isWhitelist,
+                isControllable,
+                arePartitionsProtected,
+                clearingActive,
+                internalKycActivated,
+                isMultiPartition,
+                name,
+                symbol,
+                decimals,
+                isin,
+                currency,
+                numberOfUnits,
+                nominalValue,
+                startingDate,
+                maturityDate,
+                couponFrequency,
+                couponRate,
+                firstCouponDate,
+                init_rbacs,
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
+
+            const factoryRegulationData = await setFactoryRegulationData(
+                RegulationType.REG_S,
+                RegulationSubType.NONE,
+                countriesControlListType,
+                listOfCountries,
+                info
+            )
+
+            await expect(
+                factoryAts.deployTREXSuiteAtsBond(
+                    'salt-bond',
+                    tokenDetails,
+                    claimDetails,
+                    bondData,
+                    factoryRegulationData
+                )
+            ).to.emit(factoryAts, 'TREXSuiteDeployed')
+        })
+    })
+})

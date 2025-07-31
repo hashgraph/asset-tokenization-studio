@@ -264,11 +264,7 @@ export const CONTRACT_NAMES = [
     'TREXFactoryAts',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
-export const CONTRACT_NAMES_WITH_PROXY = [
-    'Factory',
-    'BusinessLogicResolver',
-    'TREXFactoryAts',
-]
+export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
 
 export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
     (name) => `${name}__factory`
