@@ -208,6 +208,7 @@ import { Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { ProgramVotingRights } from "./ProgramVotingRights";
 import { SeeVotingRights } from "./SeeVotingRights";
+import { VotingRightsHolders } from "./VotingRightsHolders";
 
 export const VotingRights = () => {
   const { t: tTabs } = useTranslation("security", {
@@ -215,13 +216,15 @@ export const VotingRights = () => {
   });
 
   return (
-    <Stack w="full" h="full" layerStyle="container">
+    <Stack w="full" h="full" layerStyle="container" pt={0}>
       <Tabs
         tabs={[
           { content: <ProgramVotingRights />, header: tTabs("program") },
           { content: <SeeVotingRights />, header: tTabs("see") },
+          { content: <VotingRightsHolders />, header: tTabs("holders") },
         ]}
         isFitted
+        variant="secondary"
       />
     </Stack>
   );

@@ -212,7 +212,9 @@ import {
   CouponViewModel,
   GetAllCouponsRequest,
   GetCouponForRequest,
+  GetCouponHoldersRequest,
   GetCouponRequest,
+  GetTotalCouponHoldersRequest,
   SetCouponRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
@@ -227,6 +229,16 @@ export const GET_SECURITY_COUPONS = (securityId: string, couponId: number) =>
 
 export const GET_SECURITY_ALL_COUPONS = (securityId: string) =>
   `GET_SECURITY_ALL_COUPONS_${securityId}`;
+
+export const GET_SECURITY_COUPONS_HOLDERS = (
+  securityId: string,
+  couponId: number,
+) => `GET_SECURITY_COUPONS_HOLDERS_${securityId}_${couponId}`;
+
+export const GET_SECURITY_COUPONS_TOTAL_HOLDERS = (
+  securityId: string,
+  couponId: number,
+) => `GET_SECURITY_COUPONS_TOTAL_HOLDERS_${securityId}_${couponId}`;
 
 export const useCoupons = () => {
   const toast = useToast();
@@ -296,6 +308,28 @@ export const useGetAllCoupons = <TError, TData = CouponViewModel[]>(
   return useQuery(
     [GET_SECURITY_ALL_COUPONS(params.securityId)],
     () => SDKService.getAllCoupons(params),
+    options,
+  );
+};
+
+export const useGetCouponsHolders = <TError, TData = string[]>(
+  params: GetCouponHoldersRequest,
+  options: UseQueryOptions<string[], TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_SECURITY_COUPONS_HOLDERS(params.securityId, params.couponId)],
+    () => SDKService.getCouponHolders(params),
+    options,
+  );
+};
+
+export const useGetCouponsTotalHolders = <TError, TData = number>(
+  params: GetTotalCouponHoldersRequest,
+  options: UseQueryOptions<number, TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_SECURITY_COUPONS_TOTAL_HOLDERS(params.securityId, params.couponId)],
+    () => SDKService.getTotalCouponHolders(params),
     options,
   );
 };

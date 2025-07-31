@@ -67,6 +67,9 @@ export const DangerZone = () => {
     refetch: refetchIsInternalKycActivated,
   } = useGetIsInternalKycActivated(
     new IsInternalKycActivatedRequest({ securityId: id }),
+    {
+      retry: false,
+    },
   );
 
   const { mutate: pauseSecurity, isLoading: isPauseLoading } = usePauseSecurity(
