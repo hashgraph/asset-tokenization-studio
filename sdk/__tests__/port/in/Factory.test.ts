@@ -203,6 +203,7 @@
 
 */
 
+import '../environmentMock';
 import {
   CLIENT_ACCOUNT_ECDSA,
   FACTORY_ADDRESS,
