@@ -207,25 +207,12 @@
 pragma solidity 0.8.18;
 
 import {
+    IERC1410Standard
+} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+import {
     ERC1410OperatorStorageWrapper
 } from './ERC1410OperatorStorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS,
-    _FROM_ACCOUNT_KYC_ERROR_ID,
-    _CLEARING_ACTIVE_ERROR_ID,
-    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-    _ADDRESS_RECOVERED_FROM_ERROR_ID,
-    _DEFAULT_PARTITION
-} from '../../constants/values.sol';
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {DEFAULT_PARTITION} from '../../constants/values.sol';
 import {
     IERC1410Standard
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
@@ -247,12 +234,12 @@ abstract contract ERC1410StandardStorageWrapper is
         _triggerAndSyncAll(partition, from, to);
 
         if (from == address(0)) {
-            // mint
+            // mint | issue
             _updateAccountSnapshot(to, partition);
             return _updateTotalSupplySnapshot(partition);
         }
         if (to == address(0)) {
-            // burn
+            // burn | redeem
             _updateAccountSnapshot(from, partition);
             return _updateTotalSupplySnapshot(partition);
         }
@@ -337,7 +324,7 @@ abstract contract ERC1410StandardStorageWrapper is
 
         _increaseTotalSupplyByPartition(_issueData.partition, _issueData.value);
 
-        if (_issueData.partition == _DEFAULT_PARTITION) {
+        if (_issueData.partition == DEFAULT_PARTITION) {
             _erc3643Storage().compliance.functionCall(
                 abi.encodeWithSelector(
                     ICompliance.created.selector,
@@ -371,7 +358,7 @@ abstract contract ERC1410StandardStorageWrapper is
 
         _reduceTotalSupplyByPartition(_partition, _value);
 
-        if (_partition == _DEFAULT_PARTITION) {
+        if (_partition == DEFAULT_PARTITION) {
             _erc3643Storage().compliance.functionCall(
                 abi.encodeWithSelector(
                     ICompliance.destroyed.selector,
@@ -422,64 +409,6 @@ abstract contract ERC1410StandardStorageWrapper is
     function _adjustTotalAndMaxSupplyForPartition(
         bytes32 _partition
     ) internal virtual;
-
-    function _canRedeemByPartition(
-        address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata /*_data*/,
-        bytes calldata /*_operatorData*/
-    ) internal view returns (bool, bytes1, bytes32) {
-        bytes32[] memory roles = new bytes32[](2);
-        roles[0] = _CONTROLLER_ROLE;
-        roles[1] = _AGENT_ROLE;
-        if (!_hasAnyRole(roles, _msgSender())) {
-            if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-                    bytes32(0)
-                );
-            }
-            if (_isPaused()) {
-                return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-            }
-            if (_isClearingActivated()) {
-                return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
-            }
-            if (_from == address(0)) {
-                return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-            }
-            if (!_isAbleToAccess(_msgSender())) {
-                return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-            }
-            if (!_isAbleToAccess(_from)) {
-                return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-            }
-            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-                return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-            }
-            if (_from != _msgSender()) {
-                if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                    return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-                }
-                if (_isRecovered(_from)) {
-                    return (
-                        false,
-                        _ADDRESS_RECOVERED_FROM_ERROR_ID,
-                        bytes32(0)
-                    );
-                }
-            }
-        }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfByPartition(_partition, _from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        return (true, _SUCCESS, bytes32(0));
-    }
 
     function _totalSupplyAdjusted() internal view returns (uint256) {
         return _totalSupplyAdjustedAt(_blockTimestamp());

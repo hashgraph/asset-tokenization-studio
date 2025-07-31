@@ -205,7 +205,7 @@
 
 pragma solidity 0.8.18;
 
-import {_DEFAULT_PARTITION} from '../constants/values.sol';
+import {DEFAULT_PARTITION} from '../constants/values.sol';
 import {
     SnapshotsStorageWrapper2
 } from '../snapshots/SnapshotsStorageWrapper2.sol';
@@ -234,12 +234,12 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     }
 
     function _freezeTokens(address _account, uint256 _amount) internal {
-        _freezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
+        _freezeTokensByPartition(DEFAULT_PARTITION, _account, _amount);
     }
 
     function _unfreezeTokens(address _account, uint256 _amount) internal {
-        _checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount);
-        _unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
+        _checkUnfreezeAmount(DEFAULT_PARTITION, _account, _amount);
+        _unfreezeTokensByPartition(DEFAULT_PARTITION, _account, _amount);
     }
 
     function _freezeTokensByPartition(

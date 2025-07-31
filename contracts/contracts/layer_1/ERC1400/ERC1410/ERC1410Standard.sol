@@ -208,9 +208,7 @@ pragma solidity 0.8.18;
 
 import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
 import {Common} from '../../common/Common.sol';
-
 import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410Standard is IERC1410Standard, Common {
     function issueByPartition(
@@ -218,14 +216,13 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     )
         external
         override
-        onlyUnrecoveredAddress(_issueData.tokenHolder)
+        onlyUnpaused
+        onlyIssuable
         onlyWithinMaxSupply(_issueData.value)
         onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
-        validateAddress(_issueData.tokenHolder)
-        onlyListedAllowed(_issueData.tokenHolder)
-        onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _issueData.tokenHolder)
+        onlyIdentified(address(0), _issueData.tokenHolder)
+        onlyCompliant(address(0), _issueData.tokenHolder)
     {
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -248,13 +245,15 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     )
         external
         override
-        onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyListedAllowed(_msgSender())
-        onlyUnrecoveredAddress(_msgSender())
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyCanRedeemFromByPartition(
+            _msgSender(),
+            _partition,
+            _value,
+            _data,
+            ''
+        )
     {
         // Add the function to validate the `_data` parameter
         _redeemByPartition(
@@ -283,18 +282,18 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyListedAllowed(_tokenHolder)
-        onlyListedAllowed(_msgSender())
         onlyOperator(_partition, _tokenHolder)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
         {
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_tokenHolder);
+            _checkCanRedeemFromByPartition(
+                _tokenHolder,
+                _partition,
+                _value,
+                _data,
+                _operatorData
+            );
         }
         _redeemByPartition(
             _partition,
@@ -313,13 +312,18 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external view override returns (bool, bytes1, bytes32) {
-        return
-            _canRedeemByPartition(
+        (
+            bool status,
+            bytes1 code,
+            bytes32 reason,
+
+        ) = _isAbleToRedeemFromByPartition(
                 _from,
                 _partition,
                 _value,
                 _data,
                 _operatorData
             );
+        return (status, code, reason);
     }
 }

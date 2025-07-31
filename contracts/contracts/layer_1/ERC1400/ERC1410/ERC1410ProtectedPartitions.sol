@@ -210,7 +210,6 @@ import {
     IERC1410ProtectedPartitions
 } from '../../interfaces/ERC1400/IERC1410ProtectedPartitions.sol';
 import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410ProtectedPartitions is
     IERC1410ProtectedPartitions,
@@ -227,19 +226,10 @@ abstract contract ERC1410ProtectedPartitions is
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
         onlyRole(_protectedPartitionsRole(_partition))
-        onlyListedAllowed(_from)
-        onlyListedAllowed(_to)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         onlyProtectedPartitions
+        onlyCanTransferFromByPartition(_from, _to, _partition, _amount, '', '')
     {
-        {
-            _checkRecoveredAddress(_from);
-            _checkRecoveredAddress(_to);
-        }
         _protectedTransferFromByPartition(
             _partition,
             _from,
@@ -261,13 +251,9 @@ abstract contract ERC1410ProtectedPartitions is
     )
         external
         override
-        onlyUnpaused
-        onlyUnrecoveredAddress(_from)
-        onlyClearingDisabled
         onlyRole(_protectedPartitionsRole(_partition))
-        onlyListedAllowed(_from)
         onlyProtectedPartitions
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
+        onlyCanRedeemFromByPartition(_from, _partition, _amount, '', '')
     {
         _protectedRedeemFromByPartition(
             _partition,

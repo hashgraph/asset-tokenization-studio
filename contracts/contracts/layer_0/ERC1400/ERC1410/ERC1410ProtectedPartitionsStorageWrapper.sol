@@ -206,9 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC1410ControllerStorageWrapper
-} from './ERC1410ControllerStorageWrapper.sol';
+import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
 import {
     checkNounceAndDeadline
 } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
@@ -217,7 +215,7 @@ import {
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 
 abstract contract ERC1410ProtectedPartitionsStorageWrapper is
-    ERC1410ControllerStorageWrapper
+    ERC1644StorageWrapper
 {
     function _protectedTransferFromByPartition(
         bytes32 _partition,

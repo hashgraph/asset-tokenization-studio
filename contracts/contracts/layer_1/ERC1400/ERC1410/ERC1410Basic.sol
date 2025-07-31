@@ -208,7 +208,6 @@ pragma solidity 0.8.18;
 
 import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
 import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410Basic is IERC1410Basic, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -227,25 +226,22 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
     function transferByPartition(
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,
-        bytes calldata _data
+        bytes memory _data
     )
         external
         override
-        onlyUnpaused
-        validateAddress(_basicTransferInfo.to)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_basicTransferInfo.to)
-        onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _basicTransferInfo.to)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyCanTransferFromByPartition(
+            _msgSender(),
+            _basicTransferInfo.to,
+            _partition,
+            _basicTransferInfo.value,
+            _data,
+            ''
+        )
         returns (bytes32)
     {
-        {
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_basicTransferInfo.to);
-        }
         // Add a function to verify the `_data` parameter
         // TODO: Need to create the bytes division of the `_partition` so it can be easily findout in which receiver's
         // partition token will transfered. For current implementation we are assuming that the receiver's partition

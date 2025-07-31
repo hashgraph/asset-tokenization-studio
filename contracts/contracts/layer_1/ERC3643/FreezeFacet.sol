@@ -213,7 +213,7 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_FREEZE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
 contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
     // ====== External functions (state-changing) ======
@@ -250,7 +250,7 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
             _checkAnyRole(roles, _msgSender());
         }
         _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+        emit TokensFrozen(_userAddress, _amount, DEFAULT_PARTITION);
     }
 
     function unfreezePartialTokens(
@@ -270,7 +270,7 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
             _checkAnyRole(roles, _msgSender());
         }
         _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+        emit TokensUnfrozen(_userAddress, _amount, DEFAULT_PARTITION);
     }
 
     function batchSetAddressFrozen(
@@ -312,7 +312,7 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
             emit TokensFrozen(
                 _userAddresses[i],
                 _amounts[i],
-                _DEFAULT_PARTITION
+                DEFAULT_PARTITION
             );
         }
     }
@@ -337,7 +337,7 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
             emit TokensUnfrozen(
                 _userAddresses[i],
                 _amounts[i],
-                _DEFAULT_PARTITION
+                DEFAULT_PARTITION
             );
         }
     }
@@ -349,6 +349,7 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
     ) external view override returns (uint256) {
         return _getFrozenAmountForAdjusted(_userAddress);
     }
+
     function getStaticResolverKey()
         external
         pure

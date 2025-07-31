@@ -282,8 +282,12 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external view override returns (bool, bytes1, bytes32) {
-        return
-            _canTransferByPartition(
+        (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reason,
+
+        ) = _isAbleToTransferFromByPartition(
                 _from,
                 _to,
                 _partition,
@@ -291,5 +295,6 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
                 _data,
                 _operatorData
             );
+        return (status, statusCode, reason);
     }
 }

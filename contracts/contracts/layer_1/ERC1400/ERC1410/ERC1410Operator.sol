@@ -208,7 +208,6 @@ pragma solidity 0.8.18;
 
 import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
 import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
     IERC1410Operator
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
@@ -222,15 +221,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
     /// @param _operator An address which is being authorised
     function authorizeOperator(
         address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(_operator)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_operator)
-    {
+    ) external override onlyUnpaused onlyCompliant(_msgSender(), _operator) {
         _authorizeOperator(_operator);
     }
 
@@ -238,7 +229,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
     /// @param _operator An address which is being de-authorised
     function revokeOperator(
         address _operator
-    ) external override onlyUnpaused onlyListedAllowed(_msgSender()) {
+    ) external override onlyUnpaused onlyCompliant(_msgSender(), address(0)) {
         _revokeOperator(_operator);
     }
 
@@ -253,10 +244,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(_operator)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_operator)
+        onlyCompliant(_msgSender(), _operator)
     {
         _authorizeOperatorByPartition(_partition, _operator);
     }
@@ -272,7 +260,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyListedAllowed(_msgSender())
+        onlyCompliant(_msgSender(), address(0))
     {
         _revokeOperatorByPartition(_partition, _operator);
     }
@@ -284,27 +272,23 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_operatorTransferData.from)
-        onlyListedAllowed(_operatorTransferData.to)
         onlyOperator(
             _operatorTransferData.partition,
             _operatorTransferData.from
         )
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.to)
+        validateAddress(_operatorTransferData.to)
+        onlyCanTransferFromByPartition(
+            _operatorTransferData.from,
+            _operatorTransferData.to,
+            _operatorTransferData.partition,
+            _operatorTransferData.value,
+            _operatorTransferData.data,
+            _operatorTransferData.operatorData
+        )
         returns (bytes32)
     {
-        {
-            _checkValidAddress(_operatorTransferData.to);
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_operatorTransferData.to);
-            _checkRecoveredAddress(_operatorTransferData.from);
-        }
         return _operatorTransferByPartition(_operatorTransferData);
     }
 

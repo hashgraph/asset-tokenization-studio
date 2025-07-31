@@ -220,7 +220,6 @@ import {
     _AGENT_ROLE,
     _TREX_OWNER_ROLE
 } from '../constants/roles.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     address private constant _ONCHAIN_ID = address(0);
@@ -338,12 +337,11 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     )
         external
         onlyUnpaused
-        onlyUnrecoveredAddress(_to)
-        onlyWithinMaxSupply(_amount)
-        onlyListedAllowed(_to)
         onlyWithoutMultiPartition
+        onlyWithinMaxSupply(_amount)
+        onlyIdentified(address(0), _to)
+        onlyCompliant(address(0), _to)
         onlyIssuable
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
     {
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -380,19 +378,17 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         uint256[] calldata _amounts
     )
         external
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnpaused
         onlyValidInputAmountsArrayLength(_toList, _amounts)
+        onlyUnpaused
         onlyClearingDisabled
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyListedAllowed(_msgSender())
+        onlyIdentified(_msgSender(), address(0))
+        onlyCompliant(_msgSender(), address(0))
     {
         for (uint256 i = 0; i < _toList.length; i++) {
-            _checkRecoveredAddress(_toList[i]);
-            _checkControlList(_toList[i]);
-            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _toList[i]);
+            _checkIdentity(address(0), _toList[i]);
+            _checkCompliance(address(0), _toList[i]);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
             _transfer(_msgSender(), _toList[i], _amounts[i]);
@@ -427,8 +423,8 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         uint256[] calldata _amounts
     )
         external
-        onlyUnpaused
         onlyValidInputAmountsArrayLength(_toList, _amounts)
+        onlyUnpaused
         onlyWithoutMultiPartition
         onlyIssuable
     {
@@ -439,11 +435,9 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             _checkAnyRole(roles, _msgSender());
         }
         for (uint256 i = 0; i < _toList.length; i++) {
-            _checkRecoveredAddress(_toList[i]);
-            _checkControlList(_toList[i]);
+            _checkIdentity(address(0), _toList[i]);
+            _checkCompliance(address(0), _toList[i]);
             _checkWithinMaxSupply(_amounts[i]);
-            _checkControlList(_toList[i]);
-            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _toList[i]);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
             _issue(_toList[i], _amounts[i], '');

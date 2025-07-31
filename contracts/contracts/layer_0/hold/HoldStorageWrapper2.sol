@@ -218,7 +218,7 @@ import {
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import {_DEFAULT_PARTITION} from '../constants/values.sol';
+import {DEFAULT_PARTITION} from '../constants/values.sol';
 import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
 
@@ -451,7 +451,7 @@ abstract contract HoldStorageWrapper2 is
             );
             if (
                 _holdIdentifier.tokenHolder != _to &&
-                _holdIdentifier.partition == _DEFAULT_PARTITION
+                _holdIdentifier.partition == DEFAULT_PARTITION
             ) {
                 (_erc3643Storage().compliance).functionCall(
                     abi.encodeWithSelector(
@@ -468,7 +468,7 @@ abstract contract HoldStorageWrapper2 is
         _addPartitionTo(_amount, _to, _holdIdentifier.partition);
         if (
             _holdIdentifier.tokenHolder != _to &&
-            _holdIdentifier.partition == _DEFAULT_PARTITION
+            _holdIdentifier.partition == DEFAULT_PARTITION
         ) {
             (_erc3643Storage().compliance).functionCall(
                 abi.encodeWithSelector(

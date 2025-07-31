@@ -206,14 +206,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-// TODO: Delacre own interface in layer_0
 import {
     IERC1410StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
 import {
     _ERC1410_BASIC_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-import {_DEFAULT_PARTITION} from '../../constants/values.sol';
+import {DEFAULT_PARTITION} from '../../constants/values.sol';
 import {LockStorageWrapper1} from '../../lock/LockStorageWrapper1.sol';
 
 abstract contract ERC1410BasicStorageWrapperRead is
@@ -264,12 +263,12 @@ abstract contract ERC1410BasicStorageWrapperRead is
             revert IERC1410StorageWrapper.InvalidPartition(_from, _partition);
         }
 
-        uint256 balance = _balanceOfByPartition(_partition, _from);
+        uint256 fromBalance = _balanceOfByPartition(_partition, _from);
 
-        if (balance < _value) {
+        if (fromBalance < _value) {
             revert IERC1410StorageWrapper.InsufficientBalance(
                 _from,
-                balance,
+                fromBalance,
                 _value,
                 _partition
             );
@@ -424,7 +423,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
     function _checkDefaultPartitionWithSinglePartition(
         bytes32 partition
     ) internal view {
-        if (!_isMultiPartition() && partition != _DEFAULT_PARTITION)
+        if (!_isMultiPartition() && partition != DEFAULT_PARTITION)
             revert PartitionNotAllowedInSinglePartitionMode(partition);
     }
 
@@ -442,6 +441,16 @@ abstract contract ERC1410BasicStorageWrapperRead is
 
     function _checkValidAddress(address account) internal pure {
         if (account == address(0)) revert ZeroAddressNotAllowed();
+    }
+
+    function _adjustTotalBalanceFor(
+        ERC1410BasicStorage storage basicStorage,
+        uint256 abaf,
+        address account
+    ) private {
+        uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
+        basicStorage.balances[account] *= factor;
+        _updateLabafByTokenHolder(abaf, account);
     }
 
     function _adjustPartitionBalanceFor(
@@ -465,16 +474,6 @@ abstract contract ERC1410BasicStorageWrapperRead is
             account,
             partitionsIndex
         );
-    }
-
-    function _adjustTotalBalanceFor(
-        ERC1410BasicStorage storage basicStorage,
-        uint256 abaf,
-        address account
-    ) private {
-        uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
-        basicStorage.balances[account] *= factor;
-        _updateLabafByTokenHolder(abaf, account);
     }
 
     function _checkWithoutMultiPartition() private view {

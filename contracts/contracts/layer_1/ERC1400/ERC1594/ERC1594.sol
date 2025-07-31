@@ -212,8 +212,8 @@ import {
 import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {Common} from '../../common/Common.sol';
+import {DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -232,16 +232,16 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyUnrecoveredAddress(_to)
-        onlyUnrecoveredAddress(_msgSender())
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyCanTransferFromByPartition(
+            _msgSender(),
+            _to,
+            DEFAULT_PARTITION,
+            _value,
+            '',
+            ''
+        )
     {
         // Add a function to validate the `_data` parameter
         _transfer(_msgSender(), _to, _value);
@@ -255,21 +255,17 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_to)
-        onlyListedAllowed(_from)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyCanTransferFromByPartition(
+            _from,
+            _to,
+            DEFAULT_PARTITION,
+            _value,
+            '',
+            ''
+        )
     {
-        {
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_to);
-            _checkRecoveredAddress(_from);
-        }
         // Add a function to validate the `_data` parameter
         _transferFrom(_msgSender(), _from, _to, _value);
     }
@@ -290,13 +286,12 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnrecoveredAddress(_tokenHolder)
-        onlyWithinMaxSupply(_value)
-        onlyUnpaused
-        onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
+        onlyWithinMaxSupply(_value)
+        onlyIdentified(address(0), _tokenHolder)
+        onlyCompliant(address(0), _tokenHolder)
         onlyIssuable
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
+        onlyUnpaused
     {
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -316,17 +311,19 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
      */
     function redeem(
         uint256 _value,
-        bytes calldata _data
+        bytes memory _data
     )
         external
         override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyUnrecoveredAddress(_msgSender())
-        onlyListedAllowed(_msgSender())
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyCanRedeemFromByPartition(
+            _msgSender(),
+            DEFAULT_PARTITION,
+            _value,
+            _data,
+            ''
+        )
     {
         _redeem(_value, _data);
     }
@@ -343,20 +340,19 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     function redeemFrom(
         address _tokenHolder,
         uint256 _value,
-        bytes calldata _data
+        bytes memory _data
     )
         external
         override
-        onlyUnpaused
-        validateAddress(_tokenHolder)
-        onlyClearingDisabled
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(_tokenHolder)
+        onlyCanRedeemFromByPartition(
+            _tokenHolder,
+            DEFAULT_PARTITION,
+            _value,
+            _data,
+            ''
+        )
     {
         _redeemFrom(_tokenHolder, _value, _data);
     }
@@ -386,7 +382,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     function canTransfer(
         address _to,
         uint256 _value,
-        bytes calldata _data
+        bytes memory _data
     )
         external
         view
@@ -394,7 +390,20 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         onlyWithoutMultiPartition
         returns (bool, bytes1, bytes32)
     {
-        return _canTransfer(_to, _value, _data);
+        (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reason,
+
+        ) = _isAbleToTransferFromByPartition(
+                _msgSender(),
+                _to,
+                DEFAULT_PARTITION,
+                _value,
+                _data,
+                ''
+            );
+        return (status, statusCode, reason);
     }
 
     /**
@@ -413,15 +422,22 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         address _from,
         address _to,
         uint256 _value,
-        bytes calldata _data
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
-    {
-        return _canTransferFrom(_from, _to, _value, _data);
+        bytes memory _data
+    ) external view onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
+        (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reason,
+
+        ) = _isAbleToTransferFromByPartition(
+                _from,
+                _to,
+                DEFAULT_PARTITION,
+                _value,
+                _data,
+                ''
+            );
+        return (status, statusCode, reason);
     }
 
     function getStaticResolverKey()
