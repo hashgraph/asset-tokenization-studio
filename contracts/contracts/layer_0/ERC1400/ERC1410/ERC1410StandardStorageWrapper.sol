@@ -212,10 +212,19 @@ import {
 import {
     ERC1410OperatorStorageWrapper
 } from './ERC1410OperatorStorageWrapper.sol';
+import {DEFAULT_PARTITION} from '../../constants/values.sol';
+import {
+    IERC1410Standard
+} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
 {
+    using LowLevelCall for address;
+
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -315,6 +324,17 @@ abstract contract ERC1410StandardStorageWrapper is
 
         _increaseTotalSupplyByPartition(_issueData.partition, _issueData.value);
 
+        if (_issueData.partition == DEFAULT_PARTITION) {
+            _erc3643Storage().compliance.functionCall(
+                abi.encodeWithSelector(
+                    ICompliance.created.selector,
+                    _issueData.tokenHolder,
+                    _issueData.value
+                ),
+                IERC3643.ComplianceCallFailed.selector
+            );
+        }
+
         emit IssuedByPartition(
             _issueData.partition,
             _msgSender(),
@@ -337,6 +357,17 @@ abstract contract ERC1410StandardStorageWrapper is
         _reduceBalanceByPartition(_from, _value, _partition);
 
         _reduceTotalSupplyByPartition(_partition, _value);
+
+        if (_partition == DEFAULT_PARTITION) {
+            _erc3643Storage().compliance.functionCall(
+                abi.encodeWithSelector(
+                    ICompliance.destroyed.selector,
+                    _from,
+                    _value
+                ),
+                IERC3643.ComplianceCallFailed.selector
+            );
+        }
 
         emit RedeemedByPartition(
             _partition,

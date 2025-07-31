@@ -364,6 +364,7 @@ import {
   FreezePartialTokensRequest,
   UnfreezePartialTokensRequest,
   GetFrozenPartialTokensRequest,
+  ComplianceRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -537,6 +538,10 @@ export class SDKService {
   ): Promise<boolean> {
     const response = await Bond.updateMaturityDate(req);
     return response.payload;
+  }
+
+  public static async getCompliance(req: ComplianceRequest): Promise<string> {
+    return await Security.compliance(req);
   }
 
   // COUPONS ////////////////////////////////////////////

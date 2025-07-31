@@ -225,12 +225,17 @@ import {
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
+import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {DEFAULT_PARTITION} from '../constants/values.sol';
+import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
 
 abstract contract ClearingStorageWrapper2 is
     IClearingStorageWrapper,
     HoldStorageWrapper2
 {
     using EnumerableSet for EnumerableSet.UintSet;
+    using LowLevelCall for address;
 
     function _protectedClearingTransferByPartition(
         IClearing.ProtectedClearingOperation
@@ -1004,6 +1009,22 @@ abstract contract ClearingStorageWrapper2 is
             destination,
             clearingTransferData.amount
         );
+
+        if (
+            _tokenHolder != destination &&
+            _erc3643Storage().compliance != address(0) &&
+            _partition == DEFAULT_PARTITION
+        ) {
+            (_erc3643Storage().compliance).functionCall(
+                abi.encodeWithSelector(
+                    ICompliance.transferred.selector,
+                    _tokenHolder,
+                    destination,
+                    clearingTransferData.amount
+                ),
+                IERC3643.ComplianceCallFailed.selector
+            );
+        }
 
         success_ = true;
         amount_ = clearingTransferData.amount;
