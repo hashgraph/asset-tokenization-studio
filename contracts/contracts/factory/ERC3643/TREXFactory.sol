@@ -405,6 +405,11 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         emit IdFactorySet(idFactory_);
     }
 
+    /// @dev Sets the address of the ATS factory
+    function setAtsFactory(address atsFactory_) public onlyOwner {
+        _atsFactory = atsFactory_;
+    }
+
     /// @dev Standard deployment with the security passed as argument
     function _deployTREXSuite(
         string memory _salt,
@@ -605,9 +610,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         return _deploy(_salt, bytecode);
     }
 
-    /**
-     * @dev Prepares RBAC array by adding default admin role to address(this)
-     */
+    /// @dev Prepares RBAC array by adding default admin role to address(this)
     function _prepareRbacs(
         IResolverProxy.Rbac[] calldata originalRbacs
     ) private view returns (IResolverProxy.Rbac[] memory rbacs) {
