@@ -457,6 +457,15 @@ abstract contract ERC1594StorageWrapper is
                     abi.encode(_msgSender())
                 );
             }
+            if (_isRecovered(_msgSender())) {
+                return (
+                    false,
+                    Eip1066.REVOKED_OR_BANNED,
+                    IERC3643.WalletRecovered.selector,
+                    abi.encode(_msgSender())
+                );
+            }
+            // Business logic
             if (
                 !_isAuthorized(_partition, _msgSender(), _from) &&
                 _allowanceAdjusted(_from, _msgSender()) < _value
@@ -472,15 +481,6 @@ abstract contract ERC1594StorageWrapper is
                         _value,
                         DEFAULT_PARTITION
                     )
-                );
-            }
-            // Business logic
-            if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    Eip1066.REVOKED_OR_BANNED,
-                    IERC3643.WalletRecovered.selector,
-                    abi.encode(_msgSender())
                 );
             }
         }
