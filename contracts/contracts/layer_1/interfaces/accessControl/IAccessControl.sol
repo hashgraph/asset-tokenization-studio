@@ -203,9 +203,22 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+
+struct RoleData {
+    bytes32 roleAdmin;
+    EnumerableSet.AddressSet roleMembers;
+}
+
+struct RoleDataStorage {
+    mapping(bytes32 => RoleData) roles;
+    mapping(address => EnumerableSet.Bytes32Set) memberRoles;
+}
 
 interface IAccessControl {
     /**

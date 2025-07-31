@@ -49,8 +49,8 @@
       "Contribution" shall mean any work of authorship, including
       the original version of the Work and any modifications or additions
       to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
+      submitted for inclusion in the Work by the copyright owner or
+      by an individual or Legal Entity authorized to submit on behalf of
       the copyright owner. For the purposes of this definition, "submitted"
       means any form of electronic, verbal, or written communication sent
       to the Licensor or its representatives, including but not limited to
@@ -206,76 +206,114 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
+import {IERC1410Read} from '../../interfaces/ERC1400/IERC1410Read.sol';
 import {Common} from '../../common/Common.sol';
+import {
+    ERC1410StorageWrapper
+} from '../../../layer_0/ERC1400/ERC1410/ERC1410StorageWrapper.sol';
 
-abstract contract ERC1410Basic is IERC1410Basic, Common {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410_Basic(
-        bool _multiPartition
-    ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {
-        _erc1410BasicStorage().multiPartition = _multiPartition;
-        _erc1410BasicStorage().initialized = true;
+/**
+ * @title ERC1410Read
+ * @dev Facet containing all read-only operations for ERC1410 functionality
+ * @notice This facet handles balance queries, partition queries, operator queries, and validation queries
+ */
+abstract contract ERC1410Read is IERC1410Read, Common, ERC1410StorageWrapper {
+    function balanceOf(address _tokenHolder) external view returns (uint256) {
+        return _balanceOfAdjusted(_tokenHolder);
     }
 
-    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _partition The partition from which to transfer tokens
-    /// @param _basicTransferInfo The address to which to transfer tokens to and the amountn`
-    /// @param _data Additional data attached to the transfer of tokens
-    /// @return The partition to which the transferred tokens were allocated for the _to address
-    function transferByPartition(
+    function balanceOfAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) external view returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
+    }
+
+    function balanceOfByPartition(
         bytes32 _partition,
-        BasicTransferInfo calldata _basicTransferInfo,
-        bytes memory _data
-    )
-        external
-        override
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCanTransferFromByPartition(
-            _msgSender(),
-            _basicTransferInfo.to,
-            _partition,
-            _basicTransferInfo.value,
-            _data,
-            ''
-        )
-        returns (bytes32)
-    {
-        // Add a function to verify the `_data` parameter
-        // TODO: Need to create the bytes division of the `_partition` so it can be easily findout in which receiver's
-        // partition token will transfered. For current implementation we are assuming that the receiver's partition
-        // will be same as sender's as well as it also pass the `_validPartition()` check. In this particular case we
-        // are also assuming that reciever has the some tokens of the same partition as well (To avoid the array index
-        // out of bound error).
-        // Note- There is no operator used for the execution of this call so `_operator` value in
-        // in event is address(0) same for the `_operatorData`
-        return
-            _transferByPartition(
-                msg.sender,
-                _basicTransferInfo,
-                _partition,
-                _data,
-                address(0),
-                ''
-            );
+        address _tokenHolder
+    ) external view returns (uint256) {
+        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
     }
 
-    /**
-     * @return
-     *  true : the token allows multiple partitions to be set and managed
-     *  false : the token contains only one partition, the default one
-     */
+    function totalSupply() external view returns (uint256) {
+        return _totalSupplyAdjusted();
+    }
+
+    function totalSupplyByPartition(
+        bytes32 _partition
+    ) external view returns (uint256) {
+        return _totalSupplyByPartitionAdjusted(_partition);
+    }
+
+    function partitionsOf(
+        address _tokenHolder
+    ) external view returns (bytes32[] memory) {
+        return _partitionsOf(_tokenHolder);
+    }
+
     function isMultiPartition() external view returns (bool) {
         return _isMultiPartition();
     }
 
-    /// @notice Use to get the list of partitions `_tokenHolder` is associated with
-    /// @param _tokenHolder An address corresponds whom partition list is queried
-    /// @return List of partitions
-    function partitionsOf(
+    function canTransferByPartition(
+        address _from,
+        address _to,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) external view returns (bool, bytes1, bytes32) {
+        (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reason,
+
+        ) = _isAbleToTransferFromByPartition(
+                _from,
+                _to,
+                _partition,
+                _value,
+                _data,
+                _operatorData
+            );
+        return (status, statusCode, reason);
+    }
+
+    function canRedeemByPartition(
+        address _from,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) external view override returns (bool, bytes1, bytes32) {
+        (
+            bool status,
+            bytes1 code,
+            bytes32 reason,
+
+        ) = _isAbleToRedeemFromByPartition(
+                _from,
+                _partition,
+                _value,
+                _data,
+                _operatorData
+            );
+        return (status, code, reason);
+    }
+
+    function isOperator(
+        address _operator,
         address _tokenHolder
-    ) external view override returns (bytes32[] memory) {
-        return _partitionsOf(_tokenHolder);
+    ) public view returns (bool) {
+        return _isOperator(_operator, _tokenHolder);
+    }
+
+    function isOperatorForPartition(
+        bytes32 _partition,
+        address _operator,
+        address _tokenHolder
+    ) public view returns (bool) {
+        return _isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 }

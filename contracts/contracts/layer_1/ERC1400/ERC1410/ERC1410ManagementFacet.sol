@@ -49,8 +49,8 @@
       "Contribution" shall mean any work of authorship, including
       the original version of the Work and any modifications or additions
       to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
+      submitted for inclusion in the Work by the copyright owner or
+      by an individual or Legal Entity authorized to submit on behalf of
       the copyright owner. For the purposes of this definition, "submitted"
       means any form of electronic, verbal, or written communication sent
       to the Licensor or its representatives, including but not limited to
@@ -204,19 +204,77 @@
 */
 
 // SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
 
-interface IERC1410ScheduledTasks {
-    function triggerAndSyncAll(
-        bytes32 _partition,
-        address _from,
-        address _to
-    ) external;
+import {
+    _ERC1410_MANAGEMENT_RESOLVER_KEY
+} from '../../../layer_1/constants/resolverKeys.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {
+    IERC1410Management
+} from '../../interfaces/ERC1400/IERC1410Management.sol';
+import {ERC1410Management} from './ERC1410Management.sol';
 
-    function balanceOfAt(
-        address _tokenHolder,
-        uint256 _timestamp
-    ) external view returns (uint256);
+/**
+ * @title ERC1410ManagementFacet
+ * @dev Facet containing all management/administrative operations for ERC1410 functionality
+ * @notice This facet handles initialization, operator management, controller operations, and protected partitions
+ */
+contract ERC1410ManagementFacet is IStaticFunctionSelectors, ERC1410Management {
+    function getStaticResolverKey()
+        external
+        pure
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ERC1410_MANAGEMENT_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](8);
+        uint256 selectorIndex = 0;
+        // Initialization function
+        staticFunctionSelectors_[selectorIndex++] = this
+            .initialize_ERC1410
+            .selector;
+        // Controller functions
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerRedeemByPartition
+            .selector;
+        // Operator functions
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorRedeemByPartition
+            .selector;
+        // Protected functions
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedTransferFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedRedeemFromByPartition
+            .selector;
+        // Utility functions
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getStaticInterfaceIds
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        staticInterfaceIds_[0] = type(IERC1410Management).interfaceId;
+    }
 }

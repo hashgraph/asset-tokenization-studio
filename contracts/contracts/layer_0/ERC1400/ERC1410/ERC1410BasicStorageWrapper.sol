@@ -211,8 +211,8 @@ import {
 } from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
 import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
 import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+    BasicTransferInfo
+} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {DEFAULT_PARTITION} from '../../constants/values.sol';
@@ -226,7 +226,7 @@ abstract contract ERC1410BasicStorageWrapper is
 
     function _transferByPartition(
         address _from,
-        IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
+        BasicTransferInfo memory _basicTransferInfo,
         bytes32 _partition,
         bytes memory _data,
         address _operator,

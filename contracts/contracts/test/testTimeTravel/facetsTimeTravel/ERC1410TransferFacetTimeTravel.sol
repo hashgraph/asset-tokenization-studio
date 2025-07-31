@@ -201,118 +201,30 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-*/
+   */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
+
 pragma solidity 0.8.18;
 
-import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
-import {Common} from '../../common/Common.sol';
 import {
-    IERC1410Operator
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
+    ERC1410TransferFacet
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410TransferFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-abstract contract ERC1410Operator is IERC1410Operator, Common {
-    ///////////////////////
-    /// Operator Management
-    ///////////////////////
-
-    /// @notice Authorises an operator for all partitions of `msg.sender`
-    /// @param _operator An address which is being authorised
-    function authorizeOperator(
-        address _operator
-    ) external override onlyUnpaused onlyCompliant(_msgSender(), _operator) {
-        _authorizeOperator(_operator);
-    }
-
-    /// @notice Revokes authorisation of an operator previously given for all partitions of `msg.sender`
-    /// @param _operator An address which is being de-authorised
-    function revokeOperator(
-        address _operator
-    ) external override onlyUnpaused onlyCompliant(_msgSender(), address(0)) {
-        _revokeOperator(_operator);
-    }
-
-    /// @notice Authorises an operator for a given partition of `msg.sender`
-    /// @param _partition The partition to which the operator is authorised
-    /// @param _operator An address which is being authorised
-    function authorizeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), _operator)
+contract ERC1410TransferFacetTimeTravel is
+    ERC1410TransferFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        _authorizeOperatorByPartition(_partition, _operator);
-    }
-
-    /// @notice Revokes authorisation of an operator previously given for a specified partition of `msg.sender`
-    /// @param _partition The partition to which the operator is de-authorised
-    /// @param _operator An address which is being de-authorised
-    function revokeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), address(0))
-    {
-        _revokeOperatorByPartition(_partition, _operator);
-    }
-
-    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _operatorTransferData contains all the information about the operator transfer
-    function operatorTransferByPartition(
-        OperatorTransferData calldata _operatorTransferData
-    )
-        external
-        override
-        onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
-        onlyOperator(
-            _operatorTransferData.partition,
-            _operatorTransferData.from
-        )
-        onlyUnProtectedPartitionsOrWildCardRole
-        validateAddress(_operatorTransferData.to)
-        onlyCanTransferFromByPartition(
-            _operatorTransferData.from,
-            _operatorTransferData.to,
-            _operatorTransferData.partition,
-            _operatorTransferData.value,
-            _operatorTransferData.data,
-            _operatorTransferData.operatorData
-        )
-        returns (bytes32)
-    {
-        return _operatorTransferByPartition(_operatorTransferData);
-    }
-
-    /// @notice Determines whether `_operator` is an operator for all partitions of `_tokenHolder`
-    /// @param _operator The operator to check
-    /// @param _tokenHolder The token holder to check
-    /// @return Whether the `_operator` is an operator for all partitions of `_tokenHolder`
-    function isOperator(
-        address _operator,
-        address _tokenHolder
-    ) public view override returns (bool) {
-        return _isOperator(_operator, _tokenHolder);
-    }
-
-    /// @notice Determines whether `_operator` is an operator for a specified partition of `_tokenHolder`
-    /// @param _partition The partition to check
-    /// @param _operator The operator to check
-    /// @param _tokenHolder The token holder to check
-    /// @return Whether the `_operator` is an operator for a specified partition of `_tokenHolder`
-    function isOperatorForPartition(
-        bytes32 _partition,
-        address _operator,
-        address _tokenHolder
-    ) public view override returns (bool) {
-        return _isOperatorForPartition(_partition, _operator, _tokenHolder);
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

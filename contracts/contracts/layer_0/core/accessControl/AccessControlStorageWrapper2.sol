@@ -54,10 +54,10 @@
       the copyright owner. For the purposes of this definition, "submitted"
       means any form of electronic, verbal, or written communication sent
       to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
+      communication on electronic mailing lists, source code control
+      systems, and issue tracking systems that are managed by, or on behalf
+      of, the Licensor for the purpose of discussing and improving the Work,
+      but excluding communication that is conspicuously marked or otherwise
       designated in writing by the copyright owner as "Not a Contribution."
 
       "Contributor" shall mean Licensor and any individual or Legal Entity
@@ -67,9 +67,9 @@
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+      copyright license to use, reproduce, modify, publicly display,
+      publicly perform, sublicense, and distribute the Work and such
+      Derivative Works in Source or Object form.
 
    3. Grant of Patent License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
@@ -121,7 +121,7 @@
           that such additional attribution notices cannot be construed
           as modifying the License.
 
-      You may add Your own copyright statement to Your modifications and
+      You may add Your own copyright notice to Your modifications and
       may provide additional or different license terms and conditions
       for use, reproduction, or distribution of Your modifications, or
       for any such Derivative Works as a whole, provided Your use,
@@ -203,154 +203,111 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
 import {
-    IERC1410ScheduledTasks
-} from '../../interfaces/ERC1400/IERC1410ScheduledTasks.sol';
-import {ERC1410Snapshot} from './ERC1410Snapshot.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {ArrayLib} from '../../common/libraries/ArrayLib.sol';
 import {
-    _ERC1410_RESOLVER_KEY
-} from '../../../layer_1/constants/resolverKeys.sol';
-import {IERC1410} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
+    RoleDataStorage
+} from '../../../layer_1/interfaces/accessControl/IAccessControl.sol';
+import {AccessControlStorageWrapper1} from './AccessControlStorageWrapper1.sol';
 
-contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
-    function triggerAndSyncAll(
-        bytes32 _partition,
-        address _from,
-        address _to
-    ) external onlyUnpaused {
-        _triggerAndSyncAll(_partition, _from, _to);
+/**
+ * @title AccessControlStorageWrapper2
+ * @dev Storage wrapper for write access control operations,
+ * inherits read functionality from AccessControlStorageWrapper1
+ */
+abstract contract AccessControlStorageWrapper2 is AccessControlStorageWrapper1 {
+    using EnumerableSet for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    modifier onlySameRolesAndActivesLength(
+        uint256 _rolesLength,
+        uint256 _activesLength
+    ) {
+        _checkSameRolesAndActivesLength(_rolesLength, _activesLength);
+        _;
     }
 
-    function balanceOfAt(
-        address _tokenHolder,
-        uint256 _timestamp
-    ) external view returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
+    modifier onlyConsistentRoles(
+        bytes32[] calldata _roles,
+        bool[] calldata _actives
+    ) {
+        ArrayLib.checkUniqueValues(_roles, _actives);
+        _;
     }
 
-    function balanceOf(
-        address _tokenHolder
-    ) external view override returns (uint256) {
-        return _balanceOfAdjusted(_tokenHolder);
+    // Write operations
+    function _grantRole(
+        bytes32 _role,
+        address _account
+    ) internal returns (bool success_) {
+        success_ = _grant(_rolesStorage(), _role, _account);
     }
 
-    function balanceOfByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256) {
-        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
+    function _revokeRole(
+        bytes32 _role,
+        address _account
+    ) internal returns (bool success_) {
+        success_ = _remove(_rolesStorage(), _role, _account);
     }
 
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupplyAdjusted();
+    function _applyRoles(
+        bytes32[] calldata _roles,
+        bool[] calldata _actives,
+        address _account
+    ) internal returns (bool success_) {
+        RoleDataStorage storage roleDataStorage = _rolesStorage();
+        address sender = _msgSender();
+        uint256 length = _roles.length;
+        for (uint256 index; index < length; ) {
+            _checkRole(_getRoleAdmin(_roles[index]), sender);
+            if (_actives[index]) {
+                if (!_has(roleDataStorage, _roles[index], _account))
+                    _grant(roleDataStorage, _roles[index], _account);
+                unchecked {
+                    ++index;
+                }
+                continue;
+            }
+            if (_has(roleDataStorage, _roles[index], _account))
+                _remove(roleDataStorage, _roles[index], _account);
+            unchecked {
+                ++index;
+            }
+        }
+        success_ = true;
     }
 
-    function totalSupplyByPartition(
-        bytes32 _partition
-    ) external view override returns (uint256) {
-        return _totalSupplyByPartitionAdjusted(_partition);
+    function _grant(
+        RoleDataStorage storage _roleDataStorage,
+        bytes32 _role,
+        address _account
+    ) private returns (bool success_) {
+        success_ =
+            _roleDataStorage.roles[_role].roleMembers.add(_account) &&
+            _roleDataStorage.memberRoles[_account].add(_role);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC1410_RESOLVER_KEY;
+    function _remove(
+        RoleDataStorage storage _roleDataStorage,
+        bytes32 _role,
+        address _account
+    ) private returns (bool success_) {
+        success_ =
+            _roleDataStorage.roles[_role].roleMembers.remove(_account) &&
+            _roleDataStorage.memberRoles[_account].remove(_role);
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](26);
-        uint256 selectorIndex = 0;
-        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAt.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_ERC1410_Basic
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .transferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isMultiPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.partitionsOf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .authorizeOperator
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .revokeOperator
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .authorizeOperatorByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .revokeOperatorByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isOperator.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isOperatorForPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .redeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .issueByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .canTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .canRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerAndSyncAll
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedTransferFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedRedeemFromByPartition
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC1410).interfaceId;
+    function _checkSameRolesAndActivesLength(
+        uint256 _rolesLength,
+        uint256 _activesLength
+    ) private pure {
+        if (_rolesLength != _activesLength) {
+            revert RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
+        }
     }
 }
