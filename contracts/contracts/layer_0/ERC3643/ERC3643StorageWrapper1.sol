@@ -206,9 +206,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import '../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import '../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import '../../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {
     IAccessControl
 } from '../../layer_1/interfaces/accessControl/IAccessControl.sol';

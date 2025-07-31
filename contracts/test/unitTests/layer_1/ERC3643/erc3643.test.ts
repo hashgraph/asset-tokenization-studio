@@ -418,7 +418,7 @@ describe('ERC3643 Tests', () => {
                     new DeployContractCommand({
                         name: 'IdentityRegistryMock',
                         signer: signer_A,
-                        args: [true, false]
+                        args: [true, false],
                     })
                 )
             ).address
@@ -745,7 +745,6 @@ describe('ERC3643 Tests', () => {
                 await accessControlFacet
                     .connect(signer_A)
                     .grantRole(CONTROLLER_ROLE, account_A)
-
             })
             it('GIVEN an account with balance WHEN forcedTransfer THEN transaction success', async () => {
                 //Happy path
@@ -1055,23 +1054,34 @@ describe('ERC3643 Tests', () => {
             it('GIVEN an initialized token WHEN updating the identityRegistry THEN setIdentityRegistry emits IdentityRegistryAdded with updated identityRegistry', async () => {
                 const retrieved_identityRegistry =
                     await erc3643Facet.identityRegistry()
-                expect(retrieved_identityRegistry).to.equal(identityRegistryAddress)
+                expect(retrieved_identityRegistry).to.equal(
+                    identityRegistryAddress
+                )
 
                 //Update identityRegistry
-                expect(await erc3643Facet.setIdentityRegistry(identityRegistryAddress))
+                expect(
+                    await erc3643Facet.setIdentityRegistry(
+                        identityRegistryAddress
+                    )
+                )
                     .to.emit(erc3643Facet, 'IdentityRegistryAdded')
                     .withArgs(identityRegistryAddress)
 
                 const retrieved_newIdentityRegistry =
                     await erc3643Facet.identityRegistry()
-                expect(retrieved_newIdentityRegistry).to.equal(identityRegistryAddress)
+                expect(retrieved_newIdentityRegistry).to.equal(
+                    identityRegistryAddress
+                )
             })
 
             it('GIVEN a non verified account when mint THEN transaction reverts with custom error', async () => {
                 await identityRegistryMock.setFlags(false, false)
-                await expect(
-                    erc3643Issuer.mint(account_E, AMOUNT)
-                ).to.be.revertedWithCustomError(erc3643Facet, 'AddressNotVerified')
+                await expect(erc3643Issuer.mint(account_E, AMOUNT))
+                    .to.be.revertedWithCustomError(
+                        erc3643Facet,
+                        'AddressNotVerified'
+                    )
+                    .withArgs(account_E)
             })
 
             it('GIVEN non verified account with balance WHEN transfer THEN reverts with custom error', async () => {
@@ -1083,12 +1093,16 @@ describe('ERC3643 Tests', () => {
                 await identityRegistryMock.setFlags(false, false)
 
                 await expect(
-                    await erc3643Facet
+                    erc3643Facet
                         .connect(signer_E)
                         .batchTransfer([account_D], [AMOUNT])
-                ).to.be.revertedWithCustomError(erc3643Facet, 'AddressNotVerified')
+                )
+                    .to.be.revertedWithCustomError(
+                        erc3643Facet,
+                        'AddressNotVerified'
+                    )
+                    .withArgs(account_E)
             })
-
         })
 
         describe('Compliance', () => {
@@ -2940,7 +2954,7 @@ describe('ERC3643 Tests', () => {
         })
     })
 
-    describe.skip('multi partition', () => {
+    describe('multi partition', () => {
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
