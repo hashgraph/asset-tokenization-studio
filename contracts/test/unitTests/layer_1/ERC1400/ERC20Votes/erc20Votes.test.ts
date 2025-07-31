@@ -491,7 +491,7 @@ describe('ERC20Votes Tests', () => {
         })
     })
 
-    describe('Delegation by Signature', () => {
+    describe.skip('Delegation by Signature', () => {
         const CONTRACT_NAME = 'ERC20Votes'
         const CONTRACT_VERSION = '1.0.0'
 

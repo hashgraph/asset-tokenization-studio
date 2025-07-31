@@ -253,7 +253,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         _delegate(_msgSender(), delegatee);
     }
 
-    function _delegateBySig(
+    /*function _delegateBySig(
         address delegatee,
         uint256 nonce,
         uint256 expiry,
@@ -288,7 +288,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         _setNounce(nonce, from);
 
         _delegate(from, delegatee);
-    }
+    }*/
 
     function _takeAbafCheckpoint() internal {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
@@ -423,7 +423,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         }
     }
 
-    function _hashTypedDataV4(
+    /*function _hashTypedDataV4(
         bytes32 structHash
     ) internal view virtual returns (bytes32) {
         return
@@ -436,7 +436,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
                 ),
                 structHash
             );
-    }
+    }*/
 
     function _clock() internal view virtual returns (uint48) {
         return SafeCast.toUint48(_blockNumber());

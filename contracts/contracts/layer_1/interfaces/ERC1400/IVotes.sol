@@ -221,14 +221,14 @@ interface IVotes {
     /**
      * @dev Delegates votes from signer to `delegatee`.
      */
-    function delegateBySig(
+    /*function delegateBySig(
         address delegatee,
         uint256 nonce,
         uint256 expiry,
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external;
+    ) external;*/
 
     /**
      * @dev Returns the current amount of votes that `account` has.

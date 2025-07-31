@@ -237,7 +237,7 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         _delegate(_delegatee);
     }
 
-    function delegateBySig(
+    /*function delegateBySig(
         address _delegatee,
         uint256 _nonce,
         uint256 _expiry,
@@ -246,7 +246,7 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         bytes32 _s
     ) external override onlyUnpaused {
         _delegateBySig(_delegatee, _nonce, _expiry, _v, _r, _s);
-    }
+    }*/
 
     function clock() external view override returns (uint48) {
         return _clock();
@@ -310,15 +310,15 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](11);
+        staticFunctionSelectors_ = new bytes4[](10);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .initialize_ERC20Votes
             .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.delegate.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
+        /*staticFunctionSelectors_[selectorsIndex++] = this
             .delegateBySig
-            .selector;
+            .selector;*/
         staticFunctionSelectors_[selectorsIndex++] = this.clock.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.CLOCK_MODE.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.getVotes.selector;
