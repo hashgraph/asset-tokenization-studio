@@ -478,6 +478,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configId: string,
     configVersion: number,
     compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -532,6 +533,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         externalKycLists:
           externalKycLists?.map((address) => address.toString()) ?? [],
         compliance: compliance.toString(),
+        identityRegistry: identityRegistryAddress?.toString(),
       };
 
       const equityDetails: EquityDetailsData = {
@@ -603,6 +605,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configId: string,
     configVersion: number,
     compliance: EvmAddress,
+    identityRegistry: EvmAddress,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -657,6 +660,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         externalKycLists:
           externalKycLists?.map((address) => address.toString()) ?? [],
         compliance: compliance.toString(),
+        identityRegistry: identityRegistry.toString(),
       };
 
       const bondDetails = new BondDetailsData(

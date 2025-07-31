@@ -268,6 +268,7 @@ export class CreateEquityCommandHandler
         externalControlLists,
         externalKycLists,
         compliance,
+        identityRegistry,
       } = command;
 
       if (!factory) {
@@ -309,6 +310,10 @@ export class CreateEquityCommandHandler
         ? await this.contractService.getContractEvmAddress(compliance)
         : new EvmAddress(EVM_ZERO_ADDRESS);
 
+      const identityRegistryEvmAddress = identityRegistry
+        ? await this.contractService.getContractEvmAddress(identityRegistry)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
       const handler = this.transactionService.getHandler();
 
       const equityInfo = new EquityDetails(
@@ -332,6 +337,7 @@ export class CreateEquityCommandHandler
         configId,
         configVersion,
         complianceEvmAddress,
+        identityRegistryEvmAddress,
         externalPausesEvmAddresses,
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,
