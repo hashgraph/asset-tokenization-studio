@@ -148,6 +148,10 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 
 5. Save the file and proceed with running the application.
 
+## Critical Setup Recommendation for Optimal Performance
+
+For the best experience, we strongly recommend installing the [hiero-json-rpc-relay](https://github.com/hiero-ledger/hiero-json-rpc-relay/tree/main) on your local machine. The hashio API (`REACT_APP_RPC_NODE="https://testnet.hashio.io/api"`) has rate limits that may cause errors during operations. By setting up the relay locally, you can replace the `REACT_APP_RPC_NODE` environment variable with a local endpoint (e.g., `REACT_APP_RPC_NODE="http://localhost:7546"`) to ensure stable and uninterrupted performance.
+
 ## Custodian Integration
 
 The ATS project utilizes a `custodians` library to facilitate interactions with various external custody providers.
