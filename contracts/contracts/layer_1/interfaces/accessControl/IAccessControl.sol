@@ -206,9 +206,11 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {IAccessControlRead} from "./IAccessControlRead.sol";
-import {IAccessControlManagement} from "./IAccessControlManagement.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {IAccessControlRead} from './IAccessControlRead.sol';
+import {IAccessControlManagement} from './IAccessControlManagement.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 struct RoleData {
     bytes32 roleAdmin;
