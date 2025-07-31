@@ -205,14 +205,12 @@
 
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-import {Common} from '../common/Common.sol';
-import {_CONTROLLER_ROLE} from '../constants/roles.sol';
-import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import {IStaticFunctionSelectors} from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import {IHold} from "../interfaces/hold/IHold.sol";
+import {Common} from "../common/Common.sol";
+import {_CONTROLLER_ROLE} from "../constants/roles.sol";
+import {_HOLD_RESOLVER_KEY} from "../constants/resolverKeys.sol";
+import {ThirdPartyType} from "../../layer_0/common/types/ThirdPartyType.sol";
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -237,7 +235,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             _msgSender(),
             _hold,
-            '',
+            "",
             ThirdPartyType.NULL
         );
 
@@ -247,7 +245,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             holdId_,
             _hold,
-            ''
+            ""
         );
     }
 
@@ -408,7 +406,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             holdId_,
             _protectedHold.hold,
-            ''
+            ""
         );
     }
 
@@ -421,9 +419,9 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyWithValidHoldId(_holdIdentifier)
         onlyIdentified(_holdIdentifier.tokenHolder, _to)
         onlyCompliant(address(0), _to)
+        onlyWithValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
         success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);

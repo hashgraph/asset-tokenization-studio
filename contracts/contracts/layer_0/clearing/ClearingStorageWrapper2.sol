@@ -206,29 +206,19 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
-import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
-import {
-    IClearingActions
-} from '../../layer_1/interfaces/clearing/IClearingActions.sol';
-import {
-    IClearingTransfer
-} from '../../layer_1/interfaces/clearing/IClearingTransfer.sol';
-import {
-    IClearingStorageWrapper
-} from '../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    checkNounceAndDeadline
-} from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
-import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
-import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
-import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import {DEFAULT_PARTITION} from '../constants/values.sol';
-import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
+import {HoldStorageWrapper2} from "../hold/HoldStorageWrapper2.sol";
+import {IClearing} from "../../layer_1/interfaces/clearing/IClearing.sol";
+import {IClearingActions} from "../../layer_1/interfaces/clearing/IClearingActions.sol";
+import {IClearingTransfer} from "../../layer_1/interfaces/clearing/IClearingTransfer.sol";
+import {IClearingStorageWrapper} from "../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {checkNounceAndDeadline} from "../../layer_1/protectedPartitions/signatureVerification.sol";
+import {IHold} from "../../layer_1/interfaces/hold/IHold.sol";
+import {ThirdPartyType} from "../common/types/ThirdPartyType.sol";
+import {ICompliance} from "../../layer_1/interfaces/ERC3643/ICompliance.sol";
+import {IERC3643} from "../../layer_1/interfaces/ERC3643/IERC3643.sol";
+import {DEFAULT_PARTITION} from "../constants/values.sol";
+import {LowLevelCall} from "../common/libraries/LowLevelCall.sol";
 
 abstract contract ClearingStorageWrapper2 is
     IClearingStorageWrapper,
@@ -269,7 +259,7 @@ abstract contract ClearingStorageWrapper2 is
             _amount,
             _to,
             _protectedClearingOperation.from,
-            '',
+            "",
             ThirdPartyType.PROTECTED
         );
     }
@@ -302,7 +292,7 @@ abstract contract ClearingStorageWrapper2 is
             _protectedClearingOperation.clearingOperation,
             _protectedClearingOperation.from,
             _hold,
-            '',
+            "",
             ThirdPartyType.PROTECTED
         );
     }
@@ -336,7 +326,7 @@ abstract contract ClearingStorageWrapper2 is
             _protectedClearingOperation.clearingOperation,
             _amount,
             _protectedClearingOperation.from,
-            '',
+            "",
             ThirdPartyType.PROTECTED
         );
     }
