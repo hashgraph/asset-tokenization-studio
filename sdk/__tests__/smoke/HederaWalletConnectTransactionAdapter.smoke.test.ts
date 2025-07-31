@@ -203,143 +203,209 @@
 
 */
 
-import { RPCQueryAdapter } from './RPCQueryAdapter';
 import { createMock } from '@golevelup/ts-jest';
 import NetworkService from '@service/network/NetworkService';
-import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter';
+import EventService from '@service/event/EventService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
+import { HederaTransactionAdapter } from '@port/out/hs/HederaTransactionAdapter';
 
-describe('RPCQueryAdapter', () => {
-  let adapter: RPCQueryAdapter;
+describe('HederaWalletConnectTransactionAdapter', () => {
+  let adapter: HederaWalletConnectTransactionAdapter;
 
   const networkServiceMock = createMock<NetworkService>();
   const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+  const eventServiceMock = createMock<EventService>();
 
   beforeEach(() => {
-    adapter = new RPCQueryAdapter(networkServiceMock, mirrorNodeAdapterMock);
+    adapter = new HederaWalletConnectTransactionAdapter(
+      eventServiceMock,
+      networkServiceMock,
+      mirrorNodeAdapterMock,
+    );
   });
 
   it('should have exactly the expected methods defined', () => {
     const expectedMethods = [
-      'init',
-      'connect',
-      'balanceOf',
-      'balanceOfByPartition',
-      'balanceOfAtSnapshot',
-      'balanceOfAtSnapshotByPartition',
-      'getNounceFor',
-      'partitionsOf',
-      'partitionsOfAtSnapshot',
-      'totalSupply',
-      'totalSupplyAtSnapshot',
-      'getRolesFor',
-      'getRoleMembers',
-      'getRoleCountFor',
-      'getRoleMemberCount',
-      'hasRole',
-      'getSecurity',
-      'getEquityDetails',
-      'getBondDetails',
-      'getCouponDetails',
-      'getControlListMembers',
-      'getControlListCount',
-      'getControlListType',
-      'isAccountInControlList',
-      'getDividendsFor',
-      'getDividends',
-      'getDividendsCount',
-      'getVotingFor',
-      'getVoting',
-      'getVotingsCount',
-      'getCouponFor',
-      'getCoupon',
-      'getCouponCount',
-      'isPaused',
-      'arePartitionsProtected',
-      'canTransferByPartition',
-      'canTransfer',
-      'canRedeemByPartition',
-      'getDocument',
-      'getAllDocuments',
-      'isOperatorForPartition',
-      'isOperator',
-      'getScheduledSnapshots',
-      'scheduledSnapshotCount',
-      'getMaxSupply',
-      'getMaxSupplyByPartition',
-      'getTotalSupplyByPartition',
-      'getRegulationDetails',
-      'getLockedBalanceOf',
-      'getLockCount',
-      'getLocksId',
-      'getLock',
-      'getConfigInfo',
-      'getScheduledBalanceAdjustment',
-      'getScheduledBalanceAdjustmentCount',
-      'getHeldAmountFor',
-      'getHeldAmountForByPartition',
-      'getHoldCountForByPartition',
-      'getHoldsIdForByPartition',
-      'getHoldForByPartition',
-      'getRevocationRegistryAddress',
-      'getIssuerListCount',
-      'getIssuerListMembers',
-      'isIssuer',
-      'getKycFor',
-      'getKycStatusFor',
-      'getKycAccountsData',
-      'getKycAccountsCount',
-      'getClearedAmountFor',
-      'getClearedAmountForByPartition',
-      'getClearingCountForByPartition',
-      'getClearingsIdForByPartition',
-      'getClearingCreateHoldForByPartition',
-      'getClearingRedeemForByPartition',
-      'getClearingTransferForByPartition',
-      'isClearingActivated',
-      'isExternalPause',
-      'getExternalPausesCount',
-      'getExternalPausesMembers',
-      'isPausedMock',
-      'isExternalControlList',
-      'getExternalControlListsCount',
-      'getExternalControlListsMembers',
-      'isAuthorizedBlackListMock',
-      'isAuthorizedWhiteListMock',
-      'isExternalKycList',
-      'getExternalKycListsCount',
-      'getExternalKycListsMembers',
-      'isExternallyGranted',
-      'isInternalKycActivated',
-      'getKycStatusMock',
-      'onchainID',
-      'identityRegistry',
-      'compliance',
-      'getFrozenPartialTokens',
-      'isAddressRecovered',
-      'getTokenHoldersAtSnapshot',
-      'getTotalTokenHoldersAtSnapshot',
-      'getCouponHolders',
-      'getTotalCouponHolders',
-      'getDividendHolders',
-      'getTotalDividendHolders',
-      'getVotingHolders',
-      'getTotalVotingHolders',
-      'getSecurityHolders',
-      'getTotalSecurityHolders',
+      [
+        'setupDisconnectEventHandler',
+        'handleDisconnect',
+        'init',
+        'register',
+        'getChainId',
+        'connectWalletConnect',
+        'stop',
+        'restart',
+        'signAndSendTransaction',
+        'getAccount',
+        'sign',
+      ],
     ];
 
     const actualMethods = Object.getOwnPropertyNames(
-      RPCQueryAdapter.prototype,
+      HederaWalletConnectTransactionAdapter.prototype,
     ).filter(
       (name) =>
         name !== 'constructor' && typeof (adapter as any)[name] === 'function',
     );
-    expectedMethods.forEach((name) => {
-      expect(actualMethods).toContain(name);
-      expect(typeof (adapter as any)[name]).toBe('function');
+    expectedMethods.forEach((methodList) => {
+      methodList.forEach((name) => {
+        expect(actualMethods).toContain(name);
+        expect(typeof (adapter as any)[name]).toBe('function');
+      });
     });
     actualMethods.forEach((name) => {
-      expect(expectedMethods).toContain(name);
+      const allExpected = expectedMethods.flat();
+      expect(allExpected).toContain(name);
+    });
+  });
+
+  it('should have exactly the expected methods from hedera adapter defined', () => {
+    const expectedMethods = [
+      [
+        'executeWithArgs',
+        'executeWithParams',
+        'buildAndSendTransaction',
+        'setMirrorNodes',
+        'setJsonRpcRelays',
+        'setFactories',
+        'setResolvers',
+        'setBusinessLogicKeysCommon',
+        'setBusinessLogicKeysEquity',
+        'setBusinessLogicKeysBond',
+        'createEquity',
+        'createBond',
+        'transfer',
+        'transferAndLock',
+        'redeem',
+        'burn',
+        'pause',
+        'unpause',
+        'grantRole',
+        'applyRoles',
+        'revokeRole',
+        'renounceRole',
+        'issue',
+        'mint',
+        'addToControlList',
+        'removeFromControlList',
+        'controllerTransfer',
+        'forcedTransfer',
+        'controllerRedeem',
+        'setDividends',
+        'setVotingRights',
+        'setCoupon',
+        'takeSnapshot',
+        'setDocument',
+        'removeDocument',
+        'authorizeOperator',
+        'revokeOperator',
+        'authorizeOperatorByPartition',
+        'revokeOperatorByPartition',
+        'operatorTransferByPartition',
+        'setMaxSupply',
+        'triggerPendingScheduledSnapshots',
+        'triggerScheduledSnapshots',
+        'lock',
+        'release',
+        'updateConfigVersion',
+        'updateConfig',
+        'updateResolver',
+        'updateMaturityDate',
+        'setScheduledBalanceAdjustment',
+        'protectPartitions',
+        'unprotectPartitions',
+        'protectedRedeemFromByPartition',
+        'protectedTransferFromByPartition',
+        'protectedTransferAndLock',
+        'createHoldByPartition',
+        'createHoldFromByPartition',
+        'controllerCreateHoldByPartition',
+        'protectedCreateHoldByPartition',
+        'releaseHoldByPartition',
+        'reclaimHoldByPartition',
+        'executeHoldByPartition',
+        'addIssuer',
+        'setRevocationRegistryAddress',
+        'removeIssuer',
+        'grantKyc',
+        'revokeKyc',
+        'activateClearing',
+        'deactivateClearing',
+        'clearingTransferByPartition',
+        'clearingTransferFromByPartition',
+        'protectedClearingTransferByPartition',
+        'approveClearingOperationByPartition',
+        'cancelClearingOperationByPartition',
+        'reclaimClearingOperationByPartition',
+        'clearingRedeemByPartition',
+        'clearingRedeemFromByPartition',
+        'protectedClearingRedeemByPartition',
+        'clearingCreateHoldByPartition',
+        'clearingCreateHoldFromByPartition',
+        'protectedClearingCreateHoldByPartition',
+        'operatorClearingCreateHoldByPartition',
+        'operatorClearingRedeemByPartition',
+        'operatorClearingTransferByPartition',
+        'updateExternalPauses',
+        'addExternalPause',
+        'removeExternalPause',
+        'setPausedMock',
+        'createExternalPauseMock',
+        'updateExternalControlLists',
+        'addExternalControlList',
+        'removeExternalControlList',
+        'addToBlackListMock',
+        'addToWhiteListMock',
+        'removeFromBlackListMock',
+        'removeFromWhiteListMock',
+        'createExternalBlackListMock',
+        'createExternalWhiteListMock',
+        'updateExternalKycLists',
+        'addExternalKycList',
+        'removeExternalKycList',
+        'grantKycMock',
+        'revokeKycMock',
+        'createExternalKycListMock',
+        'activateInternalKyc',
+        'deactivateInternalKyc',
+        'setName',
+        'setSymbol',
+        'setOnchainID',
+        'setIdentityRegistry',
+        'setCompliance',
+        'freezePartialTokens',
+        'unfreezePartialTokens',
+        'recoveryAddress',
+        'addAgent',
+        'removeAgent',
+        'batchTransfer',
+        'batchForcedTransfer',
+        'batchMint',
+        'batchBurn',
+        'batchSetAddressFrozen',
+        'batchFreezePartialTokens',
+        'batchUnfreezePartialTokens',
+        'setAddressFrozen',
+        'redeemAtMaturityByPartition',
+      ],
+    ];
+
+    const actualMethods = Object.getOwnPropertyNames(
+      HederaTransactionAdapter.prototype,
+    ).filter(
+      (name) =>
+        name !== 'constructor' && typeof (adapter as any)[name] === 'function',
+    );
+    expectedMethods.forEach((methodList) => {
+      methodList.forEach((name) => {
+        expect(actualMethods).toContain(name);
+        expect(typeof (adapter as any)[name]).toBe('function');
+      });
+    });
+    actualMethods.forEach((name) => {
+      const allExpected = expectedMethods.flat();
+      expect(allExpected).toContain(name);
     });
   });
 });

@@ -203,177 +203,105 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import NetworkService from '@service/network/NetworkService';
-import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter';
-import { RPCTransactionAdapter } from './RPCTransactionAdapter';
-import { CommandBus } from '@core/command/CommandBus';
-import EventService from '@service/event/EventService';
+import LogService, { LogLevel } from './LogService';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
+import * as winston from 'winston';
 
-describe('RPCTransactionAdapter', () => {
-  let adapter: RPCTransactionAdapter;
+jest.mock('winston', () => {
+  const originalWinston = jest.requireActual('winston');
+  return {
+    ...originalWinston,
+    createLogger: jest.fn(() => ({
+      log: jest.fn(),
+    })),
+  };
+});
 
-  const networkServiceMock = createMock<NetworkService>();
-  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
-  const commandBusMock = createMock<CommandBus>();
-  const eventServiceMock = createMock<EventService>();
+describe('LogService', () => {
+  const mockLogger = {
+    log: jest.fn(),
+  };
 
   beforeEach(() => {
-    adapter = new RPCTransactionAdapter(
-      mirrorNodeAdapterMock,
-      networkServiceMock,
-      eventServiceMock,
-      commandBusMock,
+    (winston.createLogger as jest.Mock).mockReturnValue(mockLogger);
+    // Re-initialize LogService singleton to inject the mock logger
+    new LogService();
+    jest.clearAllMocks();
+  });
+
+  it('should log TRACE level messages', () => {
+    LogService.logTrace('Trace message', { key: 'value' });
+
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      LogLevel.TRACE,
+      'Trace message',
+      {
+        timestamp: expect.any(String),
+        other: [{ key: 'value' }],
+      },
     );
   });
 
-  it('should have exactly the expected methods defined', () => {
-    const expectedMethods = [
-      [
-        'init',
-        'register',
-        'stop',
-        'signAndSendTransaction',
-        'getMirrorNodeAdapter',
-        'getAccount',
-        'setConfig',
-        'getSignerOrProvider',
-        'setSignerOrProvider',
-        'createEquity',
-        'createBond',
-        'transfer',
-        'transferAndLock',
-        'redeem',
-        'burn',
-        'pause',
-        'unpause',
-        'grantRole',
-        'applyRoles',
-        'revokeRole',
-        'renounceRole',
-        'issue',
-        'mint',
-        'addToControlList',
-        'removeFromControlList',
-        'controllerTransfer',
-        'forcedTransfer',
-        'controllerRedeem',
-        'setDividends',
-        'setVotingRights',
-        'setCoupon',
-        'takeSnapshot',
-        'setDocument',
-        'removeDocument',
-        'authorizeOperator',
-        'revokeOperator',
-        'authorizeOperatorByPartition',
-        'revokeOperatorByPartition',
-        'operatorTransferByPartition',
-        'setMaxSupply',
-        'triggerPendingScheduledSnapshots',
-        'triggerScheduledSnapshots',
-        'lock',
-        'release',
-        'updateConfigVersion',
-        'updateConfig',
-        'updateResolver',
-        'updateMaturityDate',
-        'setScheduledBalanceAdjustment',
-        'protectPartitions',
-        'unprotectPartitions',
-        'protectedRedeemFromByPartition',
-        'protectedTransferFromByPartition',
-        'protectedTransferAndLockByPartition',
-        'createHoldByPartition',
-        'createHoldFromByPartition',
-        'controllerCreateHoldByPartition',
-        'protectedCreateHoldByPartition',
-        'releaseHoldByPartition',
-        'reclaimHoldByPartition',
-        'executeHoldByPartition',
-        'setRevocationRegistryAddress',
-        'addIssuer',
-        'removeIssuer',
-        'grantKyc',
-        'revokeKyc',
-        'activateClearing',
-        'deactivateClearing',
-        'clearingTransferByPartition',
-        'clearingTransferFromByPartition',
-        'protectedClearingTransferByPartition',
-        'approveClearingOperationByPartition',
-        'cancelClearingOperationByPartition',
-        'reclaimClearingOperationByPartition',
-        'clearingRedeemByPartition',
-        'clearingRedeemFromByPartition',
-        'protectedClearingRedeemByPartition',
-        'clearingCreateHoldByPartition',
-        'clearingCreateHoldFromByPartition',
-        'protectedClearingCreateHoldByPartition',
-        'operatorClearingCreateHoldByPartition',
-        'operatorClearingRedeemByPartition',
-        'operatorClearingTransferByPartition',
-        'updateExternalPauses',
-        'addExternalPause',
-        'removeExternalPause',
-        'setPausedMock',
-        'createExternalPauseMock',
-        'updateExternalControlLists',
-        'addExternalControlList',
-        'removeExternalControlList',
-        'addToBlackListMock',
-        'addToWhiteListMock',
-        'removeFromBlackListMock',
-        'removeFromWhiteListMock',
-        'createExternalBlackListMock',
-        'createExternalWhiteListMock',
-        'updateExternalKycLists',
-        'addExternalKycList',
-        'removeExternalKycList',
-        'grantKycMock',
-        'revokeKycMock',
-        'createExternalKycListMock',
-        'activateInternalKyc',
-        'deactivateInternalKyc',
-        'setName',
-        'setSymbol',
-        'setOnchainID',
-        'setIdentityRegistry',
-        'setCompliance',
-        'freezePartialTokens',
-        'unfreezePartialTokens',
-        'recoveryAddress',
-        'addAgent',
-        'removeAgent',
-        'batchTransfer',
-        'batchForcedTransfer',
-        'batchMint',
-        'batchBurn',
-        'batchSetAddressFrozen',
-        'batchFreezePartialTokens',
-        'batchUnfreezePartialTokens',
-        'setAddressFrozen',
-        'redeemAtMaturityByPartition',
-        'executeTransaction',
-        'createSecurity',
-      ],
-    ];
+  it('should log INFO level messages', () => {
+    LogService.logInfo('Info message', 123);
 
-    const actualMethods = Object.getOwnPropertyNames(
-      RPCTransactionAdapter.prototype,
-    ).filter(
-      (name) =>
-        name !== 'constructor' && typeof (adapter as any)[name] === 'function',
+    expect(mockLogger.log).toHaveBeenCalledWith(LogLevel.INFO, 'Info message', {
+      timestamp: expect.any(String),
+      other: [123],
+    });
+  });
+
+  it('should log ERROR level messages', () => {
+    LogService.logError('Some error message');
+
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      LogLevel.ERROR,
+      'Some error message',
+      {
+        timestamp: expect.any(String),
+        other: [],
+      },
     );
-    expectedMethods.forEach((methodList) => {
-      methodList.forEach((name) => {
-        expect(actualMethods).toContain(name);
-        expect(typeof (adapter as any)[name]).toBe('function');
-      });
-    });
-    actualMethods.forEach((name) => {
-      const allExpected = expectedMethods.flat();
-      expect(allExpected).toContain(name);
-    });
+  });
+
+  it('should log BaseError properly', () => {
+    class TestBaseError extends BaseError {
+      constructor(code: ErrorCode, message: string) {
+        super(code, message);
+      }
+
+      toString() {
+        return `BaseError: ${this.message}`;
+      }
+    }
+
+    const error = new TestBaseError(
+      ErrorCode.Unexpected,
+      'Something went wrong',
+    );
+
+    LogService.logError(error, 'context');
+
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      LogLevel.ERROR,
+      'BaseError: Something went wrong',
+      {
+        timestamp: expect.any(String),
+        other: ['context'],
+      },
+    );
+  });
+
+  it('should fallback to default log when non-BaseError thrown', () => {
+    LogService.logError(new Error('Generic error'), 'extra');
+
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      LogLevel.ERROR,
+      new Error('Generic error'),
+      {
+        timestamp: expect.any(String),
+        other: ['extra'],
+      },
+    );
   });
 });
