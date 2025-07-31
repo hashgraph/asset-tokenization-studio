@@ -206,9 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1410Standard} from "../../interfaces/ERC1400/IERC1410Standard.sol";
-import {Common} from "../../common/Common.sol";
-import {_ISSUER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
+import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
+import {Common} from '../../common/Common.sol';
+import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 
 abstract contract ERC1410Standard is IERC1410Standard, Common {
     function issueByPartition(
@@ -252,7 +252,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
             _partition,
             _value,
             _data,
-            ""
+            ''
         )
     {
         // Add the function to validate the `_data` parameter
@@ -262,7 +262,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
             address(0),
             _value,
             _data,
-            ""
+            ''
         );
     }
 

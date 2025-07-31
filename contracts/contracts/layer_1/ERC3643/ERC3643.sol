@@ -206,13 +206,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from "../common/Common.sol";
-import {IERC3643} from "../interfaces/ERC3643/IERC3643.sol";
-import {ICompliance} from "../interfaces/ERC3643/ICompliance.sol";
-import {IIdentityRegistry} from "../interfaces/ERC3643/IIdentityRegistry.sol";
-import {IStaticFunctionSelectors} from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import {_ERC3643_RESOLVER_KEY} from "../constants/resolverKeys.sol";
-import {_CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE, _TREX_OWNER_ROLE} from "../constants/roles.sol";
+import {Common} from '../common/Common.sol';
+import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {
+    _CONTROLLER_ROLE,
+    _ISSUER_ROLE,
+    _AGENT_ROLE,
+    _TREX_OWNER_ROLE
+} from '../constants/roles.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     address private constant _ONCHAIN_ID = address(0);
@@ -321,7 +328,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        _controllerRedeem(_userAddress, _amount, "", "");
+        _controllerRedeem(_userAddress, _amount, '', '');
     }
 
     function mint(
@@ -342,7 +349,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        _issue(_to, _amount, "");
+        _issue(_to, _amount, '');
     }
 
     function forcedTransfer(
@@ -362,7 +369,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        _controllerTransfer(_from, _to, _amount, "", "");
+        _controllerTransfer(_from, _to, _amount, '', '');
         return true;
     }
 
@@ -407,7 +414,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             _checkAnyRole(roles, _msgSender());
         }
         for (uint256 i = 0; i < _fromList.length; i++) {
-            _controllerTransfer(_fromList[i], _toList[i], _amounts[i], "", "");
+            _controllerTransfer(_fromList[i], _toList[i], _amounts[i], '', '');
         }
     }
 
@@ -433,7 +440,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             _checkWithinMaxSupply(_amounts[i]);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
-            _issue(_toList[i], _amounts[i], "");
+            _issue(_toList[i], _amounts[i], '');
         }
     }
 
@@ -454,7 +461,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             _checkAnyRole(roles, _msgSender());
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _controllerRedeem(_userAddresses[i], _amounts[i], "", "");
+            _controllerRedeem(_userAddresses[i], _amounts[i], '', '');
         }
     }
 

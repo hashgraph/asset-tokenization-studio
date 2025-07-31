@@ -206,17 +206,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ZERO_ADDRESS, EMPTY_BYTES, DEFAULT_PARTITION} from "../../../layer_0/constants/values.sol";
-import {_ERC1594_STORAGE_POSITION} from "../../constants/storagePositions.sol";
-import {IKyc} from "../../../layer_1/interfaces/kyc/IKyc.sol";
-import {IERC1594StorageWrapper} from "../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol";
-import {Eip1066} from "../../constants/eip1066.sol";
-import {CapStorageWrapper2} from "../../cap/CapStorageWrapper2.sol";
-import {IClearing} from "../../../layer_1/interfaces/clearing/IClearing.sol";
-import {IERC3643} from "../../../layer_1/interfaces/ERC3643/IERC3643.sol";
-import {ICompliance} from "../../../layer_1/interfaces/ERC3643/ICompliance.sol";
-import {LowLevelCall} from "../../common/libraries/LowLevelCall.sol";
-import {Eip1066Lib} from "../../common/libraries/Eip1066Lib.sol";
+import {
+    ZERO_ADDRESS,
+    EMPTY_BYTES,
+    DEFAULT_PARTITION
+} from '../../../layer_0/constants/values.sol';
+import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {
+    IERC1594StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol';
+import {Eip1066} from '../../constants/eip1066.sol';
+import {CapStorageWrapper2} from '../../cap/CapStorageWrapper2.sol';
+import {IClearing} from '../../../layer_1/interfaces/clearing/IClearing.sol';
+import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
+import {Eip1066Lib} from '../../common/libraries/Eip1066Lib.sol';
 
 abstract contract ERC1594StorageWrapper is
     IERC1594StorageWrapper,

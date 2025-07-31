@@ -206,12 +206,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IStaticFunctionSelectors} from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import {_ERC1594_RESOLVER_KEY} from "../../constants/resolverKeys.sol";
-import {_ISSUER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
-import {IERC1594} from "../../interfaces/ERC1400/IERC1594.sol";
-import {Common} from "../../common/Common.sol";
-import {DEFAULT_PARTITION} from "../../../layer_0/constants/values.sol";
+import {
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
+import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
+import {Common} from '../../common/Common.sol';
+import {DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -237,8 +239,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
             _to,
             DEFAULT_PARTITION,
             _value,
-            "",
-            ""
+            '',
+            ''
         )
     {
         // Add a function to validate the `_data` parameter
@@ -260,8 +262,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
             _to,
             DEFAULT_PARTITION,
             _value,
-            "",
-            ""
+            '',
+            ''
         )
     {
         // Add a function to validate the `_data` parameter
@@ -320,7 +322,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
             DEFAULT_PARTITION,
             _value,
             _data,
-            ""
+            ''
         )
     {
         _redeem(_value, _data);
@@ -349,7 +351,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
             DEFAULT_PARTITION,
             _value,
             _data,
-            ""
+            ''
         )
     {
         _redeemFrom(_tokenHolder, _value, _data);
@@ -399,7 +401,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
                 DEFAULT_PARTITION,
                 _value,
                 _data,
-                ""
+                ''
             );
         return (status, statusCode, reason);
     }
@@ -433,7 +435,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
                 DEFAULT_PARTITION,
                 _value,
                 _data,
-                ""
+                ''
             );
         return (status, statusCode, reason);
     }
