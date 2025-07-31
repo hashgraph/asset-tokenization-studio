@@ -207,137 +207,52 @@
 pragma solidity 0.8.18;
 
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    IAccessControlRead
+} from '../interfaces/accessControl/IAccessControlRead.sol';
 import {
-    _ACCESS_CONTROL_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {LibCommon} from '../../common/libraries/LibCommon.sol';
-import {
-    RoleDataStorage
-} from '../../../layer_1/interfaces/accessControl/IAccessControl.sol';
-import {
-    IAccessControlStorageWrapper
-} from '../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol';
-import {LocalContext} from '../../context/LocalContext.sol';
-import {
-    BusinessLogicResolverWrapper
-} from '../../../resolver/BusinessLogicResolverWrapper.sol';
+    AccessControlStorageWrapper
+} from '../../layer_0/core/accessControl/AccessControlStorageWrapper.sol';
 
 /**
- * @title AccessControlStorageWrapper1
- * @dev Storage wrapper for read-only access control operations
+ * @title AccessControlRead
+ * @dev Diamond pattern facet for read-only access control operations
  */
-abstract contract AccessControlStorageWrapper1 is
-    IAccessControlStorageWrapper,
-    LocalContext,
-    BusinessLogicResolverWrapper
+abstract contract AccessControlRead is
+    IAccessControlRead,
+    AccessControlStorageWrapper
 {
-    using LibCommon for EnumerableSet.AddressSet;
-    using LibCommon for EnumerableSet.Bytes32Set;
-    using EnumerableSet for EnumerableSet.AddressSet;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    modifier onlyRole(bytes32 _role) {
-        _checkRole(_role, _msgSender());
-        _;
-    }
-
-    modifier onlyRoleFor(bytes32 _role, address _account) {
-        _checkRole(_role, _account);
-        _;
-    }
-
-    // Read-only internal functions
-    function _getRoleAdmin(bytes32 _role) internal view returns (bytes32) {
-        return _rolesStorage().roles[_role].roleAdmin;
-    }
-
-    function _hasRole(
+    function hasRole(
         bytes32 _role,
         address _account
-    ) internal view returns (bool) {
-        return _has(_rolesStorage(), _role, _account);
+    ) external view returns (bool) {
+        return _hasRole(_role, _account);
     }
 
-    function _hasAnyRole(
-        bytes32[] memory _roles,
+    function getRoleCountFor(
         address _account
-    ) internal view returns (bool) {
-        for (uint256 i; i < _roles.length; i++) {
-            if (_has(_rolesStorage(), _roles[i], _account)) {
-                return true;
-            }
-        }
-        return false;
+    ) external view returns (uint256 roleCount_) {
+        return _getRoleCountFor(_account);
     }
 
-    function _getRoleCountFor(
-        address _account
-    ) internal view returns (uint256 roleCount_) {
-        roleCount_ = _rolesStorage().memberRoles[_account].length();
-    }
-
-    function _getRolesFor(
+    function getRolesFor(
         address _account,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (bytes32[] memory roles_) {
-        roles_ = _rolesStorage().memberRoles[_account].getFromSet(
-            _pageIndex,
-            _pageLength
-        );
+    ) external view returns (bytes32[] memory roles_) {
+        return _getRolesFor(_account, _pageIndex, _pageLength);
     }
 
-    function _getRoleMemberCount(
+    function getRoleMemberCount(
         bytes32 _role
-    ) internal view returns (uint256 memberCount_) {
-        memberCount_ = _rolesStorage().roles[_role].roleMembers.length();
+    ) external view returns (uint256 memberCount_) {
+        return _getRoleMemberCount(_role);
     }
 
-    function _getRoleMembers(
+    function getRoleMembers(
         bytes32 _role,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
-        members_ = _rolesStorage().roles[_role].roleMembers.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function _checkRole(bytes32 _role, address _account) internal view {
-        if (!_hasRole(_role, _account)) {
-            revert AccountHasNoRole(_account, _role);
-        }
-    }
-
-    function _checkAnyRole(
-        bytes32[] memory _roles,
-        address _account
-    ) internal view {
-        if (!_hasAnyRole(_roles, _account)) {
-            revert AccountHasNoRoles(_account, _roles);
-        }
-    }
-
-    function _has(
-        RoleDataStorage storage _rolesStorageData,
-        bytes32 _role,
-        address _account
-    ) internal view returns (bool hasRole_) {
-        hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
-    }
-
-    function _rolesStorage()
-        internal
-        pure
-        returns (RoleDataStorage storage roles_)
-    {
-        bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            roles_.slot := position
-        }
+    ) external view returns (address[] memory members_) {
+        return _getRoleMembers(_role, _pageIndex, _pageLength);
     }
 }

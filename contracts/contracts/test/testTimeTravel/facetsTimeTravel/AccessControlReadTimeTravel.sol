@@ -67,9 +67,9 @@
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+      copyright license to use, reproduce, modify, publicly display,
+      publicly perform, sublicense, and distribute the Work and such
+      Derivative Works in Source or Object form.
 
    3. Grant of Patent License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
@@ -121,7 +121,7 @@
           that such additional attribution notices cannot be construed
           as modifying the License.
 
-      You may add Your own copyright statement to Your modifications and
+      You may add Your own copyright notice to Your modifications and
       may provide additional or different license terms and conditions
       for use, reproduction, or distribution of Your modifications, or
       for any such Derivative Works as a whole, provided Your use,
@@ -203,109 +203,27 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
-import {IAccessControl} from '../interfaces/accessControl/IAccessControl.sol';
-import {Common} from '../common/Common.sol';
+import {
+    AccessControlReadFacet
+} from '../../../layer_1/accessControl/AccessControlReadFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-abstract contract AccessControl is IAccessControl, Common {
-    function grantRole(
-        bytes32 _role,
-        address _account
-    )
-        external
-        override
-        onlyRole(_getRoleAdmin(_role))
-        onlyUnpaused
-        returns (bool success_)
+contract AccessControlReadFacetTimeTravel is
+    AccessControlReadFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        if (!_grantRole(_role, _account)) {
-            revert AccountAssignedToRole(_role, _account);
-        }
-        emit RoleGranted(_msgSender(), _account, _role);
-        return true;
-    }
-
-    function revokeRole(
-        bytes32 _role,
-        address _account
-    )
-        external
-        override
-        onlyRole(_getRoleAdmin(_role))
-        onlyUnpaused
-        returns (bool success_)
-    {
-        success_ = _revokeRole(_role, _account);
-        if (!success_) {
-            revert AccountNotAssignedToRole(_role, _account);
-        }
-        emit RoleRevoked(_msgSender(), _account, _role);
-    }
-
-    function applyRoles(
-        bytes32[] calldata _roles,
-        bool[] calldata _actives,
-        address _account
-    )
-        external
-        override
-        onlyUnpaused
-        onlySameRolesAndActivesLength(_roles.length, _actives.length)
-        onlyConsistentRoles(_roles, _actives)
-        returns (bool success_)
-    {
-        success_ = _applyRoles(_roles, _actives, _account);
-        if (!success_) {
-            revert RolesNotApplied(_roles, _actives, _account);
-        }
-        emit RolesApplied(_roles, _actives, _account);
-    }
-
-    function renounceRole(
-        bytes32 _role
-    ) external override onlyUnpaused returns (bool success_) {
-        address account = _msgSender();
-        success_ = _revokeRole(_role, account);
-        if (!success_) {
-            revert AccountNotAssignedToRole(_role, account);
-        }
-        emit RoleRenounced(account, _role);
-    }
-
-    function hasRole(
-        bytes32 _role,
-        address _account
-    ) external view override returns (bool) {
-        return _hasRole(_role, _account);
-    }
-
-    function getRoleCountFor(
-        address _account
-    ) external view override returns (uint256 roleCount_) {
-        roleCount_ = _getRoleCountFor(_account);
-    }
-
-    function getRolesFor(
-        address _account,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (bytes32[] memory roles_) {
-        roles_ = _getRolesFor(_account, _pageIndex, _pageLength);
-    }
-
-    function getRoleMemberCount(
-        bytes32 _role
-    ) external view override returns (uint256 memberCount_) {
-        memberCount_ = _getRoleMemberCount(_role);
-    }
-
-    function getRoleMembers(
-        bytes32 _role,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (address[] memory members_) {
-        members_ = _getRoleMembers(_role, _pageIndex, _pageLength);
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

@@ -203,60 +203,100 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
-import {IAccessControl} from '../interfaces/accessControl/IAccessControl.sol';
-import {AccessControl} from './AccessControl.sol';
-import {_ACCESS_CONTROL_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+interface IAccessControlManagement {
+    /**
+     * @dev Emitted when a role is granted to an account
+     *
+     * @param role The role to be granted
+     * @param account The account for which the role is to be granted
+     * @param operator The caller of the function that emitted the event
+     */
+    event RoleGranted(
+        address indexed operator,
+        address indexed account,
+        bytes32 indexed role
+    );
 
-contract AccessControlFacet is AccessControl, IStaticFunctionSelectors {
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ACCESS_CONTROL_RESOLVER_KEY;
-    }
+    /**
+     * @dev Emitted when a role is revoked from an account
+     *
+     * @param role The role to be revoked
+     * @param account The account for which the role is to be revoked
+     * @param operator The caller of the function that emitted the event
+     */
+    event RoleRevoked(
+        address indexed operator,
+        address indexed account,
+        bytes32 indexed role
+    );
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](9);
-        staticFunctionSelectors_[selectorIndex++] = this.grantRole.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.revokeRole.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.renounceRole.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.applyRoles.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getRoleCountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getRolesFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getRoleMemberCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getRoleMembers
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.hasRole.selector;
-    }
+    /**
+     * @dev Emitted when a set of roles are applied to an account
+     *
+     * @param roles The roles that was applied
+     * @param actives By each role, true if the role is granted, false if revoked
+     * @param account The account that renouced to the role
+     */
+    event RolesApplied(bytes32[] roles, bool[] actives, address account);
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IAccessControl)
-            .interfaceId;
-    }
+    /**
+     * @dev Emitted when a role is renounced by an account
+     *
+     * @param role The role that was renounced
+     * @param account The account that renouced to the role
+     */
+    event RoleRenounced(address indexed account, bytes32 indexed role);
+
+    error AccountAssignedToRole(bytes32 role, address account);
+    error AccountNotAssignedToRole(bytes32 role, address account);
+    error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
+
+    /**
+     * @dev Grants a role
+     *
+     * @param _role The role id
+     * @param _account The account address
+     * @return success_ true or false
+     */
+    function grantRole(
+        bytes32 _role,
+        address _account
+    ) external returns (bool success_);
+
+    /**
+     * @dev Revokes a role
+     *
+     * @param _role The role id
+     * @param _account The account address
+     * @return success_ true or false
+     */
+    function revokeRole(
+        bytes32 _role,
+        address _account
+    ) external returns (bool success_);
+
+    /**
+     * @dev Renounces a role
+     *
+     * @param _role The role id
+     * @return success_ true or false
+     */
+    function renounceRole(bytes32 _role) external returns (bool success_);
+
+    /**
+     * @dev Apply roles to an account
+     *
+     * @param _roles The role id array
+     * @param _actives By each role, true if the role is granted, false if revoked
+     * @param _account The account address
+     * @return success_ true or false
+     */
+    function applyRoles(
+        bytes32[] calldata _roles,
+        bool[] calldata _actives,
+        address _account
+    ) external returns (bool success_);
 }

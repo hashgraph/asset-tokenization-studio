@@ -212,14 +212,14 @@ import {
 import {
     _ACCESS_CONTROL_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
+import {
+    IAccessControlStorageWrapper
+} from '../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol';
 import {LibCommon} from '../../common/libraries/LibCommon.sol';
 import {ArrayLib} from '../../common/libraries/ArrayLib.sol';
 import {
     RoleDataStorage
 } from '../../../layer_1/interfaces/accessControl/IAccessControl.sol';
-import {
-    IAccessControlStorageWrapper
-} from '../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol';
 import {LocalContext} from '../../context/LocalContext.sol';
 import {
     BusinessLogicResolverWrapper

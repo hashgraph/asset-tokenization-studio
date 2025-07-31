@@ -54,10 +54,10 @@
       the copyright owner. For the purposes of this definition, "submitted"
       means any form of electronic, verbal, or written communication sent
       to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control
-      systems, and issue tracking systems that are managed by, or on behalf
-      of, the Licensor for the purpose of discussing and improving the Work,
-      but excluding communication that is conspicuously marked or otherwise
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
       designated in writing by the copyright owner as "Not a Contribution."
 
       "Contributor" shall mean Licensor and any individual or Legal Entity
@@ -67,9 +67,9 @@
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to use, reproduce, modify, publicly display,
-      publicly perform, sublicense, and distribute the Work and such
-      Derivative Works in Source or Object form.
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
 
    3. Grant of Patent License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
@@ -121,7 +121,7 @@
           that such additional attribution notices cannot be construed
           as modifying the License.
 
-      You may add Your own copyright notice to Your modifications and
+      You may add Your own copyright statement to Your modifications and
       may provide additional or different license terms and conditions
       for use, reproduction, or distribution of Your modifications, or
       for any such Derivative Works as a whole, provided Your use,
@@ -206,108 +206,64 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ArrayLib} from '../../common/libraries/ArrayLib.sol';
-import {
-    RoleDataStorage
-} from '../../../layer_1/interfaces/accessControl/IAccessControl.sol';
-import {AccessControlStorageWrapper1} from './AccessControlStorageWrapper1.sol';
-
-/**
- * @title AccessControlStorageWrapper2
- * @dev Storage wrapper for write access control operations,
- * inherits read functionality from AccessControlStorageWrapper1
- */
-abstract contract AccessControlStorageWrapper2 is AccessControlStorageWrapper1 {
-    using EnumerableSet for EnumerableSet.AddressSet;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    modifier onlySameRolesAndActivesLength(
-        uint256 _rolesLength,
-        uint256 _activesLength
-    ) {
-        _checkSameRolesAndActivesLength(_rolesLength, _activesLength);
-        _;
-    }
-
-    modifier onlyConsistentRoles(
-        bytes32[] calldata _roles,
-        bool[] calldata _actives
-    ) {
-        ArrayLib.checkUniqueValues(_roles, _actives);
-        _;
-    }
-
-    // Write operations
-    function _grantRole(
+interface IAccessControlRead {
+    /**
+     * @dev Checks if an account has a role
+     *
+     * @param _role The role id
+     * @param _account the account address
+     * @return bool true or false
+     */
+    function hasRole(
         bytes32 _role,
         address _account
-    ) internal returns (bool success_) {
-        success_ = _grant(_rolesStorage(), _role, _account);
-    }
+    ) external view returns (bool);
 
-    function _revokeRole(
+    /**
+     * @dev Returns the number of roles the account currently has
+     *
+     * @param _account The account address
+     * @return roleCount_ The number of roles
+     */
+    function getRoleCountFor(
+        address _account
+    ) external view returns (uint256 roleCount_);
+
+    /**
+     * @dev Returns an array of roles the account currently has
+     *
+     * @param _account The account address
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return roles_ The array containing the roles
+     */
+    function getRolesFor(
+        address _account,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (bytes32[] memory roles_);
+
+    /**
+     * @dev Returns the number of members the role currently has
+     *
+     * @param _role The role id
+     * @return memberCount_ The number of members
+     */
+    function getRoleMemberCount(
+        bytes32 _role
+    ) external view returns (uint256 memberCount_);
+
+    /**
+     * @dev Returns an array of members the role currently has
+     *
+     * @param _role The role id
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return members_ The array containing the members addresses
+     */
+    function getRoleMembers(
         bytes32 _role,
-        address _account
-    ) internal returns (bool success_) {
-        success_ = _remove(_rolesStorage(), _role, _account);
-    }
-
-    function _applyRoles(
-        bytes32[] calldata _roles,
-        bool[] calldata _actives,
-        address _account
-    ) internal returns (bool success_) {
-        RoleDataStorage storage roleDataStorage = _rolesStorage();
-        address sender = _msgSender();
-        uint256 length = _roles.length;
-        for (uint256 index; index < length; ) {
-            _checkRole(_getRoleAdmin(_roles[index]), sender);
-            if (_actives[index]) {
-                if (!_has(roleDataStorage, _roles[index], _account))
-                    _grant(roleDataStorage, _roles[index], _account);
-                unchecked {
-                    ++index;
-                }
-                continue;
-            }
-            if (_has(roleDataStorage, _roles[index], _account))
-                _remove(roleDataStorage, _roles[index], _account);
-            unchecked {
-                ++index;
-            }
-        }
-        success_ = true;
-    }
-
-    function _grant(
-        RoleDataStorage storage _roleDataStorage,
-        bytes32 _role,
-        address _account
-    ) private returns (bool success_) {
-        success_ =
-            _roleDataStorage.roles[_role].roleMembers.add(_account) &&
-            _roleDataStorage.memberRoles[_account].add(_role);
-    }
-
-    function _remove(
-        RoleDataStorage storage _roleDataStorage,
-        bytes32 _role,
-        address _account
-    ) private returns (bool success_) {
-        success_ =
-            _roleDataStorage.roles[_role].roleMembers.remove(_account) &&
-            _roleDataStorage.memberRoles[_account].remove(_role);
-    }
-
-    function _checkSameRolesAndActivesLength(
-        uint256 _rolesLength,
-        uint256 _activesLength
-    ) private pure {
-        if (_rolesLength != _activesLength) {
-            revert RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
-        }
-    }
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory members_);
 }

@@ -203,61 +203,21 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {IAccessControl} from '../interfaces/accessControl/IAccessControl.sol';
-import {
-    AccessControlStorageWrapper1
-} from '../../layer_0/core/accessControl/AccessControlStorageWrapper1.sol';
 import {_ACCESS_CONTROL_READ_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IAccessControl} from '../interfaces/accessControl/IAccessControl.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {AccessControlRead} from './AccessControlRead.sol';
 
 /**
  * @title AccessControlReadFacet
  * @dev Diamond pattern facet for read-only access control operations
  */
-contract AccessControlReadFacet is
-    IStaticFunctionSelectors,
-    AccessControlStorageWrapper1
-{
-    function hasRole(
-        bytes32 _role,
-        address _account
-    ) external view returns (bool) {
-        return _hasRole(_role, _account);
-    }
-
-    function getRoleCountFor(
-        address _account
-    ) external view returns (uint256 roleCount_) {
-        return _getRoleCountFor(_account);
-    }
-
-    function getRolesFor(
-        address _account,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (bytes32[] memory roles_) {
-        return _getRolesFor(_account, _pageIndex, _pageLength);
-    }
-
-    function getRoleMemberCount(
-        bytes32 _role
-    ) external view returns (uint256 memberCount_) {
-        return _getRoleMemberCount(_role);
-    }
-
-    function getRoleMembers(
-        bytes32 _role,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory members_) {
-        return _getRoleMembers(_role, _pageIndex, _pageLength);
-    }
-
+contract AccessControlReadFacet is IStaticFunctionSelectors, AccessControlRead {
     function getStaticResolverKey()
         external
         pure
