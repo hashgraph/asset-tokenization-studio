@@ -208,7 +208,7 @@
 pragma solidity 0.8.18;
 
 import {Common} from '../../common/Common.sol';
-import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
+import {IERC20} from '../../interfaces/ERC1400/ERC20/IERC20.sol';
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';

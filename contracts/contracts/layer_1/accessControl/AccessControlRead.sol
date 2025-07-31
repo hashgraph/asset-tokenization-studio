@@ -54,10 +54,10 @@
       the copyright owner. For the purposes of this definition, "submitted"
       means any form of electronic, verbal, or written communication sent
       to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
+      communication on electronic mailing lists, source code control
+      systems, and issue tracking systems that are managed by, or on behalf
+      of, the Licensor for the purpose of discussing and improving the Work,
+      but excluding communication that is conspicuously marked or otherwise
       designated in writing by the copyright owner as "Not a Contribution."
 
       "Contributor" shall mean Licensor and any individual or Legal Entity
@@ -67,9 +67,9 @@
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+      copyright license to use, reproduce, modify, publicly display,
+      publicly perform, sublicense, and distribute the Work and such
+      Derivative Works in Source or Object form.
 
    3. Grant of Patent License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
@@ -121,7 +121,7 @@
           that such additional attribution notices cannot be construed
           as modifying the License.
 
-      You may add Your own copyright statement to Your modifications and
+      You may add Your own copyright notice to Your modifications and
       may provide additional or different license terms and conditions
       for use, reproduction, or distribution of Your modifications, or
       for any such Derivative Works as a whole, provided Your use,
@@ -203,98 +203,56 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {Common} from '../../common/Common.sol';
-
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {
-    IERC1410Controller
-} from '../../interfaces/ERC1400/IERC1410Controller.sol';
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
+    IAccessControlRead
+} from '../interfaces/accessControl/IAccessControlRead.sol';
+import {
+    AccessControlStorageWrapper
+} from '../../layer_0/core/accessControl/AccessControlStorageWrapper.sol';
 
-abstract contract ERC1410Controller is IERC1410Controller, Common {
-    function controllerTransferByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _transferByPartition(
-            _from,
-            IERC1410Basic.BasicTransferInfo(_to, _value),
-            _partition,
-            _data,
-            _msgSender(),
-            _operatorData
-        );
+/**
+ * @title AccessControlRead
+ * @dev Diamond pattern facet for read-only access control operations
+ */
+abstract contract AccessControlRead is
+    IAccessControlRead,
+    AccessControlStorageWrapper
+{
+    function hasRole(
+        bytes32 _role,
+        address _account
+    ) external view returns (bool) {
+        return _hasRole(_role, _account);
     }
 
-    function controllerRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _redeemByPartition(
-            _partition,
-            _tokenHolder,
-            _msgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
+    function getRoleCountFor(
+        address _account
+    ) external view returns (uint256 roleCount_) {
+        return _getRoleCountFor(_account);
     }
 
-    function canTransferByPartition(
-        address _from,
-        address _to,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external view override returns (bool, bytes1, bytes32) {
-        (
-            bool status,
-            bytes1 statusCode,
-            bytes32 reason,
+    function getRolesFor(
+        address _account,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (bytes32[] memory roles_) {
+        return _getRolesFor(_account, _pageIndex, _pageLength);
+    }
 
-        ) = _isAbleToTransferFromByPartition(
-                _from,
-                _to,
-                _partition,
-                _value,
-                _data,
-                _operatorData
-            );
-        return (status, statusCode, reason);
+    function getRoleMemberCount(
+        bytes32 _role
+    ) external view returns (uint256 memberCount_) {
+        return _getRoleMemberCount(_role);
+    }
+
+    function getRoleMembers(
+        bytes32 _role,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory members_) {
+        return _getRoleMembers(_role, _pageIndex, _pageLength);
     }
 }

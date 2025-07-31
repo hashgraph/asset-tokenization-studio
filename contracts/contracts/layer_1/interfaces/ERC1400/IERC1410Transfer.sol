@@ -203,27 +203,64 @@
 
 */
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
 import {
-    AccessControlFacet
-} from '../../../layer_1/accessControl/AccessControlFacet.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    BasicTransferInfo,
+    IssueData
+} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
-contract AccessControlFacetTimeTravel is
-    AccessControlFacet,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
+/**
+ * @title IERC1410Transfer
+ * @dev Interface for the ERC1410Transfer contract providing all transfer operations
+ * for ERC1410 tokens including transfers, operator transfers, redemptions, and issuance.
+ */
+interface IERC1410Transfer {
+    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
+    /// @param _partition The partition from which to transfer tokens
+    /// @param _basicTransferInfo The address to which to transfer tokens to and the amountn`
+    /// @param _data Additional data attached to the transfer of tokens
+    /// @return The partition to which the transferred tokens were allocated for the _to address
+    function transferByPartition(
+        bytes32 _partition,
+        BasicTransferInfo calldata _basicTransferInfo,
+        bytes memory _data
+    ) external returns (bytes32);
+
+    function issueByPartition(IssueData calldata _issueData) external;
+
+    function redeemByPartition(
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data
+    ) external;
+
+    function triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) external;
+
+    function authorizeOperator(address _operator) external;
+
+    /// @notice Revokes authorisation of an operator previously given for all partitions of `msg.sender`
+    /// @param _operator An address which is being de-authorised
+    function revokeOperator(address _operator) external;
+
+    /// @notice Authorises an operator for a given partition of `msg.sender`
+    /// @param _partition The partition to which the operator is authorised
+    /// @param _operator An address which is being authorised
+    function authorizeOperatorByPartition(
+        bytes32 _partition,
+        address _operator
+    ) external;
+
+    /// @notice Revokes authorisation of an operator previously given for a specified partition of `msg.sender`
+    /// @param _partition The partition to which the operator is de-authorised
+    /// @param _operator An address which is being de-authorised
+    function revokeOperatorByPartition(
+        bytes32 _partition,
+        address _operator
+    ) external;
 }

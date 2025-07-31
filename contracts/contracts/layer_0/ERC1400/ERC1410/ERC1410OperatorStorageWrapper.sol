@@ -212,11 +212,9 @@ import {
     _ERC1410_OPERATOR_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
-import {
-    IERC1410Operator
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
+    BasicTransferInfo,
+    OperatorTransferData
+} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
 abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     struct ERC1410OperatorStorage {
@@ -262,12 +260,12 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     }
 
     function _operatorTransferByPartition(
-        IERC1410Operator.OperatorTransferData calldata _operatorTransferData
+        OperatorTransferData calldata _operatorTransferData
     ) internal returns (bytes32) {
         return
             _transferByPartition(
                 _operatorTransferData.from,
-                IERC1410Basic.BasicTransferInfo(
+                BasicTransferInfo(
                     _operatorTransferData.to,
                     _operatorTransferData.value
                 ),

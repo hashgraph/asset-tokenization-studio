@@ -35,8 +35,9 @@
 
       "Work" shall mean the work of authorship, whether in Source or
       Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
+      copyright notice that is indicated by a copyright notice that is
+      included in or attached to the work (an example is provided in the
+      Appendix below).
 
       "Derivative Works" shall mean any work, whether in Source or Object
       form, that is based on (or derived from) the Work and for which the
@@ -201,62 +202,30 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-*/
+   */
+
+// SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IAccessControl} from '../interfaces/accessControl/IAccessControl.sol';
-import {AccessControl} from './AccessControl.sol';
-import {_ACCESS_CONTROL_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+    ERC1410ReadFacet
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410ReadFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract AccessControlFacet is AccessControl, IStaticFunctionSelectors {
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
+contract ERC1410ReadFacetTimeTravel is
+    ERC1410ReadFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        staticResolverKey_ = _ACCESS_CONTROL_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](9);
-        staticFunctionSelectors_[selectorIndex++] = this.grantRole.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.revokeRole.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.renounceRole.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.applyRoles.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getRoleCountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getRolesFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getRoleMemberCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getRoleMembers
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.hasRole.selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IAccessControl)
-            .interfaceId;
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

@@ -203,132 +203,100 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {IERC20StorageWrapper} from './IERC20StorageWrapper.sol';
-import {IFactory} from '../../../interfaces/factory/IFactory.sol';
-
-interface IERC20 is IERC20StorageWrapper {
-    struct ERC20MetadataInfo {
-        string name;
-        string symbol;
-        string isin;
-        uint8 decimals;
-    }
-
-    struct ERC20Metadata {
-        ERC20MetadataInfo info;
-        IFactory.SecurityType securityType;
-    }
-
-    // Initialization function
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20(ERC20Metadata calldata erc1594Metadata) external;
+interface IAccessControlManagement {
+    /**
+     * @dev Emitted when a role is granted to an account
+     *
+     * @param role The role to be granted
+     * @param account The account for which the role is to be granted
+     * @param operator The caller of the function that emitted the event
+     */
+    event RoleGranted(
+        address indexed operator,
+        address indexed account,
+        bytes32 indexed role
+    );
 
     /**
-     * @dev Moves `amount` tokens from the caller's account to `to`.
+     * @dev Emitted when a role is revoked from an account
      *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * Emits a {Transfer} event.
+     * @param role The role to be revoked
+     * @param account The account for which the role is to be revoked
+     * @param operator The caller of the function that emitted the event
      */
-    function transfer(address to, uint256 amount) external returns (bool);
+    event RoleRevoked(
+        address indexed operator,
+        address indexed account,
+        bytes32 indexed role
+    );
 
     /**
-     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+     * @dev Emitted when a set of roles are applied to an account
      *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * IMPORTANT: Beware that changing an allowance with this method brings the risk
-     * that someone may use both the old and the new allowance by unfortunate
-     * transaction ordering. One possible solution to mitigate this race
-     * condition is to first reduce the spender's allowance to 0 and set the
-     * desired value afterwards:
-     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-     *
-     * Emits an {Approval} event.
+     * @param roles The roles that was applied
+     * @param actives By each role, true if the role is granted, false if revoked
+     * @param account The account that renouced to the role
      */
-    function approve(address spender, uint256 amount) external returns (bool);
+    event RolesApplied(bytes32[] roles, bool[] actives, address account);
 
     /**
-     * @dev Moves `amount` tokens from `from` to `to` using the
-     * allowance mechanism. `amount` is then deducted from the caller's
-     * allowance.
+     * @dev Emitted when a role is renounced by an account
      *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * Emits a {Transfer} event.
+     * @param role The role that was renounced
+     * @param account The account that renouced to the role
      */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
+    event RoleRenounced(address indexed account, bytes32 indexed role);
+
+    error AccountAssignedToRole(bytes32 role, address account);
+    error AccountNotAssignedToRole(bytes32 role, address account);
+    error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
 
     /**
-     * @dev Atomically increases the allowance granted to `spender` by the caller.
+     * @dev Grants a role
      *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {IERC20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
+     * @param _role The role id
+     * @param _account The account address
+     * @return success_ true or false
      */
-    function increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) external returns (bool);
+    function grantRole(
+        bytes32 _role,
+        address _account
+    ) external returns (bool success_);
 
     /**
-     * @dev Atomically decreases the allowance granted to `spender` by the caller.
+     * @dev Revokes a role
      *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {IERC20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     * - `spender` must have allowance for the caller of at least
-     * `subtractedValue`.
+     * @param _role The role id
+     * @param _account The account address
+     * @return success_ true or false
      */
-    function decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) external returns (bool);
+    function revokeRole(
+        bytes32 _role,
+        address _account
+    ) external returns (bool success_);
 
     /**
-     * @dev Returns the remaining number of tokens that `spender` will be
-     * allowed to spend on behalf of `owner` through {transferFrom}. This is
-     * zero by default.
+     * @dev Renounces a role
      *
-     * This value changes when {approve} or {transferFrom} are called.
+     * @param _role The role id
+     * @return success_ true or false
      */
-    function allowance(
-        address owner,
-        address spender
-    ) external view returns (uint256);
+    function renounceRole(bytes32 _role) external returns (bool success_);
 
-    function decimalsAdjusted() external view returns (uint8);
-
-    function decimalsAdjustedAt(
-        uint256 _timestamp
-    ) external view returns (uint8);
-
-    function name() external view returns (string memory);
-
-    function symbol() external view returns (string memory);
-
-    function decimals() external view returns (uint8);
-
-    function decimalsAt(uint256 _timestamp) external view returns (uint8);
-
-    function getERC20Metadata() external view returns (ERC20Metadata memory);
+    /**
+     * @dev Apply roles to an account
+     *
+     * @param _roles The role id array
+     * @param _actives By each role, true if the role is granted, false if revoked
+     * @param _account The account address
+     * @return success_ true or false
+     */
+    function applyRoles(
+        bytes32[] calldata _roles,
+        bool[] calldata _actives,
+        address _account
+    ) external returns (bool success_);
 }

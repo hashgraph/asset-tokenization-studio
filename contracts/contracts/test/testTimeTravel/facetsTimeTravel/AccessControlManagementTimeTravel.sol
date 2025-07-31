@@ -67,9 +67,9 @@
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+      copyright license to use, reproduce, modify, publicly display,
+      publicly perform, sublicense, and distribute the Work and such
+      Derivative Works in Source or Object form.
 
    3. Grant of Patent License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
@@ -121,7 +121,7 @@
           that such additional attribution notices cannot be construed
           as modifying the License.
 
-      You may add Your own copyright statement to Your modifications and
+      You may add Your own copyright notice to Your modifications and
       may provide additional or different license terms and conditions
       for use, reproduction, or distribution of Your modifications, or
       for any such Derivative Works as a whole, provided Your use,
@@ -203,20 +203,27 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-interface IERC1410ScheduledTasks {
-    function triggerAndSyncAll(
-        bytes32 _partition,
-        address _from,
-        address _to
-    ) external;
+import {
+    AccessControlManagementFacet
+} from '../../../layer_1/accessControl/AccessControlManagementFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-    function balanceOfAt(
-        address _tokenHolder,
-        uint256 _timestamp
-    ) external view returns (uint256);
+contract AccessControlManagementFacetTimeTravel is
+    AccessControlManagementFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
+    }
 }

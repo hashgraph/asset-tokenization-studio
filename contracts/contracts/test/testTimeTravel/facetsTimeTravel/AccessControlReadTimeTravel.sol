@@ -67,9 +67,9 @@
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+      copyright license to use, reproduce, modify, publicly display,
+      publicly perform, sublicense, and distribute the Work and such
+      Derivative Works in Source or Object form.
 
    3. Grant of Patent License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
@@ -121,7 +121,7 @@
           that such additional attribution notices cannot be construed
           as modifying the License.
 
-      You may add Your own copyright statement to Your modifications and
+      You may add Your own copyright notice to Your modifications and
       may provide additional or different license terms and conditions
       for use, reproduction, or distribution of Your modifications, or
       for any such Derivative Works as a whole, provided Your use,
@@ -203,79 +203,27 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
-import {Common} from '../../common/Common.sol';
+import {
+    AccessControlReadFacet
+} from '../../../layer_1/accessControl/AccessControlReadFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-abstract contract ERC1410Basic is IERC1410Basic, Common {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410_Basic(
-        bool _multiPartition
-    ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {
-        _erc1410BasicStorage().multiPartition = _multiPartition;
-        _erc1410BasicStorage().initialized = true;
-    }
-
-    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _partition The partition from which to transfer tokens
-    /// @param _basicTransferInfo The address to which to transfer tokens to and the amountn`
-    /// @param _data Additional data attached to the transfer of tokens
-    /// @return The partition to which the transferred tokens were allocated for the _to address
-    function transferByPartition(
-        bytes32 _partition,
-        BasicTransferInfo calldata _basicTransferInfo,
-        bytes memory _data
-    )
-        external
-        override
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCanTransferFromByPartition(
-            _msgSender(),
-            _basicTransferInfo.to,
-            _partition,
-            _basicTransferInfo.value,
-            _data,
-            ''
-        )
-        returns (bytes32)
+contract AccessControlReadFacetTimeTravel is
+    AccessControlReadFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        // Add a function to verify the `_data` parameter
-        // TODO: Need to create the bytes division of the `_partition` so it can be easily findout in which receiver's
-        // partition token will transfered. For current implementation we are assuming that the receiver's partition
-        // will be same as sender's as well as it also pass the `_validPartition()` check. In this particular case we
-        // are also assuming that reciever has the some tokens of the same partition as well (To avoid the array index
-        // out of bound error).
-        // Note- There is no operator used for the execution of this call so `_operator` value in
-        // in event is address(0) same for the `_operatorData`
-        return
-            _transferByPartition(
-                msg.sender,
-                _basicTransferInfo,
-                _partition,
-                _data,
-                address(0),
-                ''
-            );
-    }
-
-    /**
-     * @return
-     *  true : the token allows multiple partitions to be set and managed
-     *  false : the token contains only one partition, the default one
-     */
-    function isMultiPartition() external view returns (bool) {
-        return _isMultiPartition();
-    }
-
-    /// @notice Use to get the list of partitions `_tokenHolder` is associated with
-    /// @param _tokenHolder An address corresponds whom partition list is queried
-    /// @return List of partitions
-    function partitionsOf(
-        address _tokenHolder
-    ) external view override returns (bytes32[] memory) {
-        return _partitionsOf(_tokenHolder);
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

@@ -201,23 +201,22 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-*/
+   */
 
-// SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
+// SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
 
 import {
-    ERC1410ScheduledTasks
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410ScheduledTasks.sol';
+    ERC1410TransferFacet
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410TransferFacet.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract ERC1410ScheduledTasksTimeTravel is
-    ERC1410ScheduledTasks,
+contract ERC1410TransferFacetTimeTravel is
+    ERC1410TransferFacet,
     TimeTravelStorageWrapper
 {
     function _blockTimestamp()

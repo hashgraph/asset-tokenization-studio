@@ -214,8 +214,8 @@ import {_AGENT_ROLE} from '../constants/roles.sol';
 import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
 import {
-    IAccessControl
-} from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
+    IAccessControlManagement
+} from '../../layer_1/interfaces/accessControl/IAccessControlManagement.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {
@@ -277,13 +277,19 @@ abstract contract ERC3643StorageWrapper1 is
 
     function _addAgent(address _agent) internal {
         if (!_grantRole(_AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
+            revert IAccessControlManagement.AccountAssignedToRole(
+                _AGENT_ROLE,
+                _agent
+            );
         }
     }
 
     function _removeAgent(address _agent) internal {
         if (!_revokeRole(_AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
+            revert IAccessControlManagement.AccountNotAssignedToRole(
+                _AGENT_ROLE,
+                _agent
+            );
         }
     }
 

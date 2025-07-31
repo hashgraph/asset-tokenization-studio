@@ -54,10 +54,10 @@
       the copyright owner. For the purposes of this definition, "submitted"
       means any form of electronic, verbal, or written communication sent
       to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
+      communication on electronic mailing lists, source code control
+      systems, and issue tracking systems that are managed by, or on behalf
+      of, the Licensor for the purpose of discussing and improving the Work,
+      but excluding communication that is conspicuously marked or otherwise
       designated in writing by the copyright owner as "Not a Contribution."
 
       "Contributor" shall mean Licensor and any individual or Legal Entity
@@ -67,9 +67,9 @@
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+      copyright license to use, reproduce, modify, publicly display,
+      publicly perform, sublicense, and distribute the Work and such
+      Derivative Works in Source or Object form.
 
    3. Grant of Patent License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
@@ -121,7 +121,7 @@
           that such additional attribution notices cannot be construed
           as modifying the License.
 
-      You may add Your own copyright statement to Your modifications and
+      You may add Your own copyright notice to Your modifications and
       may provide additional or different license terms and conditions
       for use, reproduction, or distribution of Your modifications, or
       for any such Derivative Works as a whole, provided Your use,
@@ -203,40 +203,58 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-interface IERC1410Standard {
-    struct IssueData {
-        bytes32 partition;
-        address tokenHolder;
-        uint256 value;
-        bytes data;
+import {_ACCESS_CONTROL_READ_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IAccessControl} from '../interfaces/accessControl/IAccessControl.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {AccessControlRead} from './AccessControlRead.sol';
+
+/**
+ * @title AccessControlReadFacet
+ * @dev Diamond pattern facet for read-only access control operations
+ */
+contract AccessControlReadFacet is IStaticFunctionSelectors, AccessControlRead {
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ACCESS_CONTROL_READ_RESOLVER_KEY;
     }
 
-    function redeemByPartition(
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_[selectorIndex++] = this.hasRole.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getRoleCountFor
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getRolesFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getRoleMemberCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getRoleMembers
+            .selector;
+    }
 
-    function operatorRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external;
-
-    function issueByPartition(
-        IERC1410Standard.IssueData calldata _issueData
-    ) external;
-
-    function canRedeemByPartition(
-        address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external view returns (bool, bytes1, bytes32);
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        staticInterfaceIds_[0] = type(IAccessControl).interfaceId;
+    }
 }

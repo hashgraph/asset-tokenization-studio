@@ -207,7 +207,9 @@ pragma solidity 0.8.18;
 
 import {_DEFAULT_ADMIN_ROLE} from '../../layer_1/constants/roles.sol';
 import {Pause} from '../../layer_1/pause/Pause.sol';
-import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
+import {
+    AccessControlStorageWrapper
+} from '../../layer_0/core/accessControl/AccessControlStorageWrapper.sol';
 import {DiamondCutManagerWrapper} from './DiamondCutManagerWrapper.sol';
 import {
     IDiamondLoupe
@@ -216,7 +218,7 @@ import {
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract DiamondCutManager is
-    AccessControl,
+    AccessControlStorageWrapper,
     Pause,
     DiamondCutManagerWrapper
 {
