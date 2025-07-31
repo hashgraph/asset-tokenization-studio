@@ -206,10 +206,10 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
 
-import {IResolverProxy} from './IResolverProxy.sol';
-import {IBusinessLogicResolver} from './IBusinessLogicResolver.sol';
-import {IBond} from './IBond.sol';
-import {IEquity} from './IEquity.sol';
+import {IResolverProxy_} from './IResolverProxy.sol';
+import {IBusinessLogicResolver_} from './IBusinessLogicResolver.sol';
+import {IBond_} from './IBond.sol';
+import {IEquity_} from './IEquity.sol';
 import {
     FactoryRegulationData,
     RegulationData,
@@ -219,7 +219,9 @@ import {
 
 /// @dev IFactory with ERC20MetadataInfo struct
 /// @dev Avoids overriding the whole common inhertance chain to a floating pragma
-interface IFactory {
+
+// solhint-disable contract-name-camelcase
+interface IFactory_ {
     struct ERC20MetadataInfo {
         string name;
         string symbol;
@@ -241,9 +243,9 @@ interface IFactory {
     struct SecurityData {
         bool arePartitionsProtected;
         bool isMultiPartition;
-        IBusinessLogicResolver resolver;
+        IBusinessLogicResolver_ resolver;
         ResolverProxyConfiguration resolverProxyConfiguration;
-        IResolverProxy.Rbac[] rbacs;
+        IResolverProxy_.Rbac[] rbacs;
         bool isControllable;
         bool isWhiteList;
         uint256 maxSupply;
@@ -257,13 +259,13 @@ interface IFactory {
 
     struct EquityData {
         SecurityData security;
-        IEquity.EquityDetailsData equityDetails;
+        IEquity_.EquityDetailsData equityDetails;
     }
 
     struct BondData {
         SecurityData security;
-        IBond.BondDetailsData bondDetails;
-        IBond.CouponDetailsData couponDetails;
+        IBond_.BondDetailsData bondDetails;
+        IBond_.CouponDetailsData couponDetails;
     }
 
     event EquityDeployed(
@@ -280,7 +282,7 @@ interface IFactory {
         FactoryRegulationData regulationData
     );
 
-    error EmptyResolver(IBusinessLogicResolver resolver);
+    error EmptyResolver(IBusinessLogicResolver_ resolver);
     error NoInitialAdmins();
 
     function deployEquity(

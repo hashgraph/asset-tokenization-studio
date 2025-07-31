@@ -206,7 +206,8 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
 
-interface IEquity {
+// solhint-disable contract-name-camelcase
+interface IEquity_ {
     enum DividendType {
         NONE,
         PREFERRED,

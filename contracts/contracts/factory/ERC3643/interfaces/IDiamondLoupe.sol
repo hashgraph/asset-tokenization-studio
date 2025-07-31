@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
 
-import {IStaticFunctionSelectors} from './IStaticFunctionSelectors.sol';
+import {IStaticFunctionSelectors_} from './IStaticFunctionSelectors.sol';
 
 // A loupe is a small magnifying glass used to look at resolverProxys.
 // These functions look at resolverProxys
@@ -219,7 +219,9 @@ import {IStaticFunctionSelectors} from './IStaticFunctionSelectors.sol';
 ///    }
 ///```
 // HACK: I think that Loupe and Cut should be only one contract.
-interface IDiamondLoupe is IStaticFunctionSelectors {
+
+// solhint-disable contract-name-camelcase
+interface IDiamondLoupe_ is IStaticFunctionSelectors_ {
     struct Facet {
         bytes32 id;
         address addr;
