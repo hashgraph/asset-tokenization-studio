@@ -762,7 +762,7 @@ abstract contract ERC1594StorageWrapper is
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
                     IERC3643.ComplianceNotAllowed.selector,
-                    abi.encode(_from, _to, 0)
+                    abi.encode(_from, _to, _value)
                 );
             }
         }
@@ -918,7 +918,7 @@ abstract contract ERC1594StorageWrapper is
                 InsufficientBalance.selector,
                 abi.encode(
                     _from,
-                    _balanceOfAdjusted(_from),
+                    _balanceOfByPartitionAdjusted(_partition, _from),
                     _value,
                     DEFAULT_PARTITION
                 )

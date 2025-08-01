@@ -206,7 +206,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-// import {Validation, ValidationFlags} from "../../../layer_0/common/validation/Validation.sol";
 import {ERC1410BasicStorageWrapper} from './ERC1410BasicStorageWrapper.sol';
 import {
     _ERC1410_OPERATOR_STORAGE_POSITION
