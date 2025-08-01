@@ -9,7 +9,7 @@ import {
   PopUp,
   Text,
 } from "io-bricks-ui";
-import { isHederaValidId, min, required } from "../../../../utils/rules";
+import { isValidHederaId, min, required } from "../../../../utils/rules";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
@@ -180,7 +180,7 @@ export const HoldCreate = () => {
                 isDisabled={!forceHold}
                 rules={{
                   required,
-                  validate: { isHederaValidId: isHederaValidId },
+                  validate: { isValidHederaId: isValidHederaId },
                 }}
                 placeholder={tCreate("originalAccount.label")}
               />
@@ -199,7 +199,7 @@ export const HoldCreate = () => {
                   validate: (value: string) => {
                     if (!value || value === undefined) return true;
 
-                    return isHederaValidId(value);
+                    return isValidHederaId(value);
                   },
                 }}
               />
@@ -215,7 +215,7 @@ export const HoldCreate = () => {
                 id="escrowAccount"
                 rules={{
                   required,
-                  validate: { isHederaValidId: isHederaValidId },
+                  validate: { isValidHederaId: isValidHederaId },
                 }}
                 placeholder={tCreate("escrowAccount.label")}
               />

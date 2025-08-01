@@ -214,7 +214,7 @@ import {
   Tooltip,
 } from "io-bricks-ui";
 import { Info } from "@phosphor-icons/react";
-import { isHederaValidId, min, required } from "../../../../utils/rules";
+import { isValidHederaId, min, required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
@@ -397,7 +397,7 @@ export const SeeDividend = () => {
             <InputController
               control={control}
               id="targetId"
-              rules={{ required, isHederaValidId: isHederaValidId }}
+              rules={{ required, isValidHederaId: isValidHederaId }}
               placeholder={tForm("account.placeholder")}
             />
           </Stack>

@@ -4,7 +4,7 @@ import { RouteName } from "../../router/RouteName";
 import { useTranslation } from "react-i18next";
 import { RoutePath } from "../../router/RoutePath";
 import { Button, InputController, Text, useToast } from "io-bricks-ui";
-import { isHederaValidId, required } from "../../utils/rules";
+import { isValidHederaId, required } from "../../utils/rules";
 import { useForm } from "react-hook-form";
 import { RouterManager } from "../../router/RouterManager";
 import { useState } from "react";
@@ -90,7 +90,7 @@ export const AddExternalKYC = () => {
               size="md"
               rules={{
                 required,
-                validate: { isHederaValidId: isHederaValidId },
+                validate: { isValidHederaId: isValidHederaId },
               }}
             />
           </VStack>

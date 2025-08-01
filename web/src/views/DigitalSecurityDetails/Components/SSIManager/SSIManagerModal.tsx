@@ -12,7 +12,7 @@ import {
 import { Button, InputController } from "io-bricks-ui";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { isHederaValidId, required } from "../../../../utils/rules";
+import { isValidHederaId, required } from "../../../../utils/rules";
 import { useAddIssuer } from "../../../../hooks/mutations/useSSIManager";
 import { AddIssuerRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
@@ -76,7 +76,7 @@ export const SSIManagerModal = ({ isOpen, onClose }: SSIManagerModalProps) => {
               placeholder={tCreate("form.account.placeholder")}
               rules={{
                 required,
-                validate: { isHederaValidId: isHederaValidId },
+                validate: { isValidHederaId: isValidHederaId },
               }}
             />
           </VStack>

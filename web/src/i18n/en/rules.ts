@@ -217,5 +217,5 @@ export default {
   required: "Field is mandatory",
   isISINValid: "Length should be {{length}}.",
   isISINValidFormat: "Invalid format",
-  isHederaValidId: "Wrong id",
+  isValidHederaId: "Wrong id",
 };

@@ -8,7 +8,7 @@ import {
   SelectController,
   Text,
 } from "io-bricks-ui";
-import { isHederaValidId, required } from "../../../../utils/rules";
+import { isValidHederaId, required } from "../../../../utils/rules";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
@@ -240,7 +240,7 @@ export const ClearingOperationsManage = () => {
                 isRequired={true}
                 rules={{
                   required,
-                  validate: { isHederaValidId: isHederaValidId },
+                  validate: { isValidHederaId: isValidHederaId },
                 }}
               />
             </Stack>
