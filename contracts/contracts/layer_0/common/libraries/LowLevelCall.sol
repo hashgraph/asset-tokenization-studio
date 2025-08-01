@@ -213,23 +213,25 @@ library LowLevelCall {
         bytes memory _data,
         bytes4 _errorSelector
     ) internal returns (bytes memory result) {
-        if (_target != address(0)) {
-            // solhint-disable-next-line avoid-low-level-calls
-            (bool success, bytes memory returndata) = _target.call(_data);
-            return
-                _verifyCallResultFromTarget(
-                    success,
-                    returndata,
-                    _errorSelector
-                );
+        // Check for zero address first to fail fast
+        if (_target == address(0)) {
+            return result; // Return empty bytes when target is zero address
         }
+
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, bytes memory returndata) = _target.call(_data);
+        return _verifyCallResultFromTarget(success, returndata, _errorSelector);
     }
 
     function functionStaticCall(
         address _target,
         bytes memory _data,
         bytes4 _errorSelector
-    ) internal view returns (bytes memory) {
+    ) internal view returns (bytes memory result) {
+        if (_target == address(0)) {
+            return result; // Return empty bytes when target is zero address
+        }
+
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returndata) = _target.staticcall(_data);
         return _verifyCallResultFromTarget(success, returndata, _errorSelector);

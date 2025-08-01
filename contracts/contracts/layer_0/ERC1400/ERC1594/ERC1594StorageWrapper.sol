@@ -716,7 +716,10 @@ abstract contract ERC1594StorageWrapper is
                     IERC3643.ComplianceCallFailed.selector
                 );
 
-            if (!abi.decode(complianceResult, (bool))) {
+            if (
+                complianceResult.length > 0 &&
+                !abi.decode(complianceResult, (bool))
+            ) {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
