@@ -226,9 +226,9 @@ import {
     setFactoryRegulationData,
     RegulationType,
     RegulationSubType,
-    deployContract,
-    DeployContractCommand,
     DEFAULT_ADMIN_ROLE,
+    deployContractWithLibraries,
+    DeployContractWithLibraryCommand,
 } from '@scripts'
 import { deployFullSuiteFixture } from './fixtures/deploy-full-suite.fixture'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -313,26 +313,21 @@ describe('TREX Factory Tests', () => {
             })
         )
 
-        const securityDeploymentLib = await deployContract(
-            new DeployContractCommand({
-                name: 'SecurityDeploymentLib',
-                args: [],
-                signer: deployer,
-            })
-        )
-
-        factoryAts = await (
-            await ethers.getContractFactory('TREXFactoryAts', {
-                libraries: {
-                    SecurityDeploymentLib: securityDeploymentLib.address,
-                },
-                signer: deployer,
-            })
-        ).deploy(
-            trexDeployment.authorities.trexImplementationAuthority.address,
-            trexDeployment.factories.identityFactory.address,
-            deployedContracts.factory.proxyAddress!
-        )
+        factoryAts = (
+            await deployContractWithLibraries(
+                new DeployContractWithLibraryCommand({
+                    name: `TREXFactoryAts`,
+                    signer: deployer,
+                    args: [
+                        trexDeployment.authorities.trexImplementationAuthority
+                            .address,
+                        trexDeployment.factories.identityFactory.address,
+                        deployedContracts.factory.proxyAddress!,
+                    ],
+                    libraries: ['SecurityDeploymentLib'],
+                })
+            )
+        ).contract as TREXFactoryAts
 
         await trexDeployment.factories.identityFactory
             .connect(deployer)

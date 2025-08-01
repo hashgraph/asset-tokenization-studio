@@ -254,8 +254,8 @@ task(
             deployAtsFullInfrastructure,
             DeployAtsFullInfrastructureCommand,
             addresstoHederaId,
-            deployContract,
-            DeployContractCommand,
+            deployContractWithLibraries,
+            DeployContractWithLibraryCommand,
             ADDRESS_ZERO,
         } = await import('@scripts')
         const network = hre.network.name as Network
@@ -316,8 +316,8 @@ task(
         let trexFactory
 
         if (args.trexFactory) {
-            const trexFactoryDeployResult = await deployContract(
-                new DeployContractCommand({
+            const trexFactoryDeployResult = await deployContractWithLibraries(
+                new DeployContractWithLibraryCommand({
                     name: `TREXFactoryAts`,
                     signer,
                     args: [
@@ -325,6 +325,7 @@ task(
                         ADDRESS_ZERO, // idFactory
                         factory.address,
                     ],
+                    libraries: ['SecurityDeploymentLib'],
                 })
             )
             trexFactory = trexFactoryDeployResult.proxyAddress

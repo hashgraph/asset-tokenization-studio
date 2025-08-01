@@ -203,82 +203,31 @@
 
 */
 
-// * Constants
-export * from './constants'
+import { Signer } from 'ethers'
+import { ContractName, LibraryName } from '@configuration'
 
-// * Commands
-export {
-    default as BaseBlockchainCommand,
-    BaseBlockchainCommandParams,
-} from './commands/base/BaseBlockchainCommand'
-export {
-    default as BaseAtsContractListCommand,
-    BaseAtsContractListCommandParams,
-} from './commands/base/BaseAtsContractListCommand'
-export { default as ErrorMessageCommand } from './commands/ErrorMessageCommand'
-export { default as DeployContractCommand } from './commands/DeployContractCommand'
-export { default as DeployContractWithLibraryCommand } from './commands/DeployContractWithLibraryCommand'
-export { default as DeployAtsContractsCommand } from './commands/DeployAtsContractsCommand'
-export { default as DeployAtsFullInfrastructureCommand } from './commands/DeployAtsFullInfrastructureCommand'
-export { default as DeployContractWithFactoryCommand } from './commands/DeployContractWithFactoryCommand'
-export { default as DeployProxyAdminCommand } from './commands/DeployProxyAdminCommand'
-export { default as DeployUpgradeableProxyCommand } from './commands/DeployTransparentProxyCommand'
-export { default as DeployProxyForBusinessLogicResolverCommand } from './commands/DeployProxyForBusinessLogicResolverCommand'
-export { default as UpgradeProxyImplementationCommand } from './commands/UpgradeProxyImplementationCommand'
-export { default as CallContractCommand } from './commands/CallContractCommand'
-export { default as ValidateTxResponseCommand } from './commands/ValidateTxResponseCommand'
-export { default as RegisterBusinessLogicsCommand } from './commands/RegisterBusinessLogicsCommand'
-export { default as RegisterDeployedContractBusinessLogicsCommand } from './commands/RegisterDeployedContractBusinessLogicsCommand'
-export { default as CreateConfigurationsForDeployedContractsCommand } from './commands/CreateConfigurationsForDeployedContractsCommand'
+interface DeployContractWithLibraryCommandParams {
+    name: ContractName
+    signer: Signer
+    libraries: LibraryName[]
+    args?: Array<unknown>
+}
 
-// * Queries
-export {
-    default as BaseBlockchainQuery,
-    BaseBlockchainQueryParams,
-} from './queries/base/BaseBlockchainQuery'
-export { default as ProxyImplementationQuery } from './queries/ProxyImplementationQuery'
-export { default as GetFacetsByConfigurationIdAndVersionQuery } from './queries/GetFacetsByConfigurationIdAndVersionQuery'
+export default class DeployContractWithLibraryCommand {
+    public readonly name: ContractName
+    public readonly signer: Signer
+    public readonly libraries: LibraryName[]
+    public readonly args: Array<unknown> = []
 
-// * Results
-export { default as DeployContractResult } from './results/DeployContractResult'
-export { default as DeployContractWithFactoryResult } from './results/DeployContractWithFactoryResult'
-export {
-    default as DeployAtsContractsResult,
-    DeployAtsContractsResultParams,
-} from './results/DeployAtsContractsResult'
-export { default as DeployAtsFullInfrastructureResult } from './results/DeployAtsFullInfrastructureResult'
-export { default as ValidateTxResponseResult } from './results/ValidateTxResponseResult'
-export { default as GetFacetsByConfigurationIdAndVersionResult } from './results/GetFacetsByConfigurationIdAndVersionResult'
-export { default as CreateConfigurationsForDeployedContractsResult } from './results/CreateConfigurationsForDeployedContractsResult'
-
-// * Errors
-export { default as BusinessLogicResolverNotFound } from './errors/BusinessLogicResolverNotFound'
-export { default as BusinessLogicResolverProxyNotFound } from './errors/BusinessLogicResolverProxyNotFound'
-export { default as TransactionReceiptError } from './errors/TransactionReceiptError'
-
-// * Time functions
-export * from './time'
-
-// * Blockain functions
-export * from './blockchain'
-
-// * Hedera functions
-export * from './hedera'
-
-// * Deploy functions
-export * from './deploy'
-
-// * Proxy functions
-export * from './transparentUpgradeableProxy'
-
-// * BusinessLogicResolver
-export * from './businessLogicResolver'
-
-// * ResolverDiamondCut
-export * from './resolverDiamondCut'
-
-// * Factory
-export * from './factory'
-
-// * Extract methods
-export * from './extractMethods'
+    constructor({
+        name,
+        signer,
+        args = [],
+        libraries,
+    }: DeployContractWithLibraryCommandParams) {
+        this.name = name
+        this.signer = signer
+        this.args = args
+        this.libraries = libraries
+    }
+}

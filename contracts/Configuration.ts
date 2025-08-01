@@ -262,9 +262,10 @@ export const CONTRACT_NAMES = [
     'ERC3643',
     'FreezeFacet',
     'TREXFactoryAts',
-    'SecurityDeploymentLib',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
+export const LIBRARY_NAMES = ['SecurityDeploymentLib']
+export type LibraryName = (typeof LIBRARY_NAMES)[number]
 export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
 
 export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
