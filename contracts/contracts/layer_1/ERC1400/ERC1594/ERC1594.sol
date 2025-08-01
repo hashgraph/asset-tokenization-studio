@@ -291,6 +291,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         onlyIdentified(address(0), _tokenHolder)
         onlyCompliant(address(0), _tokenHolder)
         onlyIssuable
+        onlyUnpaused
     {
         {
             bytes32[] memory roles = new bytes32[](2);

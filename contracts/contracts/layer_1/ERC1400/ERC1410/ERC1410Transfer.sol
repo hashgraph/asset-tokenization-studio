@@ -206,16 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {
-    BasicTransferInfo,
-    IssueData
-} from '../../interfaces/ERC1400/IERC1410.sol';
-import {IERC1410Transfer} from '../../interfaces/ERC1400/IERC1410Transfer.sol';
-import {Common} from '../../common/Common.sol';
-import {
-    ERC1410StorageWrapper
-} from '../../../layer_0/ERC1400/ERC1410/ERC1410StorageWrapper.sol';
+import {_ISSUER_ROLE, _AGENT_ROLE} from "../../constants/roles.sol";
+import {BasicTransferInfo, IssueData} from "../../interfaces/ERC1400/IERC1410.sol";
+import {IERC1410Transfer} from "../../interfaces/ERC1400/IERC1410Transfer.sol";
+import {Common} from "../../common/Common.sol";
+import {ERC1410StorageWrapper} from "../../../layer_0/ERC1400/ERC1410/ERC1410StorageWrapper.sol";
 
 /**
  * @title ERC1410Transfer
@@ -242,7 +237,7 @@ abstract contract ERC1410Transfer is
             _partition,
             _basicTransferInfo.value,
             _data,
-            ''
+            ""
         )
         returns (bytes32)
     {
@@ -261,7 +256,7 @@ abstract contract ERC1410Transfer is
                 _partition,
                 _data,
                 address(0),
-                ''
+                ""
             );
     }
 
@@ -274,7 +269,6 @@ abstract contract ERC1410Transfer is
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyIdentified(address(0), _issueData.tokenHolder)
         onlyCompliant(address(0), _issueData.tokenHolder)
-        onlyIssuable
     {
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -304,7 +298,7 @@ abstract contract ERC1410Transfer is
             _partition,
             _value,
             _data,
-            ''
+            ""
         )
     {
         // Add the function to validate the `_data` parameter
@@ -314,7 +308,7 @@ abstract contract ERC1410Transfer is
             address(0),
             _value,
             _data,
-            ''
+            ""
         );
     }
 

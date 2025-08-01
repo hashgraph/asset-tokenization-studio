@@ -336,6 +336,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         uint256 _amount
     )
         external
+        onlyUnpaused
         onlyWithoutMultiPartition
         onlyWithinMaxSupply(_amount)
         onlyIdentified(address(0), _to)
