@@ -74,7 +74,10 @@ export const SSIManagerModal = ({ isOpen, onClose }: SSIManagerModalProps) => {
               id="accountId"
               label={tCreate("form.account.label")}
               placeholder={tCreate("form.account.placeholder")}
-              rules={{ required, validate: { isHederaValidId: isHederaValidId } }}
+              rules={{
+                required,
+                validate: { isHederaValidId: isHederaValidId },
+              }}
             />
           </VStack>
         </ModalBody>

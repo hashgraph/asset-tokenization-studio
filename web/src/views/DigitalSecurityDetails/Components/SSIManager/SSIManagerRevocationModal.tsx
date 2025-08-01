@@ -77,7 +77,10 @@ export const SSIManagerRevocationModal = ({
               id="accountId"
               label={tRevocation("form.account.label")}
               placeholder={tRevocation("form.account.placeholder")}
-              rules={{ required, validate: { isHederaValidId: isHederaValidId } }}
+              rules={{
+                required,
+                validate: { isHederaValidId: isHederaValidId },
+              }}
             />
           </VStack>
         </ModalBody>

@@ -299,6 +299,9 @@ export default {
     compliance: "Compliance",
     complianceId: "Compliance id",
     complianceIdPlaceholder: "0.0.123456",
+    identityRegistry: "Identity registry",
+    identityRegistryId: "Identity registry id",
+    identityRegistryIdPlaceholder: "0.0.123456",
   },
 
   stepExternalManagement: {

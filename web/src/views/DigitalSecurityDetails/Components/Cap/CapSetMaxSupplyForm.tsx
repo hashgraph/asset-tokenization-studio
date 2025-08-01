@@ -99,7 +99,10 @@ export const CapSetMaxSupplyForm = () => {
               <InputController
                 control={control}
                 id="securityId"
-                rules={{ required, validate: { isHederaValidId: isHederaValidId } }}
+                rules={{
+                  required,
+                  validate: { isHederaValidId: isHederaValidId },
+                }}
                 placeholder={securityId}
                 defaultValue={securityId}
                 value={securityId}

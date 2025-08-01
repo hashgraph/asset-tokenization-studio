@@ -235,11 +235,11 @@ export const StepERC3643 = () => {
     control,
   });
 
-  const complianceAddress = watch("complianceAddress");
+  const complianceId = watch("complianceId");
 
   useEffect(() => {
-    setValue("complianceAddress", complianceAddress);
-  }, [complianceAddress, setValue, clearErrors]);
+    setValue("complianceId", complianceId);
+  }, [complianceId, setValue, clearErrors]);
 
   return (
     <FormStepContainer>
@@ -252,13 +252,11 @@ export const StepERC3643 = () => {
         <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
           <Stack w="full">
             <HStack justifySelf="flex-start">
-              <Text textStyle="BodyTextRegularSM">
-                {t("complianceAddress")}
-              </Text>
+              <Text textStyle="BodyTextRegularSM">{t("complianceId")}</Text>
             </HStack>
             <InputController
               control={control}
-              id="complianceAddress"
+              id="complianceId"
               rules={{
                 validate: (value: string) => {
                   if (!value) {
@@ -267,36 +265,36 @@ export const StepERC3643 = () => {
                   return isHederaValidId(value);
                 },
               }}
-              placeholder={t("complianceAddressPlaceholder")}
+              placeholder={t("complianceIdPlaceholder")}
             />
           </Stack>
         </FormControl>
       </VStack>
-        <InfoDivider title={t("identityRegistry")} type="main" />
-        <VStack w="full">
-            <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
-                <Stack w="full">
-                    <HStack justifySelf="flex-start">
-                        <Text textStyle="BodyTextRegularSM">
-                            {t("identityRegistryId")}
-                        </Text>
-                    </HStack>
-                    <InputController
-                        control={control}
-                        id="identityRegistryId"
-                        rules={{
-                            validate: (value: string) => {
-                                if (!value) {
-                                    return true;
-                                }
-                                return isHederaValidId(value);
-                            },
-                        }}
-                        placeholder={t("identityRegistryIdPlaceholder")}
-                    />
-                </Stack>
-            </FormControl>
-        </VStack>
+      <InfoDivider title={t("identityRegistry")} type="main" />
+      <VStack w="full">
+        <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">
+                {t("identityRegistryId")}
+              </Text>
+            </HStack>
+            <InputController
+              control={control}
+              id="identityRegistryId"
+              rules={{
+                validate: (value: string) => {
+                  if (!value) {
+                    return true;
+                  }
+                  return isHederaValidId(value);
+                },
+              }}
+              placeholder={t("identityRegistryIdPlaceholder")}
+            />
+          </Stack>
+        </FormControl>
+      </VStack>
 
       <HStack
         gap={4}
@@ -308,7 +306,7 @@ export const StepERC3643 = () => {
         <CancelButton />
         <PreviousStepButton />
         <NextStepButton
-          isDisabled={Boolean(complianceAddress) && !stepFormState.isValid}
+          isDisabled={Boolean(complianceId) && !stepFormState.isValid}
         />
       </HStack>
     </FormStepContainer>

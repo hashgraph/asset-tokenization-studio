@@ -178,7 +178,10 @@ export const HoldCreate = () => {
                 id="originalAccount"
                 defaultValue={address}
                 isDisabled={!forceHold}
-                rules={{ required, validate: { isHederaValidId: isHederaValidId } }}
+                rules={{
+                  required,
+                  validate: { isHederaValidId: isHederaValidId },
+                }}
                 placeholder={tCreate("originalAccount.label")}
               />
             </Stack>
@@ -210,7 +213,10 @@ export const HoldCreate = () => {
               <InputController
                 control={control}
                 id="escrowAccount"
-                rules={{ required, validate: { isHederaValidId: isHederaValidId } }}
+                rules={{
+                  required,
+                  validate: { isHederaValidId: isHederaValidId },
+                }}
                 placeholder={tCreate("escrowAccount.label")}
               />
             </Stack>
