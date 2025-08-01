@@ -241,6 +241,7 @@ import {
     ExternalKycListManagement,
     ERC3643,
     FreezeFacet,
+    ERC20Votes,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -253,6 +254,7 @@ export interface DeployAtsContractsResultParams {
     ssiManagement: DeployContractWithFactoryResult<SsiManagement>
     pause: DeployContractWithFactoryResult<PauseFacet>
     erc20: DeployContractWithFactoryResult<ERC20>
+    erc20Votes: DeployContractWithFactoryResult<ERC20Votes>
     erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
     erc1594: DeployContractWithFactoryResult<ERC1594>
     erc1643: DeployContractWithFactoryResult<ERC1643>
@@ -293,6 +295,7 @@ export default class DeployAtsContractsResult {
     public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>
     public readonly pause: DeployContractWithFactoryResult<PauseFacet>
     public readonly erc20: DeployContractWithFactoryResult<ERC20>
+    public readonly erc20Votes: DeployContractWithFactoryResult<ERC20Votes>
     public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
     public readonly erc1594: DeployContractWithFactoryResult<ERC1594>
     public readonly erc1643: DeployContractWithFactoryResult<ERC1643>
@@ -332,6 +335,7 @@ export default class DeployAtsContractsResult {
         ssiManagement,
         pause,
         erc20,
+        erc20Votes,
         erc1410ScheduledTasks,
         erc1594,
         erc1643,
@@ -370,6 +374,7 @@ export default class DeployAtsContractsResult {
         this.ssiManagement = ssiManagement
         this.pause = pause
         this.erc20 = erc20
+        this.erc20Votes = erc20Votes
         this.erc1410ScheduledTasks = erc1410ScheduledTasks
         this.erc1594 = erc1594
         this.erc1643 = erc1643

@@ -263,7 +263,7 @@ const ProtectedPartitionRole_1 = ethers.utils.keccak256(
 )
 
 const domain = {
-    name: 'ASSET_TOKENIZATION',
+    name: 'ProtectedPartitions',
     version: '1.0.0',
     chainId: 1,
     verifyingContract: '',

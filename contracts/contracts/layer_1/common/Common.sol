@@ -209,10 +209,10 @@ pragma solidity 0.8.18;
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
 import {
-    ERC1594StorageWrapper
-} from '../../layer_0/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
+    ERC20VotesStorageWrapper
+} from '../../layer_0/ERC1400/ERC20Votes/ERC20VotesStorageWrapper.sol';
 
-abstract contract Common is ERC1594StorageWrapper {
+abstract contract Common is ERC20VotesStorageWrapper {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();
 

@@ -204,35 +204,27 @@
 */
 
 // SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
-import {
-    TransferAndLock
-} from '../../../layer_3/transferAndLock/TransferAndLock.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import {IERC5805} from './IERC5805.sol';
 
-contract TransferAndLockTimeTravel is
-    TransferAndLock,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockTimestamp();
+interface IERC20Votes is IERC5805 {
+    struct Checkpoint {
+        uint256 fromBlock;
+        uint256 votes;
     }
 
-    function _blockNumber()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
+    error AbafChangeForBlockForbidden(uint256 blockNumber);
+
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC20Votes(bool _activated) external;
+
+    function checkpoints(
+        address _account,
+        uint256 _pos
+    ) external view returns (Checkpoint memory);
+
+    function numCheckpoints(address _account) external view returns (uint256);
 }

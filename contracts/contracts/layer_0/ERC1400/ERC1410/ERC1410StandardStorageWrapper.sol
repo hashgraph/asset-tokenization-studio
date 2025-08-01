@@ -363,6 +363,13 @@ abstract contract ERC1410StandardStorageWrapper is
 
         _increaseTotalSupplyByPartition(_issueData.partition, _issueData.value);
 
+        _afterTokenTransfer(
+            _issueData.partition,
+            address(0),
+            _issueData.tokenHolder,
+            _issueData.value
+        );
+
         emit IssuedByPartition(
             _issueData.partition,
             _msgSender(),
@@ -385,6 +392,8 @@ abstract contract ERC1410StandardStorageWrapper is
         _reduceBalanceByPartition(_from, _value, _partition);
 
         _reduceTotalSupplyByPartition(_partition, _value);
+
+        _afterTokenTransfer(_partition, _from, address(0), _value);
 
         emit RedeemedByPartition(
             _partition,
