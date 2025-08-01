@@ -977,6 +977,7 @@ abstract contract ClearingStorageWrapper2 is
     ) internal view virtual returns (uint256);
 
     function _checkCompliance(address _from, address _to) internal view virtual;
+
     function _checkIdentity(address _from, address _to) internal view virtual;
 
     function _clearingTransferExecution(
