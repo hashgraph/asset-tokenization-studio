@@ -242,12 +242,21 @@ task(
         'deployedContracts',
         types.string
     )
+    .addOptionalParam(
+        'trexFactory',
+        'Deploy the adapted Trex Factory',
+        false,
+        types.boolean
+    )
     .setAction(async (args: DeployAllArgs, hre) => {
         // Inlined to avoid circular dependency
         const {
             deployAtsFullInfrastructure,
             DeployAtsFullInfrastructureCommand,
             addresstoHederaId,
+            deployContractWithLibraries,
+            DeployContractWithLibraryCommand,
+            ADDRESS_ZERO,
         } = await import('@scripts')
         const network = hre.network.name as Network
         console.log(`Executing deployAll on ${hre.network.name} ...`)
@@ -304,6 +313,24 @@ task(
             })
         )
 
+        let trexFactory
+
+        if (args.trexFactory) {
+            const trexFactoryDeployResult = await deployContractWithLibraries(
+                new DeployContractWithLibraryCommand({
+                    name: `TREXFactoryAts`,
+                    signer,
+                    args: [
+                        ADDRESS_ZERO, // implementationAuthority
+                        ADDRESS_ZERO, // idFactory
+                        factory.address,
+                    ],
+                    libraries: ['SecurityDeploymentLib'],
+                })
+            )
+            trexFactory = trexFactoryDeployResult.proxyAddress
+        }
+
         // * Display the deployed addresses
         const addressList = {
             'Business Logic Resolver Proxy': businessLogicResolver.proxyAddress,
@@ -350,6 +377,7 @@ task(
             'Protected Partitions': protectedPartitions.address,
             ERC3643: erc3643.address,
             Freeze: freeze.address,
+            'T-REX Factory': trexFactory,
         }
 
         const contractAddress = []

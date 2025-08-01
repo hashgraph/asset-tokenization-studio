@@ -203,94 +203,100 @@
 
 */
 
-import { HardhatUserConfig } from 'hardhat/config'
-import 'tsconfig-paths/register'
-import '@nomicfoundation/hardhat-toolbox'
-import '@nomicfoundation/hardhat-chai-matchers'
-import '@typechain/hardhat'
-import 'hardhat-contract-sizer'
-import 'hardhat-gas-reporter'
-import Configuration from '@configuration'
-import '@tasks'
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity ^0.8.17;
 
-const config: HardhatUserConfig = {
-    solidity: {
-        compilers: [
-            {
-                version: '0.8.17',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-            {
-                version: '0.8.18',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-        ],
-    },
-    paths: {
-        sources: './contracts',
-        tests: './test/unitTests',
-        cache: './cache',
-        artifacts: './artifacts',
-    },
-    defaultNetwork: 'hardhat',
-    networks: {
-        hardhat: {
-            chainId: 1337,
-            blockGasLimit: 30_000_000,
-            hardfork: 'london',
-        },
-        local: {
-            url: Configuration.endpoints.local.jsonRpc,
-            accounts: Configuration.privateKeys.local,
-            timeout: 60_000,
-        },
-        previewnet: {
-            url: Configuration.endpoints.previewnet.jsonRpc,
-            accounts: Configuration.privateKeys.previewnet,
-            timeout: 120_000,
-        },
-        testnet: {
-            url: Configuration.endpoints.testnet.jsonRpc,
-            accounts: Configuration.privateKeys.testnet,
-            timeout: 120_000,
-        },
-        mainnet: {
-            url: Configuration.endpoints.mainnet.jsonRpc,
-            accounts: Configuration.privateKeys.mainnet,
-            timeout: 120_000,
-        },
-    },
-    contractSizer: {
-        alphaSort: true,
-        disambiguatePaths: false,
-        runOnCompile: Configuration.contractSizerRunOnCompile,
-        strict: true,
-    },
-    gasReporter: {
-        enabled: Configuration.reportGas,
-        showTimeSpent: true,
-        outputFile: 'gas-report.txt', // Force output to a file
-        noColors: true, // Recommended for file output
-    },
-    typechain: {
-        outDir: './typechain-types',
-        target: 'ethers-v5',
-    },
-    mocha: {
-        timeout: 3_000_000,
-    },
+import {IResolverProxy_} from './IResolverProxy.sol';
+import {IBusinessLogicResolver_} from './IBusinessLogicResolver.sol';
+import {IBond_} from './IBond.sol';
+import {IEquity_} from './IEquity.sol';
+import {
+    FactoryRegulationData,
+    RegulationData,
+    RegulationType,
+    RegulationSubType
+} from './regulation.sol';
+
+/// @dev IFactory with ERC20MetadataInfo struct
+/// @dev Avoids overriding the whole common inhertance chain to a floating pragma
+
+// solhint-disable contract-name-camelcase
+interface IFactory_ {
+    struct ERC20MetadataInfo {
+        string name;
+        string symbol;
+        string isin;
+        uint8 decimals;
+    }
+
+    enum SecurityType {
+        Bond,
+        Equity
+    }
+
+    struct ResolverProxyConfiguration {
+        bytes32 key;
+        uint256 version;
+    }
+
+    // TODO: Separete common data in new struct
+    struct SecurityData {
+        bool arePartitionsProtected;
+        bool isMultiPartition;
+        IBusinessLogicResolver_ resolver;
+        ResolverProxyConfiguration resolverProxyConfiguration;
+        IResolverProxy_.Rbac[] rbacs;
+        bool isControllable;
+        bool isWhiteList;
+        uint256 maxSupply;
+        ERC20MetadataInfo erc20MetadataInfo;
+        bool clearingActive;
+        bool internalKycActivated;
+        address[] externalPauses;
+        address[] externalControlLists;
+        address[] externalKycLists;
+    }
+
+    struct EquityData {
+        SecurityData security;
+        IEquity_.EquityDetailsData equityDetails;
+    }
+
+    struct BondData {
+        SecurityData security;
+        IBond_.BondDetailsData bondDetails;
+        IBond_.CouponDetailsData couponDetails;
+    }
+
+    event EquityDeployed(
+        address indexed deployer,
+        address equityAddress,
+        EquityData equityData,
+        FactoryRegulationData regulationData
+    );
+
+    event BondDeployed(
+        address indexed deployer,
+        address bondAddress,
+        BondData bondData,
+        FactoryRegulationData regulationData
+    );
+
+    error EmptyResolver(IBusinessLogicResolver_ resolver);
+    error NoInitialAdmins();
+
+    function deployEquity(
+        EquityData calldata _equityData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address equityAddress_);
+
+    function deployBond(
+        BondData calldata _bondData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address bondAddress_);
+
+    function getAppliedRegulationData(
+        RegulationType _regulationType,
+        RegulationSubType _regulationSubType
+    ) external pure returns (RegulationData memory regulationData_);
 }
-
-export default config

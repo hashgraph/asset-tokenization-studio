@@ -203,94 +203,141 @@
 
 */
 
-import { HardhatUserConfig } from 'hardhat/config'
-import 'tsconfig-paths/register'
-import '@nomicfoundation/hardhat-toolbox'
-import '@nomicfoundation/hardhat-chai-matchers'
-import '@typechain/hardhat'
-import 'hardhat-contract-sizer'
-import 'hardhat-gas-reporter'
-import Configuration from '@configuration'
-import '@tasks'
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.17;
 
-const config: HardhatUserConfig = {
-    solidity: {
-        compilers: [
-            {
-                version: '0.8.17',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-            {
-                version: '0.8.18',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-        ],
-    },
-    paths: {
-        sources: './contracts',
-        tests: './test/unitTests',
-        cache: './cache',
-        artifacts: './artifacts',
-    },
-    defaultNetwork: 'hardhat',
-    networks: {
-        hardhat: {
-            chainId: 1337,
-            blockGasLimit: 30_000_000,
-            hardfork: 'london',
-        },
-        local: {
-            url: Configuration.endpoints.local.jsonRpc,
-            accounts: Configuration.privateKeys.local,
-            timeout: 60_000,
-        },
-        previewnet: {
-            url: Configuration.endpoints.previewnet.jsonRpc,
-            accounts: Configuration.privateKeys.previewnet,
-            timeout: 120_000,
-        },
-        testnet: {
-            url: Configuration.endpoints.testnet.jsonRpc,
-            accounts: Configuration.privateKeys.testnet,
-            timeout: 120_000,
-        },
-        mainnet: {
-            url: Configuration.endpoints.mainnet.jsonRpc,
-            accounts: Configuration.privateKeys.mainnet,
-            timeout: 120_000,
-        },
-    },
-    contractSizer: {
-        alphaSort: true,
-        disambiguatePaths: false,
-        runOnCompile: Configuration.contractSizerRunOnCompile,
-        strict: true,
-    },
-    gasReporter: {
-        enabled: Configuration.reportGas,
-        showTimeSpent: true,
-        outputFile: 'gas-report.txt', // Force output to a file
-        noColors: true, // Recommended for file output
-    },
-    typechain: {
-        outDir: './typechain-types',
-        target: 'ethers-v5',
-    },
-    mocha: {
-        timeout: 3_000_000,
-    },
+// solhint-disable no-global-import
+import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
+import {
+    IFactory_,
+    FactoryRegulationData,
+    IResolverProxy_
+} from '../interfaces/IFactory.sol';
+import {_DEFAULT_ADMIN_ROLE} from '../interfaces/IAccessControl.sol';
+
+// solhint-disable custom-errors
+library SecurityDeploymentLib {
+    function deployEquity(
+        address _atsFactory,
+        ITREXFactory.TokenDetails calldata _tokenDetails,
+        IFactory_.EquityData calldata _equityData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (IToken token_) {
+        IFactory_.EquityData memory equityDataMem = _equityData;
+
+        _validateTokenDetails(
+            _tokenDetails,
+            equityDataMem.security.erc20MetadataInfo.name,
+            equityDataMem.security.erc20MetadataInfo.symbol,
+            equityDataMem.security.erc20MetadataInfo.decimals,
+            equityDataMem.security.rbacs
+        );
+
+        equityDataMem.security.rbacs = _prepareRbacs(
+            _equityData.security.rbacs
+        );
+
+        token_ = IToken(
+            IFactory_(_atsFactory).deployEquity(
+                equityDataMem,
+                _factoryRegulationData
+            )
+        );
+    }
+
+    function deployBond(
+        address _atsFactory,
+        ITREXFactory.TokenDetails calldata _tokenDetails,
+        IFactory_.BondData calldata _bondData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (IToken token_) {
+        IFactory_.BondData memory bondDataMem = _bondData;
+
+        _validateTokenDetails(
+            _tokenDetails,
+            bondDataMem.security.erc20MetadataInfo.name,
+            bondDataMem.security.erc20MetadataInfo.symbol,
+            bondDataMem.security.erc20MetadataInfo.decimals,
+            bondDataMem.security.rbacs
+        );
+
+        bondDataMem.security.rbacs = _prepareRbacs(_bondData.security.rbacs);
+
+        token_ = IToken(
+            IFactory_(_atsFactory).deployBond(
+                bondDataMem,
+                _factoryRegulationData
+            )
+        );
+    }
+
+    /// @dev Prepares RBAC array by adding default admin role to address(this)
+    function _prepareRbacs(
+        IResolverProxy_.Rbac[] calldata originalRbacs
+    ) private view returns (IResolverProxy_.Rbac[] memory rbacs) {
+        uint256 length = originalRbacs.length;
+        rbacs = new IResolverProxy_.Rbac[](length + 1);
+
+        // Copy original RBACs
+        for (uint256 i; i < length; ) {
+            rbacs[i] = originalRbacs[i];
+            unchecked {
+                ++i;
+            }
+        }
+
+        // Add default admin RBAC
+        address[] memory members = new address[](1);
+        members[0] = address(this);
+        //TODO: change to T_REX_OWNER
+        rbacs[length] = IResolverProxy_.Rbac({
+            role: _DEFAULT_ADMIN_ROLE,
+            members: members
+        });
+    }
+
+    /// @dev Validates that the token details match the security details
+    function _validateTokenDetails(
+        ITREXFactory.TokenDetails calldata _tokenDetails,
+        string memory _securityName,
+        string memory _securitySymbol,
+        uint8 _securityDecimals,
+        IResolverProxy_.Rbac[] memory _rbacs
+    ) private pure {
+        require(
+            keccak256(abi.encodePacked(_tokenDetails.name)) ==
+                keccak256(abi.encodePacked(_securityName)),
+            'Name mismatch'
+        );
+        require(
+            keccak256(abi.encodePacked(_tokenDetails.symbol)) ==
+                keccak256(abi.encodePacked(_securitySymbol)),
+            'Symbol mismatch'
+        );
+        require(
+            _tokenDetails.decimals == _securityDecimals,
+            'Decimals mismatch'
+        );
+        bool ownerMatch = false;
+        //TODO: replace by T_REX_OWNER
+        for (uint256 i = 0; i < _rbacs.length; ) {
+            if (
+                _rbacs[i].role == _DEFAULT_ADMIN_ROLE &&
+                _rbacs[i].members.length > 0
+            ) {
+                for (uint256 j = 0; j < _rbacs[i].members.length; ) {
+                    ownerMatch = _tokenDetails.owner == _rbacs[i].members[j];
+                    if (ownerMatch) break;
+                    unchecked {
+                        ++j;
+                    }
+                }
+            }
+            if (ownerMatch) break;
+            unchecked {
+                ++i;
+            }
+        }
+        require(ownerMatch, 'T-REX owner mismatch');
+    }
 }
-
-export default config
