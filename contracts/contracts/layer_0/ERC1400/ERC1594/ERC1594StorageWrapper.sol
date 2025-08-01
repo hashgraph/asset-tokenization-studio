@@ -432,20 +432,44 @@ abstract contract ERC1594StorageWrapper is
             return (isAbleToRedeemFrom, statusCode, reasonCode, details);
         }
 
-        // From methods checks (if not owner)
+        // Always check sender for redeems
+        if (!_isAbleToAccess(_msgSender())) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                AccountIsBlocked.selector,
+                abi.encode(_msgSender())
+            );
+        }
+        if (_isRecovered(_msgSender())) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IERC3643.WalletRecovered.selector,
+                abi.encode(_msgSender())
+            );
+        }
+
+        // From methods checks (if not owner) - check allowance
         bool shouldCheckSender = _from != _msgSender() &&
             !_isAuthorized(_partition, _msgSender(), _from) &&
             !_hasRole(_protectedPartitionsRole(_partition), _msgSender());
 
         if (shouldCheckSender) {
-            (
-                isAbleToRedeemFrom,
-                statusCode,
-                reasonCode,
-                details
-            ) = _validateRedemptionSender(_from, _value);
-            if (!isAbleToRedeemFrom) {
-                return (isAbleToRedeemFrom, statusCode, reasonCode, details);
+            // Check allowance
+            if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+                return (
+                    false,
+                    Eip1066.INSUFFICIENT_FUNDS,
+                    InsufficientAllowance.selector,
+                    abi.encode(
+                        _msgSender(),
+                        _from,
+                        _allowanceAdjusted(_from, _msgSender()),
+                        _value,
+                        DEFAULT_PARTITION
+                    )
+                );
             }
         }
 
@@ -510,16 +534,12 @@ abstract contract ERC1594StorageWrapper is
                 EMPTY_BYTES
             );
         }
-        // Compliance check
-        bool shouldCheckSender = _from != _msgSender() &&
-            !_isAuthorized(_partition, _msgSender(), _from) &&
-            !_hasRole(_protectedPartitionsRole(_partition), _msgSender());
-
+        // Compliance check - always check sender for blocked status
         (isAbleToTransfer, statusCode, reasonCode, details) = _isCompliant(
             _from,
             _to,
             _value,
-            shouldCheckSender
+            true // Always check sender for blocked status
         );
         if (!isAbleToTransfer) {
             return (isAbleToTransfer, statusCode, reasonCode, details);
@@ -534,8 +554,12 @@ abstract contract ERC1594StorageWrapper is
             return (isAbleToTransfer, statusCode, reasonCode, details);
         }
 
-        // Allowance check for non-owner transfers
-        if (shouldCheckSender) {
+        // Allowance check for non-owner transfers only
+        bool shouldCheckAllowance = _from != _msgSender() &&
+            !_isAuthorized(_partition, _msgSender(), _from) &&
+            !_hasRole(_protectedPartitionsRole(_partition), _msgSender());
+
+        if (shouldCheckAllowance) {
             uint256 currentAllowance = _allowanceAdjusted(_from, _msgSender());
             if (currentAllowance < _value) {
                 return (
@@ -553,14 +577,27 @@ abstract contract ERC1594StorageWrapper is
             }
         }
 
-        // Balance check
-        uint256 currentBalance = _balanceOfAdjusted(_from);
-        if (currentBalance < _value) {
+        // Partition validation check
+        if (!_validPartition(_partition, _from)) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                InvalidPartition.selector,
+                abi.encode(_from, _partition)
+            );
+        }
+
+        // Balance check - check partition-specific balance
+        uint256 currentPartitionBalance = _balanceOfByPartitionAdjusted(
+            _partition,
+            _from
+        );
+        if (currentPartitionBalance < _value) {
             return (
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
                 InsufficientBalance.selector,
-                abi.encode(_from, currentBalance, _value, DEFAULT_PARTITION)
+                abi.encode(_from, currentPartitionBalance, _value, _partition)
             );
         }
 
@@ -646,6 +683,7 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
+        // Check sender for blocked status and recovery status when required
         if (_checkSender) {
             if (!_isAbleToAccess(_msgSender())) {
                 return (
