@@ -416,7 +416,6 @@ export const StepReview = () => {
       value: identityRegistryId ?? "-",
     },
   ];
-  vite.config.ts;
   const externalManagement: DetailReviewProps[] = [
     {
       title: t("stepExternalManagement.externalPause"),
