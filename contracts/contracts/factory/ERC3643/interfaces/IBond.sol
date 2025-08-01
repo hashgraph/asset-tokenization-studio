@@ -207,7 +207,7 @@
 pragma solidity ^0.8.17;
 
 // solhint-disable contract-name-camelcase
-interface IBond_ {
+interface IBond {
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;

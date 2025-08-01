@@ -207,7 +207,7 @@
 pragma solidity ^0.8.17;
 
 // solhint-disable contract-name-camelcase
-interface IStaticFunctionSelectors_ {
+interface IStaticFunctionSelectors {
     /// @notice Gets the static resolver key.
     /// @return staticResolverKey_ Static resolver key
     function getStaticResolverKey()

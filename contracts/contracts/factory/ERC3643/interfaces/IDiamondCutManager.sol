@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
 
-import {IDiamondLoupe_} from './IDiamondLoupe.sol';
+import {IDiamondLoupe} from './IDiamondLoupe.sol';
 
 /// @title Resolver Proxy Manager
 /// @notice This contract is used to manage configurations of resolverProxy's.
@@ -224,7 +224,7 @@ import {IDiamondLoupe_} from './IDiamondLoupe.sol';
 ///          * list of interfaceIds
 
 // solhint-disable contract-name-camelcase
-interface IDiamondCutManager_ {
+interface IDiamondCutManager {
     struct FacetConfiguration {
         bytes32 id;
         uint256 version;
@@ -362,7 +362,7 @@ interface IDiamondCutManager_ {
         uint256 _version,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (IDiamondLoupe_.Facet[] memory facets_);
+    ) external view returns (IDiamondLoupe.Facet[] memory facets_);
 
     function getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
@@ -419,7 +419,7 @@ interface IDiamondCutManager_ {
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
-    ) external view returns (IDiamondLoupe_.Facet memory facet_);
+    ) external view returns (IDiamondLoupe.Facet memory facet_);
 
     /// @notice Returns the facet address.
     /// @param _configurationId key to filter the facets.

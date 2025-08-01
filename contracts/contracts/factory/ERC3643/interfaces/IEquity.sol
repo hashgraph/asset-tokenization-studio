@@ -207,7 +207,7 @@
 pragma solidity ^0.8.17;
 
 // solhint-disable contract-name-camelcase
-interface IEquity_ {
+interface IEquity {
     enum DividendType {
         NONE,
         PREFERRED,

@@ -206,10 +206,10 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
 
-import {IResolverProxy_} from './IResolverProxy.sol';
-import {IBusinessLogicResolver_} from './IBusinessLogicResolver.sol';
-import {IBond_} from './IBond.sol';
-import {IEquity_} from './IEquity.sol';
+import {IResolverProxy} from './IResolverProxy.sol';
+import {IBusinessLogicResolver} from './IBusinessLogicResolver.sol';
+import {IBond} from './IBond.sol';
+import {IEquity} from './IEquity.sol';
 import {
     FactoryRegulationData,
     RegulationData,
@@ -221,7 +221,7 @@ import {
 /// @dev Avoids overriding the whole common inhertance chain to a floating pragma
 
 // solhint-disable contract-name-camelcase
-interface IFactory_ {
+interface IFactory {
     struct ERC20MetadataInfo {
         string name;
         string symbol;
@@ -243,9 +243,9 @@ interface IFactory_ {
     struct SecurityData {
         bool arePartitionsProtected;
         bool isMultiPartition;
-        IBusinessLogicResolver_ resolver;
+        IBusinessLogicResolver resolver;
         ResolverProxyConfiguration resolverProxyConfiguration;
-        IResolverProxy_.Rbac[] rbacs;
+        IResolverProxy.Rbac[] rbacs;
         bool isControllable;
         bool isWhiteList;
         uint256 maxSupply;
@@ -259,13 +259,13 @@ interface IFactory_ {
 
     struct EquityData {
         SecurityData security;
-        IEquity_.EquityDetailsData equityDetails;
+        IEquity.EquityDetailsData equityDetails;
     }
 
     struct BondData {
         SecurityData security;
-        IBond_.BondDetailsData bondDetails;
-        IBond_.CouponDetailsData couponDetails;
+        IBond.BondDetailsData bondDetails;
+        IBond.CouponDetailsData couponDetails;
     }
 
     event EquityDeployed(
@@ -282,7 +282,7 @@ interface IFactory_ {
         FactoryRegulationData regulationData
     );
 
-    error EmptyResolver(IBusinessLogicResolver_ resolver);
+    error EmptyResolver(IBusinessLogicResolver resolver);
     error NoInitialAdmins();
 
     function deployEquity(

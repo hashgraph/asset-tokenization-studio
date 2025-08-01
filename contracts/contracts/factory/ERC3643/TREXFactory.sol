@@ -209,16 +209,13 @@ pragma solidity ^0.8.17;
 // solhint-disable no-empty-blocks
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
+import {IFactory, FactoryRegulationData} from './interfaces/IFactory.sol';
 import {
-    IFactory_,
-    FactoryRegulationData,
-    IResolverProxy_
-} from './interfaces/IFactory.sol';
-import {
-    IAccessControl_,
+    IAccessControl,
     _DEFAULT_ADMIN_ROLE
 } from './interfaces/IAccessControl.sol';
 import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
+import {SecurityDeploymentLib} from './libraries/SecurityDeploymentLib.sol';
 
 // imports for compilation
 import '@tokenysolutions/t-rex/contracts/registry/implementation/ClaimTopicsRegistry.sol';
@@ -282,19 +279,14 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         string memory _salt,
         TokenDetails calldata _tokenDetails,
         ClaimDetails calldata _claimDetails,
-        IFactory_.EquityData calldata _equityData,
+        IFactory.EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external onlyOwner {
-        IFactory_.EquityData memory equityDataMem = _equityData;
-        equityDataMem.security.rbacs = _prepareRbacs(
-            _equityData.security.rbacs
-        );
-
-        IToken token = IToken(
-            IFactory_(_atsFactory).deployEquity(
-                equityDataMem,
-                _factoryRegulationData
-            )
+        IToken token = SecurityDeploymentLib.deployEquity(
+            _atsFactory,
+            _tokenDetails,
+            _equityData,
+            _factoryRegulationData
         );
         _deployTREXSuite(_salt, _tokenDetails, _claimDetails, token);
     }
@@ -307,17 +299,14 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         string memory _salt,
         TokenDetails calldata _tokenDetails,
         ClaimDetails calldata _claimDetails,
-        IFactory_.BondData calldata _bondData,
+        IFactory.BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external onlyOwner {
-        IFactory_.BondData memory bondDataMem = _bondData;
-        bondDataMem.security.rbacs = _prepareRbacs(_bondData.security.rbacs);
-
-        IToken token = IToken(
-            IFactory_(_atsFactory).deployBond(
-                bondDataMem,
-                _factoryRegulationData
-            )
+        IToken token = SecurityDeploymentLib.deployBond(
+            _atsFactory,
+            _tokenDetails,
+            _bondData,
+            _factoryRegulationData
         );
         _deployTREXSuite(_salt, _tokenDetails, _claimDetails, token);
     }
@@ -373,10 +362,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         // should not be possible to set an implementation authority that is not complete
         require(
             (ITREXImplementationAuthority(implementationAuthority_))
-                .getTokenImplementation() !=
-                address(0) &&
-                (ITREXImplementationAuthority(implementationAuthority_))
-                    .getCTRImplementation() !=
+                .getCTRImplementation() !=
                 address(0) &&
                 (ITREXImplementationAuthority(implementationAuthority_))
                     .getIRImplementation() !=
@@ -407,6 +393,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
 
     /// @dev Sets the address of the ATS factory
     function setAtsFactory(address atsFactory_) public onlyOwner {
+        require(atsFactory_ != address(0), 'invalid argument - zero address');
         _atsFactory = atsFactory_;
     }
 
@@ -479,7 +466,11 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
                 _salt
             );
             _token.setOnchainID(_tokenID);
+        } else {
+            _token.setOnchainID(_tokenDetails.ONCHAINID);
         }
+        _token.setIdentityRegistry(address(ir));
+        _token.setCompliance(address(mc));
         for (uint256 i = 0; i < (_claimDetails.claimTopics).length; i++) {
             ctr.addClaimTopic(_claimDetails.claimTopics[i]);
         }
@@ -510,7 +501,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         }
         tokenDeployed[_salt] = address(_token);
         /// equivalent to transfer ownership of the token to the new owner
-        IAccessControl_(address(_token)).renounceRole(_DEFAULT_ADMIN_ROLE);
+        IAccessControl(address(_token)).renounceRole(_DEFAULT_ADMIN_ROLE);
         (Ownable(address(ir))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);
@@ -608,29 +599,5 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         );
         bytes memory bytecode = abi.encodePacked(_code, _constructData);
         return _deploy(_salt, bytecode);
-    }
-
-    /// @dev Prepares RBAC array by adding default admin role to address(this)
-    function _prepareRbacs(
-        IResolverProxy_.Rbac[] calldata originalRbacs
-    ) private view returns (IResolverProxy_.Rbac[] memory rbacs) {
-        uint256 length = originalRbacs.length;
-        rbacs = new IResolverProxy_.Rbac[](length + 1);
-
-        // Copy original RBACs
-        for (uint256 i; i < length; ) {
-            rbacs[i] = originalRbacs[i];
-            unchecked {
-                ++i;
-            }
-        }
-
-        // Add default admin RBAC
-        address[] memory members = new address[](1);
-        members[0] = address(this);
-        rbacs[length] = IResolverProxy_.Rbac({
-            role: _DEFAULT_ADMIN_ROLE,
-            members: members
-        });
     }
 }
