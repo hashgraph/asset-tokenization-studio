@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
 
-import {IDiamondCutManager} from './IDiamondCutManager.sol';
+import {IDiamondCutManager_} from './IDiamondCutManager.sol';
 
 /// @title Contracts Repository
 /// @notice This contract is used to register and resolve Business Logics (aka contracts) addresses using
@@ -221,7 +221,7 @@ import {IDiamondCutManager} from './IDiamondCutManager.sol';
 ///			latest version for all Business Logics by 1.
 
 // solhint-disable contract-name-camelcase
-interface IBusinessLogicResolver is IDiamondCutManager {
+interface IBusinessLogicResolver_ is IDiamondCutManager_ {
     enum VersionStatus {
         NONE,
         ACTIVATED,

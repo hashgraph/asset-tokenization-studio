@@ -209,9 +209,9 @@ pragma solidity ^0.8.17;
 // solhint-disable no-global-import
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import {
-    IFactory,
+    IFactory_,
     FactoryRegulationData,
-    IResolverProxy
+    IResolverProxy_
 } from '../interfaces/IFactory.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../interfaces/IAccessControl.sol';
 
@@ -220,10 +220,10 @@ library SecurityDeploymentLib {
     function deployEquity(
         address _atsFactory,
         ITREXFactory.TokenDetails calldata _tokenDetails,
-        IFactory.EquityData calldata _equityData,
+        IFactory_.EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external returns (IToken token_) {
-        IFactory.EquityData memory equityDataMem = _equityData;
+        IFactory_.EquityData memory equityDataMem = _equityData;
 
         _validateTokenDetails(
             _tokenDetails,
@@ -238,7 +238,7 @@ library SecurityDeploymentLib {
         );
 
         token_ = IToken(
-            IFactory(_atsFactory).deployEquity(
+            IFactory_(_atsFactory).deployEquity(
                 equityDataMem,
                 _factoryRegulationData
             )
@@ -248,10 +248,10 @@ library SecurityDeploymentLib {
     function deployBond(
         address _atsFactory,
         ITREXFactory.TokenDetails calldata _tokenDetails,
-        IFactory.BondData calldata _bondData,
+        IFactory_.BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external returns (IToken token_) {
-        IFactory.BondData memory bondDataMem = _bondData;
+        IFactory_.BondData memory bondDataMem = _bondData;
 
         _validateTokenDetails(
             _tokenDetails,
@@ -264,7 +264,7 @@ library SecurityDeploymentLib {
         bondDataMem.security.rbacs = _prepareRbacs(_bondData.security.rbacs);
 
         token_ = IToken(
-            IFactory(_atsFactory).deployBond(
+            IFactory_(_atsFactory).deployBond(
                 bondDataMem,
                 _factoryRegulationData
             )
@@ -273,10 +273,10 @@ library SecurityDeploymentLib {
 
     /// @dev Prepares RBAC array by adding default admin role to address(this)
     function _prepareRbacs(
-        IResolverProxy.Rbac[] calldata originalRbacs
-    ) private view returns (IResolverProxy.Rbac[] memory rbacs) {
+        IResolverProxy_.Rbac[] calldata originalRbacs
+    ) private view returns (IResolverProxy_.Rbac[] memory rbacs) {
         uint256 length = originalRbacs.length;
-        rbacs = new IResolverProxy.Rbac[](length + 1);
+        rbacs = new IResolverProxy_.Rbac[](length + 1);
 
         // Copy original RBACs
         for (uint256 i; i < length; ) {
@@ -290,7 +290,7 @@ library SecurityDeploymentLib {
         address[] memory members = new address[](1);
         members[0] = address(this);
         //TODO: change to T_REX_OWNER
-        rbacs[length] = IResolverProxy.Rbac({
+        rbacs[length] = IResolverProxy_.Rbac({
             role: _DEFAULT_ADMIN_ROLE,
             members: members
         });
@@ -302,7 +302,7 @@ library SecurityDeploymentLib {
         string memory _securityName,
         string memory _securitySymbol,
         uint8 _securityDecimals,
-        IResolverProxy.Rbac[] memory _rbacs
+        IResolverProxy_.Rbac[] memory _rbacs
     ) private pure {
         require(
             keccak256(abi.encodePacked(_tokenDetails.name)) ==

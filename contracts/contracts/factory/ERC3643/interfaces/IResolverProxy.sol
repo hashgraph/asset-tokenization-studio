@@ -207,7 +207,7 @@
 pragma solidity ^0.8.17;
 
 // solhint-disable contract-name-camelcase
-interface IResolverProxy {
+interface IResolverProxy_ {
     struct Rbac {
         bytes32 role;
         address[] members;

@@ -209,9 +209,9 @@ pragma solidity ^0.8.17;
 // solhint-disable no-empty-blocks
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
-import {IFactory, FactoryRegulationData} from './interfaces/IFactory.sol';
+import {IFactory_, FactoryRegulationData} from './interfaces/IFactory.sol';
 import {
-    IAccessControl,
+    IAccessControl_,
     _DEFAULT_ADMIN_ROLE
 } from './interfaces/IAccessControl.sol';
 import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
@@ -279,7 +279,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         string memory _salt,
         TokenDetails calldata _tokenDetails,
         ClaimDetails calldata _claimDetails,
-        IFactory.EquityData calldata _equityData,
+        IFactory_.EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external onlyOwner {
         IToken token = SecurityDeploymentLib.deployEquity(
@@ -299,7 +299,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         string memory _salt,
         TokenDetails calldata _tokenDetails,
         ClaimDetails calldata _claimDetails,
-        IFactory.BondData calldata _bondData,
+        IFactory_.BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external onlyOwner {
         IToken token = SecurityDeploymentLib.deployBond(
@@ -501,7 +501,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         }
         tokenDeployed[_salt] = address(_token);
         /// equivalent to transfer ownership of the token to the new owner
-        IAccessControl(address(_token)).renounceRole(_DEFAULT_ADMIN_ROLE);
+        IAccessControl_(address(_token)).renounceRole(_DEFAULT_ADMIN_ROLE);
         (Ownable(address(ir))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);

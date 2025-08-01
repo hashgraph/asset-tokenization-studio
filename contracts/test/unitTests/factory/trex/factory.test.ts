@@ -308,7 +308,7 @@ describe('TREX Factory Tests', () => {
             await DeployAtsFullInfrastructureCommand.newInstance({
                 signer: deployer,
                 useDeployed: false,
-                useEnvironment: true,
+                useEnvironment: false,
                 timeTravelEnabled: true,
             })
         )
