@@ -1089,6 +1089,8 @@ export async function deployContractWithFactory<
             .connect(signer)
             .deploy(...args, overrides)) as C
         txResponseList.push(implementationContract.deployTransaction)
+
+        await implementationContract.deployTransaction.wait()
     }
 
     if (!withProxy) {
