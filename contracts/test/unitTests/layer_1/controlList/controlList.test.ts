@@ -211,7 +211,7 @@ import {
     type ResolverProxy,
     type ControlList,
     type Pause,
-    AccessControl,
+    IAccessControl,
     IFactory,
     BusinessLogicResolver,
 } from '@typechain'
@@ -245,7 +245,7 @@ describe('Control List Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let controlListFacet: ControlList
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let pauseFacet: Pause
 
     before(async () => {
@@ -312,7 +312,7 @@ describe('Control List Tests', () => {
         })
 
         accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
+            'IAccessControl',
             diamond.address
         )
 

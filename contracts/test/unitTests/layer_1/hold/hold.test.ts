@@ -219,7 +219,7 @@ import {
     ControlList,
     Pause,
     ERC20,
-    ERC1410ScheduledTasks,
+    IERC1410,
     IFactory,
     BusinessLogicResolver,
     TimeTravel,
@@ -229,7 +229,7 @@ import {
     Equity,
     AdjustBalances,
     Cap,
-    AccessControl,
+    IAccessControl,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -305,7 +305,7 @@ describe('Hold Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let holdFacet: Hold
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let controlListFacet: ControlList
     let erc20Facet: ERC20
     let timeTravelFacet: TimeTravel
@@ -313,7 +313,7 @@ describe('Hold Tests', () => {
     let ssiManagementFacet: SsiManagement
     let clearingActionsFacet: ClearingActionsFacet
     let equityFacet: Equity
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let capFacet: Cap
     let adjustBalancesFacet: AdjustBalances
 
@@ -383,7 +383,7 @@ describe('Hold Tests', () => {
             signer_D
         )
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
+            'IERC1410',
             diamond.address,
             signer_B
         )
@@ -416,7 +416,7 @@ describe('Hold Tests', () => {
         capFacet = await ethers.getContractAt('Cap', diamond.address, signer_A)
 
         accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
+            'IAccessControl',
             diamond.address,
             signer_A
         )

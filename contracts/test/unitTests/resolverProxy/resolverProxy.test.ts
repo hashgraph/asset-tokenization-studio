@@ -207,13 +207,13 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
     type BusinessLogicResolver,
-    type IAccessControl,
     type PauseFacet,
     DiamondFacet,
     DiamondLoupeFacet,
     DiamondFacet__factory,
-    AccessControlReadFacet__factory,
+    AccessControlManagementFacet__factory,
     PauseFacet__factory,
+    AccessControlManagementFacet,
 } from '@typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
@@ -232,7 +232,7 @@ describe('ResolverProxy Tests', () => {
     let resolver: BusinessLogicResolver
     let resolver_2: BusinessLogicResolver
     let diamondFacet: DiamondFacet
-    let accessControlImpl: IAccessControl
+    let accessControlManagementFacet: AccessControlManagementFacet
     let pauseImpl: PauseFacet
     let signer_A: SignerWithAddress
 
@@ -242,9 +242,8 @@ describe('ResolverProxy Tests', () => {
         resolver = await deployResolver()
 
         diamondFacet = await new DiamondFacet__factory(signer_A).deploy()
-        accessControlImpl = await new AccessControlReadFacet__factory(
-            signer_A
-        ).deploy()
+        accessControlManagementFacet =
+            await new AccessControlManagementFacet__factory(signer_A).deploy()
         pauseImpl = await new PauseFacet__factory(signer_A).deploy()
     }
 
@@ -350,8 +349,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 
@@ -419,8 +418,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 
@@ -431,8 +430,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
             {
                 businessLogicKey: await pauseImpl.getStaticResolverKey(),
@@ -477,8 +476,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 
@@ -506,8 +505,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 
@@ -544,8 +543,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 
@@ -596,8 +595,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 
@@ -625,8 +624,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 
@@ -663,8 +662,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 
@@ -718,8 +717,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 
@@ -749,8 +748,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 
@@ -789,8 +788,8 @@ describe('ResolverProxy Tests', () => {
             },
             {
                 businessLogicKey:
-                    await accessControlImpl.getStaticResolverKey(),
-                businessLogicAddress: accessControlImpl.address,
+                    await accessControlManagementFacet.getStaticResolverKey(),
+                businessLogicAddress: accessControlManagementFacet.address,
             },
         ]
 

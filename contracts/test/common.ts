@@ -204,11 +204,11 @@
 */
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { type Pause, type AccessControl } from '@typechain'
+import { type Pause, type IAccessControl } from '@typechain'
 import { expect } from 'chai'
 
 export async function grantRoleAndPauseToken(
-    accessControlFacet: AccessControl,
+    accessControlFacet: IAccessControl,
     pauseFacet: Pause,
     role: string,
     signerAccessControl: SignerWithAddress,

@@ -217,13 +217,13 @@ import {
     type ResolverProxy,
     type Lock,
     Pause,
-    ERC1410ScheduledTasks,
+    IERC1410,
     IFactory,
     BusinessLogicResolver,
     Kyc,
     SsiManagement,
     AdjustBalances,
-    AccessControl,
+    IAccessControl,
     Cap,
     Equity,
     TimeTravel,
@@ -286,11 +286,11 @@ describe('Lock Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let lockFacet: Lock
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let adjustBalancesFacet: AdjustBalances
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let capFacet: Cap
     let equityFacet: Equity
     let timeTravelFacet: TimeTravel
@@ -348,7 +348,7 @@ describe('Lock Tests', () => {
             signer_D
         )
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
+            'IERC1410',
             diamond.address,
             signer_B
         )
@@ -376,7 +376,7 @@ describe('Lock Tests', () => {
         capFacet = await ethers.getContractAt('Cap', diamond.address, signer_A)
 
         accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
+            'IAccessControl',
             diamond.address,
             signer_A
         )

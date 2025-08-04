@@ -208,12 +208,12 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
-    AccessControl,
+    IAccessControl,
+    IAccessControl__factory,
     Pause,
     BusinessLogicResolver,
     DiamondCutManager,
     IDiamondCutManager,
-    AccessControlFacet__factory,
     PauseFacet__factory,
     DiamondCutManager__factory,
     IDiamondLoupe,
@@ -234,7 +234,7 @@ describe('DiamondCutManager', () => {
 
     let businessLogicResolver: BusinessLogicResolver
     let diamondCutManager: DiamondCutManager
-    let accessControl: AccessControl
+    let accessControl: IAccessControl
     let pause: Pause
     let equityFacetIdList: string[] = []
     let bondFacetIdList: string[] = []
@@ -257,7 +257,7 @@ describe('DiamondCutManager', () => {
 
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
-        accessControl = AccessControlFacet__factory.connect(
+        accessControl = IAccessControl__factory.connect(
             businessLogicResolver.address,
             signer_A
         )

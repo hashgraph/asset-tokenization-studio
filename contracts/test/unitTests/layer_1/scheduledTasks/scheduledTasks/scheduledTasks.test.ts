@@ -211,16 +211,14 @@ import {
     type ResolverProxy,
     type EquityUSA,
     type Pause,
-    type AccessControl,
+    type IAccessControl,
     TimeTravel,
     ScheduledTasks,
-    ERC1410ScheduledTasks,
+    IERC1410,
     BusinessLogicResolver,
     IFactory,
-    AccessControl__factory,
     EquityUSA__factory,
     Pause__factory,
-    ERC1410ScheduledTasks__factory,
     ScheduledTasks__factory,
     TimeTravel__factory,
     Kyc,
@@ -266,9 +264,9 @@ describe('Scheduled Tasks Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let equityFacet: EquityUSA
     let scheduledTasksFacet: ScheduledTasks
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
@@ -313,9 +311,9 @@ describe('Scheduled Tasks Tests', () => {
     }
 
     async function setFacets(diamond: ResolverProxy) {
-        accessControlFacet = AccessControl__factory.connect(
-            diamond.address,
-            signer_A
+        accessControlFacet = await ethers.getContractAt(
+            'IAccessControl',
+            diamond.address
         )
         equityFacet = EquityUSA__factory.connect(diamond.address, signer_A)
         scheduledTasksFacet = ScheduledTasks__factory.connect(
@@ -323,10 +321,7 @@ describe('Scheduled Tasks Tests', () => {
             signer_A
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(

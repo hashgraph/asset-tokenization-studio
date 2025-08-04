@@ -211,10 +211,10 @@ import {
     type ResolverProxy,
     type CorporateActions,
     type Pause,
-    type AccessControl,
+    type IAccessControl,
     IFactory,
     BusinessLogicResolver,
-    AccessControlFacet__factory,
+    IAccessControl__factory,
     CorporateActions__factory,
     PauseFacet__factory,
 } from '@typechain'
@@ -251,7 +251,7 @@ describe('Corporate Actions Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let corporateActionsFacet: CorporateActions
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let pauseFacet: Pause
 
     async function deploySecurityFixtureSinglePartition() {
@@ -294,7 +294,7 @@ describe('Corporate Actions Tests', () => {
     }
 
     async function setFacets(diamond: ResolverProxy) {
-        accessControlFacet = AccessControlFacet__factory.connect(
+        accessControlFacet = IAccessControl__factory.connect(
             diamond.address,
             signer_A
         )

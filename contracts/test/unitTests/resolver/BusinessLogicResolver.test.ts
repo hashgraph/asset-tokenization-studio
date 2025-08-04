@@ -206,7 +206,7 @@
 //import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ethers } from 'hardhat'
 import { expect } from 'chai'
-import { AccessControl, Pause, BusinessLogicResolver } from '@typechain'
+import { IAccessControl, Pause, BusinessLogicResolver } from '@typechain'
 import { EQUITY_CONFIG_ID, PAUSER_ROLE } from '@scripts'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 
@@ -218,7 +218,7 @@ describe('BusinessLogicResolver', () => {
     let account_B: string
 
     let businessLogicResolver: BusinessLogicResolver
-    let accessControl: AccessControl
+    let accessControl: IAccessControl
     let pause: Pause
 
     enum VersionStatus {
@@ -259,7 +259,7 @@ describe('BusinessLogicResolver', () => {
 
         await businessLogicResolver.initialize_BusinessLogicResolver()
         accessControl = await ethers.getContractAt(
-            'AccessControl',
+            'IAccessControl',
             businessLogicResolver.address
         )
         accessControl = accessControl.connect(signer_A)

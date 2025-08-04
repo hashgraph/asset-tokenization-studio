@@ -210,7 +210,7 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Pause,
-    AccessControl,
+    IAccessControl,
     IFactory,
     BusinessLogicResolver,
     AccessControlFacet__factory,
@@ -243,7 +243,7 @@ describe('Pause Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let pauseFacet: Pause
     let externalPauseManagement: ExternalPauseManagement
     let externalPauseMock: MockedExternalPause

@@ -210,14 +210,13 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Cap,
-    AccessControl,
+    IAccessControl,
     Pause,
-    ERC1410ScheduledTasks,
+    IERC1410,
     IFactory,
     BusinessLogicResolver,
     Cap__factory,
-    AccessControlFacet__factory,
-    ERC1410ScheduledTasks__factory,
+    IAccessControl__factory,
     PauseFacet__factory,
     Kyc,
     SsiManagement,
@@ -277,9 +276,9 @@ describe('Cap Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let capFacet: Cap
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let equityFacet: Equity
@@ -304,15 +303,12 @@ describe('Cap Tests', () => {
 
     async function setFacets({ diamond }: { diamond: ResolverProxy }) {
         capFacet = Cap__factory.connect(diamond.address, signer_A)
-        accessControlFacet = AccessControlFacet__factory.connect(
+        accessControlFacet = IAccessControl__factory.connect(
             diamond.address,
             signer_A
         )
         pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',

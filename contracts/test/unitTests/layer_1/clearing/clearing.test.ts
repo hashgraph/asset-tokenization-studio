@@ -220,13 +220,13 @@ import {
     ControlList,
     Pause,
     ERC20,
-    ERC1410ScheduledTasks,
+    IERC1410,
     IFactory,
     BusinessLogicResolver,
     TimeTravel,
     Kyc,
     SsiManagement,
-    AccessControl,
+    IAccessControl,
     AdjustBalances,
     Equity,
 } from '@typechain'
@@ -344,11 +344,11 @@ describe('Clearing Tests', () => {
     let clearingFacet: Contract
     let clearingActionsFacet: ClearingActionsFacet
     let holdFacet: HoldFacet
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let adjustBalancesFacet: AdjustBalances
     let equityFacet: Equity
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let controlListFacet: ControlList
     let erc20Facet: ERC20
     let timeTravelFacet: TimeTravel
@@ -457,7 +457,7 @@ describe('Clearing Tests', () => {
             signer_A
         )
         accessControlFacet = await ethers.getContractAt(
-            'AccessControlFacet',
+            'IAccessControl',
             diamond.address,
             signer_A
         )
@@ -472,7 +472,7 @@ describe('Clearing Tests', () => {
             signer_D
         )
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
+            'IERC1410',
             diamond.address,
             signer_B
         )

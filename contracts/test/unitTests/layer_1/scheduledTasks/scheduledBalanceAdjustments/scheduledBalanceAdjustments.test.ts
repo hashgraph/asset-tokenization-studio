@@ -211,12 +211,11 @@ import {
     type ResolverProxy,
     type Equity,
     type ScheduledBalanceAdjustments,
-    type AccessControl,
+    type IAccessControl,
     ScheduledTasks,
     TimeTravel,
     IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
     Equity__factory,
     ScheduledBalanceAdjustments__factory,
     ScheduledTasks__factory,
@@ -251,7 +250,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
     let equityFacet: Equity
     let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments
     let scheduledTasksFacet: ScheduledTasks
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let timeTravelFacet: TimeTravel
 
     async function deploySecurityFixtureSinglePartition() {
@@ -294,9 +293,9 @@ describe('Scheduled BalanceAdjustments Tests', () => {
     }
 
     async function setFacets(diamond: ResolverProxy) {
-        accessControlFacet = AccessControl__factory.connect(
-            diamond.address,
-            signer_A
+        accessControlFacet = await ethers.getContractAt(
+            'IAccessControl',
+            diamond.address
         )
         equityFacet = Equity__factory.connect(diamond.address, signer_A)
         scheduledBalanceAdjustmentsFacet =

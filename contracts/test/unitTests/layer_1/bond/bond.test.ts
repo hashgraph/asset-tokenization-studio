@@ -211,19 +211,17 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     ResolverProxy,
     BondUSA,
-    AccessControl,
+    IAccessControl,
     Pause,
     Lock,
     Hold,
     TimeTravel,
-    ERC1410ScheduledTasks,
+    IERC1410,
     IFactory,
     BusinessLogicResolver,
-    ERC1410ScheduledTasks__factory,
     Lock__factory,
     Hold__factory,
     Pause__factory,
-    AccessControl__factory,
     BondUSATimeTravel__factory,
     TimeTravel__factory,
     Kyc,
@@ -288,11 +286,11 @@ describe('Bond Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let bondFacet: BondUSA
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let pauseFacet: Pause
     let lockFacet: Lock
     let holdFacet: Hold
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
@@ -318,17 +316,14 @@ describe('Bond Tests', () => {
             diamond.address,
             signer_A
         )
-        accessControlFacet = AccessControl__factory.connect(
-            diamond.address,
-            signer_A
+        accessControlFacet = await ethers.getContractAt(
+            'IAccessControl',
+            diamond.address
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
         lockFacet = Lock__factory.connect(diamond.address, signer_A)
         holdFacet = Hold__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(

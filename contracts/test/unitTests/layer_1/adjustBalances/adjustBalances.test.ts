@@ -210,8 +210,8 @@ import {
     type ResolverProxy,
     type AdjustBalances,
     type Pause,
-    type ERC1410ScheduledTasks,
-    type AccessControl,
+    type IERC1410,
+    type IAccessControl,
     Equity,
     ScheduledTasks,
     BusinessLogicResolver,
@@ -263,9 +263,9 @@ describe('Adjust Balances Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let adjustBalancesFacet: AdjustBalances
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let pauseFacet: Pause
     let equityFacet: Equity
     let scheduledTasksFacet: ScheduledTasks
@@ -314,14 +314,11 @@ describe('Adjust Balances Tests', () => {
 
     async function setFacets(diamond: ResolverProxy) {
         accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
+            'IAccessControl',
             diamond.address
         )
 
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
 
         adjustBalancesFacet = await ethers.getContractAt(
             'AdjustBalances',

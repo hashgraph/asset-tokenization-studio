@@ -210,9 +210,9 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Pause,
-    AccessControl,
+    IAccessControl,
     ProtectedPartitions,
-    ERC1410ScheduledTasks,
+    IERC1410,
     ERC1594,
     TransferAndLock,
     ERC20,
@@ -450,12 +450,12 @@ describe('ProtectedPartitions Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let protectedPartitionsFacet: ProtectedPartitions
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let erc1594Facet: ERC1594
     let erc20Facet: ERC20
     let transferAndLockFacet: TransferAndLock
     let controlListFacet: ControlList
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let holdFacet: Hold
@@ -492,10 +492,7 @@ describe('ProtectedPartitions Tests', () => {
             address
         )
         pauseFacet = await ethers.getContractAt('Pause', address)
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            address
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', address)
         erc1594Facet = await ethers.getContractAt('ERC1594', address)
         erc20Facet = await ethers.getContractAt('ERC20', address)
         transferAndLockFacet = await ethers.getContractAt(
@@ -504,7 +501,7 @@ describe('ProtectedPartitions Tests', () => {
         )
         controlListFacet = await ethers.getContractAt('ControlList', address)
         accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
+            'IAccessControl',
             address
         )
         holdFacet = await ethers.getContractAt('Hold', address)

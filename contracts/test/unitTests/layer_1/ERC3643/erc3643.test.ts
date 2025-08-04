@@ -215,13 +215,12 @@ import {
     BusinessLogicResolver,
     IFactory,
     ERC3643,
-    type ERC1410Snapshot,
     Kyc,
     type ControlList,
     SsiManagement,
     ClearingActionsFacet,
-    type AccessControl,
-    ERC1410ScheduledTasks,
+    type IAccessControl,
+    IERC1410,
     TimeTravel,
     AdjustBalances,
     Cap,
@@ -305,7 +304,6 @@ describe('ERC3643 Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let erc3643Facet: ERC3643
-    let erc1410Facet: ERC1410ScheduledTasks
     let timeTravelFacet: TimeTravel
     let adjustBalancesFacet: AdjustBalances
     let capFacet: Cap
@@ -316,7 +314,7 @@ describe('ERC3643 Tests', () => {
     let controlList: ControlList
     let clearingActionsFacet: ClearingActionsFacet
     let ssiManagementFacet: SsiManagement
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let erc1644Facet: ERC1644
     let erc1594Facet: ERC1594
     let lockFacet: Lock
@@ -336,7 +334,7 @@ describe('ERC3643 Tests', () => {
     describe('single partition', () => {
         let erc3643Issuer: ERC3643
         let erc3643Transferor: ERC3643
-        let erc1410SnapshotFacet: ERC1410Snapshot
+        let erc1410Facet: IERC1410
         let erc20Facet: ERC20
 
         before(async () => {
@@ -454,7 +452,7 @@ describe('ERC3643 Tests', () => {
             })
 
             accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
+                'IAccessControl',
                 diamond.address
             )
 
@@ -479,8 +477,8 @@ describe('ERC3643 Tests', () => {
                 diamond.address,
                 signer_E
             )
-            erc1410SnapshotFacet = await ethers.getContractAt(
-                'ERC1410Snapshot',
+            erc1410Facet = await ethers.getContractAt(
+                'IERC1410',
                 diamond.address
             )
 
@@ -499,11 +497,11 @@ describe('ERC3643 Tests', () => {
                 diamond.address
             )
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+                'IERC1410',
                 diamond.address
             )
             accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
+                'IAccessControl',
                 diamond.address
             )
             timeTravelFacet = await ethers.getContractAt(
@@ -634,22 +632,18 @@ describe('ERC3643 Tests', () => {
                 expect(await erc3643Issuer.mint(account_E, AMOUNT / 2))
                     .to.emit(erc3643Issuer, 'Issued')
                     .withArgs(account_C, account_E, AMOUNT / 2)
-                expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(
+                expect(await erc1410Facet.totalSupply()).to.be.equal(AMOUNT / 2)
+                expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(
                     AMOUNT / 2
                 )
                 expect(
-                    await erc1410SnapshotFacet.balanceOf(account_E)
-                ).to.be.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.balanceOfByPartition(
+                    await erc1410Facet.balanceOfByPartition(
                         DEFAULT_PARTITION,
                         account_E
                     )
                 ).to.be.equal(AMOUNT / 2)
                 expect(
-                    await erc1410SnapshotFacet.totalSupplyByPartition(
-                        DEFAULT_PARTITION
-                    )
+                    await erc1410Facet.totalSupplyByPartition(DEFAULT_PARTITION)
                 ).to.be.equal(AMOUNT / 2)
             })
             it('GIVEN a paused token WHEN attempting to mint TokenIsPaused error', async () => {
@@ -724,22 +718,18 @@ describe('ERC3643 Tests', () => {
                 expect(
                     await erc20Facet.allowance(account_E, account_D)
                 ).to.be.equal(0)
-                expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(
+                expect(await erc1410Facet.totalSupply()).to.be.equal(AMOUNT / 2)
+                expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(
                     AMOUNT / 2
                 )
                 expect(
-                    await erc1410SnapshotFacet.balanceOf(account_E)
-                ).to.be.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.balanceOfByPartition(
+                    await erc1410Facet.balanceOfByPartition(
                         DEFAULT_PARTITION,
                         account_E
                     )
                 ).to.be.equal(AMOUNT / 2)
                 expect(
-                    await erc1410SnapshotFacet.totalSupplyByPartition(
-                        DEFAULT_PARTITION
-                    )
+                    await erc1410Facet.totalSupplyByPartition(DEFAULT_PARTITION)
                 ).to.be.equal(AMOUNT / 2)
             })
             it('GIVEN a paused token WHEN attempting to burn TokenIsPaused error', async () => {
@@ -775,31 +765,27 @@ describe('ERC3643 Tests', () => {
                     .to.emit(erc3643Transferor, 'Transferred')
                     .withArgs(account_E, account_D, AMOUNT / 2)
 
-                expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(
-                    AMOUNT
+                expect(await erc1410Facet.totalSupply()).to.be.equal(AMOUNT)
+                expect(await erc1410Facet.balanceOf(account_E)).to.be.equal(
+                    AMOUNT / 2
+                )
+                expect(await erc1410Facet.balanceOf(account_D)).to.be.equal(
+                    AMOUNT / 2
                 )
                 expect(
-                    await erc1410SnapshotFacet.balanceOf(account_E)
-                ).to.be.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.balanceOf(account_D)
-                ).to.be.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.balanceOfByPartition(
+                    await erc1410Facet.balanceOfByPartition(
                         DEFAULT_PARTITION,
                         account_E
                     )
                 ).to.be.equal(AMOUNT / 2)
                 expect(
-                    await erc1410SnapshotFacet.balanceOfByPartition(
+                    await erc1410Facet.balanceOfByPartition(
                         DEFAULT_PARTITION,
                         account_D
                     )
                 ).to.be.equal(AMOUNT / 2)
                 expect(
-                    await erc1410SnapshotFacet.totalSupplyByPartition(
-                        DEFAULT_PARTITION
-                    )
+                    await erc1410Facet.totalSupplyByPartition(DEFAULT_PARTITION)
                 ).to.be.equal(AMOUNT)
             })
             it('GIVEN a paused token WHEN attempting to forcedTransfer TokenIsPaused error', async () => {
@@ -1104,12 +1090,12 @@ describe('ERC3643 Tests', () => {
                 await expect(erc20FacetE.transfer(account_D, AMOUNT / 2)).to.not
                     .be.reverted
 
-                expect(
-                    await erc1410SnapshotFacet.balanceOf(account_E)
-                ).to.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.balanceOf(account_D)
-                ).to.equal(AMOUNT / 2)
+                expect(await erc1410Facet.balanceOf(account_E)).to.equal(
+                    AMOUNT / 2
+                )
+                expect(await erc1410Facet.balanceOf(account_D)).to.equal(
+                    AMOUNT / 2
+                )
             })
 
             it('GIVEN zero address compliance THEN transfers succeed without compliance checks', async () => {
@@ -1172,7 +1158,7 @@ describe('ERC3643 Tests', () => {
 
                 // Grant SSI_MANAGER_ROLE to account_A first, then add account_E as an issuer
                 const accessControlNoCompliance = await ethers.getContractAt(
-                    'AccessControl',
+                    'IAccessControl',
                     diamond.address
                 )
                 await accessControlNoCompliance.grantRole(
@@ -1564,21 +1550,19 @@ describe('ERC3643 Tests', () => {
                     const amounts = [mintAmount, mintAmount]
 
                     const initialBalanceD =
-                        await erc1410SnapshotFacet.balanceOf(account_D)
+                        await erc1410Facet.balanceOf(account_D)
                     const initialBalanceE =
-                        await erc1410SnapshotFacet.balanceOf(account_E)
-                    const initialTotalSupply =
-                        await erc1410SnapshotFacet.totalSupply()
+                        await erc1410Facet.balanceOf(account_E)
+                    const initialTotalSupply = await erc1410Facet.totalSupply()
 
                     await expect(erc3643Issuer.batchMint(toList, amounts)).to
                         .not.be.reverted
 
                     const finalBalanceD =
-                        await erc1410SnapshotFacet.balanceOf(account_D)
+                        await erc1410Facet.balanceOf(account_D)
                     const finalBalanceE =
-                        await erc1410SnapshotFacet.balanceOf(account_E)
-                    const finalTotalSupply =
-                        await erc1410SnapshotFacet.totalSupply()
+                        await erc1410Facet.balanceOf(account_E)
+                    const finalTotalSupply = await erc1410Facet.totalSupply()
 
                     expect(finalBalanceD).to.be.equal(
                         initialBalanceD.add(mintAmount)
@@ -1629,11 +1613,11 @@ describe('ERC3643 Tests', () => {
                     const amounts = [transferAmount, transferAmount]
 
                     const initialBalanceSender =
-                        await erc1410SnapshotFacet.balanceOf(account_E)
+                        await erc1410Facet.balanceOf(account_E)
                     const initialBalanceF =
-                        await erc1410SnapshotFacet.balanceOf(account_F)
+                        await erc1410Facet.balanceOf(account_F)
                     const initialBalanceD =
-                        await erc1410SnapshotFacet.balanceOf(account_D)
+                        await erc1410Facet.balanceOf(account_D)
 
                     erc3643Transferor = erc3643Facet.connect(signer_E)
                     await expect(
@@ -1641,11 +1625,11 @@ describe('ERC3643 Tests', () => {
                     ).to.not.be.reverted
 
                     const finalBalanceSender =
-                        await erc1410SnapshotFacet.balanceOf(account_E)
+                        await erc1410Facet.balanceOf(account_E)
                     const finalBalanceF =
-                        await erc1410SnapshotFacet.balanceOf(account_F)
+                        await erc1410Facet.balanceOf(account_F)
                     const finalBalanceD =
-                        await erc1410SnapshotFacet.balanceOf(account_D)
+                        await erc1410Facet.balanceOf(account_D)
 
                     expect(finalBalanceSender).to.equal(
                         initialBalanceSender.sub(transferAmount * 2)
@@ -1701,11 +1685,11 @@ describe('ERC3643 Tests', () => {
                     const amounts = [transferAmount, transferAmount]
 
                     const initialBalanceF =
-                        await erc1410SnapshotFacet.balanceOf(account_F)
+                        await erc1410Facet.balanceOf(account_F)
                     const initialBalanceD =
-                        await erc1410SnapshotFacet.balanceOf(account_D)
+                        await erc1410Facet.balanceOf(account_D)
                     const initialBalanceE =
-                        await erc1410SnapshotFacet.balanceOf(account_E)
+                        await erc1410Facet.balanceOf(account_E)
 
                     erc3643Facet = erc3643Facet.connect(signer_A)
                     await expect(
@@ -1717,11 +1701,11 @@ describe('ERC3643 Tests', () => {
                     ).to.not.be.reverted
 
                     const finalBalanceF =
-                        await erc1410SnapshotFacet.balanceOf(account_F)
+                        await erc1410Facet.balanceOf(account_F)
                     const finalBalanceD =
-                        await erc1410SnapshotFacet.balanceOf(account_D)
+                        await erc1410Facet.balanceOf(account_D)
                     const finalBalanceE =
-                        await erc1410SnapshotFacet.balanceOf(account_E)
+                        await erc1410Facet.balanceOf(account_E)
 
                     expect(finalBalanceF).to.equal(
                         initialBalanceF.sub(transferAmount)
@@ -1785,23 +1769,21 @@ describe('ERC3643 Tests', () => {
                     const userAddresses = [account_D, account_E]
                     const amounts = [burnAmount, burnAmount]
 
-                    const initialTotalSupply =
-                        await erc1410SnapshotFacet.totalSupply()
+                    const initialTotalSupply = await erc1410Facet.totalSupply()
                     const initialBalanceD =
-                        await erc1410SnapshotFacet.balanceOf(account_D)
+                        await erc1410Facet.balanceOf(account_D)
                     const initialBalanceE =
-                        await erc1410SnapshotFacet.balanceOf(account_E)
+                        await erc1410Facet.balanceOf(account_E)
 
                     erc3643Facet = erc3643Facet.connect(signer_A)
                     await expect(erc3643Facet.batchBurn(userAddresses, amounts))
                         .to.not.be.reverted
 
-                    const finalTotalSupply =
-                        await erc1410SnapshotFacet.totalSupply()
+                    const finalTotalSupply = await erc1410Facet.totalSupply()
                     const finalBalanceD =
-                        await erc1410SnapshotFacet.balanceOf(account_D)
+                        await erc1410Facet.balanceOf(account_D)
                     const finalBalanceE =
-                        await erc1410SnapshotFacet.balanceOf(account_E)
+                        await erc1410Facet.balanceOf(account_E)
 
                     expect(finalBalanceD).to.equal(
                         initialBalanceD.sub(burnAmount)
@@ -1903,12 +1885,12 @@ describe('ERC3643 Tests', () => {
                     ).to.not.be.reverted
 
                     // Check final balances to be sure
-                    expect(
-                        await erc1410SnapshotFacet.balanceOf(account_D)
-                    ).to.equal(mintAmount - transferAmount)
-                    expect(
-                        await erc1410SnapshotFacet.balanceOf(account_E)
-                    ).to.equal(mintAmount - transferAmount)
+                    expect(await erc1410Facet.balanceOf(account_D)).to.equal(
+                        mintAmount - transferAmount
+                    )
+                    expect(await erc1410Facet.balanceOf(account_E)).to.equal(
+                        mintAmount - transferAmount
+                    )
                 })
 
                 it('GIVEN an account without FREEZE_MANAGER_ROLE WHEN batchSetAddressFrozen THEN transaction fails', async () => {
@@ -2168,7 +2150,7 @@ describe('ERC3643 Tests', () => {
             })
         })
 
-        describe('AccessControl', () => {
+        describe('IAccessControl', () => {
             it('GIVEN an account without TREX_OWNER role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
@@ -3405,7 +3387,7 @@ describe('ERC3643 Tests', () => {
             })
 
             accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
+                'IAccessControl',
                 diamond.address
             )
 
