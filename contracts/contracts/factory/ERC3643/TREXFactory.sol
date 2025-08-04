@@ -217,22 +217,6 @@ import {
 import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
 import {SecurityDeploymentLib} from './libraries/SecurityDeploymentLib.sol';
 
-// imports for compilation
-import '@tokenysolutions/t-rex/contracts/registry/implementation/ClaimTopicsRegistry.sol';
-import '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistry.sol';
-import '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistryStorage.sol';
-import '@tokenysolutions/t-rex/contracts/registry/implementation/TrustedIssuersRegistry.sol';
-import '@tokenysolutions/t-rex/contracts/compliance/modular/ModularCompliance.sol';
-import '@tokenysolutions/t-rex/contracts/proxy/authority/TREXImplementationAuthority.sol';
-import '@tokenysolutions/t-rex/contracts/proxy/TrustedIssuersRegistryProxy.sol';
-import '@tokenysolutions/t-rex/contracts/proxy/ClaimTopicsRegistryProxy.sol';
-import '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryProxy.sol';
-import '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryStorageProxy.sol';
-import '@tokenysolutions/t-rex/contracts/proxy/ModularComplianceProxy.sol';
-import '@tokenysolutions/t-rex/contracts/compliance/legacy/DefaultCompliance.sol';
-import '@onchain-id/solidity/contracts/Identity.sol';
-import '@onchain-id/solidity/contracts/ClaimIssuer.sol';
-
 /// @author Tokeny Solutions
 /// @notice Adapted from the T-REX official repository to deploy an ERC-3643-compatible ATS security token
 // solhint-disable custom-errors
@@ -459,16 +443,16 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
                 address(irs)
             )
         );
+        address _tokenID = _tokenDetails.ONCHAINID;
         if (_tokenDetails.ONCHAINID == address(0)) {
-            address _tokenID = IIdFactory(_idFactory).createTokenIdentity(
+            _tokenID = IIdFactory(_idFactory).createTokenIdentity(
                 address(_token),
                 _tokenDetails.owner,
                 _salt
             );
-            _token.setOnchainID(_tokenID);
-        } else {
-            _token.setOnchainID(_tokenDetails.ONCHAINID);
-        }
+        } 
+        _token.setOnchainID(_tokenID);
+
         _token.setIdentityRegistry(address(ir));
         _token.setCompliance(address(mc));
         for (uint256 i = 0; i < (_claimDetails.claimTopics).length; i++) {

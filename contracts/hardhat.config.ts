@@ -212,6 +212,7 @@ import 'hardhat-contract-sizer'
 import 'hardhat-gas-reporter'
 import Configuration from '@configuration'
 import '@tasks'
+import 'hardhat-dependency-compiler'
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -290,6 +291,24 @@ const config: HardhatUserConfig = {
     },
     mocha: {
         timeout: 3_000_000,
+    },
+    dependencyCompiler: {
+        paths: [
+            '@tokenysolutions/t-rex/contracts/registry/implementation/ClaimTopicsRegistry.sol',
+            '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistry.sol',
+            '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistryStorage.sol',
+            '@tokenysolutions/t-rex/contracts/registry/implementation/TrustedIssuersRegistry.sol',
+            '@tokenysolutions/t-rex/contracts/compliance/modular/ModularCompliance.sol',
+            '@tokenysolutions/t-rex/contracts/proxy/authority/TREXImplementationAuthority.sol',
+            '@tokenysolutions/t-rex/contracts/proxy/TrustedIssuersRegistryProxy.sol',
+            '@tokenysolutions/t-rex/contracts/proxy/ClaimTopicsRegistryProxy.sol',
+            '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryProxy.sol',
+            '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryStorageProxy.sol',
+            '@tokenysolutions/t-rex/contracts/proxy/ModularComplianceProxy.sol',
+            '@tokenysolutions/t-rex/contracts/compliance/legacy/DefaultCompliance.sol',
+            '@onchain-id/solidity/contracts/Identity.sol',
+            '@onchain-id/solidity/contracts/ClaimIssuer.sol',
+        ],
     },
 }
 
