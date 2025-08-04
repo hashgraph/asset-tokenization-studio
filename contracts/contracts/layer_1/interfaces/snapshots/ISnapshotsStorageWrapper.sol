@@ -209,6 +209,7 @@ pragma solidity 0.8.18;
 interface ISnapshotsStorageWrapper {
     // Events
     event SnapshotTaken(address indexed operator, uint256 indexed snapshotID);
+    event SnapshotTriggered(address indexed operator, uint256 snapshotId);
 
     error SnapshotIdNull();
     error SnapshotIdDoesNotExists(uint256 snapshotId);

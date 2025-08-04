@@ -211,10 +211,10 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Pause,
-    type ERC1410ScheduledTasks,
     type AccessControl,
     type Equity,
     type ControlList,
+    type IERC1410,
     Kyc,
     SsiManagement,
     TimeTravel,
@@ -324,7 +324,7 @@ describe('ERC1410 Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let equityFacet: Equity
@@ -704,10 +704,7 @@ describe('ERC1410 Tests', () => {
             diamond.address
         )
 
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasksTimeTravel',
-            diamond.address
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         timeTravelFacet = await ethers.getContractAt(
             'TimeTravel',
             diamond.address
@@ -872,13 +869,11 @@ describe('ERC1410 Tests', () => {
                 data: '0x',
             })
 
-            // authorize
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            await erc1410Facet.authorizeOperator(account_D)
-            await erc1410Facet.authorizeOperatorByPartition(
-                _PARTITION_ID,
-                account_E
-            )
+            // authorize - no need to reassign, just use the appropriate facets with connect
+            await erc1410Facet.connect(signer_C).authorizeOperator(account_D)
+            await erc1410Facet
+                .connect(signer_C)
+                .authorizeOperatorByPartition(_PARTITION_ID, account_E)
 
             // check
             let isOperator_D = await erc1410Facet.isOperator(
