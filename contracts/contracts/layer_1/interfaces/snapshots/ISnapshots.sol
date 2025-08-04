@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {ISnapshotsStorageWrapper} from "./ISnapshotsStorageWrapper.sol";
+import {ISnapshotsStorageWrapper} from './ISnapshotsStorageWrapper.sol';
 
 interface ISnapshots is ISnapshotsStorageWrapper {
     function takeSnapshot() external returns (uint256 snapshotID_);

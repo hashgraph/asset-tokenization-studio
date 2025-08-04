@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IPauseStorageWrapper} from "./IPauseStorageWrapper.sol";
+import {IPauseStorageWrapper} from './IPauseStorageWrapper.sol';
 
 interface IPause is IPauseStorageWrapper {
     /**
