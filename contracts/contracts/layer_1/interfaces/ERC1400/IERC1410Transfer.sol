@@ -204,153 +204,63 @@
 */
 
 // SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
 
 import {
-    IERC1410ScheduledTasks
-} from '../../interfaces/ERC1400/IERC1410ScheduledTasks.sol';
-import {ERC1410Snapshot} from './ERC1410Snapshot.sol';
-import {
-    _ERC1410_RESOLVER_KEY
-} from '../../../layer_1/constants/resolverKeys.sol';
-import {IERC1410} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
+    BasicTransferInfo,
+    IssueData
+} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
-contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
+/**
+ * @title IERC1410Transfer
+ * @dev Interface for the ERC1410Transfer contract providing all transfer operations
+ * for ERC1410 tokens including transfers, operator transfers, redemptions, and issuance.
+ */
+interface IERC1410Transfer {
+    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
+    /// @param _partition The partition from which to transfer tokens
+    /// @param _basicTransferInfo The address to which to transfer tokens to and the amountn`
+    /// @param _data Additional data attached to the transfer of tokens
+    /// @return The partition to which the transferred tokens were allocated for the _to address
+    function transferByPartition(
+        bytes32 _partition,
+        BasicTransferInfo calldata _basicTransferInfo,
+        bytes memory _data
+    ) external returns (bytes32);
+
+    function issueByPartition(IssueData calldata _issueData) external;
+
+    function redeemByPartition(
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data
+    ) external;
+
     function triggerAndSyncAll(
         bytes32 _partition,
         address _from,
         address _to
-    ) external onlyUnpaused {
-        _triggerAndSyncAll(_partition, _from, _to);
-    }
+    ) external;
 
-    function balanceOfAt(
-        address _tokenHolder,
-        uint256 _timestamp
-    ) external view returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
-    }
+    function authorizeOperator(address _operator) external;
 
-    function balanceOf(
-        address _tokenHolder
-    ) external view override returns (uint256) {
-        return _balanceOfAdjusted(_tokenHolder);
-    }
+    /// @notice Revokes authorisation of an operator previously given for all partitions of `msg.sender`
+    /// @param _operator An address which is being de-authorised
+    function revokeOperator(address _operator) external;
 
-    function balanceOfByPartition(
+    /// @notice Authorises an operator for a given partition of `msg.sender`
+    /// @param _partition The partition to which the operator is authorised
+    /// @param _operator An address which is being authorised
+    function authorizeOperatorByPartition(
         bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256) {
-        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
-    }
+        address _operator
+    ) external;
 
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupplyAdjusted();
-    }
-
-    function totalSupplyByPartition(
-        bytes32 _partition
-    ) external view override returns (uint256) {
-        return _totalSupplyByPartitionAdjusted(_partition);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC1410_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](26);
-        uint256 selectorIndex = 0;
-        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAt.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_ERC1410_Basic
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .transferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isMultiPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.partitionsOf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .authorizeOperator
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .revokeOperator
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .authorizeOperatorByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .revokeOperatorByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isOperator.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isOperatorForPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .redeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .issueByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .canTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .canRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerAndSyncAll
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedTransferFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedRedeemFromByPartition
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC1410).interfaceId;
-    }
+    /// @notice Revokes authorisation of an operator previously given for a specified partition of `msg.sender`
+    /// @param _partition The partition to which the operator is de-authorised
+    /// @param _operator An address which is being de-authorised
+    function revokeOperatorByPartition(
+        bytes32 _partition,
+        address _operator
+    ) external;
 }

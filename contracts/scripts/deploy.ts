@@ -227,8 +227,12 @@ import {
     DiamondFacet__factory,
     EquityUSA__factory,
     EquityUSATimeTravel__factory,
-    ERC1410ScheduledTasks__factory,
-    ERC1410ScheduledTasksTimeTravel__factory,
+    ERC1410ReadFacet__factory,
+    ERC1410ReadTimeTravel__factory,
+    ERC1410ManagementFacet__factory,
+    ERC1410ManagementTimeTravel__factory,
+    ERC1410TransferFacet__factory,
+    ERC1410TransferTimeTravel__factory,
     ERC1594__factory,
     ERC1594TimeTravel__factory,
     ERC1643__factory,
@@ -541,14 +545,38 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        erc1410ScheduledTasks: new DeployContractWithFactoryCommand({
+        erc1410ReadFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new ERC1410ScheduledTasks__factory(),
-                new ERC1410ScheduledTasksTimeTravel__factory()
+                new ERC1410ReadFacet__factory(),
+                new ERC1410ReadTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ERC1410ScheduledTasks.addresses?.[
+                ? Configuration.contracts.ERC1410ReadFacet.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        erc1410ManagementFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC1410ManagementFacet__factory(),
+                new ERC1410ManagementTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC1410ManagementFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        erc1410TransferFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC1410TransferFacet__factory(),
+                new ERC1410TransferTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC1410TransferFacet.addresses?.[
                       network
                   ]
                 : undefined,
@@ -911,11 +939,25 @@ export async function deployAtsContracts({
                     return result
                 }
             ),
-            erc1410ScheduledTasks: await deployContractWithFactory(
-                commands.erc1410ScheduledTasks
+            erc1410ReadFacet: await deployContractWithFactory(
+                commands.erc1410ReadFacet
+            ).then((result) => {
+                console.log('ERC1410ReadFacet has been deployed successfully')
+                return result
+            }),
+            erc1410ManagementFacet: await deployContractWithFactory(
+                commands.erc1410ManagementFacet
             ).then((result) => {
                 console.log(
-                    'ERC1410ScheduledTasks has been deployed successfully'
+                    'ERC1410ManagementFacet has been deployed successfully'
+                )
+                return result
+            }),
+            erc1410TransferFacet: await deployContractWithFactory(
+                commands.erc1410TransferFacet
+            ).then((result) => {
+                console.log(
+                    'ERC1410TransferFacet has been deployed successfully'
                 )
                 return result
             }),

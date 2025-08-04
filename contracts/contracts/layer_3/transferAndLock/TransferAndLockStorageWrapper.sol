@@ -216,9 +216,7 @@ import {
     getMessageHashTransferAndLockByPartition,
     getMessageHashTransferAndLock
 } from './signatureVerification.sol';
-import {
-    IERC1410Basic
-} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {BasicTransferInfo} from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -250,10 +248,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
 
         _transferByPartition(
             _msgSender(),
-            IERC1410Basic.BasicTransferInfo(
-                _transferAndLock.to,
-                _transferAndLock.amount
-            ),
+            BasicTransferInfo(_transferAndLock.to, _transferAndLock.amount),
             _partition,
             _transferAndLock.data,
             _msgSender(),
@@ -301,10 +296,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
 
         _transferByPartition(
             _msgSender(),
-            IERC1410Basic.BasicTransferInfo(
-                _transferAndLock.to,
-                _transferAndLock.amount
-            ),
+            BasicTransferInfo(_transferAndLock.to, _transferAndLock.amount),
             DEFAULT_PARTITION,
             _transferAndLock.data,
             _msgSender(),

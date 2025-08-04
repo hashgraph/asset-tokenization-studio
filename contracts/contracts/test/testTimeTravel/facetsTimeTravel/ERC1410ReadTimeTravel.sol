@@ -204,39 +204,25 @@
 */
 
 // SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
-interface IERC1410Basic {
-    struct BasicTransferInfo {
-        address to;
-        uint256 value;
+import {
+    ERC1410ReadFacet
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410ReadFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+
+contract ERC1410ReadTimeTravel is ERC1410ReadFacet, TimeTravelStorageWrapper {
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410_Basic(bool _multiPartition) external;
-
-    function transferByPartition(
-        bytes32 _partition,
-        BasicTransferInfo calldata _basicTransferInfo,
-        bytes calldata _data
-    ) external returns (bytes32);
-
-    function balanceOf(address _tokenHolder) external view returns (uint256);
-
-    function balanceOfByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256);
-
-    function partitionsOf(
-        address _tokenHolder
-    ) external view returns (bytes32[] memory);
-
-    function totalSupply() external view returns (uint256);
-
-    function isMultiPartition() external view returns (bool);
-
-    function totalSupplyByPartition(
-        bytes32 _partition
-    ) external view returns (uint256);
 }

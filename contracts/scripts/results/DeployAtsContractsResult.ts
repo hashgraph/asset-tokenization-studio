@@ -214,7 +214,9 @@ import {
     CorporateActions,
     DiamondFacet,
     EquityUSA,
-    ERC1410ScheduledTasks,
+    ERC1410ReadFacet,
+    ERC1410ManagementFacet,
+    ERC1410TransferFacet,
     ERC1594,
     ERC1643,
     ERC1644,
@@ -253,7 +255,9 @@ export interface DeployAtsContractsResultParams {
     ssiManagement: DeployContractWithFactoryResult<SsiManagement>
     pause: DeployContractWithFactoryResult<PauseFacet>
     erc20: DeployContractWithFactoryResult<ERC20>
-    erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
+    erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
+    erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
+    erc1410TransferFacet: DeployContractWithFactoryResult<ERC1410TransferFacet>
     erc1594: DeployContractWithFactoryResult<ERC1594>
     erc1643: DeployContractWithFactoryResult<ERC1643>
     erc1644: DeployContractWithFactoryResult<ERC1644>
@@ -293,7 +297,9 @@ export default class DeployAtsContractsResult {
     public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>
     public readonly pause: DeployContractWithFactoryResult<PauseFacet>
     public readonly erc20: DeployContractWithFactoryResult<ERC20>
-    public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
+    public readonly erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
+    public readonly erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
+    public readonly erc1410TransferFacet: DeployContractWithFactoryResult<ERC1410TransferFacet>
     public readonly erc1594: DeployContractWithFactoryResult<ERC1594>
     public readonly erc1643: DeployContractWithFactoryResult<ERC1643>
     public readonly erc1644: DeployContractWithFactoryResult<ERC1644>
@@ -332,7 +338,9 @@ export default class DeployAtsContractsResult {
         ssiManagement,
         pause,
         erc20,
-        erc1410ScheduledTasks,
+        erc1410ReadFacet,
+        erc1410ManagementFacet,
+        erc1410TransferFacet,
         erc1594,
         erc1643,
         erc1644,
@@ -370,7 +378,9 @@ export default class DeployAtsContractsResult {
         this.ssiManagement = ssiManagement
         this.pause = pause
         this.erc20 = erc20
-        this.erc1410ScheduledTasks = erc1410ScheduledTasks
+        this.erc1410ReadFacet = erc1410ReadFacet
+        this.erc1410ManagementFacet = erc1410ManagementFacet
+        this.erc1410TransferFacet = erc1410TransferFacet
         this.erc1594 = erc1594
         this.erc1643 = erc1643
         this.erc1644 = erc1644
