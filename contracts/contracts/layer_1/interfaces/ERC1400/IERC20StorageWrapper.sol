@@ -217,6 +217,7 @@ interface IERC20StorageWrapper {
         uint256 value
     );
 
+    error ZeroOwnerAddress();
     error InsufficientAllowance(address spender, address from);
     error SpenderWithZeroAddress();
 }

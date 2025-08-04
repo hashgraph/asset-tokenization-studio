@@ -282,6 +282,7 @@ function buildEmptyEnvironment(): Environment {
             corporateActions: {} as IStaticFunctionSelectors,
             pause: {} as IStaticFunctionSelectors,
             ERC20: {} as IStaticFunctionSelectors,
+            ERC20Permit: {} as IStaticFunctionSelectors,
             ERC1644: {} as IStaticFunctionSelectors,
             eRC1410ScheduledTasks: {} as IStaticFunctionSelectors,
             ERC1594: {} as IStaticFunctionSelectors,
