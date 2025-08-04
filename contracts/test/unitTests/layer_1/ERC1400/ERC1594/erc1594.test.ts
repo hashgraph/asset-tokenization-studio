@@ -211,9 +211,9 @@ import {
     type ResolverProxy,
     type Pause,
     type ERC1594,
-    type AccessControl,
+    type IAccessControl,
     type ControlList,
-    type ERC1410Snapshot,
+    type IERC1410,
     ERC20,
     IFactory,
     BusinessLogicResolver,
@@ -265,7 +265,7 @@ describe('ERC1594 Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let erc1594Facet: ERC1594
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let pauseFacet: Pause
     let controlList: ControlList
     let kycFacet: Kyc
@@ -347,7 +347,7 @@ describe('ERC1594 Tests', () => {
             })
 
             accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
+                'IAccessControl',
                 diamond.address
             )
 
@@ -509,7 +509,7 @@ describe('ERC1594 Tests', () => {
         let erc1594Issuer: ERC1594
         let erc1594Transferor: ERC1594
         let erc1594Approved: ERC1594
-        let erc1410SnapshotFacet: ERC1410Snapshot
+        let erc1410SnapshotFacet: IERC1410
         let erc20Facet: ERC20
         before(async () => {
             // mute | mock console.log
@@ -597,7 +597,7 @@ describe('ERC1594 Tests', () => {
             })
 
             accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
+                'IAccessControl',
                 diamond.address
             )
 
@@ -614,7 +614,7 @@ describe('ERC1594 Tests', () => {
                 signer_E
             )
             erc1410SnapshotFacet = await ethers.getContractAt(
-                'ERC1410Snapshot',
+                'IERC1410',
                 diamond.address
             )
 
@@ -984,7 +984,7 @@ describe('ERC1594 Tests', () => {
             })
         })
 
-        describe('AccessControl', () => {
+        describe('IAccessControl', () => {
             it('GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc1594Facet = erc1594Facet.connect(signer_B)

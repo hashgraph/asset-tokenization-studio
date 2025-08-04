@@ -209,7 +209,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     BusinessLogicResolver,
-    type AccessControl,
+    type IAccessControl,
     type ControlList,
     type ERC1644,
     type ERC20,
@@ -288,7 +288,7 @@ describe('Factory Tests', () => {
 
     let factory: Factory
     let businessLogicResolver: BusinessLogicResolver
-    let accessControlFacet: AccessControl
+    let accessControlFacet: IAccessControl
     let controlListFacet: ControlList
     let erc1644Facet: ERC1644
     let erc20Facet: ERC20
@@ -308,7 +308,7 @@ describe('Factory Tests', () => {
 
     async function readFacets(equityAddress: string) {
         accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
+            'IAccessControl',
             equityAddress
         )
 

@@ -239,13 +239,13 @@ bytes32 constant _ERC1643_RESOLVER_KEY = 0x24543637956a3076689f171d3932b10f22d40
 bytes32 constant _ERC1410_RESOLVER_KEY = 0x0d714ae58404788b445b639b0a0bcf37eeeb2e661bfa542569f5555a9a40b5b2;
 
 // keccak256('security.token.standard.erc1410.read.resolverKey');
-bytes32 constant _ERC1410_READ_RESOLVER_KEY = bytes32(0); // TODO
+bytes32 constant _ERC1410_READ_RESOLVER_KEY = 0x4b82da829715756e6816dd3aae969075a28f427c46cddcfda95a83e6c0eb8ad1;
 
 // keccak256('security.token.standard.erc1410.transfer.resolverKey');
-bytes32 constant _ERC1410_TRANSFER_RESOLVER_KEY = bytes32(0); // TODO
+bytes32 constant _ERC1410_TRANSFER_RESOLVER_KEY = 0x89fcc808d9a9a4ed7e0e35ec745380066c3f670bd1bda59e8221a0e891635fea;
 
 // keccak256('security.token.standard.erc1410.management.resolverKey');
-bytes32 constant _ERC1410_MANAGEMENT_RESOLVER_KEY = bytes32(0); // TODO
+bytes32 constant _ERC1410_MANAGEMENT_RESOLVER_KEY = 0xcb72e20ff93a1627a24ce147e6017a845008f80f11534d7775f72ce43af82143;
 
 // keccak256('security.token.standard.erc1644.resolverKey');
 bytes32 constant _ERC1644_RESOLVER_KEY = 0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d;

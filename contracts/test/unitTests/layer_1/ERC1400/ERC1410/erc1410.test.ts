@@ -211,8 +211,8 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Pause,
-    type ERC1410ScheduledTasks,
-    type AccessControl,
+    type IERC1410,
+    type IAccessControl,
     type Equity,
     type ControlList,
     Kyc,
@@ -324,8 +324,8 @@ describe('ERC1410 Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc1410Facet: ERC1410ScheduledTasks
-    let accessControlFacet: AccessControl
+    let erc1410Facet: IERC1410
+    let accessControlFacet: IAccessControl
     let pauseFacet: Pause
     let equityFacet: Equity
     let controlList: ControlList
@@ -700,14 +700,11 @@ describe('ERC1410 Tests', () => {
 
     async function setFacets(diamond: ResolverProxy) {
         accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
+            'IAccessControl',
             diamond.address
         )
 
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasksTimeTravel',
-            diamond.address
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         timeTravelFacet = await ethers.getContractAt(
             'TimeTravel',
             diamond.address

@@ -207,12 +207,12 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
     type BusinessLogicResolver,
-    type AccessControlFacet,
+    type IAccessControl,
     type PauseFacet,
     DiamondFacet,
     DiamondLoupeFacet,
     DiamondFacet__factory,
-    AccessControlFacet__factory,
+    AccessControlReadFacet__factory,
     PauseFacet__factory,
 } from '@typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
@@ -232,7 +232,7 @@ describe('ResolverProxy Tests', () => {
     let resolver: BusinessLogicResolver
     let resolver_2: BusinessLogicResolver
     let diamondFacet: DiamondFacet
-    let accessControlImpl: AccessControlFacet
+    let accessControlImpl: IAccessControl
     let pauseImpl: PauseFacet
     let signer_A: SignerWithAddress
 
@@ -242,7 +242,7 @@ describe('ResolverProxy Tests', () => {
         resolver = await deployResolver()
 
         diamondFacet = await new DiamondFacet__factory(signer_A).deploy()
-        accessControlImpl = await new AccessControlFacet__factory(
+        accessControlImpl = await new AccessControlReadFacet__factory(
             signer_A
         ).deploy()
         pauseImpl = await new PauseFacet__factory(signer_A).deploy()
@@ -395,7 +395,7 @@ describe('ResolverProxy Tests', () => {
         ).deploy(resolver.address, CONFIG_ID, 1, [])
 
         const accessControl = await ethers.getContractAt(
-            'AccessControl',
+            'IAccessControl',
             resolverProxy.address
         )
         const diamondLoupe = await ethers.getContractAt(

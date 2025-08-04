@@ -35,7 +35,7 @@ contract ERC1410TransferFacet is IStaticFunctionSelectors, ERC1410Transfer {
         pure
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](11);
+        staticFunctionSelectors_ = new bytes4[](9);
         uint256 selectorIndex = 0;
         staticFunctionSelectors_[selectorIndex++] = this
             .transferByPartition

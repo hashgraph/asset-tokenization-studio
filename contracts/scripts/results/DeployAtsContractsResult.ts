@@ -206,7 +206,8 @@
 import { Signer } from 'ethers'
 import {
     BusinessLogicResolver,
-    AccessControlFacet,
+    AccessControlReadFacet,
+    AccessControlManagementFacet,
     AdjustBalances,
     BondUSA,
     Cap,
@@ -248,7 +249,8 @@ import { DeployContractWithFactoryResult } from '../index'
 
 export interface DeployAtsContractsResultParams {
     businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    accessControl: DeployContractWithFactoryResult<AccessControlFacet>
+    accessControlReadFacet: DeployContractWithFactoryResult<AccessControlReadFacet>
+    accessControlManagementFacet: DeployContractWithFactoryResult<AccessControlManagementFacet>
     cap: DeployContractWithFactoryResult<Cap>
     controlList: DeployContractWithFactoryResult<ControlList>
     kyc: DeployContractWithFactoryResult<Kyc>
@@ -290,7 +292,8 @@ export interface DeployAtsContractsResultParams {
 
 export default class DeployAtsContractsResult {
     public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    public readonly accessControl: DeployContractWithFactoryResult<AccessControlFacet>
+    public readonly accessControlReadFacet: DeployContractWithFactoryResult<AccessControlReadFacet>
+    public readonly accessControlManagementFacet: DeployContractWithFactoryResult<AccessControlManagementFacet>
     public readonly cap: DeployContractWithFactoryResult<Cap>
     public readonly controlList: DeployContractWithFactoryResult<ControlList>
     public readonly kyc: DeployContractWithFactoryResult<Kyc>
@@ -331,7 +334,8 @@ export default class DeployAtsContractsResult {
 
     constructor({
         businessLogicResolver,
-        accessControl,
+        accessControlReadFacet,
+        accessControlManagementFacet,
         cap,
         controlList,
         kyc,
@@ -371,7 +375,8 @@ export default class DeployAtsContractsResult {
         deployer,
     }: DeployAtsContractsResultParams) {
         this.businessLogicResolver = businessLogicResolver
-        this.accessControl = accessControl
+        this.accessControlReadFacet = accessControlReadFacet
+        this.accessControlManagementFacet = accessControlManagementFacet
         this.cap = cap
         this.controlList = controlList
         this.kyc = kyc

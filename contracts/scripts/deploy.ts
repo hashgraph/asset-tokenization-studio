@@ -211,8 +211,10 @@ import {
     Overrides,
 } from 'ethers'
 import {
-    AccessControlFacet__factory,
-    AccessControlFacetTimeTravel__factory,
+    AccessControlReadFacet__factory,
+    AccessControlReadFacetTimeTravel__factory,
+    AccessControlManagementFacet__factory,
+    AccessControlManagementFacetTimeTravel__factory,
     AdjustBalances__factory,
     AdjustBalancesTimeTravel__factory,
     BondUSA__factory,
@@ -441,16 +443,28 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        accessControl: new DeployContractWithFactoryCommand({
+        accessControlReadFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new AccessControlFacet__factory(),
-                new AccessControlFacetTimeTravel__factory()
+                new AccessControlReadFacet__factory(),
+                new AccessControlReadFacetTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.AccessControlFacet.addresses?.[
+                ? Configuration.contracts.AccessControlReadFacet.addresses?.[
                       network
                   ]
+                : undefined,
+            overrides,
+        }),
+        accessControlManagementFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new AccessControlManagementFacet__factory(),
+                new AccessControlManagementFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.AccessControlManagementFacet
+                      .addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -882,10 +896,20 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
-            accessControl: await deployContractWithFactory(
-                commands.accessControl
+            accessControlReadFacet: await deployContractWithFactory(
+                commands.accessControlReadFacet
             ).then((result) => {
-                console.log('AccessControl has been deployed successfully')
+                console.log(
+                    'AccessControlReadFacet has been deployed successfully'
+                )
+                return result
+            }),
+            accessControlManagementFacet: await deployContractWithFactory(
+                commands.accessControlManagementFacet
+            ).then((result) => {
+                console.log(
+                    'AccessControlManagementFacet has been deployed successfully'
+                )
                 return result
             }),
             cap: await deployContractWithFactory(commands.cap).then(

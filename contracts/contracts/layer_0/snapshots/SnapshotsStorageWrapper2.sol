@@ -209,6 +209,10 @@ pragma solidity 0.8.18;
 import {
     ISnapshotsStorageWrapper
 } from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
+import {
+    Snapshots,
+    PartitionSnapshots
+} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
 import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
 
 abstract contract SnapshotsStorageWrapper2 is
@@ -553,6 +557,7 @@ abstract contract SnapshotsStorageWrapper2 is
                 _getFrozenAmountForByPartitionAdjusted(_partition, _tokenHolder)
             );
     }
+
     function _clearedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
