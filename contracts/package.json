@@ -50,6 +50,7 @@
     "test:erc1594": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC1594/erc1594.test.ts",
     "test:erc1410": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC1410/erc1410.test.ts",
     "test:erc20": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC20/erc20.test.ts",
+    "test:erc20Permit": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC20Permit/erc20Permit.test.ts",
     "test:snapshots": "npx hardhat test test/unitTests/layer_1/snapshots/snapshots.test.ts",
     "test:adjustBalances": "npx hardhat test test/unitTests/layer_1/adjustBalances/adjustBalances.test.ts",
     "test:equity": "npx hardhat test test/unitTests/layer_1/equity/equity.test.ts",
