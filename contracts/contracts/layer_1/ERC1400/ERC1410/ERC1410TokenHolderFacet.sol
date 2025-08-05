@@ -65,10 +65,6 @@ contract ERC1410TokenHolderFacet is
         staticFunctionSelectors_[selectorIndex++] = this
             .triggerAndSyncAll
             .selector;
-        // Utility functions
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getStaticInterfaceIds
-            .selector;
     }
 
     function getStaticInterfaceIds()

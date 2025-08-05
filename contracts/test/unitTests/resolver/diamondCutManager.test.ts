@@ -375,12 +375,41 @@ describe('DiamondCutManager', () => {
         facet: IDiamondLoupe.FacetStructOutput,
         selectorsLength: number
     ) {
+        // Known problematic selectors
+        const getStaticInterfaceIdsSelector = '0xb378cf37'
+        const getStaticResolverKeySelector = '0x1ef2fdc8'
+        const nullSelector = '0x00000000'
+
         for (
             let selectorIndex = 0;
             selectorIndex < selectorsLength;
             selectorIndex++
         ) {
             const selectorId = facet.selectors[selectorIndex]
+
+            // Validate against null selector (indicates array length mismatch)
+            expect(selectorId).to.not.equal(
+                nullSelector,
+                `Null selector (0x00000000) found at index ${selectorIndex} in facet ${facet.id} (${facet.addr}). ` +
+                    `This indicates a length mismatch in the getStaticFunctionSelectors() method. ` +
+                    `The array size is larger than the number of selectors being populated.`
+            )
+
+            // Validate against getStaticInterfaceIds selector
+            expect(selectorId).to.not.equal(
+                getStaticInterfaceIdsSelector,
+                `getStaticInterfaceIds() selector (${getStaticInterfaceIdsSelector}) should NOT be registered in getStaticFunctionSelectors(). ` +
+                    `Found in facet ${facet.id} (${facet.addr}). ` +
+                    `This function is part of the IStaticFunctionSelectors interface but should not be exposed as a callable function.`
+            )
+
+            // Validate against getStaticResolverKey selector
+            expect(selectorId).to.not.equal(
+                getStaticResolverKeySelector,
+                `getStaticResolverKey() selector (${getStaticResolverKeySelector}) should NOT be registered in getStaticFunctionSelectors(). ` +
+                    `Found in facet ${facet.id} (${facet.addr}). ` +
+                    `This function is part of the IStaticFunctionSelectors interface but should not be exposed as a callable function.`
+            )
 
             const id =
                 await diamondCutManager.getFacetIdByConfigurationIdVersionAndSelector(
@@ -396,8 +425,11 @@ describe('DiamondCutManager', () => {
                     selectorId
                 )
 
-            expect(facetAddressForSelector).to.equal(facet.addr)
+            expect(facetAddressForSelector).to.not.equal(
+                '0x0000000000000000000000000000000000000000'
+            )
             expect(id).to.equal(facet.id)
+            expect(facetAddressForSelector).to.equal(facet.addr)
         }
     }
 

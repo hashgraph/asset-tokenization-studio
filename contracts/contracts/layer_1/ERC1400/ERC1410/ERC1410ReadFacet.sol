@@ -24,7 +24,7 @@ contract ERC1410ReadFacet is IStaticFunctionSelectors, ERC1410Read {
         pure
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](11);
+        staticFunctionSelectors_ = new bytes4[](10);
         uint256 selectorIndex = 0;
         // Balance and supply functions
         staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
@@ -51,10 +51,6 @@ contract ERC1410ReadFacet is IStaticFunctionSelectors, ERC1410Read {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .canRedeemByPartition
-            .selector;
-        // Utility functions
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getStaticInterfaceIds
             .selector;
     }
 
