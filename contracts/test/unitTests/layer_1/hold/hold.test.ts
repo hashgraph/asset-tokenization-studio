@@ -219,7 +219,7 @@ import {
     ControlList,
     Pause,
     ERC20,
-    ERC1410ScheduledTasks,
+    type IERC1410,
     IFactory,
     BusinessLogicResolver,
     TimeTravel,
@@ -305,7 +305,7 @@ describe('Hold Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let holdFacet: Hold
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let controlListFacet: ControlList
     let erc20Facet: ERC20
     let timeTravelFacet: TimeTravel
@@ -383,7 +383,7 @@ describe('Hold Tests', () => {
             signer_D
         )
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
+            'IERC1410',
             diamond.address,
             signer_B
         )

@@ -211,7 +211,7 @@ import {
     type ResolverProxy,
     type Snapshots,
     type Pause,
-    type ERC1410ScheduledTasks,
+    type IERC1410,
     type AccessControl,
     type Lock,
     type Hold,
@@ -273,7 +273,7 @@ describe('Snapshots Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let snapshotFacet: Snapshots
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
@@ -329,10 +329,7 @@ describe('Snapshots Tests', () => {
             diamond.address
         )
 
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
 
         snapshotFacet = await ethers.getContractAt('Snapshots', diamond.address)
 

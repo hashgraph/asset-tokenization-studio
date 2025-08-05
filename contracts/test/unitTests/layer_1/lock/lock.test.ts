@@ -216,8 +216,8 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Lock,
+    type IERC1410,
     Pause,
-    ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     Kyc,
@@ -286,7 +286,7 @@ describe('Lock Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let lockFacet: Lock
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let adjustBalancesFacet: AdjustBalances
@@ -348,7 +348,7 @@ describe('Lock Tests', () => {
             signer_D
         )
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
+            'IERC1410',
             diamond.address,
             signer_B
         )

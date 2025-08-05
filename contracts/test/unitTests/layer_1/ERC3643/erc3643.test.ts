@@ -215,13 +215,12 @@ import {
     BusinessLogicResolver,
     IFactory,
     ERC3643,
-    type ERC1410Snapshot,
     Kyc,
     type ControlList,
     SsiManagement,
     ClearingActionsFacet,
     type AccessControl,
-    ERC1410ScheduledTasks,
+    type IERC1410,
     TimeTravel,
     AdjustBalances,
     Cap,
@@ -305,7 +304,7 @@ describe('ERC3643 Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let erc3643Facet: ERC3643
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let timeTravelFacet: TimeTravel
     let adjustBalancesFacet: AdjustBalances
     let capFacet: Cap
@@ -336,7 +335,7 @@ describe('ERC3643 Tests', () => {
     describe('single partition', () => {
         let erc3643Issuer: ERC3643
         let erc3643Transferor: ERC3643
-        let erc1410SnapshotFacet: ERC1410Snapshot
+        let erc1410SnapshotFacet: IERC1410
         let erc20Facet: ERC20
 
         before(async () => {
@@ -480,7 +479,7 @@ describe('ERC3643 Tests', () => {
                 signer_E
             )
             erc1410SnapshotFacet = await ethers.getContractAt(
-                'ERC1410Snapshot',
+                'IERC1410',
                 diamond.address
             )
 
@@ -499,7 +498,7 @@ describe('ERC3643 Tests', () => {
                 diamond.address
             )
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+                'IERC1410',
                 diamond.address
             )
             accessControlFacet = await ethers.getContractAt(
@@ -2677,7 +2676,7 @@ describe('ERC3643 Tests', () => {
                         1,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 const operatorTransferData = {
                     partition: DEFAULT_PARTITION,

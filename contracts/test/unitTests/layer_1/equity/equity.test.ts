@@ -215,7 +215,7 @@ import {
     TimeTravel,
     Lock,
     Hold,
-    ERC1410ScheduledTasks,
+    type IERC1410,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
@@ -223,7 +223,6 @@ import {
     Pause__factory,
     Lock__factory,
     Hold__factory,
-    ERC1410ScheduledTasks__factory,
     TimeTravel__factory,
     Kyc,
     SsiManagement,
@@ -300,7 +299,7 @@ describe('Equity Tests', () => {
     let pauseFacet: Pause
     let lockFacet: Lock
     let holdFacet: Hold
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
@@ -325,10 +324,7 @@ describe('Equity Tests', () => {
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
         lockFacet = Lock__factory.connect(diamond.address, signer_A)
         holdFacet = Hold__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
