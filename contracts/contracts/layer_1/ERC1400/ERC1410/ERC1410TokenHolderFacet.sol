@@ -13,21 +13,26 @@
 pragma solidity 0.8.18;
 
 import {
-    _ERC1410_TRANSFER_RESOLVER_KEY
+    _ERC1410_TOKEN_HOLDER_RESOLVER_KEY
 } from '../../../layer_1/constants/resolverKeys.sol';
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {IERC1410Transfer} from '../../interfaces/ERC1400/IERC1410Transfer.sol';
-import {ERC1410Transfer} from './ERC1410Transfer.sol';
+import {
+    IERC1410TokenHolder
+} from '../../interfaces/ERC1400/IERC1410TokenHolder.sol';
+import {ERC1410TokenHolder} from './ERC1410TokenHolder.sol';
 
-contract ERC1410TransferFacet is IStaticFunctionSelectors, ERC1410Transfer {
+contract ERC1410TokenHolderFacet is
+    IStaticFunctionSelectors,
+    ERC1410TokenHolder
+{
     function getStaticResolverKey()
         external
         pure
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _ERC1410_TRANSFER_RESOLVER_KEY;
+        staticResolverKey_ = _ERC1410_TOKEN_HOLDER_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
@@ -35,7 +40,7 @@ contract ERC1410TransferFacet is IStaticFunctionSelectors, ERC1410Transfer {
         pure
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](9);
+        staticFunctionSelectors_ = new bytes4[](8);
         uint256 selectorIndex = 0;
         staticFunctionSelectors_[selectorIndex++] = this
             .transferByPartition
@@ -43,9 +48,7 @@ contract ERC1410TransferFacet is IStaticFunctionSelectors, ERC1410Transfer {
         staticFunctionSelectors_[selectorIndex++] = this
             .redeemByPartition
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .issueByPartition
-            .selector;
+
         staticFunctionSelectors_[selectorIndex++] = this
             .authorizeOperator
             .selector;
@@ -74,6 +77,6 @@ contract ERC1410TransferFacet is IStaticFunctionSelectors, ERC1410Transfer {
         returns (bytes4[] memory staticInterfaceIds_)
     {
         staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IERC1410Transfer).interfaceId;
+        staticInterfaceIds_[0] = type(IERC1410TokenHolder).interfaceId;
     }
 }

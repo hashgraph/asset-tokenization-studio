@@ -203,177 +203,74 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
+import {IHoldRead} from '../interfaces/hold/IHoldRead.sol';
+import {Common} from '../common/Common.sol';
+import {_CONTROLLER_ROLE} from '../constants/roles.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
 
-interface IHold {
-    enum OperationType {
-        Execute,
-        Release,
-        Reclaim
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+abstract contract HoldRead is IHoldRead, Common {
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view override returns (uint256 amount_) {
+        return _getHeldAmountForAdjusted(_tokenHolder);
     }
 
-    struct HoldIdentifier {
-        bytes32 partition;
-        address tokenHolder;
-        uint256 holdId;
-    }
-
-    struct Hold {
-        uint256 amount;
-        uint256 expirationTimestamp;
-        address escrow;
-        address to;
-        bytes data;
-    }
-
-    struct ProtectedHold {
-        Hold hold;
-        uint256 deadline;
-        uint256 nonce;
-    }
-
-    struct HoldData {
-        uint256 id;
-        Hold hold;
-        bytes operatorData;
-        ThirdPartyType thirdPartyType;
-    }
-
-    struct HoldDataStorage {
-        mapping(address => uint256) totalHeldAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
-        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
-    }
-
-    event HeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event HeldFromByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event OperatorHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event ControllerHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event ProtectedHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event HoldByPartitionExecuted(
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 holdId,
-        uint256 amount,
-        address to
-    );
-
-    event HoldByPartitionReleased(
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 holdId,
-        uint256 amount
-    );
-
-    event HoldByPartitionReclaimed(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 holdId,
-        uint256 amount
-    );
-
-    error HoldExpirationNotReached();
-    error WrongHoldId();
-    error InvalidDestinationAddress(address holdDestination, address to);
-    error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
-    error HoldExpirationReached();
-    error IsNotEscrow();
-
-    function createHoldByPartition(
+    function getHeldAmountForByPartition(
         bytes32 _partition,
-        Hold calldata _hold
-    ) external returns (bool success_, uint256 holdId_);
+        address _tokenHolder
+    ) external view override returns (uint256 amount_) {
+        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
 
-    function createHoldFromByPartition(
+    function getHoldCountForByPartition(
         bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    ) external returns (bool success_, uint256 holdId_);
+        address _tokenHolder
+    ) external view override returns (uint256 holdCount_) {
+        return _getHoldCountForByPartition(_partition, _tokenHolder);
+    }
 
-    function operatorCreateHoldByPartition(
+    function getHoldsIdForByPartition(
         bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    ) external returns (bool success_, uint256 holdId_);
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (uint256[] memory holdsId_) {
+        return
+            _getHoldsIdForByPartition(
+                _partition,
+                _tokenHolder,
+                _pageIndex,
+                _pageLength
+            );
+    }
 
-    function controllerCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    ) external returns (bool success_, uint256 holdId_);
+    function getHoldForByPartition(
+        IHold.HoldIdentifier calldata _holdIdentifier
+    )
+        external
+        view
+        override
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_,
+            ThirdPartyType thirdPartyType_
+        )
+    {
+        return _getHoldForByPartitionAdjusted(_holdIdentifier);
+    }
 
-    function protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        ProtectedHold memory _protectedHold,
-        bytes calldata _signature
-    ) external returns (bool success_, uint256 holdId_);
-
-    function executeHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        address _to,
-        uint256 _amount
-    ) external returns (bool success_);
-
-    function releaseHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        uint256 _amount
-    ) external returns (bool success_);
-
-    function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
-    ) external returns (bool success_);
+    function getHoldThirdParty(
+        IHold.HoldIdentifier calldata _holdIdentifier
+    ) external view override returns (address) {
+        return _getHoldThirdParty(_holdIdentifier);
+    }
 }

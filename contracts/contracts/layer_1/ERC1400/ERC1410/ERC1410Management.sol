@@ -206,7 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {
+    _CONTROLLER_ROLE,
+    _AGENT_ROLE,
+    _ISSUER_ROLE
+} from '../../constants/roles.sol';
 import {
     BasicTransferInfo,
     OperatorTransferData
@@ -218,6 +222,7 @@ import {Common} from '../../common/Common.sol';
 import {
     ERC1410StorageWrapper
 } from '../../../layer_0/ERC1400/ERC1410/ERC1410StorageWrapper.sol';
+import {IssueData} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
 abstract contract ERC1410Management is
     IERC1410Management,
@@ -230,6 +235,28 @@ abstract contract ERC1410Management is
     ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {
         _erc1410BasicStorage().multiPartition = _multiPartition;
         _erc1410BasicStorage().initialized = true;
+    }
+
+    function issueByPartition(
+        IssueData calldata _issueData
+    )
+        external
+        onlyUnpaused
+        onlyIssuable
+        onlyWithinMaxSupply(_issueData.value)
+        onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
+        onlyDefaultPartitionWithSinglePartition(_issueData.partition)
+        onlyIdentified(address(0), _issueData.tokenHolder)
+        onlyCompliant(address(0), _issueData.tokenHolder)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _ISSUER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+            _checkRecoveredAddress(_msgSender());
+        }
+        _issueByPartition(_issueData);
     }
 
     function controllerTransferByPartition(

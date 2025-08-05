@@ -206,61 +206,144 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    BasicTransferInfo,
-    IssueData
-} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import {Common} from '../common/Common.sol';
+import {IFreeze} from '../interfaces/freeze/IFreeze.sol';
 
-/**
- * @title IERC1410Transfer
- * @dev Interface for the ERC1410Transfer contract providing all transfer operations
- * for ERC1410 tokens including transfers, operator transfers, redemptions, and issuance.
- */
-interface IERC1410Transfer {
-    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _partition The partition from which to transfer tokens
-    /// @param _basicTransferInfo The address to which to transfer tokens to and the amountn`
-    /// @param _data Additional data attached to the transfer of tokens
-    /// @return The partition to which the transferred tokens were allocated for the _to address
-    function transferByPartition(
-        bytes32 _partition,
-        BasicTransferInfo calldata _basicTransferInfo,
-        bytes memory _data
-    ) external returns (bytes32);
+import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
+import {DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
-    function issueByPartition(IssueData calldata _issueData) external;
+abstract contract Freeze is IFreeze, Common {
+    // ====== External functions (state-changing) ======
 
-    function redeemByPartition(
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function setAddressFrozen(
+        address _userAddress,
+        bool _freezStatus
+    ) external override onlyUnpaused validateAddress(_userAddress) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _setAddressFrozen(_userAddress, _freezStatus);
+        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
+    }
 
-    function triggerAndSyncAll(
-        bytes32 _partition,
-        address _from,
-        address _to
-    ) external;
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(_userAddress)
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _freezeTokens(_userAddress, _amount);
+        emit TokensFrozen(_userAddress, _amount, DEFAULT_PARTITION);
+    }
 
-    function authorizeOperator(address _operator) external;
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _unfreezeTokens(_userAddress, _amount);
+        emit TokensUnfrozen(_userAddress, _amount, DEFAULT_PARTITION);
+    }
 
-    /// @notice Revokes authorisation of an operator previously given for all partitions of `msg.sender`
-    /// @param _operator An address which is being de-authorised
-    function revokeOperator(address _operator) external;
+    function batchSetAddressFrozen(
+        address[] calldata _userAddresses,
+        bool[] calldata _freeze
+    ) external onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _setAddressFrozen(_userAddresses[i], _freeze[i]);
+            emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
+        }
+    }
 
-    /// @notice Authorises an operator for a given partition of `msg.sender`
-    /// @param _partition The partition to which the operator is authorised
-    /// @param _operator An address which is being authorised
-    function authorizeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    ) external;
+    function batchFreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _checkRecoveredAddress(_userAddresses[i]);
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _freezeTokens(_userAddresses[i], _amounts[i]);
+            emit TokensFrozen(
+                _userAddresses[i],
+                _amounts[i],
+                DEFAULT_PARTITION
+            );
+        }
+    }
 
-    /// @notice Revokes authorisation of an operator previously given for a specified partition of `msg.sender`
-    /// @param _partition The partition to which the operator is de-authorised
-    /// @param _operator An address which is being de-authorised
-    function revokeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    ) external;
+    function batchUnfreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _unfreezeTokens(_userAddresses[i], _amounts[i]);
+            emit TokensUnfrozen(
+                _userAddresses[i],
+                _amounts[i],
+                DEFAULT_PARTITION
+            );
+        }
+    }
+
+    // ====== External functions (view/pure) ======
+
+    function getFrozenTokens(
+        address _userAddress
+    ) external view override returns (uint256) {
+        return _getFrozenAmountForAdjusted(_userAddress);
+    }
 }

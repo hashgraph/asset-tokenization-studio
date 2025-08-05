@@ -231,8 +231,6 @@ import {
     ERC1410ReadTimeTravel__factory,
     ERC1410ManagementFacet__factory,
     ERC1410ManagementTimeTravel__factory,
-    ERC1410TransferFacet__factory,
-    ERC1410TransferTimeTravel__factory,
     ERC1594__factory,
     ERC1594TimeTravel__factory,
     ERC1643__factory,
@@ -248,7 +246,6 @@ import {
     SsiManagementTimeTravel__factory,
     Lock__factory,
     LockTimeTravel__factory,
-    Hold__factory,
     HoldTimeTravel__factory,
     PauseFacet__factory,
     PauseFacetTimeTravel__factory,
@@ -283,10 +280,17 @@ import {
     ExternalControlListManagementTimeTravel__factory,
     ExternalKycListManagement__factory,
     ExternalKycListManagementTimeTravel__factory,
-    ERC3643__factory,
-    ERC3643TimeTravel__factory,
     FreezeFacet__factory,
     FreezeFacetTimeTravel__factory,
+    ERC3643Facet__factory,
+    ERC3643TimeTravel__factory,
+    ERC1410TokenHolderFacet__factory,
+    ERC1410TokenHolderTimeTravel__factory,
+    ERC3643BatchFacet__factory,
+    ERC3643BatchTimeTravel__factory,
+    HoldRead__factory,
+    HoldReadTimeTravel__factory,
+    HoldFacet__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -523,14 +527,25 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        hold: new DeployContractWithFactoryCommand({
+        holdFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new Hold__factory(),
+                new HoldFacet__factory(),
                 new HoldTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.Hold.addresses?.[network]
+                ? Configuration.contracts.HoldFacet.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        holdReadFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new HoldRead__factory(),
+                new HoldReadTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.HoldReadFacet.addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -569,14 +584,14 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        erc1410TransferFacet: new DeployContractWithFactoryCommand({
+        erc1410TokenHolderFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new ERC1410TransferFacet__factory(),
-                new ERC1410TransferTimeTravel__factory()
+                new ERC1410TokenHolderFacet__factory(),
+                new ERC1410TokenHolderTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ERC1410TransferFacet.addresses?.[
+                ? Configuration.contracts.ERC1410TokenHolderFacet.addresses?.[
                       network
                   ]
                 : undefined,
@@ -839,14 +854,25 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        erc3643: new DeployContractWithFactoryCommand({
+        erc3643Facet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new ERC3643__factory(),
+                new ERC3643Facet__factory(),
                 new ERC3643TimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ERC3643.addresses?.[network]
+                ? Configuration.contracts.ERC3643Facet.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        erc3643BatchFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC3643BatchFacet__factory(),
+                new ERC3643BatchTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC3643BatchFacet.addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -927,12 +953,18 @@ export async function deployAtsContracts({
                     return result
                 }
             ),
-            hold: await deployContractWithFactory(commands.hold).then(
+            holdFacet: await deployContractWithFactory(commands.holdFacet).then(
                 (result) => {
                     console.log('Hold has been deployed successfully')
                     return result
                 }
             ),
+            holdReadFacet: await deployContractWithFactory(
+                commands.holdReadFacet
+            ).then((result) => {
+                console.log('HoldRead has been deployed successfully')
+                return result
+            }),
             erc20: await deployContractWithFactory(commands.erc20).then(
                 (result) => {
                     console.log('ERC20 has been deployed successfully')
@@ -953,11 +985,11 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
-            erc1410TransferFacet: await deployContractWithFactory(
-                commands.erc1410TransferFacet
+            erc1410TokenHolderFacet: await deployContractWithFactory(
+                commands.erc1410TokenHolderFacet
             ).then((result) => {
                 console.log(
-                    'ERC1410TransferFacet has been deployed successfully'
+                    'ERC1410TokenHolderFacet has been deployed successfully'
                 )
                 return result
             }),
@@ -1111,12 +1143,18 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
-            erc3643: await deployContractWithFactory(commands.erc3643).then(
-                (result) => {
-                    console.log('ERC3643 has been deployed successfully')
-                    return result
-                }
-            ),
+            erc3643Facet: await deployContractWithFactory(
+                commands.erc3643Facet
+            ).then((result) => {
+                console.log('ERC3643Basic has been deployed successfully')
+                return result
+            }),
+            erc3643BatchFacet: await deployContractWithFactory(
+                commands.erc3643BatchFacet
+            ).then((result) => {
+                console.log('ERC3643Batch has been deployed successfully')
+                return result
+            }),
             freeze: await deployContractWithFactory(commands.freeze).then(
                 (result) => {
                     console.log('Freeze has been deployed successfully')

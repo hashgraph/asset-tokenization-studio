@@ -206,162 +206,234 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {
-    BasicTransferInfo,
-    IssueData
-} from '../../interfaces/ERC1400/IERC1410.sol';
-import {IERC1410Transfer} from '../../interfaces/ERC1400/IERC1410Transfer.sol';
-import {Common} from '../../common/Common.sol';
-import {
-    ERC1410StorageWrapper
-} from '../../../layer_0/ERC1400/ERC1410/ERC1410StorageWrapper.sol';
+import {ICompliance} from './ICompliance.sol';
+import {IIdentityRegistry} from './IIdentityRegistry.sol';
 
-/**
- * @title ERC1410Transfer
- * @dev Facet containing all transfer-related operations for ERC1410 functionality
- * @notice This facet handles transfers, operator transfers, redemptions, and issuance
- */
-abstract contract ERC1410Transfer is
-    IERC1410Transfer,
-    Common,
-    ERC1410StorageWrapper
-{
-    function transferByPartition(
-        bytes32 _partition,
-        BasicTransferInfo calldata _basicTransferInfo,
-        bytes memory _data
-    )
-        external
-        override
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCanTransferFromByPartition(
-            _msgSender(),
-            _basicTransferInfo.to,
-            _partition,
-            _basicTransferInfo.value,
-            _data,
-            ''
-        )
-        returns (bytes32)
-    {
-        // Add a function to verify the `_data` parameter
-        // TODO: Need to create the bytes division of the `_partition` so it can be easily findout in which receiver's
-        // partition token will transfered. For current implementation we are assuming that the receiver's partition
-        // will be same as sender's as well as it also pass the `_validPartition()` check. In this particular case we
-        // are also assuming that reciever has the some tokens of the same partition as well (To avoid the array index
-        // out of bound error).
-        // Note- There is no operator used for the execution of this call so `_operator` value in
-        // in event is address(0) same for the `_operatorData`
-        return
-            _transferByPartition(
-                msg.sender,
-                _basicTransferInfo,
-                _partition,
-                _data,
-                address(0),
-                ''
-            );
+interface IERC3643Basic {
+    struct ERC3643Storage {
+        address onchainID;
+        address identityRegistry;
+        address compliance;
+        mapping(address => uint256) frozenTokens;
+        mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
+        mapping(address => bool) addressRecovered;
+        bool initialized;
     }
 
-    function issueByPartition(
-        IssueData calldata _issueData
-    )
-        external
-        onlyUnpaused
-        onlyIssuable
-        onlyWithinMaxSupply(_issueData.value)
-        onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
-        onlyDefaultPartitionWithSinglePartition(_issueData.partition)
-        onlyIdentified(address(0), _issueData.tokenHolder)
-        onlyCompliant(address(0), _issueData.tokenHolder)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _ISSUER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-            _checkRecoveredAddress(_msgSender());
-        }
-        _issueByPartition(_issueData);
-    }
+    /**
+     *  @notice This event is emitted when the token information is updated.
+     */
+    event UpdatedTokenInformation(
+        string indexed newName,
+        string indexed newSymbol,
+        uint8 newDecimals,
+        string newVersion,
+        address indexed newOnchainID
+    );
 
-    /// @notice Decreases totalSupply and the corresponding amount of the specified partition of _msgSender()
-    /// @param _partition The partition to allocate the decrease in balance
-    /// @param _value The amount by which to decrease the balance
-    /// @param _data Additional data attached to the burning of tokens
-    function redeemByPartition(
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(
-            _msgSender(),
-            _partition,
-            _value,
-            _data,
-            ''
-        )
-    {
-        // Add the function to validate the `_data` parameter
-        _redeemByPartition(
-            _partition,
-            _msgSender(),
-            address(0),
-            _value,
-            _data,
-            ''
-        );
-    }
+    /**
+     *  @notice This event is emitted when the IdentityRegistry has been set for the token
+     */
+    event IdentityRegistryAdded(address indexed identityRegistry);
 
-    function triggerAndSyncAll(
-        bytes32 _partition,
+    /**
+     * @dev Emitted when the agent role is granted
+     *
+     * @param _agent Address of the agent that has been added
+     */
+    event AgentAdded(address indexed _agent);
+
+    /**
+     * @dev Emitted when the agent role is revoked
+     *
+     * @param _agent Address of the agent that has been removed
+     */
+    event AgentRemoved(address indexed _agent);
+
+    /**
+     * @dev Emitted when a wallet is recovered
+     *
+     * @param _lostWallet Address of the lost wallet
+     * @param _newWallet Address of the new wallet
+     * @param _investorOnchainID OnchainID
+     */
+    event RecoverySuccess(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    );
+
+    /**
+     * @notice Thrown when calling from a recovered wallet
+     */
+    error WalletRecovered();
+
+    /**
+     * @notice Thrown when attempting to recover a wallet with pending locks, holds or clearings
+     */
+    error CannotRecoverWallet();
+
+    /**
+     * @notice Thrown in batch operations when input amount arrays length is different
+     */
+    error InputAmountsArrayLengthMismatch();
+
+    /**
+     * @notice Thrown in batch operations when input boolean arrays length is different
+     */
+    error InputBoolArrayLengthMismatch();
+
+    /**
+     * @notice Thrown when the calls to the methods in the compliance contract fail
+     */
+    error ComplianceCallFailed();
+
+    /**
+     * @notice Thrown when the compliance contract returns false
+     */
+    error ComplianceNotAllowed();
+
+    /**
+     * @dev Facet initializer
+     *
+     * Sets the compliance contract address
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC3643(address _compliance) external;
+
+    /**
+     * @dev Sets the name of the token to `_name`.
+     *
+     * Emits an UpdatedTokenInformation event.
+     */
+    function setName(string calldata _name) external;
+
+    /**
+     * @dev Sets the symbol of the token to `_symbol`.
+     *
+     * Emits an UpdatedTokenInformation event.
+     */
+    function setSymbol(string calldata _symbol) external;
+
+    /**
+     * @dev Sets the onchainID of the token to `_onchainID`.
+     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     *
+     * This function should only be callable by an authorized entities
+     *
+     * Returns `true` if the transfer was successful.
+     *
+     * Emits an UpdatedTokenInformation event.
+     */
+    function setOnchainID(address _onchainID) external;
+
+    /**
+     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     * @dev This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the transfer was successful.
+     *
+     * Emits a ControllerTransfer event.
+     */
+    function forcedTransfer(
         address _from,
-        address _to
-    ) external onlyUnpaused {
-        _triggerAndSyncAll(_partition, _from, _to);
-    }
+        address _to,
+        uint256 _amount
+    ) external returns (bool);
 
-    function authorizeOperator(
-        address _operator
-    ) external override onlyUnpaused onlyCompliant(_msgSender(), _operator) {
-        _authorizeOperator(_operator);
-    }
+    /**
+     * @dev Sets the identity registry contract address.
+     * @dev Mints `_amount` tokens to the address `_to`.
+     *
+     * Emits an IdentityRegistryAdded event.
+     */
+    function setIdentityRegistry(address _identityRegistry) external;
 
-    function revokeOperator(
-        address _operator
-    ) external override onlyUnpaused onlyCompliant(_msgSender(), address(0)) {
-        _revokeOperator(_operator);
-    }
+    /**
+     * @dev Mints `_amount` tokens to the address `_to`.
+     *
+     * This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the minting was successful.
+     *
+     * Emits a Issued event.
+     */
+    function mint(address _to, uint256 _amount) external;
 
-    function authorizeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), _operator)
-    {
-        _authorizeOperatorByPartition(_partition, _operator);
-    }
+    /**
+     * @dev Sets the compliance contract address.
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     *
+     * Reduces total supply.
+     *
+     * Emits a ComplianceAdded event.
+     */
+    function setCompliance(address _compliance) external;
 
-    function revokeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), address(0))
-    {
-        _revokeOperatorByPartition(_partition, _operator);
-    }
+    /**
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     *
+     * This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the burn was successful.
+     *
+     * Emits a redeem event.
+     */
+    function burn(address _userAddress, uint256 _amount) external;
+
+    /**
+     * @notice Gives an account the agent role
+     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
+     * @dev Can only be called by the role admin
+     */
+    function addAgent(address _agent) external;
+
+    /**
+     * @notice Revokes an account the agent role
+     * @dev Can only be called by the role admin
+     */
+    function removeAgent(address _agent) external;
+
+    /**
+     * @notice Transfers the status of a lost wallet to a new wallet
+     * @dev Can only be called by the agent
+     */
+    function recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) external returns (bool);
+
+    /**
+     * @notice Retrieves recovery status of a wallet
+     */
+    function isAddressRecovered(address _wallet) external returns (bool);
+
+    /**
+     * @dev Checks if an account has the agent role
+     */
+    function isAgent(address _agent) external view returns (bool);
+
+    /**
+     * @dev Returns the onchainID address associated with the token.
+     */
+    function onchainID() external view returns (address);
+
+    /**
+     * @dev Returns the address of the identity registry contract.
+     * @dev Returns the version of the contract as a string.
+     *
+     */
+    function identityRegistry() external view returns (IIdentityRegistry);
+
+    /**
+     * @dev Returns the address of the compliance contract.
+     */
+    function compliance() external view returns (ICompliance);
+
+    /**
+     * @notice Retrieves the latest version of the contract.
+     * @dev The version is represented as a string.
+     */
+    function version() external view returns (string memory);
 }

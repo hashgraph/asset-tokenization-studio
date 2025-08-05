@@ -219,8 +219,10 @@ import {ERC1410Management} from './ERC1410Management.sol';
 
 /**
  * @title ERC1410ManagementFacet
- * @dev Facet containing all management/administrative operations for ERC1410 functionality
- * @notice This facet handles initialization, operator management, controller operations, and protected partitions
+ * @notice This facet handles initialization, operator management, controller operations, and protected partitions, only for permissioned functions.
+ * @dev Facet containing all management/administrative operations for ERC1410 functionality.
+ * @dev These methods only can be called by users with the permissioned role.
+ *
  */
 contract ERC1410ManagementFacet is IStaticFunctionSelectors, ERC1410Management {
     function getStaticResolverKey()
@@ -236,7 +238,7 @@ contract ERC1410ManagementFacet is IStaticFunctionSelectors, ERC1410Management {
         pure
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](8);
+        staticFunctionSelectors_ = new bytes4[](9);
         uint256 selectorIndex = 0;
         // Initialization function
         staticFunctionSelectors_[selectorIndex++] = this
@@ -266,6 +268,9 @@ contract ERC1410ManagementFacet is IStaticFunctionSelectors, ERC1410Management {
         // Utility functions
         staticFunctionSelectors_[selectorIndex++] = this
             .getStaticInterfaceIds
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .issueByPartition
             .selector;
     }
 

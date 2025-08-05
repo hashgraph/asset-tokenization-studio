@@ -207,173 +207,58 @@
 pragma solidity 0.8.18;
 
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
+    BasicTransferInfo,
+    IssueData
+} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
-interface IHold {
-    enum OperationType {
-        Execute,
-        Release,
-        Reclaim
-    }
-
-    struct HoldIdentifier {
-        bytes32 partition;
-        address tokenHolder;
-        uint256 holdId;
-    }
-
-    struct Hold {
-        uint256 amount;
-        uint256 expirationTimestamp;
-        address escrow;
-        address to;
-        bytes data;
-    }
-
-    struct ProtectedHold {
-        Hold hold;
-        uint256 deadline;
-        uint256 nonce;
-    }
-
-    struct HoldData {
-        uint256 id;
-        Hold hold;
-        bytes operatorData;
-        ThirdPartyType thirdPartyType;
-    }
-
-    struct HoldDataStorage {
-        mapping(address => uint256) totalHeldAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
-        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
-    }
-
-    event HeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event HeldFromByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event OperatorHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event ControllerHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event ProtectedHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event HoldByPartitionExecuted(
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 holdId,
-        uint256 amount,
-        address to
-    );
-
-    event HoldByPartitionReleased(
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 holdId,
-        uint256 amount
-    );
-
-    event HoldByPartitionReclaimed(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 holdId,
-        uint256 amount
-    );
-
-    error HoldExpirationNotReached();
-    error WrongHoldId();
-    error InvalidDestinationAddress(address holdDestination, address to);
-    error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
-    error HoldExpirationReached();
-    error IsNotEscrow();
-
-    function createHoldByPartition(
+/**
+ * @title IERC1410TokenHolder
+ * @dev Interface for the ERC1410TokenHolder contract providing all transfer operations
+ * for ERC1410 tokens including transfers, operator transfers, redemptions, and issuance.
+ */
+interface IERC1410TokenHolder {
+    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
+    /// @param _partition The partition from which to transfer tokens
+    /// @param _basicTransferInfo The address to which to transfer tokens to and the amountn`
+    /// @param _data Additional data attached to the transfer of tokens
+    /// @return The partition to which the transferred tokens were allocated for the _to address
+    function transferByPartition(
         bytes32 _partition,
-        Hold calldata _hold
-    ) external returns (bool success_, uint256 holdId_);
+        BasicTransferInfo calldata _basicTransferInfo,
+        bytes memory _data
+    ) external returns (bytes32);
 
-    function createHoldFromByPartition(
+    function redeemByPartition(
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data
+    ) external;
+
+    function triggerAndSyncAll(
         bytes32 _partition,
         address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    ) external returns (bool success_, uint256 holdId_);
+        address _to
+    ) external;
 
-    function operatorCreateHoldByPartition(
+    function authorizeOperator(address _operator) external;
+
+    /// @notice Revokes authorisation of an operator previously given for all partitions of `msg.sender`
+    /// @param _operator An address which is being de-authorised
+    function revokeOperator(address _operator) external;
+
+    /// @notice Authorises an operator for a given partition of `msg.sender`
+    /// @param _partition The partition to which the operator is authorised
+    /// @param _operator An address which is being authorised
+    function authorizeOperatorByPartition(
         bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    ) external returns (bool success_, uint256 holdId_);
+        address _operator
+    ) external;
 
-    function controllerCreateHoldByPartition(
+    /// @notice Revokes authorisation of an operator previously given for a specified partition of `msg.sender`
+    /// @param _partition The partition to which the operator is de-authorised
+    /// @param _operator An address which is being de-authorised
+    function revokeOperatorByPartition(
         bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    ) external returns (bool success_, uint256 holdId_);
-
-    function protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        ProtectedHold memory _protectedHold,
-        bytes calldata _signature
-    ) external returns (bool success_, uint256 holdId_);
-
-    function executeHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        address _to,
-        uint256 _amount
-    ) external returns (bool success_);
-
-    function releaseHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        uint256 _amount
-    ) external returns (bool success_);
-
-    function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
-    ) external returns (bool success_);
+        address _operator
+    ) external;
 }

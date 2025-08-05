@@ -203,177 +203,72 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
+import {Common} from '../common/Common.sol';
+import {_CONTROLLER_ROLE} from '../constants/roles.sol';
+import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import {Hold} from './Hold.sol';
 
-interface IHold {
-    enum OperationType {
-        Execute,
-        Release,
-        Reclaim
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+contract HoldFacet is Hold, IStaticFunctionSelectors {
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _HOLD_RESOLVER_KEY;
     }
 
-    struct HoldIdentifier {
-        bytes32 partition;
-        address tokenHolder;
-        uint256 holdId;
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](8);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .createHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .createHoldFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .executeHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .releaseHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .reclaimHoldByPartition
+            .selector;
     }
 
-    struct Hold {
-        uint256 amount;
-        uint256 expirationTimestamp;
-        address escrow;
-        address to;
-        bytes data;
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IHold).interfaceId;
     }
-
-    struct ProtectedHold {
-        Hold hold;
-        uint256 deadline;
-        uint256 nonce;
-    }
-
-    struct HoldData {
-        uint256 id;
-        Hold hold;
-        bytes operatorData;
-        ThirdPartyType thirdPartyType;
-    }
-
-    struct HoldDataStorage {
-        mapping(address => uint256) totalHeldAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
-        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
-    }
-
-    event HeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event HeldFromByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event OperatorHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event ControllerHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event ProtectedHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event HoldByPartitionExecuted(
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 holdId,
-        uint256 amount,
-        address to
-    );
-
-    event HoldByPartitionReleased(
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 holdId,
-        uint256 amount
-    );
-
-    event HoldByPartitionReclaimed(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 holdId,
-        uint256 amount
-    );
-
-    error HoldExpirationNotReached();
-    error WrongHoldId();
-    error InvalidDestinationAddress(address holdDestination, address to);
-    error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
-    error HoldExpirationReached();
-    error IsNotEscrow();
-
-    function createHoldByPartition(
-        bytes32 _partition,
-        Hold calldata _hold
-    ) external returns (bool success_, uint256 holdId_);
-
-    function createHoldFromByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    ) external returns (bool success_, uint256 holdId_);
-
-    function operatorCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    ) external returns (bool success_, uint256 holdId_);
-
-    function controllerCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    ) external returns (bool success_, uint256 holdId_);
-
-    function protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        ProtectedHold memory _protectedHold,
-        bytes calldata _signature
-    ) external returns (bool success_, uint256 holdId_);
-
-    function executeHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        address _to,
-        uint256 _amount
-    ) external returns (bool success_);
-
-    function releaseHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        uint256 _amount
-    ) external returns (bool success_);
-
-    function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
-    ) external returns (bool success_);
 }

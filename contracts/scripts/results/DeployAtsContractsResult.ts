@@ -216,7 +216,6 @@ import {
     EquityUSA,
     ERC1410ReadFacet,
     ERC1410ManagementFacet,
-    ERC1410TransferFacet,
     ERC1594,
     ERC1643,
     ERC1644,
@@ -228,7 +227,6 @@ import {
     Snapshots,
     TransferAndLock,
     Lock,
-    Hold,
     ProtectedPartitions,
     Kyc,
     SsiManagement,
@@ -241,8 +239,12 @@ import {
     ExternalControlListManagement,
     TimeTravel,
     ExternalKycListManagement,
-    ERC3643,
     FreezeFacet,
+    HoldFacet,
+    HoldRead,
+    ERC1410TokenHolderFacet,
+    ERC3643BatchFacet,
+    ERC3643Facet,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -257,7 +259,7 @@ export interface DeployAtsContractsResultParams {
     erc20: DeployContractWithFactoryResult<ERC20>
     erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
     erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
-    erc1410TransferFacet: DeployContractWithFactoryResult<ERC1410TransferFacet>
+    erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>
     erc1594: DeployContractWithFactoryResult<ERC1594>
     erc1643: DeployContractWithFactoryResult<ERC1643>
     erc1644: DeployContractWithFactoryResult<ERC1644>
@@ -271,7 +273,8 @@ export interface DeployAtsContractsResultParams {
     corporateActions: DeployContractWithFactoryResult<CorporateActions>
     transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     lock: DeployContractWithFactoryResult<Lock>
-    hold: DeployContractWithFactoryResult<Hold>
+    holdFacet: DeployContractWithFactoryResult<HoldFacet>
+    holdReadFacet: DeployContractWithFactoryResult<HoldRead>
     adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
     clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>
@@ -282,7 +285,8 @@ export interface DeployAtsContractsResultParams {
     externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    erc3643: DeployContractWithFactoryResult<ERC3643>
+    erc3643Facet: DeployContractWithFactoryResult<ERC3643Facet>
+    erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
     freeze: DeployContractWithFactoryResult<FreezeFacet>
     timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     deployer?: Signer
@@ -299,7 +303,7 @@ export default class DeployAtsContractsResult {
     public readonly erc20: DeployContractWithFactoryResult<ERC20>
     public readonly erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
     public readonly erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
-    public readonly erc1410TransferFacet: DeployContractWithFactoryResult<ERC1410TransferFacet>
+    public readonly erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>
     public readonly erc1594: DeployContractWithFactoryResult<ERC1594>
     public readonly erc1643: DeployContractWithFactoryResult<ERC1643>
     public readonly erc1644: DeployContractWithFactoryResult<ERC1644>
@@ -313,7 +317,8 @@ export default class DeployAtsContractsResult {
     public readonly corporateActions: DeployContractWithFactoryResult<CorporateActions>
     public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     public readonly lock: DeployContractWithFactoryResult<Lock>
-    public readonly hold: DeployContractWithFactoryResult<Hold>
+    public readonly holdFacet: DeployContractWithFactoryResult<HoldFacet>
+    public readonly holdReadFacet: DeployContractWithFactoryResult<HoldRead>
     public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
     public readonly clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>
@@ -324,7 +329,8 @@ export default class DeployAtsContractsResult {
     public readonly externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     public readonly externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    public readonly erc3643: DeployContractWithFactoryResult<ERC3643>
+    public readonly erc3643BasicFacet: DeployContractWithFactoryResult<ERC3643Facet>
+    public readonly erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
     public readonly freeze: DeployContractWithFactoryResult<FreezeFacet>
     public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     public readonly deployer?: Signer
@@ -340,7 +346,7 @@ export default class DeployAtsContractsResult {
         erc20,
         erc1410ReadFacet,
         erc1410ManagementFacet,
-        erc1410TransferFacet,
+        erc1410TokenHolderFacet,
         erc1594,
         erc1643,
         erc1644,
@@ -354,7 +360,6 @@ export default class DeployAtsContractsResult {
         corporateActions,
         transferAndLock,
         lock,
-        hold,
         adjustBalances,
         protectedPartitions,
         clearingTransferFacet,
@@ -365,10 +370,13 @@ export default class DeployAtsContractsResult {
         externalPauseManagement,
         externalControlListManagement,
         externalKycListManagement,
-        erc3643,
         freeze,
         timeTravel,
         deployer,
+        erc3643Facet,
+        erc3643BatchFacet,
+        holdFacet,
+        holdReadFacet,
     }: DeployAtsContractsResultParams) {
         this.businessLogicResolver = businessLogicResolver
         this.accessControl = accessControl
@@ -380,7 +388,7 @@ export default class DeployAtsContractsResult {
         this.erc20 = erc20
         this.erc1410ReadFacet = erc1410ReadFacet
         this.erc1410ManagementFacet = erc1410ManagementFacet
-        this.erc1410TransferFacet = erc1410TransferFacet
+        this.erc1410TokenHolderFacet = erc1410TokenHolderFacet
         this.erc1594 = erc1594
         this.erc1643 = erc1643
         this.erc1644 = erc1644
@@ -394,7 +402,8 @@ export default class DeployAtsContractsResult {
         this.corporateActions = corporateActions
         this.transferAndLock = transferAndLock
         this.lock = lock
-        this.hold = hold
+        this.holdFacet = holdFacet
+        this.holdReadFacet = holdReadFacet
         this.adjustBalances = adjustBalances
         this.protectedPartitions = protectedPartitions
         this.clearingTransferFacet = clearingTransferFacet
@@ -405,7 +414,8 @@ export default class DeployAtsContractsResult {
         this.externalPauseManagement = externalPauseManagement
         this.externalControlListManagement = externalControlListManagement
         this.externalKycListManagement = externalKycListManagement
-        this.erc3643 = erc3643
+        this.erc3643BasicFacet = erc3643Facet
+        this.erc3643BatchFacet = erc3643BatchFacet
         this.freeze = freeze
         this.timeTravel = timeTravel
         // Deployer

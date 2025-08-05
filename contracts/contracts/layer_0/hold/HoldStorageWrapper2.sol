@@ -217,7 +217,9 @@ import {
     checkNounceAndDeadline
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
-import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {
+    IERC3643Basic
+} from '../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
 import {DEFAULT_PARTITION} from '../constants/values.sol';
 import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
@@ -460,7 +462,7 @@ abstract contract HoldStorageWrapper2 is
                         _to,
                         _amount
                     ),
-                    IERC3643.ComplianceCallFailed.selector
+                    IERC3643Basic.ComplianceCallFailed.selector
                 );
             }
             return;
@@ -477,7 +479,7 @@ abstract contract HoldStorageWrapper2 is
                     _to,
                     _amount
                 ),
-                IERC3643.ComplianceCallFailed.selector
+                IERC3643Basic.ComplianceCallFailed.selector
             );
         }
     }

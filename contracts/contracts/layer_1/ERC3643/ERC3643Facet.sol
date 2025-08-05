@@ -204,28 +204,87 @@
 */
 
 // SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
 
+import {Common} from '../common/Common.sol';
+import {IERC3643Basic} from '../interfaces/ERC3643/IERC3643Basic.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
 import {
-    ERC1410TransferFacet
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410TransferFacet.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    _CONTROLLER_ROLE,
+    _ISSUER_ROLE,
+    _AGENT_ROLE,
+    _TREX_OWNER_ROLE
+} from '../constants/roles.sol';
+import {ERC3643} from './ERC3643.sol';
 
-contract ERC1410TransferTimeTravel is
-    ERC1410TransferFacet,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
+contract ERC3643Facet is ERC3643, IStaticFunctionSelectors {
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
     {
-        return TimeTravelStorageWrapper._blockTimestamp();
+        staticResolverKey_ = _ERC3643_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](20);
+        uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .forcedTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .identityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setCompliance
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setIdentityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .recoveryAddress
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .isAddressRecovered
+            .selector;
+
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .initialize_ERC3643
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Basic).interfaceId;
     }
 }

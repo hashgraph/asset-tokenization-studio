@@ -5,6 +5,7 @@ pragma solidity 0.8.18;
 import {
     OperatorTransferData
 } from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import {IssueData} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
 /**
  * @title IERC1410Management
@@ -15,6 +16,8 @@ interface IERC1410Management {
     // Initialization function
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool _multiPartition) external;
+
+    function issueByPartition(IssueData calldata _issueData) external;
 
     // Controller Functions (privileged operations)
     function controllerTransferByPartition(
