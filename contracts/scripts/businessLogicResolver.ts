@@ -251,7 +251,7 @@ export interface DeployedBusinessLogics {
     ERC1644: IStaticFunctionSelectors
     erc1410ReadFacet: IStaticFunctionSelectors
     erc1410ManagementFacet: IStaticFunctionSelectors
-    erc1410TransferFacet: IStaticFunctionSelectors
+    erc1410TokenHolderFacet: IStaticFunctionSelectors
     ERC1594: IStaticFunctionSelectors
     ERC1643: IStaticFunctionSelectors
     equityUSA: IStaticFunctionSelectors
@@ -266,6 +266,8 @@ export interface DeployedBusinessLogics {
     adjustBalances: IStaticFunctionSelectors
     protectedPartitions: IStaticFunctionSelectors
     Hold: IStaticFunctionSelectors
+    holdFacet: IStaticFunctionSelectors
+    holdReadFacet: IStaticFunctionSelectors
     externalPauseManagement: IStaticFunctionSelectors
     externalControlListManagement: IStaticFunctionSelectors
     externalKycListManagement: IStaticFunctionSelectors

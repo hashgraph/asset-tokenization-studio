@@ -270,7 +270,7 @@ task(
             erc20,
             erc1410ReadFacet,
             erc1410ManagementFacet,
-            erc1410TransferFacet,
+            erc1410TokenHolderFacet,
             erc1594,
             erc1643,
             erc1644,
@@ -283,7 +283,8 @@ task(
             scheduledTasks,
             corporateActions,
             lock,
-            hold,
+            holdFacet,
+            holdReadFacet,
             transferAndLock,
             adjustBalances,
             clearingActionsFacet,
@@ -295,7 +296,9 @@ task(
             externalControlListManagement,
             externalKycListManagement,
             protectedPartitions,
-            erc3643,
+            erc3643BasicFacet,
+            erc3643BatchFacet,
+            freeze,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -323,7 +326,7 @@ task(
             ERC20: erc20.address,
             ERC1410Read: erc1410ReadFacet.address,
             ERC1410Management: erc1410ManagementFacet.address,
-            ERC1410Transfer: erc1410TransferFacet.address,
+            ERC1410TokenHolder: erc1410TokenHolderFacet.address,
             ERC1594: erc1594.address,
             ERC1643: erc1643.address,
             ERC1644: erc1644.address,
@@ -337,7 +340,8 @@ task(
             'Scheduled Tasks': scheduledTasks.address,
             'Corporate Actions': corporateActions.address,
             Lock: lock.address,
-            Hold: hold.address,
+            'Hold Facet': holdFacet.address,
+            'Hold Read Facet': holdReadFacet.address,
             'Transfer and Lock': transferAndLock.address,
             'Adjust Balances': adjustBalances.address,
             'Clearing Action Facet': clearingActionsFacet.address,
@@ -351,7 +355,9 @@ task(
             'External Kyc List Management Facet':
                 externalKycListManagement.address,
             'Protected Partitions': protectedPartitions.address,
-            ERC3643: erc3643.address,
+            'ERC3643 Basic Facet': erc3643BasicFacet.address,
+            'ERC3643 Batch Facet': erc3643BatchFacet.address,
+            Freeze: freeze.address,
         }
 
         const contractAddress = []
