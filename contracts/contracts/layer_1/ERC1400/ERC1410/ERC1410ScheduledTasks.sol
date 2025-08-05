@@ -211,13 +211,20 @@ pragma solidity 0.8.18;
 import {
     IERC1410ScheduledTasks
 } from '../../interfaces/ERC1400/IERC1410ScheduledTasks.sol';
-import {ERC1410Snapshot} from './ERC1410Snapshot.sol';
 import {
     _ERC1410_RESOLVER_KEY
 } from '../../../layer_1/constants/resolverKeys.sol';
 import {IERC1410} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import {Common} from '../../common/Common.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
+contract ERC1410ScheduledTasks is
+    IStaticFunctionSelectors,
+    IERC1410ScheduledTasks,
+    Common
+{
     function triggerAndSyncAll(
         bytes32 _partition,
         address _from,
@@ -271,75 +278,19 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](26);
+        staticFunctionSelectors_ = new bytes4[](6);
         uint256 selectorIndex = 0;
         staticFunctionSelectors_[selectorIndex++] = this.balanceOfAt.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_ERC1410_Basic
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .transferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isMultiPartition
-            .selector;
         staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfByPartition
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.partitionsOf.selector;
         staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .totalSupplyByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .operatorTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .authorizeOperator
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .revokeOperator
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .authorizeOperatorByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .revokeOperatorByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isOperator.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isOperatorForPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .redeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .issueByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .canTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .canRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
             .triggerAndSyncAll
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedTransferFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedRedeemFromByPartition
             .selector;
     }
 

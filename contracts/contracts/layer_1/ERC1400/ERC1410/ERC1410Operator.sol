@@ -212,7 +212,7 @@ import {
     IERC1410Operator
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
 
-abstract contract ERC1410Operator is IERC1410Operator, Common {
+contract ERC1410Operator is IERC1410Operator, Common {
     ///////////////////////
     /// Operator Management
     ///////////////////////
