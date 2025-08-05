@@ -916,7 +916,44 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       [targetId.toString()],
     );
   }
+  protectedTransferAndLockByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
+    );
 
+    const transferAndLockData: TransferAndLock = {
+      from: sourceId.toString(),
+      to: targetId.toString(),
+      amount: amount.toBigNumber(),
+      data: '0x',
+      expirationTimestamp: expirationDate.toBigNumber(),
+    };
+
+    return this.executeWithArgs(
+      new TransferAndLock__factory().attach(security.toString()),
+      'protectedTransferAndLockByPartition',
+      securityId,
+      GAS.PROTECTED_TRANSFER_AND_LOCK,
+      [
+        partitionId,
+        transferAndLockData,
+        deadline.toBigNumber(),
+        nounce.toBigNumber(),
+        signature,
+      ],
+    );
+  }
   async controllerTransfer(
     security: EvmAddress,
     sourceId: EvmAddress,
