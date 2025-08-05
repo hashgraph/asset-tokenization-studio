@@ -460,7 +460,7 @@ describe('ERC3643 Tests', () => {
             erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
 
             erc3643Facet = await ethers.getContractAt(
-                'ERC3643',
+                'IERC3643',
                 diamond.address
             )
 
@@ -566,7 +566,7 @@ describe('ERC3643 Tests', () => {
                 signer_A
             )
             holdFacet = await ethers.getContractAt(
-                'Hold',
+                'IHold',
                 diamond.address,
                 signer_A
             )
@@ -3416,7 +3416,7 @@ describe('ERC3643 Tests', () => {
             )
 
             erc3643Facet = await ethers.getContractAt(
-                'ERC3643',
+                'IERC3643',
                 diamond.address
             )
 

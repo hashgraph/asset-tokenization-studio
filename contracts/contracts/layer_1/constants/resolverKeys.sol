@@ -307,5 +307,8 @@ bytes32 constant _KYC_MANAGEMENT_RESOLVER_KEY = 0x8676785f4d841823214e8ee8c497b3
 // keccak256('security.token.standard.erc3643.resolverKey');
 bytes32 constant _ERC3643_RESOLVER_KEY = 0x9670cee833e6302b5aeea3ae5875f87bd0af95a1fc660ca37cf38b1aa887fecb;
 
+// keccak256('security.token.standard.erc3643.batch.resolverKey');
+bytes32 constant _ERC3643_BATCH_RESOLVER_KEY = 0x9e671b494908a7523ee4e531ae7b7076b84f1c675d31346a9697f0ff4695f249;
+
 // keccak256('security.token.standard.freeze.resolverKey');
 bytes32 constant _FREEZE_RESOLVER_KEY = 0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1;

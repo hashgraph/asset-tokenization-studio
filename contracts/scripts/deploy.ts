@@ -246,7 +246,12 @@ import {
     SsiManagementTimeTravel__factory,
     Lock__factory,
     LockTimeTravel__factory,
-    HoldTimeTravel__factory,
+    HoldReadFacet__factory,
+    HoldReadTimeTravel__factory,
+    HoldManagementFacet__factory,
+    HoldManagementTimeTravel__factory,
+    HoldTokenHolderFacet__factory,
+    HoldTokenHolderTimeTravel__factory,
     PauseFacet__factory,
     PauseFacetTimeTravel__factory,
     ProtectedPartitions__factory,
@@ -288,9 +293,6 @@ import {
     ERC1410TokenHolderTimeTravel__factory,
     ERC3643BatchFacet__factory,
     ERC3643BatchTimeTravel__factory,
-    HoldRead__factory,
-    HoldReadTimeTravel__factory,
-    HoldFacet__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -527,25 +529,40 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        holdFacet: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new HoldFacet__factory(),
-                new HoldTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.HoldFacet.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
         holdReadFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new HoldRead__factory(),
+                new HoldReadFacet__factory(),
                 new HoldReadTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.HoldReadFacet.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        holdManagementFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new HoldManagementFacet__factory(),
+                new HoldManagementTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.HoldManagementFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        holdTokenHolderFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new HoldTokenHolderFacet__factory(),
+                new HoldTokenHolderTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.HoldTokenHolderFacet.addresses?.[
+                      network
+                  ]
                 : undefined,
             overrides,
         }),
@@ -953,16 +970,22 @@ export async function deployAtsContracts({
                     return result
                 }
             ),
-            holdFacet: await deployContractWithFactory(commands.holdFacet).then(
-                (result) => {
-                    console.log('Hold has been deployed successfully')
-                    return result
-                }
-            ),
             holdReadFacet: await deployContractWithFactory(
                 commands.holdReadFacet
             ).then((result) => {
                 console.log('HoldRead has been deployed successfully')
+                return result
+            }),
+            holdManagementFacet: await deployContractWithFactory(
+                commands.holdManagementFacet
+            ).then((result) => {
+                console.log('HoldManagement has been deployed successfully')
+                return result
+            }),
+            holdTokenHolderFacet: await deployContractWithFactory(
+                commands.holdTokenHolderFacet
+            ).then((result) => {
+                console.log('HoldTokenHolder has been deployed successfully')
                 return result
             }),
             erc20: await deployContractWithFactory(commands.erc20).then(

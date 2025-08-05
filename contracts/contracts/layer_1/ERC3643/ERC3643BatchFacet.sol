@@ -210,7 +210,7 @@ import {IERC3643Batch} from '../interfaces/ERC3643/IERC3643Batch.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_ERC3643_BATCH_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {ERC3643Batch} from './ERC3643Batch.sol';
 
 contract ERC3643BatchFacet is ERC3643Batch, IStaticFunctionSelectors {
@@ -220,7 +220,7 @@ contract ERC3643BatchFacet is ERC3643Batch, IStaticFunctionSelectors {
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _ERC3643_RESOLVER_KEY;
+        staticResolverKey_ = _ERC3643_BATCH_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()

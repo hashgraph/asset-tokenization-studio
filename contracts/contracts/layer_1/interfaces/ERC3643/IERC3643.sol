@@ -215,6 +215,6 @@ import {IERC3643Batch} from './IERC3643Batch.sol';
  * enabling interaction with all ERC3643 functions from external calls, tests, and SDK.
  * This interface is NOT meant to be inherited by any contract - it's only for external interaction.
  */
-interface ERC3643 is IERC3643Basic, IERC3643Batch {
+interface IERC3643 is IERC3643Basic, IERC3643Batch {
     // This interface combines all ERC1410 facets for external access
 }

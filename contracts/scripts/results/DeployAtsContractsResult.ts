@@ -240,8 +240,9 @@ import {
     TimeTravel,
     ExternalKycListManagement,
     FreezeFacet,
-    HoldFacet,
-    HoldRead,
+    HoldReadFacet,
+    HoldManagementFacet,
+    HoldTokenHolderFacet,
     ERC1410TokenHolderFacet,
     ERC3643BatchFacet,
     ERC3643Facet,
@@ -273,8 +274,9 @@ export interface DeployAtsContractsResultParams {
     corporateActions: DeployContractWithFactoryResult<CorporateActions>
     transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     lock: DeployContractWithFactoryResult<Lock>
-    holdFacet: DeployContractWithFactoryResult<HoldFacet>
-    holdReadFacet: DeployContractWithFactoryResult<HoldRead>
+    holdReadFacet: DeployContractWithFactoryResult<HoldReadFacet>
+    holdManagementFacet: DeployContractWithFactoryResult<HoldManagementFacet>
+    holdTokenHolderFacet: DeployContractWithFactoryResult<HoldTokenHolderFacet>
     adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
     clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>
@@ -317,8 +319,9 @@ export default class DeployAtsContractsResult {
     public readonly corporateActions: DeployContractWithFactoryResult<CorporateActions>
     public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     public readonly lock: DeployContractWithFactoryResult<Lock>
-    public readonly holdFacet: DeployContractWithFactoryResult<HoldFacet>
-    public readonly holdReadFacet: DeployContractWithFactoryResult<HoldRead>
+    public readonly holdReadFacet: DeployContractWithFactoryResult<HoldReadFacet>
+    public readonly holdManagementFacet: DeployContractWithFactoryResult<HoldManagementFacet>
+    public readonly holdTokenHolderFacet: DeployContractWithFactoryResult<HoldTokenHolderFacet>
     public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
     public readonly clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>
@@ -375,8 +378,9 @@ export default class DeployAtsContractsResult {
         deployer,
         erc3643Facet,
         erc3643BatchFacet,
-        holdFacet,
         holdReadFacet,
+        holdManagementFacet,
+        holdTokenHolderFacet,
     }: DeployAtsContractsResultParams) {
         this.businessLogicResolver = businessLogicResolver
         this.accessControl = accessControl
@@ -402,8 +406,9 @@ export default class DeployAtsContractsResult {
         this.corporateActions = corporateActions
         this.transferAndLock = transferAndLock
         this.lock = lock
-        this.holdFacet = holdFacet
         this.holdReadFacet = holdReadFacet
+        this.holdManagementFacet = holdManagementFacet
+        this.holdTokenHolderFacet = holdTokenHolderFacet
         this.adjustBalances = adjustBalances
         this.protectedPartitions = protectedPartitions
         this.clearingTransferFacet = clearingTransferFacet

@@ -265,9 +265,9 @@ export interface DeployedBusinessLogics {
     transferAndLock: IStaticFunctionSelectors
     adjustBalances: IStaticFunctionSelectors
     protectedPartitions: IStaticFunctionSelectors
-    Hold: IStaticFunctionSelectors
-    holdFacet: IStaticFunctionSelectors
     holdReadFacet: IStaticFunctionSelectors
+    holdManagementFacet: IStaticFunctionSelectors
+    holdTokenHolderFacet: IStaticFunctionSelectors
     externalPauseManagement: IStaticFunctionSelectors
     externalControlListManagement: IStaticFunctionSelectors
     externalKycListManagement: IStaticFunctionSelectors
