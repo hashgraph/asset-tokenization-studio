@@ -976,7 +976,11 @@ abstract contract ClearingStorageWrapper2 is
             memory _clearingOperationIdentifier
     ) internal view virtual returns (uint256);
 
-    function _checkCompliance(address _from, address _to) internal view virtual;
+    function _checkCompliance(
+        address _from,
+        address _to,
+        bool _checkSender
+    ) internal view virtual;
 
     function _checkIdentity(address _from, address _to) internal view virtual;
 
@@ -1000,7 +1004,11 @@ abstract contract ClearingStorageWrapper2 is
 
         if (_operation == IClearingActions.ClearingActionType.Approve) {
             _checkIdentity(_tokenHolder, clearingTransferData.destination);
-            _checkCompliance(_tokenHolder, clearingTransferData.destination);
+            _checkCompliance(
+                _tokenHolder,
+                clearingTransferData.destination,
+                false
+            );
 
             destination = clearingTransferData.destination;
         }
@@ -1050,7 +1058,7 @@ abstract contract ClearingStorageWrapper2 is
 
         if (_operation == IClearingActions.ClearingActionType.Approve) {
             _checkIdentity(_tokenHolder, address(0));
-            _checkCompliance(_tokenHolder, address(0));
+            _checkCompliance(_tokenHolder, address(0), false);
         } else
             _transferClearingBalance(
                 _partition,
