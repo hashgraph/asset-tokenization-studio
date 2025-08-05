@@ -203,15 +203,13 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
+import {HoldIdentifier} from '../interfaces/hold/IHold.sol';
 import {IHoldRead} from '../interfaces/hold/IHoldRead.sol';
-import {Common} from '../common/Common.sol';
-import {_CONTROLLER_ROLE} from '../constants/roles.sol';
 import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {Common} from '../common/Common.sol';
 
 abstract contract HoldRead is IHoldRead, Common {
     function getHeldAmountFor(
@@ -250,7 +248,7 @@ abstract contract HoldRead is IHoldRead, Common {
     }
 
     function getHoldForByPartition(
-        IHold.HoldIdentifier calldata _holdIdentifier
+        HoldIdentifier calldata _holdIdentifier
     )
         external
         view
@@ -269,7 +267,7 @@ abstract contract HoldRead is IHoldRead, Common {
     }
 
     function getHoldThirdParty(
-        IHold.HoldIdentifier calldata _holdIdentifier
+        HoldIdentifier calldata _holdIdentifier
     ) external view override returns (address) {
         return _getHoldThirdParty(_holdIdentifier);
     }

@@ -207,8 +207,7 @@
 pragma solidity 0.8.18;
 
 import {
-    BasicTransferInfo,
-    IssueData
+    BasicTransferInfo
 } from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
 /**

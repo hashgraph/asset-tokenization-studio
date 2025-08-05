@@ -206,11 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
-import {IHold} from './IHold.sol';
+import {HoldIdentifier} from './IHold.sol';
 
 interface IHoldRead {
     function getHeldAmountFor(
@@ -235,7 +232,7 @@ interface IHoldRead {
     ) external view returns (uint256[] memory holdsId_);
 
     function getHoldForByPartition(
-        IHold.HoldIdentifier calldata _holdIdentifier
+        HoldIdentifier calldata _holdIdentifier
     )
         external
         view
@@ -250,6 +247,6 @@ interface IHoldRead {
         );
 
     function getHoldThirdParty(
-        IHold.HoldIdentifier calldata _holdIdentifier
+        HoldIdentifier calldata _holdIdentifier
     ) external view returns (address thirdParty_);
 }

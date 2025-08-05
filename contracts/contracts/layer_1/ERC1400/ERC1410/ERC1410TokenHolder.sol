@@ -206,11 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {
-    BasicTransferInfo,
-    IssueData
-} from '../../interfaces/ERC1400/IERC1410.sol';
+import {BasicTransferInfo} from '../../interfaces/ERC1400/IERC1410.sol';
 import {
     IERC1410TokenHolder
 } from '../../interfaces/ERC1400/IERC1410TokenHolder.sol';

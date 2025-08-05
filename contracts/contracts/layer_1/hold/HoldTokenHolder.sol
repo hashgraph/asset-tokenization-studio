@@ -203,149 +203,159 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {LibCommon} from '../common/libraries/LibCommon.sol';
-import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {ERC3643StorageWrapper1} from '../ERC3643/ERC3643StorageWrapper1.sol';
-import {
-    IHold,
-    Hold,
-    HoldData,
-    HoldIdentifier,
-    HoldDataStorage
-} from '../../layer_1/interfaces/hold/IHold.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
+import {Hold, HoldIdentifier} from '../interfaces/hold/IHold.sol';
+import {IHoldTokenHolder} from '../interfaces/hold/IHoldTokenHolder.sol';
+import {Common} from '../common/Common.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
-    using LibCommon for EnumerableSet.UintSet;
-    using EnumerableSet for EnumerableSet.UintSet;
-
-    modifier onlyWithValidHoldId(HoldIdentifier calldata _holdIdentifier) {
-        _checkHoldId(_holdIdentifier);
-        _;
-    }
-
-    function _isHoldIdValid(
-        HoldIdentifier memory _holdIdentifier
-    ) internal view returns (bool) {
-        return _getHold(_holdIdentifier).id != 0;
-    }
-
-    function _getHold(
-        HoldIdentifier memory _holdIdentifier
-    ) internal view returns (HoldData memory) {
-        return
-            _holdStorage().holdsByAccountPartitionAndId[
-                _holdIdentifier.tokenHolder
-            ][_holdIdentifier.partition][_holdIdentifier.holdId];
-    }
-
-    function _getHeldAmountFor(
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return _holdStorage().totalHeldAmountByAccount[_tokenHolder];
-    }
-
-    function _getHeldAmountForByPartition(
+abstract contract HoldTokenHolder is IHoldTokenHolder, Common {
+    function createHoldByPartition(
         bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return
-            _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
-                _partition
-            ];
-    }
-
-    function _getHoldsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (uint256[] memory holdsId_) {
-        return
-            _holdStorage()
-            .holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(
-                    _pageIndex,
-                    _pageLength
-                );
-    }
-
-    function _getHoldForByPartition(
-        HoldIdentifier calldata _holdIdentifier
+        Hold calldata _hold
     )
-        internal
-        view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_,
-            ThirdPartyType thirdPartType_
-        )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_hold.escrow)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_hold.to)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
+        returns (bool success_, uint256 holdId_)
     {
-        HoldData memory holdData = _getHold(_holdIdentifier);
-        return (
-            holdData.hold.amount,
-            holdData.hold.expirationTimestamp,
-            holdData.hold.escrow,
-            holdData.hold.to,
-            holdData.hold.data,
-            holdData.operatorData,
-            holdData.thirdPartyType
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _msgSender(),
+            _hold,
+            '',
+            ThirdPartyType.NULL
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _msgSender(),
+            _partition,
+            holdId_,
+            _hold,
+            ''
         );
     }
 
-    function _getHoldCountForByPartition(
+    function createHoldFromByPartition(
         bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256) {
-        return
-            _holdStorage()
-            .holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
-    }
-
-    function _isHoldExpired(Hold memory _hold) internal view returns (bool) {
-        return _blockTimestamp() > _hold.expirationTimestamp;
-    }
-
-    function _isEscrow(
-        Hold memory _hold,
-        address _escrow
-    ) internal pure returns (bool) {
-        return _escrow == _hold.escrow;
-    }
-
-    function _checkHoldAmount(
-        uint256 _amount,
-        HoldData memory holdData
-    ) internal pure {
-        if (_amount > holdData.hold.amount)
-            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
-    }
-
-    function _holdStorage()
-        internal
-        pure
-        returns (HoldDataStorage storage hold_)
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingDisabled
+        validateAddress(_from)
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
     {
-        bytes32 position = _HOLD_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            hold_.slot := position
+        {
+            _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_hold.to);
+            _checkRecoveredAddress(_from);
         }
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData,
+            ThirdPartyType.AUTHORIZED
+        );
+
+        _decreaseAllowedBalanceForHold(
+            _partition,
+            _from,
+            _hold.amount,
+            holdId_
+        );
+
+        emit HeldFromByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _hold,
+            _operatorData
+        );
     }
 
-    function _checkHoldId(
+    function executeHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier,
+        address _to,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        onlyIdentified(_holdIdentifier.tokenHolder, _to)
+        onlyCompliant(address(0), _to)
+        onlyWithValidHoldId(_holdIdentifier)
+        returns (bool success_)
+    {
+        success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);
+
+        emit HoldByPartitionExecuted(
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition,
+            _holdIdentifier.holdId,
+            _amount,
+            _to
+        );
+    }
+
+    function releaseHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        onlyWithValidHoldId(_holdIdentifier)
+        returns (bool success_)
+    {
+        success_ = _releaseHoldByPartition(_holdIdentifier, _amount);
+        emit HoldByPartitionReleased(
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition,
+            _holdIdentifier.holdId,
+            _amount
+        );
+    }
+
+    function reclaimHoldByPartition(
         HoldIdentifier calldata _holdIdentifier
-    ) private view {
-        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        onlyWithValidHoldId(_holdIdentifier)
+        returns (bool success_)
+    {
+        uint256 amount;
+        (success_, amount) = _reclaimHoldByPartition(_holdIdentifier);
+        emit HoldByPartitionReclaimed(
+            _msgSender(),
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition,
+            _holdIdentifier.holdId,
+            amount
+        );
     }
 }

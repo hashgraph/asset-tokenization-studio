@@ -203,72 +203,127 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-import {Common} from '../common/Common.sol';
 import {_CONTROLLER_ROLE} from '../constants/roles.sol';
-import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {Hold, ProtectedHold} from '../interfaces/hold/IHold.sol';
+import {IHoldManagement} from '../interfaces/hold/IHoldManagement.sol';
+import {Common} from '../common/Common.sol';
 import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
-import {Hold} from './Hold.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-contract HoldFacet is Hold, IStaticFunctionSelectors {
-    function getStaticResolverKey()
+abstract contract HoldManagement is IHoldManagement, Common {
+    function operatorCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    )
         external
-        pure
         override
-        returns (bytes32 staticResolverKey_)
+        onlyUnpaused
+        onlyClearingDisabled
+        validateAddress(_from)
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyOperator(_partition, _from)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
     {
-        staticResolverKey_ = _HOLD_RESOLVER_KEY;
+        {
+            _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_hold.to);
+            _checkRecoveredAddress(_from);
+        }
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData,
+            ThirdPartyType.OPERATOR
+        );
+
+        emit OperatorHeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _hold,
+            _operatorData
+        );
     }
 
-    function getStaticFunctionSelectors()
+    function controllerCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    )
         external
-        pure
         override
-        returns (bytes4[] memory staticFunctionSelectors_)
+        onlyUnpaused
+        validateAddress(_from)
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyRole(_CONTROLLER_ROLE)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyControllable
+        returns (bool success_, uint256 holdId_)
     {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](8);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .createHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .createHoldFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .executeHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .releaseHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .reclaimHoldByPartition
-            .selector;
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData,
+            ThirdPartyType.CONTROLLER
+        );
+
+        emit ControllerHeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _hold,
+            _operatorData
+        );
     }
 
-    function getStaticInterfaceIds()
+    function protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    )
         external
-        pure
         override
-        returns (bytes4[] memory staticInterfaceIds_)
+        onlyUnpaused
+        onlyClearingDisabled
+        validateAddress(_from)
+        validateAddress(_protectedHold.hold.escrow)
+        onlyUnrecoveredAddress(_from)
+        onlyUnrecoveredAddress(_protectedHold.hold.to)
+        onlyRole(_protectedPartitionsRole(_partition))
+        onlyWithValidExpirationTimestamp(
+            _protectedHold.hold.expirationTimestamp
+        )
+        onlyProtectedPartitions
+        returns (bool success_, uint256 holdId_)
     {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IHold).interfaceId;
+        (success_, holdId_) = _protectedCreateHoldByPartition(
+            _partition,
+            _from,
+            _protectedHold,
+            _signature
+        );
+
+        emit ProtectedHeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _protectedHold.hold,
+            ''
+        );
     }
 }

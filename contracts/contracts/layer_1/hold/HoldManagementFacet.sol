@@ -203,22 +203,54 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
-import {HoldFacet} from '../../../layer_1/hold/HoldFacet.sol';
+import {_HOLD_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {IHoldManagement} from '../interfaces/hold/IHoldManagement.sol';
+import {HoldManagement} from './HoldManagement.sol';
 
-contract HoldTimeTravel is HoldFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
+contract HoldManagementFacet is HoldManagement, IStaticFunctionSelectors {
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
     {
-        return TimeTravelStorageWrapper._blockTimestamp();
+        staticResolverKey_ = _HOLD_MANAGEMENT_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedCreateHoldByPartition
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IHoldManagement)
+            .interfaceId;
     }
 }

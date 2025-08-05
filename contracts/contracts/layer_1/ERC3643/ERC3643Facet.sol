@@ -206,20 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
+import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {IERC3643Basic} from '../interfaces/ERC3643/IERC3643Basic.sol';
-import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
-import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    _CONTROLLER_ROLE,
-    _ISSUER_ROLE,
-    _AGENT_ROLE,
-    _TREX_OWNER_ROLE
-} from '../constants/roles.sol';
 import {ERC3643} from './ERC3643.sol';
 
 contract ERC3643Facet is ERC3643, IStaticFunctionSelectors {

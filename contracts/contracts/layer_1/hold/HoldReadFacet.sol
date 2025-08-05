@@ -203,16 +203,15 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
+import {_HOLD_READ_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {IHoldRead} from '../interfaces/hold/IHoldRead.sol';
-import {_HOLD_READ_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {HoldRead} from './HoldRead.sol';
-
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 contract HoldReadFacet is HoldRead, IStaticFunctionSelectors {
     function getStaticResolverKey()
