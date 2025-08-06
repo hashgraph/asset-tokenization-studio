@@ -341,7 +341,7 @@ describe('ERC3643 Tests', () => {
 
         before(async () => {
             // mute | mock console.log
-            // console.log = () => {}
+            console.log = () => {}
             ;[signer_A, signer_B, signer_C, signer_D, signer_E, signer_F] =
                 await ethers.getSigners()
             account_A = signer_A.address
@@ -1432,10 +1432,10 @@ describe('ERC3643 Tests', () => {
             })
 
             //TODO: we should test when canTransfer returns false for the FROM, TO and SENDER separately
-            it.only('GIVEN ComplianceMock::canTransfer returns false THEN operations fail with ComplianceNotAllowed', async () => {
+            it('GIVEN ComplianceMock::canTransfer returns false THEN operations fail with ComplianceNotAllowed', async () => {
                 // Setup: mint tokens and set compliance to return false for canTransfer
                 const erc20FacetE = erc20Facet.connect(signer_E)
-                await erc3643Facet.mint(account_E, AMOUNT)
+                await erc3643Facet.mint(account_E, 2 * AMOUNT)
                 await erc20FacetE.approve(account_D, MAX_UINT256)
                 await erc1410Facet
                     .connect(signer_E)
@@ -1636,6 +1636,57 @@ describe('ERC3643 Tests', () => {
                     to: account_D,
                     data: EMPTY_HEX_BYTES,
                 }
+                await holdFacet
+                    .connect(signer_E)
+                    .createHoldByPartition(DEFAULT_PARTITION, hold)
+                const holdIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    holdId: 1,
+                }
+                await expect(
+                    holdFacet
+                        .connect(signer_D)
+                        .executeHoldByPartition(
+                            holdIdentifier,
+                            account_E,
+                            AMOUNT
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Clearings
+                await clearingActionsFacet.activateClearing()
+                const clearingOperation = {
+                    partition: DEFAULT_PARTITION,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:09Z'
+                    ),
+                    data: EMPTY_HEX_BYTES,
+                }
+                await clearingFacet
+                    .connect(signer_E)
+                    .clearingTransferByPartition(
+                        clearingOperation,
+                        AMOUNT,
+                        account_D
+                    )
+                const clearingIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    clearingId: 1,
+                    clearingOperationType: ClearingOperationType.Transfer,
+                }
+                await expect(
+                    clearingFacet.approveClearingOperationByPartition(
+                        clearingIdentifier
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
             })
         })
 
@@ -3420,7 +3471,7 @@ describe('ERC3643 Tests', () => {
     describe('multi partition', () => {
         before(async () => {
             // mute | mock console.log
-            // console.log = () => {}
+            console.log = () => {}
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
             account_A = signer_A.address

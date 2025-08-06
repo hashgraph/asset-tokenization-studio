@@ -545,43 +545,6 @@ abstract contract ERC1594StorageWrapper is
         }
     }
 
-    function _isIdentified(
-        address _from,
-        address _to
-    )
-        internal
-        view
-        returns (
-            bool status,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        if (_from != address(0)) {
-            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    IKyc.InvalidKycStatus.selector,
-                    abi.encode(_from)
-                );
-            }
-        }
-        if (_to != address(0)) {
-            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    IKyc.InvalidKycStatus.selector,
-                    abi.encode(_to)
-                );
-            }
-        }
-
-        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
-    }
-
     function _checkCompliance(
         address _from,
         address _to,
@@ -598,13 +561,47 @@ abstract contract ERC1594StorageWrapper is
         }
     }
 
+    function _erc1594Storage()
+        internal
+        pure
+        returns (ERC1594Storage storage ds)
+    {
+        bytes32 position = _ERC1594_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ds.slot := position
+        }
+    }
+
+    function _genericChecks()
+        private
+        view
+        returns (bool, bytes1, bytes32, bytes memory)
+    {
+        // Application specific checks
+        if (_isPaused()) {
+            return (false, Eip1066.PAUSED, TokenIsPaused.selector, EMPTY_BYTES);
+        }
+
+        if (_isClearingActivated()) {
+            return (
+                false,
+                Eip1066.UNAVAILABLE,
+                IClearing.ClearingIsActivated.selector,
+                EMPTY_BYTES
+            );
+        }
+
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
     function _isCompliant(
         address _from,
         address _to,
         uint256 _value,
         bool _checkSender
     )
-        internal
+        private
         view
         returns (
             bool status,
@@ -720,38 +717,41 @@ abstract contract ERC1594StorageWrapper is
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
-    function _genericChecks()
-        internal
+    function _isIdentified(
+        address _from,
+        address _to
+    )
+        private
         view
-        returns (bool, bytes1, bytes32, bytes memory)
+        returns (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
     {
-        // Application specific checks
-        if (_isPaused()) {
-            return (false, Eip1066.PAUSED, TokenIsPaused.selector, EMPTY_BYTES);
+        if (_from != address(0)) {
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IKyc.InvalidKycStatus.selector,
+                    abi.encode(_from)
+                );
+            }
         }
-
-        if (_isClearingActivated()) {
-            return (
-                false,
-                Eip1066.UNAVAILABLE,
-                IClearing.ClearingIsActivated.selector,
-                EMPTY_BYTES
-            );
+        if (_to != address(0)) {
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IKyc.InvalidKycStatus.selector,
+                    abi.encode(_to)
+                );
+            }
         }
 
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
-    }
-
-    function _erc1594Storage()
-        internal
-        pure
-        returns (ERC1594Storage storage ds)
-    {
-        bytes32 position = _ERC1594_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            ds.slot := position
-        }
     }
 
     function _businessLogicChecks(
