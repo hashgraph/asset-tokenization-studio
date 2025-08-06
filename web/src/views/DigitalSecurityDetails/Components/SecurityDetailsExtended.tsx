@@ -208,7 +208,6 @@ import {
   DefinitionListProps,
   ClipboardButton,
   Text,
-  BasicDefinitionListItem,
 } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import {
@@ -219,26 +218,41 @@ import {
 import { useSecurityStore } from "../../../store/securityStore";
 import { useParams } from "react-router-dom";
 import { Flex } from "@chakra-ui/react";
-import { BondDetailsViewModel } from "@hashgraph/asset-tokenization-sdk";
-import { useEffect, useMemo } from "react";
+import {
+  BondDetailsViewModel,
+  EquityDetailsViewModel,
+} from "@hashgraph/asset-tokenization-sdk";
+import { useMemo } from "react";
 import { MaturityDateItem } from "./MadurityDateItem";
 import { DATE_TIME_FORMAT } from "../../../utils/constants";
+
 interface SecurityDetailsExtended extends Omit<DefinitionListProps, "items"> {
-  nominalValue?: number;
   bondDetailsResponse?: BondDetailsViewModel;
+  equityDetailsResponse?: EquityDetailsViewModel;
+  isLoadingSecurityDetails: boolean;
+  isFetchingSecurityDetails: boolean;
 }
 
 export const SecurityDetailsExtended = ({
-  nominalValue,
   bondDetailsResponse,
+  equityDetailsResponse,
+  isLoadingSecurityDetails,
+  isFetchingSecurityDetails,
   ...props
 }: SecurityDetailsExtended) => {
   const { t: tProperties } = useTranslation("properties");
   const { details } = useSecurityStore();
   const { id } = useParams();
 
-  const defaultItems: BasicDefinitionListItem[] = useMemo(
-    () => [
+  const nominalValue = useMemo(() => {
+    return toNumber(
+      equityDetailsResponse?.nominalValue || bondDetailsResponse?.nominalValue,
+      2,
+    );
+  }, [equityDetailsResponse, bondDetailsResponse]);
+
+  const listItems = useMemo(() => {
+    const items = [
       {
         title: tProperties("name"),
         description: details?.name ?? "",
@@ -294,51 +308,35 @@ export const SecurityDetailsExtended = ({
           toNumber(details?.maxSupply) - toNumber(details?.totalSupply)
         } ${details?.symbol}`,
       },
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [details],
-  );
+    ];
 
-  useEffect(() => {
-    if (
-      details &&
-      details.type === "BOND" &&
-      !defaultItems.find(({ title }) => title === tProperties("startingDate"))
-    ) {
-      defaultItems.push({
+    const isBond = details?.type === "BOND";
+
+    if (isBond && bondDetailsResponse?.startingDate) {
+      items.push({
         title: tProperties("startingDate"),
         description: formatDate(
-          bondDetailsResponse?.startingDate,
+          bondDetailsResponse.startingDate,
           DATE_TIME_FORMAT,
         ),
       });
-
-      if (
-        bondDetailsResponse &&
-        bondDetailsResponse.maturityDate &&
-        id &&
-        !defaultItems.find(({ title }) => title === tProperties("maturityDate"))
-      ) {
-        defaultItems.push({
-          title: tProperties("maturityDate"),
-          description: <MaturityDateItem securityId={id} />,
-        });
-      }
     }
-  }, [
-    bondDetailsResponse,
-    bondDetailsResponse?.startingDate,
-    defaultItems,
-    details,
-    id,
-    tProperties,
-  ]);
+
+    if (isBond && bondDetailsResponse?.maturityDate && id) {
+      items.push({
+        title: tProperties("maturityDate"),
+        description: <MaturityDateItem securityId={id} />,
+      });
+    }
+
+    return items;
+  }, [details, id, nominalValue, tProperties, bondDetailsResponse]);
 
   return (
     <DefinitionList
       data-testid="security-details"
-      isLoading={details === null}
-      items={defaultItems}
+      isLoading={isLoadingSecurityDetails || isFetchingSecurityDetails}
+      items={listItems}
       title="Details"
       {...props}
     />

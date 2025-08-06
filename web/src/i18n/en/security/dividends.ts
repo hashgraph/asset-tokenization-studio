@@ -207,6 +207,18 @@ export default {
   tabs: {
     program: "Program dividend",
     see: "See dividend",
+    holders: "Holders",
+    list: "List",
+  },
+  list: {
+    columns: {
+      id: "ID",
+      recordDate: "Record Date",
+      executionDate: "Execution Date",
+      dividendAmount: "Dividend Amount",
+      snapshotId: "Snapshot",
+    },
+    emptyTable: "No dividends found",
   },
   program: {
     input: {
@@ -249,6 +261,20 @@ export default {
       title: "Detail",
       paymentDay: "Payment day",
       amount: "Amount",
+    },
+  },
+  holders: {
+    title: "Holders",
+    dividendIdInput: {
+      label: "Dividend ID",
+      placeholder: "1",
+      tooltip: "ID of the dividend to display.",
+    },
+    searchButton: "Search",
+    emptyTable: "No data",
+    table: {
+      dividendId: "Dividend ID",
+      holderAddress: "Holder address",
     },
   },
   messages: {

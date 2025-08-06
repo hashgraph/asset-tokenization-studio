@@ -89,7 +89,10 @@ export const SSIManager = () => {
     new GetRevocationRegistryAddressRequest({
       securityId,
     }),
-    {},
+    {
+      enabled: !!securityId,
+      retry: false,
+    },
   );
 
   const hasSSIManagerRole = useMemo(
