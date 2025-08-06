@@ -495,6 +495,7 @@ abstract contract ERC1594StorageWrapper is
             return (isAbleToTransfer, statusCode, reasonCode, details);
         }
 
+        // Format validation
         if (_from == ZERO_ADDRESS || _to == ZERO_ADDRESS) {
             return (
                 false,
@@ -635,8 +636,8 @@ abstract contract ERC1594StorageWrapper is
                 .functionStaticCall(
                     abi.encodeWithSelector(
                         ICompliance.canTransfer.selector,
-                        _from,
-                        _to,
+                        _msgSender(),
+                        address(0),
                         0
                     ),
                     IERC3643.ComplianceCallFailed.selector
