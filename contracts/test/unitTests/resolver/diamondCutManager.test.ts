@@ -375,7 +375,25 @@ describe('DiamondCutManager', () => {
         facet: IDiamondLoupe.FacetStructOutput,
         selectorsLength: number
     ) {
-        // Known problematic selectors
+        /*
+         * Problematic selectors:
+         * - getStaticInterfaceIdsSelector ('0xb378cf37'):
+         *     This selector is known to sometimes appear unexpectedly in facet selector arrays due to
+         *     misconfiguration or incorrect facet registration. It should only be present for facets that
+         *     implement the corresponding static interface method.
+         * - getStaticResolverKeySelector ('0x1ef2fdc8'):
+         *     Similar to the above, this selector should only be present for facets that implement the
+         *     static resolver key method. Its unexpected presence may indicate a bug in facet setup.
+         * - nullSelector ('0x00000000'):
+         *     The null selector is used as a sentinel value and should never appear in the selectors array.
+         *     Its presence typically indicates an array length mismatch or that the selectors array was
+         *     not properly populated. The validation logic checks for this to catch such errors early.
+         *
+         * Expected behavior:
+         * - Only valid selectors for the facet should be present in the selectors array.
+         * - The null selector should never be present.
+         * - The static selectors should only be present for facets that implement the corresponding methods.
+         */
         const getStaticInterfaceIdsSelector = '0xb378cf37'
         const getStaticResolverKeySelector = '0x1ef2fdc8'
         const nullSelector = '0x00000000'
