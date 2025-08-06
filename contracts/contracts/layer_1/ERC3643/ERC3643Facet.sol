@@ -229,7 +229,7 @@ contract ERC3643Facet is ERC3643, IStaticFunctionSelectors {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](19);
+        staticFunctionSelectors_ = new bytes4[](18);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .initialize_ERC3643
