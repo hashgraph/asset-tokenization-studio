@@ -230,6 +230,21 @@ import {
     AdjustBalances,
     Cap,
     AccessControl,
+    Lock,
+    Lock__factory,
+    IHold__factory,
+    Pause__factory,
+    SsiManagement__factory,
+    TimeTravel__factory,
+    ClearingActionsFacet__factory,
+    AccessControl__factory,
+    ControlList__factory,
+    IERC1410__factory,
+    Kyc__factory,
+    Equity__factory,
+    AdjustBalances__factory,
+    Cap__factory,
+    ERC20__factory,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -305,6 +320,7 @@ describe('Hold Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let holdFacet: IHold
     let pauseFacet: Pause
+    let lock: Lock
     let erc1410Facet: IERC1410
     let controlListFacet: ControlList
     let erc20Facet: ERC20
@@ -372,65 +388,36 @@ describe('Hold Tests', () => {
     }
 
     async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-        holdFacet = await ethers.getContractAt(
-            'IHold',
+        lock = Lock__factory.connect(diamond.address, signer_A)
+        holdFacet = IHold__factory.connect(diamond.address, signer_A)
+        pauseFacet = Pause__factory.connect(diamond.address, signer_D)
+        erc1410Facet = IERC1410__factory.connect(diamond.address, signer_B)
+        kycFacet = Kyc__factory.connect(diamond.address, signer_B)
+        ssiManagementFacet = SsiManagement__factory.connect(
             diamond.address,
             signer_A
         )
-        pauseFacet = await ethers.getContractAt(
-            'Pause',
-            diamond.address,
-            signer_D
-        )
-        erc1410Facet = await ethers.getContractAt(
-            'IERC1410',
-            diamond.address,
-            signer_B
-        )
-        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
-        ssiManagementFacet = await ethers.getContractAt(
-            'SsiManagement',
+        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        adjustBalancesFacet = AdjustBalances__factory.connect(
             diamond.address,
             signer_A
         )
-        equityFacet = await ethers.getContractAt(
-            'Equity',
+        clearingActionsFacet = ClearingActionsFacet__factory.connect(
             diamond.address,
             signer_A
         )
-        timeTravelFacet = await ethers.getContractAt(
-            'TimeTravel',
+        capFacet = Cap__factory.connect(diamond.address, signer_A)
+        accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
         )
-        adjustBalancesFacet = await ethers.getContractAt(
-            'AdjustBalances',
-            diamond.address,
-            signer_A
-        )
-        clearingActionsFacet = await ethers.getContractAt(
-            'ClearingActionsFacet',
-            diamond.address,
-            signer_A
-        )
-        capFacet = await ethers.getContractAt('Cap', diamond.address, signer_A)
-
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address,
-            signer_A
-        )
-        erc20Facet = await ethers.getContractAt(
-            'ERC20',
-            diamond.address,
-            signer_A
-        )
-        controlListFacet = await ethers.getContractAt(
-            'ControlList',
+        erc20Facet = ERC20__factory.connect(diamond.address, signer_A)
+        controlListFacet = ControlList__factory.connect(
             diamond.address,
             signer_E
         )
-
+        // Set the initial RBACs
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
         await kycFacet.grantKyc(
             account_A,
@@ -1044,7 +1031,7 @@ describe('Hold Tests', () => {
                         hold_wrong
                     )
                 ).to.be.revertedWithCustomError(
-                    holdFacet,
+                    erc20Facet,
                     'WrongExpirationTimestamp'
                 )
 
@@ -1062,7 +1049,7 @@ describe('Hold Tests', () => {
                             EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
-                    holdFacet,
+                    equityFacet,
                     'WrongExpirationTimestamp'
                 )
 
@@ -1086,7 +1073,7 @@ describe('Hold Tests', () => {
                             EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
-                    holdFacet,
+                    lock,
                     'WrongExpirationTimestamp'
                 )
 
@@ -1104,7 +1091,7 @@ describe('Hold Tests', () => {
                             EMPTY_HEX_BYTES
                         )
                 ).to.be.revertedWithCustomError(
-                    holdFacet,
+                    lock,
                     'WrongExpirationTimestamp'
                 )
             })
@@ -1595,7 +1582,7 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .releaseHoldByPartition(holdIdentifier, _AMOUNT)
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, _AMOUNT)
 
                 expect(
@@ -1669,7 +1656,7 @@ describe('Hold Tests', () => {
             )
 
             await expect(holdFacet.reclaimHoldByPartition(holdIdentifier))
-                .to.emit(holdFacet, 'Approval')
+                .to.emit(erc20Facet, 'Approval')
                 .withArgs(account_A, account_B, _AMOUNT)
 
             expect(

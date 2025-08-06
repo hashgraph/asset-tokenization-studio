@@ -2153,10 +2153,10 @@ describe('ERC3643 Tests', () => {
                         '0x'
                     )
                 await expect(erc3643Facet.mint(account_E, amount))
-                    .to.emit(erc3643Facet, 'Issued')
+                    .to.emit(erc1594Facet, 'Issued')
                     .withArgs(account_B, account_E, amount, '0x')
                 await expect(erc3643Facet.burn(account_E, amount))
-                    .to.emit(erc3643Facet, 'Transfer')
+                    .to.emit(erc1594Facet, 'Transfer')
                     .withArgs(account_E, ADDRESS_ZERO, amount)
                 await expect(freezeFacet.setAddressFrozen(account_E, true))
                     .to.emit(freezeFacet, 'AddressFrozen')
@@ -3096,7 +3096,7 @@ describe('ERC3643 Tests', () => {
                     holdFacet
                         .connect(signer_C)
                         .createHoldByPartition(DEFAULT_PARTITION, hold)
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     holdFacet
                         .connect(signer_C)
@@ -3106,7 +3106,7 @@ describe('ERC3643 Tests', () => {
                             hold,
                             EMPTY_HEX_BYTES
                         )
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 const protectedHold = {
                     hold: hold,
@@ -3131,7 +3131,7 @@ describe('ERC3643 Tests', () => {
                             hold,
                             EMPTY_HEX_BYTES
                         )
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // 2 - From
                 await expect(
                     holdFacet.operatorCreateHoldByPartition(
@@ -3140,7 +3140,7 @@ describe('ERC3643 Tests', () => {
                         hold,
                         EMPTY_HEX_BYTES
                     )
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     holdFacet.createHoldFromByPartition(
                         DEFAULT_PARTITION,
@@ -3148,14 +3148,14 @@ describe('ERC3643 Tests', () => {
                         hold,
                         EMPTY_HEX_BYTES
                     )
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // 3 - To
                 hold.to = account_C
                 await expect(
                     holdFacet
                         .connect(signer_C)
                         .createHoldByPartition(DEFAULT_PARTITION, hold)
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     holdFacet
                         .connect(signer_C)
@@ -3165,7 +3165,7 @@ describe('ERC3643 Tests', () => {
                             hold,
                             EMPTY_HEX_BYTES
                         )
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 await expect(
                     holdFacet.protectedCreateHoldByPartition(

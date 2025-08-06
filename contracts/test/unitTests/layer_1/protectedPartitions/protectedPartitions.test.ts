@@ -1153,7 +1153,7 @@ describe('ProtectedPartitions Tests', () => {
                         '0x1234'
                     )
             ).to.be.revertedWithCustomError(
-                holdFacet,
+                transferAndLockFacet,
                 'WrongExpirationTimestamp'
             )
         })

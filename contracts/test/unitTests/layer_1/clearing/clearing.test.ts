@@ -3221,7 +3221,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, _AMOUNT)
 
                 clearingIdentifier.clearingOperationType =
@@ -3231,7 +3231,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, 2 * _AMOUNT)
 
                 clearingIdentifier.clearingOperationType =
@@ -3241,7 +3241,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, 3 * _AMOUNT)
 
                 expect(
@@ -3285,7 +3285,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, _AMOUNT)
 
                 clearingIdentifier.clearingOperationType =
@@ -3295,7 +3295,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, 2 * _AMOUNT)
 
                 clearingIdentifier.clearingOperationType =
@@ -3305,7 +3305,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, 3 * _AMOUNT)
 
                 expect(
