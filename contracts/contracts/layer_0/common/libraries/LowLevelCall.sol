@@ -237,23 +237,31 @@ library LowLevelCall {
         return _verifyCallResultFromTarget(success, returndata, _errorSelector);
     }
 
+    function revertWithData(
+        bytes4 _reasonCode,
+        bytes memory _details
+    ) internal pure {
+        bytes memory revertData = abi.encodePacked(
+            bytes4(_reasonCode),
+            _details
+        );
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let len := mload(revertData)
+            let dataPtr := add(revertData, 0x20)
+            revert(dataPtr, len)
+        }
+    }
+
     // solhint-disable-next-line private-vars-leading-underscore
     function _verifyCallResultFromTarget(
         bool _success,
         bytes memory _returndata,
         bytes4 _errorSelector
-    ) internal pure returns (bytes memory) {
+    ) private pure returns (bytes memory) {
         if (_success) {
             return _returndata;
         }
-        bytes memory revertData = abi.encodePacked(_errorSelector, _returndata);
-
-        // Revert with the encoded data using assembly
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let len := mload(revertData) // Length of revertData
-            let dataPtr := add(revertData, 0x20) // Pointer to the data (skip length prefix)
-            revert(dataPtr, len)
-        }
+        revertWithData(_errorSelector, _returndata);
     }
 }

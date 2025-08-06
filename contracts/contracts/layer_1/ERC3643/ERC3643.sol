@@ -340,7 +340,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         onlyWithoutMultiPartition
         onlyWithinMaxSupply(_amount)
         onlyIdentified(address(0), _to)
-        onlyCompliant(address(0), _to)
+        onlyCompliant(address(0), _to, false)
         onlyIssuable
     {
         {
@@ -384,11 +384,11 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyIdentified(_msgSender(), address(0))
-        onlyCompliant(_msgSender(), address(0))
+        onlyCompliant(_msgSender(), address(0), false)
     {
         for (uint256 i = 0; i < _toList.length; i++) {
             _checkIdentity(address(0), _toList[i]);
-            _checkCompliance(address(0), _toList[i]);
+            _checkCompliance(address(0), _toList[i], false);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
             _transfer(_msgSender(), _toList[i], _amounts[i]);
@@ -436,7 +436,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         }
         for (uint256 i = 0; i < _toList.length; i++) {
             _checkIdentity(address(0), _toList[i]);
-            _checkCompliance(address(0), _toList[i]);
+            _checkCompliance(address(0), _toList[i], false);
             _checkWithinMaxSupply(_amounts[i]);
         }
         for (uint256 i = 0; i < _toList.length; i++) {

@@ -1078,130 +1078,6 @@ describe('ERC3643 Tests', () => {
             })
         })
 
-        describe('ERC3643 canTransfer Compliance Integration', () => {
-            it('GIVEN ComplianceMock.canTransfer returns false THEN transfers fail with ComplianceNotAllowed', async () => {
-                // Setup: mint tokens and set compliance to return false for canTransfer
-                await erc3643Facet.mint(account_E, AMOUNT)
-                await complianceMock.setFlags(false, false) // canTransfer = false
-
-                const erc20FacetE = erc20Facet.connect(signer_E)
-
-                await expect(
-                    erc20FacetE.transfer(account_D, AMOUNT / 2)
-                ).to.be.revertedWithCustomError(
-                    erc3643Facet,
-                    'ComplianceNotAllowed'
-                )
-            })
-
-            it('GIVEN ComplianceMock.canTransfer returns true THEN transfers succeed', async () => {
-                // Setup: mint tokens and set compliance to return true for canTransfer
-                await erc3643Facet.mint(account_E, AMOUNT)
-                await complianceMock.setFlags(true, false) // canTransfer = true
-
-                const erc20FacetE = erc20Facet.connect(signer_E)
-
-                await expect(erc20FacetE.transfer(account_D, AMOUNT / 2)).to.not
-                    .be.reverted
-
-                expect(
-                    await erc1410SnapshotFacet.balanceOf(account_E)
-                ).to.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.balanceOf(account_D)
-                ).to.equal(AMOUNT / 2)
-            })
-
-            it('GIVEN zero address compliance THEN transfers succeed without compliance checks', async () => {
-                // Deploy token without compliance contract (zero address)
-                const diamond = await deployEquityFromFactory({
-                    adminAccount: account_A,
-                    isWhiteList: false,
-                    isControllable: true,
-                    arePartitionsProtected: false,
-                    clearingActive: false,
-                    internalKycActivated: true,
-                    isMultiPartition: false,
-                    name,
-                    symbol,
-                    decimals,
-                    isin,
-                    votingRight: false,
-                    informationRight: false,
-                    liquidationRight: false,
-                    subscriptionRight: true,
-                    conversionRight: true,
-                    redemptionRight: true,
-                    putRight: false,
-                    dividendRight: 1,
-                    currency: '0x345678',
-                    numberOfShares: BigInt(MAX_SUPPLY),
-                    nominalValue: 100,
-                    regulationType: RegulationType.REG_S,
-                    regulationSubType: RegulationSubType.NONE,
-                    countriesControlListType: true,
-                    listOfCountries: 'ES,FR,CH',
-                    info: 'nothing',
-                    init_rbacs: [
-                        { role: ISSUER_ROLE, members: [account_A] },
-                        { role: KYC_ROLE, members: [account_B] },
-                    ],
-                    factory,
-                    businessLogicResolver: businessLogicResolver.address,
-                    compliance: ADDRESS_ZERO, // No compliance contract
-                })
-
-                const erc3643NoCompliance = await ethers.getContractAt(
-                    'ERC3643',
-                    diamond.address
-                )
-                const kycNoCompliance = await ethers.getContractAt(
-                    'Kyc',
-                    diamond.address,
-                    signer_B
-                )
-                const erc20NoCompliance = await ethers.getContractAt(
-                    'ERC20',
-                    diamond.address,
-                    signer_E
-                )
-                const ssiNoCompliance = await ethers.getContractAt(
-                    'SsiManagement',
-                    diamond.address
-                )
-
-                // Grant SSI_MANAGER_ROLE to account_A first, then add account_E as an issuer
-                const accessControlNoCompliance = await ethers.getContractAt(
-                    'AccessControl',
-                    diamond.address
-                )
-                await accessControlNoCompliance.grantRole(
-                    SSI_MANAGER_ROLE,
-                    account_A
-                )
-                await ssiNoCompliance.addIssuer(account_E)
-                await kycNoCompliance.grantKyc(
-                    account_E,
-                    EMPTY_VC_ID,
-                    ZERO,
-                    MAX_UINT256,
-                    account_E
-                )
-                await kycNoCompliance.grantKyc(
-                    account_D,
-                    EMPTY_VC_ID,
-                    ZERO,
-                    MAX_UINT256,
-                    account_E
-                )
-
-                await erc3643NoCompliance.mint(account_E, AMOUNT)
-
-                await expect(erc20NoCompliance.transfer(account_D, AMOUNT / 2))
-                    .to.not.be.reverted
-            })
-        })
-
         describe('Compliance', () => {
             it('GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance', async () => {
                 const retrieved_compliance = await erc3643Facet.compliance()
@@ -1232,8 +1108,8 @@ describe('ERC3643 Tests', () => {
             it('GIVEN ComplianceMock flag set to true THEN canTransfer returns true', async () => {
                 expect(
                     await complianceMock.canTransfer(
-                        ADDRESS_ZERO,
-                        ADDRESS_ZERO,
+                        ethers.Wallet.createRandom().address,
+                        ethers.Wallet.createRandom().address,
                         ZERO
                     )
                 ).to.be.true
@@ -1243,8 +1119,8 @@ describe('ERC3643 Tests', () => {
                 await complianceMock.setFlags(false, false)
                 expect(
                     await complianceMock.canTransfer(
-                        ADDRESS_ZERO,
-                        ADDRESS_ZERO,
+                        ethers.Wallet.createRandom().address,
+                        ethers.Wallet.createRandom().address,
                         ZERO
                     )
                 ).to.be.false
@@ -1439,7 +1315,10 @@ describe('ERC3643 Tests', () => {
             })
 
             it('GIVEN a failed mint call THEN transaction reverts with custom error', async () => {
-                await complianceMock.setFlags(true, true)
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('created')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
                 let caught
                 try {
                     await erc1410Facet.issueByPartition({
@@ -1478,7 +1357,10 @@ describe('ERC3643 Tests', () => {
                     value: AMOUNT,
                     data: '0x',
                 })
-                await complianceMock.setFlags(true, true)
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('transferred')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
                 const basicTransferInfo = {
                     to: account_D,
                     value: AMOUNT,
@@ -1522,7 +1404,10 @@ describe('ERC3643 Tests', () => {
                     value: AMOUNT,
                     data: '0x',
                 })
-                await complianceMock.setFlags(true, true)
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('destroyed')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
                 let caught
                 try {
                     await erc1410Facet
@@ -1553,6 +1438,297 @@ describe('ERC3643 Tests', () => {
                 )
                 const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
                 expect(returnedArgs).to.equal(args.slice(2))
+            })
+
+            it('GIVEN a failed canTransfer call THEN transaction reverts with custom error', async () => {
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('canTransfer')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
+                let caught
+                try {
+                    await erc20Facet
+                        .connect(signer_E)
+                        .approve(account_D, AMOUNT)
+                } catch (err: any) {
+                    caught = err
+                }
+                const returnedSelector = (caught.data as string).slice(0, 10)
+                const outerSelector = erc3643Facet.interface.getSighash(
+                    'ComplianceCallFailed()'
+                )
+                expect(returnedSelector).to.equal(outerSelector)
+                const targetErrorSelector = complianceMock.interface.getSighash(
+                    'MockErrorCanTransfer(address,address,uint256)'
+                )
+                const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+                    ['address', 'address', 'uint256'],
+                    [account_E, account_D, ZERO] // During approvals amount is not checked
+                )
+                const args = ethers.utils.solidityPack(
+                    ['bytes4', 'bytes'],
+                    [targetErrorSelector, targetErrorArgs]
+                )
+                const returnedArgs = (caught.data as string).slice(10)
+                expect(returnedArgs).to.equal(args.slice(2))
+            })
+
+            //TODO: we should test when canTransfer returns false for the FROM, TO and SENDER separately
+            it('GIVEN ComplianceMock::canTransfer returns false THEN operations fail with ComplianceNotAllowed', async () => {
+                // Setup: mint tokens and set compliance to return false for canTransfer
+                const erc20FacetE = erc20Facet.connect(signer_E)
+                await erc3643Facet.mint(account_E, 2 * AMOUNT)
+                await erc20FacetE.approve(account_D, MAX_UINT256)
+                await erc1410Facet
+                    .connect(signer_E)
+                    .authorizeOperator(account_D)
+
+                await complianceMock.setFlags(false, false) // canTransfer = false
+
+                // Transfers
+                await expect(
+                    erc20FacetE.transfer(account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc20Facet
+                        .connect(signer_D)
+                        .transferFrom(account_E, account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                const basicTransferInfo = {
+                    to: account_D,
+                    value: AMOUNT,
+                }
+                await expect(
+                    erc1410Facet
+                        .connect(signer_E)
+                        .transferByPartition(
+                            DEFAULT_PARTITION,
+                            basicTransferInfo,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                const operatorTransferData = {
+                    partition: DEFAULT_PARTITION,
+                    from: account_E,
+                    to: account_D,
+                    value: AMOUNT,
+                    data: EMPTY_HEX_BYTES,
+                    operatorData: EMPTY_HEX_BYTES,
+                }
+                await expect(
+                    erc1410Facet
+                        .connect(signer_D)
+                        .operatorTransferByPartition(operatorTransferData)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_E)
+                        .transferWithData(account_D, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_D)
+                        .transferFromWithData(
+                            account_E,
+                            account_D,
+                            AMOUNT,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc3643Facet
+                        .connect(signer_E)
+                        .batchTransfer([account_D], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Issue
+                await expect(
+                    erc3643Facet.batchMint([account_E], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc3643Facet.mint(account_E, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1410Facet.issueByPartition({
+                        partition: DEFAULT_PARTITION,
+                        tokenHolder: account_E,
+                        value: AMOUNT,
+                        data: EMPTY_HEX_BYTES,
+                    })
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1594Facet.issue(account_E, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Redeem
+                await expect(
+                    erc1410Facet.redeemByPartition(
+                        DEFAULT_PARTITION,
+                        AMOUNT,
+                        EMPTY_HEX_BYTES
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_E)
+                        .redeem(AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_D)
+                        .redeemFrom(account_E, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Approves
+                await expect(
+                    erc20FacetE.approve(account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1410Facet.connect(signer_E).authorizeOperator(account_D)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1410Facet
+                        .connect(signer_E)
+                        .authorizeOperatorByPartition(
+                            DEFAULT_PARTITION,
+                            account_D
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc20FacetE.increaseAllowance(account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Revoke
+                await expect(
+                    erc1410Facet.connect(signer_E).revokeOperator(account_D)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1410Facet
+                        .connect(signer_E)
+                        .revokeOperatorByPartition(DEFAULT_PARTITION, account_D)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Holds
+                const hold = {
+                    amount: AMOUNT,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:03Z'
+                    ),
+                    escrow: account_D,
+                    to: account_D,
+                    data: EMPTY_HEX_BYTES,
+                }
+                await holdFacet
+                    .connect(signer_E)
+                    .createHoldByPartition(DEFAULT_PARTITION, hold)
+                const holdIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    holdId: 1,
+                }
+                await expect(
+                    holdFacet
+                        .connect(signer_D)
+                        .executeHoldByPartition(
+                            holdIdentifier,
+                            account_E,
+                            AMOUNT
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Clearings
+                await clearingActionsFacet.activateClearing()
+                const clearingOperation = {
+                    partition: DEFAULT_PARTITION,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:09Z'
+                    ),
+                    data: EMPTY_HEX_BYTES,
+                }
+                await clearingFacet
+                    .connect(signer_E)
+                    .clearingTransferByPartition(
+                        clearingOperation,
+                        AMOUNT,
+                        account_D
+                    )
+                const clearingIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    clearingId: 1,
+                    clearingOperationType: ClearingOperationType.Transfer,
+                }
+                await expect(
+                    clearingFacet.approveClearingOperationByPartition(
+                        clearingIdentifier
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
             })
         })
 

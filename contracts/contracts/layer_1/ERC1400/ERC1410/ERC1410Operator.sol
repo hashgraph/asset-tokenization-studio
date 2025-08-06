@@ -221,7 +221,12 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
     /// @param _operator An address which is being authorised
     function authorizeOperator(
         address _operator
-    ) external override onlyUnpaused onlyCompliant(_msgSender(), _operator) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyCompliant(_msgSender(), _operator, false)
+    {
         _authorizeOperator(_operator);
     }
 
@@ -229,7 +234,12 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
     /// @param _operator An address which is being de-authorised
     function revokeOperator(
         address _operator
-    ) external override onlyUnpaused onlyCompliant(_msgSender(), address(0)) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyCompliant(_msgSender(), address(0), false)
+    {
         _revokeOperator(_operator);
     }
 
@@ -244,7 +254,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), _operator)
+        onlyCompliant(_msgSender(), _operator, false)
     {
         _authorizeOperatorByPartition(_partition, _operator);
     }
@@ -260,7 +270,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), address(0))
+        onlyCompliant(_msgSender(), address(0), false)
     {
         _revokeOperatorByPartition(_partition, _operator);
     }
