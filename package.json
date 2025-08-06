@@ -67,20 +67,20 @@
   },
   "lint-staged": {
     "packages/ats/contracts/**/*.sol": [
-      "npm run ats:contracts:prettier:staged",
-      "npm run ats:contracts:lint:staged:sol"
+      "cd packages/ats/contracts && npm run prettier:staged",
+      "cd packages/ats/contracts && npm run lint:staged:sol"
     ],
     "packages/ats/contracts/**/*.{ts,js}": [
-      "npm run ats:contracts:prettier:staged",
-      "npm run ats:contracts:lint:staged:ts"
+      "cd packages/ats/contracts && npm run prettier:staged",
+      "cd packages/ats/contracts && npm run lint:staged:ts"
     ],
     "packages/ats/sdk/**/*.{ts,js}": [
-      "npm run ats:sdk:prettier:staged",
-      "npm run ats:sdk:lint:staged"
+      "cd packages/ats/sdk && npm run prettier:staged",
+      "cd packages/ats/sdk && npm run lint:staged:ts"
     ],
     "apps/ats/web/**/*.{ts,tsx,js,jsx}": [
-      "npm run ats:web:prettier:staged",
-      "npm run ats:web:lint:staged"
+      "cd apps/ats/web && npm run prettier:staged",
+      "cd apps/ats/web && npm run lint:staged:ts"
     ]
   }
 }

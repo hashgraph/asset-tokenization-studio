@@ -56,8 +56,8 @@ Below is a description of which each variable represents.
 
 - **REACT_APP_MIRROR_NODE :** mirror node's url.
 - **REACT_APP_RPC_NODE :** rpc node's url.
-- **REACT_APP_RPC_RESOLVER :** resolver's proxy smart contract address. Should be immutable.
-- **REACT_APP_RPC_FACTORY :** factory's proxy smart contract address. Should be immutable.
+- **REACT_APP_RESOLVER :** resolver's proxy smart contract address. Should be immutable.
+- **REACT_APP_FACTORY :** factory's proxy smart contract address. Should be immutable.
 
 ## Hedera Wallet Connnect
 
