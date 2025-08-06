@@ -254,8 +254,8 @@ import {
   MockedBlacklist__factory,
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
-  ERC3643__factory,
   FreezeFacet__factory,
+  ERC3643Facet__factory,
   ERC1410ReadFacet__factory,
   HoldReadFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
@@ -1827,7 +1827,10 @@ export class RPCQueryAdapter {
   async onchainID(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting OnchainID for security ${address.toString()}`);
 
-    return await this.connect(ERC3643__factory, address.toString()).onchainID();
+    return await this.connect(
+      ERC3643Facet__factory,
+      address.toString(),
+    ).onchainID();
   }
 
   async identityRegistry(address: EvmAddress): Promise<string> {
@@ -1836,7 +1839,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC3643__factory,
+      ERC3643Facet__factory,
       address.toString(),
     ).identityRegistry();
   }
@@ -1847,7 +1850,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC3643__factory,
+      ERC3643Facet__factory,
       address.toString(),
     ).compliance();
   }
@@ -1875,7 +1878,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting recovery status of ${targetId}`);
 
     const isAddressRecovered = await this.connect(
-      ERC3643__factory,
+      ERC3643Facet__factory,
       address.toString(),
     ).isAddressRecovered(targetId.toString());
 

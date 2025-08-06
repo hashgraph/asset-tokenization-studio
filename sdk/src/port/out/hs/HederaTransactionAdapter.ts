@@ -242,7 +242,7 @@ import {
   MockedWhitelist__factory,
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
-  ERC3643__factory,
+  ERC3643Facet__factory,
   FreezeFacet__factory,
   ERC1410TokenHolderFacet__factory,
   ERC1410ManagementFacet__factory,
@@ -831,12 +831,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Burning ${amount} securities from account ${source.toString()}`,
     );
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [
-      source.toString(),
-      amount.toHexString(),
-    ]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [source.toString(), amount.toHexString()],
+    );
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -1029,12 +1031,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Minting ${amount} ${security} to account: ${target.toString()}`,
     );
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [
-      target.toString(),
-      amount.toHexString(),
-    ]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [target.toString(), amount.toHexString()],
+    );
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -1151,13 +1155,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Forced transfer ${amount} tokens from account ${source.toString()} to account ${target.toString()}`,
     );
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [
-      source.toString(),
-      target.toString(),
-      amount.toHexString(),
-    ]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [source.toString(), target.toString(), amount.toHexString()],
+    );
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -3839,9 +3844,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'setName';
     LogService.logTrace(`Setting name to ${security.toString()}`);
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [name]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [name],
+    );
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -3862,9 +3872,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'setSymbol';
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [symbol]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [symbol],
+    );
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -3884,9 +3899,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'setOnchainID';
     LogService.logTrace(`Setting onchainID to ${security.toString()}`);
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [onchainID.toString()]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [onchainID.toString()],
+    );
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -3908,9 +3928,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'setIdentityRegistry';
     LogService.logTrace(`Setting identity registry to ${security.toString()}`);
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [identityRegistry.toString()]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [identityRegistry.toString()],
+    );
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -3932,9 +3957,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'setCompliance';
     LogService.logTrace(`Setting compliance to ${security.toString()}`);
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [compliance.toString()]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [compliance.toString()],
+    );
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -4019,13 +4049,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Recovering address ${lostWalletId.toString()} to ${newWalletId.toString()}`,
     );
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [
-      lostWalletId.toString(),
-      newWalletId.toString(),
-      EVM_ZERO_ADDRESS,
-    ]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [lostWalletId.toString(), newWalletId.toString(), EVM_ZERO_ADDRESS],
+    );
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -4047,9 +4078,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'addAgent';
     LogService.logTrace(`Granting agent role to ${agentId.toString()}`);
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [agentId.toString()]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [agentId.toString()],
+    );
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -4071,9 +4107,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'removeAgent';
     LogService.logTrace(`Revoking agent role from ${agentId.toString()}`);
 
-    const functionDataEncodedHex = new Interface(
-      ERC3643__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [agentId.toString()]);
+    const factoryInstance = new ERC3643Facet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [agentId.toString()],
+    );
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),

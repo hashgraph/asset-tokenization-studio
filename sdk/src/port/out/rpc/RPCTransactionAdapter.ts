@@ -410,13 +410,13 @@ import {
   MockedWhitelist__factory,
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
-  ERC3643__factory,
   FreezeFacet__factory,
   ERC3643BatchFacet__factory,
   ERC1410TokenHolderFacet__factory,
   ERC1410ManagementFacet__factory,
   HoldTokenHolderFacet__factory,
   HoldManagementFacet__factory,
+  ERC3643Facet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -1147,7 +1147,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).burn(source.toString(), amount.toBigNumber(), {
@@ -1287,7 +1287,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).mint(target.toString(), amount.toBigNumber(), { gasLimit: MINT_GAS }),
@@ -1373,7 +1373,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).forcedTransfer(
@@ -3351,7 +3351,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting name to ${security.toString()}`);
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).setName(name, {
@@ -3366,7 +3366,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).setName(symbol, {
@@ -3383,7 +3383,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting onchainID to ${security.toString()}`);
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).setOnchainID(onchainID.toString(), {
@@ -3400,7 +3400,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting Identity Registry to ${security.toString()}`);
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).setIdentityRegistry(identityRegistry.toString(), {
@@ -3417,7 +3417,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting Compliance to ${security.toString()}`);
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).setCompliance(compliance.toString(), {
@@ -3477,7 +3477,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).recoveryAddress(
@@ -3499,7 +3499,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Granting agent role to ${agentId.toString()}`);
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).addAgent(agentId.toString(), {
@@ -3516,7 +3516,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Revoking agent role from ${agentId.toString()}`);
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643__factory.connect(
+      await ERC3643Facet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).removeAgent(agentId.toString(), {
