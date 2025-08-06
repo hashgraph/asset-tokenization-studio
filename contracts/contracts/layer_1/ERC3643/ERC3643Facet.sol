@@ -213,7 +213,7 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ERC3643} from './ERC3643.sol';
 
-contract ERC3643Facet is ERC3643, IStaticFunctionSelectors {
+contract ERC3643Facet is IStaticFunctionSelectors, ERC3643 {
     function getStaticResolverKey()
         external
         pure

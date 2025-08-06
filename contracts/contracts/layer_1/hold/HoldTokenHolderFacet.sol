@@ -213,7 +213,7 @@ import {
 import {IHoldTokenHolder} from '../interfaces/hold/IHoldTokenHolder.sol';
 import {HoldTokenHolder} from './HoldTokenHolder.sol';
 
-contract HoldTokenHolderFacet is HoldTokenHolder, IStaticFunctionSelectors {
+contract HoldTokenHolderFacet is IStaticFunctionSelectors, HoldTokenHolder {
     function getStaticResolverKey()
         external
         pure

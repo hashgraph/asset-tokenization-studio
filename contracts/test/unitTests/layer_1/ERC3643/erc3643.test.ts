@@ -969,7 +969,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     freezeFacet.freezePartialTokens(account_E, amount + 1)
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'InsufficientBalance'
                 )
             })
@@ -1663,7 +1663,7 @@ describe('ERC3643 Tests', () => {
                     await expect(
                         erc3643Transferor.batchTransfer(toList, amounts)
                     ).to.be.revertedWithCustomError(
-                        erc3643Facet,
+                        erc1410Facet,
                         'InvalidPartition'
                     )
                 })
@@ -2142,7 +2142,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     erc3643Facet.forcedTransfer(account_E, account_D, amount)
                 )
-                    .to.emit(erc3643Facet, 'TransferByPartition')
+                    .to.emit(erc1410Facet, 'TransferByPartition')
                     .withArgs(
                         DEFAULT_PARTITION,
                         ADDRESS_ZERO,
@@ -2258,19 +2258,19 @@ describe('ERC3643 Tests', () => {
             it('GIVEN a paused token WHEN freezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     freezeFacet.freezePartialTokens(account_A, 10)
-                ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
+                ).to.be.revertedWithCustomError(erc1410Facet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused token WHEN unfreezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     freezeFacet.unfreezePartialTokens(account_A, 10)
-                ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
+                ).to.be.revertedWithCustomError(erc1410Facet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused token WHEN setAddressFrozen THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     freezeFacet.setAddressFrozen(account_A, true)
-                ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
+                ).to.be.revertedWithCustomError(erc1410Facet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused token WHEN attempting to addAgent THEN transactions revert with TokenIsPaused error', async () => {
@@ -3439,7 +3439,7 @@ describe('ERC3643 Tests', () => {
             await expect(
                 erc3643Facet.mint(account_D, 2 * BALANCE_OF_C_ORIGINAL)
             ).to.be.revertedWithCustomError(
-                erc3643Facet,
+                erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
             )
         })
@@ -3451,7 +3451,7 @@ describe('ERC3643 Tests', () => {
             await expect(
                 erc3643Facet.burn(account_C, 2 * BALANCE_OF_C_ORIGINAL)
             ).to.be.revertedWithCustomError(
-                erc3643Facet,
+                erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
             )
         })
@@ -3468,7 +3468,7 @@ describe('ERC3643 Tests', () => {
                     2 * BALANCE_OF_C_ORIGINAL
                 )
             ).to.be.revertedWithCustomError(
-                erc3643Facet,
+                erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
             )
         })
@@ -3478,7 +3478,7 @@ describe('ERC3643 Tests', () => {
             await expect(
                 erc3643Facet.recoveryAddress(account_C, account_D, ADDRESS_ZERO)
             ).to.be.revertedWithCustomError(
-                erc3643Facet,
+                erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
             )
         })
@@ -3488,7 +3488,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     erc3643Facet.batchTransfer([account_A], [AMOUNT])
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3500,7 +3500,7 @@ describe('ERC3643 Tests', () => {
                         [AMOUNT]
                     )
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3508,7 +3508,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     erc3643Facet.batchMint([account_A], [AMOUNT])
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3516,7 +3516,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     erc3643Facet.batchBurn([account_A], [AMOUNT])
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3527,7 +3527,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     freezeFacet.freezePartialTokens(account_A, AMOUNT)
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3536,7 +3536,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     freezeFacet.unfreezePartialTokens(account_A, AMOUNT)
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3545,7 +3545,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     freezeFacet.unfreezePartialTokens(account_A, AMOUNT)
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3554,7 +3554,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     freezeFacet.batchFreezePartialTokens([account_A], [AMOUNT])
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3566,7 +3566,7 @@ describe('ERC3643 Tests', () => {
                         [AMOUNT]
                     )
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })

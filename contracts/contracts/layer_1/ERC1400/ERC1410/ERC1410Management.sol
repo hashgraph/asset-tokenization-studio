@@ -219,16 +219,9 @@ import {
     IERC1410Management
 } from '../../interfaces/ERC1400/IERC1410Management.sol';
 import {Common} from '../../common/Common.sol';
-import {
-    ERC1410StorageWrapper
-} from '../../../layer_0/ERC1400/ERC1410/ERC1410StorageWrapper.sol';
 import {IssueData} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
-abstract contract ERC1410Management is
-    IERC1410Management,
-    Common,
-    ERC1410StorageWrapper
-{
+abstract contract ERC1410Management is IERC1410Management, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(
         bool _multiPartition

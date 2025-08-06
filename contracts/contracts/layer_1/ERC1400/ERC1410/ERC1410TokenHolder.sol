@@ -211,9 +211,6 @@ import {
     IERC1410TokenHolder
 } from '../../interfaces/ERC1400/IERC1410TokenHolder.sol';
 import {Common} from '../../common/Common.sol';
-import {
-    ERC1410StorageWrapper
-} from '../../../layer_0/ERC1400/ERC1410/ERC1410StorageWrapper.sol';
 
 /**
  * @title ERC1410TokenHolder
@@ -221,11 +218,7 @@ import {
  * @dev Facet containing all transfer-related operations for ERC1410 functionality
  * @dev These methods can by called by any users (token holders).
  */
-abstract contract ERC1410TokenHolder is
-    IERC1410TokenHolder,
-    Common,
-    ERC1410StorageWrapper
-{
+abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Common {
     function transferByPartition(
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,

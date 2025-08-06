@@ -213,7 +213,7 @@ import {
 import {IHoldManagement} from '../interfaces/hold/IHoldManagement.sol';
 import {HoldManagement} from './HoldManagement.sol';
 
-contract HoldManagementFacet is HoldManagement, IStaticFunctionSelectors {
+contract HoldManagementFacet is IStaticFunctionSelectors, HoldManagement {
     function getStaticResolverKey()
         external
         pure

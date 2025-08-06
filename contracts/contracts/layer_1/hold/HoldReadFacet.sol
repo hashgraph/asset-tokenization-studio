@@ -213,7 +213,7 @@ import {
 import {IHoldRead} from '../interfaces/hold/IHoldRead.sol';
 import {HoldRead} from './HoldRead.sol';
 
-contract HoldReadFacet is HoldRead, IStaticFunctionSelectors {
+contract HoldReadFacet is IStaticFunctionSelectors, HoldRead {
     function getStaticResolverKey()
         external
         pure
