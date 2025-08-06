@@ -387,7 +387,6 @@ import {
   ControlList__factory,
   DiamondFacet__factory,
   Equity__factory,
-  ERC1410ScheduledTasks__factory,
   ERC1643__factory,
   Factory__factory,
   IBond,
@@ -398,7 +397,6 @@ import {
   ScheduledTasks__factory,
   Snapshots__factory,
   TransferAndLock__factory,
-  Hold__factory,
   SsiManagement__factory,
   Kyc__factory,
   ClearingActionsFacet__factory,
@@ -414,6 +412,11 @@ import {
   MockedExternalKycList__factory,
   ERC3643__factory,
   FreezeFacet__factory,
+  ERC3643BatchFacet__factory,
+  ERC1410TokenHolderFacet__factory,
+  ERC1410ManagementFacet__factory,
+  HoldTokenHolderFacet__factory,
+  HoldManagementFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -1079,7 +1082,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410TokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).transferByPartition(_PARTITION_ID_1, basicTransferInfo, '0x', {
@@ -1124,7 +1127,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Redeeming ${amount} securities`);
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410TokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).redeemByPartition(_PARTITION_ID_1, amount.toBigNumber(), '0x', {
@@ -1266,7 +1269,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410ManagementFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).issueByPartition(issueData, { gasLimit: ISSUE_GAS }),
@@ -1341,7 +1344,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410ManagementFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).controllerTransferByPartition(
@@ -1395,7 +1398,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410ManagementFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).controllerRedeemByPartition(
@@ -1548,7 +1551,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410TokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).authorizeOperator(targetId.toString(), {
@@ -1566,7 +1569,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410TokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).revokeOperator(targetId.toString(), { gasLimit: REVOKE_OPERATOR_GAS }),
@@ -1583,7 +1586,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410TokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).authorizeOperatorByPartition(partitionId, targetId.toString(), {
@@ -1602,7 +1605,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410TokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).revokeOperatorByPartition(partitionId, targetId.toString(), {
@@ -1632,7 +1635,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410ManagementFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).operatorTransferByPartition(operatorTransferData, {
@@ -1886,7 +1889,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410ManagementFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedRedeemFromByPartition(
@@ -1976,7 +1979,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
+      await ERC1410ManagementFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedTransferFromByPartition(
@@ -2015,7 +2018,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await HoldTokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).createHoldByPartition(partitionId, hold, {
@@ -2046,7 +2049,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await HoldTokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).createHoldFromByPartition(
@@ -2083,7 +2086,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await HoldManagementFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).controllerCreateHoldByPartition(
@@ -2129,7 +2132,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await HoldManagementFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedCreateHoldByPartition(
@@ -2163,7 +2166,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await HoldTokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).releaseHoldByPartition(holdIdentifier, amount.toBigNumber(), {
@@ -2190,7 +2193,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await HoldTokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).reclaimHoldByPartition(holdIdentifier, {
@@ -2219,7 +2222,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await HoldTokenHolderFacet__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).executeHoldByPartition(
@@ -3533,7 +3536,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Batch transferring ${amountList.length} token amounts from ${security.toString()} to ${toList.map((item) => item.toString()).join(', ')}`,
     );
 
-    const contract = ERC3643__factory.connect(
+    const contract = ERC3643BatchFacet__factory.connect(
       security.toString(),
       this.signerOrProvider,
     );
@@ -3562,7 +3565,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Batch forced transferring ${amountList.length} token amounts from ${fromList.map((item) => item.toString())} to ${toList.map((item) => item.toString())}`,
     );
 
-    const contract = ERC3643__factory.connect(
+    const contract = ERC3643BatchFacet__factory.connect(
       security.toString(),
       this.signerOrProvider,
     );
@@ -3591,7 +3594,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Batch minting ${amountList.length} token amounts on ${security.toString()} to ${toList.map((item) => item.toString())}`,
     );
 
-    const contract = ERC3643__factory.connect(
+    const contract = ERC3643BatchFacet__factory.connect(
       security.toString(),
       this.signerOrProvider,
     );
@@ -3619,7 +3622,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Batch burning ${amountList.length} token amounts from ${targetList.map((item) => item.toString())}`,
     );
 
-    const contract = ERC3643__factory.connect(
+    const contract = ERC3643BatchFacet__factory.connect(
       security.toString(),
       this.signerOrProvider,
     );

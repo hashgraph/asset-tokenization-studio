@@ -223,10 +223,8 @@ import {
   ControlList__factory,
   DiamondFacet__factory,
   EquityUSA__factory,
-  ERC1410ScheduledTasks__factory,
   ERC1643__factory,
   Factory__factory,
-  Hold__factory,
   Lock__factory,
   ScheduledTasks__factory,
   Snapshots__factory,
@@ -246,6 +244,11 @@ import {
   MockedExternalKycList__factory,
   ERC3643__factory,
   FreezeFacet__factory,
+  ERC1410TokenHolderFacet__factory,
+  ERC1410ManagementFacet__factory,
+  HoldTokenHolderFacet__factory,
+  HoldManagementFacet__factory,
+  ERC3643BatchFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -729,7 +732,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410TokenHolderFacet__factory().attach(
       security.toString(),
     );
 
@@ -799,7 +802,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Redeeming ${amount} securities from account ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410TokenHolderFacet__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -828,11 +831,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Burning ${amount} securities from account ${source.toString()}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [source.toString(), amount.toHexString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [
+      source.toString(),
+      amount.toHexString(),
+    ]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -988,7 +992,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Issue ${amount} ${security} to account: ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410ManagementFacet__factory().attach(
       security.toString(),
     );
 
@@ -1025,12 +1029,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Minting ${amount} ${security} to account: ${target.toString()}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [target.toString(), amount.toHexString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [
+      target.toString(),
+      amount.toHexString(),
+    ]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -1110,7 +1114,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Controller transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410ManagementFacet__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -1147,12 +1151,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Forced transfer ${amount} tokens from account ${source.toString()} to account ${target.toString()}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [source.toString(), target.toString(), amount.toHexString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [
+      source.toString(),
+      target.toString(),
+      amount.toHexString(),
+    ]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -1175,7 +1180,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Force redeem ${amount} tokens from account ${sourceId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410ManagementFacet__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -1390,7 +1395,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `authorizing operator: ${targetId.toString()} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410TokenHolderFacet__factory().attach(
       security.toString(),
     );
 
@@ -1421,7 +1426,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `revoking operator: ${targetId.toString()} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410TokenHolderFacet__factory().attach(
       security.toString(),
     );
 
@@ -1453,7 +1458,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `authorizing operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410TokenHolderFacet__factory().attach(
       security.toString(),
     );
 
@@ -1485,7 +1490,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `revoking operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410TokenHolderFacet__factory().attach(
       security.toString(),
     );
 
@@ -1519,7 +1524,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()} from account ${sourceId.toString()} on partition ${partitionId}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410ManagementFacet__factory().attach(
       security.toString(),
     );
 
@@ -1909,7 +1914,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410ManagementFacet__factory().attach(
       security.toString(),
     );
 
@@ -1953,7 +1958,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
+    const factoryInstance = new ERC1410ManagementFacet__factory().attach(
       security.toString(),
     );
 
@@ -2046,7 +2051,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const factoryInstance = new Hold__factory().attach(security.toString());
+    const factoryInstance = new HoldTokenHolderFacet__factory().attach(
+      security.toString(),
+    );
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -2087,7 +2094,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const factoryInstance = new Hold__factory().attach(security.toString());
+    const factoryInstance = new HoldTokenHolderFacet__factory().attach(
+      security.toString(),
+    );
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -2128,7 +2137,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Controller Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const factoryInstance = new Hold__factory().attach(security.toString());
+    const factoryInstance = new HoldManagementFacet__factory().attach(
+      security.toString(),
+    );
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -2172,7 +2183,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Protected Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const factoryInstance = new Hold__factory().attach(security.toString());
+    const factoryInstance = new HoldManagementFacet__factory().attach(
+      security.toString(),
+    );
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -2216,7 +2229,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(
       `Releasing hold amount ${amount} from account ${targetId.toString()}}`,
     );
-    const factoryInstance = new Hold__factory().attach(security.toString());
+    const factoryInstance = new HoldTokenHolderFacet__factory().attach(
+      security.toString(),
+    );
 
     const holdIdentifier: HoldIdentifier = {
       partition: partitionId,
@@ -2250,7 +2265,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'reclaimHoldByPartition';
     LogService.logTrace(`Reclaiming hold from account ${targetId.toString()}}`);
-    const factoryInstance = new Hold__factory().attach(security.toString());
+    const factoryInstance = new HoldTokenHolderFacet__factory().attach(
+      security.toString(),
+    );
 
     const holdIdentifier: HoldIdentifier = {
       partition: partitionId,
@@ -2289,7 +2306,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
-    const factoryInstance = new Hold__factory().attach(security.toString());
+    const factoryInstance = new HoldTokenHolderFacet__factory().attach(
+      security.toString(),
+    );
 
     const holdIdentifier: HoldIdentifier = {
       partition: partitionId,
@@ -3819,12 +3838,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'setName';
     LogService.logTrace(`Setting name to ${security.toString()}`);
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [name],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [name]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -3844,12 +3861,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'setSymbol';
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [symbol],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [symbol]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -3869,12 +3884,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'setOnchainID';
     LogService.logTrace(`Setting onchainID to ${security.toString()}`);
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [onchainID.toString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [onchainID.toString()]);
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -3896,12 +3908,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'setIdentityRegistry';
     LogService.logTrace(`Setting identity registry to ${security.toString()}`);
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [identityRegistry.toString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [identityRegistry.toString()]);
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -3923,12 +3932,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'setCompliance';
     LogService.logTrace(`Setting compliance to ${security.toString()}`);
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
-
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [compliance.toString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [compliance.toString()]);
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -4012,12 +4018,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(
       `Recovering address ${lostWalletId.toString()} to ${newWalletId.toString()}`,
     );
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [lostWalletId.toString(), newWalletId.toString(), EVM_ZERO_ADDRESS],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [
+      lostWalletId.toString(),
+      newWalletId.toString(),
+      EVM_ZERO_ADDRESS,
+    ]);
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -4038,12 +4046,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'addAgent';
     LogService.logTrace(`Granting agent role to ${agentId.toString()}`);
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [agentId.toString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [agentId.toString()]);
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -4064,12 +4070,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'removeAgent';
     LogService.logTrace(`Revoking agent role from ${agentId.toString()}`);
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [agentId.toString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      ERC3643__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [agentId.toString()]);
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -4094,7 +4098,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Batch transferring ${amountList.length} tokens from ${security.toString()} to ${toList.map((item) => item.toString())}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
+    const factoryInstance = new ERC3643BatchFacet__factory().attach(
+      security.toString(),
+    );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -4127,7 +4133,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Batch forced transferring ${amountList.length} tokens from ${fromList.map((item) => item.toString())} to ${toList.map((item) => item.toString())}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
+    const factoryInstance = new ERC3643BatchFacet__factory().attach(
+      security.toString(),
+    );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -4160,7 +4168,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Batch minting ${amountList.length} tokens to ${toList.map((item) => item.toString())}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
+    const factoryInstance = new ERC3643BatchFacet__factory().attach(
+      security.toString(),
+    );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -4192,7 +4202,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Batch burning ${amountList.length} tokens from ${targetList.map((item) => item.toString())}`,
     );
 
-    const factoryInstance = new ERC3643__factory().attach(security.toString());
+    const factoryInstance = new ERC3643BatchFacet__factory().attach(
+      security.toString(),
+    );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
