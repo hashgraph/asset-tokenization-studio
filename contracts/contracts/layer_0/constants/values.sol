@@ -235,8 +235,6 @@ bytes32 constant _ERC20PERMIT_TYPEHASH = keccak256(
     'Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)'
 );
 
-string constant _CONTRACT_VERSION_ERC20PERMIT = '1.0.0';
-
 bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
 bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
 bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;

@@ -213,10 +213,11 @@ import {
     IERC20Permit
 } from '../../../layer_1/interfaces/ERC1400/IERC20Permit.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
+import {_ERC20PERMIT_TYPEHASH} from '../../constants/values.sol';
 import {
-    _ERC20PERMIT_TYPEHASH,
-    _CONTRACT_VERSION_ERC20PERMIT
-} from '../../constants/values.sol';
+    _CONTRACT_NAME,
+    _CONTRACT_VERSION
+} from '../../../layer_1/constants/values.sol';
 import {
     getDomainHash
 } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
@@ -262,8 +263,8 @@ abstract contract ERC20PermitStorageWrapper is ERC1594StorageWrapper {
     function _DOMAIN_SEPARATOR() internal view returns (bytes32) {
         return
             getDomainHash(
-                _erc20Storage().name,
-                _CONTRACT_VERSION_ERC20PERMIT,
+                _CONTRACT_NAME,
+                _CONTRACT_VERSION,
                 _blockChainid(),
                 address(this)
             );
