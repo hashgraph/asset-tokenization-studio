@@ -1431,6 +1431,36 @@ describe('ERC3643 Tests', () => {
                 expect(returnedArgs).to.equal(args.slice(2))
             })
 
+            it('GIVEN a failed canTransfer call THEN transaction reverts with custom error', async () => {
+                await complianceMock.setFlags(true, true)
+                let caught
+                try {
+                    await erc20Facet
+                        .connect(signer_E)
+                        .approve(account_D, AMOUNT)
+                } catch (err: any) {
+                    caught = err
+                }
+                const returnedSelector = (caught.data as string).slice(0, 10)
+                const outerSelector = erc3643Facet.interface.getSighash(
+                    'ComplianceCallFailed()'
+                )
+                expect(returnedSelector).to.equal(outerSelector)
+                const targetErrorSelector = complianceMock.interface.getSighash(
+                    'MockErrorCanTransfer(address,address,uint256)'
+                )
+                const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+                    ['address', 'address', 'uint256'],
+                    [account_E, account_D, ZERO] // During approvals amount is not checked
+                )
+                const args = ethers.utils.solidityPack(
+                    ['bytes4', 'bytes'],
+                    [targetErrorSelector, targetErrorArgs]
+                )
+                const returnedArgs = (caught.data as string).slice(10)
+                expect(returnedArgs).to.equal(args.slice(2))
+            })
+
             //TODO: we should test when canTransfer returns false for the FROM, TO and SENDER separately
             it('GIVEN ComplianceMock::canTransfer returns false THEN operations fail with ComplianceNotAllowed', async () => {
                 // Setup: mint tokens and set compliance to return false for canTransfer

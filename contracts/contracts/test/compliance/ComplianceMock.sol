@@ -5,6 +5,7 @@ contract ComplianceMock {
     error MockErrorTransfer(address _from, address _to, uint256 _amount);
     error MockErrorMint(address _to, uint256 _amount);
     error MockErrorBurn(address _from, uint256 _amount);
+    error MockErrorCanTransfer(address _from, address _to, uint256 _amount);
 
     uint256 public transferredHit;
     uint256 public createdHit;
@@ -54,6 +55,9 @@ contract ComplianceMock {
         address _to,
         uint256 _amount
     ) external view virtual returns (bool) {
+        if (_revert) {
+            revert MockErrorCanTransfer(_from, _to, _amount);
+        }
         return _canTransfer;
     }
 }
