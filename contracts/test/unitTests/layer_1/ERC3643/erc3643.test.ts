@@ -1108,8 +1108,8 @@ describe('ERC3643 Tests', () => {
             it('GIVEN ComplianceMock flag set to true THEN canTransfer returns true', async () => {
                 expect(
                     await complianceMock.canTransfer(
-                        ADDRESS_ZERO,
-                        ADDRESS_ZERO,
+                        ethers.Wallet.createRandom().address,
+                        ethers.Wallet.createRandom().address,
                         ZERO
                     )
                 ).to.be.true
@@ -1119,8 +1119,8 @@ describe('ERC3643 Tests', () => {
                 await complianceMock.setFlags(false, false)
                 expect(
                     await complianceMock.canTransfer(
-                        ADDRESS_ZERO,
-                        ADDRESS_ZERO,
+                        ethers.Wallet.createRandom().address,
+                        ethers.Wallet.createRandom().address,
                         ZERO
                     )
                 ).to.be.false
@@ -1315,7 +1315,10 @@ describe('ERC3643 Tests', () => {
             })
 
             it('GIVEN a failed mint call THEN transaction reverts with custom error', async () => {
-                await complianceMock.setFlags(true, true)
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('created')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
                 let caught
                 try {
                     await erc1410Facet.issueByPartition({
@@ -1354,7 +1357,10 @@ describe('ERC3643 Tests', () => {
                     value: AMOUNT,
                     data: '0x',
                 })
-                await complianceMock.setFlags(true, true)
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('transferred')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
                 const basicTransferInfo = {
                     to: account_D,
                     value: AMOUNT,
@@ -1398,7 +1404,10 @@ describe('ERC3643 Tests', () => {
                     value: AMOUNT,
                     data: '0x',
                 })
-                await complianceMock.setFlags(true, true)
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('destroyed')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
                 let caught
                 try {
                     await erc1410Facet
@@ -1432,7 +1441,10 @@ describe('ERC3643 Tests', () => {
             })
 
             it('GIVEN a failed canTransfer call THEN transaction reverts with custom error', async () => {
-                await complianceMock.setFlags(true, true)
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('canTransfer')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
                 let caught
                 try {
                     await erc20Facet
