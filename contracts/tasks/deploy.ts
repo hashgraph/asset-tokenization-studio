@@ -283,7 +283,6 @@ task(
             scheduledTasks,
             corporateActions,
             lock,
-            holdFacet,
             holdReadFacet,
             holdManagementFacet,
             holdTokenHolderFacet,
@@ -298,7 +297,7 @@ task(
             externalControlListManagement,
             externalKycListManagement,
             protectedPartitions,
-            erc3643BasicFacet,
+            erc3643Facet,
             erc3643BatchFacet,
             freeze,
         } = await deployAtsFullInfrastructure(
@@ -342,7 +341,6 @@ task(
             'Scheduled Tasks': scheduledTasks.address,
             'Corporate Actions': corporateActions.address,
             Lock: lock.address,
-            'Hold Facet': holdFacet.address,
             'Hold Read Facet': holdReadFacet.address,
             'Hold Management Facet': holdManagementFacet.address,
             'Hold TokenHolder Facet': holdTokenHolderFacet.address,
@@ -359,7 +357,7 @@ task(
             'External Kyc List Management Facet':
                 externalKycListManagement.address,
             'Protected Partitions': protectedPartitions.address,
-            'ERC3643 Basic Facet': erc3643BasicFacet.address,
+            'ERC3643 Facet': erc3643Facet.address,
             'ERC3643 Batch Facet': erc3643BatchFacet.address,
             Freeze: freeze.address,
         }

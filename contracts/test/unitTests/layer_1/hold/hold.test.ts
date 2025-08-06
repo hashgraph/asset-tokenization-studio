@@ -215,7 +215,7 @@ import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/h
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Hold,
+    type IHold,
     ControlList,
     Pause,
     ERC20,
@@ -303,7 +303,7 @@ describe('Hold Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let holdFacet: Hold
+    let holdFacet: IHold
     let pauseFacet: Pause
     let erc1410Facet: IERC1410
     let controlListFacet: ControlList
@@ -373,7 +373,7 @@ describe('Hold Tests', () => {
 
     async function setFacets({ diamond }: { diamond: ResolverProxy }) {
         holdFacet = await ethers.getContractAt(
-            'Hold',
+            'IHold',
             diamond.address,
             signer_A
         )

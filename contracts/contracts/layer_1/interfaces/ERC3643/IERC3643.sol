@@ -205,8 +205,11 @@
 
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.18;
+import {IERC3643StorageWrapper} from './IERC3643StorageWrapper.sol';
 import {IERC3643Basic} from './IERC3643Basic.sol';
 import {IERC3643Batch} from './IERC3643Batch.sol';
+import {IERC1410} from '../ERC1400/IERC1410.sol';
+
 // solhint-disable no-empty-blocks
 /**
  * @title IERC3643
@@ -215,6 +218,11 @@ import {IERC3643Batch} from './IERC3643Batch.sol';
  * enabling interaction with all ERC3643 functions from external calls, tests, and SDK.
  * This interface is NOT meant to be inherited by any contract - it's only for external interaction.
  */
-interface IERC3643 is IERC3643Basic, IERC3643Batch {
+interface IERC3643 is
+    IERC3643StorageWrapper,
+    IERC3643Basic,
+    IERC3643Batch,
+    IERC1410
+{
     // This interface combines all ERC1410 facets for external access
 }

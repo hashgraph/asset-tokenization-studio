@@ -210,8 +210,12 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
+import {IHoldRead} from './IHoldRead.sol';
 import {IHoldTokenHolder} from './IHoldTokenHolder.sol';
 import {IHoldManagement} from './IHoldManagement.sol';
+import {IAccessControl} from '../accessControl/IAccessControl.sol';
+import {IClearing} from '../clearing/IClearing.sol';
+import {IERC1410} from '../ERC1400/IERC1410.sol';
 
 enum OperationType {
     Execute,
@@ -255,7 +259,14 @@ struct HoldDataStorage {
     mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
 }
 
-interface IHold is IHoldManagement, IHoldTokenHolder {
+interface IHold is
+    IHoldRead,
+    IHoldManagement,
+    IHoldTokenHolder,
+    IAccessControl,
+    IClearing,
+    IERC1410
+{
     error HoldExpirationNotReached();
     error WrongHoldId();
     error InvalidDestinationAddress(address holdDestination, address to);

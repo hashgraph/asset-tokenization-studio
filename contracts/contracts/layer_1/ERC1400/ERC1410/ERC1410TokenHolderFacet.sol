@@ -40,7 +40,7 @@ contract ERC1410TokenHolderFacet is
         pure
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](8);
+        staticFunctionSelectors_ = new bytes4[](7);
         uint256 selectorIndex = 0;
         staticFunctionSelectors_[selectorIndex++] = this
             .transferByPartition
@@ -48,7 +48,6 @@ contract ERC1410TokenHolderFacet is
         staticFunctionSelectors_[selectorIndex++] = this
             .redeemByPartition
             .selector;
-
         staticFunctionSelectors_[selectorIndex++] = this
             .authorizeOperator
             .selector;

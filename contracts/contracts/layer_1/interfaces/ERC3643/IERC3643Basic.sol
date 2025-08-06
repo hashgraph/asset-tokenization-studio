@@ -328,37 +328,12 @@ interface IERC3643Basic {
     function setOnchainID(address _onchainID) external;
 
     /**
-     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
-     * @dev This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the transfer was successful.
-     *
-     * Emits a ControllerTransfer event.
-     */
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external returns (bool);
-
-    /**
      * @dev Sets the identity registry contract address.
      * @dev Mints `_amount` tokens to the address `_to`.
      *
      * Emits an IdentityRegistryAdded event.
      */
     function setIdentityRegistry(address _identityRegistry) external;
-
-    /**
-     * @dev Mints `_amount` tokens to the address `_to`.
-     *
-     * This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the minting was successful.
-     *
-     * Emits a Issued event.
-     */
-    function mint(address _to, uint256 _amount) external;
 
     /**
      * @dev Sets the compliance contract address.
@@ -369,17 +344,6 @@ interface IERC3643Basic {
      * Emits a ComplianceAdded event.
      */
     function setCompliance(address _compliance) external;
-
-    /**
-     * @dev Burns `_amount` tokens from the address `_userAddress`.
-     *
-     * This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the burn was successful.
-     *
-     * Emits a redeem event.
-     */
-    function burn(address _userAddress, uint256 _amount) external;
 
     /**
      * @notice Gives an account the agent role
@@ -405,19 +369,45 @@ interface IERC3643Basic {
     ) external returns (bool);
 
     /**
-     * @notice Retrieves recovery status of a wallet
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     *
+     * This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the burn was successful.
+     *
+     * Emits a redeem event.
      */
-    function isAddressRecovered(address _wallet) external returns (bool);
+    function burn(address _userAddress, uint256 _amount) external;
+
+    /**
+     * @dev Mints `_amount` tokens to the address `_to`.
+     *
+     * This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the minting was successful.
+     *
+     * Emits a Issued event.
+     */
+    function mint(address _to, uint256 _amount) external;
+
+    /**
+     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     * @dev This function should only be callable by an authorized entities.
+     *
+     * Returns `true` if the transfer was successful.
+     *
+     * Emits a ControllerTransfer event.
+     */
+    function forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external returns (bool);
 
     /**
      * @dev Checks if an account has the agent role
      */
     function isAgent(address _agent) external view returns (bool);
-
-    /**
-     * @dev Returns the onchainID address associated with the token.
-     */
-    function onchainID() external view returns (address);
 
     /**
      * @dev Returns the address of the identity registry contract.
@@ -427,9 +417,19 @@ interface IERC3643Basic {
     function identityRegistry() external view returns (IIdentityRegistry);
 
     /**
+     * @dev Returns the onchainID address associated with the token.
+     */
+    function onchainID() external view returns (address);
+
+    /**
      * @dev Returns the address of the compliance contract.
      */
     function compliance() external view returns (ICompliance);
+
+    /**
+     * @notice Retrieves recovery status of a wallet
+     */
+    function isAddressRecovered(address _wallet) external view returns (bool);
 
     /**
      * @notice Retrieves the latest version of the contract.

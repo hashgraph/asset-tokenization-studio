@@ -216,7 +216,7 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ClearingActionsFacet,
-    type Hold as HoldFacet,
+    type IHold,
     ControlList,
     Pause,
     ERC20,
@@ -343,7 +343,7 @@ describe('Clearing Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let clearingFacet: Contract
     let clearingActionsFacet: ClearingActionsFacet
-    let holdFacet: HoldFacet
+    let holdFacet: IHold
     let accessControlFacet: AccessControl
     let adjustBalancesFacet: AdjustBalances
     let equityFacet: Equity
@@ -442,7 +442,7 @@ describe('Clearing Tests', () => {
         )
 
         holdFacet = await ethers.getContractAt(
-            'Hold',
+            'IHold',
             diamond.address,
             signer_A
         )

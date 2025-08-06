@@ -221,7 +221,7 @@ import {
     BusinessLogicResolver,
     Kyc,
     SsiManagement,
-    Hold,
+    IHold,
     ComplianceMock,
 } from '@typechain'
 import {
@@ -458,7 +458,7 @@ describe('ProtectedPartitions Tests', () => {
     let accessControlFacet: AccessControl
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
-    let holdFacet: Hold
+    let holdFacet: IHold
     let clearingFacet: Contract
     let protectedHold: ProtectedHoldData
     let hold: HoldData
@@ -504,7 +504,7 @@ describe('ProtectedPartitions Tests', () => {
             'AccessControl',
             address
         )
-        holdFacet = await ethers.getContractAt('Hold', address)
+        holdFacet = await ethers.getContractAt('IHold', address)
         kycFacet = await ethers.getContractAt('Kyc', address)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',

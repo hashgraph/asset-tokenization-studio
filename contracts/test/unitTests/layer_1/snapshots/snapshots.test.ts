@@ -214,7 +214,7 @@ import {
     type IERC1410,
     type AccessControl,
     type Lock,
-    type Hold,
+    type IHold,
     IFactory,
     BusinessLogicResolver,
     SsiManagement,
@@ -278,7 +278,7 @@ describe('Snapshots Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock
-    let holdFacet: Hold
+    let holdFacet: IHold
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let equityFacet: Equity
@@ -336,7 +336,7 @@ describe('Snapshots Tests', () => {
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
         lockFacet = await ethers.getContractAt('Lock', diamond.address)
-        holdFacet = await ethers.getContractAt('Hold', diamond.address)
+        holdFacet = await ethers.getContractAt('IHold', diamond.address)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',

@@ -244,8 +244,8 @@ import {
     HoldManagementFacet,
     HoldTokenHolderFacet,
     ERC1410TokenHolderFacet,
-    ERC3643BatchFacet,
     ERC3643Facet,
+    ERC3643BatchFacet,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -332,7 +332,7 @@ export default class DeployAtsContractsResult {
     public readonly externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     public readonly externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    public readonly erc3643BasicFacet: DeployContractWithFactoryResult<ERC3643Facet>
+    public readonly erc3643Facet: DeployContractWithFactoryResult<ERC3643Facet>
     public readonly erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
     public readonly freeze: DeployContractWithFactoryResult<FreezeFacet>
     public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
@@ -419,7 +419,7 @@ export default class DeployAtsContractsResult {
         this.externalPauseManagement = externalPauseManagement
         this.externalControlListManagement = externalControlListManagement
         this.externalKycListManagement = externalKycListManagement
-        this.erc3643BasicFacet = erc3643Facet
+        this.erc3643Facet = erc3643Facet
         this.erc3643BatchFacet = erc3643BatchFacet
         this.freeze = freeze
         this.timeTravel = timeTravel

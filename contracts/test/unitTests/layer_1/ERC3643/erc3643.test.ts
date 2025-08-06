@@ -214,7 +214,6 @@ import {
     type Pause,
     BusinessLogicResolver,
     IFactory,
-    ERC3643,
     Kyc,
     type ControlList,
     SsiManagement,
@@ -228,11 +227,12 @@ import {
     ERC1644,
     ERC1594,
     Lock,
-    Hold,
+    IHold,
     ProtectedPartitions,
     DiamondFacet,
     FreezeFacet,
     ComplianceMock,
+    IERC3643,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -303,7 +303,7 @@ describe('ERC3643 Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc3643Facet: ERC3643
+    let erc3643Facet: IERC3643
     let erc1410Facet: IERC1410
     let timeTravelFacet: TimeTravel
     let adjustBalancesFacet: AdjustBalances
@@ -320,7 +320,7 @@ describe('ERC3643 Tests', () => {
     let erc1594Facet: ERC1594
     let lockFacet: Lock
     let clearingFacet: Contract
-    let holdFacet: Hold
+    let holdFacet: IHold
     let protectedPartitionsFacet: ProtectedPartitions
     let diamondFacet: DiamondFacet
     let freezeFacet: FreezeFacet
@@ -333,8 +333,8 @@ describe('ERC3643 Tests', () => {
         HoldCreation,
     }
     describe('single partition', () => {
-        let erc3643Issuer: ERC3643
-        let erc3643Transferor: ERC3643
+        let erc3643Issuer: IERC3643
+        let erc3643Transferor: IERC3643
         let erc1410SnapshotFacet: IERC1410
         let erc20Facet: ERC20
 
@@ -698,10 +698,7 @@ describe('ERC3643 Tests', () => {
                 // mint fails
                 await expect(
                     erc3643Facet.mint(account_C, AMOUNT)
-                ).to.be.revertedWithCustomError(
-                    erc3643Facet,
-                    'AccountIsBlocked'
-                )
+                ).to.be.revertedWithCustomError(controlList, 'AccountIsBlocked')
             })
             it('GIVEN non kyc account WHEN mint THEN transaction reverts with InvalidKycStatus', async () => {
                 await kycFacet.revokeKyc(account_E)
@@ -1852,7 +1849,7 @@ describe('ERC3643 Tests', () => {
                     await expect(
                         erc20FacetD.transfer(account_A, transferAmount)
                     ).to.be.revertedWithCustomError(
-                        erc3643Facet,
+                        controlList,
                         'AccountIsBlocked'
                     )
 
@@ -1860,7 +1857,7 @@ describe('ERC3643 Tests', () => {
                     await expect(
                         erc20FacetE.transfer(account_A, transferAmount)
                     ).to.be.revertedWithCustomError(
-                        erc3643Facet,
+                        controlList,
                         'AccountIsBlocked'
                     )
                 })
@@ -1922,7 +1919,7 @@ describe('ERC3643 Tests', () => {
                             freezeFlags
                         )
                     ).to.be.revertedWithCustomError(
-                        erc3643Facet,
+                        accessControlFacet,
                         'AccountHasNoRoles'
                     )
                 })
