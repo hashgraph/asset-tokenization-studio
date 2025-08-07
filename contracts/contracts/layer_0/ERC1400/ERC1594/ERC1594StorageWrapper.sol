@@ -223,10 +223,10 @@ import {
     IERC3643Basic
 } from '../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
 import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
-import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 import {
-IIdentityRegistry
+    IIdentityRegistry
 } from '../../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol';
+import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 
 abstract contract ERC1594StorageWrapper is
     IERC1594StorageWrapper,
@@ -745,15 +745,27 @@ abstract contract ERC1594StorageWrapper is
                 );
             }
 
-            if (!_isVerified(_from)) {
+            bytes memory isVerifiedFrom = (_erc3643Storage().identityRegistry)
+                .functionStaticCall(
+                    abi.encodeWithSelector(
+                        IIdentityRegistry.isVerified.selector,
+                        _from
+                    ),
+                    IERC3643Basic.IdentityRegistryCallFailed.selector
+                );
+
+            if (
+                isVerifiedFrom.length > 0 && !abi.decode(isVerifiedFrom, (bool))
+            ) {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IERC3643.AddressNotVerified.selector,
+                    IERC3643Basic.AddressNotVerified.selector,
                     abi.encode(_from)
                 );
             }
         }
+
         if (_to != address(0)) {
             if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
                 return (
@@ -763,11 +775,21 @@ abstract contract ERC1594StorageWrapper is
                     abi.encode(_to)
                 );
             }
-            if (!_isVerified(_to)) {
+
+            bytes memory isVerifiedTo = (_erc3643Storage().identityRegistry)
+                .functionStaticCall(
+                    abi.encodeWithSelector(
+                        IIdentityRegistry.isVerified.selector,
+                        _to
+                    ),
+                    IERC3643Basic.IdentityRegistryCallFailed.selector
+                );
+
+            if (isVerifiedTo.length > 0 && !abi.decode(isVerifiedTo, (bool))) {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IERC3643.AddressNotVerified.selector,
+                    IERC3643Basic.AddressNotVerified.selector,
                     abi.encode(_to)
                 );
             }

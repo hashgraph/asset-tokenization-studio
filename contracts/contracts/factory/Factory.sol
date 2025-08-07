@@ -458,7 +458,7 @@ contract Factory is IFactory, LocalContext {
 
         IERC3643Basic(securityAddress_).initialize_ERC3643(
             _securityData.compliance,
-        _securityData.identityRegistry
+            _securityData.identityRegistry
         );
     }
 }

@@ -266,7 +266,10 @@ abstract contract ERC3643StorageWrapper1 is
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC3643(address _compliance) internal {
+    function _initialize_ERC3643(
+        address _compliance,
+        address _identityRegistry
+    ) internal {
         IERC3643Basic.ERC3643Storage
             storage clearingStorage = _erc3643Storage();
         clearingStorage.initialized = true;
@@ -331,18 +334,6 @@ abstract contract ERC3643StorageWrapper1 is
 
     function _isRecovered(address _sender) internal view returns (bool) {
         return _erc3643Storage().addressRecovered[_sender];
-    }
-
-    function _isVerified(address _userAddress) internal view returns (bool) {
-        bytes memory result = LowLevelCall.functionStaticCall(
-            _erc3643Storage().identityRegistry,
-            abi.encodeWithSelector(
-                IIdentityRegistry.isVerified.selector,
-                _userAddress
-            ),
-            IERC3643.IdentityRegistryCallFailed.selector
-        );
-        return abi.decode(result, (bool));
     }
 
     function _version() internal view returns (string memory) {
