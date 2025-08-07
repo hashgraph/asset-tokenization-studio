@@ -1,2 +1,1 @@
-npm run pre-commit:ats:contracts
-npm run pre-commit:ats:sdk
+npm run pre-commit

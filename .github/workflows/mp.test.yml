@@ -1,81 +1,84 @@
 name: Tests Mass Payout
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "packages/mass-payout/**"
-      - "apps/mass-payout/**"
-  pull_request:
-    paths:
-      - "packages/mass-payout/**"
-      - "apps/mass-payout/**"
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+    pull_request_target:
+        branches-ignore: [main]
+        paths:
+            - 'packages/mass-payout/**'
+            - 'apps/mass-payout/**'
+            - 'package.json'
+            - '.github/workflows/*mp*.yml'
+            - '.github/workflows/*mp*.yaml'
+    workflow_dispatch:
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  test-mass-payout:
-    name: testing
-    runs-on: token-studio-linux-large
-    env:
-      NODE_OPTIONS: '--max-old-space-size=32768'
-      CONTRACT_SIZER_RUN_ON_COMPILE: 'false'
-      REPORT_GAS: 'false'
-      CLIENT_PRIVATE_KEY_ECDSA_1: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_1 }}
-      CLIENT_PUBLIC_KEY_ECDSA_1: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_1 }}
-      CLIENT_ACCOUNT_ID_ECDSA_1: '0.0.1328'
-      CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT: '0x97C50bb12E1C6284cF2855cdba95c5D60AEE44CF'
-      CLIENT_EVM_ADDRESS_ECDSA_1: '0x0000000000000000000000000000000000000530'
-      CLIENT_PRIVATE_KEY_ECDSA_2: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_2 }}
-      CLIENT_PUBLIC_KEY_ECDSA_2: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
-      CLIENT_ACCOUNT_ID_ECDSA_2: '0.0.2168740'
-      CLIENT_EVM_ADDRESS_ECDSA_2: '0x00000000000000000000000000000000002117A4'
-      FACTORY_ADDRESS: '0.0.5480051'
-      RESOLVER_ADDRESS: '0.0.5479997'
-      FIREBLOCKS_HEDERA_ACCOUNT_ID: '0.0.2168740'
-      FIREBLOCKS_HEDERA_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
-      DFNS_HEDERA_ACCOUNT_ID: '0.0.2168740'
-      DFNS_WALLET_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
-      AWS_KMS_HEDERA_ACCOUNT_ID: '0.0.4394946'
-      AWS_KMS_HEDERA_PUBLIC_KEY: '302d300706052b8104000a03220003ee815bb9b5e53f5dbe7264a77e586127dfcb75da8c1246f5aa6ededdb13e6c21'
-      REACT_APP_MIRROR_NODE: 'https://testnet.mirrornode.hedera.com/api/v1/'
-      REACT_APP_RPC_NODE: 'https://testnet.hashio.io/api'
-      REACT_APP_RPC_RESOLVER: '0.0.5479997'
-      REACT_APP_RPC_FACTORY: '0.0.5480051'
-      REACT_APP_SHOW_DISCLAIMER: 'true'
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    test-mass-payout:
+        name: testing
+        runs-on: token-studio-linux-large
+        env:
+            NODE_OPTIONS: '--max-old-space-size=32768'
+            CONTRACT_SIZER_RUN_ON_COMPILE: 'false'
+            REPORT_GAS: 'false'
+            CLIENT_PRIVATE_KEY_ECDSA_1: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_1 }}
+            CLIENT_PUBLIC_KEY_ECDSA_1: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_1 }}
+            CLIENT_ACCOUNT_ID_ECDSA_1: '0.0.1328'
+            CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT: '0x97C50bb12E1C6284cF2855cdba95c5D60AEE44CF'
+            CLIENT_EVM_ADDRESS_ECDSA_1: '0x0000000000000000000000000000000000000530'
+            CLIENT_PRIVATE_KEY_ECDSA_2: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_2 }}
+            CLIENT_PUBLIC_KEY_ECDSA_2: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
+            CLIENT_ACCOUNT_ID_ECDSA_2: '0.0.2168740'
+            CLIENT_EVM_ADDRESS_ECDSA_2: '0x00000000000000000000000000000000002117A4'
+            FACTORY_ADDRESS: '0.0.5480051'
+            RESOLVER_ADDRESS: '0.0.5479997'
+            FIREBLOCKS_HEDERA_ACCOUNT_ID: '0.0.2168740'
+            FIREBLOCKS_HEDERA_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
+            DFNS_HEDERA_ACCOUNT_ID: '0.0.2168740'
+            DFNS_WALLET_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
+            AWS_KMS_HEDERA_ACCOUNT_ID: '0.0.4394946'
+            AWS_KMS_HEDERA_PUBLIC_KEY: '302d300706052b8104000a03220003ee815bb9b5e53f5dbe7264a77e586127dfcb75da8c1246f5aa6ededdb13e6c21'
+            REACT_APP_MIRROR_NODE: 'https://testnet.mirrornode.hedera.com/api/v1/'
+            REACT_APP_RPC_NODE: 'https://testnet.hashio.io/api'
+            REACT_APP_RESOLVER: '0.0.5479997'
+            REACT_APP_FACTORY: '0.0.5480051'
+            REACT_APP_SHOW_DISCLAIMER: 'true'
+            CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
-        with:
-          egress-policy: audit
+        steps:
+            - name: Harden Runner
+              uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+              with:
+                  egress-policy: audit
 
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+            - name: Checkout repository
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Setup NodeJS Environment
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 20.x
+            - name: Setup NodeJS Environment
+              uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+              with:
+                  node-version: 20.x
 
-      - name: Install monorepo package dependencies (ats/contracts and ats/sdk)
-        run: npm ci # Change for npm run:install:ats:all:ci
+            - name: Install monorepo package dependencies (ats/contracts and ats/sdk)
+              run: npm ci # Change for npm run:install:ats:all:ci
 
-      - name: Build mass-payout/contracts
-        run: npm run build:mp:contracts
+            - name: Build mass-payout/contracts
+              run: npm run build:mp:contracts
 
-      - name: Build mass-payout/sdk
-        run: npm run build:mp:sdk
+            - name: Build mass-payout/sdk
+              run: npm run build:mp:sdk
 
-      - name: Install mass-payout/web dependencies
-        run: npm run install:mp:web:lock
+            - name: Install mass-payout/web dependencies
+              run: npm run install:mp:web:lock
 
-      - name: Build mass-payout/web
-        run: npm run build:mp:web
+            - name: Build mass-payout/web
+              run: npm run build:mp:web
 
-      - name: Run mass-payout/contracts tests
-        working-directory: packages/mass-payout/contracts
-        run: npm run test
-
+            - name: Run mass-payout/contracts tests
+              working-directory: packages/mass-payout/contracts
+              run: npm run test

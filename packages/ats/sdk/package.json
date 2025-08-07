@@ -1,17 +1,17 @@
 {
   "name": "@hashgraph/asset-tokenization-sdk",
   "version": "1.14.4",
-  "description": "Testing to MASTER",
+  "description": "Asset Tokenization SDK for Hedera",
   "main": "./build/cjs/src/index.js",
   "module": "./build/esm/src/index.js",
+  "types": "./build/esm/src/index.d.ts",
   "engines": {
     "node": ">= 16.17"
   },
   "files": [
-    "./build"
+    "build/"
   ],
   "readme": "README.md",
-  "types": "./build/esm/src/index.d.ts",
   "exports": {
     ".": {
       "import": "./build/esm/src/index.js",
@@ -19,22 +19,29 @@
     }
   },
   "scripts": {
-    "clean:cache": "npx --yes rimraf cache",
-    "clean:node": "npx --yes rimraf node_modules",
-    "clean:build": "npx --yes rimraf build",
-    "clean:coverage": "npx --yes rimraf coverage",
-    "clean:lock": "npx --yes rimraf package-lock.json",
-    "clean": "npx --yes npm-run-all --parallel clean:cache clean:node clean:build clean:coverage",
-    "lint": "eslint . --ext .ts --ext .mts",
-    "prettier:check": "prettier --config .prettierrc --check",
-    "prettier": "prettier --config .prettierrc --write .",
-    "prebuild": "npm run lint && npm run prettier",
     "build": "rimraf build && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
-    "prepack": "npm run build",
-    "test:local": "npx --yes jest --forceExit",
     "test": "NODE_OPTIONS=--max-old-space-size=16384 npx jest --ci --runInBand --detectOpenHandles --forceExit",
+    "lint": "eslint . --ext .ts --ext .mts",
+    "lint:fix": "eslint . --ext .ts --ext .mts --fix",
+    "clean": "npm run clean:build && npm run clean:cache && npm run clean:coverage",
+    "prettier": "prettier --config .prettierrc --write .",
+    "publish": "npm publish",
+    "lint:staged:sol": "echo 'No Solidity files in SDK'",
+    "lint:staged:ts": "eslint . --ext .ts --ext .mts --fix",
+    "lint:staged": "npm run lint:staged:ts",
+    "prettier:staged": "prettier --config .prettierrc --write .",
+    "prebuild": "npm run lint && npm run prettier",
+    "prepack": "npm run build",
+    "clean:build": "npx --yes rimraf build",
+    "clean:cache": "npx --yes rimraf cache",
+    "clean:coverage": "npx --yes rimraf coverage",
+    "clean:node": "npx --yes rimraf node_modules",
+    "clean:lock": "npx --yes rimraf package-lock.json",
+    "clean:all": "npx --yes npm-run-all --parallel clean:cache clean:node clean:build clean:coverage",
+    "test:local": "npx --yes jest --forceExit",
     "test:demo": "npx --yes jest demo.test.ts",
     "test:clear:cache": "npx --yes jest --clearCache",
+    "prettier:check": "prettier --config .prettierrc --check .",
     "pre-commit": "npx -y lint-staged && npm run prettier"
   },
   "license": "Apache-2.0",

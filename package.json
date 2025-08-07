@@ -5,48 +5,82 @@
   "description": "asset tokenization",
   "private": true,
   "workspaces": [
-    "packages/ats/*"
+    "packages/ats/*",
+    "packages/mass-payout/*",
+    "apps/ats/*",
+    "apps/mass-payout/*"
   ],
   "scripts": {
-    "setup": "npm install && npm run install:ats:web",
-    "start:ats": "npm ci && npm run build:ats:contracts && npm run build:ats:sdk && npm run install:ats:web:lock && cd apps/ats/web && yarn dev",
-    "install:ats:web": "cd apps/ats/web && yarn install",
-    "install:ats:web:lock": "cd apps/ats/web && yarn install --frozen-lockfile",
-    "install:ats:sdk": "npm install --workspace=packages/ats/sdk --ignore-scripts",
-    "install:ats:contracts": "npm install --workspace=packages/ats/contracts --ignore-scripts",
-    "install:ats:all": "npm run install:ats:contracts && npm run install:ats:sdk && npm run install:ats:web",
-    "build:ats:contracts": "npm run build --workspace=packages/ats/contracts",
-    "build:ats:sdk": "npm run build --workspace=packages/ats/sdk",
-    "build:ats:web": "cd apps/ats/web && yarn build",
-    "build:ats:all": "npm run build:ats:contracts && npm run build:ats:sdk && npm run build:ats:web",
-    "publish:ats:contracts": "cd packages/ats/contracts && npm publish",
-    "publish:ats:sdk": "cd packages/ats/sdk && npm publish",
-    "publish:ats:web": "cd apps/ats/web && npm publish",
-    "clean": "npm run clean:ats:all:modules && npm run clean:ats:all:build",
-    "clean:ats:contracts:modules": "cd packages/ats/contracts && npm run clean node_modules",
-    "clean:ats:sdk:modules": "npx -y rimraf packages/ats/sdk/node_modules",
-    "clean:ats:web:modules": "npx -y rimraf apps/ats/web/node_modules apps/ats/web/yarn.lock",
-    "clean:ats:all:modules": "rimraf node_modules package-lock.json && npx -y concurrently \"npm run clean:ats:sdk:modules\" \"npm run clean:ats:web:modules\" \"npm run clean:ats:contracts:modules\"",
-    "clean:ats:contracts:build": "cd packages/ats/contracts && npm run clean:build",
-    "clean:ats:sdk:build": "npx -y rimraf packages/ats/sdk/build sdk/coverage",
-    "clean:ats:web:build": "npx -y rimraf apps/ats/web/dist",
-    "clean:ats:all:build": "npx -y concurrently \"npm run clean:ats:sdk:build\" \"npm run clean:ats:web:build\" \"npm run clean:ats:contracts:build\"",
+    "setup": "npm install",
+    "ats:contracts:build": "npm run build --workspace=packages/ats/contracts",
+    "ats:sdk:build": "npm run build --workspace=packages/ats/sdk",
+    "ats:web:build": "npm run build --workspace=apps/ats/web",
+    "ats:build": "npm run ats:contracts:build && npm run ats:sdk:build && npm run ats:web:build",
+    "ats:contracts:test": "npm run test --workspace=packages/ats/contracts",
+    "ats:sdk:test": "npm run test --workspace=packages/ats/sdk",
+    "ats:web:test": "npm run test --workspace=apps/ats/web",
+    "ats:test": "npm run ats:contracts:test && npm run ats:sdk:test && npm run ats:web:test",
+    "ats:contracts:lint": "npm run lint --workspace=packages/ats/contracts",
+    "ats:sdk:lint": "npm run lint --workspace=packages/ats/sdk",
+    "ats:web:lint": "npm run lint --workspace=apps/ats/web",
+    "ats:lint": "npm run ats:contracts:lint && npm run ats:sdk:lint && npm run ats:web:lint",
+    "ats:contracts:lint:fix": "npm run lint:fix --workspace=packages/ats/contracts",
+    "ats:sdk:lint:fix": "npm run lint:fix --workspace=packages/ats/sdk",
+    "ats:web:lint:fix": "npm run lint:fix --workspace=apps/ats/web",
+    "ats:lint:fix": "npm run ats:contracts:lint:fix && npm run ats:sdk:lint:fix && npm run ats:web:lint:fix",
+    "ats:contracts:clean": "npm run clean --workspace=packages/ats/contracts",
+    "ats:sdk:clean": "npm run clean --workspace=packages/ats/sdk",
+    "ats:web:clean": "npm run clean --workspace=apps/ats/web",
+    "ats:clean": "npm run ats:contracts:clean && npm run ats:sdk:clean && npm run ats:web:clean",
+    "ats:contracts:prettier": "npm run prettier --workspace=packages/ats/contracts",
+    "ats:sdk:prettier": "npm run prettier --workspace=packages/ats/sdk",
+    "ats:web:prettier": "npm run prettier --workspace=apps/ats/web",
+    "ats:prettier": "npm run ats:contracts:prettier && npm run ats:sdk:prettier && npm run ats:web:prettier",
+    "ats:contracts:lint:staged:sol": "npm run lint:staged:sol --workspace=packages/ats/contracts",
+    "ats:contracts:lint:staged:ts": "npm run lint:staged:ts --workspace=packages/ats/contracts",
+    "ats:sdk:lint:staged": "npm run lint:staged --workspace=packages/ats/sdk",
+    "ats:web:lint:staged": "npm run lint:staged --workspace=apps/ats/web",
+    "ats:contracts:prettier:staged": "npm run prettier:staged --workspace=packages/ats/contracts",
+    "ats:sdk:prettier:staged": "npm run prettier:staged --workspace=packages/ats/sdk",
+    "ats:web:prettier:staged": "npm run prettier:staged --workspace=apps/ats/web",
+    "ats:contracts:publish": "npm run publish --workspace=packages/ats/contracts",
+    "ats:sdk:publish": "npm run publish --workspace=packages/ats/sdk",
+    "ats:publish": "npm run ats:contracts:publish && npm run ats:sdk:publish",
+    "mass-payout:build": "npm run build --workspace=packages/mass-payout/* && npm run build --workspace=apps/mass-payout/* --if-present",
+    "mass-payout:test": "npm run test --workspace=packages/mass-payout/* && npm run test --workspace=apps/mass-payout/* --if-present",
+    "mass-payout:dev": "npm run dev --workspace=apps/mass-payout/* --if-present",
+    "mass-payout:start": "npm run mass-payout:build && npm run mass-payout:dev",
+    "ats:web:dev": "npm run dev --workspace=apps/ats/web",
+    "ats:start": "npm run ats:contracts:build && npm run ats:sdk:build && npm run ats:web:dev",
+    "dev": "npm run ats:web:dev",
+    "start": "npm run ats:start",
+    "pre-commit": "lint-staged",
     "commitlint": "commitlint --edit",
-    "prettier": "npx -y concurrently \"npm run prettier:sdk\" \"npm run prettier:web\" \"npm run prettier:contracts\"",
-    "prettier:ats:sdk": "cd packages/ats/sdk && npm run prettier",
-    "prettier:ats:web": "cd apps/ats/web && npm run prettier",
-    "prettier:ats:contracts": "cd packages/ats/contracts && npm run prettier",
-    "pre-commit:ats:contracts": "cd packages/ats/contracts && npm run pre-commit",
-    "pre-commit:ats:sdk": "cd packages/ats/sdk && npm run pre-commit",
     "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
     "husky": "^9.1.7",
-    "yarn": "^1.22.22"
+    "lint-staged": "^15.2.11",
+    "rimraf": "^5.0.0"
   },
-  "dependencies": {
-    "ci": "^2.3.0"
+  "lint-staged": {
+    "packages/ats/contracts/**/*.sol": [
+      "cd packages/ats/contracts && npm run prettier:staged",
+      "cd packages/ats/contracts && npm run lint:staged:sol"
+    ],
+    "packages/ats/contracts/**/*.{ts,js}": [
+      "cd packages/ats/contracts && npm run prettier:staged",
+      "cd packages/ats/contracts && npm run lint:staged:ts"
+    ],
+    "packages/ats/sdk/**/*.{ts,js}": [
+      "cd packages/ats/sdk && npm run prettier:staged",
+      "cd packages/ats/sdk && npm run lint:staged:ts"
+    ],
+    "apps/ats/web/**/*.{ts,tsx,js,jsx}": [
+      "cd apps/ats/web && npm run prettier:staged",
+      "cd apps/ats/web && npm run lint:staged:ts"
+    ]
   }
 }
