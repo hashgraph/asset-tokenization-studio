@@ -364,6 +364,8 @@ import {
   FreezePartialTokensRequest,
   UnfreezePartialTokensRequest,
   GetFrozenPartialTokensRequest,
+  SDK,
+  LoggerTransports,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -419,6 +421,16 @@ export class SDKService {
       },
     ],
   };
+
+  // Initialize SDK logger
+  static {
+    try {
+      SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
+      console.log('SDK logger initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize SDK logger:', error);
+    }
+  }
 
   public static isInit() {
     return !!this.initData;
