@@ -1,4 +1,9 @@
 process.env.VITE_API_URL = "http://localhost:8080/api/v1";
+
+// Mock Terminal3 modules to avoid LRU cache issues
+jest.mock('@terminal3/verify_vc');
+jest.mock('@terminal3/bbs_vc');
+
 import Select from "react-select";
 
 // Polyfill for TextEncoder and TextDecoder
