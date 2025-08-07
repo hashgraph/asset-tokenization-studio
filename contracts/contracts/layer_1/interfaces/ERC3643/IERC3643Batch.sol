@@ -205,96 +205,25 @@
 
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+interface IERC3643Batch {
+    function batchTransfer(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
 
-import {Common} from '../../common/Common.sol';
+    function batchForcedTransfer(
+        address[] calldata _fromList,
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
 
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {
-    IERC1410Controller
-} from '../../interfaces/ERC1400/IERC1410Controller.sol';
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
+    function batchMint(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
 
-abstract contract ERC1410Controller is IERC1410Controller, Common {
-    function controllerTransferByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _transferByPartition(
-            _from,
-            IERC1410Basic.BasicTransferInfo(_to, _value),
-            _partition,
-            _data,
-            _msgSender(),
-            _operatorData
-        );
-    }
-
-    function controllerRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _redeemByPartition(
-            _partition,
-            _tokenHolder,
-            _msgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    function canTransferByPartition(
-        address _from,
-        address _to,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external view override returns (bool, bytes1, bytes32) {
-        (
-            bool status,
-            bytes1 statusCode,
-            bytes32 reason,
-
-        ) = _isAbleToTransferFromByPartition(
-                _from,
-                _to,
-                _partition,
-                _value,
-                _data,
-                _operatorData
-            );
-        return (status, statusCode, reason);
-    }
+    function batchBurn(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external;
 }

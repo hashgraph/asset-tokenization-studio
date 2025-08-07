@@ -211,11 +211,9 @@ import {
     IERC20StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
 import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
-import {
-    IERC1410Standard
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+    BasicTransferInfo,
+    IssueData
+} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 import {
     ERC1410StandardStorageWrapper
 } from '../ERC1410/ERC1410StandardStorageWrapper.sol';
@@ -311,7 +309,7 @@ abstract contract ERC20StorageWrapper2 is
         _decreaseAllowedBalance(from, spender, value);
         _transferByPartition(
             from,
-            IERC1410Basic.BasicTransferInfo(to, value),
+            BasicTransferInfo(to, value),
             DEFAULT_PARTITION,
             '',
             spender,
@@ -327,7 +325,7 @@ abstract contract ERC20StorageWrapper2 is
     ) internal returns (bool) {
         _transferByPartition(
             from,
-            IERC1410Basic.BasicTransferInfo(to, value),
+            BasicTransferInfo(to, value),
             DEFAULT_PARTITION,
             '',
             address(0),
@@ -337,9 +335,7 @@ abstract contract ERC20StorageWrapper2 is
     }
 
     function _mint(address to, uint256 value) internal {
-        _issueByPartition(
-            IERC1410Standard.IssueData(DEFAULT_PARTITION, to, value, '')
-        );
+        _issueByPartition(IssueData(DEFAULT_PARTITION, to, value, ''));
         _emitTransferEvent(address(0), to, value);
     }
 
@@ -382,6 +378,7 @@ abstract contract ERC20StorageWrapper2 is
 
         emit Approval(from, spender, _erc20Storage().allowed[from][spender]);
     }
+
     function _emitTransferEvent(
         address from,
         address to,

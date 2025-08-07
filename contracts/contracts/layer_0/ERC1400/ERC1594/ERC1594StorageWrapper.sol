@@ -219,16 +219,21 @@ import {
 import {Eip1066} from '../../constants/eip1066.sol';
 import {CapStorageWrapper2} from '../../cap/CapStorageWrapper2.sol';
 import {IClearing} from '../../../layer_1/interfaces/clearing/IClearing.sol';
-import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
-    IIdentityRegistry
+    IERC3643Basic
+} from '../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
+import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
+import {
+IIdentityRegistry
 } from '../../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol';
 
 abstract contract ERC1594StorageWrapper is
     IERC1594StorageWrapper,
     CapStorageWrapper2
 {
+    using LowLevelCall for address;
+
     struct ERC1594Storage {
         bool issuance;
         bool initialized;
@@ -244,8 +249,8 @@ abstract contract ERC1594StorageWrapper is
         address _to,
         bytes32 _partition,
         uint256 _value,
-        bytes memory /*_data*/,
-        bytes memory /*_operatorData*/
+        bytes memory,
+        bytes memory
     ) {
         _checkCanTransferFromByPartition(
             _from,
@@ -262,8 +267,8 @@ abstract contract ERC1594StorageWrapper is
         address _from,
         bytes32 _partition,
         uint256 _value,
-        bytes memory /*_data*/,
-        bytes memory /*_operatorData*/
+        bytes memory,
+        bytes memory
     ) {
         _checkCanRedeemFromByPartition(
             _from,
@@ -280,15 +285,16 @@ abstract contract ERC1594StorageWrapper is
         _;
     }
 
-    modifier onlyCompliant(address _from, address _to) {
-        _checkCompliance(_from, _to);
+    modifier onlyCompliant(address _from, address _to, bool _checkSender) {
+        _checkCompliance(_from, _to, _checkSender);
         _;
     }
 
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC1594() internal {
-        _erc1594Storage().issuance = true;
-        _erc1594Storage().initialized = true;
+        ERC1594Storage storage ds = _erc1594Storage();
+        ds.issuance = true;
+        ds.initialized = true;
     }
 
     /**
@@ -362,8 +368,8 @@ abstract contract ERC1594StorageWrapper is
         address _from,
         bytes32 _partition,
         uint256 _value,
-        bytes memory /*_data*/,
-        bytes memory /*_operatorData*/
+        bytes memory,
+        bytes memory
     ) internal view {
         (
             bool isAbleToRedeemFrom,
@@ -378,7 +384,7 @@ abstract contract ERC1594StorageWrapper is
                 EMPTY_BYTES
             );
         if (!isAbleToRedeemFrom) {
-            _revertWithData(reasonCode, details);
+            LowLevelCall.revertWithData(bytes4(reasonCode), details);
         }
     }
 
@@ -398,19 +404,17 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
-        // Application specific
-        if (_isPaused()) {
-            return (false, Eip1066.PAUSED, TokenIsPaused.selector, EMPTY_BYTES);
+        (
+            isAbleToRedeemFrom,
+            statusCode,
+            reasonCode,
+            details
+        ) = _genericChecks();
+        if (!isAbleToRedeemFrom) {
+            return (isAbleToRedeemFrom, statusCode, reasonCode, details);
         }
-        if (_isClearingActivated()) {
-            return (
-                false,
-                Eip1066.UNAVAILABLE,
-                IClearing.ClearingIsActivated.selector,
-                EMPTY_BYTES
-            );
-        }
-        // Format
+
+        // Format validation
         if (_from == ZERO_ADDRESS) {
             return (
                 false,
@@ -419,106 +423,33 @@ abstract contract ERC1594StorageWrapper is
                 EMPTY_BYTES
             );
         }
-        // Compliance
-        if (_isRecovered(_from)) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IERC3643.WalletRecovered.selector,
-                abi.encode(_from)
-            );
-        }
-        if (!_isAbleToAccess(_from)) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                AccountIsBlocked.selector,
-                abi.encode(_from)
-            );
-        }
-        // Identity
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IKyc.InvalidKycStatus.selector,
-                abi.encode(_from)
-            );
+
+        bool checkSender = _from != _msgSender() &&
+            !_hasRole(_protectedPartitionsRole(_partition), _msgSender());
+
+        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isCompliant(
+            _from,
+            address(0),
+            _value,
+            checkSender
+        );
+        if (!isAbleToRedeemFrom) {
+            return (isAbleToRedeemFrom, statusCode, reasonCode, details);
         }
 
-        if (!_isVerified(_from)) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IERC3643.AddressNotVerified.selector,
-                abi.encode(_from)
-            );
+        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isIdentified(
+            _from,
+            address(0)
+        );
+        if (!isAbleToRedeemFrom) {
+            return (isAbleToRedeemFrom, statusCode, reasonCode, details);
         }
 
-        if (
-            _from != _msgSender() &&
-            !_isAuthorized(_partition, _msgSender(), _from) &&
-            !_hasRole(_protectedPartitionsRole(_partition), _msgSender())
-        ) {
-            // From methods checks
-            // Compliance
-            if (!_isAbleToAccess(_msgSender())) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    AccountIsBlocked.selector,
-                    abi.encode(_msgSender())
-                );
-            }
-            if (_allowanceAdjusted(_from, _msgSender()) < _value) {
-                return (
-                    false,
-                    Eip1066.INSUFFICIENT_FUNDS,
-                    InsufficientAllowance.selector,
-                    abi.encode(
-                        _msgSender(),
-                        _from,
-                        _allowanceAdjusted(_from, _msgSender()),
-                        _value,
-                        DEFAULT_PARTITION
-                    )
-                );
-            }
-            // Business logic
-            if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    Eip1066.REVOKED_OR_BANNED,
-                    IERC3643.WalletRecovered.selector,
-                    abi.encode(_msgSender())
-                );
-            }
-        }
-        // Business logic
-        if (!_validPartition(_partition, _from)) {
-            return (
-                false,
-                Eip1066.INSUFFICIENT_FUNDS,
-                InvalidPartition.selector,
-                abi.encode(_from, _partition)
-            );
-        }
-        if (_balanceOfByPartitionAdjusted(_partition, _from) < _value) {
-            return (
-                false,
-                Eip1066.INSUFFICIENT_FUNDS,
-                InsufficientBalance.selector,
-                abi.encode(
-                    _from,
-                    _balanceOfAdjusted(_from),
-                    _value,
-                    DEFAULT_PARTITION
-                )
-            );
-        }
+        // Allowance check for the 'from' methods
+        bool checkAllowance = checkSender &&
+            !_isAuthorized(_partition, _msgSender(), _from);
 
-        // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+        return _businessLogicChecks(checkAllowance, _from, _value, _partition);
     }
 
     function _checkCanTransferFromByPartition(
@@ -543,7 +474,7 @@ abstract contract ERC1594StorageWrapper is
                 EMPTY_BYTES
             );
         if (!isAbleToTransfer) {
-            _revertWithData(reasonCode, details);
+            LowLevelCall.revertWithData(bytes4(reasonCode), details);
         }
     }
 
@@ -564,7 +495,95 @@ abstract contract ERC1594StorageWrapper is
             bytes memory details
         )
     {
-        // Application specific
+        (isAbleToTransfer, statusCode, reasonCode, details) = _genericChecks();
+        if (!isAbleToTransfer) {
+            return (isAbleToTransfer, statusCode, reasonCode, details);
+        }
+
+        // Format validation
+        if (_from == ZERO_ADDRESS || _to == ZERO_ADDRESS) {
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                ZeroAddressNotAllowed.selector,
+                EMPTY_BYTES
+            );
+        }
+
+        bool checkSender = _from != _msgSender() &&
+            !_hasRole(_protectedPartitionsRole(_partition), _msgSender());
+
+        (isAbleToTransfer, statusCode, reasonCode, details) = _isCompliant(
+            _from,
+            _to,
+            _value,
+            checkSender
+        );
+        if (!isAbleToTransfer) {
+            return (isAbleToTransfer, statusCode, reasonCode, details);
+        }
+
+        (isAbleToTransfer, statusCode, reasonCode, details) = _isIdentified(
+            _from,
+            _to
+        );
+        if (!isAbleToTransfer) {
+            return (isAbleToTransfer, statusCode, reasonCode, details);
+        }
+
+        // Allowance check for the 'from' methods
+        bool checkAllowance = checkSender &&
+            !_isAuthorized(_partition, _msgSender(), _from);
+
+        return _businessLogicChecks(checkAllowance, _from, _value, _partition);
+    }
+
+    function _checkIdentity(address _from, address _to) internal view override {
+        (
+            bool isIdentified,
+            ,
+            bytes32 reasonCode,
+            bytes memory details
+        ) = _isIdentified(_from, _to);
+        if (!isIdentified) {
+            LowLevelCall.revertWithData(bytes4(reasonCode), details);
+        }
+    }
+
+    function _checkCompliance(
+        address _from,
+        address _to,
+        bool _checkSender
+    ) internal view override {
+        (
+            bool isCompliant,
+            ,
+            bytes32 reasonCode,
+            bytes memory details
+        ) = _isCompliant(_from, _to, 0, _checkSender);
+        if (!isCompliant) {
+            LowLevelCall.revertWithData(bytes4(reasonCode), details);
+        }
+    }
+
+    function _erc1594Storage()
+        internal
+        pure
+        returns (ERC1594Storage storage ds)
+    {
+        bytes32 position = _ERC1594_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ds.slot := position
+        }
+    }
+
+    function _genericChecks()
+        private
+        view
+        returns (bool, bytes1, bytes32, bytes memory)
+    {
+        // Application specific checks
         if (_isPaused()) {
             return (false, Eip1066.PAUSED, TokenIsPaused.selector, EMPTY_BYTES);
         }
@@ -577,91 +596,27 @@ abstract contract ERC1594StorageWrapper is
                 EMPTY_BYTES
             );
         }
-        // Format
-        if (_from == ZERO_ADDRESS || _to == ZERO_ADDRESS) {
-            return (
-                false,
-                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                ZeroAddressNotAllowed.selector,
-                EMPTY_BYTES
-            );
-        }
-        // Compliance
-        if (_isRecovered(_from)) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IERC3643.WalletRecovered.selector,
-                abi.encode(_from)
-            );
-        }
-        if (_isRecovered(_to)) {
-            return (
-                false,
-                Eip1066.REVOKED_OR_BANNED,
-                IERC3643.WalletRecovered.selector,
-                abi.encode(_to)
-            );
-        }
-        if (!_isAbleToAccess(_from)) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                AccountIsBlocked.selector,
-                abi.encode(_from)
-            );
-        }
-        if (!_isAbleToAccess(_to)) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                AccountIsBlocked.selector,
-                abi.encode(_to)
-            );
-        }
-        // Identity
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IKyc.InvalidKycStatus.selector,
-                abi.encode(_from)
-            );
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IKyc.InvalidKycStatus.selector,
-                abi.encode(_to)
-            );
-        }
 
-        if (!_isVerified(_from)) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IERC3643.AddressNotVerified.selector,
-                abi.encode(_from)
-            );
-        }
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
 
-        if (!_isVerified(_to)) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                IERC3643.AddressNotVerified.selector,
-                abi.encode(_to)
-            );
-        }
-
-        if (
-            _from != _msgSender() &&
-            !_isAuthorized(_partition, _msgSender(), _from) &&
-            !_hasRole(_protectedPartitionsRole(_partition), _msgSender())
-        ) {
-            // From methods checks
-            // Compliance
+    function _isCompliant(
+        address _from,
+        address _to,
+        uint256 _value,
+        bool _checkSender
+    )
+        private
+        view
+        returns (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        // Check sender for blocked status and recovery status when required
+        if (_checkSender) {
             if (!_isAbleToAccess(_msgSender())) {
                 return (
                     false,
@@ -674,184 +629,40 @@ abstract contract ERC1594StorageWrapper is
                 return (
                     false,
                     Eip1066.REVOKED_OR_BANNED,
-                    IERC3643.WalletRecovered.selector,
+                    IERC3643Basic.WalletRecovered.selector,
                     abi.encode(_msgSender())
                 );
             }
-            // Business logic
-            if (_allowanceAdjusted(_from, _msgSender()) < _value) {
-                return (
-                    false,
-                    Eip1066.INSUFFICIENT_FUNDS,
-                    InsufficientAllowance.selector,
-                    abi.encode(
+            // Compliance check for sender in compliance module (amount is 0)
+            bytes memory complianceResultSender = (_erc3643Storage().compliance)
+                .functionStaticCall(
+                    abi.encodeWithSelector(
+                        ICompliance.canTransfer.selector,
                         _msgSender(),
-                        _from,
-                        _allowanceAdjusted(_from, _msgSender()),
-                        _value,
-                        DEFAULT_PARTITION
-                    )
+                        address(0),
+                        0
+                    ),
+                    IERC3643Basic.ComplianceCallFailed.selector
                 );
-            }
-        }
-        // Business logic
-        if (_balanceOfAdjusted(_from) < _value) {
-            return (
-                false,
-                Eip1066.INSUFFICIENT_FUNDS,
-                InsufficientBalance.selector,
-                abi.encode(
-                    _from,
-                    _balanceOfAdjusted(_from),
-                    _value,
-                    DEFAULT_PARTITION
-                )
-            );
-        }
 
-        // All validations passed
-        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
-    }
-
-    function _checkIdentity(address _from, address _to) internal view override {
-        (
-            bool isIdentified,
-            ,
-            bytes32 reasonCode,
-            bytes memory details
-        ) = _isIdentified(_from, _to);
-        if (!isIdentified) {
-            _revertWithData(reasonCode, details);
-        }
-
-        (
-            bool isVerified,
-            bytes1 verifyStatusCode,
-            bytes32 verifyReasonCode,
-            bytes memory verifyDetails
-        ) = _isVerified(_from, _to);
-        if (!isVerified) {
-            _revertWithData(verifyReasonCode, verifyDetails);
-        }
-    }
-
-    function _isIdentified(
-        address _from,
-        address _to
-    )
-        internal
-        view
-        returns (
-            bool status,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        if (_from != address(0)) {
-            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+            if (
+                complianceResultSender.length > 0 &&
+                !abi.decode(complianceResultSender, (bool))
+            ) {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IKyc.InvalidKycStatus.selector,
-                    abi.encode(_from)
+                    IERC3643Basic.ComplianceNotAllowed.selector,
+                    abi.encode(_from, _to, _value)
                 );
             }
-        }
-        if (_to != address(0)) {
-            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    IKyc.InvalidKycStatus.selector,
-                    abi.encode(_to)
-                );
-            }
-        }
-
-        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
-    }
-
-    function _isVerified(
-        address _from,
-        address _to
-    )
-        internal
-        view
-        returns (
-            bool status,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        if (_from != address(0)) {
-            if (!_isVerified(_from)) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    IERC3643.AddressNotVerified.selector,
-                    abi.encode(_from)
-                );
-            }
-        }
-
-        if (_to != address(0)) {
-            if (!_isVerified(_to)) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    IERC3643.AddressNotVerified.selector,
-                    abi.encode(_to)
-                );
-            }
-        }
-
-        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
-    }
-
-    function _checkCompliance(
-        address _from,
-        address _to
-    ) internal view override {
-        (
-            bool isCompliant,
-            ,
-            bytes32 reasonCode,
-            bytes memory details
-        ) = _isCompliant(_from, _to);
-        if (!isCompliant) {
-            _revertWithData(reasonCode, details);
-        }
-    }
-
-    function _isCompliant(
-        address _from,
-        address _to
-    )
-        internal
-        view
-        returns (
-            bool status,
-            bytes1 statusCode,
-            bytes32 reasonCode,
-            bytes memory details
-        )
-    {
-        if (!_isAbleToAccess(_msgSender())) {
-            return (
-                false,
-                Eip1066.DISALLOWED_OR_STOP,
-                AccountIsBlocked.selector,
-                abi.encode(_msgSender())
-            );
         }
         if (_from != address(0)) {
             if (_isRecovered(_from)) {
                 return (
                     false,
                     Eip1066.REVOKED_OR_BANNED,
-                    IERC3643.WalletRecovered.selector,
+                    IERC3643Basic.WalletRecovered.selector,
                     abi.encode(_from)
                 );
             }
@@ -870,7 +681,7 @@ abstract contract ERC1594StorageWrapper is
                 return (
                     false,
                     Eip1066.REVOKED_OR_BANNED,
-                    IERC3643.WalletRecovered.selector,
+                    IERC3643Basic.WalletRecovered.selector,
                     abi.encode(_to)
                 );
             }
@@ -884,34 +695,267 @@ abstract contract ERC1594StorageWrapper is
                 );
             }
         }
+
+        // Compliance module check
+        bytes memory complianceResult = (_erc3643Storage().compliance)
+            .functionStaticCall(
+                abi.encodeWithSelector(
+                    ICompliance.canTransfer.selector,
+                    _from,
+                    _to,
+                    _value
+                ),
+                IERC3643Basic.ComplianceCallFailed.selector
+            );
+
+        if (
+            complianceResult.length > 0 && !abi.decode(complianceResult, (bool))
+        ) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IERC3643Basic.ComplianceNotAllowed.selector,
+                abi.encode(_from, _to, _value)
+            );
+        }
+
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
-    function _revertWithData(
-        bytes32 _reasonCode,
-        bytes memory _details
-    ) internal pure {
-        bytes memory revertData = abi.encodePacked(
-            bytes4(_reasonCode),
-            _details
-        );
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let len := mload(revertData)
-            let dataPtr := add(revertData, 0x20)
-            revert(dataPtr, len)
+    function _isIdentified(
+        address _from,
+        address _to
+    )
+        private
+        view
+        returns (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        if (_from != address(0)) {
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IKyc.InvalidKycStatus.selector,
+                    abi.encode(_from)
+                );
+            }
+
+            if (!_isVerified(_from)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IERC3643.AddressNotVerified.selector,
+                    abi.encode(_from)
+                );
+            }
         }
+        if (_to != address(0)) {
+            if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IKyc.InvalidKycStatus.selector,
+                    abi.encode(_to)
+                );
+            }
+            if (!_isVerified(_to)) {
+                return (
+                    false,
+                    Eip1066.DISALLOWED_OR_STOP,
+                    IERC3643.AddressNotVerified.selector,
+                    abi.encode(_to)
+                );
+            }
+        }
+
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
-    function _erc1594Storage()
-        internal
-        pure
-        returns (ERC1594Storage storage ds)
+    function _businessLogicChecks(
+        bool _checkAllowance,
+        address _from,
+        uint256 _value,
+        bytes32 _partition
+    )
+        private
+        view
+        returns (
+            bool isAbleToTransfer,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
     {
-        bytes32 position = _ERC1594_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            ds.slot := position
+        if (_checkAllowance) {
+            uint256 currentAllowance = _allowanceAdjusted(_from, _msgSender());
+            if (currentAllowance < _value) {
+                return (
+                    false,
+                    Eip1066.INSUFFICIENT_FUNDS,
+                    InsufficientAllowance.selector,
+                    abi.encode(
+                        _msgSender(),
+                        _from,
+                        currentAllowance,
+                        _value,
+                        DEFAULT_PARTITION
+                    )
+                );
+            }
         }
+
+        // Partition validation check
+        if (!_validPartition(_partition, _from)) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                InvalidPartition.selector,
+                abi.encode(_from, _partition)
+            );
+        }
+
+        // Balance check - check partition-specific balance
+        uint256 currentPartitionBalance = _balanceOfByPartitionAdjusted(
+            _partition,
+            _from
+        );
+        if (currentPartitionBalance < _value) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                InsufficientBalance.selector,
+                abi.encode(_from, currentPartitionBalance, _value, _partition)
+            );
+        }
+
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _validateRedemption(
+        address _from
+    )
+        private
+        view
+        returns (
+            bool isValid,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        if (_isRecovered(_from)) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IERC3643Basic.WalletRecovered.selector,
+                abi.encode(_from)
+            );
+        }
+        if (!_isAbleToAccess(_from)) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                AccountIsBlocked.selector,
+                abi.encode(_from)
+            );
+        }
+        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IKyc.InvalidKycStatus.selector,
+                abi.encode(_from)
+            );
+        }
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _validateRedemptionSender(
+        address _from,
+        uint256 _value
+    )
+        private
+        view
+        returns (
+            bool isValid,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        if (!_isAbleToAccess(_msgSender())) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                AccountIsBlocked.selector,
+                abi.encode(_msgSender())
+            );
+        }
+        if (_isRecovered(_msgSender())) {
+            return (
+                false,
+                Eip1066.REVOKED_OR_BANNED,
+                IERC3643Basic.WalletRecovered.selector,
+                abi.encode(_msgSender())
+            );
+        }
+        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                InsufficientAllowance.selector,
+                abi.encode(
+                    _msgSender(),
+                    _from,
+                    _allowanceAdjusted(_from, _msgSender()),
+                    _value,
+                    DEFAULT_PARTITION
+                )
+            );
+        }
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _validateRedemptionBusinessLogic(
+        address _from,
+        bytes32 _partition,
+        uint256 _value
+    )
+        private
+        view
+        returns (
+            bool isValid,
+            bytes1 statusCode,
+            bytes32 reasonCode,
+            bytes memory details
+        )
+    {
+        if (!_validPartition(_partition, _from)) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                InvalidPartition.selector,
+                abi.encode(_from, _partition)
+            );
+        }
+        if (_balanceOfByPartitionAdjusted(_partition, _from) < _value) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                InsufficientBalance.selector,
+                abi.encode(
+                    _from,
+                    _balanceOfByPartitionAdjusted(_partition, _from),
+                    _value,
+                    DEFAULT_PARTITION
+                )
+            );
+        }
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 }

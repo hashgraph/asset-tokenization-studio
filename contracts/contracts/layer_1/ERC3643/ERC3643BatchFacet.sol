@@ -206,113 +206,50 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
-import {Common} from '../../common/Common.sol';
+import {IERC3643Batch} from '../interfaces/ERC3643/IERC3643Batch.sol';
 import {
-    IERC1410Operator
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_ERC3643_BATCH_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ERC3643Batch} from './ERC3643Batch.sol';
 
-abstract contract ERC1410Operator is IERC1410Operator, Common {
-    ///////////////////////
-    /// Operator Management
-    ///////////////////////
-
-    /// @notice Authorises an operator for all partitions of `msg.sender`
-    /// @param _operator An address which is being authorised
-    function authorizeOperator(
-        address _operator
-    ) external override onlyUnpaused onlyCompliant(_msgSender(), _operator) {
-        _authorizeOperator(_operator);
-    }
-
-    /// @notice Revokes authorisation of an operator previously given for all partitions of `msg.sender`
-    /// @param _operator An address which is being de-authorised
-    function revokeOperator(
-        address _operator
-    ) external override onlyUnpaused onlyCompliant(_msgSender(), address(0)) {
-        _revokeOperator(_operator);
-    }
-
-    /// @notice Authorises an operator for a given partition of `msg.sender`
-    /// @param _partition The partition to which the operator is authorised
-    /// @param _operator An address which is being authorised
-    function authorizeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    )
+contract ERC3643BatchFacet is ERC3643Batch, IStaticFunctionSelectors {
+    function getStaticResolverKey()
         external
+        pure
         override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), _operator)
+        returns (bytes32 staticResolverKey_)
     {
-        _authorizeOperatorByPartition(_partition, _operator);
+        staticResolverKey_ = _ERC3643_BATCH_RESOLVER_KEY;
     }
 
-    /// @notice Revokes authorisation of an operator previously given for a specified partition of `msg.sender`
-    /// @param _partition The partition to which the operator is de-authorised
-    /// @param _operator An address which is being de-authorised
-    function revokeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    )
+    function getStaticFunctionSelectors()
         external
+        pure
         override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), address(0))
+        returns (bytes4[] memory staticFunctionSelectors_)
     {
-        _revokeOperatorByPartition(_partition, _operator);
+        staticFunctionSelectors_ = new bytes4[](4);
+        uint256 selectorsIndex;
+
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchForcedTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
     }
 
-    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _operatorTransferData contains all the information about the operator transfer
-    function operatorTransferByPartition(
-        OperatorTransferData calldata _operatorTransferData
-    )
+    function getStaticInterfaceIds()
         external
+        pure
         override
-        onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
-        onlyOperator(
-            _operatorTransferData.partition,
-            _operatorTransferData.from
-        )
-        onlyUnProtectedPartitionsOrWildCardRole
-        validateAddress(_operatorTransferData.to)
-        onlyCanTransferFromByPartition(
-            _operatorTransferData.from,
-            _operatorTransferData.to,
-            _operatorTransferData.partition,
-            _operatorTransferData.value,
-            _operatorTransferData.data,
-            _operatorTransferData.operatorData
-        )
-        returns (bytes32)
+        returns (bytes4[] memory staticInterfaceIds_)
     {
-        return _operatorTransferByPartition(_operatorTransferData);
-    }
-
-    /// @notice Determines whether `_operator` is an operator for all partitions of `_tokenHolder`
-    /// @param _operator The operator to check
-    /// @param _tokenHolder The token holder to check
-    /// @return Whether the `_operator` is an operator for all partitions of `_tokenHolder`
-    function isOperator(
-        address _operator,
-        address _tokenHolder
-    ) public view override returns (bool) {
-        return _isOperator(_operator, _tokenHolder);
-    }
-
-    /// @notice Determines whether `_operator` is an operator for a specified partition of `_tokenHolder`
-    /// @param _partition The partition to check
-    /// @param _operator The operator to check
-    /// @param _tokenHolder The token holder to check
-    /// @return Whether the `_operator` is an operator for a specified partition of `_tokenHolder`
-    function isOperatorForPartition(
-        bytes32 _partition,
-        address _operator,
-        address _tokenHolder
-    ) public view override returns (bool) {
-        return _isOperatorForPartition(_partition, _operator, _tokenHolder);
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Batch).interfaceId;
     }
 }

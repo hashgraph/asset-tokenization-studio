@@ -236,7 +236,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        onlyCompliant(_msgSender(), spender)
+        onlyCompliant(_msgSender(), spender, false)
         onlyWithoutMultiPartition
         returns (bool)
     {
@@ -292,7 +292,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     )
         external
         onlyUnpaused
-        onlyCompliant(_msgSender(), spender)
+        onlyCompliant(_msgSender(), spender, false)
         onlyWithoutMultiPartition
         returns (bool)
     {
@@ -306,7 +306,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyCompliant(_msgSender(), spender)
+        onlyCompliant(_msgSender(), spender, false)
         returns (bool)
     {
         return _decreaseAllowance(spender, subtractedValue);

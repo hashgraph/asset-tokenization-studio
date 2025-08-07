@@ -203,6 +203,7 @@
 
 */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
@@ -213,14 +214,12 @@ import {
     type Pause,
     BusinessLogicResolver,
     IFactory,
-    ERC3643,
-    type ERC1410Snapshot,
     Kyc,
     type ControlList,
     SsiManagement,
     ClearingActionsFacet,
     type AccessControl,
-    ERC1410ScheduledTasks,
+    type IERC1410,
     TimeTravel,
     AdjustBalances,
     Cap,
@@ -228,11 +227,12 @@ import {
     ERC1644,
     ERC1594,
     Lock,
-    Hold,
+    IHold,
     ProtectedPartitions,
     DiamondFacet,
     FreezeFacet,
-    ComplianceMockBase,
+    ComplianceMock,
+    IERC3643,
     IdentityRegistryMock,
 } from '@typechain'
 import {
@@ -263,12 +263,12 @@ import {
     AGENT_ROLE,
     PROTECTED_PARTITIONS_ROLE,
     PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
-    ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
     LOCKER_ROLE,
-    ADDRESS_RECOVERED_TO_ERROR_ID,
-    ADDRESS_RECOVERED_FROM_ERROR_ID,
     deployContract,
     DeployContractCommand,
+    EIP1066_CODES,
+    CLEARING_VALIDATOR_ROLE,
+    TREX_OWNER_ROLE,
 } from '@scripts'
 import { Contract } from 'ethers'
 
@@ -284,6 +284,7 @@ const MAX_SUPPLY = 10000000
 const EMPTY_VC_ID = EMPTY_STRING
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
 const onchainId = ethers.Wallet.createRandom().address
+const identityRegistry = ethers.Wallet.createRandom().address
 
 describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
@@ -303,8 +304,8 @@ describe('ERC3643 Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc3643Facet: ERC3643
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc3643Facet: IERC3643
+    let erc1410Facet: IERC1410
     let timeTravelFacet: TimeTravel
     let adjustBalancesFacet: AdjustBalances
     let capFacet: Cap
@@ -320,20 +321,25 @@ describe('ERC3643 Tests', () => {
     let erc1594Facet: ERC1594
     let lockFacet: Lock
     let clearingFacet: Contract
-    let holdFacet: Hold
+    let holdFacet: IHold
     let protectedPartitionsFacet: ProtectedPartitions
     let diamondFacet: DiamondFacet
     let freezeFacet: FreezeFacet
     let identityRegistryAddress: string
     let identityRegistryMock: IdentityRegistryMock
+    let complianceMock: ComplianceMock
+    let complianceMockAddress: string
 
+    enum ClearingOperationType {
+        Transfer,
+        Redeem,
+        HoldCreation,
+    }
     describe('single partition', () => {
-        let erc3643Issuer: ERC3643
-        let erc3643Transferor: ERC3643
-        let erc1410SnapshotFacet: ERC1410Snapshot
+        let erc3643Issuer: IERC3643
+        let erc3643Transferor: IERC3643
+        let erc1410SnapshotFacet: IERC1410
         let erc20Facet: ERC20
-        let complianceMockTrue: string
-        let complianceMockFalse: string
 
         before(async () => {
             // mute | mock console.log
@@ -359,24 +365,6 @@ describe('ERC3643 Tests', () => {
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
-
-            complianceMockTrue = (
-                await deployContract(
-                    new DeployContractCommand({
-                        name: 'ComplianceMockTrue',
-                        signer: signer_A,
-                    })
-                )
-            ).address
-
-            complianceMockFalse = (
-                await deployContract(
-                    new DeployContractCommand({
-                        name: 'ComplianceMockFalse',
-                        signer: signer_A,
-                    })
-                )
-            ).address
         })
 
         beforeEach(async () => {
@@ -400,8 +388,16 @@ describe('ERC3643 Tests', () => {
                 role: CLEARING_ROLE,
                 members: [account_B],
             }
+            const rbacClearingValidator: Rbac = {
+                role: CLEARING_VALIDATOR_ROLE,
+                members: [account_A],
+            }
             const rbacAgent: Rbac = {
                 role: AGENT_ROLE,
+                members: [account_A],
+            }
+            const rbacTrexOwner: Rbac = {
+                role: TREX_OWNER_ROLE,
                 members: [account_A],
             }
             const init_rbacs: Rbac[] = [
@@ -411,7 +407,19 @@ describe('ERC3643 Tests', () => {
                 rbacSSI,
                 rbacClearing,
                 rbacAgent,
+                rbacTrexOwner,
+                rbacClearingValidator,
             ]
+
+            complianceMockAddress = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'ComplianceMock',
+                        signer: signer_A,
+                        args: [true, false],
+                    })
+                )
+            ).address
 
             identityRegistryAddress = (
                 await deployContract(
@@ -466,7 +474,7 @@ describe('ERC3643 Tests', () => {
             erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
 
             erc3643Facet = await ethers.getContractAt(
-                'ERC3643',
+                'IERC3643',
                 diamond.address
             )
 
@@ -485,7 +493,7 @@ describe('ERC3643 Tests', () => {
                 signer_E
             )
             erc1410SnapshotFacet = await ethers.getContractAt(
-                'ERC1410Snapshot',
+                'IERC1410',
                 diamond.address
             )
 
@@ -504,7 +512,7 @@ describe('ERC3643 Tests', () => {
                 diamond.address
             )
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+                'IERC1410',
                 diamond.address
             )
             accessControlFacet = await ethers.getContractAt(
@@ -573,11 +581,12 @@ describe('ERC3643 Tests', () => {
                     ...clearingTransferFacet.interface.fragments,
                     ...clearingRedeemFacet.interface.fragments,
                     ...clearingHoldCreationFacet.interface.fragments,
+                    ...clearingActionsFacet.interface.fragments,
                 ],
                 signer_A
             )
             holdFacet = await ethers.getContractAt(
-                'Hold',
+                'IHold',
                 diamond.address,
                 signer_A
             )
@@ -592,6 +601,10 @@ describe('ERC3643 Tests', () => {
             freezeFacet = await ethers.getContractAt(
                 'FreezeFacet',
                 diamond.address
+            )
+            complianceMock = await ethers.getContractAt(
+                'ComplianceMock',
+                complianceMockAddress
             )
 
             accessControlFacet = accessControlFacet.connect(signer_A)
@@ -659,12 +672,21 @@ describe('ERC3643 Tests', () => {
                 ).to.be.equal(AMOUNT / 2)
             })
             it('GIVEN a paused token WHEN attempting to mint TokenIsPaused error', async () => {
+                await ssiManagementFacet.addIssuer(account_A)
+                await kycFacet.grantKyc(
+                    account_A,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_A
+                )
+
                 pauseFacet = pauseFacet.connect(signer_B)
                 await pauseFacet.pause()
 
                 await expect(
                     erc3643Facet.mint(account_A, AMOUNT)
-                ).to.be.rejectedWith('TokenIsPaused')
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
             it('GIVEN a max supply WHEN mint more than the max supply THEN transaction fails with MaxSupplyReached', async () => {
                 // Using account A (with role)
@@ -684,19 +706,25 @@ describe('ERC3643 Tests', () => {
                 // Using account C (with role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
+                await ssiManagementFacet.addIssuer(account_C)
+                await kycFacet.grantKyc(
+                    account_C,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_C
+                )
+
                 // mint fails
                 await expect(
                     erc3643Facet.mint(account_C, AMOUNT)
-                ).to.be.revertedWithCustomError(
-                    erc3643Facet,
-                    'AccountIsBlocked'
-                )
+                ).to.be.revertedWithCustomError(controlList, 'AccountIsBlocked')
             })
             it('GIVEN non kyc account WHEN mint THEN transaction reverts with InvalidKycStatus', async () => {
                 await kycFacet.revokeKyc(account_E)
                 await expect(
                     erc3643Facet.mint(account_E, AMOUNT)
-                ).to.revertedWithCustomError(erc3643Facet, 'InvalidKycStatus')
+                ).to.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             })
         })
 
@@ -961,7 +989,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     freezeFacet.freezePartialTokens(account_E, amount + 1)
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'InsufficientBalance'
                 )
             })
@@ -1022,7 +1050,6 @@ describe('ERC3643 Tests', () => {
 
         it('GIVEN an initialized token WHEN retrieving the version THEN returns the right version', async () => {
             const json = await erc3643Facet.version()
-            console.log(json)
             const parsed = JSON.parse(json)
 
             const [configResolver, configId, configVersion] =
@@ -1105,48 +1132,781 @@ describe('ERC3643 Tests', () => {
             })
         })
 
+        describe('ERC3643 canTransfer Compliance Integration', () => {
+            it('GIVEN ComplianceMock.canTransfer returns false THEN transfers fail with ComplianceNotAllowed', async () => {
+                // Setup: mint tokens and set compliance to return false for canTransfer
+                await erc3643Facet.mint(account_E, AMOUNT)
+                await complianceMock.setFlags(false, false) // canTransfer = false
+
+                const erc20FacetE = erc20Facet.connect(signer_E)
+
+                await expect(
+                    erc20FacetE.transfer(account_D, AMOUNT / 2)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+            })
+
+            it('GIVEN ComplianceMock.canTransfer returns true THEN transfers succeed', async () => {
+                // Setup: mint tokens and set compliance to return true for canTransfer
+                await erc3643Facet.mint(account_E, AMOUNT)
+                await complianceMock.setFlags(true, false) // canTransfer = true
+
+                const erc20FacetE = erc20Facet.connect(signer_E)
+
+                await expect(erc20FacetE.transfer(account_D, AMOUNT / 2)).to.not
+                    .be.reverted
+
+                expect(
+                    await erc1410SnapshotFacet.balanceOf(account_E)
+                ).to.equal(AMOUNT / 2)
+                expect(
+                    await erc1410SnapshotFacet.balanceOf(account_D)
+                ).to.equal(AMOUNT / 2)
+            })
+
+            it('GIVEN zero address compliance THEN transfers succeed without compliance checks', async () => {
+                // Deploy token without compliance contract (zero address)
+                const diamond = await deployEquityFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList: false,
+                    isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
+                    isMultiPartition: false,
+                    name,
+                    symbol,
+                    decimals,
+                    isin,
+                    votingRight: false,
+                    informationRight: false,
+                    liquidationRight: false,
+                    subscriptionRight: true,
+                    conversionRight: true,
+                    redemptionRight: true,
+                    putRight: false,
+                    dividendRight: 1,
+                    currency: '0x345678',
+                    numberOfShares: BigInt(MAX_SUPPLY),
+                    nominalValue: 100,
+                    regulationType: RegulationType.REG_S,
+                    regulationSubType: RegulationSubType.NONE,
+                    countriesControlListType: true,
+                    listOfCountries: 'ES,FR,CH',
+                    info: 'nothing',
+                    init_rbacs: [
+                        { role: ISSUER_ROLE, members: [account_A] },
+                        { role: KYC_ROLE, members: [account_B] },
+                    ],
+                    factory,
+                    businessLogicResolver: businessLogicResolver.address,
+                    compliance: ADDRESS_ZERO, // No compliance contract
+                })
+
+                const erc3643NoCompliance = await ethers.getContractAt(
+                    'ERC3643',
+                    diamond.address
+                )
+                const kycNoCompliance = await ethers.getContractAt(
+                    'Kyc',
+                    diamond.address,
+                    signer_B
+                )
+                const erc20NoCompliance = await ethers.getContractAt(
+                    'ERC20',
+                    diamond.address,
+                    signer_E
+                )
+                const ssiNoCompliance = await ethers.getContractAt(
+                    'SsiManagement',
+                    diamond.address
+                )
+
+                // Grant SSI_MANAGER_ROLE to account_A first, then add account_E as an issuer
+                const accessControlNoCompliance = await ethers.getContractAt(
+                    'AccessControl',
+                    diamond.address
+                )
+                await accessControlNoCompliance.grantRole(
+                    SSI_MANAGER_ROLE,
+                    account_A
+                )
+                await ssiNoCompliance.addIssuer(account_E)
+                await kycNoCompliance.grantKyc(
+                    account_E,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_E
+                )
+                await kycNoCompliance.grantKyc(
+                    account_D,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_E
+                )
+
+                await erc3643NoCompliance.mint(account_E, AMOUNT)
+
+                await expect(erc20NoCompliance.transfer(account_D, AMOUNT / 2))
+                    .to.not.be.reverted
+            })
+        })
+
         describe('Compliance', () => {
             it('GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance', async () => {
                 const retrieved_compliance = await erc3643Facet.compliance()
-                expect(retrieved_compliance).to.equal(complianceMockTrue)
+                expect(retrieved_compliance).to.equal(complianceMockAddress)
 
-                //Update compliance
-                expect(await erc3643Facet.setCompliance(complianceMockFalse))
+                const newComplianceMockAddress = (
+                    await deployContract(
+                        new DeployContractCommand({
+                            name: 'ComplianceMock',
+                            signer: signer_A,
+                            args: [true, false],
+                        })
+                    )
+                ).address
+
+                expect(
+                    await erc3643Facet.setCompliance(newComplianceMockAddress)
+                )
                     .to.emit(erc3643Facet, 'ComplianceAdded')
-                    .withArgs(complianceMockFalse)
+                    .withArgs(newComplianceMockAddress)
 
                 const retrieved_newCompliance = await erc3643Facet.compliance()
-                expect(retrieved_newCompliance).to.equal(complianceMockFalse)
+                expect(retrieved_newCompliance).to.equal(
+                    newComplianceMockAddress
+                )
             })
 
-            it('GIVEN MockCompliaceTrue THEN canTransfer returns true', async () => {
-                const complianceTrue: ComplianceMockBase =
-                    await ethers.getContractAt(
-                        'ComplianceMockBase',
-                        complianceMockTrue
-                    )
+            it('GIVEN ComplianceMock flag set to true THEN canTransfer returns true', async () => {
                 expect(
-                    await complianceTrue.canTransfer(
-                        ADDRESS_ZERO,
-                        ADDRESS_ZERO,
+                    await complianceMock.canTransfer(
+                        ethers.Wallet.createRandom().address,
+                        ethers.Wallet.createRandom().address,
                         ZERO
                     )
                 ).to.be.true
             })
 
-            it('GIVEN MockCompliaceFalse THEN canTransfer returns false', async () => {
-                const complianceFalse: ComplianceMockBase =
-                    await ethers.getContractAt(
-                        'ComplianceMockBase',
-                        complianceMockFalse
-                    )
+            it('GIVEN ComplianceMock flag set to false THEN canTransfer returns false', async () => {
+                await complianceMock.setFlags(false, false)
                 expect(
-                    await complianceFalse.canTransfer(
-                        ADDRESS_ZERO,
-                        ADDRESS_ZERO,
+                    await complianceMock.canTransfer(
+                        ethers.Wallet.createRandom().address,
+                        ethers.Wallet.createRandom().address,
                         ZERO
                     )
                 ).to.be.false
+            })
+
+            it('GIVEN a successful transfer THEN transferred is called in compliance contract', async () => {
+                // Setup
+                // Grant mutual approvals to interacting accounts
+                await erc20Facet
+                    .connect(signer_D)
+                    .approve(account_E, MAX_UINT256)
+                await erc20Facet
+                    .connect(signer_E)
+                    .approve(account_D, MAX_UINT256)
+                await erc1410Facet
+                    .connect(signer_E)
+                    .authorizeOperator(account_D)
+                await erc1410Facet
+                    .connect(signer_D)
+                    .authorizeOperator(account_E)
+                // Issue
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: AMOUNT,
+                    data: '0x',
+                })
+                const basicTransferInfo = {
+                    to: account_D,
+                    value: AMOUNT,
+                }
+                let transfersCounter = 0
+                // Standard transfers
+                await erc1410Facet
+                    .connect(signer_E)
+                    .transferByPartition(
+                        DEFAULT_PARTITION,
+                        basicTransferInfo,
+                        EMPTY_HEX_BYTES
+                    )
+                transfersCounter++
+                await erc20Facet
+                    .connect(signer_E)
+                    .transferFrom(account_D, account_E, AMOUNT)
+                transfersCounter++
+                await erc20Facet.connect(signer_E).transfer(account_D, AMOUNT)
+                transfersCounter++
+                const operatorTransferData = {
+                    partition: DEFAULT_PARTITION,
+                    from: account_D,
+                    to: account_E,
+                    value: AMOUNT,
+                    data: EMPTY_HEX_BYTES,
+                    operatorData: EMPTY_HEX_BYTES,
+                }
+                await erc1410Facet
+                    .connect(signer_E)
+                    .operatorTransferByPartition(operatorTransferData)
+                transfersCounter++
+                await erc1594Facet
+                    .connect(signer_E)
+                    .transferWithData(account_D, AMOUNT, EMPTY_HEX_BYTES)
+                transfersCounter++
+                await erc1594Facet
+                    .connect(signer_E)
+                    .transferFromWithData(
+                        account_D,
+                        account_E,
+                        AMOUNT,
+                        EMPTY_HEX_BYTES
+                    )
+                transfersCounter++
+                await erc3643Facet
+                    .connect(signer_E)
+                    .batchTransfer([account_D], [AMOUNT])
+                transfersCounter++
+                // Clearing transfer
+                await clearingFacet.connect(signer_B).activateClearing()
+                const clearingOperation = {
+                    partition: DEFAULT_PARTITION,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:03Z'
+                    ),
+                    data: EMPTY_HEX_BYTES,
+                }
+                await clearingFacet
+                    .connect(signer_D)
+                    .clearingTransferByPartition(
+                        clearingOperation,
+                        AMOUNT,
+                        account_E
+                    )
+                transfersCounter++
+                const clearingIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_D,
+                    clearingId: 1,
+                    clearingOperationType: ClearingOperationType.Transfer,
+                }
+                await clearingFacet.approveClearingOperationByPartition(
+                    clearingIdentifier
+                )
+                const clearingOperationFrom = {
+                    clearingOperation: clearingOperation,
+                    from: account_E,
+                    operatorData: EMPTY_HEX_BYTES,
+                }
+                await clearingFacet
+                    .connect(signer_D)
+                    .clearingTransferFromByPartition(
+                        clearingOperationFrom,
+                        AMOUNT,
+                        account_D
+                    )
+                clearingIdentifier.tokenHolder = account_E
+                await clearingFacet.approveClearingOperationByPartition(
+                    clearingIdentifier
+                )
+                transfersCounter++
+                await clearingFacet.connect(signer_B).deactivateClearing()
+                // Hold execute
+                const hold = {
+                    amount: AMOUNT,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:03Z'
+                    ),
+                    escrow: account_E,
+                    to: account_E,
+                    data: EMPTY_HEX_BYTES,
+                }
+                await holdFacet
+                    .connect(signer_D)
+                    .createHoldByPartition(DEFAULT_PARTITION, hold)
+                const holdIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_D,
+                    holdId: 1,
+                }
+                await holdFacet
+                    .connect(signer_E)
+                    .executeHoldByPartition(holdIdentifier, account_E, AMOUNT)
+                transfersCounter++
+                expect(await complianceMock.transferredHit()).to.be.equal(
+                    transfersCounter
+                )
+            })
+
+            it('GIVEN a successful mint THEN created is called in compliance contract', async () => {
+                let mintCounter = 0
+
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: AMOUNT,
+                    data: '0x',
+                })
+                mintCounter++
+                await erc3643Facet.mint(account_E, AMOUNT)
+                mintCounter++
+                await erc3643Facet.batchMint([account_E], [AMOUNT])
+                mintCounter++
+                await erc1594Facet.issue(account_E, AMOUNT, EMPTY_HEX_BYTES)
+                mintCounter++
+                expect(await complianceMock.createdHit()).to.be.equal(
+                    mintCounter
+                )
+            })
+
+            it('GIVEN a successful burn THEN destroyed is called in compliance contract', async () => {
+                let burnCounter = 0
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: 10 * AMOUNT,
+                    data: '0x',
+                })
+                await erc1410Facet
+                    .connect(signer_E)
+                    .redeemByPartition(DEFAULT_PARTITION, AMOUNT, '0x')
+                burnCounter++
+                await erc3643Facet.burn(account_E, AMOUNT)
+                burnCounter++
+                await erc3643Facet.batchBurn([account_E], [AMOUNT])
+                burnCounter++
+                await erc1594Facet
+                    .connect(signer_E)
+                    .redeem(AMOUNT, EMPTY_HEX_BYTES)
+                burnCounter++
+                expect(await complianceMock.destroyedHit()).to.be.equal(
+                    burnCounter
+                )
+            })
+
+            it('GIVEN a failed mint call THEN transaction reverts with custom error', async () => {
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('created')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
+                let caught
+                try {
+                    await erc1410Facet.issueByPartition({
+                        partition: DEFAULT_PARTITION,
+                        tokenHolder: account_E,
+                        value: AMOUNT,
+                        data: '0x',
+                    })
+                } catch (err: any) {
+                    caught = err
+                }
+                const returnedSelector = (caught.data as string).slice(0, 10)
+                const outerSelector = erc3643Facet.interface.getSighash(
+                    'ComplianceCallFailed()'
+                )
+                expect(returnedSelector).to.equal(outerSelector)
+                const targetErrorSelector = complianceMock.interface.getSighash(
+                    'MockErrorMint(address,uint256)'
+                )
+                const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+                    ['address', 'uint256'],
+                    [account_E, AMOUNT]
+                )
+                const args = ethers.utils.solidityPack(
+                    ['bytes4', 'bytes'],
+                    [targetErrorSelector, targetErrorArgs]
+                )
+                const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
+                expect(returnedArgs).to.equal(args.slice(2))
+            })
+
+            it('GIVEN a failed transfer call THEN transaction reverts with custom error', async () => {
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: AMOUNT,
+                    data: '0x',
+                })
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('transferred')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
+                const basicTransferInfo = {
+                    to: account_D,
+                    value: AMOUNT,
+                }
+                let caught
+                try {
+                    await erc1410Facet
+                        .connect(signer_E)
+                        .transferByPartition(
+                            DEFAULT_PARTITION,
+                            basicTransferInfo,
+                            EMPTY_HEX_BYTES
+                        )
+                } catch (err: any) {
+                    caught = err
+                }
+                const returnedSelector = (caught.data as string).slice(0, 10)
+                const outerSelector = erc3643Facet.interface.getSighash(
+                    'ComplianceCallFailed()'
+                )
+                expect(returnedSelector).to.equal(outerSelector)
+                const targetErrorSelector = complianceMock.interface.getSighash(
+                    'MockErrorTransfer(address,address,uint256)'
+                )
+                const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+                    ['address', 'address', 'uint256'],
+                    [account_E, account_D, AMOUNT]
+                )
+                const args = ethers.utils.solidityPack(
+                    ['bytes4', 'bytes'],
+                    [targetErrorSelector, targetErrorArgs]
+                )
+                const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
+                expect(returnedArgs).to.equal(args.slice(2))
+            })
+
+            it('GIVEN a failed burn call THEN transaction reverts with custom error', async () => {
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    value: AMOUNT,
+                    data: '0x',
+                })
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('destroyed')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
+                let caught
+                try {
+                    await erc1410Facet
+                        .connect(signer_E)
+                        .redeemByPartition(
+                            DEFAULT_PARTITION,
+                            AMOUNT,
+                            EMPTY_HEX_BYTES
+                        )
+                } catch (err: any) {
+                    caught = err
+                }
+                const returnedSelector = (caught.data as string).slice(0, 10)
+                const outerSelector = erc3643Facet.interface.getSighash(
+                    'ComplianceCallFailed()'
+                )
+                expect(returnedSelector).to.equal(outerSelector)
+                const targetErrorSelector = complianceMock.interface.getSighash(
+                    'MockErrorBurn(address,uint256)'
+                )
+                const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+                    ['address', 'uint256'],
+                    [account_E, AMOUNT]
+                )
+                const args = ethers.utils.solidityPack(
+                    ['bytes4', 'bytes'],
+                    [targetErrorSelector, targetErrorArgs]
+                )
+                const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
+                expect(returnedArgs).to.equal(args.slice(2))
+            })
+
+            it('GIVEN a failed canTransfer call THEN transaction reverts with custom error', async () => {
+                const hash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes('canTransfer')
+                )
+                await complianceMock.setFlagsByMethod([], [], [true], [hash])
+                let caught
+                try {
+                    await erc20Facet
+                        .connect(signer_E)
+                        .approve(account_D, AMOUNT)
+                } catch (err: any) {
+                    caught = err
+                }
+                const returnedSelector = (caught.data as string).slice(0, 10)
+                const outerSelector = erc3643Facet.interface.getSighash(
+                    'ComplianceCallFailed()'
+                )
+                expect(returnedSelector).to.equal(outerSelector)
+                const targetErrorSelector = complianceMock.interface.getSighash(
+                    'MockErrorCanTransfer(address,address,uint256)'
+                )
+                const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+                    ['address', 'address', 'uint256'],
+                    [account_E, account_D, ZERO] // During approvals amount is not checked
+                )
+                const args = ethers.utils.solidityPack(
+                    ['bytes4', 'bytes'],
+                    [targetErrorSelector, targetErrorArgs]
+                )
+                const returnedArgs = (caught.data as string).slice(10)
+                expect(returnedArgs).to.equal(args.slice(2))
+            })
+
+            //TODO: we should test when canTransfer returns false for the FROM, TO and SENDER separately
+            it('GIVEN ComplianceMock::canTransfer returns false THEN operations fail with ComplianceNotAllowed', async () => {
+                // Setup: mint tokens and set compliance to return false for canTransfer
+                const erc20FacetE = erc20Facet.connect(signer_E)
+                await erc3643Facet.mint(account_E, 2 * AMOUNT)
+                await erc20FacetE.approve(account_D, MAX_UINT256)
+                await erc1410Facet
+                    .connect(signer_E)
+                    .authorizeOperator(account_D)
+
+                await complianceMock.setFlags(false, false) // canTransfer = false
+
+                // Transfers
+                await expect(
+                    erc20FacetE.transfer(account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc20Facet
+                        .connect(signer_D)
+                        .transferFrom(account_E, account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                const basicTransferInfo = {
+                    to: account_D,
+                    value: AMOUNT,
+                }
+                await expect(
+                    erc1410Facet
+                        .connect(signer_E)
+                        .transferByPartition(
+                            DEFAULT_PARTITION,
+                            basicTransferInfo,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                const operatorTransferData = {
+                    partition: DEFAULT_PARTITION,
+                    from: account_E,
+                    to: account_D,
+                    value: AMOUNT,
+                    data: EMPTY_HEX_BYTES,
+                    operatorData: EMPTY_HEX_BYTES,
+                }
+                await expect(
+                    erc1410Facet
+                        .connect(signer_D)
+                        .operatorTransferByPartition(operatorTransferData)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_E)
+                        .transferWithData(account_D, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_D)
+                        .transferFromWithData(
+                            account_E,
+                            account_D,
+                            AMOUNT,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc3643Facet
+                        .connect(signer_E)
+                        .batchTransfer([account_D], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Issue
+                await expect(
+                    erc3643Facet.batchMint([account_E], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc3643Facet.mint(account_E, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1410Facet.issueByPartition({
+                        partition: DEFAULT_PARTITION,
+                        tokenHolder: account_E,
+                        value: AMOUNT,
+                        data: EMPTY_HEX_BYTES,
+                    })
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1594Facet.issue(account_E, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Redeem
+                await expect(
+                    erc1410Facet.redeemByPartition(
+                        DEFAULT_PARTITION,
+                        AMOUNT,
+                        EMPTY_HEX_BYTES
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_E)
+                        .redeem(AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_D)
+                        .redeemFrom(account_E, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Approves
+                await expect(
+                    erc20FacetE.approve(account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1410Facet.connect(signer_E).authorizeOperator(account_D)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1410Facet
+                        .connect(signer_E)
+                        .authorizeOperatorByPartition(
+                            DEFAULT_PARTITION,
+                            account_D
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc20FacetE.increaseAllowance(account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Revoke
+                await expect(
+                    erc1410Facet.connect(signer_E).revokeOperator(account_D)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+                await expect(
+                    erc1410Facet
+                        .connect(signer_E)
+                        .revokeOperatorByPartition(DEFAULT_PARTITION, account_D)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Holds
+                const hold = {
+                    amount: AMOUNT,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:03Z'
+                    ),
+                    escrow: account_D,
+                    to: account_D,
+                    data: EMPTY_HEX_BYTES,
+                }
+                await holdFacet
+                    .connect(signer_E)
+                    .createHoldByPartition(DEFAULT_PARTITION, hold)
+                const holdIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    holdId: 1,
+                }
+                await expect(
+                    holdFacet
+                        .connect(signer_D)
+                        .executeHoldByPartition(
+                            holdIdentifier,
+                            account_E,
+                            AMOUNT
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+
+                // Clearings
+                await clearingActionsFacet.activateClearing()
+                const clearingOperation = {
+                    partition: DEFAULT_PARTITION,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:09Z'
+                    ),
+                    data: EMPTY_HEX_BYTES,
+                }
+                await clearingFacet
+                    .connect(signer_E)
+                    .clearingTransferByPartition(
+                        clearingOperation,
+                        AMOUNT,
+                        account_D
+                    )
+                const clearingIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    clearingId: 1,
+                    clearingOperationType: ClearingOperationType.Transfer,
+                }
+                await expect(
+                    clearingFacet.approveClearingOperationByPartition(
+                        clearingIdentifier
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
             })
         })
 
@@ -1261,7 +2021,7 @@ describe('ERC3643 Tests', () => {
                     await expect(
                         erc3643Transferor.batchTransfer(toList, amounts)
                     ).to.be.revertedWithCustomError(
-                        erc3643Facet,
+                        erc1410Facet,
                         'InvalidPartition'
                     )
                 })
@@ -1447,7 +2207,7 @@ describe('ERC3643 Tests', () => {
                     await expect(
                         erc20FacetD.transfer(account_A, transferAmount)
                     ).to.be.revertedWithCustomError(
-                        erc3643Facet,
+                        controlList,
                         'AccountIsBlocked'
                     )
 
@@ -1455,7 +2215,7 @@ describe('ERC3643 Tests', () => {
                     await expect(
                         erc20FacetE.transfer(account_A, transferAmount)
                     ).to.be.revertedWithCustomError(
-                        erc3643Facet,
+                        controlList,
                         'AccountIsBlocked'
                     )
                 })
@@ -1517,7 +2277,7 @@ describe('ERC3643 Tests', () => {
                             freezeFlags
                         )
                     ).to.be.revertedWithCustomError(
-                        erc3643Facet,
+                        accessControlFacet,
                         'AccountHasNoRoles'
                     )
                 })
@@ -1684,31 +2444,7 @@ describe('ERC3643 Tests', () => {
                         data: EMPTY_HEX_BYTES,
                     })
                 ).to.emit(erc1410Facet, 'IssuedByPartition')
-                const canTransferFrom = await erc1594Facet.canTransferFrom(
-                    account_E,
-                    account_D,
-                    amount,
-                    '0x'
-                )
-                const canTransferByPartition =
-                    await erc1410Facet.canTransferByPartition(
-                        account_E,
-                        account_D,
-                        DEFAULT_PARTITION,
-                        amount,
-                        '0x',
-                        '0x'
-                    )
-                const canRedeemFrom = await erc1410Facet.canRedeemByPartition(
-                    account_E,
-                    DEFAULT_PARTITION,
-                    amount,
-                    '0x',
-                    '0x'
-                )
-                expect(canTransferFrom[0]).to.equal(true)
-                expect(canTransferByPartition[0]).to.equal(true)
-                expect(canRedeemFrom[0]).to.equal(true)
+
                 await expect(
                     erc1644Facet.controllerRedeem(account_E, amount, '0x', '0x')
                 ).to.emit(erc1644Facet, 'ControllerRedemption')
@@ -1764,7 +2500,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     erc3643Facet.forcedTransfer(account_E, account_D, amount)
                 )
-                    .to.emit(erc3643Facet, 'TransferByPartition')
+                    .to.emit(erc1410Facet, 'TransferByPartition')
                     .withArgs(
                         DEFAULT_PARTITION,
                         ADDRESS_ZERO,
@@ -1775,10 +2511,10 @@ describe('ERC3643 Tests', () => {
                         '0x'
                     )
                 await expect(erc3643Facet.mint(account_E, amount))
-                    .to.emit(erc3643Facet, 'Issued')
+                    .to.emit(erc1594Facet, 'Issued')
                     .withArgs(account_B, account_E, amount, '0x')
                 await expect(erc3643Facet.burn(account_E, amount))
-                    .to.emit(erc3643Facet, 'Transfer')
+                    .to.emit(erc1594Facet, 'Transfer')
                     .withArgs(account_E, ADDRESS_ZERO, amount)
                 await expect(freezeFacet.setAddressFrozen(account_E, true))
                     .to.emit(freezeFacet, 'AddressFrozen')
@@ -1787,7 +2523,7 @@ describe('ERC3643 Tests', () => {
         })
 
         describe('AccessControl', () => {
-            it('GIVEN an account without admin role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
+            it('GIVEN an account without TREX_OWNER role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
@@ -1796,7 +2532,7 @@ describe('ERC3643 Tests', () => {
                     'AccountHasNoRole'
                 )
             })
-            it('GIVEN an account without admin role WHEN setSymbol THEN transaction fails with AccountHasNoRole', async () => {
+            it('GIVEN an account without TREX_OWNER role WHEN setSymbol THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
@@ -1805,7 +2541,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setSymbol(newSymbol)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
-            it('GIVEN an account without admin role WHEN setOnchainID THEN transaction fails with AccountHasNoRole', async () => {
+            it('GIVEN an account without TREX_OWNER role WHEN setOnchainID THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
@@ -1814,7 +2550,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setOnchainID(onchainId)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
-            it('GIVEN an account without admin role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole', async () => {
+            it('GIVEN an account without TREX_OWNER role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
@@ -1823,13 +2559,13 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setIdentityRegistry(identityRegistryAddress)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
-            it('GIVEN an account without admin role WHEN setCompliance THEN transaction fails with AccountHasNoRole', async () => {
+            it('GIVEN an account without TREX_OWNER role WHEN setCompliance THEN transaction fails with AccountHasNoRole', async () => {
                 // Using account C (non role)
                 erc3643Facet = erc3643Facet.connect(signer_C)
 
                 // set compliance fails
                 await expect(
-                    erc3643Facet.setCompliance(complianceMockFalse)
+                    erc3643Facet.setCompliance(complianceMockAddress)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
@@ -1880,19 +2616,19 @@ describe('ERC3643 Tests', () => {
             it('GIVEN a paused token WHEN freezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     freezeFacet.freezePartialTokens(account_A, 10)
-                ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused token WHEN unfreezePartialTokens THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     freezeFacet.unfreezePartialTokens(account_A, 10)
-                ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused token WHEN setAddressFrozen THEN transactions revert with TokenIsPaused error', async () => {
                 await expect(
                     freezeFacet.setAddressFrozen(account_A, true)
-                ).to.be.revertedWithCustomError(erc3643Facet, 'TokenIsPaused')
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused token WHEN attempting to addAgent THEN transactions revert with TokenIsPaused error', async () => {
@@ -1915,7 +2651,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setIdentityRegistry(identityRegistryAddress)
                 ).to.be.rejectedWith('TokenIsPaused')
                 await expect(
-                    erc3643Facet.setCompliance(complianceMockFalse)
+                    erc3643Facet.setCompliance(complianceMockAddress)
                 ).to.be.rejectedWith('TokenIsPaused')
             })
         })
@@ -2295,7 +3031,7 @@ describe('ERC3643 Tests', () => {
                         1,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 const operatorTransferData = {
                     partition: DEFAULT_PARTITION,
@@ -2329,7 +3065,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet
                         .connect(signer_C)
                         .batchTransfer([account_D], [amount])
-                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // 2 - From
                 operatorTransferData.from = account_C
                 await expect(
@@ -2379,7 +3115,7 @@ describe('ERC3643 Tests', () => {
                         1,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 operatorTransferData.to = account_C
                 await expect(
@@ -2404,7 +3140,7 @@ describe('ERC3643 Tests', () => {
                 ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc3643Facet.batchTransfer([account_C], [amount])
-                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // Allowance
                 // 1 - Operator
                 await expect(
@@ -2459,7 +3195,7 @@ describe('ERC3643 Tests', () => {
                         1,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 await expect(
                     erc1410Facet
@@ -2480,19 +3216,19 @@ describe('ERC3643 Tests', () => {
                             amount,
                             EMPTY_HEX_BYTES
                         )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc1594Facet
                         .connect(signer_C)
                         .redeemFrom(account_A, amount, EMPTY_HEX_BYTES)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // 2 - From
                 await expect(
                     erc1594Facet.redeemFrom(account_C, amount, EMPTY_HEX_BYTES)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc1594Facet.redeemFrom(account_C, amount, EMPTY_HEX_BYTES)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc1410Facet.operatorRedeemByPartition(
                         DEFAULT_PARTITION,
@@ -2505,7 +3241,7 @@ describe('ERC3643 Tests', () => {
                 // Issue
                 await expect(
                     erc1594Facet.issue(account_C, amount, EMPTY_HEX_BYTES)
-                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc1410Facet.issueByPartition({
                         partition: DEFAULT_PARTITION,
@@ -2513,17 +3249,17 @@ describe('ERC3643 Tests', () => {
                         value: amount,
                         data: EMPTY_HEX_BYTES,
                     })
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc3643Facet.mint(account_C, amount)
-                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     erc3643Facet.batchMint([account_C], [amount])
-                ).to.revertedWithCustomError(erc1594Facet, 'WalletRecovered')
+                ).to.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // Locks
                 await expect(
                     lockFacet.lock(amount, account_C, MAX_UINT256)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     lockFacet.lockByPartition(
                         DEFAULT_PARTITION,
@@ -2531,7 +3267,7 @@ describe('ERC3643 Tests', () => {
                         account_C,
                         MAX_UINT256
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // Clearings
                 await clearingActionsFacet.activateClearing()
                 const clearingOperation = {
@@ -2554,7 +3290,7 @@ describe('ERC3643 Tests', () => {
                             amount,
                             account_A
                         )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     clearingFacet
                         .connect(signer_C)
@@ -2563,7 +3299,7 @@ describe('ERC3643 Tests', () => {
                             amount,
                             account_A
                         )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 const protectedClearingOperation = {
                     clearingOperation: clearingOperation,
                     from: account_C,
@@ -2578,7 +3314,7 @@ describe('ERC3643 Tests', () => {
                         account_A,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 // 2 - From
                 clearingOperationFrom.from = account_C
@@ -2588,7 +3324,7 @@ describe('ERC3643 Tests', () => {
                         amount,
                         account_C
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 clearingOperationFrom.from = account_A
                 // 3 - To
                 await expect(
@@ -2597,14 +3333,14 @@ describe('ERC3643 Tests', () => {
                         amount,
                         account_C
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     clearingFacet.clearingTransferFromByPartition(
                         clearingOperationFrom,
                         amount,
                         account_C
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 protectedClearingOperation.from = account_A
                 await expect(
@@ -2614,7 +3350,7 @@ describe('ERC3643 Tests', () => {
                         account_C,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 protectedClearingOperation.from = account_C
                 await protectedPartitionsFacet.unprotectPartitions()
                 // Clearings - Holds
@@ -2630,7 +3366,7 @@ describe('ERC3643 Tests', () => {
                     clearingFacet
                         .connect(signer_C)
                         .clearingCreateHoldByPartition(clearingOperation, hold)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     clearingFacet
                         .connect(signer_C)
@@ -2638,7 +3374,7 @@ describe('ERC3643 Tests', () => {
                             clearingOperationFrom,
                             hold
                         )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 await expect(
                     clearingFacet.protectedClearingCreateHoldByPartition(
@@ -2646,7 +3382,7 @@ describe('ERC3643 Tests', () => {
                         hold,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 // 2 - From
                 await expect(
@@ -2654,7 +3390,7 @@ describe('ERC3643 Tests', () => {
                         clearingOperationFrom,
                         hold
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // 3 - To
                 hold.to = account_C
                 await expect(
@@ -2662,13 +3398,13 @@ describe('ERC3643 Tests', () => {
                         clearingOperation,
                         hold
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     clearingFacet.clearingCreateHoldFromByPartition(
                         clearingOperationFrom,
                         hold
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 await expect(
                     clearingFacet.protectedClearingCreateHoldByPartition(
@@ -2676,7 +3412,7 @@ describe('ERC3643 Tests', () => {
                         hold,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 // Clearings - Redeems
                 // 1 - Operator
@@ -2684,7 +3420,7 @@ describe('ERC3643 Tests', () => {
                     clearingFacet
                         .connect(signer_C)
                         .clearingRedeemByPartition(clearingOperation, amount)
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     clearingFacet
                         .connect(signer_C)
@@ -2692,7 +3428,7 @@ describe('ERC3643 Tests', () => {
                             clearingOperationFrom,
                             amount
                         )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 await expect(
                     clearingFacet.protectedClearingRedeemByPartition(
@@ -2700,7 +3436,7 @@ describe('ERC3643 Tests', () => {
                         amount,
                         '0x1234'
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.unprotectPartitions()
                 await clearingActionsFacet.deactivateClearing()
                 // 2 - From
@@ -2710,7 +3446,7 @@ describe('ERC3643 Tests', () => {
                         clearingOperationFrom,
                         amount
                     )
-                ).to.be.rejectedWith('WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 clearingOperationFrom.from = account_A
                 // Holds
                 // 1 - Operator
@@ -2718,7 +3454,7 @@ describe('ERC3643 Tests', () => {
                     holdFacet
                         .connect(signer_C)
                         .createHoldByPartition(DEFAULT_PARTITION, hold)
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     holdFacet
                         .connect(signer_C)
@@ -2728,7 +3464,7 @@ describe('ERC3643 Tests', () => {
                             hold,
                             EMPTY_HEX_BYTES
                         )
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 const protectedHold = {
                     hold: hold,
@@ -2753,7 +3489,7 @@ describe('ERC3643 Tests', () => {
                             hold,
                             EMPTY_HEX_BYTES
                         )
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // 2 - From
                 await expect(
                     holdFacet.operatorCreateHoldByPartition(
@@ -2762,7 +3498,7 @@ describe('ERC3643 Tests', () => {
                         hold,
                         EMPTY_HEX_BYTES
                     )
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     holdFacet.createHoldFromByPartition(
                         DEFAULT_PARTITION,
@@ -2770,14 +3506,14 @@ describe('ERC3643 Tests', () => {
                         hold,
                         EMPTY_HEX_BYTES
                     )
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 // 3 - To
                 hold.to = account_C
                 await expect(
                     holdFacet
                         .connect(signer_C)
                         .createHoldByPartition(DEFAULT_PARTITION, hold)
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await expect(
                     holdFacet
                         .connect(signer_C)
@@ -2787,7 +3523,7 @@ describe('ERC3643 Tests', () => {
                             hold,
                             EMPTY_HEX_BYTES
                         )
-                ).to.be.revertedWithCustomError(holdFacet, 'WalletRecovered')
+                ).to.be.revertedWithCustomError(erc3643Facet, 'WalletRecovered')
                 await protectedPartitionsFacet.protectPartitions()
                 await expect(
                     holdFacet.protectedCreateHoldByPartition(
@@ -2839,7 +3575,7 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canTransferByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 canTransferByPartition = await erc1410Facet
                     .connect(signer_C)
@@ -2852,14 +3588,12 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canTransferByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 let canTransfer = await erc1594Facet
                     .connect(signer_C)
                     .canTransfer(account_A, amount, EMPTY_HEX_BYTES)
-                expect(canTransfer[1]).to.equal(
-                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
-                )
+                expect(canTransfer[1]).to.equal(EIP1066_CODES.REVOKED_OR_BANNED)
                 // 2 - From
                 await erc1410Facet.issueByPartition({
                     partition: DEFAULT_PARTITION,
@@ -2885,7 +3619,7 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canTransferByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_FROM_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 // 3 - To
                 canTransferByPartition = await erc1410Facet
@@ -2899,14 +3633,14 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canTransferByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_TO_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 canTransfer = await erc1594Facet.canTransfer(
                     account_C,
                     amount,
                     EMPTY_HEX_BYTES
                 )
-                expect(canTransfer[1]).to.equal(ADDRESS_RECOVERED_TO_ERROR_ID)
+                expect(canTransfer[1]).to.equal(EIP1066_CODES.REVOKED_OR_BANNED)
                 // Can redeem
                 // 1 - Operator
                 let canRedeemByPartition = await erc1410Facet
@@ -2919,7 +3653,7 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canRedeemByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 canRedeemByPartition = await erc1410Facet
                     .connect(signer_C)
@@ -2931,7 +3665,7 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canRedeemByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_OPERATOR_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 // 2 - From
                 canRedeemByPartition = await erc1410Facet
@@ -2944,7 +3678,7 @@ describe('ERC3643 Tests', () => {
                         EMPTY_HEX_BYTES
                     )
                 expect(canRedeemByPartition[1]).to.equal(
-                    ADDRESS_RECOVERED_FROM_ERROR_ID
+                    EIP1066_CODES.REVOKED_OR_BANNED
                 )
                 // Freeze
                 await expect(
@@ -3037,7 +3771,7 @@ describe('ERC3643 Tests', () => {
             )
 
             erc3643Facet = await ethers.getContractAt(
-                'ERC3643',
+                'IERC3643',
                 diamond.address
             )
 
@@ -3063,7 +3797,7 @@ describe('ERC3643 Tests', () => {
             await expect(
                 erc3643Facet.mint(account_D, 2 * BALANCE_OF_C_ORIGINAL)
             ).to.be.revertedWithCustomError(
-                erc3643Facet,
+                erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
             )
         })
@@ -3075,7 +3809,7 @@ describe('ERC3643 Tests', () => {
             await expect(
                 erc3643Facet.burn(account_C, 2 * BALANCE_OF_C_ORIGINAL)
             ).to.be.revertedWithCustomError(
-                erc3643Facet,
+                erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
             )
         })
@@ -3092,7 +3826,7 @@ describe('ERC3643 Tests', () => {
                     2 * BALANCE_OF_C_ORIGINAL
                 )
             ).to.be.revertedWithCustomError(
-                erc3643Facet,
+                erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
             )
         })
@@ -3102,7 +3836,7 @@ describe('ERC3643 Tests', () => {
             await expect(
                 erc3643Facet.recoveryAddress(account_C, account_D, ADDRESS_ZERO)
             ).to.be.revertedWithCustomError(
-                erc3643Facet,
+                erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
             )
         })
@@ -3112,7 +3846,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     erc3643Facet.batchTransfer([account_A], [AMOUNT])
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3124,7 +3858,7 @@ describe('ERC3643 Tests', () => {
                         [AMOUNT]
                     )
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3132,7 +3866,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     erc3643Facet.batchMint([account_A], [AMOUNT])
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3140,7 +3874,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     erc3643Facet.batchBurn([account_A], [AMOUNT])
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3151,7 +3885,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     freezeFacet.freezePartialTokens(account_A, AMOUNT)
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3160,7 +3894,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     freezeFacet.unfreezePartialTokens(account_A, AMOUNT)
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3169,7 +3903,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     freezeFacet.unfreezePartialTokens(account_A, AMOUNT)
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3178,7 +3912,7 @@ describe('ERC3643 Tests', () => {
                 await expect(
                     freezeFacet.batchFreezePartialTokens([account_A], [AMOUNT])
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })
@@ -3190,7 +3924,7 @@ describe('ERC3643 Tests', () => {
                         [AMOUNT]
                     )
                 ).to.be.revertedWithCustomError(
-                    erc3643Facet,
+                    erc1410Facet,
                     'NotAllowedInMultiPartitionMode'
                 )
             })

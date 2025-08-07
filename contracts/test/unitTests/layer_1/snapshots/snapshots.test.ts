@@ -211,10 +211,10 @@ import {
     type ResolverProxy,
     type Snapshots,
     type Pause,
-    type ERC1410ScheduledTasks,
+    type IERC1410,
     type AccessControl,
     type Lock,
-    type Hold,
+    type IHold,
     IFactory,
     BusinessLogicResolver,
     SsiManagement,
@@ -273,12 +273,12 @@ describe('Snapshots Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let snapshotFacet: Snapshots
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock
-    let holdFacet: Hold
+    let holdFacet: IHold
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let equityFacet: Equity
@@ -329,17 +329,14 @@ describe('Snapshots Tests', () => {
             diamond.address
         )
 
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
 
         snapshotFacet = await ethers.getContractAt('Snapshots', diamond.address)
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
         lockFacet = await ethers.getContractAt('Lock', diamond.address)
-        holdFacet = await ethers.getContractAt('Hold', diamond.address)
+        holdFacet = await ethers.getContractAt('IHold', diamond.address)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',

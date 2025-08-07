@@ -206,9 +206,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {DEFAULT_PARTITION} from '../../constants/values.sol';
 import {
-    IERC1410Standard
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+    IERC3643Basic
+} from '../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
+import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {IssueData} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 import {
     ERC1410OperatorStorageWrapper
 } from './ERC1410OperatorStorageWrapper.sol';
@@ -216,6 +220,8 @@ import {
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
 {
+    using LowLevelCall for address;
+
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -282,9 +288,7 @@ abstract contract ERC1410StandardStorageWrapper is
         if (_value != 0) erc1410Storage.balances[_account] += _value;
     }
 
-    function _issueByPartition(
-        IERC1410Standard.IssueData memory _issueData
-    ) internal {
+    function _issueByPartition(IssueData memory _issueData) internal {
         _validateParams(_issueData.partition, _issueData.value);
 
         _beforeTokenTransfer(
@@ -315,6 +319,17 @@ abstract contract ERC1410StandardStorageWrapper is
 
         _increaseTotalSupplyByPartition(_issueData.partition, _issueData.value);
 
+        if (_issueData.partition == DEFAULT_PARTITION) {
+            _erc3643Storage().compliance.functionCall(
+                abi.encodeWithSelector(
+                    ICompliance.created.selector,
+                    _issueData.tokenHolder,
+                    _issueData.value
+                ),
+                IERC3643Basic.ComplianceCallFailed.selector
+            );
+        }
+
         emit IssuedByPartition(
             _issueData.partition,
             _msgSender(),
@@ -337,6 +352,17 @@ abstract contract ERC1410StandardStorageWrapper is
         _reduceBalanceByPartition(_from, _value, _partition);
 
         _reduceTotalSupplyByPartition(_partition, _value);
+
+        if (_partition == DEFAULT_PARTITION) {
+            _erc3643Storage().compliance.functionCall(
+                abi.encodeWithSelector(
+                    ICompliance.destroyed.selector,
+                    _from,
+                    _value
+                ),
+                IERC3643Basic.ComplianceCallFailed.selector
+            );
+        }
 
         emit RedeemedByPartition(
             _partition,
