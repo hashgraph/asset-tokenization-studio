@@ -2,18 +2,17 @@ name: Tests ATS
 
 on:
     push:
-        branches: [main, refactor/add-workspaces]
-        paths:
-            - 'packages/ats/**'
-            - 'apps/ats/**'
-            - 'package.json'
-            - '.github/workflows/ats.test.yml'
+        branches: [main]
     pull_request:
+        branches: [main]
+    pull_request_target:
+        branches-ignore: [main]
         paths:
             - 'packages/ats/**'
             - 'apps/ats/**'
             - 'package.json'
-            - '.github/workflows/ats.test.yml'
+            - '.github/workflows/*ats*.yml'
+            - '.github/workflows/*ats*.yaml'
     workflow_dispatch:
 
 permissions:
