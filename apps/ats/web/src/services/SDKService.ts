@@ -425,10 +425,10 @@ export class SDKService {
   // Initialize SDK logger
   static {
     try {
-      SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
-      console.log('SDK logger initialized successfully');
+      SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
+      console.log("SDK logger initialized successfully");
     } catch (error) {
-      console.error('Failed to initialize SDK logger:', error);
+      console.error("Failed to initialize SDK logger:", error);
     }
   }
 
