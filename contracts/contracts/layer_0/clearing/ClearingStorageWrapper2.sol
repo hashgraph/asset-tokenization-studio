@@ -223,10 +223,12 @@ import {
 import {
     checkNounceAndDeadline
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
+import {Hold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
-import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {
+    IERC3643Basic
+} from '../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
 import {DEFAULT_PARTITION} from '../constants/values.sol';
 import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
 
@@ -276,7 +278,7 @@ abstract contract ClearingStorageWrapper2 is
 
     function _protectedClearingCreateHoldByPartition(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
-        IHold.Hold calldata _hold,
+        Hold calldata _hold,
         bytes calldata _signature
     ) internal returns (bool success_, uint256 clearingId_) {
         checkNounceAndDeadline(
@@ -467,7 +469,7 @@ abstract contract ClearingStorageWrapper2 is
     function _clearingHoldCreationCreation(
         IClearing.ClearingOperation memory _clearingOperation,
         address _from,
-        IHold.Hold calldata _hold,
+        Hold calldata _hold,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) internal returns (bool success_, uint256 clearingId_) {
@@ -1031,7 +1033,7 @@ abstract contract ClearingStorageWrapper2 is
                     destination,
                     clearingTransferData.amount
                 ),
-                IERC3643.ComplianceCallFailed.selector
+                IERC3643Basic.ComplianceCallFailed.selector
             );
         }
 
@@ -1285,7 +1287,7 @@ abstract contract ClearingStorageWrapper2 is
         address _tokenHolder,
         bytes32 _partition,
         uint256 _clearingId,
-        IHold.Hold calldata _hold,
+        Hold calldata _hold,
         uint256 _expirationDate,
         bytes memory _data,
         bytes memory _operatorData,
@@ -1344,9 +1346,9 @@ abstract contract ClearingStorageWrapper2 is
 
     function _fromClearingHoldCreationDataToHold(
         IClearing.ClearingHoldCreationData memory _clearingHoldCreationData
-    ) private pure returns (IHold.Hold memory) {
+    ) private pure returns (Hold memory) {
         return
-            IHold.Hold(
+            Hold(
                 _clearingHoldCreationData.amount,
                 _clearingHoldCreationData.holdExpirationTimestamp,
                 _clearingHoldCreationData.holdEscrow,

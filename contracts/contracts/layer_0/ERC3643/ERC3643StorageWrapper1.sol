@@ -211,13 +211,16 @@ import {
     _RESOLVER_PROXY_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {_AGENT_ROLE} from '../constants/roles.sol';
-import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {
+    IERC3643Basic
+} from '../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
 import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
 import {
     IAccessControl
 } from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
-import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
-import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {
+    IERC3643StorageWrapper
+} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
 import {
     IIdentityRegistry
 } from '../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol';
@@ -225,13 +228,22 @@ import {
     ResolverProxyUnstructured
 } from '../../resolver/resolverProxy/unstructured/ResolverProxyUnstructured.sol';
 import {
-    IERC3643StorageWrapper
-} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
+    _ERC3643_STORAGE_POSITION,
+    _RESOLVER_PROXY_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
+import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import {_AGENT_ROLE} from '../constants/roles.sol';
 
 abstract contract ERC3643StorageWrapper1 is
     IERC3643StorageWrapper,
     PauseStorageWrapper
 {
+    using LowLevelCall for address;
+
     modifier onlyUnrecoveredAddress(address _account) {
         _checkRecoveredAddress(_account);
         _;
@@ -254,10 +266,15 @@ abstract contract ERC3643StorageWrapper1 is
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC3643(address _compliance) internal {
-        IERC3643.ERC3643Storage storage clearingStorage = _erc3643Storage();
+    function _initialize_ERC3643(
+        address _compliance,
+        address _identityRegistry
+    ) internal {
+        IERC3643Basic.ERC3643Storage
+            storage clearingStorage = _erc3643Storage();
         clearingStorage.initialized = true;
         _setCompliance(_compliance);
+        _setIdentityRegistry(_identityRegistry);
     }
 
     function _setAddressFrozen(
@@ -299,7 +316,7 @@ abstract contract ERC3643StorageWrapper1 is
     function _getFrozenAmountFor(
         address _userAddress
     ) internal view returns (uint256) {
-        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        IERC3643Basic.ERC3643Storage storage st = _erc3643Storage();
         return st.frozenTokens[_userAddress];
     }
 
@@ -307,12 +324,12 @@ abstract contract ERC3643StorageWrapper1 is
         bytes32 _partition,
         address _userAddress
     ) internal view returns (uint256) {
-        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        IERC3643Basic.ERC3643Storage storage st = _erc3643Storage();
         return st.frozenTokensByPartition[_userAddress][_partition];
     }
 
     function _checkRecoveredAddress(address _sender) internal view {
-        if (_isRecovered(_sender)) revert IERC3643.WalletRecovered();
+        if (_isRecovered(_sender)) revert IERC3643Basic.WalletRecovered();
     }
 
     function _isRecovered(address _sender) internal view returns (bool) {
@@ -363,7 +380,7 @@ abstract contract ERC3643StorageWrapper1 is
         uint256[] memory _amounts
     ) internal pure {
         if (_addresses.length != _amounts.length) {
-            revert IERC3643.InputAmountsArrayLengthMismatch();
+            revert IERC3643Basic.InputAmountsArrayLengthMismatch();
         }
     }
 
@@ -372,14 +389,14 @@ abstract contract ERC3643StorageWrapper1 is
         bool[] memory _status
     ) internal pure {
         if (_addresses.length != _status.length) {
-            revert IERC3643.InputBoolArrayLengthMismatch();
+            revert IERC3643Basic.InputBoolArrayLengthMismatch();
         }
     }
 
     function _erc3643Storage()
         internal
         pure
-        returns (IERC3643.ERC3643Storage storage erc3643Storage_)
+        returns (IERC3643Basic.ERC3643Storage storage erc3643Storage_)
     {
         bytes32 position = _ERC3643_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly

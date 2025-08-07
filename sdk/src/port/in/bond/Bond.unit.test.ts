@@ -366,6 +366,7 @@ describe('Bond', () => {
           createBondRequest.externalControlLists,
           createBondRequest.externalKycLists,
           createBondRequest.compliance,
+          createBondRequest.identityRegistry,
         ),
       );
 
@@ -431,6 +432,7 @@ describe('Bond', () => {
           createBondRequest.externalControlLists,
           createBondRequest.externalKycLists,
           createBondRequest.compliance,
+          createBondRequest.identityRegistry,
         ),
       );
     });

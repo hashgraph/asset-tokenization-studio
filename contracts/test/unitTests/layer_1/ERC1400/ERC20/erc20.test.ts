@@ -210,7 +210,7 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ERC20,
-    type ERC1410Snapshot,
+    type IERC1410,
     type Pause,
     type ControlList,
     type ERC1594,
@@ -440,7 +440,7 @@ describe('ERC20 Tests', () => {
     describe('Single partition', () => {
         let erc20SignerC: ERC20
         let erc20SignerE: ERC20
-        let erc1410Facet: ERC1410Snapshot
+        let erc1410Facet: IERC1410
 
         before(async () => {
             // mute | mock console.log
@@ -549,7 +549,7 @@ describe('ERC20 Tests', () => {
                 signer_E
             )
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410Snapshot',
+                'IERC1410',
                 diamond.address
             )
             erc1594Facet = await ethers.getContractAt(

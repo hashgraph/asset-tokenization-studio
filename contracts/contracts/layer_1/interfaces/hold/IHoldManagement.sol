@@ -206,30 +206,54 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IERC1410Controller {
-    function controllerTransferByPartition(
+import {Hold, ProtectedHold} from './IHold.sol';
+
+interface IHoldManagement {
+    event OperatorHeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event ControllerHeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event ProtectedHeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    function operatorCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
+        Hold calldata _hold,
         bytes calldata _operatorData
-    ) external;
+    ) external returns (bool success_, uint256 holdId_);
 
-    function controllerRedeemByPartition(
+    function controllerCreateHoldByPartition(
         bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external;
-
-    function canTransferByPartition(
         address _from,
-        address _to,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
+        Hold calldata _hold,
         bytes calldata _operatorData
-    ) external view returns (bool, bytes1, bytes32);
+    ) external returns (bool success_, uint256 holdId_);
+
+    function protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    ) external returns (bool success_, uint256 holdId_);
 }

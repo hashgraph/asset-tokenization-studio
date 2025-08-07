@@ -206,23 +206,47 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IERC1410ProtectedPartitions {
-    function protectedTransferFromByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) external;
+import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
+import {HoldIdentifier} from './IHold.sol';
 
-    function protectedRedeemFromByPartition(
+interface IHoldRead {
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view returns (uint256 amount_);
+
+    function getHeldAmountForByPartition(
         bytes32 _partition,
-        address _from,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) external;
+        address _tokenHolder
+    ) external view returns (uint256 amount_);
+
+    function getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 holdCount_);
+
+    function getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory holdsId_);
+
+    function getHoldForByPartition(
+        HoldIdentifier calldata _holdIdentifier
+    )
+        external
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_,
+            ThirdPartyType thirdPartyType_
+        );
+
+    function getHoldThirdParty(
+        HoldIdentifier calldata _holdIdentifier
+    ) external view returns (address thirdParty_);
 }

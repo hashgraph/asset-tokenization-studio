@@ -211,14 +211,13 @@ import {
     type ResolverProxy,
     type Lock,
     Pause,
-    ERC1410ScheduledTasks,
+    type IERC1410,
     TransferAndLock,
     BusinessLogicResolver,
     IFactory,
     Lock__factory,
     TransferAndLock__factory,
     PauseFacet__factory,
-    ERC1410ScheduledTasks__factory,
     SsiManagement,
     Kyc,
 } from '@typechain'
@@ -264,7 +263,7 @@ describe('Transfer and lock Tests', () => {
     let lockFacet: Lock
     let transferAndLockFacet: TransferAndLock
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
 
@@ -304,10 +303,7 @@ describe('Transfer and lock Tests', () => {
             signer_C
         )
         pauseFacet = PauseFacet__factory.connect(diamond.address, signer_D)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_B
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',
@@ -550,7 +546,7 @@ describe('Transfer and lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN transferAndLockByPartition with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: _NON_DEFAULT_PARTITION,
                     tokenHolder: account_C,
                     value: _AMOUNT * 2,
@@ -676,7 +672,7 @@ describe('Transfer and lock Tests', () => {
 
         describe('transferAndLock', () => {
             it('GIVEN a valid partition WHEN transferAndLockByPartition with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: _DEFAULT_PARTITION,
                     tokenHolder: account_C,
                     value: _AMOUNT * 2,
@@ -729,7 +725,7 @@ describe('Transfer and lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN transferAndLock with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: _DEFAULT_PARTITION,
                     tokenHolder: account_C,
                     value: _AMOUNT * 2,

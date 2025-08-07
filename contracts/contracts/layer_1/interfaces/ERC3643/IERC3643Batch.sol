@@ -204,28 +204,26 @@
 */
 
 // SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
+interface IERC3643Batch {
+    function batchTransfer(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
 
-import {
-    ERC1410ScheduledTasks
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410ScheduledTasks.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    function batchForcedTransfer(
+        address[] calldata _fromList,
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
 
-contract ERC1410ScheduledTasksTimeTravel is
-    ERC1410ScheduledTasks,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
+    function batchMint(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
+
+    function batchBurn(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external;
 }

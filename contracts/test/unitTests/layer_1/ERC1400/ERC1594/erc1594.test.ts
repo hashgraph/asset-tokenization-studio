@@ -213,7 +213,7 @@ import {
     type ERC1594,
     type AccessControl,
     type ControlList,
-    type ERC1410Snapshot,
+    type IERC1410,
     ERC20,
     IFactory,
     BusinessLogicResolver,
@@ -509,7 +509,7 @@ describe('ERC1594 Tests', () => {
         let erc1594Issuer: ERC1594
         let erc1594Transferor: ERC1594
         let erc1594Approved: ERC1594
-        let erc1410SnapshotFacet: ERC1410Snapshot
+        let erc1410SnapshotFacet: IERC1410
         let erc20Facet: ERC20
         before(async () => {
             // mute | mock console.log
@@ -614,7 +614,7 @@ describe('ERC1594 Tests', () => {
                 signer_E
             )
             erc1410SnapshotFacet = await ethers.getContractAt(
-                'ERC1410Snapshot',
+                'IERC1410',
                 diamond.address
             )
 

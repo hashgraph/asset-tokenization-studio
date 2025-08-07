@@ -216,11 +216,11 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ClearingActionsFacet,
-    type Hold as HoldFacet,
+    type IHold,
     ControlList,
     Pause,
     ERC20,
-    ERC1410ScheduledTasks,
+    type IERC1410,
     IFactory,
     BusinessLogicResolver,
     TimeTravel,
@@ -343,12 +343,12 @@ describe('Clearing Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let clearingFacet: Contract
     let clearingActionsFacet: ClearingActionsFacet
-    let holdFacet: HoldFacet
+    let holdFacet: IHold
     let accessControlFacet: AccessControl
     let adjustBalancesFacet: AdjustBalances
     let equityFacet: Equity
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let controlListFacet: ControlList
     let erc20Facet: ERC20
     let timeTravelFacet: TimeTravel
@@ -442,7 +442,7 @@ describe('Clearing Tests', () => {
         )
 
         holdFacet = await ethers.getContractAt(
-            'Hold',
+            'IHold',
             diamond.address,
             signer_A
         )
@@ -472,7 +472,7 @@ describe('Clearing Tests', () => {
             signer_D
         )
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
+            'IERC1410',
             diamond.address,
             signer_B
         )
@@ -3221,7 +3221,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, _AMOUNT)
 
                 clearingIdentifier.clearingOperationType =
@@ -3231,7 +3231,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, 2 * _AMOUNT)
 
                 clearingIdentifier.clearingOperationType =
@@ -3241,7 +3241,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, 3 * _AMOUNT)
 
                 expect(
@@ -3285,7 +3285,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, _AMOUNT)
 
                 clearingIdentifier.clearingOperationType =
@@ -3295,7 +3295,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, 2 * _AMOUNT)
 
                 clearingIdentifier.clearingOperationType =
@@ -3305,7 +3305,7 @@ describe('Clearing Tests', () => {
                         clearingIdentifier
                     )
                 )
-                    .to.emit(holdFacet, 'Approval')
+                    .to.emit(erc20Facet, 'Approval')
                     .withArgs(account_A, account_B, 3 * _AMOUNT)
 
                 expect(

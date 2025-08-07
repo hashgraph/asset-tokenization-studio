@@ -206,198 +206,74 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {IFreeze} from '../interfaces/ERC3643/IFreeze.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_FREEZE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
-import {DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {Hold, HoldIdentifier} from './IHold.sol';
 
-contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
-    // ====== External functions (state-changing) ======
+interface IHoldTokenHolder {
+    event HeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
 
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezStatus
-    ) external override onlyUnpaused validateAddress(_userAddress) {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _setAddressFrozen(_userAddress, _freezStatus);
-        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
-    }
+    event HeldFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
 
-    function freezePartialTokens(
-        address _userAddress,
+    event HoldByPartitionExecuted(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount,
+        address to
+    );
+
+    event HoldByPartitionReleased(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    event HoldByPartitionReclaimed(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    function createHoldByPartition(
+        bytes32 _partition,
+        Hold calldata _hold
+    ) external returns (bool success_, uint256 holdId_);
+
+    function createHoldFromByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external returns (bool success_, uint256 holdId_);
+
+    function executeHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier,
+        address _to,
         uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyUnrecoveredAddress(_userAddress)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, DEFAULT_PARTITION);
-    }
+    ) external returns (bool success_);
 
-    function unfreezePartialTokens(
-        address _userAddress,
+    function releaseHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, DEFAULT_PARTITION);
-    }
+    ) external returns (bool success_);
 
-    function batchSetAddressFrozen(
-        address[] calldata _userAddresses,
-        bool[] calldata _freeze
-    ) external onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _setAddressFrozen(_userAddresses[i], _freeze[i]);
-            emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
-        }
-    }
-
-    function batchFreezePartialTokens(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _checkRecoveredAddress(_userAddresses[i]);
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _freezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensFrozen(
-                _userAddresses[i],
-                _amounts[i],
-                DEFAULT_PARTITION
-            );
-        }
-    }
-
-    function batchUnfreezePartialTokens(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _unfreezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensUnfrozen(
-                _userAddresses[i],
-                _amounts[i],
-                DEFAULT_PARTITION
-            );
-        }
-    }
-
-    // ====== External functions (view/pure) ======
-
-    function getFrozenTokens(
-        address _userAddress
-    ) external view override returns (uint256) {
-        return _getFrozenAmountForAdjusted(_userAddress);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _FREEZE_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](7);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .freezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .unfreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getFrozenTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setAddressFrozen
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchSetAddressFrozen
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchFreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchUnfreezePartialTokens
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IFreeze).interfaceId;
-    }
+    function reclaimHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier
+    ) external returns (bool success_);
 }

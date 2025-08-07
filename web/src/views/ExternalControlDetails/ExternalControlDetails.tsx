@@ -11,7 +11,7 @@ import {
   Table,
   Text,
 } from "io-bricks-ui";
-import { isHederaValidAddress, required } from "../../utils/rules";
+import { isValidHederaId, required } from "../../utils/rules";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { CellContext, createColumnHelper } from "@tanstack/table-core";
@@ -119,7 +119,7 @@ export const ExternalControlDetails = () => {
               size="sm"
               rules={{
                 required,
-                validate: { isHederaValidAddress },
+                validate: { isValidHederaId: isValidHederaId },
               }}
             />
           </Stack>

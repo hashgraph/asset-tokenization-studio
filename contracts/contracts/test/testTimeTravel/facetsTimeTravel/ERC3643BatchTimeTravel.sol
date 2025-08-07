@@ -204,45 +204,25 @@
 */
 
 // SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
-interface IERC1410Operator {
-    struct OperatorTransferData {
-        bytes32 partition;
-        address from;
-        address to;
-        uint256 value;
-        bytes data;
-        bytes operatorData;
+import {
+    ERC3643BatchFacet
+} from '../../../layer_1/ERC3643/ERC3643BatchFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+
+contract ERC3643BatchTimeTravel is ERC3643BatchFacet, TimeTravelStorageWrapper {
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
-    function operatorTransferByPartition(
-        OperatorTransferData calldata _operatorTransferData
-    ) external returns (bytes32);
-
-    // Operator Management
-    function authorizeOperator(address _operator) external;
-
-    function revokeOperator(address _operator) external;
-
-    function authorizeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    ) external;
-
-    function revokeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    ) external;
-
-    // Operator Information
-    function isOperator(
-        address _operator,
-        address _tokenHolder
-    ) external view returns (bool);
-
-    function isOperatorForPartition(
-        bytes32 _partition,
-        address _operator,
-        address _tokenHolder
-    ) external view returns (bool);
 }

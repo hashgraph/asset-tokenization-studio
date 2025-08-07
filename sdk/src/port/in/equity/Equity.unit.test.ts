@@ -395,6 +395,7 @@ describe('Equity', () => {
           createEquityRequest.externalControlLists,
           createEquityRequest.externalKycLists,
           createEquityRequest.compliance,
+          createEquityRequest.identityRegistry,
         ),
       );
 
@@ -465,6 +466,7 @@ describe('Equity', () => {
           createEquityRequest.externalControlLists,
           createEquityRequest.externalKycLists,
           createEquityRequest.compliance,
+          createEquityRequest.identityRegistry,
         ),
       );
     });

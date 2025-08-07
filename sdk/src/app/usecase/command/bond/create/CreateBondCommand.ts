@@ -237,6 +237,7 @@ export class CreateBondCommand extends Command<CreateBondCommandResponse> {
     public readonly externalControlLists?: string[],
     public readonly externalKycLists?: string[],
     public readonly compliance?: string,
+    public readonly identityRegistry?: string,
   ) {
     super();
   }

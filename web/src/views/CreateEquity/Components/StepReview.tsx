@@ -290,7 +290,8 @@ export const StepReview = () => {
   const externalControlList = getValues("externalControlList");
   const externalKYCList = getValues("externalKYCList");
   const internalKycActivated = getValues("internalKycActivated");
-  const complianceAddress = getValues("complianceAddress");
+  const complianceId = getValues("complianceId");
+  const identityRegistryId = getValues("identityRegistryId");
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
@@ -345,7 +346,8 @@ export const StepReview = () => {
           externalKycLists: externalKYCList,
         }),
       internalKycActivated,
-      compliance: complianceAddress,
+      compliance: complianceId,
+      identityRegistry: identityRegistryId,
     });
 
     createSecurity(request);
@@ -398,8 +400,12 @@ export const StepReview = () => {
 
   const erc3643Details: DetailReviewProps[] = [
     {
-      title: t("stepERC3643.complianceAddress"),
-      value: complianceAddress ?? "-",
+      title: t("stepERC3643.complianceId"),
+      value: complianceId ?? "-",
+    },
+    {
+      title: t("stepERC3643.identityRegistryId"),
+      value: identityRegistryId ?? "-",
     },
   ];
 

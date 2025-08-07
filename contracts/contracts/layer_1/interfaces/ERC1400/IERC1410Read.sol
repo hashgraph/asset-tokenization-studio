@@ -49,8 +49,8 @@
       "Contribution" shall mean any work of authorship, including
       the original version of the Work and any modifications or additions
       to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
+      submitted for inclusion in the Work by the copyright owner or
+      by an individual or Legal Entity authorized to submit on behalf of
       the copyright owner. For the purposes of this definition, "submitted"
       means any form of electronic, verbal, or written communication sent
       to the Licensor or its representatives, including but not limited to
@@ -206,101 +206,44 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
-import {Common} from '../../common/Common.sol';
-import {
-    IERC1410Operator
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
+/**
+ * @title IERC1410Read
+ * @dev Interface for the ERC1410Read contract providing read-only operations
+ * for ERC1410 tokens including balance queries, partition information, and operator queries.
+ */
+interface IERC1410Read {
+    // Balance and supply functions
+    function balanceOf(address _tokenHolder) external view returns (uint256);
 
-abstract contract ERC1410Operator is IERC1410Operator, Common {
-    ///////////////////////
-    /// Operator Management
-    ///////////////////////
+    function balanceOfAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) external view returns (uint256);
 
-    /// @notice Authorises an operator for all partitions of `msg.sender`
-    /// @param _operator An address which is being authorised
-    function authorizeOperator(
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyCompliant(_msgSender(), _operator, false)
-    {
-        _authorizeOperator(_operator);
-    }
-
-    /// @notice Revokes authorisation of an operator previously given for all partitions of `msg.sender`
-    /// @param _operator An address which is being de-authorised
-    function revokeOperator(
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyCompliant(_msgSender(), address(0), false)
-    {
-        _revokeOperator(_operator);
-    }
-
-    /// @notice Authorises an operator for a given partition of `msg.sender`
-    /// @param _partition The partition to which the operator is authorised
-    /// @param _operator An address which is being authorised
-    function authorizeOperatorByPartition(
+    function balanceOfByPartition(
         bytes32 _partition,
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), _operator, false)
-    {
-        _authorizeOperatorByPartition(_partition, _operator);
-    }
+        address _tokenHolder
+    ) external view returns (uint256);
 
-    /// @notice Revokes authorisation of an operator previously given for a specified partition of `msg.sender`
-    /// @param _partition The partition to which the operator is de-authorised
-    /// @param _operator An address which is being de-authorised
-    function revokeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), address(0), false)
-    {
-        _revokeOperatorByPartition(_partition, _operator);
-    }
+    function totalSupply() external view returns (uint256);
 
-    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _operatorTransferData contains all the information about the operator transfer
-    function operatorTransferByPartition(
-        OperatorTransferData calldata _operatorTransferData
-    )
-        external
-        override
-        onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
-        onlyOperator(
-            _operatorTransferData.partition,
-            _operatorTransferData.from
-        )
-        onlyUnProtectedPartitionsOrWildCardRole
-        validateAddress(_operatorTransferData.to)
-        onlyCanTransferFromByPartition(
-            _operatorTransferData.from,
-            _operatorTransferData.to,
-            _operatorTransferData.partition,
-            _operatorTransferData.value,
-            _operatorTransferData.data,
-            _operatorTransferData.operatorData
-        )
-        returns (bytes32)
-    {
-        return _operatorTransferByPartition(_operatorTransferData);
-    }
+    function totalSupplyByPartition(
+        bytes32 _partition
+    ) external view returns (uint256);
+
+    /// @notice Use to get the list of partitions `_tokenHolder` is associated with
+    /// @param _tokenHolder An address corresponds whom partition list is queried
+    /// @return List of partitions
+    function partitionsOf(
+        address _tokenHolder
+    ) external view returns (bytes32[] memory);
+
+    /**
+     * @return
+     *  true : the token allows multiple partitions to be set and managed
+     *  false : the token contains only one partition, the default one
+     */
+    function isMultiPartition() external view returns (bool);
 
     /// @notice Determines whether `_operator` is an operator for all partitions of `_tokenHolder`
     /// @param _operator The operator to check
@@ -309,9 +252,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
     function isOperator(
         address _operator,
         address _tokenHolder
-    ) public view override returns (bool) {
-        return _isOperator(_operator, _tokenHolder);
-    }
+    ) external view returns (bool);
 
     /// @notice Determines whether `_operator` is an operator for a specified partition of `_tokenHolder`
     /// @param _partition The partition to check
@@ -322,7 +263,22 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         bytes32 _partition,
         address _operator,
         address _tokenHolder
-    ) public view override returns (bool) {
-        return _isOperatorForPartition(_partition, _operator, _tokenHolder);
-    }
+    ) external view returns (bool);
+
+    function canTransferByPartition(
+        address _from,
+        address _to,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) external view returns (bool, bytes1, bytes32);
+
+    function canRedeemByPartition(
+        address _from,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) external view returns (bool, bytes1, bytes32);
 }

@@ -338,6 +338,7 @@ export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
     ]);
     request.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
     request.compliance?.as(() => HederaIdPropsFixture.create().value);
+    request.identityRegistry?.as(() => HederaIdPropsFixture.create().value);
   },
 );
 

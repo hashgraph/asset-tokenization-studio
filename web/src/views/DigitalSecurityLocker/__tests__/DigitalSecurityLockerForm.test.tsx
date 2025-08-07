@@ -25,7 +25,7 @@ describe(`${DigitalSecurityLockerForm.name}`, () => {
       target: { value: "0x1234567890abcdef" },
     });
 
-    expect(await component.findByText(/Wrong address/i)).toBeInTheDocument();
+    expect(await component.findByText(/Wrong id/i)).toBeInTheDocument();
   });
 
   test("should validate amount field", async () => {

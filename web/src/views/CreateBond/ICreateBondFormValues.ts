@@ -232,5 +232,6 @@ export interface ICreateBondFormValues {
   externalControlList: string[];
   externalKYCList?: string[];
   internalKycActivated: boolean;
-  complianceAddress: string;
+  complianceId?: string;
+  identityRegistryId?: string;
 }

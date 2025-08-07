@@ -244,6 +244,9 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   @OptionalField()
   compliance?: string;
 
+  @OptionalField()
+  identityRegistry?: string;
+
   currency: string;
   numberOfUnits: string;
   nominalValue: string;
@@ -291,6 +294,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configId,
     configVersion,
     compliance,
+    identityRegistry,
   }: {
     name: string;
     symbol: string;
@@ -322,6 +326,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configId: string;
     configVersion: number;
     compliance?: string;
+    identityRegistry?: string;
   }) {
     super({
       name: (val) => {
@@ -427,5 +432,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.configId = configId;
     this.configVersion = configVersion;
     this.compliance = compliance;
+    this.identityRegistry = identityRegistry;
   }
 }
