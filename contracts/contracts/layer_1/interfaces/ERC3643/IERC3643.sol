@@ -289,6 +289,11 @@ interface IERC3643 {
     error ComplianceCallFailed();
 
     /**
+     * @notice Thrown when the compliance contract returns false
+     */
+    error ComplianceNotAllowed();
+
+    /**
      * @dev Facet initializer
      *
      * Sets the compliance contract address
