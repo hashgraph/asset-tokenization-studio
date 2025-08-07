@@ -203,40 +203,60 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-interface IERC1410Standard {
-    struct IssueData {
-        bytes32 partition;
-        address tokenHolder;
-        uint256 value;
-        bytes data;
+import {_HOLD_TOKEN_HOLDER_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {IHoldTokenHolder} from '../interfaces/hold/IHoldTokenHolder.sol';
+import {HoldTokenHolder} from './HoldTokenHolder.sol';
+
+contract HoldTokenHolderFacet is IStaticFunctionSelectors, HoldTokenHolder {
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _HOLD_TOKEN_HOLDER_RESOLVER_KEY;
     }
 
-    function redeemByPartition(
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .createHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .createHoldFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .executeHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .releaseHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .reclaimHoldByPartition
+            .selector;
+    }
 
-    function operatorRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external;
-
-    function issueByPartition(
-        IERC1410Standard.IssueData calldata _issueData
-    ) external;
-
-    function canRedeemByPartition(
-        address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external view returns (bool, bytes1, bytes32);
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IHoldTokenHolder)
+            .interfaceId;
+    }
 }

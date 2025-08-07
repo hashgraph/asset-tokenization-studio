@@ -219,7 +219,9 @@ import {
 import {Eip1066} from '../../constants/eip1066.sol';
 import {CapStorageWrapper2} from '../../cap/CapStorageWrapper2.sol';
 import {IClearing} from '../../../layer_1/interfaces/clearing/IClearing.sol';
-import {IERC3643} from '../../../layer_1/interfaces/ERC3643/IERC3643.sol';
+import {
+    IERC3643Basic
+} from '../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
 import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 
@@ -624,7 +626,7 @@ abstract contract ERC1594StorageWrapper is
                 return (
                     false,
                     Eip1066.REVOKED_OR_BANNED,
-                    IERC3643.WalletRecovered.selector,
+                    IERC3643Basic.WalletRecovered.selector,
                     abi.encode(_msgSender())
                 );
             }
@@ -637,7 +639,7 @@ abstract contract ERC1594StorageWrapper is
                         address(0),
                         0
                     ),
-                    IERC3643.ComplianceCallFailed.selector
+                    IERC3643Basic.ComplianceCallFailed.selector
                 );
 
             if (
@@ -647,7 +649,7 @@ abstract contract ERC1594StorageWrapper is
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IERC3643.ComplianceNotAllowed.selector,
+                    IERC3643Basic.ComplianceNotAllowed.selector,
                     abi.encode(_from, _to, _value)
                 );
             }
@@ -657,7 +659,7 @@ abstract contract ERC1594StorageWrapper is
                 return (
                     false,
                     Eip1066.REVOKED_OR_BANNED,
-                    IERC3643.WalletRecovered.selector,
+                    IERC3643Basic.WalletRecovered.selector,
                     abi.encode(_from)
                 );
             }
@@ -676,7 +678,7 @@ abstract contract ERC1594StorageWrapper is
                 return (
                     false,
                     Eip1066.REVOKED_OR_BANNED,
-                    IERC3643.WalletRecovered.selector,
+                    IERC3643Basic.WalletRecovered.selector,
                     abi.encode(_to)
                 );
             }
@@ -700,7 +702,7 @@ abstract contract ERC1594StorageWrapper is
                     _to,
                     _value
                 ),
-                IERC3643.ComplianceCallFailed.selector
+                IERC3643Basic.ComplianceCallFailed.selector
             );
 
         if (
@@ -709,7 +711,7 @@ abstract contract ERC1594StorageWrapper is
             return (
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
-                IERC3643.ComplianceNotAllowed.selector,
+                IERC3643Basic.ComplianceNotAllowed.selector,
                 abi.encode(_from, _to, _value)
             );
         }

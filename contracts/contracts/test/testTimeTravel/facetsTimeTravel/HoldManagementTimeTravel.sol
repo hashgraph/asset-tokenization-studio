@@ -203,20 +203,27 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-interface IERC1410ScheduledTasks {
-    function triggerAndSyncAll(
-        bytes32 _partition,
-        address _from,
-        address _to
-    ) external;
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {
+    HoldManagementFacet
+} from '../../../layer_1/hold/HoldManagementFacet.sol';
 
-    function balanceOfAt(
-        address _tokenHolder,
-        uint256 _timestamp
-    ) external view returns (uint256);
+contract HoldManagementTimeTravel is
+    HoldManagementFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
+    }
 }

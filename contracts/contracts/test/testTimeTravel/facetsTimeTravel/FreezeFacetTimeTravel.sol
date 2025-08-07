@@ -208,7 +208,7 @@
 
 pragma solidity 0.8.18;
 
-import {FreezeFacet} from '../../../layer_1/ERC3643/FreezeFacet.sol';
+import {FreezeFacet} from '../../../layer_1/freeze/FreezeFacet.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';

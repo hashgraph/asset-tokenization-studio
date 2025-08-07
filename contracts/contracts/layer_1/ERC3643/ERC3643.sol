@@ -206,22 +206,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
-import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
-import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     _CONTROLLER_ROLE,
     _ISSUER_ROLE,
     _AGENT_ROLE,
     _TREX_OWNER_ROLE
 } from '../constants/roles.sol';
+import {IERC3643Basic} from '../interfaces/ERC3643/IERC3643Basic.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
+import {Common} from '../common/Common.sol';
 
-contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
+abstract contract ERC3643 is IERC3643Basic, Common {
     address private constant _ONCHAIN_ID = address(0);
 
     // ====== External functions (state-changing) ======
@@ -373,98 +369,6 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         return true;
     }
 
-    function batchTransfer(
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyIdentified(_msgSender(), address(0))
-        onlyCompliant(_msgSender(), address(0), false)
-    {
-        for (uint256 i = 0; i < _toList.length; i++) {
-            _checkIdentity(address(0), _toList[i]);
-            _checkCompliance(address(0), _toList[i], false);
-        }
-        for (uint256 i = 0; i < _toList.length; i++) {
-            _transfer(_msgSender(), _toList[i], _amounts[i]);
-        }
-    }
-
-    function batchForcedTransfer(
-        address[] calldata _fromList,
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyWithoutMultiPartition
-        onlyControllable
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_fromList, _amounts)
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _fromList.length; i++) {
-            _controllerTransfer(_fromList[i], _toList[i], _amounts[i], '', '');
-        }
-    }
-
-    function batchMint(
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyIssuable
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _ISSUER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _toList.length; i++) {
-            _checkIdentity(address(0), _toList[i]);
-            _checkCompliance(address(0), _toList[i], false);
-            _checkWithinMaxSupply(_amounts[i]);
-        }
-        for (uint256 i = 0; i < _toList.length; i++) {
-            _issue(_toList[i], _amounts[i], '');
-        }
-    }
-
-    function batchBurn(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-        onlyControllable
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _controllerRedeem(_userAddresses[i], _amounts[i], '', '');
-        }
-    }
-
     // ====== External functions (view/pure) ======
 
     function isAgent(address _agent) external view returns (bool) {
@@ -494,77 +398,5 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
 
     function version() external view returns (string memory) {
         return _version();
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC3643_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](24);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .forcedTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .identityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setCompliance
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setIdentityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .recoveryAddress
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .isAddressRecovered
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchForcedTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC3643
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;
     }
 }

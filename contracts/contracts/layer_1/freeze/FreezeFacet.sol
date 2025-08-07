@@ -203,348 +203,23 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-
+import {_FREEZE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-import {Common} from '../common/Common.sol';
-import {_CONTROLLER_ROLE} from '../constants/roles.sol';
-import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import {IFreeze} from '../interfaces/freeze/IFreeze.sol';
+import {Freeze} from './Freeze.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-contract Hold is IHold, IStaticFunctionSelectors, Common {
-    function createHoldByPartition(
-        bytes32 _partition,
-        Hold calldata _hold
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_hold.escrow)
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(_hold.to)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _msgSender(),
-            _hold,
-            '',
-            ThirdPartyType.NULL
-        );
-
-        emit HeldByPartition(
-            _msgSender(),
-            _msgSender(),
-            _partition,
-            holdId_,
-            _hold,
-            ''
-        );
-    }
-
-    function createHoldFromByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyClearingDisabled
-        validateAddress(_from)
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 holdId_)
-    {
-        {
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_hold.to);
-            _checkRecoveredAddress(_from);
-        }
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData,
-            ThirdPartyType.AUTHORIZED
-        );
-
-        _decreaseAllowedBalanceForHold(
-            _partition,
-            _from,
-            _hold.amount,
-            holdId_
-        );
-
-        emit HeldFromByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
-    }
-
-    function operatorCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyClearingDisabled
-        validateAddress(_from)
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyOperator(_partition, _from)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 holdId_)
-    {
-        {
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_hold.to);
-            _checkRecoveredAddress(_from);
-        }
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData,
-            ThirdPartyType.OPERATOR
-        );
-
-        emit OperatorHeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
-    }
-
-    function controllerCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_from)
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyRole(_CONTROLLER_ROLE)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyControllable
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData,
-            ThirdPartyType.CONTROLLER
-        );
-
-        emit ControllerHeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
-    }
-
-    function protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        ProtectedHold memory _protectedHold,
-        bytes calldata _signature
-    )
-        external
-        override
-        onlyUnpaused
-        onlyClearingDisabled
-        validateAddress(_from)
-        validateAddress(_protectedHold.hold.escrow)
-        onlyUnrecoveredAddress(_from)
-        onlyUnrecoveredAddress(_protectedHold.hold.to)
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyWithValidExpirationTimestamp(
-            _protectedHold.hold.expirationTimestamp
-        )
-        onlyProtectedPartitions
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _protectedCreateHoldByPartition(
-            _partition,
-            _from,
-            _protectedHold,
-            _signature
-        );
-
-        emit ProtectedHeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _protectedHold.hold,
-            ''
-        );
-    }
-
-    function executeHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        address _to,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyIdentified(_holdIdentifier.tokenHolder, _to)
-        onlyCompliant(address(0), _to, false)
-        onlyWithValidHoldId(_holdIdentifier)
-        returns (bool success_)
-    {
-        success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);
-
-        emit HoldByPartitionExecuted(
-            _holdIdentifier.tokenHolder,
-            _holdIdentifier.partition,
-            _holdIdentifier.holdId,
-            _amount,
-            _to
-        );
-    }
-
-    function releaseHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyWithValidHoldId(_holdIdentifier)
-        returns (bool success_)
-    {
-        success_ = _releaseHoldByPartition(_holdIdentifier, _amount);
-        emit HoldByPartitionReleased(
-            _holdIdentifier.tokenHolder,
-            _holdIdentifier.partition,
-            _holdIdentifier.holdId,
-            _amount
-        );
-    }
-
-    function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyWithValidHoldId(_holdIdentifier)
-        returns (bool success_)
-    {
-        uint256 amount;
-        (success_, amount) = _reclaimHoldByPartition(_holdIdentifier);
-        emit HoldByPartitionReclaimed(
-            _msgSender(),
-            _holdIdentifier.tokenHolder,
-            _holdIdentifier.partition,
-            _holdIdentifier.holdId,
-            amount
-        );
-    }
-
-    function getHeldAmountFor(
-        address _tokenHolder
-    ) external view override returns (uint256 amount_) {
-        return _getHeldAmountForAdjusted(_tokenHolder);
-    }
-
-    function getHeldAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 amount_) {
-        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
-    }
-
-    function getHoldCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 holdCount_) {
-        return _getHoldCountForByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (uint256[] memory holdsId_) {
-        return
-            _getHoldsIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function getHoldForByPartition(
-        HoldIdentifier calldata _holdIdentifier
-    )
-        external
-        view
-        override
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_,
-            ThirdPartyType thirdPartyType_
-        )
-    {
-        return _getHoldForByPartitionAdjusted(_holdIdentifier);
-    }
-
-    function getHoldThirdParty(
-        HoldIdentifier calldata _holdIdentifier
-    ) external view override returns (address) {
-        return _getHoldThirdParty(_holdIdentifier);
-    }
-
+contract FreezeFacet is Freeze, IStaticFunctionSelectors {
     function getStaticResolverKey()
         external
         pure
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _HOLD_RESOLVER_KEY;
+        staticResolverKey_ = _FREEZE_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
@@ -553,49 +228,28 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](14);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .createHoldByPartition
+        staticFunctionSelectors_ = new bytes4[](7);
+        uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .freezePartialTokens
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .createHoldFromByPartition
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .unfreezePartialTokens
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorCreateHoldByPartition
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .getFrozenTokens
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerCreateHoldByPartition
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setAddressFrozen
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedCreateHoldByPartition
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchSetAddressFrozen
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .executeHoldByPartition
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchFreezePartialTokens
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .releaseHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .reclaimHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHeldAmountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldCountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldsIdForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHeldAmountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldThirdParty
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchUnfreezePartialTokens
             .selector;
     }
 
@@ -607,6 +261,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IHold).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IFreeze).interfaceId;
     }
 }

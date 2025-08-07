@@ -16,7 +16,7 @@ import {
     _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
     _PROTECTED_CLEARING_OPERATION_TYPEHASH
 } from '../constants/values.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
+import {Hold, ProtectedHold} from '../interfaces/hold/IHold.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
 
 error WrongSignatureLength();
@@ -68,7 +68,7 @@ function getMessageHashRedeem(
 function getMessageHashCreateHold(
     bytes32 _partition,
     address _from,
-    IHold.ProtectedHold memory _protectedHold
+    ProtectedHold memory _protectedHold
 ) pure returns (bytes32) {
     return
         keccak256(
@@ -134,7 +134,7 @@ function getMessageHashClearingTransfer(
 
 function getMessageHashClearingCreateHold(
     IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
-    IHold.Hold memory _hold
+    Hold memory _hold
 ) pure returns (bytes32) {
     return
         keccak256(

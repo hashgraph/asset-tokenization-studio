@@ -218,7 +218,7 @@ import {
     type ControlList,
     type ERC20,
     type ERC1644,
-    type ERC1410ScheduledTasks,
+    type IERC1410,
     type ERC1594,
     type ERC1643,
     type Equity,
@@ -235,7 +235,6 @@ import {
     AccessControlFacet__factory,
     ERC1643__factory,
     ERC20__factory,
-    ERC1410ScheduledTasks__factory,
     CorporateActionsSecurity__factory,
     ScheduledSnapshots__factory,
     ResolverProxy__factory,
@@ -319,7 +318,7 @@ describe('Demo RedSwam', () => {
         controlList: ControlList,
         erc20: ERC20,
         erc1644: ERC1644,
-        erc1410: ERC1410ScheduledTasks,
+        erc1410: IERC1410,
         erc1594: ERC1594,
         erc1643: ERC1643,
         equity: Equity,
@@ -577,11 +576,10 @@ describe('Demo RedSwam', () => {
             ERC1644__factory.abi,
             signer_A
         ) as ERC1644
-        erc1410 = new ethers.Contract(
-            await toEvmAddress(erc1410Address, true),
-            ERC1410ScheduledTasks__factory.abi,
-            signer_A
-        ) as ERC1410ScheduledTasks
+        erc1410 = await ethers.getContractAt(
+            'IERC1410',
+            await toEvmAddress(erc1410Address, true)
+        )
         erc1594 = new ethers.Contract(
             await toEvmAddress(erc1594Address, true),
             ERC1594__factory.abi,

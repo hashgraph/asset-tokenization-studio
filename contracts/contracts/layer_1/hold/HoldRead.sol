@@ -203,65 +203,72 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {
-    IERC1410ProtectedPartitions
-} from '../../interfaces/ERC1400/IERC1410ProtectedPartitions.sol';
-import {Common} from '../../common/Common.sol';
+import {HoldIdentifier} from '../interfaces/hold/IHold.sol';
+import {IHoldRead} from '../interfaces/hold/IHoldRead.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import {Common} from '../common/Common.sol';
 
-abstract contract ERC1410ProtectedPartitions is
-    IERC1410ProtectedPartitions,
-    Common
-{
-    function protectedTransferFromByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    )
-        external
-        override
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyProtectedPartitions
-        onlyCanTransferFromByPartition(_from, _to, _partition, _amount, '', '')
-    {
-        _protectedTransferFromByPartition(
-            _partition,
-            _from,
-            _to,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
+abstract contract HoldRead is IHoldRead, Common {
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view override returns (uint256 amount_) {
+        return _getHeldAmountForAdjusted(_tokenHolder);
     }
 
-    function protectedRedeemFromByPartition(
+    function getHeldAmountForByPartition(
         bytes32 _partition,
-        address _from,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        address _tokenHolder
+    ) external view override returns (uint256 amount_) {
+        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view override returns (uint256 holdCount_) {
+        return _getHoldCountForByPartition(_partition, _tokenHolder);
+    }
+
+    function getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (uint256[] memory holdsId_) {
+        return
+            _getHoldsIdForByPartition(
+                _partition,
+                _tokenHolder,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function getHoldForByPartition(
+        HoldIdentifier calldata _holdIdentifier
     )
         external
+        view
         override
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyProtectedPartitions
-        onlyCanRedeemFromByPartition(_from, _partition, _amount, '', '')
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_,
+            ThirdPartyType thirdPartyType_
+        )
     {
-        _protectedRedeemFromByPartition(
-            _partition,
-            _from,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        return _getHoldForByPartitionAdjusted(_holdIdentifier);
+    }
+
+    function getHoldThirdParty(
+        HoldIdentifier calldata _holdIdentifier
+    ) external view override returns (address) {
+        return _getHoldThirdParty(_holdIdentifier);
     }
 }

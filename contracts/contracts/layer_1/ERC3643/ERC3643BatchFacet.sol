@@ -206,95 +206,50 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../../common/Common.sol';
-
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {IERC3643Batch} from '../interfaces/ERC3643/IERC3643Batch.sol';
 import {
-    IERC1410Controller
-} from '../../interfaces/ERC1400/IERC1410Controller.sol';
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_ERC3643_BATCH_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ERC3643Batch} from './ERC3643Batch.sol';
 
-abstract contract ERC1410Controller is IERC1410Controller, Common {
-    function controllerTransferByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
+contract ERC3643BatchFacet is ERC3643Batch, IStaticFunctionSelectors {
+    function getStaticResolverKey()
         external
+        pure
         override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
+        returns (bytes32 staticResolverKey_)
     {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _transferByPartition(
-            _from,
-            IERC1410Basic.BasicTransferInfo(_to, _value),
-            _partition,
-            _data,
-            _msgSender(),
-            _operatorData
-        );
+        staticResolverKey_ = _ERC3643_BATCH_RESOLVER_KEY;
     }
 
-    function controllerRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
+    function getStaticFunctionSelectors()
         external
+        pure
         override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
+        returns (bytes4[] memory staticFunctionSelectors_)
     {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _redeemByPartition(
-            _partition,
-            _tokenHolder,
-            _msgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
+        staticFunctionSelectors_ = new bytes4[](4);
+        uint256 selectorsIndex;
+
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchForcedTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
     }
 
-    function canTransferByPartition(
-        address _from,
-        address _to,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external view override returns (bool, bytes1, bytes32) {
-        (
-            bool status,
-            bytes1 statusCode,
-            bytes32 reason,
-
-        ) = _isAbleToTransferFromByPartition(
-                _from,
-                _to,
-                _partition,
-                _value,
-                _data,
-                _operatorData
-            );
-        return (status, statusCode, reason);
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Batch).interfaceId;
     }
 }

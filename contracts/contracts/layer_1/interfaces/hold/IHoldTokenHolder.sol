@@ -206,124 +206,74 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
-import {Common} from '../../common/Common.sol';
-import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
+import {Hold, HoldIdentifier} from './IHold.sol';
 
-abstract contract ERC1410Standard is IERC1410Standard, Common {
-    function issueByPartition(
-        IERC1410Standard.IssueData calldata _issueData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyIssuable
-        onlyWithinMaxSupply(_issueData.value)
-        onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
-        onlyDefaultPartitionWithSinglePartition(_issueData.partition)
-        onlyIdentified(address(0), _issueData.tokenHolder)
-        onlyCompliant(address(0), _issueData.tokenHolder, false)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _ISSUER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-            _checkRecoveredAddress(_msgSender());
-        }
-        _issueByPartition(_issueData);
-    }
+interface IHoldTokenHolder {
+    event HeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
 
-    /// @notice Decreases totalSupply and the corresponding amount of the specified partition of _msgSender()
-    /// @param _partition The partition to allocate the decrease in balance
-    /// @param _value The amount by which to decrease the balance
-    /// @param _data Additional data attached to the burning of tokens
-    function redeemByPartition(
+    event HeldFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event HoldByPartitionExecuted(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount,
+        address to
+    );
+
+    event HoldByPartitionReleased(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    event HoldByPartitionReclaimed(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    function createHoldByPartition(
         bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(
-            _msgSender(),
-            _partition,
-            _value,
-            _data,
-            ''
-        )
-    {
-        // Add the function to validate the `_data` parameter
-        _redeemByPartition(
-            _partition,
-            _msgSender(),
-            address(0),
-            _value,
-            _data,
-            ''
-        );
-    }
+        Hold calldata _hold
+    ) external returns (bool success_, uint256 holdId_);
 
-    /// @notice Decreases totalSupply and the corresponding amount of the specified partition of tokenHolder
-    /// @dev This function can only be called by the authorised operator.
-    /// @param _partition The partition to allocate the decrease in balance.
-    /// @param _tokenHolder The token holder whose balance should be decreased
-    /// @param _value The amount by which to decrease the balance
-    /// @param _data Additional data attached to the burning of tokens
-    /// @param _operatorData Additional data attached to the transfer of tokens by the operator
-    function operatorRedeemByPartition(
+    function createHoldFromByPartition(
         bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyOperator(_partition, _tokenHolder)
-        onlyUnProtectedPartitionsOrWildCardRole
-    {
-        {
-            _checkCanRedeemFromByPartition(
-                _tokenHolder,
-                _partition,
-                _value,
-                _data,
-                _operatorData
-            );
-        }
-        _redeemByPartition(
-            _partition,
-            _tokenHolder,
-            _msgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    function canRedeemByPartition(
         address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
+        Hold calldata _hold,
         bytes calldata _operatorData
-    ) external view override returns (bool, bytes1, bytes32) {
-        (
-            bool status,
-            bytes1 code,
-            bytes32 reason,
+    ) external returns (bool success_, uint256 holdId_);
 
-        ) = _isAbleToRedeemFromByPartition(
-                _from,
-                _partition,
-                _value,
-                _data,
-                _operatorData
-            );
-        return (status, code, reason);
-    }
+    function executeHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier,
+        address _to,
+        uint256 _amount
+    ) external returns (bool success_);
+
+    function releaseHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier,
+        uint256 _amount
+    ) external returns (bool success_);
+
+    function reclaimHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier
+    ) external returns (bool success_);
 }

@@ -49,8 +49,8 @@
       "Contribution" shall mean any work of authorship, including
       the original version of the Work and any modifications or additions
       to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
+      submitted for inclusion in the Work by the copyright owner or
+      by an individual or Legal Entity authorized to submit on behalf of
       the copyright owner. For the purposes of this definition, "submitted"
       means any form of electronic, verbal, or written communication sent
       to the Licensor or its representatives, including but not limited to
@@ -206,198 +206,111 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {IFreeze} from '../interfaces/ERC3643/IFreeze.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_FREEZE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
-import {DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {IERC1410Read} from '../../interfaces/ERC1400/IERC1410Read.sol';
+import {Common} from '../../common/Common.sol';
 
-contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
-    // ====== External functions (state-changing) ======
-
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezStatus
-    ) external override onlyUnpaused validateAddress(_userAddress) {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _setAddressFrozen(_userAddress, _freezStatus);
-        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
+/**
+ * @title ERC1410Read
+ * @dev Facet containing all read-only operations for ERC1410 functionality
+ * @notice This facet handles balance queries, partition queries, operator queries, and validation queries
+ */
+abstract contract ERC1410Read is IERC1410Read, Common {
+    function balanceOf(address _tokenHolder) external view returns (uint256) {
+        return _balanceOfAdjusted(_tokenHolder);
     }
 
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyUnrecoveredAddress(_userAddress)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, DEFAULT_PARTITION);
+    function balanceOfAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) external view returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
     }
 
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, DEFAULT_PARTITION);
+    function balanceOfByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256) {
+        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
     }
 
-    function batchSetAddressFrozen(
-        address[] calldata _userAddresses,
-        bool[] calldata _freeze
-    ) external onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _setAddressFrozen(_userAddresses[i], _freeze[i]);
-            emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
-        }
+    function totalSupply() external view returns (uint256) {
+        return _totalSupplyAdjusted();
     }
 
-    function batchFreezePartialTokens(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _checkRecoveredAddress(_userAddresses[i]);
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _freezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensFrozen(
-                _userAddresses[i],
-                _amounts[i],
-                DEFAULT_PARTITION
+    function totalSupplyByPartition(
+        bytes32 _partition
+    ) external view returns (uint256) {
+        return _totalSupplyByPartitionAdjusted(_partition);
+    }
+
+    function partitionsOf(
+        address _tokenHolder
+    ) external view returns (bytes32[] memory) {
+        return _partitionsOf(_tokenHolder);
+    }
+
+    function isMultiPartition() external view returns (bool) {
+        return _isMultiPartition();
+    }
+
+    function canTransferByPartition(
+        address _from,
+        address _to,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) external view returns (bool, bytes1, bytes32) {
+        (
+            bool status,
+            bytes1 statusCode,
+            bytes32 reason,
+
+        ) = _isAbleToTransferFromByPartition(
+                _from,
+                _to,
+                _partition,
+                _value,
+                _data,
+                _operatorData
             );
-        }
+        return (status, statusCode, reason);
     }
 
-    function batchUnfreezePartialTokens(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _unfreezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensUnfrozen(
-                _userAddresses[i],
-                _amounts[i],
-                DEFAULT_PARTITION
+    function canRedeemByPartition(
+        address _from,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) external view override returns (bool, bytes1, bytes32) {
+        (
+            bool status,
+            bytes1 code,
+            bytes32 reason,
+
+        ) = _isAbleToRedeemFromByPartition(
+                _from,
+                _partition,
+                _value,
+                _data,
+                _operatorData
             );
-        }
+        return (status, code, reason);
     }
 
-    // ====== External functions (view/pure) ======
-
-    function getFrozenTokens(
-        address _userAddress
-    ) external view override returns (uint256) {
-        return _getFrozenAmountForAdjusted(_userAddress);
+    function isOperator(
+        address _operator,
+        address _tokenHolder
+    ) public view returns (bool) {
+        return _isOperator(_operator, _tokenHolder);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _FREEZE_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](7);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .freezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .unfreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getFrozenTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setAddressFrozen
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchSetAddressFrozen
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchFreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchUnfreezePartialTokens
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IFreeze).interfaceId;
+    function isOperatorForPartition(
+        bytes32 _partition,
+        address _operator,
+        address _tokenHolder
+    ) public view returns (bool) {
+        return _isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 }

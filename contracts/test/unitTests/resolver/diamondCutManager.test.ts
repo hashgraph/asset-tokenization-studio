@@ -375,12 +375,59 @@ describe('DiamondCutManager', () => {
         facet: IDiamondLoupe.FacetStructOutput,
         selectorsLength: number
     ) {
+        /*
+         * Problematic selectors:
+         * - getStaticInterfaceIdsSelector ('0xb378cf37'):
+         *     This selector is known to sometimes appear unexpectedly in facet selector arrays due to
+         *     misconfiguration or incorrect facet registration. It should only be present for facets that
+         *     implement the corresponding static interface method.
+         * - getStaticResolverKeySelector ('0x1ef2fdc8'):
+         *     Similar to the above, this selector should only be present for facets that implement the
+         *     static resolver key method. Its unexpected presence may indicate a bug in facet setup.
+         * - nullSelector ('0x00000000'):
+         *     The null selector is used as a sentinel value and should never appear in the selectors array.
+         *     Its presence typically indicates an array length mismatch or that the selectors array was
+         *     not properly populated. The validation logic checks for this to catch such errors early.
+         *
+         * Expected behavior:
+         * - Only valid selectors for the facet should be present in the selectors array.
+         * - The null selector should never be present.
+         * - The static selectors should only be present for facets that implement the corresponding methods.
+         */
+        const getStaticInterfaceIdsSelector = '0xb378cf37'
+        const getStaticResolverKeySelector = '0x1ef2fdc8'
+        const nullSelector = '0x00000000'
+
         for (
             let selectorIndex = 0;
             selectorIndex < selectorsLength;
             selectorIndex++
         ) {
             const selectorId = facet.selectors[selectorIndex]
+
+            // Validate against null selector (indicates array length mismatch)
+            expect(selectorId).to.not.equal(
+                nullSelector,
+                `Null selector (0x00000000) found at index ${selectorIndex} in facet ${facet.id} (${facet.addr}). ` +
+                    `This indicates a length mismatch in the getStaticFunctionSelectors() method. ` +
+                    `The array size is larger than the number of selectors being populated.`
+            )
+
+            // Validate against getStaticInterfaceIds selector
+            expect(selectorId).to.not.equal(
+                getStaticInterfaceIdsSelector,
+                `getStaticInterfaceIds() selector (${getStaticInterfaceIdsSelector}) should NOT be registered in getStaticFunctionSelectors(). ` +
+                    `Found in facet ${facet.id} (${facet.addr}). ` +
+                    `This function is part of the IStaticFunctionSelectors interface but should not be exposed as a callable function.`
+            )
+
+            // Validate against getStaticResolverKey selector
+            expect(selectorId).to.not.equal(
+                getStaticResolverKeySelector,
+                `getStaticResolverKey() selector (${getStaticResolverKeySelector}) should NOT be registered in getStaticFunctionSelectors(). ` +
+                    `Found in facet ${facet.id} (${facet.addr}). ` +
+                    `This function is part of the IStaticFunctionSelectors interface but should not be exposed as a callable function.`
+            )
 
             const id =
                 await diamondCutManager.getFacetIdByConfigurationIdVersionAndSelector(
@@ -396,8 +443,11 @@ describe('DiamondCutManager', () => {
                     selectorId
                 )
 
-            expect(facetAddressForSelector).to.equal(facet.addr)
+            expect(facetAddressForSelector).to.not.equal(
+                '0x0000000000000000000000000000000000000000'
+            )
             expect(id).to.equal(facet.id)
+            expect(facetAddressForSelector).to.equal(facet.addr)
         }
     }
 
