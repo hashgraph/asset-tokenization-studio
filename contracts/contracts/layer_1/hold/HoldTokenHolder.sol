@@ -303,7 +303,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Common {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyIdentified(_holdIdentifier.tokenHolder, _to)
-        onlyCompliant(address(0), _to)
+        onlyCompliant(address(0), _to, false)
         onlyWithValidHoldId(_holdIdentifier)
         returns (bool success_)
     {

@@ -299,13 +299,23 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Common {
 
     function authorizeOperator(
         address _operator
-    ) external override onlyUnpaused onlyCompliant(_msgSender(), _operator) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyCompliant(_msgSender(), _operator, false)
+    {
         _authorizeOperator(_operator);
     }
 
     function revokeOperator(
         address _operator
-    ) external override onlyUnpaused onlyCompliant(_msgSender(), address(0)) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyCompliant(_msgSender(), address(0), false)
+    {
         _revokeOperator(_operator);
     }
 
@@ -317,7 +327,7 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), _operator)
+        onlyCompliant(_msgSender(), _operator, false)
     {
         _authorizeOperatorByPartition(_partition, _operator);
     }
@@ -330,7 +340,7 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(_msgSender(), address(0))
+        onlyCompliant(_msgSender(), address(0), false)
     {
         _revokeOperatorByPartition(_partition, _operator);
     }

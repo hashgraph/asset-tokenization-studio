@@ -240,7 +240,7 @@ abstract contract ERC1410Management is IERC1410Management, Common {
         onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyIdentified(address(0), _issueData.tokenHolder)
-        onlyCompliant(address(0), _issueData.tokenHolder)
+        onlyCompliant(address(0), _issueData.tokenHolder, false)
     {
         {
             bytes32[] memory roles = new bytes32[](2);

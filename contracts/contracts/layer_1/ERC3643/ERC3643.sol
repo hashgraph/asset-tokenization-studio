@@ -336,7 +336,7 @@ abstract contract ERC3643 is IERC3643Basic, Common {
         onlyWithoutMultiPartition
         onlyWithinMaxSupply(_amount)
         onlyIdentified(address(0), _to)
-        onlyCompliant(address(0), _to)
+        onlyCompliant(address(0), _to, false)
         onlyIssuable
     {
         {

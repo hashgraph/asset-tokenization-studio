@@ -210,8 +210,6 @@ import {IERC1410StorageWrapper} from './IERC1410StorageWrapper.sol';
 import {IERC1410Read} from './IERC1410Read.sol';
 import {IERC1410TokenHolder} from './IERC1410TokenHolder.sol';
 import {IERC1410Management} from './IERC1410Management.sol';
-import {IPause} from '../pause/IPause.sol';
-import {ISnapshots} from '../snapshots/ISnapshots.sol';
 
 struct BasicTransferInfo {
     address to;
@@ -246,9 +244,7 @@ interface IERC1410 is
     IERC1410StorageWrapper,
     IERC1410Read,
     IERC1410TokenHolder,
-    IERC1410Management,
-    IPause,
-    ISnapshots
+    IERC1410Management
 {
     // This interface combines all ERC1410 facets for external access
 }

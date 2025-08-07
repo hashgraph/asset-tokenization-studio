@@ -1079,7 +1079,7 @@ describe('ProtectedPartitions Tests', () => {
                     protectedHold,
                     '0x1234'
                 )
-            ).to.be.revertedWithCustomError(holdFacet, 'TokenIsPaused')
+            ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
         })
 
         it('GIVEN a security with clearing active WHEN performing a protected hold THEN transaction fails with ClearingIsActivated', async () => {

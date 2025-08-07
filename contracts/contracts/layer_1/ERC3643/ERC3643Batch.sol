@@ -226,11 +226,11 @@ abstract contract ERC3643Batch is IERC3643Batch, Common {
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyIdentified(_msgSender(), address(0))
-        onlyCompliant(_msgSender(), address(0))
+        onlyCompliant(_msgSender(), address(0), false)
     {
         for (uint256 i = 0; i < _toList.length; i++) {
             _checkIdentity(address(0), _toList[i]);
-            _checkCompliance(address(0), _toList[i]);
+            _checkCompliance(address(0), _toList[i], false);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
             _transfer(_msgSender(), _toList[i], _amounts[i]);
@@ -278,7 +278,7 @@ abstract contract ERC3643Batch is IERC3643Batch, Common {
         }
         for (uint256 i = 0; i < _toList.length; i++) {
             _checkIdentity(address(0), _toList[i]);
-            _checkCompliance(address(0), _toList[i]);
+            _checkCompliance(address(0), _toList[i], false);
             _checkWithinMaxSupply(_amounts[i]);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
