@@ -245,13 +245,20 @@ abstract contract ERC20StorageWrapper2 is
         _updateAllowanceLabaf(_owner, _spender, abaf);
     }
 
-    function _approve(address spender, uint256 value) internal returns (bool) {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value
+    ) internal returns (bool) {
+        if (owner == address(0)) {
+            revert ZeroOwnerAddress();
+        }
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
 
-        _erc20Storage().allowed[_msgSender()][spender] = value;
-        emit Approval(_msgSender(), spender, value);
+        _erc20Storage().allowed[owner][spender] = value;
+        emit Approval(owner, spender, value);
         return true;
     }
 
