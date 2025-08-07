@@ -243,7 +243,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyWithoutMultiPartition
         returns (bool)
     {
-        return _approve(spender, value);
+        return _approve(_msgSender(), spender, value);
     }
 
     function transfer(
