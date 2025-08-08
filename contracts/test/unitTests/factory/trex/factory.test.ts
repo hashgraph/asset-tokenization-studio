@@ -322,9 +322,13 @@ describe('TREX Factory Tests', () => {
                         trexDeployment.authorities.trexImplementationAuthority
                             .address,
                         trexDeployment.factories.identityFactory.address,
-                        deployedContracts.factory.proxyAddress!,
+                        deployedContracts.factory.proxyAddress,
+                        deployedContracts.businessLogicResolver.proxyAddress,
                     ],
-                    libraries: ['SecurityDeploymentLib'],
+                    libraries: [
+                        'TrexBondDeploymentLib',
+                        'TrexEquityDeploymentLib',
+                    ],
                 })
             )
         ).contract as TREXFactoryAts
@@ -354,209 +358,7 @@ describe('TREX Factory Tests', () => {
     })
 
     describe('Equity tests', () => {
-        it('GIVEN different owners THEN deployment should fail', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            tokenDetails.owner = ethers.Wallet.createRandom().address
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.be.rejectedWith('T-REX owner mismatch')
-        })
-
-        it('GIVEN different names THEN deployment should fail', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name: 'Different Name',
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.be.rejectedWith('Name mismatch')
-        })
-
-        it('GIVEN different symbols THEN deployment should fail', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol: 'Different Symbol',
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.be.rejectedWith('Symbol mismatch')
-        })
-
-        it('GIVEN different decimals THEN deployment should fail', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals: decimals + 1,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.be.rejectedWith('Decimals mismatch')
-        })
-
-        it('GIVEN a valid equitiy THEN security is deployed successfully', async () => {
+        it('GIVEN an equity with custom values THEN security is deployed successfully', async () => {
             const equityData = await setEquityData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -668,7 +470,9 @@ describe('TREX Factory Tests', () => {
             expect(await complianceContract.getModules()).to.deep.equal(
                 tokenDetails.complianceModules
             )
-            //TODO: should security call compliance module in setCompliance()?
+            expect(await complianceContract.getTokenBound()).to.deep.equal(
+                _token
+            )
 
             const tirContract = await ethers.getContractAt(
                 'TrustedIssuersRegistry',
@@ -691,221 +495,7 @@ describe('TREX Factory Tests', () => {
     })
 
     describe('Bond tests', () => {
-        it('GIVEN different owners THEN deployment should fail', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            tokenDetails.owner = ethers.Wallet.createRandom().address
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.be.rejectedWith('T-REX owner mismatch')
-        })
-
-        it('GIVEN different names THEN deployment should fail', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name: 'Different Name',
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.be.rejectedWith('Name mismatch')
-        })
-
-        it('GIVEN different symbols THEN deployment should fail', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol: 'Different Symbol',
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.be.rejectedWith('Symbol mismatch')
-        })
-
-        it('GIVEN different decimals THEN deployment should fail', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals: decimals + 1,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.be.rejectedWith('Decimals mismatch')
-        })
-
-        it('GIVEN a valid bond THEN security is deployed successfully', async () => {
+        it('GIVEN a bond with custom values THEN security is deployed successfully', async () => {
             const currentTimeInSeconds =
                 Math.floor(new Date().getTime() / 1000) + 1
             startingDate = currentTimeInSeconds + 10000
@@ -1016,7 +606,9 @@ describe('TREX Factory Tests', () => {
             expect(await complianceContract.getModules()).to.deep.equal(
                 tokenDetails.complianceModules
             )
-            //TODO: should security call compliance module in setCompliance()?
+            expect(await complianceContract.getTokenBound()).to.deep.equal(
+                _token
+            )
 
             const tirContract = await ethers.getContractAt(
                 'TrustedIssuersRegistry',

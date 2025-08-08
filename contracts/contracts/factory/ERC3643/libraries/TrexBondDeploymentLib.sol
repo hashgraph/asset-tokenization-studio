@@ -203,338 +203,42 @@
 
 */
 
-import { task, types } from 'hardhat/config'
-import { CONTRACT_NAMES, ContractName, Network } from '@configuration'
-import {
-    DeployAllArgs,
-    DeployArgs,
-    DeployTrexFactoryArgs,
-    GetSignerResult,
-} from './Arguments'
-import * as fs from 'fs'
+pragma solidity ^0.8.17;
 
-task(
-    'deployAll',
-    'Deploy new factory, new facet implementation, new resolver and initialize it with the new facet implementations'
-)
-    .addOptionalParam(
-        'useDeployed',
-        'Use already deployed contracts',
-        true,
-        types.boolean
-    )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
-    .addOptionalParam(
-        'fileName',
-        'The output file name',
-        'deployedContracts',
-        types.string
-    )
-    .setAction(async (args: DeployAllArgs, hre) => {
-        // Inlined to avoid circular dependency
-        const {
-            deployAtsFullInfrastructure,
-            DeployAtsFullInfrastructureCommand,
-            addresstoHederaId,
-        } = await import('@scripts')
-        const network = hre.network.name as Network
-        console.log(`Executing deployAll on ${hre.network.name} ...`)
-        const { signer }: GetSignerResult = await hre.run('getSigner', {
-            privateKey: args.privateKey,
-            signerAddress: args.signerAddress,
-            signerPosition: args.signerPosition,
-        })
+// solhint-disable no-global-import
+import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
+import {IFactory_, FactoryRegulationData} from '../interfaces/IFactory.sol';
+import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
+import {TREXFactoryAts} from '../TREXFactory.sol';
+import {SecurityDeploymentLib} from './SecurityDeploymentLib.sol';
+import {TrexBaseDeploymentLib} from './TrexBaseDeploymentLib.sol';
 
-        // * Deploy the full infrastructure
-        const {
-            factory,
-            businessLogicResolver,
-            accessControl,
-            cap,
-            controlList,
-            kyc,
-            ssiManagement,
-            pause,
-            erc20,
-            erc1410ScheduledTasks,
-            erc1594,
-            erc1643,
-            erc1644,
-            snapshots,
-            diamondFacet,
-            equityUsa,
-            bondUsa,
-            scheduledSnapshots,
-            scheduledBalanceAdjustments,
-            scheduledTasks,
-            corporateActions,
-            lock,
-            hold,
-            transferAndLock,
-            adjustBalances,
-            clearingActionsFacet,
-            clearingTransferFacet,
-            clearingRedeemFacet,
-            clearingHoldCreationFacet,
-            clearingReadFacet,
-            externalPauseManagement,
-            externalControlListManagement,
-            externalKycListManagement,
-            protectedPartitions,
-            erc3643,
-            freeze,
-        } = await deployAtsFullInfrastructure(
-            new DeployAtsFullInfrastructureCommand({
-                signer: signer,
-                network: hre.network.name as Network,
-                useDeployed: args.useDeployed,
-                useEnvironment: false,
-            })
-        )
-
-        // * Display the deployed addresses
-        const addressList = {
-            'Business Logic Resolver Proxy': businessLogicResolver.proxyAddress,
-            'Business Logic Resolver Proxy Admin':
-                businessLogicResolver.proxyAdminAddress,
-            'Business Logic Resolver': businessLogicResolver.address,
-            'Factory Proxy': factory.proxyAddress,
-            'Factory Proxy Admin': factory.proxyAdminAddress,
-            Factory: factory.address,
-            'Access Control': accessControl.address,
-            Cap: cap.address,
-            'Control List': controlList.address,
-            Kyc: kyc.address,
-            SsiManagement: ssiManagement.address,
-            Pause: pause.address,
-            ERC20: erc20.address,
-            ERC1410: erc1410ScheduledTasks.address,
-            ERC1594: erc1594.address,
-            ERC1643: erc1643.address,
-            ERC1644: erc1644.address,
-            Snapshots: snapshots.address,
-            'Diamond Facet': diamondFacet.address,
-            Equity: equityUsa.address,
-            Bond: bondUsa.address,
-            'Scheduled Snapshots': scheduledSnapshots.address,
-            'Scheduled Balance Adjustments':
-                scheduledBalanceAdjustments.address,
-            'Scheduled Tasks': scheduledTasks.address,
-            'Corporate Actions': corporateActions.address,
-            Lock: lock.address,
-            Hold: hold.address,
-            'Transfer and Lock': transferAndLock.address,
-            'Adjust Balances': adjustBalances.address,
-            'Clearing Action Facet': clearingActionsFacet.address,
-            'Clearing Transfer Facet': clearingTransferFacet.address,
-            'Clearing Redeem Facet': clearingRedeemFacet.address,
-            'Clearing Hold Creation Facet': clearingHoldCreationFacet.address,
-            'Clearing Read Facet': clearingReadFacet.address,
-            'External Pause Management Facet': externalPauseManagement.address,
-            'External Control List Management Facet':
-                externalControlListManagement.address,
-            'External Kyc List Management Facet':
-                externalKycListManagement.address,
-            'Protected Partitions': protectedPartitions.address,
-            ERC3643: erc3643.address,
-            Freeze: freeze.address,
-        }
-
-        const contractAddress = []
-
-        console.log('\n 🟢 Deployed ATS Contract List:')
-        for (const [key, address] of Object.entries(addressList)) {
-            if (!address) {
-                continue
-            }
-            let contractId = ''
-            try {
-                contractId = await addresstoHederaId({
-                    address,
-                    network,
-                })
-                if (
-                    ['Business Logic Resolver Proxy', 'Factory Proxy'].includes(
-                        key
-                    )
-                ) {
-                    console.log(`   --> *** ${key}: ${address} (${contractId})`)
-                } else {
-                    console.log(`   --> ${key}: ${address} (${contractId})`)
-                }
-            } catch (e: unknown) {
-                console.log((e as Error).message)
-            } finally {
-                contractAddress.push({
-                    name: key,
-                    address: address,
-                    contractId: contractId,
-                })
-            }
-        }
-        if (args.fileName) {
-            console.log('File saved: ' + args.fileName + '.json')
-            fs.writeFileSync(
-                args.fileName + '.json',
-                JSON.stringify(contractAddress, null, 2),
-                'utf8'
-            )
-        }
-    })
-
-task('deploy', 'Deploy new contract')
-    .addPositionalParam(
-        'contractName',
-        'The name of the contract to deploy',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
-    .setAction(async (args: DeployArgs, hre) => {
-        // Inlined to avoid circular dependency
-        const {
-            deployContract,
-            DeployContractCommand,
-            addressListToHederaIdList,
-        } = await import('@scripts')
-        const network = hre.network.name as Network
-        console.log(`Executing deploy on ${network} ...`)
-        if (!CONTRACT_NAMES.includes(args.contractName as ContractName)) {
-            throw new Error(
-                `Contract name ${args.contractName} is not in the list of deployable contracts`
-            )
-        }
-        const contractName = args.contractName as ContractName
-        const { signer }: GetSignerResult = await hre.run('getSigner', {
-            privateKey: args.privateKey,
-            signerAddress: args.signerAddress,
-            signerPosition: args.signerPosition,
-        })
-        console.log(`Using signer: ${signer.address}`)
-        // * Deploy the contract
-        const { proxyAdminAddress, proxyAddress, address } =
-            await deployContract(
-                new DeployContractCommand({
-                    name: contractName,
-                    signer,
-                })
-            )
-
-        const [contractId, proxyContractId, proxyAdminContractId] =
-            await addressListToHederaIdList({
-                addressList: [address, proxyAddress, proxyAdminAddress].filter(
-                    (addr): addr is string => !!addr
-                ),
-                network,
-            })
-
-        console.log('\n 🟢 Deployed Contract:')
-        if (proxyAdminAddress) {
-            console.log(
-                `Proxy Admin: ${proxyAdminAddress} (${proxyAdminContractId})`
-            )
-        }
-        if (proxyAddress) {
-            console.log(`Proxy: ${proxyAddress} (${proxyContractId})`)
-        }
-        console.log(
-            `Implementation: ${address} (${contractId}) for ${contractName}`
-        )
-    })
-
-task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
-    .addOptionalParam(
-        'atsFactory',
-        'Address of the ATS factory',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'resolver',
-        'Address of the BLR proxy',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
-    .setAction(async (args: DeployTrexFactoryArgs, hre) => {
-        const {
-            deployContractWithLibraries,
-            DeployContractWithLibraryCommand,
-            ADDRESS_ZERO,
-        } = await import('@scripts')
-
-        const { signer }: GetSignerResult = await hre.run('getSigner', {
-            privateKey: args.privateKey,
-            signerAddress: args.signerAddress,
-            signerPosition: args.signerPosition,
-        })
-
-        const trexFactoryDeployResult = await deployContractWithLibraries(
-            new DeployContractWithLibraryCommand({
-                name: `TREXFactoryAts`,
-                signer,
-                args: [
-                    ADDRESS_ZERO, // implementationAuthority
-                    ADDRESS_ZERO, // idFactory
-                    args.atsFactory ?? ADDRESS_ZERO,
-                    args.resolver ?? ADDRESS_ZERO,
-                ],
-                libraries: ['TrexBondDeploymentLib', 'TrexEquityDeploymentLib'],
-            })
-        )
-
-        console.log(
-            `TREX factory deployed at ${trexFactoryDeployResult.address}`
-        )
-    })
+library TrexBondDeploymentLib {
+    function deployTREXSuiteAtsBond(
+        mapping(string => address) storage _tokenDeployed,
+        address _implementationAuthority,
+        address _idFactory,
+        address _atsFactory,
+        string memory _salt,
+        TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
+        ITREXFactory.ClaimDetails calldata _claimDetails,
+        IFactory_.BondData calldata _bondData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external {
+        IToken token = SecurityDeploymentLib.deployBond(
+            _atsFactory,
+            _tokenDetails.owner,
+            _bondData,
+            _factoryRegulationData
+        );
+        TrexBaseDeploymentLib.deployTREXSuite(
+            _tokenDeployed,
+            _implementationAuthority,
+            _idFactory,
+            _salt,
+            _tokenDetails,
+            _claimDetails,
+            token
+        );
+    }
+}

@@ -264,7 +264,10 @@ export const CONTRACT_NAMES = [
     'TREXFactoryAts',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
-export const LIBRARY_NAMES = ['SecurityDeploymentLib']
+export const LIBRARY_NAMES = [
+    'TrexBondDeploymentLib',
+    'TrexEquityDeploymentLib',
+]
 export type LibraryName = (typeof LIBRARY_NAMES)[number]
 export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
 

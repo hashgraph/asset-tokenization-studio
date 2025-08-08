@@ -238,7 +238,11 @@ export interface DeployArgs extends WithSigner {
 export interface DeployAllArgs extends WithSigner {
     useDeployed: boolean
     fileName: string
-    trexFactory: boolean
+}
+
+export interface DeployTrexFactoryArgs extends WithSigner {
+    atsFactory?: string
+    resolver?: string
 }
 
 // * Transparent Upgradeable Proxy

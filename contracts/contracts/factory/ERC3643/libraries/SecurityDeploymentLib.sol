@@ -211,35 +211,30 @@ import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import {
     IFactory_,
     FactoryRegulationData,
-    IResolverProxy_
+    IResolverProxy_,
+    IBusinessLogicResolver_,
+    RegulationType,
+    RegulationSubType
 } from '../interfaces/IFactory.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../interfaces/IAccessControl.sol';
 
 // solhint-disable custom-errors
+// solhint-disable no-inline-assembly
 library SecurityDeploymentLib {
     function deployEquity(
         address _atsFactory,
-        ITREXFactory.TokenDetails calldata _tokenDetails,
-        IFactory_.EquityData calldata _equityData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (IToken token_) {
-        IFactory_.EquityData memory equityDataMem = _equityData;
-
-        _validateTokenDetails(
-            _tokenDetails,
-            equityDataMem.security.erc20MetadataInfo.name,
-            equityDataMem.security.erc20MetadataInfo.symbol,
-            equityDataMem.security.erc20MetadataInfo.decimals,
-            equityDataMem.security.rbacs
-        );
-
-        equityDataMem.security.rbacs = _prepareRbacs(
-            _equityData.security.rbacs
+        address _tRexOwner,
+        IFactory_.EquityData memory _equityData,
+        FactoryRegulationData memory _factoryRegulationData
+    ) internal returns (IToken token_) {
+        _equityData.security.rbacs = _prepareRbacs(
+            _equityData.security.rbacs,
+            _tRexOwner
         );
 
         token_ = IToken(
             IFactory_(_atsFactory).deployEquity(
-                equityDataMem,
+                _equityData,
                 _factoryRegulationData
             )
         );
@@ -247,87 +242,58 @@ library SecurityDeploymentLib {
 
     function deployBond(
         address _atsFactory,
-        ITREXFactory.TokenDetails calldata _tokenDetails,
-        IFactory_.BondData calldata _bondData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (IToken token_) {
-        IFactory_.BondData memory bondDataMem = _bondData;
-
-        _validateTokenDetails(
-            _tokenDetails,
-            bondDataMem.security.erc20MetadataInfo.name,
-            bondDataMem.security.erc20MetadataInfo.symbol,
-            bondDataMem.security.erc20MetadataInfo.decimals,
-            bondDataMem.security.rbacs
+        address _tRexOwner,
+        IFactory_.BondData memory _bondData,
+        FactoryRegulationData memory _factoryRegulationData
+    ) internal returns (IToken token_) {
+        _bondData.security.rbacs = _prepareRbacs(
+            _bondData.security.rbacs,
+            _tRexOwner
         );
-
-        bondDataMem.security.rbacs = _prepareRbacs(_bondData.security.rbacs);
 
         token_ = IToken(
-            IFactory_(_atsFactory).deployBond(
-                bondDataMem,
-                _factoryRegulationData
-            )
+            IFactory_(_atsFactory).deployBond(_bondData, _factoryRegulationData)
         );
     }
 
-    /// @dev Prepares RBAC array by adding default admin role to address(this)
+    function buildDefaultEquityData(
+        IBusinessLogicResolver_ _resolver,
+        ITREXFactory.TokenDetails memory _tokenDetails
+    ) internal pure returns (IFactory_.EquityData memory equityData_) {
+        equityData_.security = _buildDefaultSecurityData(
+            _resolver,
+            _tokenDetails
+        );
+    }
+
+    function buildDefaultFactoryRegulationData()
+        internal
+        pure
+        returns (FactoryRegulationData memory factoryRegulationData_)
+    {
+        factoryRegulationData_.regulationType = RegulationType.REG_S;
+        factoryRegulationData_.regulationSubType = RegulationSubType.NONE;
+    }
+
+    /// @dev Prepares RBAC array by adding T_REX_OWNER_ROLE to address(this)
     function _prepareRbacs(
-        IResolverProxy_.Rbac[] calldata originalRbacs
-    ) private view returns (IResolverProxy_.Rbac[] memory rbacs) {
-        uint256 length = originalRbacs.length;
-        rbacs = new IResolverProxy_.Rbac[](length + 1);
+        IResolverProxy_.Rbac[] memory _rbacs,
+        address _tRexOwner
+    ) private view returns (IResolverProxy_.Rbac[] memory) {
+        bool ownerMatch;
+        uint256 length = _rbacs.length;
 
-        // Copy original RBACs
-        for (uint256 i; i < length; ) {
-            rbacs[i] = originalRbacs[i];
-            unchecked {
-                ++i;
-            }
-        }
-
-        // Add default admin RBAC
-        address[] memory members = new address[](1);
-        members[0] = address(this);
-        //TODO: change to T_REX_OWNER
-        rbacs[length] = IResolverProxy_.Rbac({
-            role: _DEFAULT_ADMIN_ROLE,
-            members: members
-        });
-    }
-
-    /// @dev Validates that the token details match the security details
-    function _validateTokenDetails(
-        ITREXFactory.TokenDetails calldata _tokenDetails,
-        string memory _securityName,
-        string memory _securitySymbol,
-        uint8 _securityDecimals,
-        IResolverProxy_.Rbac[] memory _rbacs
-    ) private pure {
-        require(
-            keccak256(abi.encodePacked(_tokenDetails.name)) ==
-                keccak256(abi.encodePacked(_securityName)),
-            'Name mismatch'
-        );
-        require(
-            keccak256(abi.encodePacked(_tokenDetails.symbol)) ==
-                keccak256(abi.encodePacked(_securitySymbol)),
-            'Symbol mismatch'
-        );
-        require(
-            _tokenDetails.decimals == _securityDecimals,
-            'Decimals mismatch'
-        );
-        bool ownerMatch = false;
-        //TODO: replace by T_REX_OWNER
-        for (uint256 i = 0; i < _rbacs.length; ) {
+        // Check if owner was already assigned the role
+        for (uint256 i = 0; i < length; ) {
             if (
                 _rbacs[i].role == _DEFAULT_ADMIN_ROLE &&
                 _rbacs[i].members.length > 0
             ) {
                 for (uint256 j = 0; j < _rbacs[i].members.length; ) {
-                    ownerMatch = _tokenDetails.owner == _rbacs[i].members[j];
-                    if (ownerMatch) break;
+                    if (_tRexOwner == _rbacs[i].members[j]) {
+                        ownerMatch = true;
+                        break;
+                    }
                     unchecked {
                         ++j;
                     }
@@ -338,6 +304,69 @@ library SecurityDeploymentLib {
                 ++i;
             }
         }
-        require(ownerMatch, 'T-REX owner mismatch');
+
+        IResolverProxy_.Rbac[] memory newRbacs = new IResolverProxy_.Rbac[](
+            length + 1
+        );
+
+        for (uint256 i = 0; i < length; ) {
+            newRbacs[i] = _rbacs[i];
+            unchecked {
+                ++i;
+            }
+        }
+
+        address[] memory membersArr;
+        if (!ownerMatch) {
+            membersArr = new address[](2);
+            membersArr[0] = address(this);
+            membersArr[1] = _tRexOwner;
+        } else {
+            membersArr = new address[](1);
+            membersArr[0] = address(this);
+        }
+
+        newRbacs[length] = IResolverProxy_.Rbac({
+            role: _DEFAULT_ADMIN_ROLE,
+            members: membersArr
+        });
+
+        return newRbacs;
+    }
+
+    function _buildDefaultSecurityData(
+        IBusinessLogicResolver_ _resolver,
+        ITREXFactory.TokenDetails memory _tokenDetails
+    ) private pure returns (IFactory_.SecurityData memory) {
+        address[] memory roleMembers = new address[](1);
+        roleMembers[0] = _tokenDetails.owner;
+        IResolverProxy_.Rbac[] memory rbacs = new IResolverProxy_.Rbac[](1);
+        rbacs[0] = IResolverProxy_.Rbac({
+            role: _DEFAULT_ADMIN_ROLE,
+            members: roleMembers
+        });
+        return
+            IFactory_.SecurityData({
+                arePartitionsProtected: false,
+                isMultiPartition: false,
+                resolver: _resolver,
+                resolverProxyConfiguration: IFactory_
+                    .ResolverProxyConfiguration({key: '0x01', version: 1}),
+                rbacs: rbacs,
+                isControllable: true,
+                isWhiteList: false,
+                maxSupply: type(uint256).max,
+                erc20MetadataInfo: IFactory_.ERC20MetadataInfo({
+                    name: _tokenDetails.name,
+                    symbol: _tokenDetails.symbol,
+                    isin: 'US0378331005',
+                    decimals: _tokenDetails.decimals
+                }),
+                clearingActive: false,
+                internalKycActivated: false,
+                externalPauses: new address[](0),
+                externalControlLists: new address[](0),
+                externalKycLists: new address[](0)
+            });
     }
 }

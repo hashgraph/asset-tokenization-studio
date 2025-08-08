@@ -203,338 +203,232 @@
 
 */
 
-import { task, types } from 'hardhat/config'
-import { CONTRACT_NAMES, ContractName, Network } from '@configuration'
+pragma solidity ^0.8.17;
+
+// solhint-disable no-global-import
+import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import {
-    DeployAllArgs,
-    DeployArgs,
-    DeployTrexFactoryArgs,
-    GetSignerResult,
-} from './Arguments'
-import * as fs from 'fs'
+    IAccessControl_,
+    _DEFAULT_ADMIN_ROLE
+} from '../interfaces/IAccessControl.sol';
+import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
+import {TREXFactoryAts} from '../TREXFactory.sol';
 
-task(
-    'deployAll',
-    'Deploy new factory, new facet implementation, new resolver and initialize it with the new facet implementations'
-)
-    .addOptionalParam(
-        'useDeployed',
-        'Use already deployed contracts',
-        true,
-        types.boolean
-    )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
-    .addOptionalParam(
-        'fileName',
-        'The output file name',
-        'deployedContracts',
-        types.string
-    )
-    .setAction(async (args: DeployAllArgs, hre) => {
-        // Inlined to avoid circular dependency
-        const {
-            deployAtsFullInfrastructure,
-            DeployAtsFullInfrastructureCommand,
-            addresstoHederaId,
-        } = await import('@scripts')
-        const network = hre.network.name as Network
-        console.log(`Executing deployAll on ${hre.network.name} ...`)
-        const { signer }: GetSignerResult = await hre.run('getSigner', {
-            privateKey: args.privateKey,
-            signerAddress: args.signerAddress,
-            signerPosition: args.signerPosition,
-        })
+// solhint-disable custom-errors
+library TrexBaseDeploymentLib {
+    /// @notice Copied from ITREXFactory
+    event TREXSuiteDeployed(
+        address indexed _token,
+        address _ir,
+        address _irs,
+        address _tir,
+        address _ctr,
+        address _mc,
+        string indexed _salt
+    );
+    event Deployed(address indexed _addr);
 
-        // * Deploy the full infrastructure
-        const {
-            factory,
-            businessLogicResolver,
-            accessControl,
-            cap,
-            controlList,
-            kyc,
-            ssiManagement,
-            pause,
-            erc20,
-            erc1410ScheduledTasks,
-            erc1594,
-            erc1643,
-            erc1644,
-            snapshots,
-            diamondFacet,
-            equityUsa,
-            bondUsa,
-            scheduledSnapshots,
-            scheduledBalanceAdjustments,
-            scheduledTasks,
-            corporateActions,
-            lock,
-            hold,
-            transferAndLock,
-            adjustBalances,
-            clearingActionsFacet,
-            clearingTransferFacet,
-            clearingRedeemFacet,
-            clearingHoldCreationFacet,
-            clearingReadFacet,
-            externalPauseManagement,
-            externalControlListManagement,
-            externalKycListManagement,
-            protectedPartitions,
-            erc3643,
-            freeze,
-        } = await deployAtsFullInfrastructure(
-            new DeployAtsFullInfrastructureCommand({
-                signer: signer,
-                network: hre.network.name as Network,
-                useDeployed: args.useDeployed,
-                useEnvironment: false,
-            })
-        )
+    function deployTREXSuite(
+        mapping(string => address) storage _tokenDeployed,
+        address _implementationAuthority,
+        address _idFactory,
+        string memory _salt,
+        TREXFactoryAts.TokenDetailsAts memory _tokenDetails,
+        ITREXFactory.ClaimDetails memory _claimDetails,
+        IToken _token
+    ) internal {
+        require(_tokenDeployed[_salt] == address(0), 'token already deployed');
+        require(
+            (_claimDetails.issuers).length ==
+                (_claimDetails.issuerClaims).length,
+            'claim pattern not valid'
+        );
+        require(
+            (_claimDetails.issuers).length <= 5,
+            'max 5 claim issuers at deployment'
+        );
+        require(
+            (_claimDetails.claimTopics).length <= 5,
+            'max 5 claim topics at deployment'
+        );
+        require(
+            (_tokenDetails.irAgents).length <= 5 &&
+                (_tokenDetails.tokenAgents).length <= 5,
+            'max 5 agents at deployment'
+        );
+        require(
+            (_tokenDetails.complianceModules).length <= 30,
+            'max 30 module actions at deployment'
+        );
+        require(
+            (_tokenDetails.complianceModules).length >=
+                (_tokenDetails.complianceSettings).length,
+            'invalid compliance pattern'
+        );
 
-        // * Display the deployed addresses
-        const addressList = {
-            'Business Logic Resolver Proxy': businessLogicResolver.proxyAddress,
-            'Business Logic Resolver Proxy Admin':
-                businessLogicResolver.proxyAdminAddress,
-            'Business Logic Resolver': businessLogicResolver.address,
-            'Factory Proxy': factory.proxyAddress,
-            'Factory Proxy Admin': factory.proxyAdminAddress,
-            Factory: factory.address,
-            'Access Control': accessControl.address,
-            Cap: cap.address,
-            'Control List': controlList.address,
-            Kyc: kyc.address,
-            SsiManagement: ssiManagement.address,
-            Pause: pause.address,
-            ERC20: erc20.address,
-            ERC1410: erc1410ScheduledTasks.address,
-            ERC1594: erc1594.address,
-            ERC1643: erc1643.address,
-            ERC1644: erc1644.address,
-            Snapshots: snapshots.address,
-            'Diamond Facet': diamondFacet.address,
-            Equity: equityUsa.address,
-            Bond: bondUsa.address,
-            'Scheduled Snapshots': scheduledSnapshots.address,
-            'Scheduled Balance Adjustments':
-                scheduledBalanceAdjustments.address,
-            'Scheduled Tasks': scheduledTasks.address,
-            'Corporate Actions': corporateActions.address,
-            Lock: lock.address,
-            Hold: hold.address,
-            'Transfer and Lock': transferAndLock.address,
-            'Adjust Balances': adjustBalances.address,
-            'Clearing Action Facet': clearingActionsFacet.address,
-            'Clearing Transfer Facet': clearingTransferFacet.address,
-            'Clearing Redeem Facet': clearingRedeemFacet.address,
-            'Clearing Hold Creation Facet': clearingHoldCreationFacet.address,
-            'Clearing Read Facet': clearingReadFacet.address,
-            'External Pause Management Facet': externalPauseManagement.address,
-            'External Control List Management Facet':
-                externalControlListManagement.address,
-            'External Kyc List Management Facet':
-                externalKycListManagement.address,
-            'Protected Partitions': protectedPartitions.address,
-            ERC3643: erc3643.address,
-            Freeze: freeze.address,
+        ITrustedIssuersRegistry tir = ITrustedIssuersRegistry(
+            _deployTIR(_salt, _implementationAuthority)
+        );
+        IClaimTopicsRegistry ctr = IClaimTopicsRegistry(
+            _deployCTR(_salt, _implementationAuthority)
+        );
+        IModularCompliance mc = IModularCompliance(
+            _deployMC(_salt, _implementationAuthority)
+        );
+        IIdentityRegistryStorage irs;
+        if (_tokenDetails.irs == address(0)) {
+            irs = IIdentityRegistryStorage(
+                _deployIRS(_salt, _implementationAuthority)
+            );
+        } else {
+            irs = IIdentityRegistryStorage(_tokenDetails.irs);
         }
-
-        const contractAddress = []
-
-        console.log('\n 🟢 Deployed ATS Contract List:')
-        for (const [key, address] of Object.entries(addressList)) {
-            if (!address) {
-                continue
+        address ir = _deployIR(
+            _salt,
+            _implementationAuthority,
+            address(tir),
+            address(ctr),
+            address(irs)
+        );
+        address _tokenID = _tokenDetails.ONCHAINID;
+        if (_tokenDetails.ONCHAINID == address(0)) {
+            _tokenID = IIdFactory(_idFactory).createTokenIdentity(
+                address(_token),
+                _tokenDetails.owner,
+                _salt
+            );
+        }
+        _token.setOnchainID(_tokenID);
+        _token.setIdentityRegistry(address(ir));
+        _token.setCompliance(address(mc));
+        mc.bindToken(address(_token));
+        for (uint256 i = 0; i < (_claimDetails.claimTopics).length; i++) {
+            ctr.addClaimTopic(_claimDetails.claimTopics[i]);
+        }
+        for (uint256 i = 0; i < (_claimDetails.issuers).length; i++) {
+            tir.addTrustedIssuer(
+                IClaimIssuer((_claimDetails).issuers[i]),
+                _claimDetails.issuerClaims[i]
+            );
+        }
+        irs.bindIdentityRegistry(address(ir));
+        AgentRole(address(ir)).addAgent(address(_token));
+        for (uint256 i = 0; i < (_tokenDetails.irAgents).length; i++) {
+            AgentRole(address(ir)).addAgent(_tokenDetails.irAgents[i]);
+        }
+        for (uint256 i = 0; i < (_tokenDetails.tokenAgents).length; i++) {
+            AgentRole(address(_token)).addAgent(_tokenDetails.tokenAgents[i]);
+        }
+        for (uint256 i = 0; i < (_tokenDetails.complianceModules).length; i++) {
+            if (!mc.isModuleBound(_tokenDetails.complianceModules[i])) {
+                mc.addModule(_tokenDetails.complianceModules[i]);
             }
-            let contractId = ''
-            try {
-                contractId = await addresstoHederaId({
-                    address,
-                    network,
-                })
-                if (
-                    ['Business Logic Resolver Proxy', 'Factory Proxy'].includes(
-                        key
-                    )
-                ) {
-                    console.log(`   --> *** ${key}: ${address} (${contractId})`)
-                } else {
-                    console.log(`   --> ${key}: ${address} (${contractId})`)
-                }
-            } catch (e: unknown) {
-                console.log((e as Error).message)
-            } finally {
-                contractAddress.push({
-                    name: key,
-                    address: address,
-                    contractId: contractId,
-                })
+            if (i < (_tokenDetails.complianceSettings).length) {
+                mc.callModuleFunction(
+                    _tokenDetails.complianceSettings[i],
+                    _tokenDetails.complianceModules[i]
+                );
             }
         }
-        if (args.fileName) {
-            console.log('File saved: ' + args.fileName + '.json')
-            fs.writeFileSync(
-                args.fileName + '.json',
-                JSON.stringify(contractAddress, null, 2),
-                'utf8'
-            )
+        _tokenDeployed[_salt] = address(_token);
+        // equivalent to transfer ownership of the token to the new owner
+        IAccessControl_(address(_token)).renounceRole(_DEFAULT_ADMIN_ROLE);
+        (Ownable(ir)).transferOwnership(_tokenDetails.owner);
+        (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
+        (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);
+        (Ownable(address(mc))).transferOwnership(_tokenDetails.owner);
+        emit TREXSuiteDeployed(
+            address(_token),
+            address(ir),
+            address(irs),
+            address(tir),
+            address(ctr),
+            address(mc),
+            _salt
+        );
+    }
+
+    /// deploy function with create2 opcode call
+    /// returns the address of the contract created
+    function _deploy(
+        string memory salt,
+        bytes memory bytecode
+    ) private returns (address) {
+        bytes32 saltBytes = bytes32(keccak256(abi.encodePacked(salt)));
+        address addr;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let encoded_data := add(0x20, bytecode) // load initialization code.
+            let encoded_size := mload(bytecode) // load init code's length.
+            addr := create2(0, encoded_data, encoded_size, saltBytes)
+            if iszero(extcodesize(addr)) {
+                revert(0, 0)
+            }
         }
-    })
+        emit Deployed(addr);
+        return addr;
+    }
 
-task('deploy', 'Deploy new contract')
-    .addPositionalParam(
-        'contractName',
-        'The name of the contract to deploy',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
-    .setAction(async (args: DeployArgs, hre) => {
-        // Inlined to avoid circular dependency
-        const {
-            deployContract,
-            DeployContractCommand,
-            addressListToHederaIdList,
-        } = await import('@scripts')
-        const network = hre.network.name as Network
-        console.log(`Executing deploy on ${network} ...`)
-        if (!CONTRACT_NAMES.includes(args.contractName as ContractName)) {
-            throw new Error(
-                `Contract name ${args.contractName} is not in the list of deployable contracts`
-            )
-        }
-        const contractName = args.contractName as ContractName
-        const { signer }: GetSignerResult = await hre.run('getSigner', {
-            privateKey: args.privateKey,
-            signerAddress: args.signerAddress,
-            signerPosition: args.signerPosition,
-        })
-        console.log(`Using signer: ${signer.address}`)
-        // * Deploy the contract
-        const { proxyAdminAddress, proxyAddress, address } =
-            await deployContract(
-                new DeployContractCommand({
-                    name: contractName,
-                    signer,
-                })
-            )
+    /// function used to deploy a trusted issuers registry using CREATE2
+    function _deployTIR(
+        string memory _salt,
+        address implementationAuthority_
+    ) private returns (address) {
+        bytes memory _code = type(TrustedIssuersRegistryProxy).creationCode;
+        bytes memory _constructData = abi.encode(implementationAuthority_);
+        bytes memory bytecode = abi.encodePacked(_code, _constructData);
+        return _deploy(_salt, bytecode);
+    }
 
-        const [contractId, proxyContractId, proxyAdminContractId] =
-            await addressListToHederaIdList({
-                addressList: [address, proxyAddress, proxyAdminAddress].filter(
-                    (addr): addr is string => !!addr
-                ),
-                network,
-            })
+    /// function used to deploy a claim topics registry using CREATE2
+    function _deployCTR(
+        string memory _salt,
+        address implementationAuthority_
+    ) private returns (address) {
+        bytes memory _code = type(ClaimTopicsRegistryProxy).creationCode;
+        bytes memory _constructData = abi.encode(implementationAuthority_);
+        bytes memory bytecode = abi.encodePacked(_code, _constructData);
+        return _deploy(_salt, bytecode);
+    }
 
-        console.log('\n 🟢 Deployed Contract:')
-        if (proxyAdminAddress) {
-            console.log(
-                `Proxy Admin: ${proxyAdminAddress} (${proxyAdminContractId})`
-            )
-        }
-        if (proxyAddress) {
-            console.log(`Proxy: ${proxyAddress} (${proxyContractId})`)
-        }
-        console.log(
-            `Implementation: ${address} (${contractId}) for ${contractName}`
-        )
-    })
+    /// function used to deploy modular compliance contract using CREATE2
+    function _deployMC(
+        string memory _salt,
+        address implementationAuthority_
+    ) private returns (address) {
+        bytes memory _code = type(ModularComplianceProxy).creationCode;
+        bytes memory _constructData = abi.encode(implementationAuthority_);
+        bytes memory bytecode = abi.encodePacked(_code, _constructData);
+        return _deploy(_salt, bytecode);
+    }
 
-task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
-    .addOptionalParam(
-        'atsFactory',
-        'Address of the ATS factory',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'resolver',
-        'Address of the BLR proxy',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
-    .setAction(async (args: DeployTrexFactoryArgs, hre) => {
-        const {
-            deployContractWithLibraries,
-            DeployContractWithLibraryCommand,
-            ADDRESS_ZERO,
-        } = await import('@scripts')
+    /// function used to deploy an identity registry storage using CREATE2
+    function _deployIRS(
+        string memory _salt,
+        address implementationAuthority_
+    ) private returns (address) {
+        bytes memory _code = type(IdentityRegistryStorageProxy).creationCode;
+        bytes memory _constructData = abi.encode(implementationAuthority_);
+        bytes memory bytecode = abi.encodePacked(_code, _constructData);
+        return _deploy(_salt, bytecode);
+    }
 
-        const { signer }: GetSignerResult = await hre.run('getSigner', {
-            privateKey: args.privateKey,
-            signerAddress: args.signerAddress,
-            signerPosition: args.signerPosition,
-        })
-
-        const trexFactoryDeployResult = await deployContractWithLibraries(
-            new DeployContractWithLibraryCommand({
-                name: `TREXFactoryAts`,
-                signer,
-                args: [
-                    ADDRESS_ZERO, // implementationAuthority
-                    ADDRESS_ZERO, // idFactory
-                    args.atsFactory ?? ADDRESS_ZERO,
-                    args.resolver ?? ADDRESS_ZERO,
-                ],
-                libraries: ['TrexBondDeploymentLib', 'TrexEquityDeploymentLib'],
-            })
-        )
-
-        console.log(
-            `TREX factory deployed at ${trexFactoryDeployResult.address}`
-        )
-    })
+    /// function used to deploy an identity registry using CREATE2
+    function _deployIR(
+        string memory _salt,
+        address implementationAuthority_,
+        address _trustedIssuersRegistry,
+        address _claimTopicsRegistry,
+        address _identityStorage
+    ) private returns (address) {
+        bytes memory _code = type(IdentityRegistryProxy).creationCode;
+        bytes memory _constructData = abi.encode(
+            implementationAuthority_,
+            _trustedIssuersRegistry,
+            _claimTopicsRegistry,
+            _identityStorage
+        );
+        bytes memory bytecode = abi.encodePacked(_code, _constructData);
+        return _deploy(_salt, bytecode);
+    }
+}
