@@ -331,7 +331,7 @@ describe('ERC3643 Tests', () => {
 
     enum ClearingOperationType {
         Transfer,
-        Redeem
+        Redeem,
     }
     describe('single partition', () => {
         let erc3643Issuer: IERC3643
@@ -1230,11 +1230,13 @@ describe('ERC3643 Tests', () => {
 
                 //Redeem
                 await expect(
-                    erc1410Facet.connect(signer_E).redeemByPartition(
-                        DEFAULT_PARTITION,
-                        AMOUNT,
-                        EMPTY_HEX_BYTES
-                    )
+                    erc1410Facet
+                        .connect(signer_E)
+                        .redeemByPartition(
+                            DEFAULT_PARTITION,
+                            AMOUNT,
+                            EMPTY_HEX_BYTES
+                        )
                 ).to.be.revertedWithCustomError(
                     erc3643Facet,
                     'AddressNotVerified'
@@ -1294,7 +1296,6 @@ describe('ERC3643 Tests', () => {
                     'AddressNotVerified'
                 )
             })
-
         })
 
         describe('ERC3643 canTransfer Compliance Integration', () => {

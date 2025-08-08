@@ -232,7 +232,6 @@ import {
     _RESOLVER_PROXY_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
-import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
 import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
