@@ -15,6 +15,7 @@
         "paths": {
             "@configuration": ["./Configuration"],
             "@typechain": ["./typechain-types/*", "./typechain-types/index.ts"],
+            "@typechain/contracts/*": ["./typechain-types/contracts/*"],
             "@scripts": ["./scripts/index"],
             "@tasks": ["./tasks/index.ts"],
             "@test": ["./test/index.ts"]

@@ -223,10 +223,10 @@ import {
     ERC1644,
     AdjustBalances,
     Cap,
-    IERC20,
     IFactory,
     BusinessLogicResolver,
 } from '@typechain'
+import { IERC20 } from '@typechain/contracts/layer_1/interfaces/ERC1400/IERC20'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     CAP_ROLE,
