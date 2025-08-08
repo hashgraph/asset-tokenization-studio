@@ -88,8 +88,6 @@
     "slither": "npm run slither:summary && npm run slither:storageLayout && npm run slither:inheritance && npm run slither:analysis",
     "prettierCheck": "prettier --check",
     "prepack": "npm run compile:force",
-    "find-selector": "npx ts-node scripts/findFunctionSelector.ts",
-    "list-selectors": "npx ts-node scripts/findFunctionSelector.ts --list",
     "doc": "npx hardhat dodoc"
   },
   "keywords": [],
