@@ -284,7 +284,6 @@ const MAX_SUPPLY = 10000000
 const EMPTY_VC_ID = EMPTY_STRING
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
 const onchainId = ethers.Wallet.createRandom().address
-const identityRegistry = ethers.Wallet.createRandom().address
 
 describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
@@ -332,8 +331,7 @@ describe('ERC3643 Tests', () => {
 
     enum ClearingOperationType {
         Transfer,
-        Redeem,
-        HoldCreation,
+        Redeem
     }
     describe('single partition', () => {
         let erc3643Issuer: IERC3643
@@ -462,7 +460,7 @@ describe('ERC3643 Tests', () => {
                 init_rbacs,
                 factory,
                 businessLogicResolver: businessLogicResolver.address,
-                compliance: complianceMockTrue,
+                compliance: complianceMockAddress,
                 identityRegistry: identityRegistryAddress,
             })
 
@@ -1101,35 +1099,202 @@ describe('ERC3643 Tests', () => {
                 )
             })
 
-            it('GIVEN a non verified account when mint THEN transaction reverts with custom error', async () => {
-                await identityRegistryMock.setFlags(false, false)
-                await expect(erc3643Issuer.mint(account_E, AMOUNT))
-                    .to.be.revertedWithCustomError(
-                        erc3643Facet,
-                        'AddressNotVerified'
-                    )
-                    .withArgs(account_E)
-            })
+            it('GIVEN non verified account with balance WHEN transfer THEN reverts with AddressNotVerified', async () => {
+                // Setup
+                const erc20FacetE = erc20Facet.connect(signer_E)
+                await erc3643Facet.mint(account_E, 2 * AMOUNT)
+                await erc20FacetE.approve(account_D, MAX_UINT256)
+                await erc1410Facet
+                    .connect(signer_E)
+                    .authorizeOperator(account_D)
 
-            it('GIVEN non verified account with balance WHEN transfer THEN reverts with custom error', async () => {
-                await erc3643Issuer.mint(account_E, AMOUNT)
+                await identityRegistryMock.setFlags(false, false) // canTransfer = false
 
-                //Grant CONTROLLER_ROLE role to account E
-                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_E)
+                // Transfers
+                await expect(
+                    erc20FacetE.transfer(account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc20Facet
+                        .connect(signer_D)
+                        .transferFrom(account_E, account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
 
-                await identityRegistryMock.setFlags(false, false)
+                const basicTransferInfo = {
+                    to: account_D,
+                    value: AMOUNT,
+                }
+                await expect(
+                    erc1410Facet
+                        .connect(signer_E)
+                        .transferByPartition(
+                            DEFAULT_PARTITION,
+                            basicTransferInfo,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
 
+                const operatorTransferData = {
+                    partition: DEFAULT_PARTITION,
+                    from: account_E,
+                    to: account_D,
+                    value: AMOUNT,
+                    data: EMPTY_HEX_BYTES,
+                    operatorData: EMPTY_HEX_BYTES,
+                }
+                await expect(
+                    erc1410Facet
+                        .connect(signer_D)
+                        .operatorTransferByPartition(operatorTransferData)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_E)
+                        .transferWithData(account_D, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_D)
+                        .transferFromWithData(
+                            account_E,
+                            account_D,
+                            AMOUNT,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
                 await expect(
                     erc3643Facet
                         .connect(signer_E)
                         .batchTransfer([account_D], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
                 )
-                    .to.be.revertedWithCustomError(
-                        erc3643Facet,
-                        'AddressNotVerified'
-                    )
-                    .withArgs(account_E)
             })
+
+            it('GIVEN non verified account WHEN issue THEN reverts with AddressNotVerified', async () => {
+                await identityRegistryMock.setFlags(false, false) // canTransfer = false
+
+                // Issue
+                await expect(
+                    erc3643Facet.batchMint([account_E], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc3643Facet.mint(account_E, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1410Facet.issueByPartition({
+                        partition: DEFAULT_PARTITION,
+                        tokenHolder: account_E,
+                        value: AMOUNT,
+                        data: EMPTY_HEX_BYTES,
+                    })
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1594Facet.issue(account_E, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+            })
+
+            it('GIVEN non verified account WHEN redeem THEN reverts with AddressNotVerified', async () => {
+                await identityRegistryMock.setFlags(false, false) // canTransfer = false
+
+                //Redeem
+                await expect(
+                    erc1410Facet.connect(signer_E).redeemByPartition(
+                        DEFAULT_PARTITION,
+                        AMOUNT,
+                        EMPTY_HEX_BYTES
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_E)
+                        .redeem(AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_D)
+                        .redeemFrom(account_E, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+            })
+
+            it('GIVEN non verified account WHEN Revoke THEN reverts with AddressNotVerified', async () => {
+                // Setup: mint tokens
+                await erc3643Facet.mint(account_E, 2 * AMOUNT)
+
+                await identityRegistryMock.setFlags(false, false) // canTransfer = false
+
+                // Clearings
+                await clearingActionsFacet.activateClearing()
+                const clearingOperation = {
+                    partition: DEFAULT_PARTITION,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:09Z'
+                    ),
+                    data: EMPTY_HEX_BYTES,
+                }
+                await clearingFacet
+                    .connect(signer_E)
+                    .clearingTransferByPartition(
+                        clearingOperation,
+                        AMOUNT,
+                        account_D
+                    )
+                const clearingIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    clearingId: 1,
+                    clearingOperationType: ClearingOperationType.Transfer,
+                }
+                await expect(
+                    clearingFacet.approveClearingOperationByPartition(
+                        clearingIdentifier
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+            })
+
         })
 
         describe('ERC3643 canTransfer Compliance Integration', () => {
