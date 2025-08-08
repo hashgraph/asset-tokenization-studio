@@ -200,24 +200,231 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
 */
 
-// * Arguments
-// TODO: Add command , query based logic
-export * from './Arguments'
+import path from 'path'
+import fs from 'fs'
+import { task } from 'hardhat/config'
+import type { HardhatRuntimeEnvironment } from 'hardhat/types'
+import { Interface } from 'ethers/lib/utils'
 
-// * Utils
-export * from './utils'
+// Use lazy imports from @scripts within task actions to avoid circular deps with typechain
 
-// * Deploy
-export * from './deploy'
+type Kind = 'function' | 'error' | 'all'
 
-// * Transparent Upgradeable Proxy
-export * from './transparentUpgradeableProxy'
+function contractsDir(): string {
+    return path.join(__dirname, '../contracts')
+}
 
-// * Business Logic Resolver
-export * from './businessLogicResolver'
+function defaultReportsDir(): string {
+    // contracts/.reports/selectors
+    return path.join(__dirname, '../.reports/selectors')
+}
 
-// * Selectors
-export * from './selectors'
+function ensureDir(p: string) {
+    fs.mkdirSync(p, { recursive: true })
+}
+
+function writeJsonFile(outPath: string, data: unknown) {
+    ensureDir(path.dirname(outPath))
+    fs.writeFileSync(outPath, JSON.stringify(data, null, 2), 'utf-8')
+}
+
+function timestamp(): string {
+    const d = new Date()
+    const pad = (n: number) => n.toString().padStart(2, '0')
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`
+}
+
+// Task: selectors:find
+task(
+    'selectors:find',
+    'Find where a selector is implemented in Solidity source'
+)
+    .addParam('selector', 'Selector to search for, e.g. 0xa9059cbb')
+    .addOptionalParam('kind', 'function | error | all', 'function')
+    .addFlag('json', 'Output as JSON (also writes to file)')
+    .addFlag('padded', 'Return selectors padded to 32 bytes (bytes32)')
+    .addOptionalParam('out', 'Output file path (used when --json is set)')
+    .setAction(
+        async (args: {
+            selector: string
+            kind?: Kind
+            json?: boolean
+            padded?: boolean
+            out?: string
+        }) => {
+            const { searchSelectors } = await import('@scripts')
+            const base = contractsDir()
+            const kind = (args.kind ?? 'function') as Kind
+            const results = searchSelectors(
+                base,
+                args.selector,
+                kind,
+                !!args.padded
+            )
+            if (args.json) {
+                const reportsDir = defaultReportsDir()
+                const defaultName = `selectors-find-${args.selector}-${kind}${args.padded ? '-padded' : ''}-${timestamp()}.json`
+                const outPath = path.isAbsolute(args.out ?? '')
+                    ? (args.out as string)
+                    : path.join(
+                          args.out ? process.cwd() : reportsDir,
+                          args.out ? (args.out as string) : defaultName
+                      )
+                writeJsonFile(outPath, results)
+                console.log(
+                    `Wrote ${results.length} result(s) to ${path.relative(process.cwd(), outPath)}`
+                )
+                return
+            }
+            if (results.length === 0) {
+                console.log('No matches found.')
+                return
+            }
+            for (const m of results) {
+                const rel = path.relative(process.cwd(), m.contractPath)
+                console.log(`Selector: ${m.selector}`)
+                console.log(`  - ${m.itemType}: ${m.signature}`)
+                console.log(`    Contract: ${m.contractName}`)
+                console.log(`    File: ${rel}:${m.lineNumber}`)
+                console.log('')
+            }
+        }
+    )
+
+// Task: selectors:list
+task('selectors:list', 'List selectors in the repo')
+    .addOptionalParam('kind', 'function | error | all', 'function')
+    .addOptionalParam('contract', 'Filter by contract name (contains match)')
+    .addFlag('json', 'Output as JSON (also writes to file)')
+    .addFlag('padded', 'Return selectors padded to 32 bytes (bytes32)')
+    .addOptionalParam('out', 'Output file path (used when --json is set)')
+    .setAction(
+        async (args: {
+            kind?: Kind
+            contract?: string
+            json?: boolean
+            padded?: boolean
+            out?: string
+        }) => {
+            const { listSelectors } = await import('@scripts')
+            const base = contractsDir()
+            const kind = (args.kind ?? 'function') as Kind
+            let results = listSelectors(base, kind, !!args.padded)
+            if (args.contract) {
+                results = results.filter((m) =>
+                    m.contractName.includes(args.contract as string)
+                )
+            }
+            if (args.json) {
+                const reportsDir = defaultReportsDir()
+                const cf = args.contract ? `-contract-${args.contract}` : ''
+                const defaultName = `selectors-list-${kind}${args.padded ? '-padded' : ''}${cf}-${timestamp()}.json`
+                const outPath = path.isAbsolute(args.out ?? '')
+                    ? (args.out as string)
+                    : path.join(
+                          args.out ? process.cwd() : reportsDir,
+                          args.out ? (args.out as string) : defaultName
+                      )
+                writeJsonFile(outPath, results)
+                console.log(
+                    `Wrote ${results.length} item(s) to ${path.relative(process.cwd(), outPath)}`
+                )
+                return
+            }
+            const grouped: Record<string, typeof results> = {}
+            for (const m of results) {
+                if (!grouped[m.selector]) grouped[m.selector] = []
+                grouped[m.selector].push(m)
+            }
+            const keys = Object.keys(grouped).sort()
+            console.log(
+                `Found ${results.length} items with ${keys.length} unique selectors`
+            )
+            console.log('')
+            for (const sel of keys) {
+                console.log(`Selector: ${sel}`)
+                for (const m of grouped[sel]) {
+                    const rel = path.relative(process.cwd(), m.contractPath)
+                    console.log(`  - ${m.itemType}: ${m.signature}`)
+                    console.log(`    Contract: ${m.contractName}`)
+                    console.log(`    File: ${rel}:${m.lineNumber}`)
+                }
+                console.log('')
+            }
+        }
+    )
+
+// Task: selectors:artifact
+// Uses compiled artifact ABI to compute selectors via Interface (functions, errors, events)
+// Default kind = all, default not padded
+// name should correspond to an artifact name (e.g., ERC1594)
+
+task('selectors:artifact', 'List selectors from a compiled artifact ABI')
+    .addParam('name', 'Artifact name, e.g. ERC1594')
+    .addOptionalParam('kind', 'function | error | event | all', 'all')
+    .addFlag('json', 'Output as JSON (also writes to file)')
+    .addFlag('padded', 'Return selectors padded to 32 bytes (bytes32)')
+    .addOptionalParam('out', 'Output file path (used when --json is set)')
+    .setAction(
+        async (
+            args: {
+                name: string
+                kind?: 'function' | 'error' | 'event' | 'all'
+                json?: boolean
+                padded?: boolean
+                out?: string
+            },
+            hre: HardhatRuntimeEnvironment
+        ) => {
+            const { selectorFromSignature } = await import('@scripts')
+            const artifact = await hre.artifacts.readArtifact(args.name)
+            const iface = new Interface(artifact.abi)
+            const kind = args.kind ?? 'all'
+            const padded = !!args.padded
+            type Item = {
+                type: string
+                name: string
+                signature: string
+                selector: string
+            }
+            const out: Item[] = []
+            for (const frag of iface.fragments) {
+                const fragType = frag.type // function | error | event | constructor | fallback | receive
+                if (kind !== 'all' && fragType !== kind) continue
+                if (
+                    fragType === 'constructor' ||
+                    fragType === 'fallback' ||
+                    fragType === 'receive'
+                )
+                    continue
+                const signature = frag.format('sighash')
+                const selector = selectorFromSignature(signature, padded)
+                out.push({
+                    type: fragType,
+                    name: frag.name ?? '',
+                    signature,
+                    selector,
+                })
+            }
+            if (args.json) {
+                const reportsDir = defaultReportsDir()
+                const defaultName = `selectors-artifact-${args.name}-${kind}${padded ? '-padded' : ''}-${timestamp()}.json`
+                const outPath = path.isAbsolute(args.out ?? '')
+                    ? (args.out as string)
+                    : path.join(
+                          args.out ? process.cwd() : reportsDir,
+                          args.out ? (args.out as string) : defaultName
+                      )
+                writeJsonFile(outPath, out)
+                console.log(
+                    `Wrote ${out.length} item(s) to ${path.relative(process.cwd(), outPath)}`
+                )
+                return
+            }
+            for (const m of out) {
+                console.log(`[${m.type}] ${m.signature} -> ${m.selector}`)
+            }
+        }
+    )

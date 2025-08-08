@@ -200,24 +200,166 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
 */
 
-// * Arguments
-// TODO: Add command , query based logic
-export * from './Arguments'
+import fs from 'fs'
+import path from 'path'
+import { Interface, id } from 'ethers/lib/utils'
 
-// * Utils
-export * from './utils'
+// Public types for tasks to reuse
+export type Kind = 'function' | 'error' | 'all'
+export interface MatchItem {
+    contractPath: string
+    contractName: string
+    itemName: string
+    signature: string
+    selector: string
+    lineNumber?: number
+    itemType: 'function' | 'error'
+}
 
-// * Deploy
-export * from './deploy'
+// Compute selector from a signature (e.g. "transfer(address,uint256)")
+export function selectorFromSignature(
+    signature: string,
+    padded: boolean
+): string {
+    const sigHash = id(signature).slice(0, 10)
+    return padded ? sigHash.padEnd(66, '0') : sigHash
+}
 
-// * Transparent Upgradeable Proxy
-export * from './transparentUpgradeableProxy'
+// Compute selector from an Interface by fragment name (functions or errors)
+export function getSelectorFromInterface(
+    contractInterface: Interface,
+    name: string,
+    padded: boolean
+): string {
+    const fragment = contractInterface.fragments.find((f) => f.name === name)
+    if (!fragment) throw new Error(`Selector "${name}" is not implemented`)
+    const signature = fragment.format('sighash')
+    return selectorFromSignature(signature, padded)
+}
 
-// * Business Logic Resolver
-export * from './businessLogicResolver'
+// Back-compat helper for tests that import from scripts/selector
+export function getSelector(
+    contractFactory: { interface: Interface },
+    selector: string,
+    asBytes4 = false
+): string {
+    return getSelectorFromInterface(
+        contractFactory.interface,
+        selector,
+        !asBytes4
+    )
+}
 
-// * Selectors
-export * from './selectors'
+// Find all .sol files recursively
+export function findSolidityFiles(dir: string): string[] {
+    const files: string[] = []
+    function traverse(currentDir: string) {
+        const entries = fs.readdirSync(currentDir, { withFileTypes: true })
+        for (const entry of entries) {
+            const fullPath = path.join(currentDir, entry.name)
+            if (entry.isDirectory()) {
+                traverse(fullPath)
+            } else if (entry.isFile() && entry.name.endsWith('.sol')) {
+                files.push(fullPath)
+            }
+        }
+    }
+    traverse(dir)
+    return files
+}
+
+// Parse a .sol file for functions and/or errors
+export function parseContractFile(
+    filePath: string,
+    kind: Kind,
+    padded: boolean
+): MatchItem[] {
+    const content = fs.readFileSync(filePath, 'utf8')
+    const matches: MatchItem[] = []
+    const contractName = path.basename(filePath, '.sol')
+
+    const pushMatch = (
+        itemType: 'function' | 'error',
+        name: string,
+        signature: string,
+        index: number
+    ) => {
+        const before = content.substring(0, index)
+        const lineNumber = before.split('\n').length
+        matches.push({
+            contractPath: filePath,
+            contractName,
+            itemName: name,
+            signature,
+            selector: selectorFromSignature(signature, padded),
+            lineNumber,
+            itemType,
+        })
+    }
+
+    if (kind === 'function' || kind === 'all') {
+        const functionRegex =
+            /function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)/g
+        let m: RegExpExecArray | null
+        while ((m = functionRegex.exec(content)) !== null) {
+            const name = m[1]
+            if (
+                name === 'constructor' ||
+                name === 'receive' ||
+                name === 'fallback'
+            )
+                continue
+            const signature = `${name}(${m[2].replace(/\s+/g, '')})`
+            pushMatch('function', name, signature, m.index)
+        }
+    }
+
+    if (kind === 'error' || kind === 'all') {
+        const errorRegex = /error\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)/g
+        let m: RegExpExecArray | null
+        while ((m = errorRegex.exec(content)) !== null) {
+            const name = m[1]
+            const signature = `${name}(${m[2].replace(/\s+/g, '')})`
+            pushMatch('error', name, signature, m.index)
+        }
+    }
+
+    return matches
+}
+
+export function searchSelectors(
+    baseDir: string,
+    target: string,
+    kind: Kind,
+    padded: boolean
+): MatchItem[] {
+    const files = findSolidityFiles(baseDir)
+    const all: MatchItem[] = []
+    for (const file of files) {
+        try {
+            all.push(...parseContractFile(file, kind, padded))
+        } catch {
+            // ignore parse errors
+        }
+    }
+    return all.filter((m) => m.selector.toLowerCase() === target.toLowerCase())
+}
+
+export function listSelectors(
+    baseDir: string,
+    kind: Kind,
+    padded: boolean
+): MatchItem[] {
+    const files = findSolidityFiles(baseDir)
+    const all: MatchItem[] = []
+    for (const file of files) {
+        try {
+            all.push(...parseContractFile(file, kind, padded))
+        } catch {
+            // ignore parse errors
+        }
+    }
+    return all
+}

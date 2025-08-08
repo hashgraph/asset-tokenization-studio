@@ -135,3 +135,6 @@ asset-tokenization-studio.iml
 
 # Kiro files
 .kiro/
+
+# Generated selector reports
+contracts/.reports/
