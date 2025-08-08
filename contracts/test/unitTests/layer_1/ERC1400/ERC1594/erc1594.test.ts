@@ -239,8 +239,8 @@ import {
     ZERO,
     EMPTY_STRING,
     EIP1066_CODES,
+    getSelector,
 } from '@scripts'
-import { getSelector } from '../../../../../scripts/selector'
 
 const AMOUNT = 1000
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT

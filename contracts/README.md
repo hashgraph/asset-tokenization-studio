@@ -36,6 +36,71 @@ npm run compile:force
 
 # Tasks
 
+Note: Run commands from the contracts directory, or use npm --prefix ./contracts exec -- hardhat ... to ensure Hardhat uses the local installation.
+
+### Selectors utilities
+
+- Find a specific selector in Solidity sources (functions by default):
+
+```
+npx hardhat selectors:find --selector 0xa9059cbb
+```
+
+- Include errors too:
+
+```
+npx hardhat selectors:find --selector 0xa9059cbb --kind=all
+```
+
+- Return bytes32 (padded) selectors:
+
+```
+# when using --padded with selectors:find, if you also use --json the matching will compare
+# with padded values; to search a padded selector, pass a 32-byte value.
+npx hardhat selectors:find --selector 0xa9059cbb --padded
+npx hardhat selectors:find --selector 0xa9059cbb00000000000000000000000000000000000000000000000000000000 --padded --json
+```
+
+- Write JSON output to file:
+
+```
+# when using --json, results are also written to contracts/.reports/selectors/<timestamped>.json by default.
+# you can override the file path with --out
+npx hardhat selectors:find --selector 0xa9059cbb --json
+npx hardhat selectors:find --selector 0xa9059cbb --json --out my-find.json
+```
+
+- List selectors:
+
+```
+npx hardhat selectors:list
+```
+
+- Include errors too or return padded or JSON to file (with optional filter by contract):
+
+```
+# include errors as well
+npx hardhat selectors:list --kind all
+
+# return padded 32-byte selectors
+npx hardhat selectors:list --padded
+
+# filter by contract name and write JSON to a file (default path contracts/.reports/selectors)
+# optional: choose a custom output path with --out
+npx hardhat selectors:list --contract ERC20 --json
+npx hardhat selectors:list --contract ERC20 --json --out erc20-selectors.json
+```
+
+- From a compiled artifact ABI:
+
+```
+# run from the contracts directory (recommended)
+npx hardhat selectors:artifact --name ERC1594
+
+# or using npm exec from the repo root
+npm --prefix ./contracts exec -- hardhat selectors:artifact --name ERC1594 --kind all --padded --json
+```
+
 ### deployAll
 
 Deploys the full infrastructure (factory, resolver, facets, and initialized contracts) in a single execution.
