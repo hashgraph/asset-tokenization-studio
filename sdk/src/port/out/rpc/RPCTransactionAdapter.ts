@@ -211,7 +211,6 @@ import TransactionResponse from '@domain/context/transaction/TransactionResponse
 import TransactionAdapter, { InitializationData } from '../TransactionAdapter';
 import { Signer } from 'ethers';
 import { singleton } from 'tsyringe';
-import { RuntimeError } from '@core/error/RuntimeError';
 import Account from '@domain/context/account/Account';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter';
@@ -338,12 +337,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async stop(): Promise<boolean> {
     return this.metamaskService.stop();
-  }
-
-  async signAndSendTransaction(
-    t: RPCTransactionAdapter,
-  ): Promise<TransactionResponse> {
-    throw new RuntimeError('Method not implemented.');
   }
 
   getMirrorNodeAdapter(): MirrorNodeAdapter {

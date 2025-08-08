@@ -210,8 +210,10 @@ import { useTranslation } from "react-i18next";
 import {
   DividendsForViewModel,
   DividendsViewModel,
+  GetDividendHoldersRequest,
   GetDividendsForRequest,
   GetDividendsRequest,
+  GetTotalDividendHoldersRequest,
   SetDividendsRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
@@ -225,6 +227,16 @@ export const GET_SECURITY_DIVIDENDS = (
   securityId: string,
   dividendId: number,
 ) => `GET_SECURITY_DIVIDENDS_${securityId}_${dividendId}`;
+
+export const GET_SECURITY_DIVIDENDS_HOLDERS = (
+  securityId: string,
+  dividendId: number,
+) => `GET_SECURITY_DIVIDENDS_HOLDERS_${securityId}_${dividendId}`;
+
+export const GET_SECURITY_DIVIDENDS_TOTAL_HOLDERS = (
+  securityId: string,
+  dividendId: number,
+) => `GET_SECURITY_DIVIDENDS_TOTAL_HOLDERS_${securityId}_${dividendId}`;
 
 export const useDividends = () => {
   const toast = useToast();
@@ -285,6 +297,33 @@ export const useGetDividends = <TError, TData = DividendsViewModel>(
   return useQuery(
     [GET_SECURITY_DIVIDENDS(params.securityId, params.dividendId)],
     () => SDKService.getDividends(params),
+    options,
+  );
+};
+
+export const useGetDividendHolders = <TError, TData = string[]>(
+  params: GetDividendHoldersRequest,
+  options: UseQueryOptions<string[], TError, TData, [string]>,
+) => {
+  return useQuery(
+    [GET_SECURITY_DIVIDENDS_HOLDERS(params.securityId, params.dividendId)],
+    () => SDKService.getDividendHolders(params),
+    options,
+  );
+};
+
+export const useGetDividendHoldersTotal = <TError, TData = number>(
+  params: GetTotalDividendHoldersRequest,
+  options: UseQueryOptions<number, TError, TData, [string]>,
+) => {
+  return useQuery(
+    [
+      GET_SECURITY_DIVIDENDS_TOTAL_HOLDERS(
+        params.securityId,
+        params.dividendId,
+      ),
+    ],
+    () => SDKService.getTotalDividendHolders(params),
     options,
   );
 };

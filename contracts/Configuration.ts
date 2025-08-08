@@ -231,6 +231,7 @@ export const CONTRACT_NAMES = [
     'ControlList',
     'PauseFacet',
     'ERC20',
+    'ERC20Permit',
     'ERC1410ScheduledTasks',
     'ERC1594',
     'ERC1643',

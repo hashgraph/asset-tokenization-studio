@@ -236,6 +236,8 @@ import {
     ERC1644__factory,
     ERC1644TimeTravel__factory,
     ERC20__factory,
+    ERC20Permit__factory,
+    ERC20PermitTimeTravel__factory,
     ERC20TimeTravel__factory,
     Factory__factory,
     Kyc__factory,
@@ -539,6 +541,17 @@ export async function deployAtsContracts({
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC20.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        erc20Permit: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC20Permit__factory(),
+                new ERC20PermitTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC20Permit.addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -930,6 +943,14 @@ export async function deployAtsContracts({
                     return result
                 }
             ),
+            erc20Permit: await deployContractWithFactory(
+                commands.erc20Permit
+            ).then((result) => {
+                console.log(
+                    `ERC20Permit has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
             erc1410ScheduledTasks: await deployContractWithFactory(
                 commands.erc1410ScheduledTasks
             ).then((result) => {

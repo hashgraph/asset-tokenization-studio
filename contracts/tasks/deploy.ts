@@ -300,6 +300,7 @@ task(
             protectedPartitions,
             erc3643,
             freeze,
+            erc20Permit,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -355,6 +356,7 @@ task(
             'Protected Partitions': protectedPartitions.address,
             ERC3643: erc3643.address,
             Freeze: freeze.address,
+            ERC20Permit: erc20Permit.address,
         }
 
         const contractAddress = []

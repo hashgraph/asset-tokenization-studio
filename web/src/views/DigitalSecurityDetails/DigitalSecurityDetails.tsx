@@ -204,7 +204,7 @@
 */
 
 import { HStack, Stack } from "@chakra-ui/react";
-import { Tag, Tabs } from "io-bricks-ui";
+import { Tag, Tabs, Spinner, Text, TabProps } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { History } from "../../components/History";
 import { Details } from "./Components/Details";
@@ -216,9 +216,7 @@ import {
   PauseRequest,
   SecurityViewModel,
   GetEquityDetailsRequest,
-  EquityDetailsViewModel,
   GetBondDetailsRequest,
-  BondDetailsViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
 import {
   useGetBondDetails,
@@ -230,12 +228,11 @@ import {
 } from "../../hooks/queries/useGetSecurityDetails";
 import { useParams } from "react-router-dom";
 import { useWalletStore } from "../../store/walletStore";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { User } from "../../utils/constants";
 import { useUserStore } from "../../store/userStore";
 import { SecurityRole } from "../../utils/SecurityRole";
 import { useRolesStore } from "../../store/rolesStore";
-import { useSecurityStore } from "../../store/securityStore";
 import { ManagementTab } from "./Components/Tabs/Management";
 import { OperationsTab } from "./Components/Tabs/Operations";
 import { ControlTab } from "./Components/Tabs/Control";
@@ -243,25 +240,30 @@ import { CorporateActionsTab } from "./Components/Tabs/CorporateActions";
 import { hasRole } from "../../utils/helpers";
 
 export const DigitalSecurityDetails = () => {
+  const { id = "" } = useParams();
+
   const { t: tHeader } = useTranslation("security", {
     keyPrefix: "details.header",
   });
-
   const { t: tTabs } = useTranslation("security", {
     keyPrefix: "details.tabs",
   });
 
-  const { id = "" } = useParams();
-
   const { address: walletAddress } = useWalletStore();
   const { type: userType } = useUserStore();
-  const { roles: accountRoles, setRoles } = useRolesStore();
-  const { setDetails } = useSecurityStore();
+  const { setRoles } = useRolesStore();
 
-  const { data: securityDetails } = useGetSecurityDetails(
+  const {
+    data: securityDetails,
+    isLoading: isLoadingSecurityDetails,
+    isFetching: isFetchingSecurityDetails,
+  } = useGetSecurityDetails(
     new GetSecurityDetailsRequest({
       securityId: id,
     }),
+    {
+      enabled: !!id,
+    },
   );
 
   // GET EQUITY DETAILS
@@ -286,17 +288,16 @@ export const DigitalSecurityDetails = () => {
     },
   );
 
-  useEffect(() => {
-    setDetails(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // ROLE COUNT FOR
   const { data: roleCountFor } = useGetSecurityRoleCountFor(
     new GetRoleCountForRequest({
       securityId: id,
       targetId: walletAddress,
     }),
+    {
+      staleTime: 0,
+      cacheTime: 0,
+    },
   );
 
   // ROLES FOR
@@ -311,6 +312,8 @@ export const DigitalSecurityDetails = () => {
       {
         enabled: !!roleCountFor,
         onSuccess: (roles) => setRoles(roles as SecurityRole[]),
+        staleTime: 0,
+        cacheTime: 0,
       },
     );
 
@@ -326,10 +329,10 @@ export const DigitalSecurityDetails = () => {
           <Details
             id={id}
             detailsResponse={securityDetails ?? ({} as SecurityViewModel)}
-            equityDetailsResponse={
-              equityDetails ?? ({} as EquityDetailsViewModel)
-            }
-            bondDetailsResponse={bondDetails ?? ({} as BondDetailsViewModel)}
+            isLoadingSecurityDetails={isLoadingSecurityDetails}
+            isFetchingSecurityDetails={isFetchingSecurityDetails}
+            equityDetailsResponse={equityDetails}
+            bondDetailsResponse={bondDetails}
           />
         ),
         header: tTabs("details"),
@@ -342,16 +345,16 @@ export const DigitalSecurityDetails = () => {
 
     if (userType !== User.admin) return holderTabs;
 
-    const adminTabs = [
+    const adminTabs: TabProps[] = [
       {
         content: (
           <Details
             id={id}
             detailsResponse={securityDetails ?? ({} as SecurityViewModel)}
-            equityDetailsResponse={
-              equityDetails ?? ({} as EquityDetailsViewModel)
-            }
-            bondDetailsResponse={bondDetails ?? ({} as BondDetailsViewModel)}
+            isLoadingSecurityDetails={isLoadingSecurityDetails}
+            isFetchingSecurityDetails={isFetchingSecurityDetails}
+            equityDetailsResponse={equityDetails}
+            bondDetailsResponse={bondDetails}
           />
         ),
         header: tTabs("details"),
@@ -377,19 +380,19 @@ export const DigitalSecurityDetails = () => {
     const corporateActionsConfig = {
       showBalanceAdjustment:
         !isSecurityPaused &&
-        Boolean(equityDetails) &&
+        securityDetails?.type === "EQUITY" &&
         hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
       showDividends:
         !isSecurityPaused &&
-        Boolean(equityDetails?.dividendRight) &&
+        securityDetails?.type === "EQUITY" &&
         hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
       showVotingRights:
         !isSecurityPaused &&
-        Boolean(equityDetails?.votingRight) &&
+        securityDetails?.type === "EQUITY" &&
         hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
       showCoupons:
         !isSecurityPaused &&
-        Boolean(bondDetails) &&
+        securityDetails?.type === "BOND" &&
         hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
     };
 
@@ -412,30 +415,24 @@ export const DigitalSecurityDetails = () => {
       showConfiguration: true,
     };
 
+    const isLoadingTabs =
+      isLoadingRoles || isLoadingSecurityDetails || isFetchingSecurityDetails;
+
     const showOperationTab =
-      !isLoadingRoles &&
+      !isLoadingTabs &&
       Object.values(operationsConfig).some((isVisible) => isVisible);
 
     const showCorporateActionsTab =
-      !isLoadingRoles &&
+      !isLoadingTabs &&
       Object.values(corporateActionsConfig).some((isVisible) => isVisible);
 
     const showControlTab =
-      !isLoadingRoles &&
+      !isLoadingTabs &&
       Object.values(controlConfig).some((isVisible) => isVisible);
 
     const showManagementTab =
-      !isLoadingRoles &&
+      !isLoadingTabs &&
       Object.values(managementConfig).some((isVisible) => isVisible);
-
-    const showLoadingTab = isLoadingRoles;
-
-    if (showManagementTab) {
-      adminTabs.push({
-        content: <ManagementTab config={managementConfig} />,
-        header: tTabs("management"),
-      });
-    }
 
     if (showOperationTab) {
       adminTabs.push({
@@ -460,16 +457,40 @@ export const DigitalSecurityDetails = () => {
       });
     }
 
-    if (showLoadingTab) {
+    if (showManagementTab) {
+      adminTabs.push({
+        content: <ManagementTab config={managementConfig} />,
+        header: tTabs("management"),
+      });
+    }
+
+    if (isLoadingTabs) {
       adminTabs.push({
         content: <></>,
-        header: "Loading...",
+        header: (
+          <HStack>
+            <Spinner />
+            <Text>Loading</Text>
+          </HStack>
+        ),
       });
     }
 
     return adminTabs;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [securityDetails, id, roles, isPaused, accountRoles]);
+  }, [
+    securityDetails,
+    equityDetails,
+    bondDetails,
+    id,
+    isLoadingSecurityDetails,
+    isFetchingSecurityDetails,
+    tTabs,
+    userType,
+    isLoadingRoles,
+    isPaused,
+    isLoadingIsPaused,
+    roles,
+  ]);
 
   return (
     <>
@@ -479,8 +500,9 @@ export const DigitalSecurityDetails = () => {
           <Tag label="Digital security paused" variant="paused" mt={1} />
         )}
       </HStack>
+
       <Stack w="full" h="full" borderRadius={1} pt={6} gap={4}>
-        <Tabs tabs={tabs} variant="primary" />
+        <Tabs tabs={tabs} variant="primary" isLazy />
       </Stack>
     </>
   );

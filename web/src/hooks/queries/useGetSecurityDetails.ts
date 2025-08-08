@@ -228,8 +228,8 @@ import {
 } from "@hashgraph/asset-tokenization-sdk";
 import { useSecurityStore } from "../../store/securityStore";
 
-export const GET_SECURITY_DETAILS = (equityId: string) =>
-  `GET_SECURITY_DETAILS${equityId}`;
+export const GET_SECURITY_DETAILS = (securityId: string) =>
+  `GET_SECURITY_DETAILS_${securityId}`;
 
 export const GET_SECURITY_ROLE_COUNT_FOR = (
   securityId: string,
@@ -280,6 +280,7 @@ export const useGetSecurityDetails = <TError, TData = SecurityViewModel>(
   options?: UseQueryOptions<SecurityViewModel, TError, TData, [string]>,
 ) => {
   const { setDetails } = useSecurityStore();
+
   return useQuery(
     [GET_SECURITY_DETAILS(request.securityId)],
     () => SDKService.getSecurityDetails(request),

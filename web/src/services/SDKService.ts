@@ -364,6 +364,12 @@ import {
   FreezePartialTokensRequest,
   UnfreezePartialTokensRequest,
   GetFrozenPartialTokensRequest,
+  GetCouponHoldersRequest,
+  GetTotalCouponHoldersRequest,
+  GetTotalDividendHoldersRequest,
+  GetDividendHoldersRequest,
+  GetTotalVotingHoldersRequest,
+  GetVotingHoldersRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -563,6 +569,18 @@ export class SDKService {
     return await Bond.getAllCoupons(req);
   }
 
+  public static async getCouponHolders(
+    req: GetCouponHoldersRequest,
+  ): Promise<string[]> {
+    return await Bond.getCouponHolders(req);
+  }
+
+  public static async getTotalCouponHolders(
+    req: GetTotalCouponHoldersRequest,
+  ): Promise<number> {
+    return await Bond.getTotalCouponHolders(req);
+  }
+
   // ROLES ////////////////////////////////////////////
   public static async grantRole(req: RoleRequest): Promise<boolean> {
     const response = await Role.grantRole(req);
@@ -709,6 +727,18 @@ export class SDKService {
     return await Equity.getAllDividends(req);
   }
 
+  public static async getDividendHolders(
+    req: GetDividendHoldersRequest,
+  ): Promise<string[]> {
+    return await Equity.getDividendHolders(req);
+  }
+
+  public static async getTotalDividendHolders(
+    req: GetTotalDividendHoldersRequest,
+  ): Promise<number> {
+    return await Equity.getTotalDividendHolders(req);
+  }
+
   // SPLIT & REVERSE SPLIT ////////////////////////////////////////////
   public static async setScheduledBalanceAdjustmentRequest(
     req: SetScheduledBalanceAdjustmentRequest,
@@ -795,6 +825,18 @@ export class SDKService {
     req: GetVotingRightsRequest,
   ): Promise<VotingRightsViewModel> {
     return await Equity.getVotingRights(req);
+  }
+
+  public static async getVotingHolders(
+    req: GetVotingHoldersRequest,
+  ): Promise<string[]> {
+    return await Equity.getVotingHolders(req);
+  }
+
+  public static async getTotalVotingHolders(
+    req: GetTotalVotingHoldersRequest,
+  ): Promise<number> {
+    return await Equity.getTotalVotingHolders(req);
   }
 
   // HOLD ////////////////////////////////////////////
