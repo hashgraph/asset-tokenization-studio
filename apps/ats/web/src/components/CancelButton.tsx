@@ -203,15 +203,15 @@
 
 */
 
-import { Button } from "io-bricks-ui";
-import type { ButtonProps } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { RouterManager } from "../router/RouterManager";
-import { RouteName } from "../router/RouteName";
-import { Link as RouterLink } from "react-router-dom";
+import { Button } from 'io-bricks-ui';
+import type { ButtonProps } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { RouterManager } from '../router/RouterManager';
+import { RouteName } from '../router/RouteName';
+import { Link as RouterLink } from 'react-router-dom';
 
 export const CancelButton = (props: ButtonProps) => {
-  const { t: tGlobals } = useTranslation("globals");
+  const { t: tGlobals } = useTranslation('globals');
 
   return (
     <Button
@@ -222,7 +222,7 @@ export const CancelButton = (props: ButtonProps) => {
       variant="secondary"
       {...props}
     >
-      {tGlobals("cancel")}
+      {tGlobals('cancel')}
     </Button>
   );
 };
