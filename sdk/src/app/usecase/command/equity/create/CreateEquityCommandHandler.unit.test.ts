@@ -356,6 +356,7 @@ describe('CreateEquityCommandHandler', () => {
         contractServiceMock.getContractEvmAddress
           .mockResolvedValueOnce(evmAddress)
           .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress)
           .mockResolvedValueOnce(evmAddress);
         contractServiceMock.getEvmAddressesFromHederaIds
           .mockResolvedValueOnce([externalPauseEvmAddress])
