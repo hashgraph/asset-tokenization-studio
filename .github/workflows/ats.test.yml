@@ -65,7 +65,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Install ATS dependencies only
-        run: npm ci --workspaces --workspace=packages/ats/contracts --workspace=packages/ats/sdk --workspace=apps/ats/web
+        run: npm ci --workspaces
 
       - name: Build ATS packages
         run: npm run ats:build:all

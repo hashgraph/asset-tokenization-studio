@@ -48,6 +48,7 @@
     "ats:start": "npm run ats:contracts:build && npm run ats:sdk:build && npm run ats:web:dev",
     "dev": "npm run ats:web:dev",
     "start": "npm run ats:start",
+    "clean:deps": "rimraf packages/*/node_modules packages/*/*/node_modules apps/*/node_modules apps/*/*/node_modules package-lock.json node_modules",
     "pre-commit": "lint-staged",
     "commitlint": "commitlint --edit",
     "prepare": "husky"
